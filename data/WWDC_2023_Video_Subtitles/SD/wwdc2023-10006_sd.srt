@@ -1,0 +1,1837 @@
+2
+00:00:00,501 --> 00:00:08,509 line:-1
+♪ ♪
+
+
+3
+00:00:10,544 --> 00:00:12,379 line:-1
+Jonathan: Hi, I'm Jonathan,
+
+
+4
+00:00:12.412 --> 00:00:15.849 line:-2 align:center
+and I'm an engineer
+on the Internet Technologies team.
+
+
+5
+00:00:15.883 --> 00:00:20.521 line:-2 align:center
+Today we'll explore how to build
+robust and resumable file transfers
+
+
+6
+00:00:20,554 --> 00:00:23,257 line:-1
+using URLSession.
+
+
+7
+00:00:23,290 --> 00:00:26,093 line:-2
+Large file transfers can be
+a huge challenge
+
+
+8
+00:00:26.126 --> 00:00:30.564 line:-2 align:center
+because even a tiny interruption
+can throw away all your user's progress
+
+
+9
+00:00:30,597 --> 00:00:33,567 line:-2
+and force them to start
+from the very beginning.
+
+
+10
+00:00:33.600 --> 00:00:36.036 line:-1 align:center
+Plus, the larger the transfer,
+
+
+11
+00:00:36,069 --> 00:00:39,072 line:-2
+the longer it takes,
+and the longer it takes,
+
+
+12
+00:00:39.106 --> 00:00:42.776 line:-2 align:center
+the more opportunity there is
+for something to go wrong.
+
+
+13
+00:00:44.044 --> 00:00:48.615 line:-2 align:center
+In that time, your user might
+navigate away from your app,
+
+
+14
+00:00:48,649 --> 00:00:50,617 line:-1
+leave the range of Wi-Fi,
+
+
+15
+00:00:50.651 --> 00:00:56.123 line:-2 align:center
+or experience one of so many
+network problems outside of their control.
+
+
+16
+00:00:56,156 --> 00:00:59,826 line:-2
+In this session, we'll explore
+how to solve these challenges
+
+
+17
+00:00:59.860 --> 00:01:04.364 line:-2 align:center
+and provide a robust
+networking experience for your users.
+
+
+18
+00:01:04.398 --> 00:01:08.435 line:-2 align:center
+Our first stop
+is resumable HTTP protocols,
+
+
+19
+00:01:08.468 --> 00:01:10.938 line:-2 align:center
+which allow your user
+to keep their progress
+
+
+20
+00:01:10.971 --> 00:01:13.574 line:-1 align:center
+when a connection is interrupted.
+
+
+21
+00:01:13,607 --> 00:01:16,476 line:-1
+This prevents wasted time and bandwidth,
+
+
+22
+00:01:16,510 --> 00:01:22,015 line:-2
+making these protocols a powerful tool
+when transferring large amounts of data.
+
+
+23
+00:01:22,049 --> 00:01:27,087 line:-2
+I'll demonstrate how to resume both
+downloads and uploads in URLSession,
+
+
+24
+00:01:27,120 --> 00:01:31,892 line:-2
+including brand new APIs
+for resumable upload tasks.
+
+
+25
+00:01:31.925 --> 00:01:36.029 line:-2 align:center
+Understanding the mechanism
+behind these APIs can be really helpful
+
+
+26
+00:01:36.063 --> 00:01:40.400 line:-2 align:center
+for debugging your app,
+or even building your own server support.
+
+
+27
+00:01:40,434 --> 00:01:44,204 line:-2
+That's why we'll also cover
+the resumable protocols themselves,
+
+
+28
+00:01:44.238 --> 00:01:49.142 line:-2 align:center
+so you know exactly how your app
+and server achieve this over HTTP.
+
+
+29
+00:01:50.878 --> 00:01:53.146 line:-1 align:center
+Next up, speaking of servers,
+
+
+30
+00:01:53.180 --> 00:01:58.485 line:-2 align:center
+you'll learn how to bring resumable upload
+support to any server that uses SwiftNIO.
+
+
+31
+00:01:59.686 --> 00:02:03.557 line:-2 align:center
+And lastly,
+we'll review how background URLSessions
+
+
+32
+00:02:03.590 --> 00:02:07.294 line:-2 align:center
+can gracefully handle
+user and network interruptions,
+
+
+33
+00:02:07.327 --> 00:02:10.197 line:-2 align:center
+while making efficient use
+of system resources.
+
+
+34
+00:02:11,765 --> 00:02:16,436 line:-2
+Let's learn more about download
+and upload resumption in URLSession.
+
+
+35
+00:02:16.470 --> 00:02:19.473 line:-1 align:center
+So I'm downloading the latest Xcode,
+
+
+36
+00:02:19.506 --> 00:02:23.043 line:-2 align:center
+and the 7 gigabyte download
+is almost finished.
+
+
+37
+00:02:23,076 --> 00:02:25,913 line:-1
+Right at the end, my Wi-Fi goes out.
+
+
+38
+00:02:26,880 --> 00:02:29,583 line:-1
+But wait, the download is paused,
+
+
+39
+00:02:29,616 --> 00:02:32,753 line:-1
+and when the Wi-Fi comes back online,
+
+
+40
+00:02:32.786 --> 00:02:35.689 line:-2 align:center
+I can resume my download
+from where it left off.
+
+
+41
+00:02:37,457 --> 00:02:42,196 line:-2
+I just saved lots of time
+and several gigs of bandwidth.
+
+
+42
+00:02:42.229 --> 00:02:44.398 line:-1 align:center
+Resumable downloads are amazing.
+
+
+43
+00:02:44.431 --> 00:02:47.167 line:-1 align:center
+But how do they work?
+
+
+44
+00:02:47.201 --> 00:02:52.072 line:-2 align:center
+First, the client sends a GET request
+to retrieve the download from the server.
+
+
+45
+00:02:53.640 --> 00:02:56.844 line:-2 align:center
+In the response,
+the server advertises its support
+
+
+46
+00:02:56,877 --> 00:03:01,415 line:-2
+for resumable downloads
+using the Accept-Ranges header.
+
+
+47
+00:03:01,448 --> 00:03:05,586 line:-2
+Accept-Ranges: bytes means
+the server supports range requests
+
+
+48
+00:03:05,619 --> 00:03:09,256 line:-1
+for specific bytes of this resource.
+
+
+49
+00:03:09,289 --> 00:03:12,893 line:-2
+The server response also contains
+what's called an ETag,
+
+
+50
+00:03:12.926 --> 00:03:17.631 line:-2 align:center
+which uniquely identifies the resource
+at this moment in time.
+
+
+51
+00:03:17,664 --> 00:03:21,502 line:-2
+If the content on the server changes,
+the ETag does, too.
+
+
+52
+00:03:22.903 --> 00:03:25.706 line:-2 align:center
+So what happens
+if this download is interrupted?
+
+
+53
+00:03:26.940 --> 00:03:29.910 line:-2 align:center
+The client has stored
+the partial download data,
+
+
+54
+00:03:29.943 --> 00:03:32.779 line:-1 align:center
+so it only needs the last part.
+
+
+55
+00:03:32.813 --> 00:03:36.049 line:-2 align:center
+To accomplish this,
+it can send a range request
+
+
+56
+00:03:36,083 --> 00:03:39,520 line:-2
+to retrieve the missing bytes
+of the download.
+
+
+57
+00:03:39.553 --> 00:03:44.191 line:-2 align:center
+The request indicates which bytes
+using the Range field.
+
+
+58
+00:03:44.224 --> 00:03:49.029 line:-2 align:center
+But the client also needs to make sure
+the resource hasn't changed,
+
+
+59
+00:03:49.062 --> 00:03:52.199 line:-2 align:center
+or else it would be appending data
+from the new resource
+
+
+60
+00:03:52,232 --> 00:03:55,736 line:-1
+onto the older resource that's stored.
+
+
+61
+00:03:55.769 --> 00:04:00.274 line:-2 align:center
+To prevent this, the If-Range field
+contains the ETag received
+
+
+62
+00:04:00,307 --> 00:04:02,142 line:-1
+from the previous response,
+
+
+63
+00:04:02,176 --> 00:04:06,713 line:-2
+telling the server to only send
+the partial data if the ETag is the same.
+
+
+64
+00:04:09.082 --> 00:04:11.185 line:-1 align:center
+If the ETag is the same,
+
+
+65
+00:04:11,218 --> 00:04:15,923 line:-2
+then the server responds
+with 206 Partial Content.
+
+
+66
+00:04:15.956 --> 00:04:19.293 line:-2 align:center
+The Content-Range field here
+denotes the range of bytes
+
+
+67
+00:04:19,326 --> 00:04:23,130 line:-2
+included in this response,
+completing the download.
+
+
+68
+00:04:24,131 --> 00:04:27,835 line:-2
+Since the beginning,
+URLSession has offered API
+
+
+69
+00:04:27.868 --> 00:04:32.206 line:-2 align:center
+to pause and resume download tasks
+using Range requests.
+
+
+70
+00:04:32.239 --> 00:04:35.742 line:-2 align:center
+Now,
+you can pause and resume uploads, too.
+
+
+71
+00:04:35,776 --> 00:04:40,514 line:-2
+Not only does this allow you
+to manually pause an ongoing task,
+
+
+72
+00:04:40.547 --> 00:04:45.752 line:-2 align:center
+but you can also perform error handling to
+recover from unexpected connection issues
+
+
+73
+00:04:45.786 --> 00:04:49.857 line:-2 align:center
+and resume your transfer
+right where it left off.
+
+
+74
+00:04:49.890 --> 00:04:53.560 line:-2 align:center
+Let's review how this works
+for downloads first.
+
+
+75
+00:04:53,594 --> 00:04:57,698 line:-2
+Imagine you're creating a UI
+that allow users to manually pause
+
+
+76
+00:04:57.731 --> 00:05:00.067 line:-1 align:center
+and resume their downloads.
+
+
+77
+00:05:00,100 --> 00:05:02,035 line:-1
+Like the Safari example,
+
+
+78
+00:05:02.069 --> 00:05:05.472 line:-1 align:center
+your app owns this UI, but under the hood,
+
+
+79
+00:05:05,506 --> 00:05:08,775 line:-2
+you can use URLSession
+to handle all the details,
+
+
+80
+00:05:08.809 --> 00:05:14.515 line:-2 align:center
+like keeping track of the partial download
+data, ETag, and request headers.
+
+
+81
+00:05:14,548 --> 00:05:18,185 line:-2
+To begin a download,
+you create a download task like usual,
+
+
+82
+00:05:18.218 --> 00:05:21.455 line:-1 align:center
+and start it by calling resume.
+
+
+83
+00:05:21,488 --> 00:05:25,792 line:-2
+To pause the download,
+such as when a user taps a pause button,
+
+
+84
+00:05:25.826 --> 00:05:30.264 line:-1 align:center
+you can call cancelByProducingResumeData.
+
+
+85
+00:05:30.297 --> 00:05:32.566 line:-1 align:center
+In order to resume this download later,
+
+
+86
+00:05:32.599 --> 00:05:36.370 line:-2 align:center
+URLSession will need information
+about the partial download,
+
+
+87
+00:05:36.403 --> 00:05:41.308 line:-2 align:center
+like its ETag, current size,
+and location on disk.
+
+
+88
+00:05:41.341 --> 00:05:43.477 line:-1 align:center
+This, and other metadata,
+
+
+89
+00:05:43.510 --> 00:05:49.383 line:-2 align:center
+are conveniently stored in the resume
+data object returned from this function.
+
+
+90
+00:05:49,416 --> 00:05:52,953 line:-2
+Again, it's important to note
+that this resume data
+
+
+91
+00:05:52,986 --> 00:05:55,756 line:-1
+is not the partial download data.
+
+
+92
+00:05:55.789 --> 00:05:57.758 line:-1 align:center
+If the resume data is nil,
+
+
+93
+00:05:57,791 --> 00:06:03,063 line:-2
+this means that one or more requirements
+for resumable downloads are not met,
+
+
+94
+00:06:03.096 --> 00:06:05.299 line:-1 align:center
+which we'll cover soon.
+
+
+95
+00:06:05,332 --> 00:06:08,502 line:-2
+On the other hand,
+if the resume data is not nil,
+
+
+96
+00:06:08.535 --> 00:06:11.672 line:-1 align:center
+you should store it for later use.
+
+
+97
+00:06:11.705 --> 00:06:14.241 line:-1 align:center
+That's because to resume the download,
+
+
+98
+00:06:14.274 --> 00:06:17.010 line:-1 align:center
+like when a user taps a resume button,
+
+
+99
+00:06:17,044 --> 00:06:22,216 line:-2
+you pass this stored data to
+the downloadTask withResumeData method.
+
+
+100
+00:06:22,249 --> 00:06:24,685 line:-1
+It's as simple as that!
+
+
+101
+00:06:24.718 --> 00:06:28.021 line:-2 align:center
+This pattern is great
+for manually pausing a download,
+
+
+102
+00:06:28.055 --> 00:06:33.193 line:-2 align:center
+but URLSession also offers ways to recover
+from unpredicted connection interruptions.
+
+
+103
+00:06:34.895 --> 00:06:38.432 line:-2 align:center
+If your download task fails
+due to a network problem,
+
+
+104
+00:06:38,465 --> 00:06:42,169 line:-2
+you can check for resume data
+in the error itself.
+
+
+105
+00:06:42,202 --> 00:06:44,171 line:-1
+If the download can be resumed,
+
+
+106
+00:06:44.204 --> 00:06:49.243 line:-2 align:center
+the error's userInfo dictionary
+will contain that resume data.
+
+
+107
+00:06:49.276 --> 00:06:51.712 line:-1 align:center
+You can conveniently access this data
+
+
+108
+00:06:51,745 --> 00:06:56,783 line:-2
+using the downloadTaskResumeData
+property of URLError.
+
+
+109
+00:06:56,817 --> 00:07:02,155 line:-2
+There are a few requirements for
+resumable downloads in URLSession.
+
+
+110
+00:07:02.189 --> 00:07:06.026 line:-2 align:center
+Downloads inherently fetch data,
+and should be safe to repeat,
+
+
+111
+00:07:06.059 --> 00:07:12.065 line:-2 align:center
+so URLSession requires the download task
+to have an HTTP GET request.
+
+
+112
+00:07:12.099 --> 00:07:15.469 line:-2 align:center
+Other schemes or methods
+are not supported.
+
+
+113
+00:07:15.502 --> 00:07:19.039 line:-2 align:center
+Next, the server must support
+byte-range requests
+
+
+114
+00:07:19,072 --> 00:07:23,744 line:-2
+and advertise this
+using the Accept-Ranges header.
+
+
+115
+00:07:23.777 --> 00:07:27.748 line:-2 align:center
+The server must provide an ETag,
+or Last-Modified field,
+
+
+116
+00:07:27,781 --> 00:07:32,686 line:-2
+for the resource in the response,
+but ETag is preferred.
+
+
+117
+00:07:32.719 --> 00:07:37.724 line:-2 align:center
+And lastly, the temporary download file
+must not have been deleted by the system
+
+
+118
+00:07:37,758 --> 00:07:40,194 line:-1
+in response to disk space pressure.
+
+
+119
+00:07:41.962 --> 00:07:43.730 line:-1 align:center
+With these requirements in place,
+
+
+120
+00:07:43.764 --> 00:07:46.633 line:-2 align:center
+you can manually pause
+and resume a download,
+
+
+121
+00:07:46.667 --> 00:07:50.204 line:-2 align:center
+or even recover
+from connection interruption.
+
+
+122
+00:07:50,237 --> 00:07:52,239 line:-1
+Without a resumption protocol,
+
+
+123
+00:07:52.272 --> 00:07:56.210 line:-2 align:center
+even a small interruption
+forces you to restart your transfer
+
+
+124
+00:07:56.243 --> 00:07:58.779 line:-1 align:center
+from the very beginning.
+
+
+125
+00:07:58,812 --> 00:08:02,182 line:-2
+This is an even bigger problem
+for uploads.
+
+
+126
+00:08:02.216 --> 00:08:05.853 line:-2 align:center
+Upload speeds are often much slower
+than download speeds,
+
+
+127
+00:08:05,886 --> 00:08:09,723 line:-2
+so restarting means even more lost time
+and resources.
+
+
+128
+00:08:09.756 --> 00:08:14.461 line:-2 align:center
+iOS 17 introduces brand new support
+for resumable upload tasks.
+
+
+129
+00:08:14.494 --> 00:08:16.496 line:-1 align:center
+I'm super excited for these.
+
+
+130
+00:08:16.530 --> 00:08:20.100 line:-2 align:center
+Now, upload tasks
+are automatically resumable
+
+
+131
+00:08:20.133 --> 00:08:23.504 line:-2 align:center
+if the server supports
+the latest protocol draft.
+
+
+132
+00:08:23.537 --> 00:08:26.073 line:-1 align:center
+Let's explore the new API first,
+
+
+133
+00:08:26,106 --> 00:08:30,110 line:-2
+then dive-in to the details
+of the resumable upload protocol.
+
+
+134
+00:08:30,143 --> 00:08:31,812 line:-1
+Just like download tasks,
+
+
+135
+00:08:31.845 --> 00:08:36.850 line:-2 align:center
+simply create an upload task
+and start it by calling resume.
+
+
+136
+00:08:36,884 --> 00:08:39,553 line:-2
+To pause,
+upload tasks now support
+
+
+137
+00:08:39,586 --> 00:08:45,192 line:-2
+the same cancelByProducingResumeData
+method as download tasks.
+
+
+138
+00:08:45.225 --> 00:08:48.328 line:-2 align:center
+The task automatically detects
+if the server supports
+
+
+139
+00:08:48.362 --> 00:08:51.732 line:-1 align:center
+the latest resumable upload protocol.
+
+
+140
+00:08:51,765 --> 00:08:53,534 line:-1
+If the server does support it,
+
+
+141
+00:08:53,567 --> 00:08:56,703 line:-2
+then you can store the resume data
+for later use.
+
+
+142
+00:08:58.105 --> 00:09:00.974 line:-1 align:center
+And finally, to resume your paused upload,
+
+
+143
+00:09:01,008 --> 00:09:05,345 line:-2
+use the new
+uploadTask withResumeData method.
+
+
+144
+00:09:05,379 --> 00:09:10,684 line:-2
+You'll notice the pattern shown here
+is identical to download tasks.
+
+
+145
+00:09:10.717 --> 00:09:13.921 line:-2 align:center
+That means if you've already
+created a great experience
+
+
+146
+00:09:13,954 --> 00:09:16,790 line:-2
+for pausing and resuming downloads
+in your app,
+
+
+147
+00:09:16.823 --> 00:09:21.595 line:-2 align:center
+you can easily implement resumable uploads
+for your users, too.
+
+
+148
+00:09:21,628 --> 00:09:24,064 line:-2
+If there's just
+a momentary network interruption,
+
+
+149
+00:09:24.097 --> 00:09:26.533 line:-1 align:center
+but the server is still reachable,
+
+
+150
+00:09:26.567 --> 00:09:30.604 line:-2 align:center
+URLSession will automatically try
+to resume your upload.
+
+
+151
+00:09:30.637 --> 00:09:33.073 line:-1 align:center
+No extra code is needed.
+
+
+152
+00:09:33,106 --> 00:09:35,976 line:-2
+But in case of other,
+broader connection issues,
+
+
+153
+00:09:36.009 --> 00:09:39.213 line:-2 align:center
+like if your network or server
+goes down entirely,
+
+
+154
+00:09:39.246 --> 00:09:41.615 line:-1 align:center
+you can check the error for resume data,
+
+
+155
+00:09:41,648 --> 00:09:44,518 line:-1
+just like download tasks.
+
+
+156
+00:09:44.551 --> 00:09:48.589 line:-2 align:center
+I'm extremely happy to see
+resumable uploads in URLSession,
+
+
+157
+00:09:48.622 --> 00:09:50.924 line:-1 align:center
+and I hope you love them, too.
+
+
+158
+00:09:50,958 --> 00:09:53,727 line:-2
+But in order for you to take advantage
+of this feature,
+
+
+159
+00:09:53.760 --> 00:09:57.731 line:-2 align:center
+your server must also support
+the latest resumable upload protocol.
+
+
+160
+00:09:59,233 --> 00:10:01,535 line:-2
+This protocol
+is currently being developed,
+
+
+161
+00:10:01.568 --> 00:10:07.007 line:-2 align:center
+and there are efforts across the industry
+to standardize it in the IETF.
+
+
+162
+00:10:07,040 --> 00:10:12,679 line:-2
+In the protocol, the client is able
+to automatically discover server support.
+
+
+163
+00:10:12.713 --> 00:10:16.884 line:-2 align:center
+This means URLSession can attempt
+to make ALL uploads resumable
+
+
+164
+00:10:16,917 --> 00:10:19,887 line:-1
+on the very first request.
+
+
+165
+00:10:19.920 --> 00:10:22.990 line:-2 align:center
+If the server does not support
+resumable uploads,
+
+
+166
+00:10:23,023 --> 00:10:27,027 line:-2
+the request simply continues
+as a regular upload.
+
+
+167
+00:10:27.060 --> 00:10:29.263 line:-1 align:center
+Let's see how it works on the wire.
+
+
+168
+00:10:30.797 --> 00:10:34.835 line:-2 align:center
+The client first sends a request
+to an upload endpoint.
+
+
+169
+00:10:34.868 --> 00:10:38.205 line:-2 align:center
+The Upload-Incomplete field
+indicates that this client
+
+
+170
+00:10:38.238 --> 00:10:40.807 line:-1 align:center
+supports resumable uploads.
+
+
+171
+00:10:40.841 --> 00:10:45.412 line:-2 align:center
+The question mark zero is what's known
+as a structured field boolean,
+
+
+172
+00:10:45,445 --> 00:10:48,682 line:-1
+and it represents the value false.
+
+
+173
+00:10:48,715 --> 00:10:53,687 line:-2
+This means that all of the upload data
+is included in the body of this request.
+
+
+174
+00:10:55.055 --> 00:10:57.758 line:-1 align:center
+If the server supports resumable uploads,
+
+
+175
+00:10:57.791 --> 00:11:01.495 line:-2 align:center
+it detects the client's header
+and advertises its own support
+
+
+176
+00:11:01,528 --> 00:11:05,465 line:-1
+using a 104 informational response.
+
+
+177
+00:11:05,499 --> 00:11:11,104 line:-2
+The 104 response contains
+a location field with a resume URL.
+
+
+178
+00:11:11,138 --> 00:11:15,342 line:-2
+This resume URL is used
+to uniquely identify the upload,
+
+
+179
+00:11:15,375 --> 00:11:20,881 line:-2
+so the client knows where to resume the
+upload if the connection is interrupted.
+
+
+180
+00:11:20,914 --> 00:11:26,286 line:-2
+The server associates the upload data
+it receives with this unique resume URL.
+
+
+181
+00:11:28.055 --> 00:11:31.592 line:-2 align:center
+If the upload finishes
+without interruption, then great.
+
+
+182
+00:11:31,625 --> 00:11:35,796 line:-1
+The server sends a 201 and it's done.
+
+
+183
+00:11:35.829 --> 00:11:38.899 line:-1 align:center
+However, if the upload is interrupted,
+
+
+184
+00:11:38.932 --> 00:11:42.836 line:-2 align:center
+the client and server perform
+the resumable upload procedures.
+
+
+185
+00:11:44,538 --> 00:11:48,342 line:-2
+The server has stored the partial upload
+for the resume URL,
+
+
+186
+00:11:48,375 --> 00:11:53,580 line:-2
+but the client needs a way to determine
+how much data the server actually got.
+
+
+187
+00:11:53,614 --> 00:11:57,985 line:-2
+To do this, the client sends
+a HEAD request to the resume URL,
+
+
+188
+00:11:58.018 --> 00:12:01.588 line:-1 align:center
+asking the server for the upload offset.
+
+
+189
+00:12:01.622 --> 00:12:05.559 line:-2 align:center
+This offset is the true number of bytes
+the server has received.
+
+
+190
+00:12:07,261 --> 00:12:12,065 line:-2
+The server then responds with the upload
+offset for the client's specific upload.
+
+
+191
+00:12:13,467 --> 00:12:16,303 line:0
+And lastly,
+the client needs to acknowledge
+
+
+192
+00:12:16,336 --> 00:12:20,707 align:center
+the server's offset
+and send the remaining data.
+
+
+193
+00:12:20,741 --> 00:12:23,777 align:center
+To do this,
+the client sends a PATCH request
+
+
+194
+00:12:23,810 --> 00:12:28,215 line:0
+to the resume URL
+with a matching upload offset.
+
+
+195
+00:12:28,248 --> 00:12:31,385 line:0
+The body of this request
+contains the upload data
+
+
+196
+00:12:31,418 --> 00:12:33,687 line:0
+starting from the given offset.
+
+
+197
+00:12:35,756 --> 00:12:40,027 line:0
+With that, the client has finally sent
+all the data to the server,
+
+
+198
+00:12:40,060 --> 00:12:41,995 align:center
+completing the upload.
+
+
+199
+00:12:42.029 --> 00:12:46.900 line:-2 align:center
+Your app gets all this for free
+using upload tasks in URLSession.
+
+
+200
+00:12:46,934 --> 00:12:50,304 line:-2
+Now, let's take a quick trip
+to the server side
+
+
+201
+00:12:50,337 --> 00:12:55,309 line:-2
+and explore how you can build your very
+own resumable upload server with SwiftNIO.
+
+
+202
+00:12:56.343 --> 00:12:59.446 line:-2 align:center
+For those of you already using SwiftNIO
+on your server,
+
+
+203
+00:12:59,479 --> 00:13:02,249 line:-1
+this section is for you.
+
+
+204
+00:13:02,282 --> 00:13:05,452 line:-2
+Resumable uploads can be implemented
+in any server,
+
+
+205
+00:13:05.485 --> 00:13:08.388 line:-1 align:center
+but if your server already uses SwiftNIO,
+
+
+206
+00:13:08.422 --> 00:13:12.826 line:-2 align:center
+there's a new package that makes it
+really easy to add support.
+
+
+207
+00:13:12,860 --> 00:13:15,929 line:-1
+Let's go over a quick example.
+
+
+208
+00:13:15.963 --> 00:13:21.301 line:-2 align:center
+If you're not familiar, SwiftNIO is an
+asynchronous network application framework
+
+
+209
+00:13:21,335 --> 00:13:24,004 line:-1
+that works in your app and server.
+
+
+210
+00:13:24.037 --> 00:13:29.910 line:-2 align:center
+In this sample code,
+we're setting up an HTTP/2, server.
+
+
+211
+00:13:29,943 --> 00:13:33,280 line:-1
+We've added two handlers to our server.
+
+
+212
+00:13:33.313 --> 00:13:37.084 line:-2 align:center
+The codec translates HTTP/2 frames
+into requests
+
+
+213
+00:13:37.117 --> 00:13:40.354 line:-1 align:center
+our example handler can understand.
+
+
+214
+00:13:40,387 --> 00:13:44,892 line:-2
+In the other direction, it takes
+responses from the example handler
+
+
+215
+00:13:44.925 --> 00:13:48.562 line:-1 align:center
+and codes them into HTTP/2 frames.
+
+
+216
+00:13:48.595 --> 00:13:51.965 line:-2 align:center
+The ExampleChannelHandler
+performs the basic routing
+
+
+217
+00:13:51.999 --> 00:13:54.535 line:-1 align:center
+and logic for our server.
+
+
+218
+00:13:54.568 --> 00:13:58.505 line:-1 align:center
+At first, we only support regular uploads.
+
+
+219
+00:13:58.539 --> 00:14:04.044 line:-2 align:center
+Let's find out how easy it is to transform
+our server to support resumable uploads.
+
+
+220
+00:14:06,046 --> 00:14:10,050 line:-2
+First, we download
+the NIOResumableUpload project,
+
+
+221
+00:14:10,083 --> 00:14:14,621 line:-2
+add it as a dependency,
+and import it in our code.
+
+
+222
+00:14:14.655 --> 00:14:19.059 line:-2 align:center
+Then, we define
+a resumable upload context.
+
+
+223
+00:14:19.092 --> 00:14:22.062 line:-2 align:center
+This tells the handler
+which upload endpoint to use
+
+
+224
+00:14:22.095 --> 00:14:24.097 line:-1 align:center
+when generating resume URLs.
+
+
+225
+00:14:25.699 --> 00:14:32.673 line:-2 align:center
+And lastly, we wrap our current handler
+in the HTTPResumableUploadHandler.
+
+
+226
+00:14:32.706 --> 00:14:38.445 line:-2 align:center
+This performs the resumable upload
+procedures on top of our current logic.
+
+
+227
+00:14:38.478 --> 00:14:43.050 line:-2 align:center
+For each upload, it generates a random
+and secure resume URL
+
+
+228
+00:14:43.083 --> 00:14:46.920 line:-1 align:center
+and associates this with the upload data.
+
+
+229
+00:14:46.954 --> 00:14:51.758 line:-2 align:center
+If a connection is interrupted,
+the handler holds on to any partial data
+
+
+230
+00:14:51,792 --> 00:14:55,896 line:-2
+and responds to all
+the resumable upload procedures for us.
+
+
+231
+00:14:55,929 --> 00:14:57,197 line:-1
+Wow!
+
+
+232
+00:14:57.231 --> 00:15:00.801 line:-2 align:center
+With just a few lines of code,
+we've supercharged our server
+
+
+233
+00:15:00.834 --> 00:15:03.604 line:-1 align:center
+to support resumable uploads.
+
+
+234
+00:15:03,637 --> 00:15:08,008 line:-2
+For those of you using Swift on Server
+already, try this out!
+
+
+235
+00:15:08.041 --> 00:15:09.910 line:-1 align:center
+And for everybody regardless,
+
+
+236
+00:15:09,943 --> 00:15:12,379 line:-2
+be sure to check out
+the open-source sample code
+
+
+237
+00:15:12.412 --> 00:15:13.947 line:-1 align:center
+from the link in the description.
+
+
+238
+00:15:13.981 --> 00:15:17.918 line:-1 align:center
+The sample code also uses new HTTP types,
+
+
+239
+00:15:17.951 --> 00:15:20.921 line:-2 align:center
+which allow you to use the same types
+across your app
+
+
+240
+00:15:20.954 --> 00:15:23.824 line:-1 align:center
+and your Swift on Server projects.
+
+
+241
+00:15:23.857 --> 00:15:26.927 line:-2 align:center
+These data types were released
+as an open-source package
+
+
+242
+00:15:26,960 --> 00:15:29,162 line:-1
+in collaboration with SwiftNIO,
+
+
+243
+00:15:29.196 --> 00:15:32.933 line:-2 align:center
+so check out the Swift blog to learn more
+and provide your feedback.
+
+
+244
+00:15:34,701 --> 00:15:37,271 line:-2
+You might have noticed
+the resumable upload protocol
+
+
+245
+00:15:37.304 --> 00:15:42.843 line:-2 align:center
+makes use of informational responses
+using the 104 status code.
+
+
+246
+00:15:42,876 --> 00:15:48,615 line:-2
+The new HTTP Types make it easy to support
+these responses on the server side.
+
+
+247
+00:15:48.649 --> 00:15:53.253 line:-2 align:center
+In your app, URLSession handles
+the 104 response automatically
+
+
+248
+00:15:53.287 --> 00:15:55.355 line:-1 align:center
+for resumable uploads.
+
+
+249
+00:15:55.389 --> 00:15:59.426 line:-2 align:center
+But on top of that, URLSession now
+provides a delegate method
+
+
+250
+00:15:59,459 --> 00:16:02,296 line:-1
+didReceiveInformationalResponse.
+
+
+251
+00:16:02.329 --> 00:16:05.666 line:-2 align:center
+This allows your app to handle
+other intermediate responses
+
+
+252
+00:16:05,699 --> 00:16:09,369 line:-1
+such as 102 Processing or 103 Early Hints.
+
+
+253
+00:16:10,704 --> 00:16:14,875 line:-2
+Resumable protocols are a great way
+to alleviate network interruptions
+
+
+254
+00:16:14.908 --> 00:16:17.311 line:-1 align:center
+and save bandwidth.
+
+
+255
+00:16:17,344 --> 00:16:22,983 line:-2
+Background URLSession can also be useful
+when handling large file transfers.
+
+
+256
+00:16:23,016 --> 00:16:29,122 line:-2
+Imagine your user wants to upload a huge
+4K video from their latest ski trip.
+
+
+257
+00:16:29,156 --> 00:16:31,191 line:-1
+If their connection gets interrupted,
+
+
+258
+00:16:31.225 --> 00:16:35.128 line:-2 align:center
+you want to make sure to resume
+the upload if possible.
+
+
+259
+00:16:35,162 --> 00:16:37,931 line:-2
+You could do
+all the error handling yourself.
+
+
+260
+00:16:37.965 --> 00:16:41.168 line:-2 align:center
+Or, you can let background session
+do it for you.
+
+
+261
+00:16:42.636 --> 00:16:46.907 line:-2 align:center
+In fact, background session will handle
+resumption automatically
+
+
+262
+00:16:46,940 --> 00:16:50,677 line:-2
+for both download and upload tasks,
+if the server supports it.
+
+
+263
+00:16:51.845 --> 00:16:55.649 line:-2 align:center
+If a task is interrupted,
+the system will try to resume the task
+
+
+264
+00:16:55,682 --> 00:16:57,718 line:-1
+at increasing time intervals.
+
+
+265
+00:16:59.453 --> 00:17:01.522 line:-1 align:center
+If the task cannot be resumed,
+
+
+266
+00:17:01.555 --> 00:17:05.425 line:-2 align:center
+the system will automatically retry
+the task from the beginning.
+
+
+267
+00:17:07,160 --> 00:17:10,430 line:-2
+Maybe your user loses cell coverage
+on the ski mountain,
+
+
+268
+00:17:10.464 --> 00:17:13.500 line:-1 align:center
+or a snowstorm took out their Wi-Fi.
+
+
+269
+00:17:13.534 --> 00:17:16.270 line:-2 align:center
+Background session always waits
+for connectivity,
+
+
+270
+00:17:16.303 --> 00:17:18.705 line:-1 align:center
+so tasks will be scheduled at some point
+
+
+271
+00:17:18.739 --> 00:17:21.608 line:-2 align:center
+after the device connects
+to the internet again.
+
+
+272
+00:17:23,777 --> 00:17:26,113 line:-1
+While your user is uploading their video,
+
+
+273
+00:17:26,146 --> 00:17:29,850 line:-2
+they might leave your app
+or put their device away.
+
+
+274
+00:17:29.883 --> 00:17:32.519 line:-2 align:center
+Maybe they're getting ready
+to shred more some powder,
+
+
+275
+00:17:32.553 --> 00:17:35.022 line:-2 align:center
+and they still expect
+their upload to continue.
+
+
+276
+00:17:36.490 --> 00:17:40.060 line:-2 align:center
+This specifically calls
+for a background session.
+
+
+277
+00:17:40,093 --> 00:17:42,596 line:-2
+Background tasks are scheduled
+by the system,
+
+
+278
+00:17:42.629 --> 00:17:46.033 line:-1 align:center
+so they run outside your app's process.
+
+
+279
+00:17:46,066 --> 00:17:50,103 line:-2
+This means even if your app is suspended
+or terminated by the system,
+
+
+280
+00:17:50.137 --> 00:17:53.607 line:-1 align:center
+your network tasks continue reliably.
+
+
+281
+00:17:53,640 --> 00:17:57,644 line:-2
+Use a background session for large
+file transfers that might take a long time
+
+
+282
+00:17:57,678 --> 00:18:00,280 line:-2
+and need to persist
+when a user leaves your app.
+
+
+283
+00:18:02.082 --> 00:18:06.420 line:-2 align:center
+Lastly, your user deserves the best
+experience when they're in your app,
+
+
+284
+00:18:06.453 --> 00:18:11.925 line:-2 align:center
+and that might mean scheduling less urgent
+tasks to happen at a later time.
+
+
+285
+00:18:11,959 --> 00:18:13,694 line:-1
+By using a background session,
+
+
+286
+00:18:13.727 --> 00:18:17.130 line:-2 align:center
+you have several ways
+to efficiently schedule network activity
+
+
+287
+00:18:17,164 --> 00:18:19,166 line:-1
+and save resources for your user.
+
+
+288
+00:18:20.400 --> 00:18:22.903 line:-2 align:center
+For tasks that don't need
+to happen immediately,
+
+
+289
+00:18:22,936 --> 00:18:26,340 line:-2
+consider setting the isDiscretionary
+property to true
+
+
+290
+00:18:26.373 --> 00:18:29.309 line:-1 align:center
+on your background configuration.
+
+
+291
+00:18:29,343 --> 00:18:33,046 line:-2
+This allows the system
+to intelligently schedule your tasks,
+
+
+292
+00:18:33.080 --> 00:18:36.917 line:-2 align:center
+taking into account factors like
+"Is the user on Wi-Fi",
+
+
+293
+00:18:36,950 --> 00:18:38,785 line:-1
+"is their device connected to power",
+
+
+294
+00:18:38,819 --> 00:18:41,788 line:-1
+and "is the network constrained"?
+
+
+295
+00:18:41.822 --> 00:18:45.492 line:-2 align:center
+This can be a great option
+when downloading assets for later use,
+
+
+296
+00:18:45,526 --> 00:18:47,995 line:-2
+or uploading a nightly backup,
+or analytics.
+
+
+297
+00:18:49.730 --> 00:18:53.000 line:-2 align:center
+To prevent using too much bandwidth
+on Low Data Mode,
+
+
+298
+00:18:53.033 --> 00:18:56.036 line:-2 align:center
+consider setting
+the allowsConstrainedNetworkAccess
+
+
+299
+00:18:56.069 --> 00:18:58.672 line:-1 align:center
+property to false.
+
+
+300
+00:18:58,705 --> 00:19:01,074 align:center
+Check out the Advances
+in Networking session
+
+
+301
+00:19:01,108 --> 00:19:04,444 line:0
+for more tips on supporting
+Low Data Mode in your app.
+
+
+302
+00:19:06.613 --> 00:19:10.884 line:-2 align:center
+You can also schedule the background task
+itself to begin at a later time,
+
+
+303
+00:19:10.918 --> 00:19:15.656 line:-2 align:center
+when a person is less likely
+to be using system resources.
+
+
+304
+00:19:15,689 --> 00:19:20,160 line:-2
+Late at night is often a great time
+for scheduling tasks like large backups.
+
+
+305
+00:19:22,095 --> 00:19:24,364 line:-1
+To further assist the system scheduling,
+
+
+306
+00:19:24.398 --> 00:19:27.701 line:-2 align:center
+we can set the
+countOfBytesClientExpectsToSend
+
+
+307
+00:19:27,734 --> 00:19:30,504 line:-1
+and Receive properties.
+
+
+308
+00:19:30.537 --> 00:19:32.706 line:-1 align:center
+By utilizing these properties,
+
+
+309
+00:19:32.739 --> 00:19:36.009 line:-2 align:center
+you're empowering the system
+to best allocate resources
+
+
+310
+00:19:36,043 --> 00:19:39,947 line:-2
+and passing those benefits on
+to your users.
+
+
+311
+00:19:39.980 --> 00:19:43.283 line:-2 align:center
+Background session is a great tool
+for large file transfers
+
+
+312
+00:19:43.317 --> 00:19:45.118 line:-1 align:center
+that don't need to happen immediately
+
+
+313
+00:19:45,152 --> 00:19:49,323 line:-2
+or transfers that should continue
+when your app is suspended.
+
+
+314
+00:19:49,356 --> 00:19:53,493 line:-2
+For smaller tasks, or tasks
+that need to happen as soon as possible,
+
+
+315
+00:19:53,527 --> 00:19:56,897 line:-1
+you can use a standard URLSession.
+
+
+316
+00:19:56,930 --> 00:19:59,199 line:-1
+Make networking reliable for your users
+
+
+317
+00:19:59,233 --> 00:20:02,870 line:-2
+by bringing the power of resumption
+to your app.
+
+
+318
+00:20:02.903 --> 00:20:05.739 line:-1 align:center
+Check out SwiftNIO and HTTP Types,
+
+
+319
+00:20:05,772 --> 00:20:11,545 line:-2
+and let's work together to create
+the best HTTP experience in Swift.
+
+
+320
+00:20:11.578 --> 00:20:18.018 line:-2 align:center
+And lastly, try using background session
+for large or discretionary file transfers.
+
+
+321
+00:20:18,051 --> 00:20:23,690 line:-2
+You'll find lots of ways to save resources
+for when your user needs it most.
+
+
+322
+00:20:23,724 --> 00:20:25,826 line:0
+Thanks for watching,
+and be sure to check out
+
+
+323
+00:20:25,859 --> 00:20:29,563 align:center
+these other
+great networking sessions below.
+
+
+324
+00:20:29.596 --> 00:20:31.465 line:-1 align:center
+And that's a wrap!
+
+
+325
+00:20:31,498 --> 00:20:34,501 line:-1
+♪ ♪
+

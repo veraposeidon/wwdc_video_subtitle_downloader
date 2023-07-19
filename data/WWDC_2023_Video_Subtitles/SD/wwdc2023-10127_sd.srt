@@ -1,0 +1,1499 @@
+2
+00:00:00,501 --> 00:00:08,509 line:-1
+♪ ♪
+
+
+3
+00:00:10.410 --> 00:00:13.080 line:-1 align:center
+Hi everyone, I am Gauri Jog,
+
+
+4
+00:00:13.113 --> 00:00:15.983 line:-2 align:center
+and I work on the Metal Ecosystem team
+here at Apple.
+
+
+5
+00:00:16.016 --> 00:00:20.621 line:-2 align:center
+I'm excited to talk to you about
+optimizing GPU renderers using Metal.
+
+
+6
+00:00:21.755 --> 00:00:25.125 line:-2 align:center
+Modern digital content creation
+applications and game-engines
+
+
+7
+00:00:25,158 --> 00:00:29,696 line:-2
+empower content creators to interactively
+create and modify materials
+
+
+8
+00:00:29.730 --> 00:00:31.598 line:-1 align:center
+for their 3D assets.
+
+
+9
+00:00:31.632 --> 00:00:33.734 line:-2 align:center
+There are several common techniques
+for handling
+
+
+10
+00:00:33,767 --> 00:00:37,304 line:-2
+these complex and dynamic materials
+at runtime.
+
+
+11
+00:00:37.337 --> 00:00:40.807 line:-2 align:center
+Some applications compile materials
+into individual shaders
+
+
+12
+00:00:40,841 --> 00:00:44,378 line:-2
+and others use data-driven solutions
+such as uber shaders
+
+
+13
+00:00:44,411 --> 00:00:47,347 line:-1
+or shader virtual machines.
+
+
+14
+00:00:47.381 --> 00:00:51.685 line:-2 align:center
+These material-centric workflows
+have two main performance goals.
+
+
+15
+00:00:51.718 --> 00:00:55.255 line:-2 align:center
+Authoring of materials should be
+responsive for fast iteration
+
+
+16
+00:00:55.289 --> 00:00:57.724 line:-1 align:center
+and the best experience.
+
+
+17
+00:00:57.758 --> 00:01:00.694 line:-2 align:center
+Rendering performance
+should be as good as possible
+
+
+18
+00:01:00.727 --> 00:01:04.298 line:-2 align:center
+for real-time interactivity
+and efficient final-frame rendering.
+
+
+19
+00:01:05.966 --> 00:01:08.435 line:-1 align:center
+In this demonstration of Blender 3D,
+
+
+20
+00:01:08,468 --> 00:01:11,271 line:-1
+material editing is responsive.
+
+
+21
+00:01:11,305 --> 00:01:14,374 line:-2
+When you modify a material slider
+in the user interface,
+
+
+22
+00:01:14,408 --> 00:01:17,511 line:-2
+the results are shown instantly
+in the viewport
+
+
+23
+00:01:17.544 --> 00:01:21.481 line:-2 align:center
+without any stutters
+due to shader re-compilation.
+
+
+24
+00:01:21,515 --> 00:01:23,417 line:-1
+Once the material is modified,
+
+
+25
+00:01:23,450 --> 00:01:26,753 line:-2
+the resulting rendering performance
+is fast and interactive,
+
+
+26
+00:01:26,787 --> 00:01:28,622 line:-1
+giving content creators the ability
+
+
+27
+00:01:28,655 --> 00:01:31,024 line:-2
+to efficiently view
+the results of their work.
+
+
+28
+00:01:34.595 --> 00:01:38.031 line:-2 align:center
+To achieve a responsive and
+performant workflow in your application,
+
+
+29
+00:01:38.065 --> 00:01:43.070 line:-2 align:center
+you can leverage key Metal features
+and implement Metal best practices.
+
+
+30
+00:01:43.103 --> 00:01:47.174 line:-2 align:center
+Metal can help you maximize
+complex shaders' performance
+
+
+31
+00:01:47.207 --> 00:01:51.545 line:-2 align:center
+leverage asynchronous compilation
+to keep the application responsive,
+
+
+32
+00:01:51,578 --> 00:01:54,448 line:-1
+compile faster with dynamic linking
+
+
+33
+00:01:54.481 --> 00:01:59.853 line:-2 align:center
+and tune your compute shaders
+with new Metal compiler options.
+
+
+34
+00:01:59.887 --> 00:02:04.157 line:-2 align:center
+Optimizing your shaders
+is the key to performance.
+
+
+35
+00:02:05.092 --> 00:02:08.395 line:-2 align:center
+An uber shader is an example
+of a long and complex shader
+
+
+36
+00:02:08.428 --> 00:02:11.965 line:-2 align:center
+that can be used
+to render any possible material.
+
+
+37
+00:02:11,999 --> 00:02:17,671 line:-2
+These types of shaders have lots of
+branches for any possible combination.
+
+
+38
+00:02:17,704 --> 00:02:20,140 line:-1
+When artists create material,
+
+
+39
+00:02:20.174 --> 00:02:23.177 line:-2 align:center
+the material parameters are stored
+in a Metal buffer,
+
+
+40
+00:02:23.210 --> 00:02:25.579 line:-1 align:center
+used by the material shader.
+
+
+41
+00:02:25.612 --> 00:02:28.849 line:-2 align:center
+This buffer gets updated
+when you change the parameters,
+
+
+42
+00:02:28.882 --> 00:02:31.351 line:-1 align:center
+but there is no recompilation required.
+
+
+43
+00:02:35.088 --> 00:02:39.693 line:-2 align:center
+This approach provides a great
+responsive authoring experience.
+
+
+44
+00:02:39,726 --> 00:02:42,996 line:-1
+However, uber shaders are not optimal
+
+
+45
+00:02:43,030 --> 00:02:46,266 line:-2
+since they have to account for
+all the possible options.
+
+
+46
+00:02:48,302 --> 00:02:51,038 line:-1
+To make the most optimal shader variant,
+
+
+47
+00:02:51.071 --> 00:02:55.008 line:-2 align:center
+you should use Metal specialization
+with function constants.
+
+
+48
+00:02:55,042 --> 00:02:58,312 line:-2
+Simply declare function constants
+in your Metal shader
+
+
+49
+00:02:58.345 --> 00:03:02.015 line:-2 align:center
+and set their values at runtime
+when they are changed.
+
+
+50
+00:03:02.049 --> 00:03:04.818 line:-2 align:center
+The material buffer contents
+simply become constants
+
+
+51
+00:03:04.852 --> 00:03:06.720 line:-1 align:center
+in your shader pipeline states,
+
+
+52
+00:03:06.753 --> 00:03:09.356 line:-1 align:center
+dynamic branching is eliminated.
+
+
+53
+00:03:09,389 --> 00:03:13,260 line:-2
+Specialized materials give you
+the most performance.
+
+
+54
+00:03:13,293 --> 00:03:16,230 line:-2
+This is a comparison
+of real-time performance data
+
+
+55
+00:03:16.263 --> 00:03:19.299 line:-1 align:center
+from two common test assets in Blender 3D,
+
+
+56
+00:03:19.333 --> 00:03:21.902 line:-1 align:center
+Wanderer and Tree Creature.
+
+
+57
+00:03:21,935 --> 00:03:25,439 line:-2
+First is the baseline performance
+in frames per second
+
+
+58
+00:03:25,472 --> 00:03:28,375 line:-1
+of the scenes using an uber shader.
+
+
+59
+00:03:28.408 --> 00:03:31.044 line:-1 align:center
+Second is the specialized shader approach
+
+
+60
+00:03:31.078 --> 00:03:34.882 line:-2 align:center
+with function constants
+that performs much faster.
+
+
+61
+00:03:34,915 --> 00:03:38,852 line:-2
+In order to make the fastest
+specialized shader variant,
+
+
+62
+00:03:38,886 --> 00:03:43,957 line:-2
+use function constants to disable
+unused features and eliminate branching.
+
+
+63
+00:03:45,225 --> 00:03:49,196 line:-2
+An uber shader would query
+material parameters from a buffer
+
+
+64
+00:03:49,229 --> 00:03:54,134 line:-2
+doing conditional branches at runtime
+to enable and disable features.
+
+
+65
+00:03:54.168 --> 00:03:59.239 line:-2 align:center
+With function constants you declare
+one constant per material feature.
+
+
+66
+00:03:59,273 --> 00:04:04,044 line:-2
+Now the dynamic branch
+for the feature codepath
+
+
+67
+00:04:04,077 --> 00:04:06,013 line:-1
+is replaced with the function constant,
+
+
+68
+00:04:06,046 --> 00:04:09,416 line:-1
+eliminating all unused code.
+
+
+69
+00:04:09,449 --> 00:04:11,785 line:-1
+Here is the same uber shader
+
+
+70
+00:04:11,818 --> 00:04:14,121 line:-1
+now using function constants.
+
+
+71
+00:04:14,154 --> 00:04:17,858 line:-2
+The Metal compiler can fold these
+as constant booleans
+
+
+72
+00:04:17,891 --> 00:04:20,961 line:-1
+and remove unused code.
+
+
+73
+00:04:20,994 --> 00:04:25,532 line:-2
+Branch expressions that resolve
+to false will be optimized out,
+
+
+74
+00:04:25,566 --> 00:04:29,303 line:-1
+leaving only the true branches.
+
+
+75
+00:04:29,336 --> 00:04:32,573 line:-2
+All the unused control flow
+is optimized out.
+
+
+76
+00:04:34,007 --> 00:04:38,145 line:-2
+Specialized shader now does not need
+to query material data,
+
+
+77
+00:04:38.178 --> 00:04:40.781 line:-1 align:center
+having a much simpler control flow.
+
+
+78
+00:04:40.814 --> 00:04:43.750 line:-2 align:center
+Memory loads and branches
+have been removed
+
+
+79
+00:04:43.784 --> 00:04:47.054 line:-1 align:center
+resulting in faster runtime performance.
+
+
+80
+00:04:48,288 --> 00:04:52,392 line:-2
+Function specialization
+also helps with constants folding.
+
+
+81
+00:04:52,426 --> 00:04:58,332 line:-2
+Material parameters that don't change
+are replaced with constants.
+
+
+82
+00:04:58,365 --> 00:05:03,837 line:-2
+This example material uses a collection
+of input parameters from a Metal buffer.
+
+
+83
+00:05:03,871 --> 00:05:08,375 line:-2
+The parameters could be color,
+weight, sheen color, and many more.
+
+
+84
+00:05:09,877 --> 00:05:14,248 line:-2
+At material creation time,
+these static parameters can be replaced
+
+
+85
+00:05:14,281 --> 00:05:16,717 line:-1
+with function constants.
+
+
+86
+00:05:16.750 --> 00:05:19.853 line:-2 align:center
+Function constants produce
+the most optimal code
+
+
+87
+00:05:19,887 --> 00:05:23,290 line:-1
+with no buffer reads required.
+
+
+88
+00:05:23.323 --> 00:05:27.027 line:-2 align:center
+On the host side,
+function constant values are provided
+
+
+89
+00:05:27.060 --> 00:05:30.531 line:-2 align:center
+when creating
+a specialized pipeline state.
+
+
+90
+00:05:30,564 --> 00:05:34,568 line:-2
+MaterialParameter structure can
+be used to represent all parameters
+
+
+91
+00:05:34,601 --> 00:05:37,404 line:-1
+that are constant for a material.
+
+
+92
+00:05:37.437 --> 00:05:41.275 line:-2 align:center
+IsGlossy is an example
+of a boolean material feature flag
+
+
+93
+00:05:41,308 --> 00:05:44,077 line:-1
+controlling glossiness.
+
+
+94
+00:05:44,111 --> 00:05:48,815 line:-2
+MaterialColor is an example of a vector
+parameter used to describe color.
+
+
+95
+00:05:50,617 --> 00:05:53,487 line:-2
+To create a specialized
+Pipeline State Object,
+
+
+96
+00:05:53,520 --> 00:05:57,691 line:-2
+iterate over
+a MetalFunctionConstantValues set
+
+
+97
+00:05:57,724 --> 00:06:00,994 line:-2
+and insert
+the values using setConstantValue.
+
+
+98
+00:06:02,296 --> 00:06:05,966 line:-2
+Then just create
+a Render Pipeline as usual.
+
+
+99
+00:06:05,999 --> 00:06:09,369 line:-2
+The only difference is when
+creating the fragment function,
+
+
+100
+00:06:09,403 --> 00:06:14,208 line:-2
+you'd use the variant of
+newFunctionWithName with constantValues.
+
+
+101
+00:06:16,143 --> 00:06:19,213 line:-2
+Finally,
+create your Pipeline State Object.
+
+
+102
+00:06:19,246 --> 00:06:23,951 line:-2
+The resulting shader is the most optimal
+performing variant of this material.
+
+
+103
+00:06:26,420 --> 00:06:30,157 line:-2
+Always use Xcode's
+GPU Debugger Performance section
+
+
+104
+00:06:30,190 --> 00:06:32,893 line:-2
+to confirm the impact
+of using function constants.
+
+
+105
+00:06:35.128 --> 00:06:39.366 line:-2 align:center
+The original uber shader shows
+a high number of ALU instructions
+
+
+106
+00:06:39,399 --> 00:06:41,969 line:-1
+and a large amount of spill.
+
+
+107
+00:06:42.002 --> 00:06:44.972 line:-1 align:center
+The number of memory waits is also large.
+
+
+108
+00:06:46.206 --> 00:06:51.278 line:-2 align:center
+Specialized approach gives
+immediate relief on the ALU and spill.
+
+
+109
+00:06:51,311 --> 00:06:55,482 line:-2
+This is due to dead code elimination
+and constants folding.
+
+
+110
+00:06:55.516 --> 00:06:59.820 line:-2 align:center
+Also, the number of memory waits
+is significantly smaller.
+
+
+111
+00:07:01,655 --> 00:07:06,660 line:-2
+Observing the original uber shader
+in runtime shader execution costs,
+
+
+112
+00:07:06,693 --> 00:07:10,664 line:-2
+the GPU is spending significant time
+on memory waits.
+
+
+113
+00:07:11,965 --> 00:07:16,503 line:-2
+Specialized approach, in contrast,
+spends far less time on memory waits,
+
+
+114
+00:07:16.537 --> 00:07:19.640 line:-1 align:center
+enabling more productive ALU utilization,
+
+
+115
+00:07:19,673 --> 00:07:22,075 line:-1
+along with other efficiency benefits.
+
+
+116
+00:07:23,510 --> 00:07:26,113 line:-1
+In the GPU Debugger timeline view,
+
+
+117
+00:07:26,146 --> 00:07:28,148 line:-1
+it takes 58 milliseconds
+
+
+118
+00:07:28,182 --> 00:07:31,485 line:-2
+to render the material pass
+using the uber shader.
+
+
+119
+00:07:31,518 --> 00:07:36,523 line:-2
+And only 12.5 milliseconds
+to render with specialized versions.
+
+
+120
+00:07:36.557 --> 00:07:38.992 line:-1 align:center
+It's a pretty dramatic improvement.
+
+
+121
+00:07:40,894 --> 00:07:45,432 line:-2
+Material specialization requires
+runtime shader compilation
+
+
+122
+00:07:45,465 --> 00:07:48,902 line:-2
+and this will often result in hitching
+if you block and wait
+
+
+123
+00:07:48.936 --> 00:07:52.372 line:-2 align:center
+for these specialized materials
+to be created.
+
+
+124
+00:07:52,406 --> 00:07:57,945 line:-2
+The Metal asynchronous compilation APIs
+allow you to use generic uber shaders
+
+
+125
+00:07:57,978 --> 00:08:01,582 line:-2
+and keep user experience
+interactive and responsive
+
+
+126
+00:08:01,615 --> 00:08:05,118 line:-2
+while generating specialized versions
+in the background.
+
+
+127
+00:08:06.186 --> 00:08:09.690 line:-2 align:center
+To opt in to the asynchronous pipeline
+state creation,
+
+
+128
+00:08:09.723 --> 00:08:11.892 line:-1 align:center
+provide a completion handler.
+
+
+129
+00:08:11.925 --> 00:08:14.394 line:-1 align:center
+These calls will return immediately
+
+
+130
+00:08:14,428 --> 00:08:18,866 line:-2
+allowing you to keep the user experience
+interactive and responsive.
+
+
+131
+00:08:18.899 --> 00:08:22.903 line:-2 align:center
+Completion handler will be called
+when specialized pipeline state is ready,
+
+
+132
+00:08:22.936 --> 00:08:25.873 line:-2 align:center
+and you can switch
+to the optimal shader right away.
+
+
+133
+00:08:28.041 --> 00:08:31.945 line:-2 align:center
+This is a diagram of an asynchronous
+material workflow.
+
+
+134
+00:08:31.979 --> 00:08:36.149 line:-2 align:center
+By default, when the material
+has not yet been specialized,
+
+
+135
+00:08:36,183 --> 00:08:38,785 line:-1
+you use your uber shader.
+
+
+136
+00:08:38.819 --> 00:08:40.454 line:-1 align:center
+At the same time,
+
+
+137
+00:08:40.487 --> 00:08:43.457 line:-2 align:center
+Metal compiles the specialized shader
+in the background.
+
+
+138
+00:08:44.591 --> 00:08:47.694 line:-2 align:center
+Once this is done,
+you can switch out the uber shader
+
+
+139
+00:08:47,728 --> 00:08:50,130 line:-1
+for the fast specialized material.
+
+
+140
+00:08:51,865 --> 00:08:54,902 line:-2
+Runtime Metal shaders compilation
+is designed
+
+
+141
+00:08:54,935 --> 00:08:58,138 line:-2
+to provide a balanced level
+of parallelism.
+
+
+142
+00:08:58.172 --> 00:09:01.175 line:-2 align:center
+However,
+modern content creation applications
+
+
+143
+00:09:01.208 --> 00:09:04.611 line:-2 align:center
+need to provide multi-material
+editing workflows,
+
+
+144
+00:09:04.645 --> 00:09:08.282 line:-1 align:center
+resulting in many shader re-compilations.
+
+
+145
+00:09:08.315 --> 00:09:10.784 line:-1 align:center
+To help such heavy authoring needs,
+
+
+146
+00:09:10,817 --> 00:09:12,352 line:-1
+you may want to ask Metal
+
+
+147
+00:09:12.386 --> 00:09:16.590 line:-2 align:center
+to maximize
+shader compilation parallelism.
+
+
+148
+00:09:16.623 --> 00:09:20.160 line:-2 align:center
+Metal device has
+a new property in macOS13.3
+
+
+149
+00:09:20.194 --> 00:09:24.231 line:-2 align:center
+called
+should-Maximize-Concurrent-Compilation.
+
+
+150
+00:09:24.264 --> 00:09:25.832 line:-1 align:center
+When you set it to Yes,
+
+
+151
+00:09:25.866 --> 00:09:30.237 line:-2 align:center
+Metal compiler will make the best use
+of your CPU cores.
+
+
+152
+00:09:30.270 --> 00:09:33.740 line:-2 align:center
+Maximizing concurrent compilation
+is really great
+
+
+153
+00:09:33.774 --> 00:09:37.144 line:-1 align:center
+for multi-material authoring workflows.
+
+
+154
+00:09:37.177 --> 00:09:40.113 line:-1 align:center
+With additional compiler jobs available,
+
+
+155
+00:09:40,147 --> 00:09:44,318 line:-2
+specialized material variants
+are available much sooner.
+
+
+156
+00:09:44.351 --> 00:09:46.954 line:-1 align:center
+Here is how it all works in practice.
+
+
+157
+00:09:46.987 --> 00:09:49.156 line:-1 align:center
+When material parameters are changed,
+
+
+158
+00:09:49,189 --> 00:09:53,694 line:-2
+the current specialized variants
+of the material are invalidated,
+
+
+159
+00:09:53,727 --> 00:09:58,265 line:-2
+there is a switch back to using
+the uber shader to keep authoring fluid.
+
+
+160
+00:09:58.298 --> 00:10:01.401 line:-2 align:center
+A new async job is queued
+and once it completes,
+
+
+161
+00:10:01,435 --> 00:10:04,304 line:-2
+you can observe
+a substantial performance improvement
+
+
+162
+00:10:04,338 --> 00:10:07,508 line:-1
+once the specialized material is engaged.
+
+
+163
+00:10:07.541 --> 00:10:11.178 line:-2 align:center
+Most modern apps have extremely
+complex materials,
+
+
+164
+00:10:11.211 --> 00:10:13.714 line:-2 align:center
+so it can take
+a significant amount of time
+
+
+165
+00:10:13.747 --> 00:10:16.750 line:-1 align:center
+for a specialized variant to be ready.
+
+
+166
+00:10:16.783 --> 00:10:21.255 line:-2 align:center
+Dynamic libraries in Metal can be used
+to pre-compile the utility functions
+
+
+167
+00:10:21,288 --> 00:10:25,158 line:-1
+and reduce overall material compile time.
+
+
+168
+00:10:25,192 --> 00:10:28,362 line:-2
+You do this
+by splitting up groups of functionality
+
+
+169
+00:10:28.395 --> 00:10:31.131 line:-1 align:center
+into separate dynamic libraries.
+
+
+170
+00:10:31.164 --> 00:10:33.634 line:-1 align:center
+For even faster runtime compilation,
+
+
+171
+00:10:33.667 --> 00:10:37.404 line:-2 align:center
+utility libraries
+could be precompiled offline.
+
+
+172
+00:10:37,437 --> 00:10:41,642 line:-2
+And you end up compiling
+much less code at runtime.
+
+
+173
+00:10:43,310 --> 00:10:47,915 line:-2
+If I were to take the previous uber shader
+and split it into dylibs.
+
+
+174
+00:10:47,948 --> 00:10:51,885 line:-2
+one approach is to split it
+by common groups of functionality.
+
+
+175
+00:10:51,919 --> 00:10:55,155 line:-1
+In this case, one math utility library
+
+
+176
+00:10:55,189 --> 00:10:57,591 line:-1
+and another for lighting functions.
+
+
+177
+00:10:58,992 --> 00:11:01,628 line:-2
+To make function symbols visible
+for linking,
+
+
+178
+00:11:01,662 --> 00:11:04,798 line:-1
+you assign "default” visibility.
+
+
+179
+00:11:04,831 --> 00:11:07,901 line:-2
+Symbols can also be hidden
+from external programs
+
+
+180
+00:11:07,935 --> 00:11:10,504 line:-1
+by assigning visibility to "hidden".
+
+
+181
+00:11:12,172 --> 00:11:13,974 line:-1
+There are two properties to check
+
+
+182
+00:11:14,007 --> 00:11:17,044 line:-2
+if your Metal device
+supports dynamic libraries.
+
+
+183
+00:11:17,077 --> 00:11:22,182 line:-2
+For render pipelines you should use the
+supportsRenderDynamicLibraries property
+
+
+184
+00:11:22,216 --> 00:11:24,218 line:-1
+of the Metal device.
+
+
+185
+00:11:24,251 --> 00:11:29,056 line:-2
+This is currently available on devices
+with Apple6 and above GPU families.
+
+
+186
+00:11:30,324 --> 00:11:36,096 line:-2
+For compute pipelines you should query
+the supportsDynamicLibraries property.
+
+
+187
+00:11:36.129 --> 00:11:38.899 line:-1 align:center
+This is available on Apple6 and above
+
+
+188
+00:11:38.932 --> 00:11:42.135 line:-1 align:center
+and for most of the Mac2 GPU families.
+
+
+189
+00:11:43.871 --> 00:11:47.674 line:-2 align:center
+To create a dynamic library
+from an existing Metal library,
+
+
+190
+00:11:47,708 --> 00:11:50,577 line:-1
+simply call newDynamicLibrary
+
+
+191
+00:11:50,611 --> 00:11:53,046 line:-1
+and pass it a Metal library.
+
+
+192
+00:11:53,080 --> 00:11:58,151 line:-2
+To create from the URL,
+call the newDynamicLibraryWithURL method
+
+
+193
+00:11:58,185 --> 00:12:01,355 line:-2
+and provide the path
+to the stored dynamic library.
+
+
+194
+00:12:03.056 --> 00:12:05.893 line:-2 align:center
+You can precompile
+dynamic libraries offline
+
+
+195
+00:12:05.926 --> 00:12:08.629 line:-1 align:center
+using the metal compiler tool chain.
+
+
+196
+00:12:08.662 --> 00:12:11.832 line:-2 align:center
+When loading precompiled
+dynamic libraries at runtime,
+
+
+197
+00:12:11.865 --> 00:12:15.435 line:-1 align:center
+compilation is completely avoided.
+
+
+198
+00:12:15,469 --> 00:12:18,739 line:-1
+To specify dylibs in the linking phase:
+
+
+199
+00:12:18,772 --> 00:12:21,742 line:-2
+pass an array
+of Metal Dynamic Library Objects
+
+
+200
+00:12:21,775 --> 00:12:26,480 line:-2
+into the preloadedLibraries parameters
+on the pipeline descriptor.
+
+
+201
+00:12:26.513 --> 00:12:29.983 line:-2 align:center
+There is also the option
+to provide this array of dynamic libraries
+
+
+202
+00:12:30,017 --> 00:12:35,489 line:-2
+via Metal Compile Options
+when compiling other shader libraries.
+
+
+203
+00:12:35.522 --> 00:12:39.293 line:-2 align:center
+Moving large parts of utility code
+into dynamic libraries
+
+
+204
+00:12:39.326 --> 00:12:42.396 line:-1 align:center
+greatly shortens runtime compilation.
+
+
+205
+00:12:42,429 --> 00:12:48,168 line:-2
+And finally, compiler options tuning
+is really important for compute cases
+
+
+206
+00:12:48,202 --> 00:12:52,506 line:-2
+like path tracing
+in the final production quality renders.
+
+
+207
+00:12:52,539 --> 00:12:56,310 line:-2
+and there is one additional Metal feature
+to get the most performance
+
+
+208
+00:12:56,343 --> 00:12:58,879 line:-1
+out of your final rendering.
+
+
+209
+00:12:58.912 --> 00:13:01.381 line:-2 align:center
+Metal compiler options
+and occupancy hints,
+
+
+210
+00:13:01.415 --> 00:13:06.053 line:-2 align:center
+enable you to tune the performance
+of any of these compute kernels
+
+
+211
+00:13:06,086 --> 00:13:09,256 line:-2
+specifically when working
+with dynamic linking.
+
+
+212
+00:13:10,824 --> 00:13:13,894 line:-2
+Every GPU workload
+has a performance sweet spot
+
+
+213
+00:13:13,927 --> 00:13:17,631 line:-1
+that needs analysis and evaluation.
+
+
+214
+00:13:17.664 --> 00:13:21.768 line:-2 align:center
+There is a Metal API
+to target desired GPU occupancy,
+
+
+215
+00:13:21,802 --> 00:13:26,106 line:-2
+that is also available
+for dynamic libraries now.
+
+
+216
+00:13:26,139 --> 00:13:29,209 line:-2
+This can unlock performance
+for an existing workload
+
+
+217
+00:13:29.243 --> 00:13:33.780 line:-2 align:center
+without changing
+original code or algorithm.
+
+
+218
+00:13:33.814 --> 00:13:39.019 line:-2 align:center
+It's worth noting that any tuning
+needs to be performed per-device
+
+
+219
+00:13:39,052 --> 00:13:43,891 line:-2
+as performance characteristics can vary
+depending on the GPU architecture.
+
+
+220
+00:13:45,859 --> 00:13:48,729 line:-2
+The Metal compute pipeline
+descriptor property allows you
+
+
+221
+00:13:48,762 --> 00:13:51,265 line:-1
+to express the desired occupancy level
+
+
+222
+00:13:51,298 --> 00:13:56,270 line:-2
+by specifying the
+Max-Total-Threads-Per-Threadgroup value.
+
+
+223
+00:13:56,303 --> 00:13:58,872 line:-2
+The higher the value,
+the higher occupancy
+
+
+224
+00:13:58,906 --> 00:14:02,809 line:-1
+you hint the compiler to aim for.
+
+
+225
+00:14:02,843 --> 00:14:07,948 line:-2
+Now, using this new Metal-Compile-Options
+property for dynamic libraries,
+
+
+226
+00:14:07,981 --> 00:14:13,353 line:-2
+you can match the pipeline state object
+desired occupancy level.
+
+
+227
+00:14:13,387 --> 00:14:17,891 line:-2
+Max-Total-Threads-Per-Threadgroup
+is available for MetalCompileOptions
+
+
+228
+00:14:17,925 --> 00:14:21,962 line:-1
+in iOS 16.4 and macOS 13.3.
+
+
+229
+00:14:24.131 --> 00:14:28.235 line:-2 align:center
+Now you can simply match the
+Pipeline State Object desired occupancy
+
+
+230
+00:14:28,268 --> 00:14:32,239 line:-2
+while tuning Metal dynamic libraries
+for the optimal performance.
+
+
+231
+00:14:33,407 --> 00:14:35,742 line:-1
+This graph of the Blender Cycles shading
+
+
+232
+00:14:35,776 --> 00:14:38,245 line:-2
+and intersection compute
+kernels performance
+
+
+233
+00:14:38,278 --> 00:14:42,583 line:-2
+shows the impact of changing
+Max-Total-Threads-Per-Threadgroup.
+
+
+234
+00:14:42,616 --> 00:14:47,688 line:-2
+That was the only variable changed for
+the pipeline state object and the dylibs.
+
+
+235
+00:14:48.589 --> 00:14:53.961 line:-2 align:center
+In this case, there is a sweet spot
+where kernels perform at their best.
+
+
+236
+00:14:53.994 --> 00:14:56.330 line:-1 align:center
+Each workload and device is unique
+
+
+237
+00:14:56.363 --> 00:15:00.534 line:-2 align:center
+and the optimal value of
+Max-Total-Threads-Per-Threadgroup differs
+
+
+238
+00:15:00,567 --> 00:15:03,303 line:-1
+depending on the nature of the kernel.
+
+
+239
+00:15:03,337 --> 00:15:07,808 line:-2
+The optimal value is not always
+necessarily the maximum number of threads
+
+
+240
+00:15:07,841 --> 00:15:10,744 line:-1
+per threadgroup a GPU supports.
+
+
+241
+00:15:10,777 --> 00:15:13,614 line:-2
+Experiment with your kernels
+to find the optimal value
+
+
+242
+00:15:13,647 --> 00:15:16,350 line:-1
+you want to use and bake in the code.
+
+
+243
+00:15:16.383 --> 00:15:19.520 line:-1 align:center
+Here is a Blender Cycles shading kernel,
+
+
+244
+00:15:19,553 --> 00:15:24,224 line:-2
+The compiler statistics demonstrate
+that the kernel is very complex.
+
+
+245
+00:15:24,258 --> 00:15:28,161 line:-2
+There are several parameters
+that affect the actual runtime.
+
+
+246
+00:15:28.195 --> 00:15:31.498 line:-2 align:center
+The amount of spill,
+the number of registers used,
+
+
+247
+00:15:31,532 --> 00:15:34,801 line:-1
+and other operations like memory loads.
+
+
+248
+00:15:34,835 --> 00:15:38,138 line:-2
+By tuning
+the Max-Total-Threads-Per-Threadgroup,
+
+
+249
+00:15:38,172 --> 00:15:42,843 line:-2
+you can change target occupancy
+and find that performance sweet spot.
+
+
+250
+00:15:44,344 --> 00:15:48,382 line:-2
+After finding the sweet spot,
+the spill increases a little,
+
+
+251
+00:15:48,415 --> 00:15:54,054 line:-2
+but increased overall occupancy has led to
+significantly better kernel performance.
+
+
+252
+00:15:55.622 --> 00:15:59.760 line:-2 align:center
+The Cycles path tracer
+within Blender 3D 3.5
+
+
+253
+00:15:59.793 --> 00:16:04.097 line:-1 align:center
+is now well-optimized for Metal,
+
+
+254
+00:16:04,131 --> 00:16:08,035 line:-2
+and it uses all the best practices
+I covered today.
+
+
+255
+00:16:10.938 --> 00:16:15.609 line:-2 align:center
+Remember to maximize shader performance
+of large and complex shaders
+
+
+256
+00:16:15.642 --> 00:16:18.312 line:-1 align:center
+using function specialization,
+
+
+257
+00:16:18,345 --> 00:16:22,482 line:-2
+use asynchronous compilation
+to keep the application responsive
+
+
+258
+00:16:22.516 --> 00:16:26.286 line:-2 align:center
+while generating optimized shaders
+in the background,
+
+
+259
+00:16:26.320 --> 00:16:30.891 line:-2 align:center
+enable dynamic linking
+for faster compilation at runtime,
+
+
+260
+00:16:30,924 --> 00:16:34,695 line:-2
+and tune your compute kernels
+with new Metal compiler options
+
+
+261
+00:16:34.728 --> 00:16:38.065 line:-1 align:center
+to get the optimal performance.
+
+
+262
+00:16:38,098 --> 00:16:40,200 line:0
+Be sure to check out previous sessions
+
+
+263
+00:16:40,234 --> 00:16:44,438 line:0
+where you can learn how to scale
+compute workloads for Apple GPUs
+
+
+264
+00:16:44,471 --> 00:16:48,008 align:center
+and discover
+more compilation workflows in Metal.
+
+
+265
+00:16:48,041 --> 00:16:50,043 line:-1
+Thank you for watching.
+
+
+266
+00:16:50,077 --> 00:16:55,082 line:-1
+♪ ♪
+

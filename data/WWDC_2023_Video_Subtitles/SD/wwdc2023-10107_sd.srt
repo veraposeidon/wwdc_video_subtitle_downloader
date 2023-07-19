@@ -1,0 +1,1277 @@
+2
+00:00:00,501 --> 00:00:08,509 line:-1
+♪ ♪
+
+
+3
+00:00:10.010 --> 00:00:12.746 line:-2 align:center
+Justin: Hello!
+My name's Justin,
+
+
+4
+00:00:12.779 --> 00:00:15.048 line:-1 align:center
+and I'm part of the Photos team.
+
+
+5
+00:00:15,082 --> 00:00:17,618 line:-2
+Today I'm going to take you through
+new improvements
+
+
+6
+00:00:17,651 --> 00:00:19,720 line:-1
+to the system Photos picker
+
+
+7
+00:00:19,753 --> 00:00:22,489 line:-2
+and all the great new APIs
+you can use in your app.
+
+
+8
+00:00:22,523 --> 00:00:26,527 line:-2
+We introduced
+the redesigned picker UI in iOS 14.
+
+
+9
+00:00:26.560 --> 00:00:30.631 line:-2 align:center
+It has many great features
+like search and a zoomable grid.
+
+
+10
+00:00:30,664 --> 00:00:35,402 line:-2
+Even better, you don't need to request
+any photo library access to use it.
+
+
+11
+00:00:35,435 --> 00:00:37,871 line:-2
+We really recommend you
+to replace your custom picker
+
+
+12
+00:00:37,905 --> 00:00:40,974 line:-1
+with the system one whenever possible.
+
+
+13
+00:00:41,008 --> 00:00:44,211 line:-1
+The API is really easy to use as well.
+
+
+14
+00:00:44,244 --> 00:00:46,346 line:-1
+With only a few lines of code,
+
+
+15
+00:00:46,380 --> 00:00:51,451 line:-2
+you can present the picker
+and receive user selected images.
+
+
+16
+00:00:51,485 --> 00:00:54,121 line:-2
+"What's new in the Photos picker"
+session last year
+
+
+17
+00:00:54.154 --> 00:00:56.690 line:-1 align:center
+talked about the new API in depth.
+
+
+18
+00:00:56,723 --> 00:01:01,161 line:-2
+In this session, I'm going to focus
+on new APIs you can leverage
+
+
+19
+00:01:01,195 --> 00:01:03,797 line:-1
+to embed the system picker in your app,
+
+
+20
+00:01:03,830 --> 00:01:07,134 line:-2
+making the photo picking experience
+more seamless.
+
+
+21
+00:01:07,167 --> 00:01:11,038 line:-2
+Later, I will also discuss
+the new Options menu,
+
+
+22
+00:01:11,071 --> 00:01:14,708 line:-2
+as well as best practices
+if you want to support HDR photos,
+
+
+23
+00:01:14.741 --> 00:01:18.245 line:-1 align:center
+HDR videos, and Cinematic mode videos.
+
+
+24
+00:01:19,680 --> 00:01:21,348 line:-1
+But before we dive in,
+
+
+25
+00:01:21.381 --> 00:01:24.184 line:-2 align:center
+let's quickly recap
+the picker's access model.
+
+
+26
+00:01:25,252 --> 00:01:28,088 line:-1
+This is the picker you saw a moment ago.
+
+
+27
+00:01:28,121 --> 00:01:30,624 line:-2
+Even though it looks like
+it is running in your app,
+
+
+28
+00:01:30,657 --> 00:01:32,626 line:-2
+it is really running
+in a separate process,
+
+
+29
+00:01:32.659 --> 00:01:34.761 line:-1 align:center
+rendered on top of your app.
+
+
+30
+00:01:34.795 --> 00:01:37.631 line:-2 align:center
+Your app can't access
+the picker directly
+
+
+31
+00:01:37.664 --> 00:01:41.568 line:-2 align:center
+and not even take screenshots
+of the picker content.
+
+
+32
+00:01:41,602 --> 00:01:47,341 line:-2
+Only what the user actually selected
+is passed back to your app.
+
+
+33
+00:01:47,374 --> 00:01:50,978 line:-2
+This year, we are bringing
+more configuration options
+
+
+34
+00:01:51,011 --> 00:01:54,214 line:-1
+to the out-of-process picker.
+
+
+35
+00:01:54.248 --> 00:01:57.918 line:-2 align:center
+A new ".photosPickerDisabledCapabilities"
+modifier
+
+
+36
+00:01:57.951 --> 00:02:01.255 line:-2 align:center
+allows you to disable
+certain picker capabilities,
+
+
+37
+00:02:01.288 --> 00:02:04.424 line:-2 align:center
+so you can implement
+your own version of it.
+
+
+38
+00:02:04,458 --> 00:02:07,995 line:-2
+For example, the "Cancel" button
+and the "Add" button
+
+
+39
+00:02:08.028 --> 00:02:11.698 line:-2 align:center
+can be hidden
+if you disable selection actions.
+
+
+40
+00:02:11,732 --> 00:02:17,337 line:-2
+A new ".photosPickerAccessoryVisibility"
+modifier allows you to hide accessory UI
+
+
+41
+00:02:17,371 --> 00:02:19,673 line:-1
+around the picker content,
+
+
+42
+00:02:19,706 --> 00:02:22,843 line:-1
+like the navigation bar and the toolbar.
+
+
+43
+00:02:24,144 --> 00:02:27,381 line:-2
+You can even specify the size
+and position of the picker
+
+
+44
+00:02:27.414 --> 00:02:32.119 line:-2 align:center
+using standard SwiftUI modifiers
+like ".frame" and ".padding".
+
+
+45
+00:02:32.152 --> 00:02:35.956 line:-2 align:center
+You may be wondering:
+"If the "Add" button is hidden,
+
+
+46
+00:02:35.989 --> 00:02:40.894 line:-2 align:center
+how can my app receive user selected
+assets in multiple selection mode?"
+
+
+47
+00:02:40,928 --> 00:02:44,264 line:-2
+You can now set selection behavior
+to ".continuous"
+
+
+48
+00:02:44,298 --> 00:02:47,134 line:-1
+to receive live selection updates.
+
+
+49
+00:02:47,167 --> 00:02:51,972 line:-2
+And finally, you can use the new
+".photosPickerStyle(.inline)" modifier
+
+
+50
+00:02:52.005 --> 00:02:54.675 line:-1 align:center
+to embed the picker in your app,
+
+
+51
+00:02:54.708 --> 00:02:58.011 line:-2 align:center
+instead of having it presented
+as a separate sheet.
+
+
+52
+00:02:59,680 --> 00:03:01,915 line:-1
+Even though the picker is embedded,
+
+
+53
+00:03:01,949 --> 00:03:05,519 line:-2
+it is still rendered
+in a separate process.
+
+
+54
+00:03:05,552 --> 00:03:08,789 line:-2
+Some users might be worried
+when they see your app displaying
+
+
+55
+00:03:08,822 --> 00:03:13,060 line:-2
+all of their photos
+without prompting for library access.
+
+
+56
+00:03:13,093 --> 00:03:16,730 line:-2
+We want to help users to feel safe
+when using your app,
+
+
+57
+00:03:16.763 --> 00:03:19.233 line:-2 align:center
+so the first time
+an embedded picker is displayed,
+
+
+58
+00:03:19.266 --> 00:03:22.102 line:-1 align:center
+an onboarding UI will automatically appear
+
+
+59
+00:03:22.135 --> 00:03:25.539 line:-2 align:center
+explaining that your app
+can only access selected photos.
+
+
+60
+00:03:25.572 --> 00:03:29.610 line:-2 align:center
+The Photos privacy badge
+indicates that the picker is private
+
+
+61
+00:03:29,643 --> 00:03:31,678 line:-1
+and out of process.
+
+
+62
+00:03:31,712 --> 00:03:34,715 line:-2
+If your app already presents
+the full size picker,
+
+
+63
+00:03:34,748 --> 00:03:39,553 line:-2
+a dismissible banner will appear
+when users upgrade to iOS 17.
+
+
+64
+00:03:39,586 --> 00:03:45,259 line:-2
+The Privacy Settings UI is also updated
+with more detailed explanation.
+
+
+65
+00:03:45,292 --> 00:03:50,564 line:-2
+In addition, we made some changes
+to the library access permission prompt.
+
+
+66
+00:03:50,597 --> 00:03:52,766 line:0
+To learn more about those changes,
+
+
+67
+00:03:52,799 --> 00:03:55,769 align:center
+you can watch
+the "What's new in privacy" session.
+
+
+68
+00:03:56.603 --> 00:04:00.607 line:-2 align:center
+All right, let's go back
+to the actual API.
+
+
+69
+00:04:00,641 --> 00:04:03,076 line:-1
+I will go though their use cases first,
+
+
+70
+00:04:03.110 --> 00:04:06.480 line:-1 align:center
+and then I'll explain each API in detail.
+
+
+71
+00:04:06,513 --> 00:04:09,483 line:-2
+If you want to embed
+the out-of-process picker,
+
+
+72
+00:04:09,516 --> 00:04:12,753 line:-1
+use the ".photosPickerStyle" modifier.
+
+
+73
+00:04:12.786 --> 00:04:15.789 line:-1 align:center
+To place your own UI around the picker,
+
+
+74
+00:04:15,822 --> 00:04:19,860 line:-2
+".photosPickerAccessoryVisibility"
+is the one to use.
+
+
+75
+00:04:19.893 --> 00:04:22.095 line:-1 align:center
+It also has an optional argument
+
+
+76
+00:04:22,129 --> 00:04:26,466 line:-2
+allowing you to control accessories
+around specified edges.
+
+
+77
+00:04:26,500 --> 00:04:30,037 line:-1
+The default value is all edges.
+
+
+78
+00:04:30,070 --> 00:04:31,972 line:-2
+If you want to implement
+your own replacement
+
+
+79
+00:04:32,005 --> 00:04:34,007 line:-1
+for some picker features,
+
+
+80
+00:04:34,041 --> 00:04:37,845 line:-2
+use the ".photosPicker
+DisabledCapabilities" modifier.
+
+
+81
+00:04:37,878 --> 00:04:40,514 align:center
+And lastly, if you need to adjust
+
+
+82
+00:04:40,547 --> 00:04:43,417 line:-2
+or respond to selection updates
+in real time,
+
+
+83
+00:04:43.450 --> 00:04:48.755 line:-2 align:center
+make sure "selectionBehavior"
+is set to ".continuous".
+
+
+84
+00:04:48.789 --> 00:04:52.292 line:-2 align:center
+So what exactly are considered
+as accessories?
+
+
+85
+00:04:52,326 --> 00:04:56,496 line:-2
+On iOS, the top accessory
+is the navigation bar
+
+
+86
+00:04:56,530 --> 00:05:00,701 line:-1
+and the bottom accessory is the toolbar.
+
+
+87
+00:05:00,734 --> 00:05:03,003 line:-1
+On iPadOS and macOS,
+
+
+88
+00:05:03,036 --> 00:05:07,307 line:-2
+the leading accessory is the sidebar
+when it is visible.
+
+
+89
+00:05:07,341 --> 00:05:12,946 line:-2
+The top and bottom accessories
+are similar to what iOS has.
+
+
+90
+00:05:12,980 --> 00:05:16,750 line:-2
+Next, I will walk you through
+picker capabilities
+
+
+91
+00:05:16.783 --> 00:05:20.988 line:-2 align:center
+that can be disabled
+and how they will affect the picker UI.
+
+
+92
+00:05:23.657 --> 00:05:28.896 line:-2 align:center
+The search bar will be hidden
+if the search capability is disabled.
+
+
+93
+00:05:28,929 --> 00:05:34,401 line:-2
+If collection navigation is disabled,
+the albums tab will be hidden.
+
+
+94
+00:05:34,434 --> 00:05:39,740 line:-2
+On iPadOS and macOS,
+the sidebar will be hidden as well.
+
+
+95
+00:05:39.773 --> 00:05:42.109 line:-1 align:center
+If the staging area is disabled,
+
+
+96
+00:05:42.142 --> 00:05:47.181 line:-2 align:center
+the toolbar button will be replaced
+with the status label.
+
+
+97
+00:05:47.214 --> 00:05:51.051 line:-2 align:center
+If you disabled selection actions
+without continuous selection,
+
+
+98
+00:05:51,084 --> 00:05:53,320 line:-1
+only the "Cancel" button will be hidden
+
+
+99
+00:05:53,353 --> 00:05:56,757 line:-2
+and the "Add" button
+will still be visible.
+
+
+100
+00:05:56,790 --> 00:06:01,195 line:-2
+Otherwise, your app won't be able
+to receive any user selection.
+
+
+101
+00:06:01.228 --> 00:06:04.932 line:-2 align:center
+Both buttons will be hidden
+if you also set the selection behavior
+
+
+102
+00:06:04,965 --> 00:06:08,335 line:-1
+to ".continuous".
+
+
+103
+00:06:08.368 --> 00:06:11.538 line:-1 align:center
+Let's look at new picker styles now.
+
+
+104
+00:06:11.572 --> 00:06:15.409 line:-2 align:center
+In addition to the ".presentation" style
+and the ".inline" style,
+
+
+105
+00:06:15,442 --> 00:06:19,580 line:-2
+the picker also supports
+another ".compact" style.
+
+
+106
+00:06:19,613 --> 00:06:22,983 line:-1
+This is the default ".presentation" style.
+
+
+107
+00:06:23,016 --> 00:06:28,288 line:-2
+This is the ".inline" style
+with all accessories hidden.
+
+
+108
+00:06:28,322 --> 00:06:31,325 line:-1
+And this is the ".compact" style.
+
+
+109
+00:06:31.358 --> 00:06:35.095 line:-2 align:center
+The single row picker allows you
+to embed it in more places
+
+
+110
+00:06:35,128 --> 00:06:39,366 line:-2
+where the available vertical space
+is seriously constrained.
+
+
+111
+00:06:39.399 --> 00:06:43.504 line:-2 align:center
+It's time for a demo
+to connect everything together.
+
+
+112
+00:06:43,537 --> 00:06:48,876 line:-2
+I already made a simple app allowing me
+to annotate images with text descriptions.
+
+
+113
+00:06:48,909 --> 00:06:52,379 line:-1
+Let me show you what it can do right now.
+
+
+114
+00:06:52.412 --> 00:06:56.316 line:-1 align:center
+I can present the picker as a modal sheet,
+
+
+115
+00:06:56.350 --> 00:06:59.119 line:-1 align:center
+select some images,
+
+
+116
+00:06:59.152 --> 00:07:02.022 line:-1 align:center
+and add some descriptions.
+
+
+117
+00:07:02.055 --> 00:07:05.058 line:-2 align:center
+For the demo, I want to replace
+the "Select Photos" button
+
+
+118
+00:07:05.092 --> 00:07:07.694 line:-1 align:center
+with the embedded picker.
+
+
+119
+00:07:07.728 --> 00:07:09.997 line:-2 align:center
+Let me add the
+".photosPickerStyle(.inline)" modifier
+
+
+120
+00:07:10,030 --> 00:07:11,899 line:-1
+and try it out.
+
+
+121
+00:07:15.536 --> 00:07:21.542 line:-1 align:center
+[no audio]
+
+
+122
+00:07:23,577 --> 00:07:27,281 line:-1
+It works, but it doesn't look good yet.
+
+
+123
+00:07:27.314 --> 00:07:30.684 line:-2 align:center
+I still need to tap the "Add" button
+to update the list,
+
+
+124
+00:07:30,717 --> 00:07:32,920 line:-1
+and if the picker resizes,
+
+
+125
+00:07:32.953 --> 00:07:36.423 line:-2 align:center
+the toolbar is not extended
+to the bottom edge of the device.
+
+
+126
+00:07:38.125 --> 00:07:39.626 line:-1 align:center
+But don't worry.
+
+
+127
+00:07:39,660 --> 00:07:43,463 line:-2
+With only a few tweaks,
+it can look a lot better.
+
+
+128
+00:07:43.497 --> 00:07:48.435 line:-2 align:center
+First, because the picker can handle
+safe area insets gracefully,
+
+
+129
+00:07:48,468 --> 00:07:51,305 line:-1
+I can use the ".ignoresSafeArea" modifier
+
+
+130
+00:07:51,338 --> 00:07:55,042 line:-2
+so the picker can expand
+to the bottom edge of the screen.
+
+
+131
+00:07:55,075 --> 00:07:59,847 line:-2
+Next, I'm going to make sure
+the list can be updated
+
+
+132
+00:07:59,880 --> 00:08:03,684 line:-1
+as soon as I select a photo in the picker.
+
+
+133
+00:08:03,717 --> 00:08:07,387 line:-1
+Actually, it's super easy to change.
+
+
+134
+00:08:07.421 --> 00:08:11.792 line:-2 align:center
+Setting the selection behavior
+to ".continuous" is all I need to do.
+
+
+135
+00:08:13,560 --> 00:08:16,096 line:-1
+Since the list is now live updated,
+
+
+136
+00:08:16.129 --> 00:08:20.067 line:-2 align:center
+I don't really need to keep
+the navigation bar buttons anymore.
+
+
+137
+00:08:20,100 --> 00:08:21,268 line:-1
+I can remove them
+
+
+138
+00:08:21.301 --> 00:08:25.339 line:-2 align:center
+using the ".photosPicker
+DisabledCapabilities" modifier.
+
+
+139
+00:08:32,379 --> 00:08:34,548 line:-1
+The picker is now fully functional.
+
+
+140
+00:08:34.581 --> 00:08:37.618 line:-2 align:center
+But I want to make sure
+the picker looks nice as well.
+
+
+141
+00:08:39.186 --> 00:08:43.023 line:-2 align:center
+I think I should hide the navigation bar
+and the toolbar.
+
+
+142
+00:08:43.056 --> 00:08:47.127 line:-2 align:center
+I also want to give the picker
+a fixed height.
+
+
+143
+00:08:47,160 --> 00:08:50,898 line:-2
+I can use the ".photosPicker
+AccessoryVisibility" modifier
+
+
+144
+00:08:50.931 --> 00:08:52.499 line:-1 align:center
+to hide the bars,
+
+
+145
+00:08:52,533 --> 00:08:57,137 line:-2
+and adjust the height of the picker
+like any other SwiftUI views.
+
+
+146
+00:08:59,673 --> 00:09:09,683 line:-1
+[no audio]
+
+
+147
+00:09:15.022 --> 00:09:17.191 line:-1 align:center
+Now it looks great.
+
+
+148
+00:09:17.224 --> 00:09:19.293 line:-1 align:center
+Within just a few minutes,
+
+
+149
+00:09:19.326 --> 00:09:22.996 line:-2 align:center
+I updated my app
+to display the new embedded picker.
+
+
+150
+00:09:23,030 --> 00:09:27,467 line:-2
+I'll build and run so we can test it
+on a real device.
+
+
+151
+00:09:27,501 --> 00:09:32,306 line:-2
+I can use the zoomable grid to quickly
+navigate to the photo I want to pick.
+
+
+152
+00:09:32.339 --> 00:09:35.976 line:-2 align:center
+Selected photos
+automatically appear in my app.
+
+
+153
+00:09:36.009 --> 00:09:38.846 line:-2 align:center
+My app's photo picking experience
+is greatly improved
+
+
+154
+00:09:38.879 --> 00:09:40.848 line:-1 align:center
+with the new embedded picker.
+
+
+155
+00:09:44,084 --> 00:09:45,752 line:-1
+That's it for the demo.
+
+
+156
+00:09:46.887 --> 00:09:49.223 line:-1 align:center
+I was using an iPhone in the demo,
+
+
+157
+00:09:49,256 --> 00:09:52,326 line:-1
+but the same API is available on iOS,
+
+
+158
+00:09:52.359 --> 00:09:56.363 line:-1 align:center
+iPadOS, and macOS.
+
+
+159
+00:09:56,396 --> 00:09:59,766 line:0
+In addition to SwiftUI,
+the same API is available
+
+
+160
+00:09:59,800 --> 00:10:02,469 line:0
+to UIKit and AppKit apps as well.
+
+
+161
+00:10:02,503 --> 00:10:06,573 line:0
+Let's take a look
+at the UIKit and AppKit API.
+
+
+162
+00:10:06,607 --> 00:10:12,246 line:-2
+The embedded picker is available
+via the same PHPickerConfiguration API.
+
+
+163
+00:10:12.279 --> 00:10:14.848 line:-2 align:center
+You can now set "selection"
+to ".continuous"
+
+
+164
+00:10:14,882 --> 00:10:18,619 line:-2
+to opt in the continuous selection
+behavior.
+
+
+165
+00:10:18,652 --> 00:10:20,687 line:-1
+You can also set "mode" to ".compact"
+
+
+166
+00:10:20,721 --> 00:10:24,691 line:-2
+to configure the picker
+to the single row layout.
+
+
+167
+00:10:24.725 --> 00:10:27.327 line:-1 align:center
+You can use "edgesWithoutContentMargins"
+
+
+168
+00:10:27.361 --> 00:10:30.831 line:-2 align:center
+to hide accessories
+like the navigation bar,
+
+
+169
+00:10:30.864 --> 00:10:37.070 line:-2 align:center
+and "disabledCapabilities"
+to disable certain picker capability.
+
+
+170
+00:10:37.104 --> 00:10:39.907 line:-2 align:center
+Unlike the SwiftUI API
+where you can use
+
+
+171
+00:10:39.940 --> 00:10:44.378 line:-2 align:center
+the ".photosPickerStyle(.inline)" modifier
+to embed the picker,
+
+
+172
+00:10:44.411 --> 00:10:46.847 line:-2 align:center
+you will need to add it
+as a child view controller
+
+
+173
+00:10:46,880 --> 00:10:49,716 line:-1
+to your container controller.
+
+
+174
+00:10:49.750 --> 00:10:52.352 line:-2 align:center
+You can set the frame
+of the picker manually
+
+
+175
+00:10:52,386 --> 00:10:57,257 line:-2
+or use Auto Layout constraints
+to size and position the picker view.
+
+
+176
+00:10:57,291 --> 00:10:59,626 line:-1
+After adding the subview,
+
+
+177
+00:10:59,660 --> 00:11:02,696 line:-2
+you just need to notify the picker
+that it has been added.
+
+
+178
+00:11:04,798 --> 00:11:10,070 line:-2
+A new "PHPickerConfiguration.Update" API
+allows you to update the picker
+
+
+179
+00:11:10,103 --> 00:11:12,639 line:-1
+while it is shown to the user.
+
+
+180
+00:11:12.673 --> 00:11:16.510 line:-2 align:center
+You can also deselect
+or reorder selected assets
+
+
+181
+00:11:16,543 --> 00:11:21,715 line:-2
+using the existing "deselectAsset"
+and "moveAsset" APIs.
+
+
+182
+00:11:21.748 --> 00:11:25.252 line:-2 align:center
+Next, I will talk about
+the new Options menu
+
+
+183
+00:11:25,285 --> 00:11:28,422 line:-1
+and how it will affect your app.
+
+
+184
+00:11:28,455 --> 00:11:32,693 line:-2
+The new Options menu gives users
+more control over what they can share
+
+
+185
+00:11:32,726 --> 00:11:34,328 line:-1
+with your app.
+
+
+186
+00:11:34,361 --> 00:11:38,866 line:-2
+By default,
+all image metadata are included,
+
+
+187
+00:11:38,899 --> 00:11:42,069 line:-2
+but users can now choose
+to remove sensitive metadata,
+
+
+188
+00:11:42.102 --> 00:11:45.439 line:-1 align:center
+like location, from selected photos.
+
+
+189
+00:11:47,407 --> 00:11:51,211 line:-2
+If you are using the "PhotosPicker"
+and "Transferable" API,
+
+
+190
+00:11:51.245 --> 00:11:56.049 line:-2 align:center
+you don't need to do any adoption work
+to support the new Options menu.
+
+
+191
+00:11:56.083 --> 00:11:59.486 line:-1 align:center
+Similarly, no adoption work is needed
+
+
+192
+00:11:59,520 --> 00:12:03,257 line:-2
+if you are using
+the "PHPickerViewController" API.
+
+
+193
+00:12:03.290 --> 00:12:06.760 line:-2 align:center
+The Options menu will not be supported
+for apps that use
+
+
+194
+00:12:06,793 --> 00:12:09,630 line:-1
+the legacy "UIImagePickerController" API
+
+
+195
+00:12:09,663 --> 00:12:12,366 line:-1
+or have full library access.
+
+
+196
+00:12:12.399 --> 00:12:16.403 line:-1 align:center
+Okay, that's the Options menu.
+
+
+197
+00:12:16.436 --> 00:12:19.806 line:-2 align:center
+Now I will talk about how you can
+support HDR images,
+
+
+198
+00:12:19,840 --> 00:12:23,377 line:-1
+HDR videos, and Cinematic mode videos
+
+
+199
+00:12:23,410 --> 00:12:25,479 line:-1
+if you use the system picker.
+
+
+200
+00:12:25.512 --> 00:12:29.216 line:-2 align:center
+The picker may automatically
+transcode assets to compatible formats,
+
+
+201
+00:12:29,249 --> 00:12:32,286 line:-1
+like JPEG, by default.
+
+
+202
+00:12:32,319 --> 00:12:36,890 line:-2
+However, the transcoded asset
+may not contain all information
+
+
+203
+00:12:36,924 --> 00:12:39,026 line:-1
+included in the original asset.
+
+
+204
+00:12:39.059 --> 00:12:41.862 line:-1 align:center
+So if you want to receive HDR content,
+
+
+205
+00:12:41,895 --> 00:12:44,331 line:-1
+it's best to avoid automatic transcoding.
+
+
+206
+00:12:44,364 --> 00:12:47,501 line:-2
+You can get photos and videos
+in their original formats
+
+
+207
+00:12:47,534 --> 00:12:50,170 line:-1
+by using the ".current" encoding policy
+
+
+208
+00:12:50,204 --> 00:12:53,140 line:-1
+and requesting a generic content type,
+
+
+209
+00:12:53,173 --> 00:12:55,609 line:-1
+like ".image" or ".movie".
+
+
+210
+00:12:55.642 --> 00:13:00.781 line:-2 align:center
+Requesting specific content types,
+like ".jpeg", may still transcode assets
+
+
+211
+00:13:00,814 --> 00:13:04,017 line:-2
+even if the encoding policy
+is set to ".current".
+
+
+212
+00:13:04,051 --> 00:13:07,287 line:0
+For more information
+about adding support for HDR,
+
+
+213
+00:13:07,321 --> 00:13:10,791 align:center
+you can watch the "Support HDR images
+in your app" session this year.
+
+
+214
+00:13:10.824 --> 00:13:16.930 line:-2 align:center
+Here is a code example that receives
+images in their original formats.
+
+
+215
+00:13:16,964 --> 00:13:20,467 line:-2
+You can see that "preferredItemEncoding"
+is set to ".current"
+
+
+216
+00:13:20.501 --> 00:13:24.404 line:-1 align:center
+and "importedContentType" is ".image".
+
+
+217
+00:13:24.438 --> 00:13:26.974 line:-1 align:center
+If a Cinematic mode video is selected,
+
+
+218
+00:13:27,007 --> 00:13:29,209 line:-2
+the picker will give you
+its rendered version,
+
+
+219
+00:13:29.243 --> 00:13:32.346 line:-1 align:center
+with all the depth effect baked in.
+
+
+220
+00:13:32.379 --> 00:13:37.150 line:-2 align:center
+If you want to get all decision points,
+you need to request photo library access
+
+
+221
+00:13:37.184 --> 00:13:40.387 line:-2 align:center
+and use PhotoKit
+to fetch the video instead.
+
+
+222
+00:13:40,420 --> 00:13:42,890 line:0
+To learn more about Cinematic mode videos,
+
+
+223
+00:13:42,923 --> 00:13:48,128 line:0
+you can check out the "Support Cinematic
+mode videos in your app" session.
+
+
+224
+00:13:48,161 --> 00:13:53,133 line:-2
+To wrap up, the new embedded picker
+brings a lot of flexibility
+
+
+225
+00:13:53,166 --> 00:13:56,503 line:-2
+and I can't wait to see
+what you can do with it.
+
+
+226
+00:13:56,537 --> 00:14:00,240 line:-2
+The Options menu gives users more control
+over what to share,
+
+
+227
+00:14:00.274 --> 00:14:05.145 line:-2 align:center
+so please avoid requesting photo library
+access unless it's really necessary.
+
+
+228
+00:14:06,346 --> 00:14:08,682 line:-1
+Thank you, and happy coding!
+
+
+229
+00:14:08.715 --> 00:14:11.718 line:-1 align:center
+♪ ♪
+

@@ -1,0 +1,1981 @@
+2
+00:00:00,334 --> 00:00:06,340 line:-1
+♪ ♪
+
+
+3
+00:00:10,644 --> 00:00:15,449 line:-2
+Denis: Hi, my name is Denis Vieriu,
+and I'm a software engineer in the GPU,
+
+
+4
+00:00:15,482 --> 00:00:18,452 line:-2
+Graphics,
+and Display Software group at Apple.
+
+
+5
+00:00:18,485 --> 00:00:21,889 line:-2
+Today I will present to you
+all the new features and enhancements
+
+
+6
+00:00:21.922 --> 00:00:25.125 line:-2 align:center
+introduced to machine learning
+this year in Metal.
+
+
+7
+00:00:25.158 --> 00:00:28.562 line:-2 align:center
+I'll first recap the existing
+machine learning backends.
+
+
+8
+00:00:28.595 --> 00:00:31.131 line:-2 align:center
+The Metal machine learning APIs
+are exposed
+
+
+9
+00:00:31.164 --> 00:00:34.201 line:-2 align:center
+through Metal Performance Shaders
+framework.
+
+
+10
+00:00:34.234 --> 00:00:38.839 line:-2 align:center
+MPS is a collection of high-performance
+GPU primitives for various fields,
+
+
+11
+00:00:38,872 --> 00:00:43,677 line:-2
+like image processing,
+linear algebra, and machine learning.
+
+
+12
+00:00:43.710 --> 00:00:46.580 line:-2 align:center
+MPSGraph is
+a general purpose compute graph,
+
+
+13
+00:00:46,613 --> 00:00:49,082 line:-1
+which sits on top of the MPS framework
+
+
+14
+00:00:49.116 --> 00:00:53.220 line:-2 align:center
+and extends support
+to multi-dimensional tensors.
+
+
+15
+00:00:53.253 --> 00:00:56.423 line:-2 align:center
+machine learning inference frameworks,
+like CoreML,
+
+
+16
+00:00:56,456 --> 00:00:59,493 line:-1
+build on top of the MPSGraph backend.
+
+
+17
+00:00:59,526 --> 00:01:02,396 line:-2
+MPSGraph also supports
+training frameworks,
+
+
+18
+00:01:02,429 --> 00:01:05,365 line:-1
+like TensorFlow and PyTorch.
+
+
+19
+00:01:05.399 --> 00:01:07.167 line:-1 align:center
+To learn more about MPSGraph
+
+
+20
+00:01:07,201 --> 00:01:09,203 line:0
+and ML Frameworks, please refer
+
+
+21
+00:01:09,236 --> 00:01:12,773 align:center
+to the previous Metal WWDC talks
+listed here.
+
+
+22
+00:01:14.942 --> 00:01:18.745 line:-2 align:center
+This session focuses on the updates
+and enhancements added to PyTorch
+
+
+23
+00:01:18.779 --> 00:01:23.817 line:-2 align:center
+and TensorFlow Metal backends,
+the new GPU acceleration for JAX,
+
+
+24
+00:01:23.851 --> 00:01:27.988 line:-2 align:center
+and the features added this year
+to MPSGraph for ML Inference.
+
+
+25
+00:01:29.223 --> 00:01:32.559 line:-2 align:center
+PyTorch and TensorFlow
+Metal acceleration enable you to use
+
+
+26
+00:01:32.593 --> 00:01:36.830 line:-2 align:center
+the highly efficient kernels from MPS
+to get the best performance on your Mac.
+
+
+27
+00:01:36,864 --> 00:01:40,968 line:-2
+PyTorch Metal acceleration
+has been available since version 1.12
+
+
+28
+00:01:41.001 --> 00:01:42.936 line:-1 align:center
+through the MPS backend.
+
+
+29
+00:01:42,970 --> 00:01:46,507 line:-2
+This was introduced last year
+into the PyTorch ecosystem,
+
+
+30
+00:01:46,540 --> 00:01:49,476 line:0
+and since then,
+multiple improvements have been made
+
+
+31
+00:01:49,510 --> 00:01:52,880 line:0
+for optimizing memory usage
+and view tensors.
+
+
+32
+00:01:52,913 --> 00:01:57,518 align:center
+This year, PyTorch 2.0 MPS Backend
+made a great leap forward
+
+
+33
+00:01:57,551 --> 00:02:00,687 line:0
+and has been qualified for the Beta Stage.
+
+
+34
+00:02:00,721 --> 00:02:03,457 align:center
+But these were not all the improvements.
+
+
+35
+00:02:03,490 --> 00:02:06,493 align:center
+Latest PyTorch builds contain lots
+of new updates,
+
+
+36
+00:02:06,527 --> 00:02:10,030 line:0
+such as MPS operation profiling,
+custom kernel,
+
+
+37
+00:02:10,063 --> 00:02:12,766 align:center
+and Automatic Mixed precision support.
+
+
+38
+00:02:12,799 --> 00:02:15,769 align:center
+Before covering
+all the nightly build features,
+
+
+39
+00:02:15,802 --> 00:02:19,573 line:0
+I'll start with what is new
+in PyTorch 2.0.
+
+
+40
+00:02:20,641 --> 00:02:24,478 line:-2
+There is support
+for the top 60 most used Torch operators,
+
+
+41
+00:02:24.511 --> 00:02:30.517 line:-2 align:center
+including ops such as grid sampler,
+triangular solve, topk, and many more.
+
+
+42
+00:02:32,486 --> 00:02:35,222 line:-1
+The testing coverage has greatly improved.
+
+
+43
+00:02:35,255 --> 00:02:38,292 line:-2
+This includes tests
+for most of the Torch operators,
+
+
+44
+00:02:38,325 --> 00:02:41,895 line:-2
+gradient testing,
+and ModuleInfo based testing.
+
+
+45
+00:02:43,197 --> 00:02:46,099 line:-2
+Since release,
+the network coverage has expanded
+
+
+46
+00:02:46,133 --> 00:02:51,338 line:-2
+as multiple popular models adopted MPS
+as their official backend on macOS.
+
+
+47
+00:02:51.371 --> 00:02:55.175 line:-2 align:center
+This includes foundation models,
+such as WhisperAI,
+
+
+48
+00:02:55,209 --> 00:03:01,215 line:-2
+object detection models such as YOLO,
+stable diffusion models, and many more.
+
+
+49
+00:03:01,248 --> 00:03:06,520 line:-2
+Let's check one of these models
+in action using latest PyTorch 2.0.
+
+
+50
+00:03:06,553 --> 00:03:09,923 align:center
+For this example, I am using YoloV5,
+
+
+51
+00:03:09,957 --> 00:03:13,560 line:0
+an object detection network
+running on an M2 Max.
+
+
+52
+00:03:13,594 --> 00:03:16,129 line:0
+On the left side,
+I have the network running
+
+
+53
+00:03:16,163 --> 00:03:19,533 line:0
+and generating live images using
+the PyTorch MPS backend,
+
+
+54
+00:03:19,566 --> 00:03:22,135 line:0
+while on the right,
+I have the exact same model,
+
+
+55
+00:03:22,169 --> 00:03:24,271 line:0
+but running on the CPU.
+
+
+56
+00:03:24,304 --> 00:03:29,643 line:0
+The left side, using the MPS backend,
+is running at noticeably higher framerate.
+
+
+57
+00:03:31,278 --> 00:03:34,548 line:-2
+And furthermore,
+the developers not only adopted
+
+
+58
+00:03:34.581 --> 00:03:37.651 line:-2 align:center
+the PyTorch MPS backend
+in their external networks,
+
+
+59
+00:03:37.684 --> 00:03:40.954 line:-2 align:center
+but also have contributed code
+for multiple new operators,
+
+
+60
+00:03:40.988 --> 00:03:45.559 line:-2 align:center
+including histogram,
+group_norm, signbit, and more.
+
+
+61
+00:03:47.094 --> 00:03:49.463 line:-1 align:center
+Next, I'll cover the new features
+
+
+62
+00:03:49,496 --> 00:03:51,899 line:-1
+available in the latest PyTorch builds,
+
+
+63
+00:03:51.932 --> 00:03:53.500 line:-1 align:center
+starting with profiling support
+
+
+64
+00:03:53.534 --> 00:03:55.903 line:-1 align:center
+for MPS operations.
+
+
+65
+00:03:55,936 --> 00:03:58,405 line:-2
+PyTorch nightly builds
+have profiling support
+
+
+66
+00:03:58.438 --> 00:04:01.508 line:-2 align:center
+that uses OS signposts
+to show the exact running time
+
+
+67
+00:04:01,542 --> 00:04:05,479 line:-2
+for operation executions,
+copies between CPU and GPU,
+
+
+68
+00:04:05,512 --> 00:04:09,483 line:-2
+and fallbacks to the CPU
+caused by unsupported operators.
+
+
+69
+00:04:09,516 --> 00:04:13,654 line:-2
+You will be able to visualize the
+profiling data in a very familiar tool,
+
+
+70
+00:04:13.687 --> 00:04:17.424 line:-2 align:center
+Metal System Trace,
+which is part of Instruments.
+
+
+71
+00:04:17.457 --> 00:04:21.862 line:-2 align:center
+To learn more about profiling
+ML applications using Metal System Trace,
+
+
+72
+00:04:21.895 --> 00:04:24.364 line:-3 align:center
+I recommend you watch
+the session from last year,
+
+
+73
+00:04:24.398 --> 00:04:27.534 line:-2 align:center
+"Accelerate machine learning with Metal."
+
+
+74
+00:04:27.568 --> 00:04:31.004 line:-3 align:center
+Using the profiler
+is a very simple process.
+
+
+75
+00:04:31,038 --> 00:04:35,342 line:-2
+Call the start method on the MPS
+profiler package to enable tracing,
+
+
+76
+00:04:35.375 --> 00:04:40.581 line:-2 align:center
+and, at the end of your script,
+use the stop method to end profiling.
+
+
+77
+00:04:40,614 --> 00:04:44,251 line:-2
+Now I will walk through the profiler
+to debug an example.
+
+
+78
+00:04:45.152 --> 00:04:48.255 line:-2 align:center
+This sample network uses
+a Sequential model composed
+
+
+79
+00:04:48,288 --> 00:04:52,259 align:center line:-2
+of linear transformations
+and Softshrink activation functions
+
+
+80
+00:04:52,292 --> 00:04:55,195 line:-1
+with a total of seven layers in the model.
+
+
+81
+00:04:56,163 --> 00:05:00,133 line:-2
+The current performance
+of this model is not satisfying.
+
+
+82
+00:05:00,167 --> 00:05:02,803 line:-1
+In this case, the profiler can be used
+
+
+83
+00:05:02.836 --> 00:05:04.771 line:-1 align:center
+to find the bottleneck.
+
+
+84
+00:05:05,806 --> 00:05:10,711 line:-2
+In the Metal System Trace, first,
+make sure to enable the os_signpost.
+
+
+85
+00:05:10.744 --> 00:05:14.948 line:-2 align:center
+This will allow you to capture
+the PyTorch operator information.
+
+
+86
+00:05:14.982 --> 00:05:19.086 line:-2 align:center
+Next, check that the device
+and the right executable are set,
+
+
+87
+00:05:19,119 --> 00:05:21,788 line:-1
+in this case, the Python binary.
+
+
+88
+00:05:21,822 --> 00:05:24,258 line:-1
+Then click on the record button.
+
+
+89
+00:05:24,992 --> 00:05:28,395 line:-2
+Instruments is now recording
+the PyTorch execution.
+
+
+90
+00:05:28,428 --> 00:05:32,666 line:-2
+I'll let it run for couple of seconds
+to make sure I capture enough data.
+
+
+91
+00:05:32,699 --> 00:05:34,268 line:-1
+Then I click Stop.
+
+
+92
+00:05:36.737 --> 00:05:38.405 line:-1 align:center
+In the os_signpost tab,
+
+
+93
+00:05:38,438 --> 00:05:41,375 line:-1
+disclose the PyTorch Intervals timeline.
+
+
+94
+00:05:42,242 --> 00:05:45,846 line:0
+This timeline displays
+the execution time of an operator,
+
+
+95
+00:05:45,879 --> 00:05:49,216 line:0
+alongside PyTorch Metadata,
+such as string identifiers,
+
+
+96
+00:05:49,249 --> 00:05:52,052 line:0
+data types, and copy lengths.
+
+
+97
+00:05:53,153 --> 00:05:58,192 line:0
+Zooming into the timeline reveals
+PyTorch operators used by this example.
+
+
+98
+00:05:58,225 --> 00:06:01,061 align:center
+The pattern from this trace
+can be easily identified
+
+
+99
+00:06:01,094 --> 00:06:04,464 align:center
+to the custom Sequential model
+made of seven layers.
+
+
+100
+00:06:05,599 --> 00:06:08,168 align:center
+From the trace,
+it's clear that the bottleneck
+
+
+101
+00:06:08,202 --> 00:06:11,305 align:center
+is in the Softshrink fallback to the CPU.
+
+
+102
+00:06:11.338 --> 00:06:13.874 line:-1 align:center
+This process is very inefficient.
+
+
+103
+00:06:13,907 --> 00:06:17,144 line:-2
+The model incurs the overhead
+from the CPU execution
+
+
+104
+00:06:17,177 --> 00:06:20,013 line:-2
+of the Softshrink operator
+and the additional copies,
+
+
+105
+00:06:20,047 --> 00:06:22,316 line:-1
+while the GPU is starved.
+
+
+106
+00:06:22.349 --> 00:06:25.018 line:-2 align:center
+Most of the gaps
+in the GPU timeline are coming
+
+
+107
+00:06:25,052 --> 00:06:29,156 line:-2
+from the Softshrink activation
+function falling back to CPU.
+
+
+108
+00:06:29,189 --> 00:06:34,628 line:-2
+In order to fix this, I'll write a custom
+kernel to improve the performance.
+
+
+109
+00:06:34.661 --> 00:06:37.931 line:-2 align:center
+There are four steps
+to write a custom operation.
+
+
+110
+00:06:37,965 --> 00:06:42,436 line:-2
+First, implement the operation
+in Objective-C and Metal.
+
+
+111
+00:06:42.469 --> 00:06:46.073 line:-2 align:center
+Next, create the Python bindings
+for your Objective-C code
+
+
+112
+00:06:46.106 --> 00:06:48.542 line:-1 align:center
+and compile your extension.
+
+
+113
+00:06:48,575 --> 00:06:51,245 line:-1
+Finally, once your extension is built,
+
+
+114
+00:06:51,278 --> 00:06:55,682 line:-2
+import the operation into
+your training script and begin using it.
+
+
+115
+00:06:55,716 --> 00:06:58,919 line:-2
+I'll start
+with the operation implementation.
+
+
+116
+00:07:00,621 --> 00:07:03,857 line:-2
+Start by importing
+the Torch extension header.
+
+
+117
+00:07:03,891 --> 00:07:08,795 line:-2
+This includes all the necessary
+PyTorch bits to write C++ extensions.
+
+
+118
+00:07:09,796 --> 00:07:13,333 line:-1
+Then define the compute function
+
+
+119
+00:07:13.367 --> 00:07:17.638 line:-2 align:center
+and use the get_command_buffer
+MPS backend API to get a reference
+
+
+120
+00:07:17,671 --> 00:07:20,007 line:-1
+to the MPSStream Command Buffer.
+
+
+121
+00:07:20.040 --> 00:07:25.846 line:-2 align:center
+Similarly, use the get_dispatch_queue API
+to get a reference to the serial queue.
+
+
+122
+00:07:26,780 --> 00:07:32,619 line:-2
+Next, create an encoder using the command
+buffer and define the custom GPU kernel.
+
+
+123
+00:07:33.720 --> 00:07:36.690 line:-2 align:center
+You encode the kernel
+inside the dispatch queue
+
+
+124
+00:07:36.723 --> 00:07:40.527 line:-2 align:center
+to ensure that submissions
+from multiple threads are serialized.
+
+
+125
+00:07:41.662 --> 00:07:45.499 line:-2 align:center
+After all the work is encoded,
+use the synchronize API to wait
+
+
+126
+00:07:45,532 --> 00:07:47,868 line:-2
+until the current command buffer
+is done running,
+
+
+127
+00:07:47,901 --> 00:07:50,671 line:-1
+so you can observe serialized submissions.
+
+
+128
+00:07:50.704 --> 00:07:54.474 line:-2 align:center
+Or if you don't need serialization,
+use the commit API.
+
+
+129
+00:07:55,442 --> 00:07:58,779 line:-1
+Next, bind your custom functions.
+
+
+130
+00:07:58.812 --> 00:08:02.082 line:-2 align:center
+You can use PYBIND11
+to bind the Objective-C functions
+
+
+131
+00:08:02,115 --> 00:08:04,952 line:-1
+into Python in a very simple manner.
+
+
+132
+00:08:04,985 --> 00:08:09,723 line:-2
+For this extension, the necessary
+binding code spans only two lines.
+
+
+133
+00:08:10.757 --> 00:08:14.161 line:-1 align:center
+After binding, compile your extension.
+
+
+134
+00:08:14.194 --> 00:08:17.831 line:-1 align:center
+First import torch.utils.cpp_extension.
+
+
+135
+00:08:18,665 --> 00:08:23,437 line:-2
+This provides a load function which you
+can use to compile your extension.
+
+
+136
+00:08:23,470 --> 00:08:26,907 line:-2
+Next, pass the name
+of your extension to build,
+
+
+137
+00:08:26.940 --> 00:08:31.778 line:-2 align:center
+then a list of relative or absolute paths
+to the source code files.
+
+
+138
+00:08:31,812 --> 00:08:37,417 line:-2
+Optionally, you can list additional
+compiler flags to forward to the build.
+
+
+139
+00:08:37.451 --> 00:08:41.288 line:-2 align:center
+The load function will compile
+the source files into a shared library,
+
+
+140
+00:08:41,321 --> 00:08:45,792 line:-2
+which will be subsequently loaded into
+the current Python process as a module.
+
+
+141
+00:08:46,994 --> 00:08:51,131 line:-2
+Finally, import the operator
+into your script to begin using it.
+
+
+142
+00:08:52,332 --> 00:08:56,937 line:-2
+Start by importing the compiled library
+and change the previous Sequential model
+
+
+143
+00:08:56,970 --> 00:08:59,706 line:-1
+to use the custom Softshrink kernel.
+
+
+144
+00:09:01.742 --> 00:09:05.145 line:-2 align:center
+Let's run the same model again
+and check the result.
+
+
+145
+00:09:06.046 --> 00:09:11.318 line:-2 align:center
+With the newly added custom operator,
+the model runs much more efficiently.
+
+
+146
+00:09:12.519 --> 00:09:15.956 line:-2 align:center
+All the copies and intermediate tensors
+created by the fallback
+
+
+147
+00:09:15,989 --> 00:09:20,427 line:-2
+to the CPU are gone,
+and the Sequential model runs much faster.
+
+
+148
+00:09:20,460 --> 00:09:24,731 line:-2
+Now let's explore more ways
+your network can be further improved.
+
+
+149
+00:09:26,200 --> 00:09:30,237 line:-2
+PyTorch MPS backend now supports
+automatic mixed precision,
+
+
+150
+00:09:30.270 --> 00:09:33.006 line:-2 align:center
+which allows you
+to train faster using less memory
+
+
+151
+00:09:33,040 --> 00:09:35,342 line:-1
+and without loss in quality.
+
+
+152
+00:09:35,375 --> 00:09:37,277 line:-1
+To understand mixed precision,
+
+
+153
+00:09:37,311 --> 00:09:40,547 line:-2
+I will first review
+the supported data types.
+
+
+154
+00:09:40.581 --> 00:09:43.717 line:-2 align:center
+Mixed precision training
+is a mode that allows training
+
+
+155
+00:09:43.750 --> 00:09:47.387 line:-2 align:center
+deep learning models with a mix
+of single precision floating point
+
+
+156
+00:09:47,421 --> 00:09:50,290 line:-1
+and half precision floating point.
+
+
+157
+00:09:50.324 --> 00:09:52.426 line:-1 align:center
+Starting with macOS Sonoma,
+
+
+158
+00:09:52.459 --> 00:09:56.964 line:-2 align:center
+MPSGraph adds support
+for a new data type, bfloat16.
+
+
+159
+00:09:57.931 --> 00:10:02.302 line:-2 align:center
+bfloat16 is a 16-bit floating point format
+for deep learning.
+
+
+160
+00:10:02,336 --> 00:10:06,306 line:-2
+It is comprised of 1 sign bit,
+8 exponent bits,
+
+
+161
+00:10:06,340 --> 00:10:08,542 line:-1
+and 7 mantissa bits.
+
+
+162
+00:10:08,575 --> 00:10:13,113 line:-2
+This is different from the standard
+IEEE 16-bit floating point format,
+
+
+163
+00:10:13.146 --> 00:10:16.917 line:-2 align:center
+which was not designed
+with deep learning applications in mind.
+
+
+164
+00:10:16,950 --> 00:10:22,623 line:-2
+Automatic Mixed Precision will be enabled
+for both float16 and bfloat16.
+
+
+165
+00:10:23,590 --> 00:10:27,327 line:-2
+Automatic mixed precision
+chooses the right precision per layer
+
+
+166
+00:10:27,361 --> 00:10:31,198 line:-2
+by measuring the performance
+of the network in default precision,
+
+
+167
+00:10:31,231 --> 00:10:34,234 line:-2
+then it runs again,
+with mixed precision settings
+
+
+168
+00:10:34,268 --> 00:10:38,305 line:-2
+to optimize the performance
+without impacting the accuracy.
+
+
+169
+00:10:38,338 --> 00:10:42,809 line:-2
+Some layers of the neural networks
+can be executed at lower precision,
+
+
+170
+00:10:42.843 --> 00:10:45.546 line:-1 align:center
+such as convolutional or linear layers.
+
+
+171
+00:10:45.579 --> 00:10:50.984 line:-2 align:center
+Other layers such as reductions will
+often require a higher precision level.
+
+
+172
+00:10:52.319 --> 00:10:57.057 line:-2 align:center
+Adding Automatic Mixed Precision support
+to your network is a very easy process.
+
+
+173
+00:10:57.090 --> 00:10:59.393 line:-1 align:center
+First, add autocast.
+
+
+174
+00:10:59,426 --> 00:11:04,531 line:-1
+Both float16 and bfloat16 are supported.
+
+
+175
+00:11:04.565 --> 00:11:08.969 line:-2 align:center
+Autocast serves as a context manager
+that allows a region of the script
+
+
+176
+00:11:09.002 --> 00:11:11.271 line:-1 align:center
+to run in mixed precision.
+
+
+177
+00:11:12.339 --> 00:11:16.777 line:-2 align:center
+In this region, MPS ops run
+in a data type chosen by autocast
+
+
+178
+00:11:16,810 --> 00:11:20,047 line:-2
+to improve performance
+while maintaining accuracy.
+
+
+179
+00:11:21,148 --> 00:11:24,618 line:-2
+The MPS backend has also
+been significantly optimized.
+
+
+180
+00:11:24,651 --> 00:11:27,421 line:-1
+With PyTorch 2.0 and macOS Sonoma,
+
+
+181
+00:11:27,454 --> 00:11:29,723 align:center
+the MPS backend is up to five times faster
+
+
+182
+00:11:29,756 --> 00:11:32,192 line:0
+compared to our previous release.
+
+
+183
+00:11:32.226 --> 00:11:36.496 line:-2 align:center
+That's it for PyTorch.
+Now let's move on to TensorFlow.
+
+
+184
+00:11:36,530 --> 00:11:41,435 line:-2
+The TensorFlow Metal backend has
+matured to a stable 1.0 release version.
+
+
+185
+00:11:41,468 --> 00:11:44,705 line:-2
+In this release,
+a grappler remapping optimizer pass
+
+
+186
+00:11:44,738 --> 00:11:47,307 line:-1
+has been added to the plugin.
+
+
+187
+00:11:47,341 --> 00:11:50,677 line:-2
+The Metal plugin
+also gets mixed precision support,
+
+
+188
+00:11:50.711 --> 00:11:54.014 line:-2 align:center
+and the installation process
+is now simpler than before.
+
+
+189
+00:11:55,282 --> 00:11:59,119 line:-2
+The performance of the TensorFlow Metal
+backend has been improved
+
+
+190
+00:11:59,152 --> 00:12:04,157 line:-2
+through addition of automatic fusion
+of recognized computation patterns.
+
+
+191
+00:12:04.191 --> 00:12:06.760 line:-2 align:center
+These computations
+include fused convolutions
+
+
+192
+00:12:06.793 --> 00:12:12.432 line:-2 align:center
+and matrix multiplications,
+optimizer operations, and RNN cells.
+
+
+193
+00:12:12,466 --> 00:12:16,103 line:-2
+This optimization happens automatically
+through the grappler pass
+
+
+194
+00:12:16.136 --> 00:12:18.739 line:-1 align:center
+when the computation graph is created.
+
+
+195
+00:12:20,107 --> 00:12:22,843 line:-2
+Here I have an example
+of a common computation
+
+
+196
+00:12:22,876 --> 00:12:25,746 line:-2
+of a two-dimensional
+convolution operation.
+
+
+197
+00:12:25,779 --> 00:12:29,183 line:-2
+The convolution is often followed
+by an addition function,
+
+
+198
+00:12:29,216 --> 00:12:32,819 line:-2
+a common pattern
+in convolutional neural networks.
+
+
+199
+00:12:32,853 --> 00:12:34,655 line:-1
+By identifying this pattern,
+
+
+200
+00:12:34,688 --> 00:12:37,991 line:-2
+the grappler pass
+can remap the computation.
+
+
+201
+00:12:39.293 --> 00:12:43.197 line:-2 align:center
+This allows you to use a more optimized
+kernel to achieve the same output,
+
+
+202
+00:12:43.230 --> 00:12:45.465 line:-1 align:center
+leading to better performance.
+
+
+203
+00:12:45,499 --> 00:12:50,070 line:-2
+Like in PyTorch, TensorFlow
+also gets mixed precision support.
+
+
+204
+00:12:50,103 --> 00:12:53,540 line:-2
+TensorFlow allows setting
+mixed precision globally.
+
+
+205
+00:12:53.574 --> 00:12:56.977 line:-2 align:center
+This enables all network layers
+to be automatically created
+
+
+206
+00:12:57,010 --> 00:13:00,747 line:-2
+with the requested data type policy,
+so enabling this change
+
+
+207
+00:13:00.781 --> 00:13:04.885 line:-2 align:center
+in your standard workflow requires
+minimal changes to existing code.
+
+
+208
+00:13:06.019 --> 00:13:11.491 line:-2 align:center
+Global policy can be set
+to use either Float16 or BFloat16.
+
+
+209
+00:13:14,461 --> 00:13:17,130 line:-2
+In addition to improvements
+in performance,
+
+
+210
+00:13:17.164 --> 00:13:21.735 line:-2 align:center
+the user experience in enabling the Metal
+acceleration has been streamlined.
+
+
+211
+00:13:21,768 --> 00:13:24,605 line:-2
+From now on,
+simply following the usual path
+
+
+212
+00:13:24,638 --> 00:13:28,008 line:-2
+of installing the TensorFlow wheel
+and the TensorFlow-Metal plugin
+
+
+213
+00:13:28,041 --> 00:13:32,112 line:-2
+through a package manager
+will enable the Metal acceleration.
+
+
+214
+00:13:32,145 --> 00:13:36,183 line:-2
+For those who want to stay on the bleeding
+edge of TensorFlow development,
+
+
+215
+00:13:36,216 --> 00:13:39,019 line:-2
+the Metal acceleration support
+is now also available
+
+
+216
+00:13:39.052 --> 00:13:41.922 line:-1 align:center
+on the nightly releases of TensorFlow.
+
+
+217
+00:13:41.955 --> 00:13:46.126 line:-2 align:center
+Now let's talk about the new
+GPU acceleration for JAX.
+
+
+218
+00:13:46,159 --> 00:13:49,196 line:-2
+This year,
+JAX GPU acceleration will be supported
+
+
+219
+00:13:49,229 --> 00:13:53,166 line:-2
+through the Metal backend,
+similar to PyTorch and TensorFlow.
+
+
+220
+00:13:53,867 --> 00:13:57,971 line:-2
+JAX is a Python library
+for high-performance numerical computing
+
+
+221
+00:13:58,005 --> 00:14:00,440 line:-1
+and machine learning research.
+
+
+222
+00:14:00,474 --> 00:14:04,645 line:1
+It is based on the popular NumPy framework
+for working with large arrays,
+
+
+223
+00:14:04,678 --> 00:14:08,248 align:center
+with three key extensions
+for machine learning research.
+
+
+224
+00:14:09,349 --> 00:14:14,188 line:0
+First, it supports automatic
+differentiation using the grad function.
+
+
+225
+00:14:14,221 --> 00:14:17,658 line:0
+It can differentiate through
+a large subset of Python's features,
+
+
+226
+00:14:17,691 --> 00:14:21,295 align:center
+and it can even take
+high order derivatives.
+
+
+227
+00:14:21,328 --> 00:14:25,265 line:0
+JAX also supports fast
+and efficient vectorization.
+
+
+228
+00:14:25,299 --> 00:14:27,401 line:0
+Given a function apply_matrix,
+
+
+229
+00:14:27,434 --> 00:14:29,937 line:0
+you could loop over a batch dimension
+in Python,
+
+
+230
+00:14:29,970 --> 00:14:33,040 line:0
+but it may run at sub-optimal performance.
+
+
+231
+00:14:33,073 --> 00:14:37,711 align:center
+In this case, vmap can be used
+to add batching support automatically.
+
+
+232
+00:14:38,478 --> 00:14:41,548 line:0
+And further,
+JAX lets you just-in-time compile
+
+
+233
+00:14:41,582 --> 00:14:45,485 align:center
+your function into optimized kernels
+using an API called jit.
+
+
+234
+00:14:45,519 --> 00:14:49,022 line:0
+In the same case,
+jit is used to transform the function
+
+
+235
+00:14:49,056 --> 00:14:52,025 line:0
+on top of vmap to make it run faster.
+
+
+236
+00:14:53,227 --> 00:14:55,596 align:center
+On a MacBook Pro with M2 Max,
+
+
+237
+00:14:55,629 --> 00:14:58,999 line:1
+JAX Metal acceleration provides
+amazing speedups,
+
+
+238
+00:14:59,032 --> 00:15:03,737 line:1
+with an average of ten times faster
+than the CPU across these networks.
+
+
+239
+00:15:03,770 --> 00:15:07,341 line:1
+For more details on environment setup
+and installation of JAX,
+
+
+240
+00:15:07,374 --> 00:15:10,911 line:1
+please refer to the Metal Developer
+Resources web page.
+
+
+241
+00:15:12,479 --> 00:15:15,883 line:-2
+Let's switch gears
+and move to ML inference.
+
+
+242
+00:15:15,916 --> 00:15:18,685 line:-2
+I will start by introducing
+a new serialization format
+
+
+243
+00:15:18,719 --> 00:15:22,523 line:-2
+for MPSGraph that you use
+to optimize your load times.
+
+
+244
+00:15:22.556 --> 00:15:25.092 line:-2 align:center
+This new serialization format
+can be generated
+
+
+245
+00:15:25.125 --> 00:15:28.896 line:-2 align:center
+from your existing serialized networks
+from other frameworks.
+
+
+246
+00:15:28.929 --> 00:15:32.332 line:-2 align:center
+Finally, I will show you how
+to optimize the memory footprint
+
+
+247
+00:15:32,366 --> 00:15:36,136 line:-2
+of your network by leveraging
+8-bit integer quantization.
+
+
+248
+00:15:36.170 --> 00:15:38.005 line:-1 align:center
+Let's begin.
+
+
+249
+00:15:38.038 --> 00:15:42.543 line:-2 align:center
+An MPSGraph can be created using
+the high level APIs with full flexibility,
+
+
+250
+00:15:42.576 --> 00:15:44.244 line:-1 align:center
+layer by layer.
+
+
+251
+00:15:44.278 --> 00:15:47.714 line:-3 align:center
+Please refer to the video
+on building customized ML models
+
+
+252
+00:15:47.748 --> 00:15:51.151 line:-3 align:center
+with Metal Performance Shaders Graph
+for details.
+
+
+253
+00:15:51,185 --> 00:15:54,354 line:-3
+After defining and compiling
+your custom graph,
+
+
+254
+00:15:54.388 --> 00:15:59.026 line:-3 align:center
+it will then execute through
+the MPSGraphExecutable to get results.
+
+
+255
+00:15:59,059 --> 00:16:02,062 line:-1
+Normally, this process works great.
+
+
+256
+00:16:02,095 --> 00:16:05,465 line:-2
+However,
+in complex graphs with many layers,
+
+
+257
+00:16:05,499 --> 00:16:08,869 line:-2
+this initial compilation can lead
+to high application launch times.
+
+
+258
+00:16:10,437 --> 00:16:14,575 line:-3
+MPSGraph has a new serialization format
+called MPSGraphPackage,
+
+
+259
+00:16:14,608 --> 00:16:17,211 line:-1
+to address exactly this problem.
+
+
+260
+00:16:17,244 --> 00:16:20,047 line:-2
+This new serialization format
+allows you to create
+
+
+261
+00:16:20.080 --> 00:16:23.217 line:-1 align:center
+the MPSGraphExecutable ahead of time.
+
+
+262
+00:16:23,250 --> 00:16:26,587 line:-2
+Once created,
+the optimized MPSGraphExecutable
+
+
+263
+00:16:26.620 --> 00:16:30.357 line:-2 align:center
+can be loaded directly
+from a MPSGraphPackage file.
+
+
+264
+00:16:30,390 --> 00:16:33,360 line:-1
+Creating a MPSGraphPackage is very simple.
+
+
+265
+00:16:34.428 --> 00:16:37.164 line:-2 align:center
+All you need to do is
+to create a serialization descriptor
+
+
+266
+00:16:37.197 --> 00:16:39.433 line:-1 align:center
+and pass it to the serialize function
+
+
+267
+00:16:39,466 --> 00:16:42,603 line:-2
+of the MPSGraphExecutable
+you want to serialize.
+
+
+268
+00:16:42.636 --> 00:16:46.039 line:-2 align:center
+You'll also need
+to pass a path to store it.
+
+
+269
+00:16:46.073 --> 00:16:47.875 line:-1 align:center
+After creating the package,
+
+
+270
+00:16:47,908 --> 00:16:51,378 line:-2
+this is how
+you load the graph into your app.
+
+
+271
+00:16:51,411 --> 00:16:55,282 line:-2
+You need a compilation descriptor
+and the path to your stored package.
+
+
+272
+00:16:55.315 --> 00:16:59.653 line:-2 align:center
+Then use them to initialize
+the MPSGraphExecutable.
+
+
+273
+00:16:59,686 --> 00:17:03,056 line:-2
+If you've been already using MPSGraph,
+you can easily adopt
+
+
+274
+00:17:03.090 --> 00:17:07.194 line:-2 align:center
+the new serialization format
+using the APIs we have presented.
+
+
+275
+00:17:07.227 --> 00:17:09.329 line:-2 align:center
+But if you're coming
+from other frameworks,
+
+
+276
+00:17:09,363 --> 00:17:11,932 line:-2
+you can now easily migrate
+to MPSGraphPackage
+
+
+277
+00:17:11,965 --> 00:17:14,401 line:-1
+using the new MPSGraphTool.
+
+
+278
+00:17:14.434 --> 00:17:16.370 line:-1 align:center
+For users of CoreML,
+
+
+279
+00:17:16,403 --> 00:17:18,138 line:-1
+you can pass your ML Programs
+
+
+280
+00:17:18.172 --> 00:17:20.073 line:-1 align:center
+tp the MPSGraphTool, which will create
+
+
+281
+00:17:20,107 --> 00:17:22,109 line:-1
+a MPSGraphPackage for you.
+
+
+282
+00:17:22.142 --> 00:17:23.710 line:-1 align:center
+The same goes for ONNX,
+
+
+283
+00:17:23,744 --> 00:17:25,379 line:-1
+where you can use your ONNX file
+
+
+284
+00:17:25,412 --> 00:17:26,713 line:-1
+as the input.
+
+
+285
+00:17:26,747 --> 00:17:30,150 line:0
+This new tool lets you quickly include
+your existing models
+
+
+286
+00:17:30,184 --> 00:17:32,719 line:0
+to your MPSGraph application
+without the need
+
+
+287
+00:17:32,753 --> 00:17:35,122 align:center
+to encode the inference model manually.
+
+
+288
+00:17:35.956 --> 00:17:38.091 line:-1 align:center
+Here's how you use the command line tool.
+
+
+289
+00:17:38,125 --> 00:17:41,995 line:-2
+You give the MPSGraphTool a flag
+to declare the input model type,
+
+
+290
+00:17:42,029 --> 00:17:44,498 line:-1
+in this case, CoreML Package.
+
+
+291
+00:17:44.531 --> 00:17:47.668 line:-2 align:center
+You also provide it with the path
+to your output destination
+
+
+292
+00:17:47,701 --> 00:17:50,037 line:-1
+and the name of your output model.
+
+
+293
+00:17:50,070 --> 00:17:52,739 line:-2
+Additionally,
+you define the target platform
+
+
+294
+00:17:52,773 --> 00:17:55,008 line:-1
+and minimum OS version.
+
+
+295
+00:17:55.042 --> 00:17:58.345 line:-2 align:center
+After conversion,
+the produced MPSGraphPackages
+
+
+296
+00:17:58,378 --> 00:18:01,648 line:-2
+can be loaded to your app
+and executed directly.
+
+
+297
+00:18:02,482 --> 00:18:05,552 line:-2
+Next, lets discuss how
+you can improve the efficiency
+
+
+298
+00:18:05,586 --> 00:18:10,023 line:-2
+of your computations using
+the 8-bit integer quantizations.
+
+
+299
+00:18:10.057 --> 00:18:14.061 line:-2 align:center
+It's common to use floating point formats
+to do training and inference,
+
+
+300
+00:18:14,094 --> 00:18:16,930 line:-1
+such as 16-bit floating point format.
+
+
+301
+00:18:16,964 --> 00:18:22,970 line:-2
+However, at inference, these models
+may take a longer time to predict results.
+
+
+302
+00:18:23,003 --> 00:18:27,074 line:-2
+Instead, it's better in many cases
+to use reduced precision
+
+
+303
+00:18:27,107 --> 00:18:29,643 line:-1
+or 8-bit integer numbers.
+
+
+304
+00:18:29,676 --> 00:18:32,145 line:-2
+This will help you
+in saving memory bandwith
+
+
+305
+00:18:32,179 --> 00:18:35,048 line:-2
+and reduce the memory footprint
+of your model.
+
+
+306
+00:18:36,183 --> 00:18:40,254 line:-2
+For 8-bit integer formats,
+there are two types of quantization:
+
+
+307
+00:18:40.287 --> 00:18:42.589 line:-1 align:center
+symmetric and asymmetric.
+
+
+308
+00:18:42.623 --> 00:18:46.226 line:-2 align:center
+MPSGraph now supports APIs
+for both of them.
+
+
+309
+00:18:46,260 --> 00:18:50,731 line:-2
+Compared to the symmetric quantization,
+the asymmetric one lets you specify
+
+
+310
+00:18:50.764 --> 00:18:54.368 line:-2 align:center
+a quantization bias,
+denoted by zeroPoint here.
+
+
+311
+00:18:55,869 --> 00:19:00,474 line:-2
+Now let's delve into using quantized
+computations through an example,
+
+
+312
+00:19:00.507 --> 00:19:05.479 line:-2 align:center
+starting with activation and weights
+in an Int8 format as the inputs.
+
+
+313
+00:19:05,512 --> 00:19:08,448 line:0
+These inputs are dequantized
+to floating point format
+
+
+314
+00:19:08,482 --> 00:19:12,186 line:0
+using the dequantizeTensor op in MPSGraph.
+
+
+315
+00:19:12,219 --> 00:19:15,055 line:0
+Now the floating point inputs can be fed
+
+
+316
+00:19:15,088 --> 00:19:17,891 line:-1
+into a convolution operation.
+
+
+317
+00:19:17.925 --> 00:19:19.860 line:-1 align:center
+The resulting floating point tensor
+
+
+318
+00:19:19.893 --> 00:19:21.728 line:-1 align:center
+can then be quantized back to Int8
+
+
+319
+00:19:21,762 --> 00:19:23,830 line:-1
+using the quantizeTensor op.
+
+
+320
+00:19:23.864 --> 00:19:28.702 line:-2 align:center
+MPSGraph will automatically fuse all
+of these kernels into a single operation,
+
+
+321
+00:19:28,735 --> 00:19:33,073 line:-2
+therefore saving memory bandwidth
+and potentially improving performance.
+
+
+322
+00:19:33,907 --> 00:19:37,878 line:-2
+And this is how you can use
+the quantization support in MPSGraph.
+
+
+323
+00:19:39,146 --> 00:19:41,348 line:-1
+In addition to the previous new features,
+
+
+324
+00:19:41,381 --> 00:19:45,252 align:center line:-2
+MPSGraph supports
+even more machine learning operators.
+
+
+325
+00:19:45,285 --> 00:19:50,023 position:49% line:-2
+Starting this year, complex types
+are supported for most graph operations.
+
+
+326
+00:19:50.057 --> 00:19:52.993 line:-2 align:center
+You can use complex numbers
+either with single precision
+
+
+327
+00:19:53,026 --> 00:19:55,495 line:-1 align:center
+or half precision floating point formats.
+
+
+328
+00:19:56.196 --> 00:19:58.031 line:-1 align:center
+Building on the complex data type,
+
+
+329
+00:19:58,065 --> 00:20:02,669 line:-2
+MPSGraph adds operators for computing
+Fast Fourier Transformations.
+
+
+330
+00:20:02,703 --> 00:20:05,939 line:-2 position:49%
+You can apply complex to complex,
+complex to real,
+
+
+331
+00:20:05,973 --> 00:20:09,743 line:-2
+and real to complex transformations
+up to four dimensions.
+
+
+332
+00:20:09,776 --> 00:20:15,616 line:-2 align:center
+These are very common in audio,
+video, and image processing applications.
+
+
+333
+00:20:15,649 --> 00:20:18,051 line:-1
+Furthermore, using MPSGraph,
+
+
+334
+00:20:18,085 --> 00:20:21,288 line:-2
+you can now perform
+three-dimensional convolutions,
+
+
+335
+00:20:21,321 --> 00:20:25,926 line:-2
+grid sampling, Sort and ArgSort,
+and cumulative operations,
+
+
+336
+00:20:25,959 --> 00:20:30,264 line:-2
+including sums,
+products, minima, and maxima.
+
+
+337
+00:20:30,297 --> 00:20:35,102 line:-2
+And this concludes the discussion
+about the new features in MPSGraph.
+
+
+338
+00:20:35.135 --> 00:20:38.105 line:-2 align:center
+Let's review what was presented
+today in this session.
+
+
+339
+00:20:38,839 --> 00:20:42,709 line:-2
+I went over the improvements
+in accelerating popular ML frameworks
+
+
+340
+00:20:42,743 --> 00:20:45,846 line:-2
+like PyTorch and TensorFlow
+through Metal.
+
+
+341
+00:20:45.879 --> 00:20:51.118 line:-2 align:center
+Now you can also take advantage of
+the new Metal accelerated JAX framework.
+
+
+342
+00:20:51,151 --> 00:20:54,721 line:-2
+We also discussed how to seamlessly
+integrate your existing models
+
+
+343
+00:20:54.755 --> 00:20:59.626 line:-2 align:center
+from other frameworks to MPSGraph
+using the new serialization tools.
+
+
+344
+00:20:59,660 --> 00:21:01,562 line:-1
+And this concludes our talk.
+
+
+345
+00:21:01.595 --> 00:21:04.298 line:-2 align:center
+We can't wait to see
+the amazing content that you will create
+
+
+346
+00:21:04,331 --> 00:21:05,966 line:-1
+using all of these features.
+
+
+347
+00:21:05,999 --> 00:21:07,401 line:-1
+Thanks for watching.
+
+
+348
+00:21:07,434 --> 00:21:11,004 line:0
+♪ ♪
+

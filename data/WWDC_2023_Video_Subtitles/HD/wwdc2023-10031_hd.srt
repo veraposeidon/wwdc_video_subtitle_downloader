@@ -1,0 +1,1095 @@
+2
+00:00:00.334 --> 00:00:07.341 line:-1
+♪ ♪
+
+
+3
+00:00:10.010 --> 00:00:11.245 line:-1
+Nina: Hello.
+
+
+4
+00:00:11.278 --> 00:00:15.315 line:-2
+My name is Nina Paripovic,
+and I'm a watchOS software engineer.
+
+
+5
+00:00:15.349 --> 00:00:18.852 line:-2
+In this code-along session,
+we'll take an existing app
+
+
+6
+00:00:18.886 --> 00:00:23.557 line:-2
+built with the watchOS 9 SDK
+and update it for watchOS 10.
+
+
+7
+00:00:23.590 --> 00:00:28.629 line:-2
+We'll talk about the new design paradigms
+and SwiftUI APIs you can use
+
+
+8
+00:00:28.662 --> 00:00:33.166 line:-2
+to make your app look beautiful
+alongside the system-wide redesign.
+
+
+9
+00:00:33.200 --> 00:00:36.203 line:-2
+The sample project is linked
+in the Resources list
+
+
+10
+00:00:36.236 --> 00:00:38.705 line:-1
+associated with this session.
+
+
+11
+00:00:38.739 --> 00:00:40.908 line:-1
+I encourage you to start that download now
+
+
+12
+00:00:40.941 --> 00:00:45.345 line:-2
+so that we're ready to build
+for watchOS 10 together.
+
+
+13
+00:00:45.379 --> 00:00:49.383 line:-2
+Before we jump in,
+let's take a look at our existing project.
+
+
+14
+00:00:49.416 --> 00:00:53.253 line:-2
+The app we'll be updating
+is Backyard Birds,
+
+
+15
+00:00:53.287 --> 00:00:56.957 line:-2
+an app that lets you create and manage
+beautiful backyard gardens
+
+
+16
+00:00:56.990 --> 00:00:59.226 line:-1
+and their curious visitors.
+
+
+17
+00:00:59.259 --> 00:01:02.930 line:-2
+In the app today,
+there is a list of backyards.
+
+
+18
+00:01:02.963 --> 00:01:08.535 line:-2
+Each backyard has a detail view
+which shows us its activity and condition.
+
+
+19
+00:01:08.569 --> 00:01:12.840 line:-2
+If food or water is running low,
+they can be topped up.
+
+
+20
+00:01:12.873 --> 00:01:17.711 line:-2
+We can also see all of our bird visitors
+in each backyard.
+
+
+21
+00:01:17.744 --> 00:01:22.249 line:-5
+watchOS 10 brings an exciting,
+fresh new look to watch apps.
+
+
+22
+00:01:22.282 --> 00:01:25.786 line:-5
+If you haven't already,
+check out "Meet watchOS 10"
+
+
+23
+00:01:25.819 --> 00:01:29.156 line:-5
+as well as "Design and build apps
+for watchOS 10"
+
+
+24
+00:01:29.189 --> 00:01:31.658 line:-4
+to get more info on the design principles
+
+
+25
+00:01:31.692 --> 00:01:33.794 line:-4
+we are going to apply in this session.
+
+
+26
+00:01:33.827 --> 00:01:39.166 line:-2
+Now, let's open up Xcode
+to get started with updating our app.
+
+
+27
+00:01:40.467 --> 00:01:45.572 line:-2
+Here is our current Backyard Birds app
+built for and running on watchOS 9.
+
+
+28
+00:01:45.606 --> 00:01:51.245 line:-2
+We see the list of backyards,
+which transition to a backyard detail.
+
+
+29
+00:01:51.278 --> 00:01:55.048 line:-2
+First, let's build
+against the watchOS10 SDK.
+
+
+30
+00:01:56.650 --> 00:01:58.852 line:-1
+The app is already looking great.
+
+
+31
+00:01:58.886 --> 00:02:00.754 line:-1
+We see new system features,
+
+
+32
+00:02:00.787 --> 00:02:06.426 line:-2
+like the large title that transitions
+as we scroll
+
+
+33
+00:02:06.460 --> 00:02:11.398 line:-2
+and the new material that blurs content
+underneath the navigation bar.
+
+
+34
+00:02:11.431 --> 00:02:16.236 line:-2
+Tapping on a backyard animates the cell,
+and we have automatically adopted
+
+
+35
+00:02:16.270 --> 00:02:21.041 line:-2
+the systemwide toolbar button styling
+we see in the top left.
+
+
+36
+00:02:21.074 --> 00:02:24.344 line:-1
+If we scroll and then tap on Refill,
+
+
+37
+00:02:24.378 --> 00:02:28.215 line:-2
+it presents a modal with our new
+blurred background material.
+
+
+38
+00:02:31.818 --> 00:02:35.355 line:-2
+People who use Backyard Birds
+care most about what's happening
+
+
+39
+00:02:35.389 --> 00:02:37.191 line:-1
+in their own backyard.
+
+
+40
+00:02:37.224 --> 00:02:41.028 line:-2
+Currently, when they launch the app,
+the first thing they do is tap
+
+
+41
+00:02:41.061 --> 00:02:45.832 line:-2
+on a backyard in the list to see
+what's happening in the detail view.
+
+
+42
+00:02:45.866 --> 00:02:48.836 line:-1
+In watchOS 10, we can make things easier
+
+
+43
+00:02:48.869 --> 00:02:53.106 line:-2
+by modifying the structure of the app
+with NavigationSplitView.
+
+
+44
+00:02:53.140 --> 00:02:57.811 line:-2
+This will allow people to launch directly
+into the detail view of their backyard
+
+
+45
+00:02:57.845 --> 00:02:59.513 line:-1
+and then pop back up to the list
+
+
+46
+00:02:59.546 --> 00:03:03.050 line:-2
+when they want to visit
+their friends' yards.
+
+
+47
+00:03:03.083 --> 00:03:06.920 line:-2
+Since the detail view is
+the most important part of our app,
+
+
+48
+00:03:06.954 --> 00:03:10.824 line:-2
+we can bring emphasis to it
+by implementing NavigationSplitView.
+
+
+49
+00:03:12.092 --> 00:03:15.796 line:-2
+NavigationSplitView is great
+when we have this strong source list
+
+
+50
+00:03:15.829 --> 00:03:17.865 line:-1
+and detail relationship.
+
+
+51
+00:03:17.898 --> 00:03:22.135 line:-2
+It allows people to focus on the detail
+by directly launching to it,
+
+
+52
+00:03:22.169 --> 00:03:26.673 line:-2
+while still being able to easily switch
+over to another yard from the source list.
+
+
+53
+00:03:28.675 --> 00:03:34.414 line:-2
+We're already using it for Backyard Birds
+on iOS and iPadOS.
+
+
+54
+00:03:34.448 --> 00:03:38.418 line:-2
+Looks like NavigationSplitView
+would be a great fit for our app.
+
+
+55
+00:03:39.720 --> 00:03:43.557 line:-2
+In ContentView, we are going
+to swap out the NavigationStack
+
+
+56
+00:03:43.590 --> 00:03:45.759 line:-1
+for a NavigationSplitView.
+
+
+57
+00:03:45.792 --> 00:03:49.863 line:-2
+Then we are going to move
+the contents of our navigationDestination
+
+
+58
+00:03:49.897 --> 00:03:53.066 line:-2
+into the detail
+of the NavigationSplitView.
+
+
+59
+00:03:53.100 --> 00:03:56.603 line:-2
+Finally, we'll adopt
+the new list selection APIs,
+
+
+60
+00:03:56.637 --> 00:03:58.639 line:-1
+available in watchOS 10,
+
+
+61
+00:03:58.672 --> 00:04:03.610 line:-2
+that will drive which detail view is
+presented by the NavigationSplitView.
+
+
+62
+00:04:03.644 --> 00:04:06.280 line:-2
+To start,
+let's swap out the NavigationStack
+
+
+63
+00:04:06.313 --> 00:04:08.182 line:-1
+for a NavigationSplitView.
+
+
+64
+00:04:10.617 --> 00:04:15.889 line:-2
+We can leave the Backyard List where it is
+at the root of the NavigationSplitView.
+
+
+65
+00:04:15.923 --> 00:04:18.959 line:-2
+Let's remove
+the navigationDestination modifier
+
+
+66
+00:04:18.992 --> 00:04:24.031 line:-2
+and move BackyardView
+into the detail view builder.
+
+
+67
+00:04:24.064 --> 00:04:26.400 line:-1
+Since selectedBackyard is an optional,
+
+
+68
+00:04:26.433 --> 00:04:29.770 line:-2
+let's make sure to unwrap it
+and provide a fallback view.
+
+
+69
+00:04:38.445 --> 00:04:42.850 line:-2
+Finally, let's use a list initializer
+that takes a selection binding.
+
+
+70
+00:04:42.883 --> 00:04:46.520 line:-2
+When you provide a value
+for the selection parameter of a list,
+
+
+71
+00:04:46.553 --> 00:04:50.057 line:-2
+the selection binding drives
+which detail view we present
+
+
+72
+00:04:50.090 --> 00:04:52.559 line:-1
+within our NavigationSplitView.
+
+
+73
+00:04:57.231 --> 00:04:58.298 line:-1
+Nice.
+
+
+74
+00:04:58.332 --> 00:05:02.369 line:-2
+We now see the detail view
+for our selected yard by default.
+
+
+75
+00:05:02.402 --> 00:05:07.641 line:-2
+Since we launch directly to the detail,
+we can remove the navigationTitle.
+
+
+76
+00:05:07.674 --> 00:05:10.677 line:-2
+We can navigate back
+to see the rest of our backyards
+
+
+77
+00:05:10.711 --> 00:05:14.214 line:-1
+using the source list button.
+
+
+78
+00:05:14.248 --> 00:05:16.483 line:-1
+And tapping back into the detail view
+
+
+79
+00:05:16.517 --> 00:05:20.521 line:-2
+gives us
+a beautiful full-screen animation.
+
+
+80
+00:05:20.554 --> 00:05:25.392 line:-2
+Right now, the backyard view
+is a long list of scrollable content.
+
+
+81
+00:05:25.425 --> 00:05:28.829 line:-2
+Our list is already broken up
+into three different sections
+
+
+82
+00:05:28.862 --> 00:05:31.365 line:-1
+with distinct sets of functionality,
+
+
+83
+00:05:31.398 --> 00:05:35.936 line:-1
+the today view, the habitat view
+
+
+84
+00:05:35.969 --> 00:05:39.006 line:-1
+and the visitors view.
+
+
+85
+00:05:39.039 --> 00:05:42.075 line:-2
+We'll be able to improve
+the visual clarity of our app
+
+
+86
+00:05:42.109 --> 00:05:46.246 line:-2
+by instead using a TabView
+and creating tabs for each section.
+
+
+87
+00:05:47.581 --> 00:05:51.885 line:-2
+TabView gives us a way to break up content
+into full-screen views,
+
+
+88
+00:05:51.919 --> 00:05:55.923 line:-2
+with each tab having
+a clear and distinct purpose.
+
+
+89
+00:05:55.956 --> 00:05:58.325 line:-1
+I want to keep Digital Crown functionality
+
+
+90
+00:05:58.358 --> 00:06:00.794 line:-1
+for quick scrolling through views.
+
+
+91
+00:06:00.827 --> 00:06:05.499 line:-2
+The new vertical page style
+lets me do this with TabView.
+
+
+92
+00:06:05.532 --> 00:06:10.537 line:-2
+People can quickly navigate between tabs
+and even scroll within a single tab.
+
+
+93
+00:06:11.839 --> 00:06:17.477 line:-2
+Let's jump back to Xcode and update
+the detail view to use a TabView.
+
+
+94
+00:06:18.812 --> 00:06:21.381 line:-1
+In BackyardView, let's move each section
+
+
+95
+00:06:21.415 --> 00:06:26.887 line:-2
+into its own respective view
+and replace the List with a TabView.
+
+
+96
+00:06:26.920 --> 00:06:30.891 line:-2
+Since each page of the TabView
+takes up the full size of the screen,
+
+
+97
+00:06:30.924 --> 00:06:34.061 line:-1
+we don't need the sections and dividers.
+
+
+98
+00:06:34.094 --> 00:06:38.432 line:-2
+Let's make sure to add the section headers
+back in as navigationTitles.
+
+
+99
+00:06:51.078 --> 00:06:54.147 line:-2
+Lastly, let's use
+the tabViewStyle modifier
+
+
+100
+00:06:54.181 --> 00:06:58.585 line:-1
+and specify that we want verticalPage.
+
+
+101
+00:06:58.619 --> 00:07:00.220 line:-1
+We're almost there.
+
+
+102
+00:07:00.254 --> 00:07:05.058 line:-2
+As we paginate,
+we see views settling into each tab.
+
+
+103
+00:07:05.092 --> 00:07:08.629 line:-2
+To make it easier for people
+to quickly view all of the visitors,
+
+
+104
+00:07:08.662 --> 00:07:11.498 line:-1
+we can wrap our VisitorView in a List.
+
+
+105
+00:07:15.969 --> 00:07:21.208 line:-2
+Now, the TabView will designate one tab
+to its child List view.
+
+
+106
+00:07:21.241 --> 00:07:23.410 line:-2
+If the list exceeds
+the height of the screen,
+
+
+107
+00:07:23.443 --> 00:07:25.946 line:-1
+the view will become scrollable.
+
+
+108
+00:07:27.915 --> 00:07:31.285 line:-2
+If you have scrollable content
+within a vertical TabView,
+
+
+109
+00:07:31.318 --> 00:07:33.854 line:-2
+place it in the last tab
+whenever possible.
+
+
+110
+00:07:35.355 --> 00:07:39.426 line:-2
+I'm also going to break up
+the habitat view into two separate tabs,
+
+
+111
+00:07:39.459 --> 00:07:43.997 line:-2
+so that people can easily distinguish
+between food and water levels.
+
+
+112
+00:07:45.098 --> 00:07:49.770 line:-2
+For this, I've created my own gauge
+that fits better within a TabView.
+
+
+113
+00:07:51.438 --> 00:07:55.676 line:-2
+In our TabView, let's replace HabitatView
+with our new GaugeView
+
+
+114
+00:07:55.709 --> 00:07:59.046 line:-2
+by creating one instance for food
+and one for water.
+
+
+115
+00:08:08.755 --> 00:08:10.357 line:-1
+That's looking great.
+
+
+116
+00:08:10.390 --> 00:08:14.761 line:-2
+Now all we need to do
+is add back the refill functionality.
+
+
+117
+00:08:14.795 --> 00:08:18.131 line:-1
+For this, I am going to use a toolbar.
+
+
+118
+00:08:18.165 --> 00:08:21.168 line:-1
+Toolbar has been elevated in watchOS 10
+
+
+119
+00:08:21.201 --> 00:08:26.206 line:-2
+with brand-new placement options,
+consistent across all screen sizes.
+
+
+120
+00:08:26.240 --> 00:08:30.511 line:-2
+The new bottom bar placement
+is a great place to put controls.
+
+
+121
+00:08:30.544 --> 00:08:33.347 line:-2
+I'm going to make use
+of this placement option
+
+
+122
+00:08:33.380 --> 00:08:36.950 line:-2
+by adding in the Refill button
+to the bottom bar.
+
+
+123
+00:08:38.218 --> 00:08:43.190 line:-2
+Back in the new HabitatGaugeView,
+we'll add a toolbar
+
+
+124
+00:08:43.223 --> 00:08:48.095 line:-2
+and then use a ToolbarGroup to specify
+we want bottom bar placement.
+
+
+125
+00:08:48.128 --> 00:08:52.299 line:-2
+I'll use a spacer to add the button
+to the trailing corner of the toolbar.
+
+
+126
+00:09:00.574 --> 00:09:02.342 line:-1
+We now have a lot more space,
+
+
+127
+00:09:02.376 --> 00:09:06.280 line:-2
+and it's easier to focus
+on the Habitat summary.
+
+
+128
+00:09:06.313 --> 00:09:11.285 line:-2
+I want to do more to help orient people
+as they navigate through the TabView.
+
+
+129
+00:09:11.318 --> 00:09:14.321 line:-2
+Additionally, if the food and water
+of a backyard is low,
+
+
+130
+00:09:14.354 --> 00:09:16.623 line:-1
+I want to bring attention to this.
+
+
+131
+00:09:17.558 --> 00:09:21.361 line:-2
+We can achieve this by applying
+a background gradient.
+
+
+132
+00:09:21.395 --> 00:09:25.199 line:-2
+The title for each tab is helpful,
+but color would be a great way
+
+
+133
+00:09:25.232 --> 00:09:30.537 line:-2
+to increase glanceability and reinforce
+where we are within the detail view.
+
+
+134
+00:09:30.571 --> 00:09:33.707 line:-2
+We can also use it to highlight
+the state of our backyard
+
+
+135
+00:09:33.740 --> 00:09:36.410 line:-1
+if food or water is running low.
+
+
+136
+00:09:36.443 --> 00:09:39.313 line:-2
+The system gradient is a nice way
+to relay this
+
+
+137
+00:09:39.346 --> 00:09:43.517 line:-2
+while maintaining contrast
+against foreground elements.
+
+
+138
+00:09:43.550 --> 00:09:46.119 line:-2
+Let's use the container
+background modifier
+
+
+139
+00:09:46.153 --> 00:09:49.189 line:-1
+with a color gradient to achieve this.
+
+
+140
+00:09:49.223 --> 00:09:53.894 line:-2
+Let's first remove
+our original background.
+
+
+141
+00:09:53.927 --> 00:09:58.131 line:-2
+We can add a function to the BackyardView
+that determines the background color
+
+
+142
+00:09:58.165 --> 00:10:01.168 line:-1
+based on the current food and water level.
+
+
+143
+00:10:01.201 --> 00:10:04.004 line:-2
+If levels are low,
+the background will be red
+
+
+144
+00:10:04.037 --> 00:10:07.140 line:-1
+to indicate that it's time for a refill.
+
+
+145
+00:10:07.174 --> 00:10:11.178 line:-2
+I'll also add
+some helpful computed variables.
+
+
+146
+00:10:11.211 --> 00:10:15.883 line:-2
+Now we can pass this computed property
+to the containerBackground modifier.
+
+
+147
+00:10:18.051 --> 00:10:22.289 line:-2
+The modifier takes in a ShapeStyle
+where we'll pass in the color gradient
+
+
+148
+00:10:22.322 --> 00:10:24.958 line:-1
+as well as a ContainerBackgroundPlacement.
+
+
+149
+00:10:24.992 --> 00:10:27.494 line:-1
+Here, we'll specify it's for a TabView.
+
+
+150
+00:10:33.734 --> 00:10:37.471 line:-2
+I also want to change the gauge color
+when the background changes.
+
+
+151
+00:10:37.504 --> 00:10:40.340 line:-2
+Let's pass in
+the same computed color variable.
+
+
+152
+00:10:43.544 --> 00:10:45.812 line:-2
+Let's apply
+the containerBackground modifier
+
+
+153
+00:10:45.846 --> 00:10:50.017 line:-2
+to the other views within the TabView,
+using the app's accent color.
+
+
+154
+00:10:55.255 --> 00:10:57.658 line:-2
+As we scroll,
+you can see that the gradient
+
+
+155
+00:10:57.691 --> 00:11:01.295 line:-2
+contrasts nicely
+against the foreground elements.
+
+
+156
+00:11:01.328 --> 00:11:03.564 line:-1
+And as we tap on the toolbar button,
+
+
+157
+00:11:03.597 --> 00:11:06.600 line:-2
+we can see
+how the background gradient changes.
+
+
+158
+00:11:08.202 --> 00:11:11.405 line:-2
+As a final touch,
+I want to make use of materials
+
+
+159
+00:11:11.438 --> 00:11:14.174 line:-1
+to highlight important information.
+
+
+160
+00:11:14.208 --> 00:11:17.010 line:-2
+Materials have been available
+across platforms
+
+
+161
+00:11:17.044 --> 00:11:19.613 line:-1
+and are new to watch apps in watchOS10.
+
+
+162
+00:11:20.747 --> 00:11:24.651 line:-2
+They're a nice way to distinguish
+between foreground and background elements
+
+
+163
+00:11:24.685 --> 00:11:27.654 line:-1
+while also adding a visual flourish.
+
+
+164
+00:11:27.688 --> 00:11:32.392 line:-2
+Finally, they can surface
+or reinforce information on screen.
+
+
+165
+00:11:32.426 --> 00:11:36.530 line:-2
+There's a couple places in the app
+where we can use materials and vibrancy.
+
+
+166
+00:11:36.563 --> 00:11:38.999 line:-1
+Let's take a look.
+
+
+167
+00:11:39.032 --> 00:11:41.835 line:-2
+To start, I want to replace
+the shadow backdrop
+
+
+168
+00:11:41.869 --> 00:11:46.540 line:-2
+from the backyard title
+and instead use a material background.
+
+
+169
+00:11:46.573 --> 00:11:50.244 line:-2
+The background of the cell is colorful,
+and adding in a material will
+
+
+170
+00:11:50.277 --> 00:11:52.613 line:-1
+help provide clarity to the title.
+
+
+171
+00:12:00.687 --> 00:12:03.257 line:-2
+People really care
+about the number of bird visitors
+
+
+172
+00:12:03.290 --> 00:12:07.394 line:-2
+in each backyard, which you can see
+in the summary view.
+
+
+173
+00:12:07.427 --> 00:12:09.997 line:-2
+It would be great to surface it
+in the list view,
+
+
+174
+00:12:10.030 --> 00:12:14.902 line:-2
+so that people can see it without going
+into the detail view of a backyard.
+
+
+175
+00:12:14.935 --> 00:12:20.574 line:-2
+I'll add it as another overlay and provide
+a material background to the number.
+
+
+176
+00:12:20.607 --> 00:12:23.677 line:-1
+watchOS apps tend to use dark backgrounds,
+
+
+177
+00:12:23.710 --> 00:12:27.047 line:-1
+so the material defaults to dark variants.
+
+
+178
+00:12:27.080 --> 00:12:29.516 line:-2
+Because the backyards are
+light and colorful,
+
+
+179
+00:12:29.550 --> 00:12:32.386 line:-2
+I'm going to switch these
+to the light variant.
+
+
+180
+00:12:36.523 --> 00:12:41.461 line:-2
+And with that, our Backyard Birds app
+has now been updated for watchOS 10.
+
+
+181
+00:12:42.829 --> 00:12:46.433 line:-2
+Let's review
+all the big changes we've just made.
+
+
+182
+00:12:46.466 --> 00:12:50.871 line:-2
+We've added in
+the NavigationSplitView to our list.
+
+
+183
+00:12:50.904 --> 00:12:56.310 line:-2
+We then replaced the List
+with a Vertical TabView.
+
+
+184
+00:12:56.343 --> 00:13:00.080 line:-2
+We added functionality to the toolbar
+with each backyard,
+
+
+185
+00:13:00.113 --> 00:13:03.016 line:-1
+as well as some beautiful gradients.
+
+
+186
+00:13:03.050 --> 00:13:08.422 line:-2
+To finish, we made use of materials
+to surface useful information.
+
+
+187
+00:13:08.455 --> 00:13:10.591 line:-1
+Thanks for coding along with me.
+
+
+188
+00:13:10.624 --> 00:13:12.526 line:-1
+This is a big year for Apple Watch,
+
+
+189
+00:13:12.559 --> 00:13:16.029 line:-2
+and I encourage you to explore
+more sessions.
+
+
+190
+00:13:16.063 --> 00:13:18.799 line:-5
+To go further with Backyard Birds,
+head over
+
+
+191
+00:13:18.832 --> 00:13:22.970 line:-5
+to "Build widgets
+for the Smart Stack on Apple Watch".
+
+
+192
+00:13:23.003 --> 00:13:25.439 line:-2
+I can't wait to see
+the updates you'll make
+
+
+193
+00:13:25.472 --> 00:13:28.041 line:-1
+so your app shines on watchOS 10.
+

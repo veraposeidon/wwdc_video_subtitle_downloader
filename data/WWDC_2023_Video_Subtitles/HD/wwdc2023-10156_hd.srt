@@ -1,0 +1,2792 @@
+2
+00:00:00.334 --> 00:00:06.340 line:-1 align:center
+♪ ♪
+
+
+3
+00:00:10.677 --> 00:00:14.715 line:-2 align:center
+Kyle: Hi, I'm Kyle
+a member of the SwiftUI team.
+
+
+4
+00:00:14.748 --> 00:00:18.418 line:-2 align:center
+Animation is a key component
+of modern app design.
+
+
+5
+00:00:18,452 --> 00:00:24,224 line:-2
+When tastefully applied, it can bring
+both clarity and life to your UI.
+
+
+6
+00:00:24,258 --> 00:00:27,060 line:-2
+Making it simple
+to add animation to your app
+
+
+7
+00:00:27,094 --> 00:00:31,231 line:-2
+was one of our core motivations
+when we began developing SwiftUI.
+
+
+8
+00:00:31.265 --> 00:00:35.669 line:-2 align:center
+It's a big reason why SwiftUI
+is shaped the way that it is.
+
+
+9
+00:00:35,702 --> 00:00:40,908 line:-2
+This session is an overview of SwiftUI's
+powerful animation capabilities
+
+
+10
+00:00:40.941 --> 00:00:45.379 line:-2 align:center
+and how they work together
+to produce impressive visual effects.
+
+
+11
+00:00:45,412 --> 00:00:50,117 line:-2
+I'll cover how SwiftUI
+refreshes the rendering of a view,
+
+
+12
+00:00:50.150 --> 00:00:54.054 line:-2 align:center
+determines what
+to animate using Animatable,
+
+
+13
+00:00:54.087 --> 00:00:57.758 line:-2 align:center
+interpolates values over time
+using Animation,
+
+
+14
+00:00:57,791 --> 00:01:01,995 line:-2
+and propagates context
+for the current update using Transaction.
+
+
+15
+00:01:03.463 --> 00:01:06.767 line:-2 align:center
+In recent years,
+there's been debate among my colleagues
+
+
+16
+00:01:06.800 --> 00:01:11.238 line:-2 align:center
+about who makes the best furry--
+or not so furry--companion.
+
+
+17
+00:01:12.206 --> 00:01:15.042 line:-2 align:center
+We were curious
+if we could come to a consensus,
+
+
+18
+00:01:15,075 --> 00:01:17,044 line:-1
+so we made an app to take a poll.
+
+
+19
+00:01:18,178 --> 00:01:21,281 line:-2
+There's a button to cast a vote
+for each pet.
+
+
+20
+00:01:21.315 --> 00:01:23.750 line:-1 align:center
+When you tap, the vote count changes,
+
+
+21
+00:01:23.784 --> 00:01:27.554 line:-2 align:center
+and the avatars slide around
+to reflect the current standings.
+
+
+22
+00:01:28,488 --> 00:01:32,860 line:-2
+In the last poll, as is proper,
+cats came in first place,
+
+
+23
+00:01:32,893 --> 00:01:34,862 line:-1
+but only narrowly.
+
+
+24
+00:01:34.895 --> 00:01:39.333 line:-2 align:center
+The stakes are too high
+to leave this next poll purely to chance,
+
+
+25
+00:01:39,366 --> 00:01:41,702 line:-1
+so I'm adding a new feature.
+
+
+26
+00:01:41.735 --> 00:01:45.205 line:-2 align:center
+On tap,
+the avatar of my choice will scale up
+
+
+27
+00:01:45.239 --> 00:01:49.176 line:-2 align:center
+in order to nudge people
+towards voting for the proper pet.
+
+
+28
+00:01:49,209 --> 00:01:52,379 line:-1
+And I can tap again to scale it back down.
+
+
+29
+00:01:52.412 --> 00:01:54.848 line:-1 align:center
+This is already working pretty well,
+
+
+30
+00:01:54.882 --> 00:01:57.384 line:-2 align:center
+but it would be way better
+with an animation.
+
+
+31
+00:01:58.185 --> 00:02:01.655 line:-2 align:center
+Before adding that,
+I'm gonna trace through how SwiftUI
+
+
+32
+00:02:01.688 --> 00:02:05.526 line:-2 align:center
+refreshes the rendering of a view
+to give you a better understanding
+
+
+33
+00:02:05,559 --> 00:02:08,529 line:-1
+of the anatomy of a view update.
+
+
+34
+00:02:08,562 --> 00:02:14,067 line:-2
+For this exercise, I'm gonna focus
+on the pet avatar view in isolation.
+
+
+35
+00:02:14.868 --> 00:02:20.274 line:-2 align:center
+SwiftUI tracks a view's dependencies,
+like this selected state variable.
+
+
+36
+00:02:20,307 --> 00:02:25,112 line:-2
+When an event, like a tap, comes in,
+an update transaction is opened.
+
+
+37
+00:02:26,346 --> 00:02:30,617 line:-2
+If any of its dependencies change,
+the view is invalidated,
+
+
+38
+00:02:30,651 --> 00:02:34,121 line:-2
+and at the close of the transaction,
+the framework calls body
+
+
+39
+00:02:34,154 --> 00:02:37,791 line:-2
+to produce a new value
+in order to refresh the rendering.
+
+
+40
+00:02:40.994 --> 00:02:44.932 line:-2 align:center
+This view's body
+is composed of a tap gesture,
+
+
+41
+00:02:44,965 --> 00:02:48,468 line:-1
+a scale effect, and an image.
+
+
+42
+00:02:49.469 --> 00:02:53.941 line:-2 align:center
+Behind the scenes, SwiftUI maintains
+a long-lived dependency graph
+
+
+43
+00:02:53.974 --> 00:02:57.544 line:-2 align:center
+that manages the lifetime
+of views and their data.
+
+
+44
+00:02:58,412 --> 00:03:01,081 line:-2
+Each node in this graph,
+called an attribute,
+
+
+45
+00:03:01,114 --> 00:03:04,618 line:-1
+maps to a fine-grained piece of the UI.
+
+
+46
+00:03:04,651 --> 00:03:07,354 line:-1
+When the selected state changed to true,
+
+
+47
+00:03:07,387 --> 00:03:11,692 line:-2
+the value of each of these downstream
+attributes became stale.
+
+
+48
+00:03:11.725 --> 00:03:16.997 line:-2 align:center
+They're refreshed by unwrapping
+the new view value one layer at a time.
+
+
+49
+00:03:22.035 --> 00:03:25.205 line:-2 align:center
+Once the corresponding graph attributes
+have been updated,
+
+
+50
+00:03:25.239 --> 00:03:27.708 line:-1 align:center
+the view's body value is discarded.
+
+
+51
+00:03:30.010 --> 00:03:34.681 line:-2 align:center
+Finally, the graph emits drawing commands
+on your behalf to update the rendering.
+
+
+52
+00:03:36,450 --> 00:03:41,722 align:center
+I'll zoom in on just the graph in order
+to visualize the lifetime of an attribute.
+
+
+53
+00:03:43,156 --> 00:03:46,293 align:center
+An attribute is born
+with an initial value.
+
+
+54
+00:03:46,326 --> 00:03:50,330 align:center
+An event comes in,
+and an update transaction opens.
+
+
+55
+00:03:50,364 --> 00:03:53,233 align:center
+An upstream dependency changes.
+
+
+56
+00:03:53,267 --> 00:03:55,402 align:center
+The framework calls body.
+
+
+57
+00:03:55,435 --> 00:03:58,205 line:0
+The attribute's value is updated.
+
+
+58
+00:03:58,238 --> 00:04:00,874 line:0
+The transaction closes.
+
+
+59
+00:04:00,908 --> 00:04:06,914 align:center
+And in this way, the current value of each
+attribute in the graph evolves over time.
+
+
+60
+00:04:08,015 --> 00:04:10,284 line:-1
+So that's the anatomy of a view update.
+
+
+61
+00:04:10,317 --> 00:04:12,352 line:-1
+Now I'll add an animation.
+
+
+62
+00:04:13,487 --> 00:04:17,791 line:-2
+If I wrap withAnimation
+around my state change,
+
+
+63
+00:04:17,824 --> 00:04:20,227 line:-1
+when the tap gesture closure fires,
+
+
+64
+00:04:20,260 --> 00:04:23,430 line:-1
+the animation is set for the transaction.
+
+
+65
+00:04:23,463 --> 00:04:25,599 line:-1
+Then selected is toggled,
+
+
+66
+00:04:25.632 --> 00:04:29.203 line:-2 align:center
+and the downstream attributes
+are invalidated.
+
+
+67
+00:04:29,236 --> 00:04:31,538 line:-1
+As before, body is called
+
+
+68
+00:04:31.572 --> 00:04:34.074 line:-1 align:center
+to provide new attribute values.
+
+
+69
+00:04:36,009 --> 00:04:37,911 line:-1
+And here's where it gets interesting.
+
+
+70
+00:04:37,945 --> 00:04:40,614 line:-1
+scaleEffect is a special attribute,
+
+
+71
+00:04:40.647 --> 00:04:43.483 line:-1 align:center
+an "animatable attribute."
+
+
+72
+00:04:43,517 --> 00:04:46,453 line:-2
+When the value
+of an animatable attribute changes,
+
+
+73
+00:04:46.486 --> 00:04:50.190 line:-2 align:center
+it checks if an animation
+is set for the transaction.
+
+
+74
+00:04:51,124 --> 00:04:55,562 line:-2
+If so, it makes a copy
+and uses the animation to interpolate
+
+
+75
+00:04:55.596 --> 00:04:57.998 line:-1 align:center
+from the old value to the new value
+
+
+76
+00:04:58.031 --> 00:04:59.399 line:-1 align:center
+as time passes.
+
+
+77
+00:05:00,434 --> 00:05:03,704 align:center
+I'll zoom in
+on the scaleEffect animatable attribute
+
+
+78
+00:05:03,737 --> 00:05:06,773 line:0
+to examine how this plays out.
+
+
+79
+00:05:06,807 --> 00:05:10,177 line:0
+The first thing to notice
+is that animatable attributes
+
+
+80
+00:05:10,210 --> 00:05:13,780 align:center
+conceptually have both model
+and presentation values.
+
+
+81
+00:05:13,814 --> 00:05:16,049 align:center
+Right now they're the same.
+
+
+82
+00:05:16,083 --> 00:05:20,220 align:center
+Then an event comes in,
+and a transaction is opened,
+
+
+83
+00:05:20,254 --> 00:05:22,623 align:center
+this time with an animation.
+
+
+84
+00:05:22,656 --> 00:05:24,091 align:center
+State is changed,
+
+
+85
+00:05:24,124 --> 00:05:28,962 align:center
+and body is called
+to refresh the stale attribute values.
+
+
+86
+00:05:28,996 --> 00:05:32,933 align:center
+Because the value has changed,
+the attribute makes a local copy
+
+
+87
+00:05:32,966 --> 00:05:36,737 line:0
+of the animation to calculate
+the current presentation value.
+
+
+88
+00:05:37,871 --> 00:05:41,942 align:center
+SwiftUI knows when the attribute graph
+contains running animations
+
+
+89
+00:05:41,975 --> 00:05:45,245 align:center
+and will call
+into the appropriate animatable attributes
+
+
+90
+00:05:45,279 --> 00:05:47,848 line:0
+to produce the next frame.
+
+
+91
+00:05:47,881 --> 00:05:51,051 align:center
+For built-in animatable attributes
+like scaleEffect,
+
+
+92
+00:05:51,084 --> 00:05:52,753 align:center
+SwiftUI is very efficient.
+
+
+93
+00:05:52,786 --> 00:05:55,122 line:0
+It's able to do this work
+off the main thread
+
+
+94
+00:05:55,155 --> 00:05:58,058 align:center
+and without calling into any
+of your view code.
+
+
+95
+00:05:59.026 --> 00:06:01.128 line:-1 align:center
+Here's the animation in action.
+
+
+96
+00:06:02,796 --> 00:06:04,398 line:-1
+Nice.
+
+
+97
+00:06:05,232 --> 00:06:09,102 line:-2
+When someone uses the word "animation,"
+they're probably referring
+
+
+98
+00:06:09.136 --> 00:06:13.106 line:-2 align:center
+to the overall visual experience
+of the way a view changes over time.
+
+
+99
+00:06:14,308 --> 00:06:17,177 line:-2
+What I've covered so far is that,
+in SwiftUI,
+
+
+100
+00:06:17.211 --> 00:06:19.346 line:-1 align:center
+there are two orthogonal aspects
+
+
+101
+00:06:19.379 --> 00:06:22.683 line:-2 align:center
+contributing
+to the overall visual experience.
+
+
+102
+00:06:22,716 --> 00:06:27,855 line:-2
+Animatable attributes, like scaleEffect,
+determine the data being animated,
+
+
+103
+00:06:27.888 --> 00:06:32.426 line:-2 align:center
+while the Animation determines
+how that data changes over time.
+
+
+104
+00:06:33,393 --> 00:06:35,896 line:-2
+I'll dive deeper
+into each of these in turn,
+
+
+105
+00:06:35.929 --> 00:06:40.467 line:-2 align:center
+starting with Animatable,
+which determines what to animate.
+
+
+106
+00:06:40.501 --> 00:06:44.671 line:-2 align:center
+SwiftUI builds an animatable attribute
+for any view conforming
+
+
+107
+00:06:44,705 --> 00:06:46,740 line:-1
+to the Animatable protocol.
+
+
+108
+00:06:46,773 --> 00:06:50,611 line:-2
+The only requirement
+is that the view define a readwrite vector
+
+
+109
+00:06:50,644 --> 00:06:53,380 line:-1
+of the data it wants to animate.
+
+
+110
+00:06:53.413 --> 00:06:56.383 line:-1 align:center
+The data must conform to VectorArithmetic.
+
+
+111
+00:06:57,351 --> 00:07:00,387 line:-2
+VectorArithmetic matches
+the textbook definition
+
+
+112
+00:07:00.420 --> 00:07:03.123 line:-1 align:center
+of a vector from your math class.
+
+
+113
+00:07:03.156 --> 00:07:05.592 line:-1 align:center
+It supports vector addition
+
+
+114
+00:07:05.626 --> 00:07:07.461 line:-1 align:center
+and scalar multiplication.
+
+
+115
+00:07:08.328 --> 00:07:11.198 line:-2 align:center
+If you're rusty
+or not familiar with vectors,
+
+
+116
+00:07:11,231 --> 00:07:12,499 line:-1
+don't be discouraged.
+
+
+117
+00:07:12.533 --> 00:07:15.869 line:-2 align:center
+A vector is basically just
+a fixed-length list of numbers,
+
+
+118
+00:07:15,903 --> 00:07:19,506 line:-2
+and for SwiftUI animation,
+the purpose of dealing in vectors
+
+
+119
+00:07:19.540 --> 00:07:22.809 line:-2 align:center
+is mostly just to abstract
+over the length of that list.
+
+
+120
+00:07:23.677 --> 00:07:28.348 line:-2 align:center
+For example, CGFloat and Double
+are one-dimensional vectors,
+
+
+121
+00:07:28,382 --> 00:07:32,486 line:-2
+while CGPoint and CGSize
+define two-dimensional vectors,
+
+
+122
+00:07:32,519 --> 00:07:35,622 line:-2
+and CGRect defines
+a four-dimensional vector.
+
+
+123
+00:07:36,690 --> 00:07:40,227 line:-2
+By dealing in vectors,
+SwiftUI is able to animate all
+
+
+124
+00:07:40.260 --> 00:07:44.097 line:-2 align:center
+of these types and more
+with a single generic implementation.
+
+
+125
+00:07:45,299 --> 00:07:49,870 align:center
+So far, for the sake of simplicity,
+I've represented scaleEffect
+
+
+126
+00:07:49,903 --> 00:07:52,639 line:0
+as if it were
+a one-dimensional scale factor.
+
+
+127
+00:07:53.674 --> 00:07:57.177 line:-2 align:center
+The Animatable conformance
+for a one-dimensional scaleEffect
+
+
+128
+00:07:57.211 --> 00:07:58.745 line:-1 align:center
+would be straightforward.
+
+
+129
+00:07:58.779 --> 00:08:01.949 line:-2 align:center
+Its animatableData
+would just be a CGFloat.
+
+
+130
+00:08:02.883 --> 00:08:06.820 line:-2 align:center
+In reality, scaleEffect allows you
+to independently configure
+
+
+131
+00:08:06,854 --> 00:08:09,489 line:-2
+the width, height,
+and relative anchor point
+
+
+132
+00:08:09.523 --> 00:08:13.193 line:-1 align:center
+of the transformation--all animatable.
+
+
+133
+00:08:13.227 --> 00:08:16.463 line:-2 align:center
+So scaleEffect actually defines
+a four-dimensional vector
+
+
+134
+00:08:16,496 --> 00:08:18,565 line:-1
+for its animatable data,
+
+
+135
+00:08:18,599 --> 00:08:21,969 line:-1
+a CGSize for the width and height scale,
+
+
+136
+00:08:22.002 --> 00:08:24.938 line:-2 align:center
+paired with a UnitPoint
+for the relative anchor.
+
+
+137
+00:08:26,006 --> 00:08:31,311 line:-2
+AnimatablePair fuses the two vectors
+together into a single, larger vector.
+
+
+138
+00:08:31,345 --> 00:08:34,348 line:-2
+It's a public type,
+and you can use it too.
+
+
+139
+00:08:34.381 --> 00:08:36.817 line:-2 align:center
+It might come in handy
+if you're conforming one
+
+
+140
+00:08:36.850 --> 00:08:38.952 line:-1 align:center
+of your own views to Animatable.
+
+
+141
+00:08:40,020 --> 00:08:44,124 line:-2
+scaleEffect is just one
+of the many animatable visual effects
+
+
+142
+00:08:44,157 --> 00:08:48,662 line:-2
+that come built into SwiftUI,
+so the vast majority of the time,
+
+
+143
+00:08:48.695 --> 00:08:52.799 line:-2 align:center
+Animatable is not an API
+you'll need to use directly.
+
+
+144
+00:08:52,833 --> 00:08:57,104 line:-2
+In rare circumstances, though,
+an advanced use case may call
+
+
+145
+00:08:57,137 --> 00:08:59,907 line:-2
+for conforming one
+of your own views to Animatable.
+
+
+146
+00:09:00.707 --> 00:09:04.411 line:-2 align:center
+Consider the pet Podium view,
+which distributes its subviews
+
+
+147
+00:09:04.444 --> 00:09:08.615 line:-2 align:center
+along the arc of a circle
+using a custom RadialLayout.
+
+
+148
+00:09:08.649 --> 00:09:13.053 line:-2 align:center
+By default, changing the offset angle
+within an animation
+
+
+149
+00:09:13.086 --> 00:09:17.958 line:-2 align:center
+animates the pet avatars to their new
+positions along a straight line.
+
+
+150
+00:09:17.991 --> 00:09:20.594 line:-1 align:center
+Notice how the pets are taking a shortcut
+
+
+151
+00:09:20,627 --> 00:09:24,031 line:-2
+and trespassing
+on the interior of the circle?
+
+
+152
+00:09:24,064 --> 00:09:25,599 line:-1
+That's not what I want.
+
+
+153
+00:09:27,301 --> 00:09:32,706 line:0
+Instead, I want my avatars to animate
+along the perimeter of the circle.
+
+
+154
+00:09:32,739 --> 00:09:36,743 align:center
+I can get this effect by conforming Podium
+to animatable
+
+
+155
+00:09:36,777 --> 00:09:40,514 align:center
+and using the offset angle
+as its animatable data.
+
+
+156
+00:09:42,649 --> 00:09:45,786 align:center
+Why does this result
+in such a different effect?
+
+
+157
+00:09:46.987 --> 00:09:49.890 line:-2 align:center
+To explain,
+I'll step through an animated update
+
+
+158
+00:09:49.923 --> 00:09:54.328 line:-2 align:center
+for each version of the Podium view,
+starting with the default behavior,
+
+
+159
+00:09:54.361 --> 00:09:57.431 line:-2 align:center
+which animates the avatars
+along a straight line.
+
+
+160
+00:09:58.966 --> 00:10:04.571 line:-2 align:center
+Podium's body is composed
+of a RadialLayout and three avatars.
+
+
+161
+00:10:04.605 --> 00:10:06.807 line:-1 align:center
+When a transaction opens,
+
+
+162
+00:10:06,840 --> 00:10:09,376 line:-1
+if the offset angle has changed,
+
+
+163
+00:10:09,409 --> 00:10:14,281 line:-2
+body is called to refresh
+the stale downstream attribute values.
+
+
+164
+00:10:14,314 --> 00:10:18,619 line:-2
+Then layout is run,
+updating the position of each subview.
+
+
+165
+00:10:19,486 --> 00:10:22,322 align:center
+So this is what an animated update is like
+
+
+166
+00:10:22,356 --> 00:10:24,124 line:0
+in the default version.
+
+
+167
+00:10:24,157 --> 00:10:26,159 line:0
+The active animatable data
+
+
+168
+00:10:26,193 --> 00:10:28,395 align:center
+is the view position CGPoint,
+
+
+169
+00:10:28,428 --> 00:10:31,398 align:center
+which interpolates
+in a cartesian coordinate space,
+
+
+170
+00:10:31,431 --> 00:10:35,502 align:center
+meaning each avatar moves
+along a straight line.
+
+
+171
+00:10:35,536 --> 00:10:37,037 align:center
+In the custom version,
+
+
+172
+00:10:37,070 --> 00:10:39,907 line:0
+when I conform Podium to Animatable,
+
+
+173
+00:10:39,940 --> 00:10:41,842 line:0
+what changes is that body
+
+
+174
+00:10:41,875 --> 00:10:44,011 line:0
+becomes the active animatable attribute,
+
+
+175
+00:10:44,044 --> 00:10:45,546 line:0
+with the offset angle
+
+
+176
+00:10:45,579 --> 00:10:48,048 line:0
+as its animatable data.
+
+
+177
+00:10:48,081 --> 00:10:50,450 align:center
+How does this result in each avatar
+
+
+178
+00:10:50,484 --> 00:10:51,585 align:center
+moving along an arc?
+
+
+179
+00:10:52.586 --> 00:10:54.154 line:-1 align:center
+In this custom version,
+
+
+180
+00:10:54,188 --> 00:10:56,790 line:-1
+for every frame of the animation,
+
+
+181
+00:10:56,823 --> 00:10:58,659 line:-1
+body is going to be called
+
+
+182
+00:10:58.692 --> 00:11:01.094 line:-1 align:center
+by SwiftUI with a new offset angle,
+
+
+183
+00:11:01.128 --> 00:11:03.530 line:-1 align:center
+and the layout will be rerun.
+
+
+184
+00:11:04,531 --> 00:11:07,634 line:-1
+This is super powerful, and sometimes,
+
+
+185
+00:11:07,668 --> 00:11:10,971 line:-2
+like when you're animating
+custom layout or drawing code,
+
+
+186
+00:11:11,004 --> 00:11:14,675 line:-2
+it might be the only way
+to achieve the effect you're going for.
+
+
+187
+00:11:15,576 --> 00:11:16,877 align:center
+Just keep in mind
+
+
+188
+00:11:16,910 --> 00:11:19,146 line:0
+that a custom Animatable conformance
+
+
+189
+00:11:19,179 --> 00:11:21,315 align:center
+can be much more expensive to animate
+
+
+190
+00:11:21,348 --> 00:11:23,450 align:center
+than a built-in effect because it'll
+
+
+191
+00:11:23,483 --> 00:11:26,854 line:0
+run body for every frame of the animation.
+
+
+192
+00:11:26,887 --> 00:11:29,389 line:0
+So only use this tool if you can't
+
+
+193
+00:11:29,423 --> 00:11:30,924 align:center
+achieve the effect you're going for
+
+
+194
+00:11:30,958 --> 00:11:33,126 align:center
+using the built-in effects.
+
+
+195
+00:11:34.061 --> 00:11:36.196 line:-1 align:center
+Next, I'll cover Animation,
+
+
+196
+00:11:36,230 --> 00:11:40,667 line:-2
+the generic algorithms that interpolate
+animatable data over time.
+
+
+197
+00:11:41.668 --> 00:11:45.305 line:-2 align:center
+Earlier, I added an animation
+to the pet avatar view
+
+
+198
+00:11:45,339 --> 00:11:48,542 line:-2
+by wrapping the state change
+in withAnimation.
+
+
+199
+00:11:49.743 --> 00:11:53.447 line:-2 align:center
+You can customize this
+by passing an explicit animation,
+
+
+200
+00:11:53.480 --> 00:11:55.449 line:-1 align:center
+like a bouncy spring.
+
+
+201
+00:11:58,519 --> 00:12:02,723 line:-2
+SwiftUI comes with a ton
+of powerful animations built in.
+
+
+202
+00:12:02,756 --> 00:12:06,426 line:-2
+They can roughly be categorized
+into three buckets:
+
+
+203
+00:12:06.460 --> 00:12:10.931 line:-2 align:center
+Timing curve animations,
+Spring animations,
+
+
+204
+00:12:10.964 --> 00:12:15.269 line:-2 align:center
+and Higher order animations,
+which modify a base animation.
+
+
+205
+00:12:16.703 --> 00:12:19.473 line:-2 align:center
+Timing curve animations
+are likely the category
+
+
+206
+00:12:19.506 --> 00:12:22.042 line:-1 align:center
+of animation you're most familiar with.
+
+
+207
+00:12:22,075 --> 00:12:26,146 line:-2
+For example,
+easeInOut is a timing curve animation.
+
+
+208
+00:12:27.447 --> 00:12:29.917 line:-1 align:center
+All timing curve animations take a curve,
+
+
+209
+00:12:29,950 --> 00:12:33,587 line:-2
+which defines the speed of the animation,
+and a duration.
+
+
+210
+00:12:34.688 --> 00:12:39.393 line:-2 align:center
+A timing curve can be created
+using bezier control points.
+
+
+211
+00:12:39.426 --> 00:12:42.162 line:-2 align:center
+By adjusting the start
+and end control points,
+
+
+212
+00:12:42,196 --> 00:12:46,400 line:-2
+you change the initial
+and final velocity of the animation.
+
+
+213
+00:12:47,801 --> 00:12:51,038 line:0
+The UnitCurve type can be used standalone
+
+
+214
+00:12:51,071 --> 00:12:54,141 align:center
+to calculate the value and the velocity
+
+
+215
+00:12:54,174 --> 00:12:57,544 align:center
+at a relative point between 0 and 1.
+
+
+216
+00:12:58.846 --> 00:13:04.518 line:-2 align:center
+SwiftUI comes with a number
+of built-in timing curve presets:
+
+
+217
+00:13:04.551 --> 00:13:06.887 line:-1 align:center
+Linear,
+
+
+218
+00:13:06,920 --> 00:13:09,456 line:-1
+easeIn,
+
+
+219
+00:13:09.489 --> 00:13:11.925 line:-1 align:center
+easeOut,
+
+
+220
+00:13:11.959 --> 00:13:13.861 line:-1 align:center
+and easeInOut.
+
+
+221
+00:13:15,295 --> 00:13:19,867 line:-2
+All timing curve animations
+can also specify a custom duration.
+
+
+222
+00:13:22,269 --> 00:13:26,440 line:-2
+The next category of animation,
+Springs, determine the value
+
+
+223
+00:13:26,473 --> 00:13:30,110 line:-2
+at a given point in time
+by running a spring simulation.
+
+
+224
+00:13:31.278 --> 00:13:35.516 line:-2 align:center
+You may be familiar with traditional ways
+of specifying a spring,
+
+
+225
+00:13:35.549 --> 00:13:39.586 line:-1 align:center
+for example, mass, stiffness, and damping.
+
+
+226
+00:13:39.620 --> 00:13:43.257 line:-2 align:center
+But we've never found these ways
+to be particularly intuitive,
+
+
+227
+00:13:43,290 --> 00:13:45,959 line:-1
+so we invented a new way.
+
+
+228
+00:13:45,993 --> 00:13:49,830 line:-2
+You just specify
+the perceived duration of the animation
+
+
+229
+00:13:49,863 --> 00:13:52,533 line:-1
+and how bouncy you want the spring to be.
+
+
+230
+00:13:52,566 --> 00:13:54,535 line:-1
+It's much more approachable.
+
+
+231
+00:13:56,870 --> 00:14:00,841 align:center
+Similar to UnitCurve,
+the Spring type can be used standalone
+
+
+232
+00:14:00,874 --> 00:14:06,413 line:0
+to calculate the value and the velocity
+of a spring at a given time.
+
+
+233
+00:14:07.915 --> 00:14:12.319 line:-2 align:center
+SwiftUI comes
+with three built-in spring presets:
+
+
+234
+00:14:12,352 --> 00:14:15,589 line:-1
+Smooth, which has no bounce,
+
+
+235
+00:14:15,622 --> 00:14:19,226 line:-2
+snappy,
+which has a small amount of bounce,
+
+
+236
+00:14:19.259 --> 00:14:22.763 line:-2 align:center
+and bouncy,
+which has a larger amount of bounce.
+
+
+237
+00:14:23.664 --> 00:14:27.267 line:-2 align:center
+If you're uncomfortable
+parameterizing a spring animation,
+
+
+238
+00:14:27.301 --> 00:14:31.772 line:-2 align:center
+these presets are a reliable way
+to get something that feels good.
+
+
+239
+00:14:33,073 --> 00:14:38,912 line:-2
+Each preset can be also tuned to adjust
+the duration or tweak the bounciness.
+
+
+240
+00:14:40.347 --> 00:14:43.050 line:-2 align:center
+We highly recommend
+using spring animations
+
+
+241
+00:14:43.083 --> 00:14:45.919 line:-1 align:center
+because they give your UI an organic feel
+
+
+242
+00:14:45,953 --> 00:14:50,190 line:-2
+by preserving velocity
+and naturally coming to rest.
+
+
+243
+00:14:50,224 --> 00:14:54,361 line:-2
+In fact, we feel so strongly
+about the benefits of spring animations
+
+
+244
+00:14:54.394 --> 00:14:58.131 line:-2 align:center
+that we made a smooth spring
+the new default when you use
+
+
+245
+00:14:58.165 --> 00:15:02.569 line:-2 align:center
+a bare withAnimation
+in iOS 17 and aligned releases.
+
+
+246
+00:15:04,004 --> 00:15:09,877 line:-2
+The last category of animations,
+Higher order, modify a base animation.
+
+
+247
+00:15:09.910 --> 00:15:13.480 line:-1 align:center
+They can slow it down or speed it up.
+
+
+248
+00:15:13.514 --> 00:15:17.551 line:-2 align:center
+They can add a delay
+before the base animation starts.
+
+
+249
+00:15:17,584 --> 00:15:21,288 line:-2
+And they can repeat a base animation
+any number of times,
+
+
+250
+00:15:21,321 --> 00:15:25,692 line:-2
+optionally toggling between playing
+forwards and playing in reverse.
+
+
+251
+00:15:27.594 --> 00:15:31.732 line:-2 align:center
+And now we're introducing
+an entirely new category of animation:
+
+
+252
+00:15:31,765 --> 00:15:34,034 line:-1
+Custom animations.
+
+
+253
+00:15:34.067 --> 00:15:36.837 line:-2 align:center
+The CustomAnimation protocol
+gives you access
+
+
+254
+00:15:36.870 --> 00:15:41.775 line:-2 align:center
+to the same low-level generic entry points
+we use to implement all the animations
+
+
+255
+00:15:41.808 --> 00:15:44.011 line:-1 align:center
+that come built into SwiftUI.
+
+
+256
+00:15:44.878 --> 00:15:48.715 line:-2 align:center
+The CustomAnimation protocol
+has three requirements:
+
+
+257
+00:15:48.749 --> 00:15:52.486 line:-1 align:center
+animate, shouldMerge, and velocity.
+
+
+258
+00:15:53.587 --> 00:15:55.856 line:-1 align:center
+I'll start by focusing on animate.
+
+
+259
+00:15:55.889 --> 00:15:59.326 line:-2 align:center
+shouldMerge and velocity
+are optional requirements.
+
+
+260
+00:15:59.359 --> 00:16:01.328 line:-1 align:center
+I'll get back to them later.
+
+
+261
+00:16:02.930 --> 00:16:06.300 line:-2 align:center
+Animate is passed the vector
+to animate towards,
+
+
+262
+00:16:06,333 --> 00:16:11,171 line:-2
+the amount of time that has elapsed
+since the animation began,
+
+
+263
+00:16:11.205 --> 00:16:15.209 line:-2 align:center
+and the context,
+which includes additional animation state.
+
+
+264
+00:16:16.109 --> 00:16:19.313 line:-2 align:center
+Animate returns
+the current value of the animation,
+
+
+265
+00:16:19,346 --> 00:16:21,949 line:-1
+or nil if the animation has finished.
+
+
+266
+00:16:22,749 --> 00:16:25,385 line:-1
+Where does this value vector come from?
+
+
+267
+00:16:25.419 --> 00:16:28.722 line:-1 align:center
+It comes from a view's animatable data.
+
+
+268
+00:16:28.755 --> 00:16:31.959 line:-2 align:center
+In the pet avatar view,
+that's the scale effect.
+
+
+269
+00:16:32.826 --> 00:16:37.631 line:-2 align:center
+Recall that scaleEffect's animatable data
+is a four-dimensional vector,
+
+
+270
+00:16:37,664 --> 00:16:41,368 line:-2
+including a two-dimensional width
+and height scale.
+
+
+271
+00:16:41,401 --> 00:16:45,138 line:-2
+When the avatar is selected,
+it's animated to a scale factor
+
+
+272
+00:16:45,172 --> 00:16:50,410 line:-2
+of 1.5 by 1.5
+from a scale factor of 1 by 1.
+
+
+273
+00:16:51,311 --> 00:16:56,583 line:-2
+Vector addition and scalar multiplication
+operations allow SwiftUI to subtract
+
+
+274
+00:16:56.617 --> 00:17:00.821 line:-2 align:center
+these two vectors from one another
+to calculate the delta between them.
+
+
+275
+00:17:02.122 --> 00:17:05.092 line:-2 align:center
+This delta
+is actually what's being animated.
+
+
+276
+00:17:06,360 --> 00:17:09,496 line:0
+This means, in practice,
+the animation running
+
+
+277
+00:17:09,530 --> 00:17:15,202 align:center
+in the scaleEffect animatable attribute
+isn't interpolating from 1 to 1.5,
+
+
+278
+00:17:15,235 --> 00:17:18,172 align:center
+but from 0 to 0.5.
+
+
+279
+00:17:18,205 --> 00:17:20,807 align:center
+Among other things,
+this makes it more convenient
+
+
+280
+00:17:20,841 --> 00:17:22,643 align:center
+to implement the animate method.
+
+
+281
+00:17:22,676 --> 00:17:23,944 align:center
+Let me show you.
+
+
+282
+00:17:25,946 --> 00:17:29,016 line:-2
+I'm going to implement
+a linear timing curve animation
+
+
+283
+00:17:29.049 --> 00:17:32.319 line:-2 align:center
+configured by a duration
+to interpolate over.
+
+
+284
+00:17:33.854 --> 00:17:38.258 line:-2 align:center
+Recall that animate is passed
+the delta vector to animate towards.
+
+
+285
+00:17:38.292 --> 00:17:42.596 line:-2 align:center
+I can use scalar multiplication
+to scale the vector by the proportion
+
+
+286
+00:17:42,629 --> 00:17:45,265 line:-1
+of the duration that has elapsed.
+
+
+287
+00:17:45.299 --> 00:17:49.269 line:-2 align:center
+And once the full duration has elapsed,
+I'll return nil to indicate
+
+
+288
+00:17:49.303 --> 00:17:52.873 line:-2 align:center
+that the animation has finished
+and can be removed.
+
+
+289
+00:17:52.906 --> 00:17:54.675 line:-1 align:center
+That's it.
+
+
+290
+00:17:54.708 --> 00:17:57.144 line:-2 align:center
+And because
+this implementation is generic,
+
+
+291
+00:17:57,177 --> 00:18:01,915 line:-2
+it works with animatable data
+of any number of dimensions.
+
+
+292
+00:18:01.949 --> 00:18:05.853 line:-2 align:center
+So that's how Animatable
+and Animation work together
+
+
+293
+00:18:05,886 --> 00:18:10,023 line:-2
+to produce the impressive visual effects
+that appear in your UI.
+
+
+294
+00:18:11,425 --> 00:18:15,929 line:-2
+Next, I'll return to CustomAnimation's
+two optional requirements:
+
+
+295
+00:18:15,963 --> 00:18:18,432 line:-1
+shouldMerge and velocity.
+
+
+296
+00:18:18,465 --> 00:18:19,766 line:-1
+What are they for?
+
+
+297
+00:18:20,868 --> 00:18:25,606 align:center
+Imagine for a moment that you're
+the scaleEffect animatable attribute.
+
+
+298
+00:18:25,639 --> 00:18:29,409 align:center
+The user taps down, a transaction opens,
+
+
+299
+00:18:29,443 --> 00:18:34,248 line:0
+your value changes,
+you make a local copy of the animation,
+
+
+300
+00:18:34,281 --> 00:18:37,351 align:center
+and you start happily animating
+your delta vector.
+
+
+301
+00:18:37,384 --> 00:18:40,254 align:center
+Everything is going great.
+
+
+302
+00:18:40,287 --> 00:18:45,459 align:center
+That is, until the pesky user taps again
+before the animation has finished.
+
+
+303
+00:18:45,492 --> 00:18:47,995 align:center
+What do you do?
+
+
+304
+00:18:48,028 --> 00:18:49,496 line:0
+You set up a new animation,
+
+
+305
+00:18:49,530 --> 00:18:51,398 line:0
+and you call shouldMerge on it.
+
+
+306
+00:18:52,432 --> 00:18:54,902 line:0
+The default implementation returns false--
+
+
+307
+00:18:54,935 --> 00:18:57,404 line:0
+this is what timing curve animations do--
+
+
+308
+00:18:57,437 --> 00:19:00,641 align:center
+in which case both animations will be
+run together,
+
+
+309
+00:19:00,674 --> 00:19:03,477 line:0
+and their results will be combined
+by the system.
+
+
+310
+00:19:04,378 --> 00:19:06,980 line:0
+This is another reason why
+SwiftUI animations
+
+
+311
+00:19:07,014 --> 00:19:09,583 align:center
+deal in terms of delta vectors.
+
+
+312
+00:19:09,616 --> 00:19:13,620 align:center
+It makes it easy to calculate
+the correct combined presentation value
+
+
+313
+00:19:13,654 --> 00:19:16,557 align:center
+when multiple animations are running.
+
+
+314
+00:19:16,590 --> 00:19:18,458 line:0
+But what if I'd chosen a spring animation,
+
+
+315
+00:19:18,492 --> 00:19:20,594 align:center
+not a timing curve animation?
+
+
+316
+00:19:21.528 --> 00:19:25.365 line:-2 align:center
+Spring animations
+override shouldMerge to return true
+
+
+317
+00:19:25.399 --> 00:19:28.902 line:-2 align:center
+and incorporate the state
+of the previous animation.
+
+
+318
+00:19:28.936 --> 00:19:33.407 line:-2 align:center
+This allows them to preserve velocity
+and retarget to the new value,
+
+
+319
+00:19:33.440 --> 00:19:36.310 line:-2 align:center
+which can feel more natural
+than combining additively,
+
+
+320
+00:19:36,343 --> 00:19:38,412 line:-1
+like timing curve animations.
+
+
+321
+00:19:39,246 --> 00:19:42,816 line:-2
+And that's what
+this final velocity requirement is for.
+
+
+322
+00:19:42,850 --> 00:19:47,087 line:-2
+Implementing it allows velocity
+to be preserved when a running animation
+
+
+323
+00:19:47.120 --> 00:19:49.423 line:-1 align:center
+is merged with a new one.
+
+
+324
+00:19:49,456 --> 00:19:52,659 line:0
+So I'll finish off
+my linear timing curve animation
+
+
+325
+00:19:52,693 --> 00:19:55,596 line:0
+by adding an implementation for velocity.
+
+
+326
+00:19:57.931 --> 00:20:01.602 line:-2 align:center
+I've used the term "transaction"
+throughout this talk to refer to the set
+
+
+327
+00:20:01.635 --> 00:20:05.038 line:-2 align:center
+of work that's performed
+for a given update to the UI.
+
+
+328
+00:20:05.072 --> 00:20:09.276 line:-2 align:center
+In SwiftUI code,
+Transaction also refers to a related,
+
+
+329
+00:20:09,309 --> 00:20:13,614 line:-2
+powerful data-flow construct
+and family of APIs.
+
+
+330
+00:20:13,647 --> 00:20:17,718 line:-2
+You may already be familiar
+with Environment and Preferences,
+
+
+331
+00:20:17.751 --> 00:20:20.087 line:-1 align:center
+dictionaries SwiftUI implicitly passes
+
+
+332
+00:20:20.120 --> 00:20:23.290 line:-2 align:center
+down and up the view hierarchy,
+respectively.
+
+
+333
+00:20:23.323 --> 00:20:24.958 line:-1 align:center
+Transaction is similar.
+
+
+334
+00:20:24.992 --> 00:20:29.663 line:-2 align:center
+It's a dictionary SwiftUI uses
+to implicitly propagate all the context
+
+
+335
+00:20:29.696 --> 00:20:33.000 line:-2 align:center
+for the current update,
+most notably the animation.
+
+
+336
+00:20:34.168 --> 00:20:35.836 line:-1 align:center
+My explanation earlier
+
+
+337
+00:20:35.869 --> 00:20:37.671 line:-1 align:center
+of how an animatable attribute
+
+
+338
+00:20:37,704 --> 00:20:39,239 line:-1
+reads the current animation
+
+
+339
+00:20:39,273 --> 00:20:41,008 line:-1
+was a little vague.
+
+
+340
+00:20:41.041 --> 00:20:45.746 line:-2 align:center
+So I'm gonna trace through another
+animated update of the avatar view.
+
+
+341
+00:20:45.779 --> 00:20:48.582 line:-1 align:center
+This time, I'll be more specific.
+
+
+342
+00:20:48.615 --> 00:20:51.418 line:-1 align:center
+When the tap gesture closure fires,
+
+
+343
+00:20:51.451 --> 00:20:56.123 line:-2 align:center
+withAnimation sets an animation
+in the root transaction dictionary.
+
+
+344
+00:20:57,591 --> 00:21:01,161 line:-2
+Body is called
+to update the attribute values.
+
+
+345
+00:21:01,195 --> 00:21:05,766 line:-2
+The transaction dictionary is propagated
+across the attribute graph.
+
+
+346
+00:21:05.799 --> 00:21:08.135 line:-1 align:center
+When it reaches an animatable attribute,
+
+
+347
+00:21:08.168 --> 00:21:11.271 line:-2 align:center
+the attribute checks
+if an animation is set.
+
+
+348
+00:21:11,305 --> 00:21:16,109 line:-2
+And if so, it makes a copy
+to drive its presentation value.
+
+
+349
+00:21:16.143 --> 00:21:19.847 line:-2 align:center
+The Transaction is only relevant
+for a specific update,
+
+
+350
+00:21:19,880 --> 00:21:23,984 line:-2
+so once the stale attributes
+have been refreshed, it's discarded.
+
+
+351
+00:21:24,918 --> 00:21:27,621 line:-2
+Flowing the animation
+down the view hierarchy
+
+
+352
+00:21:27.654 --> 00:21:32.492 line:-2 align:center
+within the transaction dictionary
+makes possible a number of powerful APIs
+
+
+353
+00:21:32,526 --> 00:21:37,197 line:-2
+for controlling when and how
+animations apply to your views.
+
+
+354
+00:21:38,565 --> 00:21:44,004 line:-2
+Right now, the pet avatar view
+can only be selected via tap.
+
+
+355
+00:21:44.037 --> 00:21:47.674 line:-2 align:center
+I'll change
+the selected State variable to a Binding.
+
+
+356
+00:21:47.708 --> 00:21:50.811 line:-2 align:center
+That way, it can be also be
+selected programmatically.
+
+
+357
+00:21:51.812 --> 00:21:55.415 line:-2 align:center
+But how do I animate a programmatic
+change to a view property?
+
+
+358
+00:21:56,316 --> 00:21:58,752 line:-1
+I can use the transaction modifier
+
+
+359
+00:21:58,785 --> 00:22:00,087 line:-1
+to access the animation
+
+
+360
+00:22:00.120 --> 00:22:02.289 line:-1 align:center
+as it flows down the view hierarchy
+
+
+361
+00:22:02.322 --> 00:22:04.825 line:-1 align:center
+inside the transaction dictionary.
+
+
+362
+00:22:06.593 --> 00:22:08.228 line:-1 align:center
+If I set an animation
+
+
+363
+00:22:08.262 --> 00:22:09.830 line:-1 align:center
+from within this modifier,
+
+
+364
+00:22:09,863 --> 00:22:11,832 line:-1
+then whenever body is called,
+
+
+365
+00:22:11.865 --> 00:22:13.600 line:-1 align:center
+even if there is no animation
+
+
+366
+00:22:13.634 --> 00:22:15.002 line:-1 align:center
+or a different animation
+
+
+367
+00:22:15.035 --> 00:22:17.271 line:-1 align:center
+in the transaction,
+
+
+368
+00:22:17,304 --> 00:22:20,574 line:-1
+the attribute will override the animation.
+
+
+369
+00:22:20.607 --> 00:22:22.809 line:-1 align:center
+And when it reaches the scale effect,
+
+
+370
+00:22:22.843 --> 00:22:24.378 line:-1 align:center
+this animation will be used
+
+
+371
+00:22:24.411 --> 00:22:26.580 line:-1 align:center
+to interpolate the scale factor.
+
+
+372
+00:22:27,848 --> 00:22:29,183 line:-1
+Pretty cool.
+
+
+373
+00:22:30.317 --> 00:22:32.553 line:-1 align:center
+But there's a problem with this pattern.
+
+
+374
+00:22:32,586 --> 00:22:35,355 line:-1
+Indiscriminately overriding the animation
+
+
+375
+00:22:35.389 --> 00:22:36.990 line:-1 align:center
+for all descendants
+
+
+376
+00:22:37,024 --> 00:22:39,259 line:-1
+whenever SwiftUI refreshes a view
+
+
+377
+00:22:39,293 --> 00:22:42,329 line:-1
+can lead to accidental animations.
+
+
+378
+00:22:42.362 --> 00:22:45.165 line:-1 align:center
+Instead, for uses cases like this,
+
+
+379
+00:22:45.199 --> 00:22:49.203 line:-2 align:center
+SwiftUI provides
+an animation view modifier.
+
+
+380
+00:22:49,236 --> 00:22:51,638 line:-1
+It takes an additional value argument,
+
+
+381
+00:22:51.672 --> 00:22:53.640 line:-1 align:center
+which allows you to scope the effect
+
+
+382
+00:22:53,674 --> 00:22:55,409 line:-1
+much more precisely.
+
+
+383
+00:22:55.442 --> 00:22:57.311 line:-1 align:center
+It will only write the animation
+
+
+384
+00:22:57.344 --> 00:22:58.445 line:-1 align:center
+into the transaction
+
+
+385
+00:22:58.478 --> 00:23:00.414 line:-1 align:center
+if the value has changed.
+
+
+386
+00:23:01,949 --> 00:23:03,383 line:-1
+Now that that's hooked up,
+
+
+387
+00:23:03,417 --> 00:23:06,553 line:-2
+this withAnimation
+isn't accomplishing anything,
+
+
+388
+00:23:06,587 --> 00:23:08,388 line:-1
+so we can remove it.
+
+
+389
+00:23:10,123 --> 00:23:14,695 line:-2
+The animation view modifier
+is also a powerful tool for situations
+
+
+390
+00:23:14,728 --> 00:23:18,899 line:-2
+where you want to apply different
+animations to different parts of a view.
+
+
+391
+00:23:19.967 --> 00:23:24.605 line:-2 align:center
+For example, the pet avatar has a shadow,
+which I've omitted thus far
+
+
+392
+00:23:24.638 --> 00:23:27.341 line:-2 align:center
+from the example
+for the sake of simplicity.
+
+
+393
+00:23:27,374 --> 00:23:31,345 line:-2
+The shadow radius increases
+when the avatar is selected
+
+
+394
+00:23:31.378 --> 00:23:35.582 line:-2 align:center
+to accentuate the illusion
+that it's elevated above the background.
+
+
+395
+00:23:36.717 --> 00:23:40.087 line:-2 align:center
+After playing with it,
+I've decided I want the shadow's animation
+
+
+396
+00:23:40.120 --> 00:23:43.190 line:-2 align:center
+to be more subdued
+than the scale effect's.
+
+
+397
+00:23:43.223 --> 00:23:47.528 line:-2 align:center
+To accomplish this, I can insert
+another animation view modifier
+
+
+398
+00:23:47.561 --> 00:23:50.631 line:-1 align:center
+between the scaleEffect and the shadow.
+
+
+399
+00:23:50,664 --> 00:23:54,334 line:-2
+Now the transaction
+picks up the bouncy spring
+
+
+400
+00:23:54,368 --> 00:23:56,637 line:-1
+for animating the scale effect.
+
+
+401
+00:23:58.438 --> 00:24:01.575 line:-2 align:center
+And it picks up
+the more subtle smooth spring
+
+
+402
+00:24:01,608 --> 00:24:04,278 line:-1
+for animating the shadow radius.
+
+
+403
+00:24:05.546 --> 00:24:08.715 line:-2 align:center
+Because animation modifiers
+are only active
+
+
+404
+00:24:08.749 --> 00:24:10.417 line:-1 align:center
+when their value has changed,
+
+
+405
+00:24:10.450 --> 00:24:14.588 line:-2 align:center
+the odds of an accidental animation
+are greatly reduced.
+
+
+406
+00:24:14,621 --> 00:24:17,658 line:-2
+But if the avatar's image
+had just happened to change
+
+
+407
+00:24:17,691 --> 00:24:19,960 line:-1
+in the same transaction as selected,
+
+
+408
+00:24:19,993 --> 00:24:23,330 line:-2
+it would have inherited
+the shadow's smooth spring animation
+
+
+409
+00:24:23,363 --> 00:24:25,165 line:-1
+for its content transition.
+
+
+410
+00:24:26,033 --> 00:24:28,502 line:-1
+This is a point worth lingering on.
+
+
+411
+00:24:28,535 --> 00:24:32,039 line:-2
+This animation view modifier
+works well for leaf components
+
+
+412
+00:24:32,072 --> 00:24:35,342 line:-2
+where the entire sub-hierarchy
+is under your control.
+
+
+413
+00:24:35.375 --> 00:24:39.513 line:-2 align:center
+But for non-leaf components,
+which contain arbitrary child content,
+
+
+414
+00:24:39,546 --> 00:24:43,116 line:-2
+it's much more likely
+for an accidental animation to occur.
+
+
+415
+00:24:44.117 --> 00:24:47.087 line:-2 align:center
+For example,
+if I want to reuse my avatar
+
+
+416
+00:24:47.120 --> 00:24:50.190 line:-2 align:center
+in another app
+that has nothing to do with pets,
+
+
+417
+00:24:50,224 --> 00:24:55,062 line:-2
+I could make it more generic
+by accepting arbitrary child content.
+
+
+418
+00:24:55.095 --> 00:24:58.098 line:-2 align:center
+In this scenario,
+I have less of a guarantee
+
+
+419
+00:24:58.131 --> 00:24:59.833 line:-1 align:center
+that when selected changes,
+
+
+420
+00:24:59.867 --> 00:25:02.936 line:-1 align:center
+the child content won't also have changed.
+
+
+421
+00:25:04,037 --> 00:25:07,374 line:-2
+This could result
+in an accidental animation.
+
+
+422
+00:25:07,407 --> 00:25:09,176 line:-1
+Whoops.
+
+
+423
+00:25:09,209 --> 00:25:10,310 line:-1
+Good news.
+
+
+424
+00:25:10,344 --> 00:25:13,180 line:-2
+We have a new version
+of the animation view modifier
+
+
+425
+00:25:13.213 --> 00:25:16.884 line:-2 align:center
+specifically designed
+for use cases like this.
+
+
+426
+00:25:16.917 --> 00:25:21.121 line:-2 align:center
+It narrowly scopes the animation
+to the animatable attributes
+
+
+427
+00:25:21.154 --> 00:25:24.057 line:-1 align:center
+specified in its body closure.
+
+
+428
+00:25:24.091 --> 00:25:25.959 line:-1 align:center
+Here's how it works.
+
+
+429
+00:25:25.993 --> 00:25:30.163 line:-2 align:center
+Imagine there's
+no animation in the transaction.
+
+
+430
+00:25:30.197 --> 00:25:34.401 line:-2 align:center
+When the transaction reaches
+the animation view modifier's attribute,
+
+
+431
+00:25:34,434 --> 00:25:39,273 line:-2
+a copy is made that's populated
+with the specified animation.
+
+
+432
+00:25:39,306 --> 00:25:41,608 line:-1
+The copy is propagated downstream,
+
+
+433
+00:25:41.642 --> 00:25:45.779 line:-2 align:center
+but only
+to the scoped animatable attributes.
+
+
+434
+00:25:45.812 --> 00:25:49.516 line:-2 align:center
+Once it's done its job,
+the copy is discarded,
+
+
+435
+00:25:49,550 --> 00:25:53,287 line:-2
+and the original transaction
+picks up where it left off.
+
+
+436
+00:25:54,688 --> 00:25:58,492 line:0
+So when the transaction
+reaches the child content,
+
+
+437
+00:25:58,525 --> 00:26:02,396 line:0
+because the original transaction
+is unaffected by any
+
+
+438
+00:26:02,429 --> 00:26:05,199 align:center
+of the intermediate
+animation view modifiers,
+
+
+439
+00:26:05,232 --> 00:26:09,036 align:center
+there's no risk of accidental animations.
+
+
+440
+00:26:09,069 --> 00:26:12,206 line:-2
+A limited set of transaction APIs
+have been available
+
+
+441
+00:26:12.239 --> 00:26:14.541 line:-1 align:center
+since the first version of SwiftUI.
+
+
+442
+00:26:14.575 --> 00:26:19.279 line:-2 align:center
+Now we're introducing the capability
+to define custom transaction keys,
+
+
+443
+00:26:19,313 --> 00:26:21,915 line:-2
+so you can leverage
+the transaction dictionary
+
+
+444
+00:26:21.949 --> 00:26:25.853 line:-2 align:center
+to implicitly propagate
+your own update-specific data.
+
+
+445
+00:26:27.788 --> 00:26:30.724 line:-2 align:center
+If you've ever declared
+a custom environment key,
+
+
+446
+00:26:30,757 --> 00:26:34,294 line:-2
+declaring a custom transaction key
+will be familiar.
+
+
+447
+00:26:34,328 --> 00:26:37,731 line:-2
+The pattern is to create
+a unique type that conforms
+
+
+448
+00:26:37.764 --> 00:26:40.167 line:-1 align:center
+to the TransactionKey protocol.
+
+
+449
+00:26:40,200 --> 00:26:43,937 line:-2
+The only requirement
+is to provide a defaultValue.
+
+
+450
+00:26:43.971 --> 00:26:48.575 line:-2 align:center
+Then declare a computed property
+as an extension on Transaction
+
+
+451
+00:26:48.609 --> 00:26:53.514 line:-2 align:center
+that reads and writes from
+the transaction dictionary using your key.
+
+
+452
+00:26:53,547 --> 00:26:56,950 line:-2
+Here, I've defined
+a boolean key to track whether,
+
+
+453
+00:26:56,984 --> 00:27:00,220 line:-2
+for the given update,
+the avatar was tapped or not.
+
+
+454
+00:27:00,254 --> 00:27:03,857 line:-2
+I'll decide which animation
+to use based on its value.
+
+
+455
+00:27:04.725 --> 00:27:07.194 line:-1 align:center
+If the avatar was selected interactively,
+
+
+456
+00:27:07,227 --> 00:27:11,598 line:-2
+I'll scale it up or down
+using a more lively spring.
+
+
+457
+00:27:11,632 --> 00:27:14,201 line:-2
+But if the avatar
+was selected programmatically,
+
+
+458
+00:27:14,234 --> 00:27:17,704 line:-1
+I'll scale it using a more subdued spring.
+
+
+459
+00:27:17,738 --> 00:27:20,641 line:-2
+I can set a value
+in the transaction dictionary
+
+
+460
+00:27:20,674 --> 00:27:25,245 line:-2
+for the given update by wrapping
+withTransaction around my state change.
+
+
+461
+00:27:25,279 --> 00:27:26,847 line:-1
+This should seem familiar.
+
+
+462
+00:27:26,880 --> 00:27:30,984 line:-2
+withAnimation is just a thin wrapper
+around withTransaction.
+
+
+463
+00:27:32.085 --> 00:27:35.722 line:-2 align:center
+The arguments passed
+to withTransaction are a keypath
+
+
+464
+00:27:35.756 --> 00:27:39.793 line:-2 align:center
+to a computed property
+on the Transaction and the value to set.
+
+
+465
+00:27:40,794 --> 00:27:44,831 line:-2
+Transaction is unique among SwiftUI's
+implicit data-flow constructs
+
+
+466
+00:27:44,865 --> 00:27:48,001 line:-2
+because it's discarded
+at the end of every update.
+
+
+467
+00:27:48,035 --> 00:27:51,638 line:-2
+This means, unless explicitly set
+for the current update,
+
+
+468
+00:27:51.672 --> 00:27:54.341 line:-1 align:center
+every value in the transaction dictionary
+
+
+469
+00:27:54.374 --> 00:27:57.678 line:-2 align:center
+reverts to just being
+the default value for its key.
+
+
+470
+00:27:58,946 --> 00:28:02,115 line:-2
+In the avatar view,
+when the tap gesture closure fires,
+
+
+471
+00:28:02,149 --> 00:28:05,619 line:-2
+avatarTapped is set
+to true for the current update.
+
+
+472
+00:28:07.788 --> 00:28:11.058 line:-2 align:center
+The transaction
+also contains the default value
+
+
+473
+00:28:11.091 --> 00:28:13.961 line:-1 align:center
+for the animation key, which is nil.
+
+
+474
+00:28:16.296 --> 00:28:19.299 line:-2 align:center
+The transaction propagates
+across the view hierarchy
+
+
+475
+00:28:19,333 --> 00:28:22,202 line:-1
+until it reaches the transaction modifier.
+
+
+476
+00:28:23.170 --> 00:28:26.440 line:-1 align:center
+Here, the avatar view reads avatarTapped,
+
+
+477
+00:28:26,473 --> 00:28:30,577 line:-2
+and based on its value,
+sets the appropriate animation...
+
+
+478
+00:28:32,412 --> 00:28:35,415 align:center
+Which propagates down the view hierarchy.
+
+
+479
+00:28:39,253 --> 00:28:42,155 line:-2
+This works pretty well,
+but just like earlier,
+
+
+480
+00:28:42,189 --> 00:28:45,125 line:-1
+it can result in accidental animations.
+
+
+481
+00:28:46,059 --> 00:28:49,997 line:-2
+To give you finer-grained control
+over modifying the transaction,
+
+
+482
+00:28:50,030 --> 00:28:54,368 line:-2
+we're introducing two new variants
+of the transaction modifier.
+
+
+483
+00:28:54,401 --> 00:28:58,005 line:-2
+One lets you scope
+using a value argument.
+
+
+484
+00:28:58.038 --> 00:29:00.474 line:-2 align:center
+And the other lets you scope
+to a sub-hierarchy
+
+
+485
+00:29:00,507 --> 00:29:03,076 line:-1
+defined in a body closure.
+
+
+486
+00:29:03,110 --> 00:29:04,511 line:-1
+These variants mirror
+
+
+487
+00:29:04.545 --> 00:29:07.848 line:-2 align:center
+the scoped animation view modifiers
+covered earlier.
+
+
+488
+00:29:09,216 --> 00:29:13,921 line:-2
+In this session, I explained
+SwiftUI's powerful animation primitives,
+
+
+489
+00:29:13,954 --> 00:29:18,559 line:-1
+Animatable, Animation, and Transaction.
+
+
+490
+00:29:19,560 --> 00:29:23,964 line:1
+As a next step, I recommend
+checking out two related sessions.
+
+
+491
+00:29:23,997 --> 00:29:28,168 line:1
+"Animate with springs" provides
+more guidance on why and how
+
+
+492
+00:29:28,202 --> 00:29:31,805 line:1
+to effectively use spring animations
+in your app.
+
+
+493
+00:29:31,839 --> 00:29:35,375 align:center
+And "Wind your way through
+advanced animations in SwiftUI"
+
+
+494
+00:29:35,409 --> 00:29:41,048 align:center
+introduces powerful new tools
+for constructing multi-step animations.
+
+
+495
+00:29:41.081 --> 00:29:44.318 line:-2 align:center
+I hope this content
+gives you a better understanding
+
+
+496
+00:29:44,351 --> 00:29:47,621 line:-2
+of how SwiftUI animation works
+and empowers you
+
+
+497
+00:29:47.654 --> 00:29:50.891 line:-2 align:center
+to more skillfully leverage
+animation in your app.
+
+
+498
+00:29:50,924 --> 00:29:52,693 line:-1
+Thanks.
+
+
+499
+00:29:52,726 --> 00:29:57,998 line:0
+♪ ♪
+

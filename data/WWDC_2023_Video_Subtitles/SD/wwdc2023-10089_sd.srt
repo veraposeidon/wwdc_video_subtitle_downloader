@@ -1,0 +1,2601 @@
+2
+00:00:00.100 --> 00:00:04.037 line:-1 position:50%
+♪ Mellow instrumental hip-hop ♪
+
+
+3
+00:00:04,037 --> 00:00:10,444 line:0 position:90% size:2%
+♪
+
+
+4
+00:00:10.444 --> 00:00:14.681 line:-1 position:50%
+Hey, I'm Pau Sastre Miguel,
+a Software Engineer at Apple.
+
+
+5
+00:00:14.681 --> 00:00:17.384 line:-1 position:50%
+Today I'm going to talk
+about how to create
+
+
+6
+00:00:17.384 --> 00:00:21.388 line:-1 position:50%
+immersive experiences
+with Metal on xrOS.
+
+
+7
+00:00:21.388 --> 00:00:23.523 line:-1 position:50%
+This year,
+with the launch of xrOS,
+
+
+8
+00:00:23.523 --> 00:00:25.993 line:-1 position:50%
+you will be able to create
+immersive experiences
+
+
+9
+00:00:25.993 --> 00:00:29.396 line:-1 position:50%
+with familiar technologies
+in the Apple ecosystem.
+
+
+10
+00:00:29.396 --> 00:00:32.366 line:-1 position:50%
+With RealityKit you will be able
+to create experiences
+
+
+11
+00:00:32.366 --> 00:00:35.535 line:-1 position:50%
+that blend your virtual content
+with the real world.
+
+
+12
+00:00:35.535 --> 00:00:36.770 line:-1 position:50%
+On the other hand,
+
+
+13
+00:00:36.770 --> 00:00:38.405 line:-1 position:50%
+if your application
+will take the user
+
+
+14
+00:00:38.405 --> 00:00:40.507 line:-1 position:50%
+into a fully immersive
+experience,
+
+
+15
+00:00:40.507 --> 00:00:43.443 line:-1 position:50%
+xrOS also enables you
+to completely replace
+
+
+16
+00:00:43.443 --> 00:00:47.281 line:-1 position:50%
+the real world content
+with your own virtual content.
+
+
+17
+00:00:47.281 --> 00:00:49.683 line:-1 position:50%
+When creating fully
+immersive experiences,
+
+
+18
+00:00:49.683 --> 00:00:52.920 line:-1 position:50%
+you have a few choices when it
+comes to your rendering method.
+
+
+19
+00:00:52.920 --> 00:00:54.855 line:-1 position:50%
+You can still use RealityKit,
+
+
+20
+00:00:54.855 --> 00:00:58.992 line:-1 position:50%
+or if you prefer, you can choose
+Metal and ARKit APIs.
+
+
+21
+00:00:58,992 --> 00:01:01,728 position:50%
+RecRoom is a great example
+of an application
+
+
+22
+00:01:01,728 --> 00:01:04,331 position:50%
+that provides a fully
+immersive experience
+
+
+23
+00:01:04,331 --> 00:01:07,334 position:50%
+using CompositorServices
+to create a rendering session,
+
+
+24
+00:01:07,334 --> 00:01:09,403 position:50%
+Metal APIs to render frames,
+
+
+25
+00:01:09,403 --> 00:01:12,973 position:50%
+and ARKit to get
+world and hand tracking.
+
+
+26
+00:01:12,973 --> 00:01:15,642 position:50%
+They were able to bring support
+to all these technologies
+
+
+27
+00:01:15,642 --> 00:01:18,045 position:50%
+thanks to the Unity editor.
+
+
+28
+00:01:18.045 --> 00:01:20.247 line:-1 position:50%
+If you'd like to write
+your own engine,
+
+
+29
+00:01:20.247 --> 00:01:22.950 line:-1 position:50%
+the CompositorServices API
+gives you access
+
+
+30
+00:01:22.950 --> 00:01:25.152 line:-1 position:50%
+to Metal rendering on xrOS.
+
+
+31
+00:01:25.152 --> 00:01:26.887 line:-1 position:50%
+You can combine it with ARKit,
+
+
+32
+00:01:26.887 --> 00:01:29.289 line:-1 position:50%
+which adds world tracking
+and hand tracking,
+
+
+33
+00:01:29.289 --> 00:01:32.159 line:-1 position:50%
+to create a fully
+immersive experience.
+
+
+34
+00:01:32.159 --> 00:01:35.295 line:-1 position:50%
+CompositorServices is the key
+to configure your engine
+
+
+35
+00:01:35.295 --> 00:01:37.331 line:-1 position:50%
+to work on xrOS.
+
+
+36
+00:01:37.331 --> 00:01:39.866 line:-1 position:50%
+I'll show you how to setup
+the render loop
+
+
+37
+00:01:39.866 --> 00:01:42.703 line:-1 position:50%
+and then how to render
+one frame.
+
+
+38
+00:01:42.703 --> 00:01:45.305 line:-1 position:50%
+Finally, I'll show you
+how to use ARKit
+
+
+39
+00:01:45.305 --> 00:01:47.975 line:-1 position:50%
+to make your experience
+interactive.
+
+
+40
+00:01:47.975 --> 00:01:52.312 line:-1 position:50%
+Start with the architecture
+of an xrOS app.
+
+
+41
+00:01:52.312 --> 00:01:54.448 line:-1 position:50%
+You'll get the most
+out of today's session
+
+
+42
+00:01:54.448 --> 00:01:56.950 line:-1 position:50%
+if you have previous experience
+with Metal APIs
+
+
+43
+00:01:56.950 --> 00:01:59.052 line:-1 position:50%
+and Metal rendering techniques.
+
+
+44
+00:01:59.052 --> 00:02:00.921 line:-1 position:50%
+If you haven't
+used Metal before,
+
+
+45
+00:02:00.921 --> 00:02:03.056 line:-1 position:50%
+check out the code samples
+and documentation
+
+
+46
+00:02:03.056 --> 00:02:07.327 line:-1 position:50%
+over in
+developer.apple.com/Metal.
+
+
+47
+00:02:07.327 --> 00:02:11.298 line:-1 position:50%
+When you create immersive
+experiences on xrOS with Metal,
+
+
+48
+00:02:11.298 --> 00:02:13.934 line:-1 position:50%
+you'll start with SwiftUI
+to create the application
+
+
+49
+00:02:13.934 --> 00:02:15.836 line:-1 position:50%
+and the rendering session.
+
+
+50
+00:02:15.836 --> 00:02:17.804 line:-1 position:50%
+After creating
+the rendering session,
+
+
+51
+00:02:17.804 --> 00:02:20.807 line:-1 position:50%
+you can switch to a language
+you might be more familiar with,
+
+
+52
+00:02:20.807 --> 00:02:25.445 line:-1 position:50%
+like C or C++, to define
+the inner parts of the engine.
+
+
+53
+00:02:25.445 --> 00:02:27.314 line:-1 position:50%
+You start by creating
+a type that conforms
+
+
+54
+00:02:27.314 --> 00:02:29.916 line:-1 position:50%
+to the SwiftUI app protocol.
+
+
+55
+00:02:29.916 --> 00:02:31.351 line:-1 position:50%
+To conform to this protocol,
+
+
+56
+00:02:31.351 --> 00:02:34.221 line:-1 position:50%
+you will define the list
+of scenes in your app.
+
+
+57
+00:02:34.221 --> 00:02:37.424 line:-1 position:50%
+On xrOS, there are three main
+scenes types.
+
+
+58
+00:02:37.424 --> 00:02:39.593 line:-1 position:50%
+The window type provides
+an experience similar
+
+
+59
+00:02:39.593 --> 00:02:42.529 line:-1 position:50%
+to 2D platforms like macOS.
+
+
+60
+00:02:42.529 --> 00:02:45.032 line:-1 position:50%
+The volume type renders content
+within its bounds
+
+
+61
+00:02:45.032 --> 00:02:48.902 line:-1 position:50%
+and it coexists in the Shared
+Space with other applications.
+
+
+62
+00:02:48.902 --> 00:02:53.707 line:-1 position:50%
+And ImmersiveSpace allows you
+to render content anywhere.
+
+
+63
+00:02:53.707 --> 00:02:56.043 line:-1 position:50%
+Whenever you render
+fully immersive experiences
+
+
+64
+00:02:56.043 --> 00:03:00.981 line:-1 position:50%
+with Metal, you will choose
+the ImmersiveSpace type.
+
+
+65
+00:03:00.981 --> 00:03:03.817 line:-1 position:50%
+ImmersiveSpace is a new
+SwiftUI Scene type
+
+
+66
+00:03:03.817 --> 00:03:05.786 line:-1 position:50%
+available on xrOS.
+
+
+67
+00:03:05.786 --> 00:03:10.090 line:-1 position:50%
+It serves as the container
+for fully immersive experiences.
+
+
+68
+00:03:10,090 --> 00:03:11,925 position:50%
+To learn how to use
+ImmersiveSpace,
+
+
+69
+00:03:11,925 --> 00:03:16,897 position:50%
+check out the session "Go beyond
+the window with SwiftUI."
+
+
+70
+00:03:16.897 --> 00:03:19.166 line:-1 position:50%
+When you create an
+ImmersiveSpace scene,
+
+
+71
+00:03:19.166 --> 00:03:21.735 line:-1 position:50%
+your application provides
+the content by using a type
+
+
+72
+00:03:21.735 --> 00:03:26.706 line:-1 position:50%
+that conforms to the
+ImmersiveSpaceContent protocol.
+
+
+73
+00:03:26.706 --> 00:03:29.943 line:-1 position:50%
+Often, when creating content
+for an ImmersiveSpace Scene,
+
+
+74
+00:03:29.943 --> 00:03:32.179 line:-1 position:50%
+applications
+will use RealityKit.
+
+
+75
+00:03:32.179 --> 00:03:35.849 line:-1 position:50%
+It uses CoreAnimation
+and MaterialX under the hood.
+
+
+76
+00:03:35.849 --> 00:03:38.385 line:-1 position:50%
+But if instead, you'd like
+to use the power of Metal
+
+
+77
+00:03:38.385 --> 00:03:40.554 line:-1 position:50%
+to render the content
+of your application,
+
+
+78
+00:03:40.554 --> 00:03:42.956 line:-1 position:50%
+you've got another option.
+
+
+79
+00:03:42.956 --> 00:03:46.560 line:-1 position:50%
+The CompositorServices API
+uses Metal and ARKit
+
+
+80
+00:03:46.560 --> 00:03:48.595 line:-1 position:50%
+to provide immersive
+rendering capabilities
+
+
+81
+00:03:48.595 --> 00:03:50.297 line:-1 position:50%
+to your application.
+
+
+82
+00:03:50.297 --> 00:03:54.434 line:-1 position:50%
+The new CompositorServices API,
+introduced in xrOS,
+
+
+83
+00:03:54.434 --> 00:03:56.736 line:-1 position:50%
+provides a Metal
+rendering interface
+
+
+84
+00:03:56.736 --> 00:04:00.307 line:-1 position:50%
+to be able to render the
+contents of an ImmersiveSpace.
+
+
+85
+00:04:00.307 --> 00:04:03.009 line:-1 position:50%
+With CompositorServices,
+applications can render
+
+
+86
+00:04:03.009 --> 00:04:05.846 line:-1 position:50%
+directly into
+the compositor server.
+
+
+87
+00:04:05.846 --> 00:04:09.149 line:-1 position:50%
+It has a low IPC overhead
+to minimize latency,
+
+
+88
+00:04:09.149 --> 00:04:10.817 line:-1 position:50%
+and it is built from
+the ground up
+
+
+89
+00:04:10.817 --> 00:04:14.888 line:-1 position:50%
+to support both
+C and Swift APIs.
+
+
+90
+00:04:14.888 --> 00:04:16.556 line:-1 position:50%
+When using CompositorServices,
+
+
+91
+00:04:16.556 --> 00:04:20.994 line:-1 position:50%
+the ImmersiveSpaceContent
+is called CompositorLayer.
+
+
+92
+00:04:20.994 --> 00:04:22.629 line:-1 position:50%
+To create a CompositorLayer
+
+
+93
+00:04:22.629 --> 00:04:25.966 line:-1 position:50%
+you will need to provide
+two parameters.
+
+
+94
+00:04:25.966 --> 00:04:27.234 line:-1 position:50%
+The first one is the
+
+
+95
+00:04:27.234 --> 00:04:29.736 line:-1 position:50%
+CompositorLayerConfiguration
+protocol.
+
+
+96
+00:04:29.736 --> 00:04:32.506 line:-1 position:50%
+This protocol defines
+the behavior and capabilities
+
+
+97
+00:04:32.506 --> 00:04:34.741 line:-1 position:50%
+of your rendering session.
+
+
+98
+00:04:34,741 --> 00:04:37,277 position:50%
+The second
+is the LayerRenderer.
+
+
+99
+00:04:37,277 --> 00:04:40,180 position:50%
+This is the interface
+to the layer rendering session.
+
+
+100
+00:04:40,180 --> 00:04:41,948 position:50%
+Your application
+will use this object
+
+
+101
+00:04:41,948 --> 00:04:45,719 position:50%
+to schedule and render
+new frames.
+
+
+102
+00:04:45.719 --> 00:04:48.088 line:-1 position:50%
+When writing an immersive
+experience with Metal,
+
+
+103
+00:04:48.088 --> 00:04:51.291 line:-1 position:50%
+start by defining the app type.
+
+
+104
+00:04:51.291 --> 00:04:54.728 line:-1 position:50%
+As the scene type,
+use ImmersiveSpace.
+
+
+105
+00:04:54.728 --> 00:04:58.431 line:-1 position:50%
+For the content type,
+use a CompositorLayer.
+
+
+106
+00:04:58.431 --> 00:05:01.401 line:-1 position:50%
+Once the CompositorLayer
+is ready to render content,
+
+
+107
+00:05:01.401 --> 00:05:03.103 line:-1 position:50%
+the system will call
+the application
+
+
+108
+00:05:03.103 --> 00:05:06.773 line:-1 position:50%
+with the instance
+of the rendering session.
+
+
+109
+00:05:06.773 --> 00:05:09.176 line:-1 position:50%
+Here is a good place
+to create the instance
+
+
+110
+00:05:09.176 --> 00:05:11.745 line:-1 position:50%
+of your custom engine.
+
+
+111
+00:05:11.745 --> 00:05:14.047 line:-1 position:50%
+Now that you have
+the engine instance,
+
+
+112
+00:05:14.047 --> 00:05:17.050 line:-1 position:50%
+you can create the render thread
+and run the render loop
+
+
+113
+00:05:17.050 --> 00:05:20.086 line:-1 position:50%
+by calling start.
+
+
+114
+00:05:20.086 --> 00:05:21.788 line:-1 position:50%
+One thing to take into account
+
+
+115
+00:05:21.788 --> 00:05:24.124 line:-1 position:50%
+when defining the scene list
+in your application,
+
+
+116
+00:05:24.124 --> 00:05:27.227 line:-1 position:50%
+is that by default
+SwiftUI creates a window scene,
+
+
+117
+00:05:27.227 --> 00:05:31.598 line:-1 position:50%
+even if the first scene in
+your app is an ImmersiveSpace.
+
+
+118
+00:05:31.598 --> 00:05:33.033 line:-1 position:50%
+To change that default behavior,
+
+
+119
+00:05:33.033 --> 00:05:35.101 line:-1 position:50%
+you can modify the info plist
+of your app.
+
+
+120
+00:05:35.101 --> 00:05:36.403 line:-1 position:50%
+You can add the key
+
+
+121
+00:05:36.403 --> 00:05:39.472 line:-1 position:50%
+UIApplicationPreferred
+DefaultSceneSessionRole
+
+
+122
+00:05:39.472 --> 00:05:41.408 line:-1 position:50%
+to your
+application scene manifest
+
+
+123
+00:05:41.408 --> 00:05:44.778 line:-1 position:50%
+to change the default
+scene type of your application.
+
+
+124
+00:05:44.778 --> 00:05:47.948 line:-1 position:50%
+If you are using a space
+with a Compositor SpaceContent,
+
+
+125
+00:05:47.948 --> 00:05:49.149 line:-1 position:50%
+you will use
+
+
+126
+00:05:49.149 --> 00:05:52.953 line:-1 position:50%
+CPSceneSessionRole
+ImmersiveSpaceApplication.
+
+
+127
+00:05:52.953 --> 00:05:54.554 line:-1 position:50%
+After setting up
+the application,
+
+
+128
+00:05:54.554 --> 00:05:56.389 line:-1 position:50%
+and before getting
+in the render loop,
+
+
+129
+00:05:56.389 --> 00:05:58.825 line:-1 position:50%
+you'll tell CompositorServices
+how to configure
+
+
+130
+00:05:58.825 --> 00:06:01.294 line:-1 position:50%
+the LayerRenderer.
+
+
+131
+00:06:01,294 --> 00:06:03,897 position:50%
+To provide a configuration
+to the CompositorLayer,
+
+
+132
+00:06:03,897 --> 00:06:05,966 position:50%
+you will create a new type
+that conforms to the
+
+
+133
+00:06:05,966 --> 00:06:08,935 position:50%
+CompositorLayerConfiguration
+protocol.
+
+
+134
+00:06:08,935 --> 00:06:11,304 position:50%
+This protocol allows you
+to modify the setup
+
+
+135
+00:06:11,304 --> 00:06:15,141 position:50%
+and some of the behavior
+of the rendering session.
+
+
+136
+00:06:15.141 --> 00:06:18.745 line:-1 position:50%
+The CompositorLayerConfiguration
+provides you two parameters.
+
+
+137
+00:06:18.745 --> 00:06:21.014 line:-1 position:50%
+The first one
+is the layer capabilities.
+
+
+138
+00:06:21.014 --> 00:06:23.683 line:-1 position:50%
+It enables you to query
+what features are available
+
+
+139
+00:06:23.683 --> 00:06:25.118 line:-1 position:50%
+on the device.
+
+
+140
+00:06:25.118 --> 00:06:29.689 line:-1 position:50%
+Use the capabilities to create
+a valid configuration.
+
+
+141
+00:06:29.689 --> 00:06:32.659 line:-1 position:50%
+And the second parameter is the
+LayerRenderer Configuration.
+
+
+142
+00:06:32.659 --> 00:06:34.561 line:-1 position:50%
+This type defines
+the configuration
+
+
+143
+00:06:34.561 --> 00:06:36.830 line:-1 position:50%
+of your rendering session.
+
+
+144
+00:06:36,830 --> 00:06:38,565 position:50%
+With the configuration,
+you can define
+
+
+145
+00:06:38,565 --> 00:06:41,868 position:50%
+how your engine maps
+its content into the layer,
+
+
+146
+00:06:41,868 --> 00:06:43,403 position:50%
+enable foveated rendering,
+
+
+147
+00:06:43,403 --> 00:06:46,940 position:50%
+and define the color management
+of your pipeline.
+
+
+148
+00:06:46,940 --> 00:06:49,542 position:50%
+Now, I'll talk about how
+each of these properties
+
+
+149
+00:06:49,542 --> 00:06:51,611 position:50%
+will affect your engine.
+
+
+150
+00:06:51,611 --> 00:06:54,114 position:50%
+The first one
+is foveated rendering.
+
+
+151
+00:06:54,114 --> 00:06:57,217 position:50%
+The main goal of this feature is
+to allow you to render content
+
+
+152
+00:06:57,217 --> 00:06:59,486 position:50%
+at a higher
+pixel-per-degree density
+
+
+153
+00:06:59,486 --> 00:07:02,555 position:50%
+without using
+a bigger texture size.
+
+
+154
+00:07:02.555 --> 00:07:04.324 line:-1 position:50%
+In a regular display pipeline,
+
+
+155
+00:07:04.324 --> 00:07:08.528 line:-1 position:50%
+the pixels are distributed
+linearly in a texture.
+
+
+156
+00:07:08.528 --> 00:07:11.398 line:-1 position:50%
+xrOS optimizes this workflow
+by creating a map
+
+
+157
+00:07:11.398 --> 00:07:13.566 line:-1 position:50%
+that defines what regions
+in a display
+
+
+158
+00:07:13.566 --> 00:07:16.102 line:-1 position:50%
+can use a lower sampling rate.
+
+
+159
+00:07:16.102 --> 00:07:19.072 line:-1 position:50%
+This helps reduce the power
+required to render your frame
+
+
+160
+00:07:19.072 --> 00:07:22.676 line:-1 position:50%
+while maintaining the visual
+fidelity of the display.
+
+
+161
+00:07:22.676 --> 00:07:25.412 line:-1 position:50%
+Using foveation whenever
+possible is important,
+
+
+162
+00:07:25.412 --> 00:07:28.948 line:-1 position:50%
+as it will result
+in a better visual experience.
+
+
+163
+00:07:28.948 --> 00:07:31.651 line:-1 position:50%
+A great way to visualize
+how foveation affects
+
+
+164
+00:07:31.651 --> 00:07:35.855 line:-1 position:50%
+your rendering pipeline
+is using Xcode's Metal Debugger.
+
+
+165
+00:07:35.855 --> 00:07:39.092 line:-1 position:50%
+With Metal Debugger, you can
+inspect the target textures
+
+
+166
+00:07:39.092 --> 00:07:40.960 line:-1 position:50%
+and rasterization rate maps
+
+
+167
+00:07:40.960 --> 00:07:43.663 line:-1 position:50%
+being used
+in the render pipeline.
+
+
+168
+00:07:43.663 --> 00:07:45.999 line:-1 position:50%
+This capture shows
+the contents of the texture
+
+
+169
+00:07:45.999 --> 00:07:49.102 line:-1 position:50%
+without scaling for
+the rasterization rate map.
+
+
+170
+00:07:49.102 --> 00:07:51.604 line:-1 position:50%
+You can notice the different
+sample rates by focusing
+
+
+171
+00:07:51.604 --> 00:07:55.508 line:-1 position:50%
+in the regions of the texture
+that are more compressed.
+
+
+172
+00:07:55.508 --> 00:07:58.345 line:-1 position:50%
+With the attachment viewer
+options in Metal Debugger,
+
+
+173
+00:07:58.345 --> 00:08:01.081 line:-1 position:50%
+you can scale the image
+to visualize the final result
+
+
+174
+00:08:01.081 --> 00:08:04.217 line:-1 position:50%
+that the display will show.
+
+
+175
+00:08:04.217 --> 00:08:06.353 line:-1 position:50%
+Compositor provides
+the foveation map
+
+
+176
+00:08:06.353 --> 00:08:11.091 line:-1 position:50%
+using an MTLRasterizationRateMap
+for each frame.
+
+
+177
+00:08:11.091 --> 00:08:12.992 line:-1 position:50%
+It is a good practice
+to always check
+
+
+178
+00:08:12.992 --> 00:08:15.028 line:-1 position:50%
+if foveation is supported.
+
+
+179
+00:08:15.028 --> 00:08:17.197 line:-1 position:50%
+This will change depending
+on the platform.
+
+
+180
+00:08:17.197 --> 00:08:19.332 line:-1 position:50%
+For example,
+in the xrOS simulator,
+
+
+181
+00:08:19.332 --> 00:08:22.469 line:-1 position:50%
+foveation is not available.
+
+
+182
+00:08:22.469 --> 00:08:23.570 line:-1 position:50%
+To enable foveation,
+
+
+183
+00:08:23.570 --> 00:08:28.074 line:-1 position:50%
+you can set isFoveationEnabled
+on the configuration.
+
+
+184
+00:08:28,074 --> 00:08:31,444 position:50%
+The second property
+is LayerRenderer layout.
+
+
+185
+00:08:31,444 --> 00:08:34,180 position:50%
+This property is one of the most
+important configurations
+
+
+186
+00:08:34,180 --> 00:08:36,116 position:50%
+for your engine.
+
+
+187
+00:08:36.116 --> 00:08:38.485 line:-1 position:50%
+It defines how each display
+from the headset
+
+
+188
+00:08:38.485 --> 00:08:43.823 line:-1 position:50%
+gets mapped into the rendered
+content of your application.
+
+
+189
+00:08:43.823 --> 00:08:46.226 line:-1 position:50%
+Each eye first maps
+into a Metal texture
+
+
+190
+00:08:46.226 --> 00:08:48.161 line:-1 position:50%
+provided by Compositor.
+
+
+191
+00:08:48.161 --> 00:08:50.897 line:-1 position:50%
+Then Compositor provides
+the index of which slice
+
+
+192
+00:08:50.897 --> 00:08:53.099 line:-1 position:50%
+to use within that texture.
+
+
+193
+00:08:53.099 --> 00:08:56.202 line:-1 position:50%
+And finally, Compositor provides
+the viewport to use
+
+
+194
+00:08:56.202 --> 00:08:59.205 line:-1 position:50%
+within that texture slice.
+
+
+195
+00:08:59.205 --> 00:09:01.908 line:-1 position:50%
+The LayerRenderer layout lets
+you choose different mappings
+
+
+196
+00:09:01.908 --> 00:09:04.944 line:-1 position:50%
+between the texture slice
+and viewport.
+
+
+197
+00:09:04.944 --> 00:09:07.313 line:-1 position:50%
+With layered,
+Compositor will use one texture
+
+
+198
+00:09:07.313 --> 00:09:10.116 line:-1 position:50%
+with two slices
+and two viewports.
+
+
+199
+00:09:10,116 --> 00:09:13,186 position:50%
+With dedicated, Compositor
+will use two textures
+
+
+200
+00:09:13,186 --> 00:09:16,356 position:50%
+with one slice
+and one viewport each.
+
+
+201
+00:09:16,356 --> 00:09:20,026 position:50%
+And finally with shared,
+Compositor will use one texture,
+
+
+202
+00:09:20,026 --> 00:09:24,631 position:50%
+one slice, and two different
+viewports for that slice.
+
+
+203
+00:09:24,631 --> 00:09:26,633 position:50%
+Choosing which layout
+to use will depend
+
+
+204
+00:09:26,633 --> 00:09:29,702 position:50%
+on how you set up
+your rendering pipeline.
+
+
+205
+00:09:29,702 --> 00:09:32,572 position:50%
+For example, with layered
+and shared, you will be able
+
+
+206
+00:09:32,572 --> 00:09:35,241 position:50%
+to perform your rendering
+in one single pass,
+
+
+207
+00:09:35,241 --> 00:09:38,545 position:50%
+so you can optimize
+your rendering pipeline.
+
+
+208
+00:09:38,545 --> 00:09:40,480 position:50%
+With shared layout,
+it might be easier
+
+
+209
+00:09:40,480 --> 00:09:42,015 position:50%
+to port existing code bases
+
+
+210
+00:09:42,015 --> 00:09:44,617 position:50%
+where foveated rendering
+is not an option.
+
+
+211
+00:09:44,617 --> 00:09:46,953 position:50%
+Layered layout
+is the optimal layout
+
+
+212
+00:09:46,953 --> 00:09:50,190 position:50%
+since it allows you to render
+your scene in a single pass
+
+
+213
+00:09:50,190 --> 00:09:53,092 position:50%
+while still maintaining
+foveated rendering.
+
+
+214
+00:09:53.092 --> 00:09:57.230 line:-1 position:50%
+The last configuration property
+to discuss is color management.
+
+
+215
+00:09:57.230 --> 00:09:59.632 line:-1 position:50%
+Compositor expects the content
+to be rendered
+
+
+216
+00:09:59.632 --> 00:10:03.736 line:-1 position:50%
+with extended linear display
+P3 color space.
+
+
+217
+00:10:03.736 --> 00:10:06.940 line:-1 position:50%
+xrOS supports
+an EDR headroom of 2.0.
+
+
+218
+00:10:06.940 --> 00:10:09.943 line:-1 position:50%
+That is two times the SDR range.
+
+
+219
+00:10:09.943 --> 00:10:12.745 line:-1 position:50%
+By default, Compositor does not
+use a pixel format
+
+
+220
+00:10:12.745 --> 00:10:14.647 line:-1 position:50%
+that is HDR renderable,
+
+
+221
+00:10:14.647 --> 00:10:16.583 line:-1 position:50%
+but if your application
+supports HDR,
+
+
+222
+00:10:16.583 --> 00:10:21.654 line:-1 position:50%
+you can specify rgba16Float
+in the layer configuration.
+
+
+223
+00:10:21,654 --> 00:10:25,258 position:50%
+If you want to know more about
+how to render HDR with EDR,
+
+
+224
+00:10:25,258 --> 00:10:29,429 position:50%
+checkout the session "Explore
+HDR rendering with EDR."
+
+
+225
+00:10:29.429 --> 00:10:32.265 line:-1 position:50%
+To create a custom configuration
+in your application,
+
+
+226
+00:10:32.265 --> 00:10:34.834 line:-1 position:50%
+start by defining a new type
+that conforms to the
+
+
+227
+00:10:34.834 --> 00:10:37.971 line:-1 position:50%
+CompositorLayerConfiguration
+protocol.
+
+
+228
+00:10:37.971 --> 00:10:39.439 line:-1 position:50%
+To conform to this protocol,
+
+
+229
+00:10:39.439 --> 00:10:42.008 line:-1 position:50%
+add the makeConfiguration
+method.
+
+
+230
+00:10:42.008 --> 00:10:44.077 line:-1 position:50%
+This method provides
+the layer capabilities
+
+
+231
+00:10:44.077 --> 00:10:47.046 line:-1 position:50%
+and a configuration
+you can modify.
+
+
+232
+00:10:47.046 --> 00:10:49.749 line:-1 position:50%
+To enable the three properties
+I mentioned before,
+
+
+233
+00:10:49.749 --> 00:10:52.986 line:-1 position:50%
+first check if foveation
+is supported.
+
+
+234
+00:10:52.986 --> 00:10:57.190 line:-1 position:50%
+Then check what layouts
+are supported in this device.
+
+
+235
+00:10:57.190 --> 00:10:59.626 line:-1 position:50%
+With this information,
+you can set a valid layout
+
+
+236
+00:10:59.626 --> 00:11:01.327 line:-1 position:50%
+in the configuration.
+
+
+237
+00:11:01.327 --> 00:11:03.229 line:-1 position:50%
+In some devices
+like the simulator,
+
+
+238
+00:11:03.229 --> 00:11:05.465 line:-1 position:50%
+where the Compositor
+only renders one view,
+
+
+239
+00:11:05.465 --> 00:11:08.434 line:-1 position:50%
+layered won't be available.
+
+
+240
+00:11:08.434 --> 00:11:12.505 line:-1 position:50%
+For foveation, set it to true
+if the device supports it.
+
+
+241
+00:11:12.505 --> 00:11:15.875 line:-1 position:50%
+And finally, set the colorFormat
+to rgba16Float
+
+
+242
+00:11:15.875 --> 00:11:19.512 line:-1 position:50%
+to be able to render
+HDR content.
+
+
+243
+00:11:19.512 --> 00:11:22.448 line:-1 position:50%
+Returning to the code that
+created the Compositor layer,
+
+
+244
+00:11:22.448 --> 00:11:24.551 line:-1 position:50%
+you can now add
+the configuration type
+
+
+245
+00:11:24.551 --> 00:11:26.920 line:-1 position:50%
+you just created.
+
+
+246
+00:11:26.920 --> 00:11:28.988 line:-1 position:50%
+Now that the rendering session
+is configured,
+
+
+247
+00:11:28.988 --> 00:11:31.491 line:-1 position:50%
+you can set up the render loop.
+
+
+248
+00:11:31,491 --> 00:11:33,893 position:50%
+You'll start by using
+the LayerRenderer object
+
+
+249
+00:11:33,893 --> 00:11:35,895 position:50%
+from the CompositorLayer.
+
+
+250
+00:11:35,895 --> 00:11:39,065 position:50%
+First, you'll load the resources
+and initialize any objects
+
+
+251
+00:11:39,065 --> 00:11:42,201 position:50%
+that your engine will need
+to render frames.
+
+
+252
+00:11:42.201 --> 00:11:44.504 line:-1 position:50%
+Then check the state
+of the layer.
+
+
+253
+00:11:44.504 --> 00:11:48.207 line:-1 position:50%
+If the layer is paused,
+wait until the layer is running.
+
+
+254
+00:11:48.207 --> 00:11:50.043 line:-1 position:50%
+Once the layer is unblocked
+from the wait,
+
+
+255
+00:11:50.043 --> 00:11:51.978 line:-1 position:50%
+check the layer state again.
+
+
+256
+00:11:51.978 --> 00:11:53.246 line:-1 position:50%
+If the layer is running,
+
+
+257
+00:11:53.246 --> 00:11:55.048 line:-1 position:50%
+you'll be able to render
+a frame.
+
+
+258
+00:11:55.048 --> 00:11:56.683 line:-1 position:50%
+And once that frame
+is rendered,
+
+
+259
+00:11:56.683 --> 00:12:00.019 line:-1 position:50%
+check the layer state again
+before rendering the next frame.
+
+
+260
+00:12:00,019 --> 00:12:02,255 position:50%
+If the layer state
+is invalidated,
+
+
+261
+00:12:02,255 --> 00:12:06,192 position:50%
+free the resources
+you created for the render loop.
+
+
+262
+00:12:06.192 --> 00:12:08.528 line:-1 position:50%
+Now, it's time to define
+the main function
+
+
+263
+00:12:08.528 --> 00:12:10.530 line:-1 position:50%
+of the render_loop.
+
+
+264
+00:12:10.530 --> 00:12:13.533 line:-1 position:50%
+Until now I've been using Swift
+since the ImmersiveSpace API
+
+
+265
+00:12:13.533 --> 00:12:15.535 line:-1 position:50%
+is only available in Swift.
+
+
+266
+00:12:15.535 --> 00:12:20.006 line:-1 position:50%
+But from here I will switch
+to C to write the render loop.
+
+
+267
+00:12:20,006 --> 00:12:22,575 position:50%
+As I mentioned, the first step
+in the render loop
+
+
+268
+00:12:22,575 --> 00:12:25,545 position:50%
+is to allocate and initialize
+all the objects you'll need
+
+
+269
+00:12:25,545 --> 00:12:27,213 position:50%
+to render frames.
+
+
+270
+00:12:27,213 --> 00:12:29,315 position:50%
+You'll do this by calling
+the setup function
+
+
+271
+00:12:29,315 --> 00:12:31,851 position:50%
+in your custom engine.
+
+
+272
+00:12:31,851 --> 00:12:35,054 position:50%
+Next, is the main section
+of the loop.
+
+
+273
+00:12:35,054 --> 00:12:38,224 position:50%
+The first step is to check
+the layerRenderer state.
+
+
+274
+00:12:38,224 --> 00:12:39,792 position:50%
+If the state is paused,
+
+
+275
+00:12:39,792 --> 00:12:43,930 position:50%
+the thread will sleep until
+the layerRenderer is running.
+
+
+276
+00:12:43,930 --> 00:12:45,531 position:50%
+If the layer state is running,
+
+
+277
+00:12:45,531 --> 00:12:48,101 position:50%
+the engine will render
+one frame.
+
+
+278
+00:12:48,101 --> 00:12:50,737 position:50%
+And finally, if the layer
+has been invalidated,
+
+
+279
+00:12:50,737 --> 00:12:53,172 position:50%
+the render loop will finish.
+
+
+280
+00:12:53,172 --> 00:12:55,108 position:50%
+The last step of the
+render_loop function
+
+
+281
+00:12:55,108 --> 00:12:58,111 position:50%
+will be to clear any
+used resources.
+
+
+282
+00:12:58.111 --> 00:13:00.613 line:-1 position:50%
+Now that the app is going
+through the render loop,
+
+
+283
+00:13:00.613 --> 00:13:03.416 line:-1 position:50%
+I'll explain how to render
+one frame.
+
+
+284
+00:13:03.416 --> 00:13:05.885 line:-1 position:50%
+Rendering content
+in xrOS is always
+
+
+285
+00:13:05.885 --> 00:13:08.254 line:-1 position:50%
+from the point of view
+of the device.
+
+
+286
+00:13:08.254 --> 00:13:11.090 line:-1 position:50%
+You can use ARKit to obtain
+the device orientation
+
+
+287
+00:13:11.090 --> 00:13:12.625 line:-1 position:50%
+and translation.
+
+
+288
+00:13:12.625 --> 00:13:15.028 line:-1 position:50%
+ARKit is already
+available on iOS,
+
+
+289
+00:13:15.028 --> 00:13:18.464 line:-1 position:50%
+and now xrOS is introducing
+a whole new API,
+
+
+290
+00:13:18.464 --> 00:13:21.100 line:-1 position:50%
+which has additional features
+that can help you create
+
+
+291
+00:13:21.100 --> 00:13:23.903 line:-1 position:50%
+immersive experiences.
+
+
+292
+00:13:23.903 --> 00:13:27.106 line:-1 position:50%
+With ARKit, you can add
+world tracking, hand tracking,
+
+
+293
+00:13:27.106 --> 00:13:29.142 line:-1 position:50%
+and other world sensing
+capabilities
+
+
+294
+00:13:29.142 --> 00:13:31.678 line:-1 position:50%
+to your application.
+
+
+295
+00:13:31.678 --> 00:13:34.514 line:-1 position:50%
+The new ARKit API is also built
+from the ground up
+
+
+296
+00:13:34.514 --> 00:13:36.616 line:-1 position:50%
+to support C and Swift APIs,
+
+
+297
+00:13:36.616 --> 00:13:38.484 line:-1 position:50%
+which will allow
+for an easier integration
+
+
+298
+00:13:38.484 --> 00:13:41.454 line:-1 position:50%
+with existing rendering engines.
+
+
+299
+00:13:41,454 --> 00:13:43,790 position:50%
+To learn more about ARKit
+on xrOS,
+
+
+300
+00:13:43,790 --> 00:13:47,860 position:50%
+check out "Meet ARKit
+for spatial computing."
+
+
+301
+00:13:47.860 --> 00:13:52.331 line:-1 position:50%
+Within the render loop,
+it's time to render one frame.
+
+
+302
+00:13:52.331 --> 00:13:53.599 line:-1 position:50%
+When rendering a frame,
+
+
+303
+00:13:53.599 --> 00:13:56.269 line:-1 position:50%
+Compositor defines
+two main sections.
+
+
+304
+00:13:56.269 --> 00:13:58.037 line:-1 position:50%
+The first one is the update.
+
+
+305
+00:13:58.037 --> 00:13:59.338 line:-1 position:50%
+Here's where you will do
+
+
+306
+00:13:59.338 --> 00:14:02.208 line:-1 position:50%
+any work that is not
+input-latency critical.
+
+
+307
+00:14:02.208 --> 00:14:05.144 line:-1 position:50%
+This can be things like updating
+the animations in your scene,
+
+
+308
+00:14:05.144 --> 00:14:07.413 line:-1 position:50%
+updating your characters,
+or gathering inputs
+
+
+309
+00:14:07.413 --> 00:14:10.416 line:-1 position:50%
+in your system
+like hand skeleton poses.
+
+
+310
+00:14:10.416 --> 00:14:13.519 line:-1 position:50%
+The second section of the frame
+is the submission section.
+
+
+311
+00:14:13.519 --> 00:14:16.923 line:-1 position:50%
+Here's where you will perform
+any latency-critical work.
+
+
+312
+00:14:16.923 --> 00:14:18.524 line:-1 position:50%
+You'll also render any content
+
+
+313
+00:14:18.524 --> 00:14:21.327 line:-1 position:50%
+that is headset-pose
+dependent here.
+
+
+314
+00:14:21.327 --> 00:14:24.163 line:-1 position:50%
+In order to define the timing
+for each of those sections,
+
+
+315
+00:14:24.163 --> 00:14:27.266 line:-1 position:50%
+Compositor provides
+a timing object.
+
+
+316
+00:14:27.266 --> 00:14:29.569 line:-1 position:50%
+This diagram defines
+how the timing affects
+
+
+317
+00:14:29.569 --> 00:14:32.071 line:-1 position:50%
+the different frame sections.
+
+
+318
+00:14:32.071 --> 00:14:35.541 line:-1 position:50%
+The CPU and GPU tracks represent
+the work that is being done
+
+
+319
+00:14:35.541 --> 00:14:37.243 line:-1 position:50%
+by your application.
+
+
+320
+00:14:37.243 --> 00:14:39.712 line:-1 position:50%
+And the Compositor track
+represents the work done
+
+
+321
+00:14:39.712 --> 00:14:43.015 line:-1 position:50%
+by the Compositor server
+to display your frame.
+
+
+322
+00:14:43.015 --> 00:14:45.184 line:-1 position:50%
+The timing type
+from Compositor Services
+
+
+323
+00:14:45.184 --> 00:14:48.521 line:-1 position:50%
+defines three main time values.
+
+
+324
+00:14:48.521 --> 00:14:50.990 line:-1 position:50%
+First is the optimal input time.
+
+
+325
+00:14:50.990 --> 00:14:54.460 line:-1 position:50%
+That is the best time to query
+the latency-critical input
+
+
+326
+00:14:54.460 --> 00:14:57.096 line:-1 position:50%
+and start rendering your frame.
+
+
+327
+00:14:57.096 --> 00:14:59.398 line:-1 position:50%
+Second is
+the rendering deadline.
+
+
+328
+00:14:59.398 --> 00:15:02.435 line:-1 position:50%
+That is the time by when
+your CPU and GPU work
+
+
+329
+00:15:02.435 --> 00:15:05.171 line:-1 position:50%
+to render a frame
+should be finished.
+
+
+330
+00:15:05.171 --> 00:15:07.406 line:-1 position:50%
+And third is presentation time.
+
+
+331
+00:15:07.406 --> 00:15:11.811 line:-1 position:50%
+That is the time when your frame
+will be presented on display.
+
+
+332
+00:15:11.811 --> 00:15:14.247 line:-1 position:50%
+In the two sections
+of your frame,
+
+
+333
+00:15:14.247 --> 00:15:18.117 line:-1 position:50%
+The update section should happen
+before the optimal input time.
+
+
+334
+00:15:18.117 --> 00:15:21.087 line:-1 position:50%
+After the update, you will wait
+for the optimal input time
+
+
+335
+00:15:21.087 --> 00:15:23.790 line:-1 position:50%
+before starting
+the frame submission.
+
+
+336
+00:15:23.790 --> 00:15:26.092 line:-1 position:50%
+Then you will perform
+the frame submission,
+
+
+337
+00:15:26.092 --> 00:15:29.762 line:-1 position:50%
+which will submit
+the render work to the GPU.
+
+
+338
+00:15:29.762 --> 00:15:33.032 line:-1 position:50%
+It is important to notice
+that the CPU and GPU work
+
+
+339
+00:15:33.032 --> 00:15:35.668 line:-1 position:50%
+needs to finish before
+the rendering deadline,
+
+
+340
+00:15:35.668 --> 00:15:39.238 line:-1 position:50%
+otherwise the Compositor server
+won't be able to use this frame
+
+
+341
+00:15:39.238 --> 00:15:42.341 line:-1 position:50%
+and will use a previous
+one instead.
+
+
+342
+00:15:42.341 --> 00:15:44.143 line:-1 position:50%
+Finally, on the
+rendering deadline,
+
+
+343
+00:15:44.143 --> 00:15:46.646 line:-1 position:50%
+the Compositor server
+will composite this frame
+
+
+344
+00:15:46.646 --> 00:15:49.482 line:-1 position:50%
+with the other layers
+in the system.
+
+
+345
+00:15:49.482 --> 00:15:51.717 line:-1 position:50%
+Back to the render loop code,
+
+
+346
+00:15:51.717 --> 00:15:56.055 line:-1 position:50%
+it's time to define
+the render_new_frame function.
+
+
+347
+00:15:56.055 --> 00:15:58.624 line:-1 position:50%
+In your engine's
+render_new_frame function,
+
+
+348
+00:15:58.624 --> 00:16:02.361 line:-1 position:50%
+you will first query a frame
+from the layerRenderer.
+
+
+349
+00:16:02.361 --> 00:16:04.730 line:-1 position:50%
+With the frame object,
+you will be able to predict
+
+
+350
+00:16:04.730 --> 00:16:06.399 line:-1 position:50%
+the timing information.
+
+
+351
+00:16:06.399 --> 00:16:08.734 line:-1 position:50%
+Use that timing information
+to scope the update
+
+
+352
+00:16:08.734 --> 00:16:11.204 line:-1 position:50%
+and submit intervals.
+
+
+353
+00:16:11.204 --> 00:16:13.573 line:-1 position:50%
+Next, implement
+the update section.
+
+
+354
+00:16:13.573 --> 00:16:16.375 line:-1 position:50%
+Define this section by calling
+the start and end update
+
+
+355
+00:16:16.375 --> 00:16:18.511 line:-1 position:50%
+on the frame.
+
+
+356
+00:16:18.511 --> 00:16:20.746 line:-1 position:50%
+Inside, you will gather
+the device inputs
+
+
+357
+00:16:20.746 --> 00:16:23.716 line:-1 position:50%
+and update the contents
+of the frame.
+
+
+358
+00:16:23.716 --> 00:16:25.017 line:-1 position:50%
+Once the update is finished,
+
+
+359
+00:16:25.017 --> 00:16:29.088 line:-1 position:50%
+wait for the optimal input time
+before starting the submission.
+
+
+360
+00:16:29,088 --> 00:16:31,390 position:50%
+After the wait,
+define the submission section
+
+
+361
+00:16:31,390 --> 00:16:34,794 position:50%
+by calling start
+and end submission.
+
+
+362
+00:16:34,794 --> 00:16:38,631 position:50%
+Inside this section,
+first query the drawable object.
+
+
+363
+00:16:38,631 --> 00:16:41,300 position:50%
+Similar to CAMetalLayer,
+the drawable object
+
+
+364
+00:16:41,300 --> 00:16:43,636 position:50%
+contains the target texture
+and the information
+
+
+365
+00:16:43,636 --> 00:16:47,106 position:50%
+that you will need to set up
+the render pipeline.
+
+
+366
+00:16:47,106 --> 00:16:49,141 position:50%
+Now that you have your drawable,
+
+
+367
+00:16:49,141 --> 00:16:51,177 position:50%
+you can get the final timing
+information
+
+
+368
+00:16:51,177 --> 00:16:54,413 position:50%
+that Compositor will use
+to render this frame.
+
+
+369
+00:16:54,413 --> 00:16:57,149 position:50%
+With the final timing,
+you can query the ar_pose.
+
+
+370
+00:16:57,149 --> 00:16:59,952 position:50%
+It is important to set the pose
+in the drawable
+
+
+371
+00:16:59,952 --> 00:17:02,054 position:50%
+since it will be used
+by the Compositor
+
+
+372
+00:17:02,054 --> 00:17:04,657 position:50%
+to perform reprojection
+on the frame.
+
+
+373
+00:17:04,657 --> 00:17:06,459 position:50%
+Here I'm getting the pose
+
+
+374
+00:17:06,459 --> 00:17:10,096 position:50%
+by calling the get_ar_pose
+function in my engine object.
+
+
+375
+00:17:10,096 --> 00:17:12,565 position:50%
+But you will need to implement
+the contents of this function
+
+
+376
+00:17:12,565 --> 00:17:15,935 position:50%
+using the ARKit
+world tracking APIs.
+
+
+377
+00:17:15,935 --> 00:17:18,170 position:50%
+The last step of the function
+will be to encode
+
+
+378
+00:17:18,170 --> 00:17:21,040 position:50%
+all the GPU work
+and submit the frame.
+
+
+379
+00:17:21,040 --> 00:17:23,309 position:50%
+Inside the submit_frame,
+use the drawable
+
+
+380
+00:17:23,309 --> 00:17:26,312 position:50%
+to render the contents
+of the frame as usual.
+
+
+381
+00:17:26.312 --> 00:17:28.781 line:-1 position:50%
+Now that the render loop
+is rendering frames,
+
+
+382
+00:17:28.781 --> 00:17:32.451 line:-1 position:50%
+it's time to make your immersive
+experience interactive.
+
+
+383
+00:17:32.451 --> 00:17:35.021 line:-1 position:50%
+This video shows how
+RecRoom using Unity
+
+
+384
+00:17:35.021 --> 00:17:39.025 line:-1 position:50%
+is already taking advantage
+of the ARKit and Compositor APIs
+
+
+385
+00:17:39.025 --> 00:17:42.461 line:-1 position:50%
+to add interactivity
+to their application.
+
+
+386
+00:17:42.461 --> 00:17:46.098 line:-1 position:50%
+There are two main input sources
+driving this interaction.
+
+
+387
+00:17:46.098 --> 00:17:49.035 line:-1 position:50%
+ARKit's HandTracking
+is providing the hand skeleton
+
+
+388
+00:17:49.035 --> 00:17:51.370 line:-1 position:50%
+to render virtual hands.
+
+
+389
+00:17:51.370 --> 00:17:53.272 line:-1 position:50%
+And pinch events
+from the LayerRenderer
+
+
+390
+00:17:53.272 --> 00:17:55.875 line:-1 position:50%
+are driving
+the user interactions.
+
+
+391
+00:17:55.875 --> 00:17:57.977 line:-1 position:50%
+In order to make
+the experience interactive,
+
+
+392
+00:17:57.977 --> 00:17:59.879 line:-1 position:50%
+you'll first gather
+the user input
+
+
+393
+00:17:59.879 --> 00:18:03.015 line:-1 position:50%
+and then apply it to
+the contents of your scene.
+
+
+394
+00:18:03.015 --> 00:18:07.119 line:-1 position:50%
+All this work will happen in
+the update section of the frame.
+
+
+395
+00:18:07.119 --> 00:18:09.021 line:-1 position:50%
+There are two main
+input sources,
+
+
+396
+00:18:09.021 --> 00:18:13.059 line:-1 position:50%
+the LayerRenderer and
+the ARKit HandTracking provider.
+
+
+397
+00:18:13.059 --> 00:18:15.795 line:-1 position:50%
+With the LayerRenderer,
+you will get updates every time
+
+
+398
+00:18:15.795 --> 00:18:18.965 line:-1 position:50%
+the application receives
+a pinch event.
+
+
+399
+00:18:18.965 --> 00:18:23.169 line:-1 position:50%
+These updates are exposed
+in the form of spatial events.
+
+
+400
+00:18:23.169 --> 00:18:26.572 line:-1 position:50%
+These events contains
+three main properties.
+
+
+401
+00:18:26.572 --> 00:18:29.008 line:-1 position:50%
+The phase will tell
+you if the event is active,
+
+
+402
+00:18:29.008 --> 00:18:32.178 line:-1 position:50%
+if it finished,
+or if it got canceled.
+
+
+403
+00:18:32.178 --> 00:18:34.313 line:-1 position:50%
+The selection ray
+will allow you to determine
+
+
+404
+00:18:34.313 --> 00:18:36.649 line:-1 position:50%
+the content of the scene
+that had the attention
+
+
+405
+00:18:36.649 --> 00:18:38.584 line:-1 position:50%
+when the event began.
+
+
+406
+00:18:38.584 --> 00:18:41.687 line:-1 position:50%
+And the last event property
+is the manipulator pose.
+
+
+407
+00:18:41,687 --> 00:18:43,122 position:50%
+This is the pose of the pinch
+
+
+408
+00:18:43,122 --> 00:18:47,827 position:50%
+and gets updated every frame
+for the duration of the event.
+
+
+409
+00:18:47,827 --> 00:18:51,197 position:50%
+From the HandTracking API,
+you will be able to get skeleton
+
+
+410
+00:18:51,197 --> 00:18:54,266 position:50%
+for both the left
+and right hands.
+
+
+411
+00:18:54,266 --> 00:18:57,503 position:50%
+Now, it's time to add
+input support in the code.
+
+
+412
+00:18:57.503 --> 00:18:59.772 line:-1 position:50%
+Before gathering the input,
+you will decide
+
+
+413
+00:18:59.772 --> 00:19:02.308 line:-1 position:50%
+if your application is rendering
+virtual hands
+
+
+414
+00:19:02.308 --> 00:19:04.710 line:-1 position:50%
+or if it uses passthrough hands.
+
+
+415
+00:19:04.710 --> 00:19:07.513 line:-1 position:50%
+Add the upperLimbVisibility
+scene modifier
+
+
+416
+00:19:07.513 --> 00:19:10.049 line:-1 position:50%
+to the ImmersiveSpace to make
+the passthrough hands
+
+
+417
+00:19:10.049 --> 00:19:12.852 line:-1 position:50%
+visible or hidden.
+
+
+418
+00:19:12,852 --> 00:19:15,855 position:50%
+To access the spatial events,
+go back to where you defined
+
+
+419
+00:19:15,855 --> 00:19:18,924 position:50%
+the CompositorLayer
+render handler.
+
+
+420
+00:19:18,924 --> 00:19:21,560 position:50%
+Here, register a block
+in the layerRenderer
+
+
+421
+00:19:21,560 --> 00:19:25,631 position:50%
+to get updates every time
+there is a new spatial event.
+
+
+422
+00:19:25,631 --> 00:19:28,067 position:50%
+If you are writing
+your engine code in C,
+
+
+423
+00:19:28,067 --> 00:19:32,805 position:50%
+you'll map the SwiftUI
+spatial event to a C type.
+
+
+424
+00:19:32.805 --> 00:19:34.306 line:-1 position:50%
+Inside the C code,
+
+
+425
+00:19:34.306 --> 00:19:37.877 line:-1 position:50%
+you can now receive
+the C event collection.
+
+
+426
+00:19:37.877 --> 00:19:39.211 line:-1 position:50%
+One thing to keep in mind
+
+
+427
+00:19:39.211 --> 00:19:41.313 line:-1 position:50%
+when handling
+the spatial event updates
+
+
+428
+00:19:41.313 --> 00:19:44.517 line:-1 position:50%
+is that the updates get
+delivered in the main thread.
+
+
+429
+00:19:44.517 --> 00:19:47.620 line:-1 position:50%
+This means that you will use
+some synchronization mechanism
+
+
+430
+00:19:47.620 --> 00:19:51.323 line:-1 position:50%
+when reading and writing
+the events in your engine.
+
+
+431
+00:19:51.323 --> 00:19:53.759 line:-1 position:50%
+Now that the events
+are stored in the engine,
+
+
+432
+00:19:53.759 --> 00:19:57.029 line:-1 position:50%
+it's time to implement
+the gather input function.
+
+
+433
+00:19:57.029 --> 00:19:58.631 line:-1 position:50%
+The first step
+is to create an object
+
+
+434
+00:19:58.631 --> 00:20:02.568 line:-1 position:50%
+to store the current
+input state for this frame.
+
+
+435
+00:20:02.568 --> 00:20:05.104 line:-1 position:50%
+This input state will store
+the events that you received
+
+
+436
+00:20:05.104 --> 00:20:07.273 line:-1 position:50%
+from the LayerRenderer.
+
+
+437
+00:20:07.273 --> 00:20:09.642 line:-1 position:50%
+Make sure that you are
+accessing your internal storage
+
+
+438
+00:20:09.642 --> 00:20:11.877 line:-1 position:50%
+in a safe way.
+
+
+439
+00:20:11.877 --> 00:20:13.179 line:-1 position:50%
+As for the hand skeleton,
+
+
+440
+00:20:13.179 --> 00:20:16.716 line:-1 position:50%
+you can use the hand tracking
+provider API from ARKit
+
+
+441
+00:20:16.716 --> 00:20:19.418 line:-1 position:50%
+to get the latest hand anchors.
+
+
+442
+00:20:19.418 --> 00:20:22.221 line:-1 position:50%
+And now that your application
+has input support,
+
+
+443
+00:20:22.221 --> 00:20:24.056 line:-1 position:50%
+you have all the tools
+at your disposal
+
+
+444
+00:20:24.056 --> 00:20:27.993 line:-1 position:50%
+to create fully immersive
+experiences on xrOS.
+
+
+445
+00:20:27.993 --> 00:20:31.097 line:-1 position:50%
+To recap, with SwiftUI,
+you will define the application.
+
+
+446
+00:20:31,097 --> 00:20:34,100 position:50%
+With CompositorServices
+and Metal, you will set up
+
+
+447
+00:20:34,100 --> 00:20:36,736 position:50%
+the render loop
+and display 3D content.
+
+
+448
+00:20:36,736 --> 00:20:38,571 position:50%
+And finally, with ARKit,
+
+
+449
+00:20:38,571 --> 00:20:41,874 position:50%
+you will be able to make
+your experience interactive.
+
+
+450
+00:20:41.874 --> 00:20:43.709 line:-1 position:50%
+Thank you for watching!
+
+
+451
+00:20:43,709 --> 00:20:47,179 line:0 position:90% size:2%
+♪
+

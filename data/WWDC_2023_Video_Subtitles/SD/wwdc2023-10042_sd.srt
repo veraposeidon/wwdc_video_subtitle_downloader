@@ -1,0 +1,1326 @@
+2
+00:00:00,334 --> 00:00:07,341 line:-1
+♪ ♪
+
+
+3
+00:00:10,711 --> 00:00:12,746 line:-2
+Doug: Welcome, everyone.
+I’m Doug Davidson,
+
+
+4
+00:00:12,779 --> 00:00:15,716 line:-2
+and I’m here to talk to you
+about Natural Language Processing.
+
+
+5
+00:00:15,749 --> 00:00:17,351 line:-1
+Now, there have been a number of sessions
+
+
+6
+00:00:17,384 --> 00:00:19,887 line:-2
+on Natural Language Processing
+in past years.
+
+
+7
+00:00:19,920 --> 00:00:22,489 line:-2
+What we’re going to talk about today
+builds on all of that,
+
+
+8
+00:00:22,523 --> 00:00:25,926 line:-2
+with the addition
+of some exciting new functionality.
+
+
+9
+00:00:25,959 --> 00:00:31,865 line:-2
+First I’m going to give some background
+on NLP and NLP models.
+
+
+10
+00:00:31,899 --> 00:00:34,902 line:-2
+Then I’ll summarize
+the existing functionality.
+
+
+11
+00:00:34,935 --> 00:00:37,671 line:-1
+Then I’ll talk about what’s new this year.
+
+
+12
+00:00:37,704 --> 00:00:40,941 line:-1
+I’ll discuss some advanced applications.
+
+
+13
+00:00:40,974 --> 00:00:43,310 line:-1
+And then I’ll wrap it up.
+
+
+14
+00:00:43,343 --> 00:00:45,879 line:-1
+Let’s start with some background.
+
+
+15
+00:00:45,913 --> 00:00:50,083 line:-2
+Schematically,
+NLP models generally have a similar flow.
+
+
+16
+00:00:50,117 --> 00:00:52,152 line:-1
+They start off with text data,
+
+
+17
+00:00:52,186 --> 00:00:58,225 line:-2
+then have an input layer that converts it
+to a numerical feature representation,
+
+
+18
+00:00:58,258 --> 00:01:00,694 line:-2
+upon which
+a machine learning model can act,
+
+
+19
+00:01:00,727 --> 00:01:03,297 line:-1
+and that produces some output.
+
+
+20
+00:01:03,330 --> 00:01:05,966 line:-2
+The most obvious examples of this
+from previous years
+
+
+21
+00:01:05,999 --> 00:01:08,635 line:-2
+are the Create ML models
+that are supported
+
+
+22
+00:01:08,669 --> 00:01:12,439 line:-1
+for text classification and word tagging.
+
+
+23
+00:01:12,472 --> 00:01:16,643 line:-2
+The development of NLP as a field
+can be traced fairly closely
+
+
+24
+00:01:16,677 --> 00:01:19,613 line:-2
+just by the development
+of increasingly sophisticated
+
+
+25
+00:01:19,646 --> 00:01:21,315 line:-1
+versions of the input layers.
+
+
+26
+00:01:22,449 --> 00:01:26,653 line:-2
+Ten or twenty years ago,
+these were simple orthographic features.
+
+
+27
+00:01:26,687 --> 00:01:28,689 line:0
+Then about a decade ago,
+
+
+28
+00:01:28,722 --> 00:01:31,625 line:0
+things moved to the use
+of static word embeddings,
+
+
+29
+00:01:31,658 --> 00:01:34,428 line:0
+such as Word2Vec and GloVe.
+
+
+30
+00:01:34,461 --> 00:01:38,932 line:0
+Then to contextual word embeddings
+based on neural network models,
+
+
+31
+00:01:38,966 --> 00:01:41,969 line:0
+such as CNNs and LSTMs.
+
+
+32
+00:01:42,002 --> 00:01:46,507 line:0
+And more recently,
+transformer-based language models.
+
+
+33
+00:01:46,540 --> 00:01:49,443 line:-2
+I should say a few words
+about what an embedding is.
+
+
+34
+00:01:49,476 --> 00:01:53,447 line:-2
+In the simplest form,
+it’s just a map from words in a language
+
+
+35
+00:01:53,480 --> 00:01:56,049 line:-1
+to vectors in some abstract vector space,
+
+
+36
+00:01:56,083 --> 00:01:58,685 line:-1
+but trained as a machine learning model
+
+
+37
+00:01:58,719 --> 00:02:03,223 line:-2
+such that words with similar meaning
+are close together in vector space.
+
+
+38
+00:02:03,257 --> 00:02:07,160 line:-2
+This allows it to incorporate
+linguistic knowledge.
+
+
+39
+00:02:07,194 --> 00:02:11,532 line:0
+Static embeddings are just a simple map
+from words to vectors.
+
+
+40
+00:02:11,565 --> 00:02:15,602 line:0
+Pass in a word, the model looks it up
+in a table and provides a vector.
+
+
+41
+00:02:15,636 --> 00:02:18,372 line:0
+These are trained such that words
+with similar meaning
+
+
+42
+00:02:18,405 --> 00:02:20,374 line:0
+are close together in vector space.
+
+
+43
+00:02:20,407 --> 00:02:24,111 line:0
+This is quite useful
+for understanding individual words.
+
+
+44
+00:02:24,144 --> 00:02:27,514 line:-2
+More sophisticated embeddings
+are dynamic and contextual
+
+
+45
+00:02:27,548 --> 00:02:31,618 line:-2
+such that each word in a sentence
+is mapped to a different vector
+
+
+46
+00:02:31,652 --> 00:02:33,887 line:-1
+depending on its use in the sentence.
+
+
+47
+00:02:33,921 --> 00:02:37,457 line:-1
+For example, “food” in “fast food joint”
+
+
+48
+00:02:37,491 --> 00:02:40,227 line:-2
+has a different meaning
+than “food” in “food for thought,”
+
+
+49
+00:02:40,260 --> 00:02:43,263 line:-2
+so they will get different
+embedding vectors.
+
+
+50
+00:02:43,297 --> 00:02:47,234 line:-2
+Now, the point of having
+a powerful embedding as an input layer
+
+
+51
+00:02:47,267 --> 00:02:49,369 line:-1
+is to allow for transfer learning.
+
+
+52
+00:02:49,403 --> 00:02:52,072 line:-2
+The embedding is trained
+on large amounts of data
+
+
+53
+00:02:52,105 --> 00:02:54,908 line:-2
+and encapsulates general knowledge
+of the language,
+
+
+54
+00:02:54,942 --> 00:02:58,111 line:-2
+which can be transferred
+to your specific task
+
+
+55
+00:02:58,145 --> 00:03:02,015 line:-2
+without requiring huge amounts
+of task-specific training data.
+
+
+56
+00:03:03,116 --> 00:03:07,988 line:0
+Currently, Create ML supports embeddings
+of this sort using ELMo models.
+
+
+57
+00:03:08,021 --> 00:03:12,226 line:0
+These models are based on LSTMs
+whose outputs are combined
+
+
+58
+00:03:12,259 --> 00:03:14,761 line:0
+to produce the embedding vector.
+
+
+59
+00:03:14,795 --> 00:03:16,864 line:0
+These can be used via Create ML
+
+
+60
+00:03:16,897 --> 00:03:20,567 line:0
+for training classification
+and tagging models.
+
+
+61
+00:03:20,601 --> 00:03:24,738 line:-2
+Now, let me discuss the models
+that have been supported so far.
+
+
+62
+00:03:24,771 --> 00:03:29,877 line:-2
+These were discussed in great detail
+in previous sessions in 2019 and 2020,
+
+
+63
+00:03:29,910 --> 00:03:32,913 line:-1
+so I’ll just describe them briefly here.
+
+
+64
+00:03:33,881 --> 00:03:37,718 line:-2
+Natural Language supports model training
+using Create ML
+
+
+65
+00:03:37,751 --> 00:03:42,022 line:-2
+that generally follows the pattern
+we’ve seen for NLP models.
+
+
+66
+00:03:42,055 --> 00:03:44,458 line:-2
+This involves models
+for two different tasks:
+
+
+67
+00:03:44,491 --> 00:03:48,095 line:-1
+text classification and word tagging.
+
+
+68
+00:03:48,128 --> 00:03:52,065 line:0
+In text classification,
+the output describes the input text
+
+
+69
+00:03:52,099 --> 00:03:54,334 line:0
+using one of a set of classes.
+
+
+70
+00:03:54,368 --> 00:03:57,871 line:0
+For example,
+it might be a topic or a sentiment.
+
+
+71
+00:03:57,905 --> 00:04:02,876 line:0
+And in word tagging, the output puts
+a label on each word in the input text,
+
+
+72
+00:04:02,910 --> 00:04:06,413 line:0
+for example,
+a part of speech or a role label.
+
+
+73
+00:04:08,415 --> 00:04:11,318 line:-2
+And the supported Create ML models
+have generally followed
+
+
+74
+00:04:11,351 --> 00:04:16,723 line:-2
+the evolution of the NLP field,
+starting with maxent and CRF-based models,
+
+
+75
+00:04:16,757 --> 00:04:19,626 line:-2
+then adding support
+for static word embeddings,
+
+
+76
+00:04:19,660 --> 00:04:22,763 line:-2
+and then dynamic word embeddings
+for Create ML models
+
+
+77
+00:04:22,796 --> 00:04:25,132 line:-1
+using ELMo embeddings.
+
+
+78
+00:04:25,165 --> 00:04:28,635 line:0
+And you can view the detail on this
+in previous sessions,
+
+
+79
+00:04:28,669 --> 00:04:32,172 line:0
+“Advances in Natural Language Framework”
+from 2019
+
+
+80
+00:04:32,206 --> 00:04:35,742 line:0
+and “Make Apps Smarter
+with Natural Language” from 2020.
+
+
+81
+00:04:35,776 --> 00:04:40,347 line:-2
+Now let me turn to what's new this year
+in Natural Language.
+
+
+82
+00:04:40,380 --> 00:04:45,719 line:-2
+I’m happy to say that we now provide
+transformer-based contextual embeddings.
+
+
+83
+00:04:45,752 --> 00:04:48,322 line:-1
+Specifically, these are BERT embeddings.
+
+
+84
+00:04:48,355 --> 00:04:53,126 line:-2
+That just stands for Bidirectional Encoder
+Representations from Transformers.
+
+
+85
+00:04:53,160 --> 00:04:56,730 line:-2
+These are embedding models
+that are trained on large amounts of text
+
+
+86
+00:04:56,763 --> 00:05:00,133 line:-2
+using a masked language model
+style of training.
+
+
+87
+00:05:00,167 --> 00:05:03,737 line:-2
+This means that the model is given
+a sentence with one word masked out
+
+
+88
+00:05:03,770 --> 00:05:06,039 line:-1
+and asked to suggest the word,
+
+
+89
+00:05:06,073 --> 00:05:08,842 line:-1
+for example, “food” in “food for thought,”
+
+
+90
+00:05:08,876 --> 00:05:12,079 line:-2
+and trained to do better and better
+at this.
+
+
+91
+00:05:14,081 --> 00:05:19,319 line:-2
+Transformers at their heart are based
+on what’s called an attention mechanism,
+
+
+92
+00:05:19,353 --> 00:05:22,689 line:-1
+specifically, multi-headed self-attention,
+
+
+93
+00:05:22,723 --> 00:05:24,658 line:-2
+which allows the model
+to take into account
+
+
+94
+00:05:24,691 --> 00:05:27,794 line:-2
+different portions of the text
+with different weights,
+
+
+95
+00:05:27,828 --> 00:05:31,064 line:-1
+in multiple different ways at once.
+
+
+96
+00:05:31,098 --> 00:05:35,569 line:-2
+The multi-headed self-attention mechanism
+is wrapped up with multiple other layers,
+
+
+97
+00:05:35,602 --> 00:05:39,273 line:-2
+then repeated several times,
+which altogether provides a powerful
+
+
+98
+00:05:39,306 --> 00:05:44,778 line:-2
+and flexible model that can take advantage
+of large amounts of textual data.
+
+
+99
+00:05:44,811 --> 00:05:49,850 line:-2
+So much so in fact that it can be trained
+on multiple languages at once,
+
+
+100
+00:05:49,883 --> 00:05:52,619 line:-1
+leading to a multilingual model.
+
+
+101
+00:05:52,653 --> 00:05:54,021 line:-1
+This has several advantages.
+
+
+102
+00:05:54,054 --> 00:05:57,858 line:-2
+It makes it possible to support
+many languages immediately
+
+
+103
+00:05:57,891 --> 00:06:00,294 line:-1
+and even multiple languages at once.
+
+
+104
+00:06:00,327 --> 00:06:04,164 line:-2
+But even more than that,
+because of similarities between languages,
+
+
+105
+00:06:04,198 --> 00:06:09,736 line:-2
+there's some synergy such that data
+for one language helps with others.
+
+
+106
+00:06:10,604 --> 00:06:13,974 line:-2
+So we’ve gone immediately
+to supporting 27 different languages
+
+
+107
+00:06:14,007 --> 00:06:17,644 line:-2
+across a wide variety
+of language families.
+
+
+108
+00:06:17,678 --> 00:06:20,581 line:-1
+This is done with three separate models,
+
+
+109
+00:06:20,614 --> 00:06:25,319 line:-2
+one each for groups of languages
+that share related writing systems.
+
+
+110
+00:06:25,352 --> 00:06:28,555 line:-2
+So there's one model
+for Latin-script languages,
+
+
+111
+00:06:28,589 --> 00:06:31,091 line:-1
+one for languages that use Cyrillic,
+
+
+112
+00:06:31,124 --> 00:06:34,528 line:-1
+and one for Chinese, Japanese, and Korean.
+
+
+113
+00:06:35,629 --> 00:06:38,632 line:-2
+These embedding models fit right in
+with the Create ML training
+
+
+114
+00:06:38,665 --> 00:06:42,402 line:-2
+we discussed earlier,
+serving as an input encoding layer.
+
+
+115
+00:06:42,436 --> 00:06:46,006 line:-2
+This is a powerful encoding
+for many different models.
+
+
+116
+00:06:46,039 --> 00:06:48,575 line:-2
+In addition though,
+the data that you use for training
+
+
+117
+00:06:48,609 --> 00:06:51,278 line:-2
+doesn’t have to all be
+in a single language.
+
+
+118
+00:06:51,311 --> 00:06:54,848 line:-2
+Let me show you how this works
+with an example.
+
+
+119
+00:06:54,882 --> 00:06:58,452 line:-2
+Suppose you're writing a messaging app
+and want to aid users
+
+
+120
+00:06:58,485 --> 00:07:02,055 line:-2
+by automatically classifying
+the messages that they receive.
+
+
+121
+00:07:02,089 --> 00:07:04,992 line:-2
+Suppose you want to divide them
+into three categories:
+
+
+122
+00:07:05,025 --> 00:07:08,362 line:-2
+personal messages, such as you might
+receive from your friends,
+
+
+123
+00:07:08,395 --> 00:07:11,832 line:-2
+business messages, such as you might
+receive from your colleagues,
+
+
+124
+00:07:11,865 --> 00:07:16,970 line:-2
+and commercial messages, such as you might
+receive from businesses you interact with.
+
+
+125
+00:07:17,004 --> 00:07:20,507 line:-2
+But users might receive messages
+in many different languages,
+
+
+126
+00:07:20,541 --> 00:07:22,409 line:-1
+and you want to handle that.
+
+
+127
+00:07:22,442 --> 00:07:26,580 line:-2
+For this example, I’ve assembled
+some training data in multiple languages,
+
+
+128
+00:07:26,613 --> 00:07:29,183 line:-1
+English, Italian, German, and Spanish.
+
+
+129
+00:07:29,216 --> 00:07:35,088 line:-2
+I used json format,
+but you could also use directories or CSV.
+
+
+130
+00:07:35,122 --> 00:07:39,526 line:-2
+To train our model, we go into
+the Create ML app and create a project.
+
+
+131
+00:07:39,560 --> 00:07:42,863 line:-1
+Then we need to select our training data.
+
+
+132
+00:07:48,735 --> 00:07:54,575 line:-2
+I’ve also prepared validation data
+and test data to go along with it.
+
+
+133
+00:08:00,814 --> 00:08:03,951 line:-2
+Then we need to choose our algorithm,
+and we have a new choice here:
+
+
+134
+00:08:03,984 --> 00:08:07,387 line:-1
+the BERT embeddings.
+
+
+135
+00:08:09,389 --> 00:08:13,026 line:-2
+Once we’ve chosen those,
+we can choose the script.
+
+
+136
+00:08:13,060 --> 00:08:17,264 line:-2
+Since these are Latin-script languages,
+I’ll leave it on Latin.
+
+
+137
+00:08:17,297 --> 00:08:18,966 line:-1
+If we were using a single language,
+
+
+138
+00:08:18,999 --> 00:08:21,935 line:-2
+we would have the option
+of specifying it here,
+
+
+139
+00:08:21,969 --> 00:08:25,706 line:-2
+but this is multilingual,
+so we’ll just leave it on automatic.
+
+
+140
+00:08:27,708 --> 00:08:33,580 line:-2
+Then all we need to do is press Train,
+and model training will start.
+
+
+141
+00:08:36,517 --> 00:08:38,352 line:-2
+The most time-consuming part
+of the training
+
+
+142
+00:08:38,385 --> 00:08:41,655 line:-2
+is applying these powerful embeddings
+to the text.
+
+
+143
+00:08:41,688 --> 00:08:47,327 line:-2
+Then the model trains fairly quickly
+to a high degree of accuracy.
+
+
+144
+00:08:49,329 --> 00:08:54,501 line:-2
+At that point, we can try it out
+on some example messages.
+
+
+145
+00:08:56,503 --> 00:08:59,473 line:-1
+In English…
+
+
+146
+00:09:01,475 --> 00:09:04,645 line:-1
+Or Spanish.
+
+
+147
+00:09:08,015 --> 00:09:12,019 line:-2
+And the model is pretty confident
+that these are commercial messages.
+
+
+148
+00:09:12,052 --> 00:09:14,521 line:-2
+As an example of the synergies
+that are possible,
+
+
+149
+00:09:14,555 --> 00:09:16,823 line:-1
+this model hasn’t been trained on French,
+
+
+150
+00:09:16,857 --> 00:09:19,960 line:-2
+but it can still classify
+some French text as well.
+
+
+151
+00:09:25,832 --> 00:09:28,335 line:-2
+I do recommend though
+that you use training data
+
+
+152
+00:09:28,368 --> 00:09:31,371 line:-2
+for each of the languages
+you are interested in.
+
+
+153
+00:09:31,405 --> 00:09:34,041 line:-2
+Now, so far we’ve just been working
+with Create ML,
+
+
+154
+00:09:34,074 --> 00:09:36,410 line:-2
+but it’s also possible
+to work with these embeddings
+
+
+155
+00:09:36,443 --> 00:09:38,612 line:-1
+using the Natural Language framework
+
+
+156
+00:09:38,645 --> 00:09:42,649 line:-2
+with a new class called
+NLContextualEmbedding.
+
+
+157
+00:09:42,683 --> 00:09:45,452 line:-2
+This allows you to identify
+the embedding model you want
+
+
+158
+00:09:45,485 --> 00:09:47,921 line:-1
+and find out some of its properties.
+
+
+159
+00:09:48,822 --> 00:09:52,125 line:-2
+You can look for an embedding model
+in a number of different ways,
+
+
+160
+00:09:52,159 --> 00:09:55,662 line:-1
+for example, by language or by script.
+
+
+161
+00:09:55,696 --> 00:09:58,365 line:-2
+Once you have such a model,
+you can get properties
+
+
+162
+00:09:58,398 --> 00:10:01,602 line:-1
+such as the dimensionality of the vectors.
+
+
+163
+00:10:01,635 --> 00:10:04,071 line:-1
+Also, each model has an identifier,
+
+
+164
+00:10:04,104 --> 00:10:07,574 line:-2
+which is just a string
+that uniquely identifies the model.
+
+
+165
+00:10:07,608 --> 00:10:09,910 line:-2
+For example,
+when you start working with a model,
+
+
+166
+00:10:09,943 --> 00:10:11,712 line:-1
+you might locate it by language,
+
+
+167
+00:10:11,745 --> 00:10:16,283 line:-2
+but later on you would want to make sure
+that you're using the exact same model,
+
+
+168
+00:10:16,316 --> 00:10:20,487 line:-2
+and the identifier will allow you
+to do this.
+
+
+169
+00:10:20,521 --> 00:10:24,391 line:-2
+One thing to keep in mind is that,
+like many other Natural Language features,
+
+
+170
+00:10:24,424 --> 00:10:29,796 line:-2
+these embedding models rely on assets
+that are downloaded as needed.
+
+
+171
+00:10:29,830 --> 00:10:34,801 line:-2
+NLContextualEmbedding provides some APIs
+to give you additional control over this,
+
+
+172
+00:10:34,835 --> 00:10:40,007 line:-2
+for example,
+to request download before use.
+
+
+173
+00:10:40,040 --> 00:10:42,342 line:-2
+You can ask
+whether a given embedding model
+
+
+174
+00:10:42,376 --> 00:10:46,914 line:-2
+currently has assets available on device,
+and if not put in a request,
+
+
+175
+00:10:46,947 --> 00:10:51,318 line:-2
+which will result
+in their being downloaded.
+
+
+176
+00:10:51,351 --> 00:10:54,221 line:-1
+Now, some of you may be saying,
+
+
+177
+00:10:54,254 --> 00:10:57,224 line:-2
+I have some models
+that I don’t train using Create ML,
+
+
+178
+00:10:57,257 --> 00:11:00,928 line:-2
+but instead I train
+using PyTorch or TensorFlow.
+
+
+179
+00:11:00,961 --> 00:11:03,664 line:-1
+Can I still use these new BERT embeddings?
+
+
+180
+00:11:03,697 --> 00:11:05,165 line:-1
+Yes, you can.
+
+
+181
+00:11:05,199 --> 00:11:08,368 line:-2
+We provide these pre-trained
+multilingual embedding models
+
+
+182
+00:11:08,402 --> 00:11:11,939 line:-2
+that are available to you,
+that you can use as an input layer
+
+
+183
+00:11:11,972 --> 00:11:14,875 line:-1
+to just about any model you want to train.
+
+
+184
+00:11:14,908 --> 00:11:17,544 line:-1
+Here’s how that would work.
+
+
+185
+00:11:17,578 --> 00:11:21,682 line:-2
+On your macOS device,
+you would use NLContextualEmbedding
+
+
+186
+00:11:21,715 --> 00:11:24,518 line:-2
+to get the embedding vectors
+for your training data.
+
+
+187
+00:11:24,551 --> 00:11:27,621 line:-2
+You would then feed these
+as input to your training
+
+
+188
+00:11:27,654 --> 00:11:29,890 line:-1
+using PyTorch or TensorFlow
+
+
+189
+00:11:29,923 --> 00:11:34,328 line:-2
+and convert the result to a Core ML model
+using Core ML tools.
+
+
+190
+00:11:36,330 --> 00:11:40,801 line:-2
+Then at inference time on device,
+you would use NLContextualEmbedding
+
+
+191
+00:11:40,834 --> 00:11:43,370 line:-2
+to get the embedding vectors
+for your input data,
+
+
+192
+00:11:43,403 --> 00:11:47,407 line:-2
+pass them into your Core ML model
+to get the output.
+
+
+193
+00:11:47,441 --> 00:11:51,945 line:-2
+To support this, there are additional
+NLContextualEmbedding APIs
+
+
+194
+00:11:51,979 --> 00:11:55,916 line:-2
+that allow you to load a model,
+apply it to a piece of text,
+
+
+195
+00:11:55,949 --> 00:11:57,818 line:-1
+and get the resulting embedding vectors.
+
+
+196
+00:11:58,852 --> 00:12:02,055 line:-2
+If you remember
+the model identifier from earlier,
+
+
+197
+00:12:02,089 --> 00:12:06,660 line:-2
+you can use that to retrieve
+the same model that you used for training.
+
+
+198
+00:12:06,693 --> 00:12:09,897 line:-2
+You can then apply the model
+to a piece of text,
+
+
+199
+00:12:09,930 --> 00:12:14,334 line:-2
+giving
+an NLContextualEmbeddingResult object.
+
+
+200
+00:12:14,368 --> 00:12:16,937 line:-2
+Once you have this object,
+you can then use it
+
+
+201
+00:12:16,970 --> 00:12:20,941 line:-1
+to iterate over the embedding vectors.
+
+
+202
+00:12:20,974 --> 00:12:23,777 line:0
+Now, to give you just a taste
+of what's possible with this,
+
+
+203
+00:12:23,810 --> 00:12:26,747 line:0
+we prepared a simple example model.
+
+
+204
+00:12:26,780 --> 00:12:31,685 line:0
+We started with an existing
+English-language Stable Diffusion model,
+
+
+205
+00:12:31,718 --> 00:12:35,889 line:0
+then used some multilingual data
+to fine-tune it
+
+
+206
+00:12:35,923 --> 00:12:40,794 line:0
+to use the new BERT embeddings
+as an input layer, taking those as fixed,
+
+
+207
+00:12:40,827 --> 00:12:44,031 line:0
+and also training
+a simple linear projection layer
+
+
+208
+00:12:44,064 --> 00:12:46,600 line:0
+to convert dimensionalities.
+
+
+209
+00:12:46,633 --> 00:12:52,406 line:0
+The result then is a Stable Diffusion
+model that takes multilingual input.
+
+
+210
+00:12:52,439 --> 00:12:55,108 line:-2
+Here are some examples
+of output from the model.
+
+
+211
+00:12:55,142 --> 00:12:58,278 line:-2
+If I pass in some English text,
+for example,
+
+
+212
+00:12:58,312 --> 00:13:01,949 line:-2
+“A path through a garden
+full of pink flowers,”
+
+
+213
+00:13:01,982 --> 00:13:06,587 line:-2
+the model leads us down a path
+into a garden full of pink flowers.
+
+
+214
+00:13:06,620 --> 00:13:11,892 line:-2
+But also, if I translate the same sentence
+into French, Spanish, Italian, and German,
+
+
+215
+00:13:11,925 --> 00:13:17,698 line:-2
+the model produces images of paths and
+gardens full of pink flowers for each one.
+
+
+216
+00:13:17,731 --> 00:13:20,100 line:-2
+Let me take a slightly more complicated
+example.
+
+
+217
+00:13:20,133 --> 00:13:25,405 line:-2
+“A road in front of trees and mountains
+under a cloudy sky.”
+
+
+218
+00:13:25,439 --> 00:13:31,612 line:-2
+Here’s some output from the model,
+with road, trees, mountains, and clouds.
+
+
+219
+00:13:31,645 --> 00:13:34,281 line:-2
+But likewise,
+I can translate the same sentence
+
+
+220
+00:13:34,314 --> 00:13:37,217 line:-1
+into French, Spanish, Italian, and German,
+
+
+221
+00:13:37,251 --> 00:13:39,486 line:-1
+or any of a number of other languages,
+
+
+222
+00:13:39,520 --> 00:13:45,259 line:-2
+and for each one get an image
+of road, trees, mountains, and clouds.
+
+
+223
+00:13:45,292 --> 00:13:49,429 line:-2
+Now let me sum up the lessons
+from this session.
+
+
+224
+00:13:49,463 --> 00:13:52,099 line:-2
+You can use Create ML
+to easily train models
+
+
+225
+00:13:52,132 --> 00:13:55,135 line:-2
+for text classification
+or word tagging tasks,
+
+
+226
+00:13:55,169 --> 00:13:58,138 line:-2
+and the new multilingual
+BERT embedding models provide
+
+
+227
+00:13:58,172 --> 00:14:01,341 line:-2
+a powerful input encoding layer
+for this purpose.
+
+
+228
+00:14:01,375 --> 00:14:05,045 line:-2
+These models can be single-language
+or multilingual.
+
+
+229
+00:14:05,078 --> 00:14:08,182 line:-2
+You can also use the BERT embeddings
+as input layers
+
+
+230
+00:14:08,215 --> 00:14:13,187 line:-2
+for whatever model you want to train
+with PyTorch or TensorFlow.
+
+
+231
+00:14:13,220 --> 00:14:14,588 line:-1
+Thank you.
+
+
+232
+00:14:14,621 --> 00:14:17,591 line:-1
+Now go out and start training some models.
+
+
+233
+00:14:17,624 --> 00:14:19,726 line:-1
+♪ ♪
+

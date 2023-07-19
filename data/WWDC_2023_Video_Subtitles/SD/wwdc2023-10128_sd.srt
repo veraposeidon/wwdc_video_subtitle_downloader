@@ -1,0 +1,3026 @@
+2
+00:00:00.501 --> 00:00:08.509 line:-1 align:center
+♪ ♪
+
+
+3
+00:00:10.410 --> 00:00:12.746 line:-2 align:center
+Pawel Szczerbuk:
+Hello, my name is Pawel Szczerbuk,
+
+
+4
+00:00:12.779 --> 00:00:15.048 line:-1 align:center
+and I'm a GPU Software Engineer.
+
+
+5
+00:00:15.082 --> 00:00:18.418 line:-2 align:center
+Metal can help you scale
+your ray tracing applications
+
+
+6
+00:00:18.452 --> 00:00:21.021 line:-1 align:center
+to complex and detailed scenes.
+
+
+7
+00:00:21.054 --> 00:00:24.658 line:-2 align:center
+Ray tracing is fundamental to image
+fidelity in production rendering
+
+
+8
+00:00:24.691 --> 00:00:28.328 line:-2 align:center
+while ray tracing in games
+focuses on high frame rates
+
+
+9
+00:00:28.362 --> 00:00:30.464 line:-1 align:center
+while improving visual quality.
+
+
+10
+00:00:30,497 --> 00:00:36,303 line:-2
+This image of Disney's Moana Island Scene
+was rendered with Metal ray tracing.
+
+
+11
+00:00:36,336 --> 00:00:40,340 line:-2
+Today I am going to talk about
+how to use Metal ray tracing.
+
+
+12
+00:00:40,374 --> 00:00:43,443 line:-2
+I will highlight some exciting
+new features you can use
+
+
+13
+00:00:43,477 --> 00:00:47,748 line:-2
+to accelerate ray tracing in games
+and production renderers.
+
+
+14
+00:00:49,383 --> 00:00:52,619 line:-2
+Ray tracing applications
+simulate individual rays of light
+
+
+15
+00:00:52,653 --> 00:00:55,455 line:-1
+bouncing around a scene
+
+
+16
+00:00:55.489 --> 00:00:57.224 line:-1 align:center
+To render with Metal ray tracing,
+
+
+17
+00:00:57,257 --> 00:01:00,894 line:-2
+the first step is to define
+your scene geometry.
+
+
+18
+00:01:00.928 --> 00:01:03.564 line:-2 align:center
+Then Metal builds
+an Acceleration Structure
+
+
+19
+00:01:03,597 --> 00:01:07,034 line:-2
+that contains your geometry
+and can be efficiently queried
+
+
+20
+00:01:07,067 --> 00:01:10,737 line:-1
+for intersections using GPU acceleration.
+
+
+21
+00:01:10.771 --> 00:01:15.142 line:-2 align:center
+In a GPU function,
+create a ray to intersect with your scene.
+
+
+22
+00:01:15,175 --> 00:01:18,145 line:-2
+Make an intersector object in your shader
+and provide it
+
+
+23
+00:01:18,178 --> 00:01:22,416 line:-2
+with both your ray
+and the acceleration structure.
+
+
+24
+00:01:22.449 --> 00:01:24.852 line:-1 align:center
+This returns an intersection result,
+
+
+25
+00:01:24.885 --> 00:01:26.653 line:-1 align:center
+with all the information you may need
+
+
+26
+00:01:26.687 --> 00:01:29.990 line:-2 align:center
+to either shade the pixel,
+or process it further.
+
+
+27
+00:01:30,023 --> 00:01:34,795 line:-2
+Each of these pieces work together
+to enable you to build your scene,
+
+
+28
+00:01:34.828 --> 00:01:38.365 line:-1 align:center
+use instancing to add visual complexity,
+
+
+29
+00:01:38,398 --> 00:01:41,535 line:-1
+and perform ray intersection.
+
+
+30
+00:01:41.568 --> 00:01:44.438 line:-2 align:center
+And there are some amazing tools
+at your disposal
+
+
+31
+00:01:44.471 --> 00:01:48.275 line:-2 align:center
+to help you work
+with ray tracing applications.
+
+
+32
+00:01:48.308 --> 00:01:51.111 line:-1 align:center
+It all starts with building your scene.
+
+
+33
+00:01:52.012 --> 00:01:56.617 line:-2 align:center
+The Metal ray tracing API supports
+a few different types of geometry.
+
+
+34
+00:01:56.650 --> 00:02:00.621 line:-2 align:center
+All of this geometry is stored
+in an acceleration structure.
+
+
+35
+00:02:02.055 --> 00:02:05.893 line:-2 align:center
+An acceleration structure speeds up
+the ray tracing process
+
+
+36
+00:02:05.926 --> 00:02:09.463 line:-1 align:center
+by recursively partitioning the geometry.
+
+
+37
+00:02:09,496 --> 00:02:12,833 line:-2
+This allows for quick elimination
+of any geometry
+
+
+38
+00:02:12.866 --> 00:02:15.602 line:-1 align:center
+that does not intersect with the ray.
+
+
+39
+00:02:15,636 --> 00:02:20,174 line:-2
+You can set up an acceleration structure
+in three steps.
+
+
+40
+00:02:20,207 --> 00:02:22,676 line:-2
+Create an acceleration structure
+descriptor,
+
+
+41
+00:02:22,709 --> 00:02:25,846 line:-2
+where you will provide
+your actual geometry.
+
+
+42
+00:02:25.879 --> 00:02:27.548 line:-1 align:center
+Once you have the descriptor,
+
+
+43
+00:02:27.581 --> 00:02:29.950 line:-2 align:center
+you can allocate
+the acceleration structure,
+
+
+44
+00:02:29,983 --> 00:02:32,486 line:-1
+and then build it.
+
+
+45
+00:02:32,519 --> 00:02:38,458 line:-2
+An acceleration structure descriptor
+contains one or more geometry descriptors.
+
+
+46
+00:02:38,492 --> 00:02:42,763 line:-2
+There are three types of geometry
+descriptors available in Metal.
+
+
+47
+00:02:42.796 --> 00:02:45.732 line:-2 align:center
+Triangles are the primitives
+we all know and love,
+
+
+48
+00:02:45.766 --> 00:02:48.936 line:-2 align:center
+used to model almost everything
+in computer graphics.
+
+
+49
+00:02:48.969 --> 00:02:51.772 line:-2 align:center
+Bounding box primitives
+are entirely defined
+
+
+50
+00:02:51.805 --> 00:02:53.907 line:-1 align:center
+by your custom intersection function
+
+
+51
+00:02:53.941 --> 00:02:58.946 line:-2 align:center
+that Metal will call when a ray hits
+an enclosing bounding box.
+
+
+52
+00:02:58,979 --> 00:03:00,747 line:-1
+And new this year, curves.
+
+
+53
+00:03:00.781 --> 00:03:04.985 line:-2 align:center
+These are great
+for rendering hair and fur.
+
+
+54
+00:03:05,018 --> 00:03:08,789 line:-2
+To create an acceleration
+structure using triangles,
+
+
+55
+00:03:08,822 --> 00:03:13,527 line:-2
+create a triangle geometry descriptor
+for an individual piece of geometry.
+
+
+56
+00:03:13,560 --> 00:03:18,765 line:-2
+You'll provide a vertex buffer,
+index buffer, and triangle count.
+
+
+57
+00:03:18.799 --> 00:03:21.668 line:-2 align:center
+Bounding box geometry
+works in a similar way,
+
+
+58
+00:03:21.702 --> 00:03:23.403 line:-1 align:center
+except instead of vertices,
+
+
+59
+00:03:23,437 --> 00:03:27,641 line:-2
+you provide the bounding boxes
+that enclose your geometry.
+
+
+60
+00:03:27,674 --> 00:03:30,644 line:-2
+Additionally,
+you provide an intersection function
+
+
+61
+00:03:30,677 --> 00:03:34,748 line:-2
+which Metal will invoke when
+a ray hits your bounding box primitive.
+
+
+62
+00:03:35,782 --> 00:03:39,286 line:0
+For more details about how
+to set up the intersection function,
+
+
+63
+00:03:39,319 --> 00:03:42,923 align:center
+see the 2020
+"Discover ray tracing with Metal" talk.
+
+
+64
+00:03:44.124 --> 00:03:47.561 line:-1 align:center
+Geometry such as hair, fur, and vegetation
+
+
+65
+00:03:47.594 --> 00:03:51.098 line:-2 align:center
+can have thousands
+or even millions of primitives.
+
+
+66
+00:03:51,131 --> 00:03:54,835 line:-2
+These are typically modeled
+as fine, smooth curves.
+
+
+67
+00:03:54,868 --> 00:03:57,838 line:-2
+Instead of using triangles
+to approximate these curves,
+
+
+68
+00:03:57,871 --> 00:04:00,774 line:-1
+you can use Metal's new curve primitives.
+
+
+69
+00:04:00,807 --> 00:04:04,878 line:-2
+These curves will remain smooth
+even as the camera zooms in.
+
+
+70
+00:04:04,912 --> 00:04:06,647 line:-1
+And compared to triangles,
+
+
+71
+00:04:06.680 --> 00:04:09.483 line:-2 align:center
+curves have a more compact
+memory footprint
+
+
+72
+00:04:09.516 --> 00:04:12.653 line:-2 align:center
+and allow faster
+acceleration structure builds.
+
+
+73
+00:04:14,688 --> 00:04:19,593 line:-2
+A full curve is made of a series
+of connected curve segments.
+
+
+74
+00:04:19,626 --> 00:04:22,763 line:-2
+Every segment on a curve
+is its own primitive,
+
+
+75
+00:04:22.796 --> 00:04:26.867 line:-2 align:center
+and Metal assigns each segment
+a unique primitive ID.
+
+
+76
+00:04:26,900 --> 00:04:30,637 line:-2
+Each of these segments
+is defined by a series of control points,
+
+
+77
+00:04:30.671 --> 00:04:33.340 line:-1 align:center
+which control the shape of the curve.
+
+
+78
+00:04:33.373 --> 00:04:38.111 line:-2 align:center
+These control points are interpolated
+using a set of basis functions.
+
+
+79
+00:04:38,145 --> 00:04:40,080 line:-1
+Depending on the basis function,
+
+
+80
+00:04:40,113 --> 00:04:44,618 line:-2
+each curve segment can have
+2, 3, or 4 control points.
+
+
+81
+00:04:44,651 --> 00:04:49,022 line:-2
+Metal offers four
+different curve basis functions:
+
+
+82
+00:04:49.056 --> 00:04:50.190 line:-1 align:center
+Bezier,
+
+
+83
+00:04:50.224 --> 00:04:51.792 line:-1 align:center
+Catmull-Rom,
+
+
+84
+00:04:51,825 --> 00:04:53,093 align:center
+B-Spline,
+
+
+85
+00:04:53,126 --> 00:04:55,062 align:center
+and Linear.
+
+
+86
+00:04:55,095 --> 00:04:58,298 align:center
+Each of these basis functions
+has their own benefits,
+
+
+87
+00:04:58,332 --> 00:05:01,668 align:center
+so choose the best one for your use case.
+
+
+88
+00:05:01,702 --> 00:05:05,405 line:-2
+Metal also requires
+a control point index buffer.
+
+
+89
+00:05:05.439 --> 00:05:08.509 line:-2 align:center
+Each curve segment has one index
+in this buffer
+
+
+90
+00:05:08,542 --> 00:05:12,145 line:-2
+representing the first control point
+for the segment.
+
+
+91
+00:05:12,179 --> 00:05:15,849 line:-2
+For example,
+say you have four control points.
+
+
+92
+00:05:15.883 --> 00:05:20.287 line:-2 align:center
+You define a curve segment using the index
+of its first control point,
+
+
+93
+00:05:20.320 --> 00:05:23.524 line:-1 align:center
+so add a zero to the index buffer.
+
+
+94
+00:05:23.557 --> 00:05:26.760 line:-2 align:center
+This example is using
+Catmull-Rom basis function,
+
+
+95
+00:05:26.793 --> 00:05:32.165 line:-2 align:center
+so the actual curve segment is only
+defined between control points 1 and 2.
+
+
+96
+00:05:32.199 --> 00:05:35.102 line:-2 align:center
+All you need to do to connect
+another curve segment
+
+
+97
+00:05:35,135 --> 00:05:37,771 line:-1
+is add one more control point.
+
+
+98
+00:05:37.804 --> 00:05:41.808 line:-2 align:center
+This additional curve segment
+uses control points 1 through 4,
+
+
+99
+00:05:41.842 --> 00:05:44.611 line:-1 align:center
+so add a 1 to the index buffer.
+
+
+100
+00:05:44,645 --> 00:05:49,183 line:-2
+These two curve segments share 3 control
+points because of the index buffer,
+
+
+101
+00:05:49,216 --> 00:05:52,653 line:-2
+which is one reason
+curves are able to save memory.
+
+
+102
+00:05:52,686 --> 00:05:56,323 line:-2
+Repeat this as many times as needed
+to finish the curve.
+
+
+103
+00:05:56.356 --> 00:06:00.160 line:-2 align:center
+To start a new curve,
+simply add additional control points
+
+
+104
+00:06:00,194 --> 00:06:03,130 line:-2
+which don't overlap
+the previous control points
+
+
+105
+00:06:03,163 --> 00:06:06,867 line:-2
+and add the corresponding index
+to the index buffer.
+
+
+106
+00:06:06,900 --> 00:06:11,405 line:-2
+So far the curves I've described
+have been abstract mathematical objects.
+
+
+107
+00:06:11,438 --> 00:06:16,176 line:-2
+In order to render them,
+they need to have some kind of 3D shape.
+
+
+108
+00:06:16,210 --> 00:06:18,545 line:-1
+Each control point also has a radius
+
+
+109
+00:06:18.579 --> 00:06:21.882 line:-2 align:center
+which is interpolated
+along the length of the curve.
+
+
+110
+00:06:21.915 --> 00:06:26.587 line:-2 align:center
+By default, curves are rendered
+with a 3D cylindrical cross section.
+
+
+111
+00:06:26.620 --> 00:06:30.023 line:-2 align:center
+This is great for curves
+that will be seen from close-up.
+
+
+112
+00:06:30,057 --> 00:06:32,960 line:-2
+For curves
+that will only be seen from far away,
+
+
+113
+00:06:32,993 --> 00:06:35,629 line:-1
+Metal also supports flat curves.
+
+
+114
+00:06:35.662 --> 00:06:40.000 line:-2 align:center
+This can improve performance
+whenever you don't need full 3D geometry.
+
+
+115
+00:06:41.201 --> 00:06:43.637 line:-1 align:center
+Similar to triangles and bounding boxes,
+
+
+116
+00:06:43.670 --> 00:06:48.275 line:-2 align:center
+curve geometry is represented
+with a curve geometry descriptor.
+
+
+117
+00:06:48.308 --> 00:06:50.644 line:-2 align:center
+Attach the buffers
+containing your control points,
+
+
+118
+00:06:50,677 --> 00:06:54,648 line:-2
+the corresponding radii,
+and control point indices.
+
+
+119
+00:06:54.681 --> 00:06:57.651 line:-2 align:center
+Set the number of control points
+in the control point buffer,
+
+
+120
+00:06:57.684 --> 00:07:00.854 line:-2 align:center
+as well as the number
+of actual curve segments.
+
+
+121
+00:07:00,888 --> 00:07:06,159 line:-2
+This should be the same as the number
+of indices in the index buffer.
+
+
+122
+00:07:06,193 --> 00:07:08,829 line:-1
+Specify what kind of curves you are using.
+
+
+123
+00:07:08.862 --> 00:07:14.134 line:-2 align:center
+This example uses round Bezier curves
+with 4 control points per curve segment.
+
+
+124
+00:07:14,168 --> 00:07:18,238 line:-2
+That's all you need to do
+to set up a curve geometry descriptor.
+
+
+125
+00:07:19.773 --> 00:07:22.543 line:-2 align:center
+Now that you've created
+your geometry descriptors,
+
+
+126
+00:07:22.576 --> 00:07:27.014 line:-2 align:center
+you can set up
+the acceleration structure descriptor.
+
+
+127
+00:07:27,047 --> 00:07:29,883 line:-2
+Use the primitive acceleration
+structure descriptor
+
+
+128
+00:07:29,917 --> 00:07:34,855 line:-2
+for primitive geometry like triangles,
+bounding boxes, and curves.
+
+
+129
+00:07:34,888 --> 00:07:39,459 line:-2
+Add the geometry descriptor
+to the acceleration structure descriptor.
+
+
+130
+00:07:39,493 --> 00:07:43,897 line:-2
+Multiple geometry descriptors can be added
+to a single acceleration structure
+
+
+131
+00:07:43.931 --> 00:07:46.533 line:-1 align:center
+to combine the geometry.
+
+
+132
+00:07:46.567 --> 00:07:49.570 line:-2 align:center
+When you have your acceleration structure
+descriptor ready,
+
+
+133
+00:07:49.603 --> 00:07:53.340 line:-2 align:center
+you can allocate memory
+for the acceleration structure.
+
+
+134
+00:07:53,373 --> 00:07:58,378 line:-2
+Metal gives you full control over when
+and where this memory is allocated.
+
+
+135
+00:07:59,980 --> 00:08:02,316 line:-1
+This is a two-part operation.
+
+
+136
+00:08:02,349 --> 00:08:07,020 line:-2
+First calculate the size of the objects
+needed for the build.
+
+
+137
+00:08:07.054 --> 00:08:11.258 line:-2 align:center
+The Metal device provides a method
+to calculate the required allocation size
+
+
+138
+00:08:11,291 --> 00:08:13,026 line:-1
+for an acceleration structure.
+
+
+139
+00:08:13.060 --> 00:08:16.730 line:-2 align:center
+Although it's possible to allocate storage
+for acceleration structures
+
+
+140
+00:08:16,763 --> 00:08:20,267 line:-2
+directly from the Metal device,
+allocating them from a heap
+
+
+141
+00:08:20,300 --> 00:08:24,137 line:-2
+will allow you to reduce resource
+management overhead later.
+
+
+142
+00:08:24,171 --> 00:08:27,641 line:-2
+The heap may have additional size
+and alignment requirements,
+
+
+143
+00:08:27,674 --> 00:08:31,345 line:-2
+which you can query using another method
+on the Metal device.
+
+
+144
+00:08:32,312 --> 00:08:35,015 line:-2
+With these sizes
+you can now allocate memory
+
+
+145
+00:08:35,048 --> 00:08:38,018 line:-1
+to store the acceleration structure.
+
+
+146
+00:08:38,051 --> 00:08:42,890 line:-2
+This storage is represented by
+an MTL Acceleration Structure object.
+
+
+147
+00:08:42,923 --> 00:08:44,925 line:-1
+To allocate one of these objects,
+
+
+148
+00:08:44,958 --> 00:08:47,494 line:-2
+call the make Acceleration Structure
+method
+
+
+149
+00:08:47.528 --> 00:08:51.965 line:-2 align:center
+on a heap or Metal device,
+passing the size.
+
+
+150
+00:08:51,999 --> 00:08:54,635 line:-1
+You will also allocate some scratch memory
+
+
+151
+00:08:54,668 --> 00:08:58,505 line:-2
+which Metal will use
+while building the acceleration structure.
+
+
+152
+00:08:58.539 --> 00:09:02.543 line:-2 align:center
+Since this memory only needs
+to be accessed by the GPU,
+
+
+153
+00:09:02,576 --> 00:09:07,614 line:-2
+you can do this by allocating a private
+storage mode buffer from the Metal device.
+
+
+154
+00:09:08,682 --> 00:09:12,219 line:-2
+Now you're ready to actually build
+the acceleration structure.
+
+
+155
+00:09:12,252 --> 00:09:13,854 line:-1
+Schedule the build operation,
+
+
+156
+00:09:13,887 --> 00:09:18,659 line:-2
+and then Metal will build the acceleration
+for you on the GPU.
+
+
+157
+00:09:18.692 --> 00:09:22.629 line:-2 align:center
+You do this using an acceleration
+structure command encoder.
+
+
+158
+00:09:24,264 --> 00:09:27,067 line:-2
+This encoder has several methods
+that you can use
+
+
+159
+00:09:27.100 --> 00:09:30.137 line:-2 align:center
+to build and modify
+acceleration structures.
+
+
+160
+00:09:30,170 --> 00:09:34,708 line:-2
+In this case, call the build method with
+the destination acceleration structure,
+
+
+161
+00:09:34,741 --> 00:09:37,411 line:-1
+the descriptor, and the scratch buffer.
+
+
+162
+00:09:37,444 --> 00:09:41,181 line:-2
+Metal will build the primitive
+acceleration structure for your geometry,
+
+
+163
+00:09:41,215 --> 00:09:45,452 line:-2
+and it will be available for use
+in subsequent GPU commands.
+
+
+164
+00:09:45.485 --> 00:09:48.488 line:-2 align:center
+That's how you can represent
+the geometry in your scene
+
+
+165
+00:09:48.522 --> 00:09:51.058 line:-1 align:center
+with a primitive acceleration structure.
+
+
+166
+00:09:51,091 --> 00:09:53,227 line:-1
+To help you scale to larger scenes,
+
+
+167
+00:09:53.260 --> 00:09:57.164 line:-2 align:center
+Metal also supports
+instance acceleration structures.
+
+
+168
+00:09:57.898 --> 00:10:01.835 line:-2 align:center
+It would take an enormous amount
+of memory to store a complex,
+
+
+169
+00:10:01.869 --> 00:10:04.738 line:-2 align:center
+detailed environment
+like the Moana island scene
+
+
+170
+00:10:04.771 --> 00:10:07.875 line:-2 align:center
+in a single primitive
+acceleration structure.
+
+
+171
+00:10:07.908 --> 00:10:10.978 line:-2 align:center
+But this intricate scene
+has a repetitive structure
+
+
+172
+00:10:11,011 --> 00:10:15,382 line:-2
+in the thousands of trees,
+millions of leaves, and other objects,
+
+
+173
+00:10:15,415 --> 00:10:19,753 line:-2
+which can be exploited
+to render the scene efficiently.
+
+
+174
+00:10:19,786 --> 00:10:21,655 line:-1
+All unique objects in the scene,
+
+
+175
+00:10:21.688 --> 00:10:24.458 line:-2 align:center
+including the mountains, corals,
+and trees,
+
+
+176
+00:10:24,491 --> 00:10:28,629 line:-2
+can be represented
+as primitive acceleration structures.
+
+
+177
+00:10:28.662 --> 00:10:32.666 line:-2 align:center
+These can be combined into an instance
+acceleration structure
+
+
+178
+00:10:32,699 --> 00:10:34,868 line:-1
+representing the whole scene.
+
+
+179
+00:10:34,902 --> 00:10:39,039 line:-2
+So while a primitive acceleration
+structure contains geometry,
+
+
+180
+00:10:39.072 --> 00:10:41.008 line:-1 align:center
+an instance acceleration structure
+
+
+181
+00:10:41,041 --> 00:10:44,378 line:-2
+contains references
+to other acceleration structures,
+
+
+182
+00:10:44,411 --> 00:10:50,017 line:-2
+transformed to different positions, sizes,
+and orientations to compose a full scene.
+
+
+183
+00:10:50,050 --> 00:10:52,519 line:-1
+Each instance has a transformation matrix
+
+
+184
+00:10:52.553 --> 00:10:56.757 line:-2 align:center
+to place the acceleration structure
+that it references in the scene.
+
+
+185
+00:10:56.790 --> 00:10:59.893 line:-2 align:center
+Building an instance acceleration
+structure is similar
+
+
+186
+00:10:59.927 --> 00:11:03.130 line:-2 align:center
+to building
+a primitive acceleration structure.
+
+
+187
+00:11:03,163 --> 00:11:06,166 line:0
+You will start by creating a descriptor.
+
+
+188
+00:11:06,200 --> 00:11:08,335 line:0
+This time, instead of geometry,
+
+
+189
+00:11:08,368 --> 00:11:12,206 line:0
+you provide a buffer containing
+information about each instance,
+
+
+190
+00:11:12,239 --> 00:11:14,741 align:center
+like the acceleration structure
+it references,
+
+
+191
+00:11:14,775 --> 00:11:18,745 line:0
+and the transformation matrix
+that places it in the scene.
+
+
+192
+00:11:18,779 --> 00:11:21,648 align:center
+Then build the acceleration structure
+on the GPU
+
+
+193
+00:11:21,682 --> 00:11:25,452 line:0
+in the same way that you build
+a primitive acceleration structure.
+
+
+194
+00:11:27,020 --> 00:11:32,960 line:-2
+To create the descriptor, construct an MTL
+Instance Acceleration Structure Descriptor
+
+
+195
+00:11:32.993 --> 00:11:36.797 line:-2 align:center
+and set the number of instances
+it will contain.
+
+
+196
+00:11:36,830 --> 00:11:40,601 line:-2
+Then provide an array
+of the primitive acceleration structures,
+
+
+197
+00:11:40.634 --> 00:11:42.769 line:-1 align:center
+which can be referenced by instances,
+
+
+198
+00:11:42.803 --> 00:11:45.873 line:-2 align:center
+and specify
+which type of instance descriptor
+
+
+199
+00:11:45.906 --> 00:11:48.475 line:-1 align:center
+will be contained in the instance buffer.
+
+
+200
+00:11:48,509 --> 00:11:52,579 line:-2
+Metal offers several instance descriptor
+types which you can choose from,
+
+
+201
+00:11:52.613 --> 00:11:55.449 line:-1 align:center
+depending on your use-case.
+
+
+202
+00:11:55,482 --> 00:12:00,320 line:-2
+You will configure the instances in
+the acceleration structure in two steps.
+
+
+203
+00:12:01,655 --> 00:12:06,527 line:-2
+First, allocate a buffer
+to store the per-instance data.
+
+
+204
+00:12:06.560 --> 00:12:10.497 line:-2 align:center
+The size of this buffer
+depends on the number of instances
+
+
+205
+00:12:10,531 --> 00:12:13,200 line:-1
+and the size of each instance descriptor,
+
+
+206
+00:12:13.233 --> 00:12:17.437 line:-2 align:center
+but it's allocated
+just like any other Metal buffer.
+
+
+207
+00:12:17,471 --> 00:12:19,206 line:-1
+Once you've allocated the buffer,
+
+
+208
+00:12:19.239 --> 00:12:22.676 line:-2 align:center
+assign it to the instance
+acceleration structure descriptor.
+
+
+209
+00:12:23.911 --> 00:12:27.314 line:-2 align:center
+Next you will fill the instance buffer
+with information
+
+
+210
+00:12:27,347 --> 00:12:31,919 line:-2
+about all of the instances
+in the acceleration structure.
+
+
+211
+00:12:31.952 --> 00:12:34.755 line:-1 align:center
+For each instance, create a descriptor
+
+
+212
+00:12:34,788 --> 00:12:39,426 line:-2
+and specify the acceleration structure
+that this instance refers to.
+
+
+213
+00:12:39.459 --> 00:12:43.864 line:-2 align:center
+You will identify the acceleration
+structure with an index into the array
+
+
+214
+00:12:43.897 --> 00:12:48.335 line:-2 align:center
+that you set on the instance
+acceleration structure descriptor.
+
+
+215
+00:12:48.368 --> 00:12:51.371 line:-2 align:center
+Each instance
+also has a transformation matrix,
+
+
+216
+00:12:51.405 --> 00:12:53.974 line:-1 align:center
+visibility mask, and other properties
+
+
+217
+00:12:54,007 --> 00:12:57,678 line:-2
+depending on which type
+of instance descriptor you are using.
+
+
+218
+00:12:59,046 --> 00:13:02,549 line:-2
+The last step is to build
+the actual acceleration structure,
+
+
+219
+00:13:02.583 --> 00:13:07.120 line:-2 align:center
+which is the same process as for
+a primitive acceleration structure.
+
+
+220
+00:13:07,154 --> 00:13:10,691 line:-2
+All of the steps before the build
+can run on the CPU.
+
+
+221
+00:13:10,724 --> 00:13:13,427 line:-1
+But if the number of instances is large,
+
+
+222
+00:13:13.460 --> 00:13:17.564 line:-2 align:center
+the process of filling out the instance
+buffer can become compute intensive.
+
+
+223
+00:13:17,598 --> 00:13:21,535 line:-2
+Since instance descriptors are stored
+in a normal Metal buffer,
+
+
+224
+00:13:21,568 --> 00:13:27,107 line:-2
+you can accelerate this step by filling
+out these descriptors from the GPU.
+
+
+225
+00:13:27.140 --> 00:13:30.344 line:-2 align:center
+This is a great opportunity
+for GPU acceleration,
+
+
+226
+00:13:30,377 --> 00:13:35,048 line:-2
+as long as you know how many instances
+your acceleration structure will contain
+
+
+227
+00:13:35,082 --> 00:13:38,418 line:-1
+before you hand off the work to the GPU.
+
+
+228
+00:13:38.452 --> 00:13:41.455 line:-2 align:center
+But if you want to do something
+like instance culling,
+
+
+229
+00:13:41,488 --> 00:13:44,324 line:-2
+you would have to cull instances
+on the CPU
+
+
+230
+00:13:44.358 --> 00:13:48.128 line:-2 align:center
+so you can set the final instance count
+on the descriptor.
+
+
+231
+00:13:48,161 --> 00:13:51,632 line:-2
+New this year,
+you can drive this process on the GPU
+
+
+232
+00:13:51.665 --> 00:13:55.536 line:-2 align:center
+with the new indirect instance
+acceleration structure descriptor.
+
+
+233
+00:13:55,569 --> 00:13:59,106 line:-2
+With this indirect descriptor,
+you can cull instances,
+
+
+234
+00:13:59.139 --> 00:14:02.342 line:-2 align:center
+fill the instance buffer,
+and set the final instance count
+
+
+235
+00:14:02,376 --> 00:14:04,811 line:-1
+entirely on the GPU.
+
+
+236
+00:14:04,845 --> 00:14:08,182 line:-2
+To perform a GPU-driven
+acceleration structure build,
+
+
+237
+00:14:08.215 --> 00:14:12.553 line:-2 align:center
+create an indirect instance
+acceleration structure descriptor.
+
+
+238
+00:14:12,586 --> 00:14:15,422 line:-2
+Set the maximum instance count
+on the descriptor,
+
+
+239
+00:14:15,455 --> 00:14:20,561 line:-2
+and the buffer where you will write
+the final instance count from the GPU.
+
+
+240
+00:14:20,594 --> 00:14:23,330 line:-2
+Then simply set
+the instance descriptor buffer,
+
+
+241
+00:14:23.363 --> 00:14:27.334 line:-2 align:center
+and you're ready to start
+configuring instances on the GPU.
+
+
+242
+00:14:28.602 --> 00:14:32.306 line:-2 align:center
+You will use a different type
+of descriptor in the instance buffer.
+
+
+243
+00:14:32,339 --> 00:14:36,844 line:-2
+The indirect instance descriptor is
+similar to the direct instance descriptor,
+
+
+244
+00:14:36,877 --> 00:14:40,180 line:-2
+except that you can identify
+the acceleration structure
+
+
+245
+00:14:40,214 --> 00:14:44,651 line:-2
+being instanced by simply assigning it
+to the descriptor.
+
+
+246
+00:14:44.685 --> 00:14:48.155 line:-2 align:center
+That's how you build
+an instance acceleration structure.
+
+
+247
+00:14:48.188 --> 00:14:52.326 line:-2 align:center
+So far, I've talked about
+two-level model of instancing.
+
+
+248
+00:14:52,359 --> 00:14:55,829 line:-2
+In this model,
+a forest in the Moana island scene
+
+
+249
+00:14:55.863 --> 00:14:59.633 line:-2 align:center
+is composed of thousands of instances
+of different trees.
+
+
+250
+00:14:59.666 --> 00:15:05.506 line:-2 align:center
+But if we dig deeper, a tree itself is
+a trunk with many copies of the same leaf.
+
+
+251
+00:15:05,539 --> 00:15:07,541 line:-1
+You can take advantage of this structure
+
+
+252
+00:15:07.574 --> 00:15:11.812 line:-2 align:center
+using the new multi-level
+instancing feature.
+
+
+253
+00:15:11,845 --> 00:15:13,680 line:-1
+With multi-level instancing,
+
+
+254
+00:15:13.714 --> 00:15:16.483 line:-2 align:center
+an instance acceleration structure
+can contain
+
+
+255
+00:15:16,517 --> 00:15:19,052 line:-2
+not just primitive
+acceleration structures,
+
+
+256
+00:15:19,086 --> 00:15:22,623 line:-2
+but also other
+instance acceleration structures.
+
+
+257
+00:15:22,656 --> 00:15:26,560 line:-2
+For example, in this scene a palm tree
+can be expressed
+
+
+258
+00:15:26.593 --> 00:15:28.962 line:-1 align:center
+as an instance acceleration structure
+
+
+259
+00:15:28,996 --> 00:15:32,399 line:-2
+containing a trunk
+and instances of a leaf,
+
+
+260
+00:15:32.432 --> 00:15:37.604 line:-2 align:center
+while the scene as a whole
+can contain instances of the palm tree.
+
+
+261
+00:15:37,638 --> 00:15:43,210 line:-2
+The Moana island scene is a great example
+of the power of multi-level instancing.
+
+
+262
+00:15:43.243 --> 00:15:45.412 line:-1 align:center
+When using two levels of instancing,
+
+
+263
+00:15:45.445 --> 00:15:47.915 line:-1 align:center
+adding one type of tree to a scene
+
+
+264
+00:15:47.948 --> 00:15:53.353 line:-2 align:center
+could mean adding hundreds or even
+thousands of copies of parts of the tree.
+
+
+265
+00:15:53.387 --> 00:15:55.355 line:-1 align:center
+But with multi-level instancing,
+
+
+266
+00:15:55,389 --> 00:15:58,091 line:-1
+you can add instances of a complex tree,
+
+
+267
+00:15:58,125 --> 00:16:01,562 line:-2
+defined with repeated instances
+of its parts.
+
+
+268
+00:16:01.595 --> 00:16:06.567 line:-2 align:center
+This saves millions of instances
+across the Moana island scene.
+
+
+269
+00:16:06,600 --> 00:16:10,804 line:-2
+But multi-level instancing isn't just
+for production renderers.
+
+
+270
+00:16:10,838 --> 00:16:15,042 line:-2
+It is also valuable
+for real time apps like games.
+
+
+271
+00:16:16.009 --> 00:16:19.446 line:-2 align:center
+Games also use the two-level
+acceleration structure pattern,
+
+
+272
+00:16:19.479 --> 00:16:22.916 line:-2 align:center
+building worlds
+from instances of game objects.
+
+
+273
+00:16:22.950 --> 00:16:26.220 line:-2 align:center
+However, games are different
+from production renderers.
+
+
+274
+00:16:26.253 --> 00:16:30.123 line:-2 align:center
+Production renderers use deep hierarchies
+to reuse objects,
+
+
+275
+00:16:30,157 --> 00:16:34,494 line:-2
+but games use long lists of instances
+for game objects.
+
+
+276
+00:16:34,528 --> 00:16:38,332 line:-2
+Games also rebuild their instance
+acceleration structure each frame
+
+
+277
+00:16:38.365 --> 00:16:40.000 line:-1 align:center
+for their dynamic content,
+
+
+278
+00:16:40.033 --> 00:16:44.972 line:-2 align:center
+and high instance count
+mean a lot of GPU time for the rebuild.
+
+
+279
+00:16:46,807 --> 00:16:50,210 line:-2
+However in a game,
+a lot of the content is static
+
+
+280
+00:16:50.244 --> 00:16:52.880 line:-2 align:center
+and doesn't need to be updated
+every frame.
+
+
+281
+00:16:52,913 --> 00:16:57,150 line:-2
+You can split the world into static
+and dynamic acceleration structures
+
+
+282
+00:16:57,184 --> 00:17:02,322 line:-2
+to limit acceleration structure updates
+to only the content that changes.
+
+
+283
+00:17:02,356 --> 00:17:05,025 line:-2
+This means only rebuilding
+the dynamic content,
+
+
+284
+00:17:05,058 --> 00:17:08,896 line:-2
+which is typically much less
+than the static content.
+
+
+285
+00:17:08.929 --> 00:17:12.432 line:-2 align:center
+When applying this split of static
+and dynamic content,
+
+
+286
+00:17:12.466 --> 00:17:15.903 line:-2 align:center
+it is important to balance
+the depth of the hierarchy
+
+
+287
+00:17:15.936 --> 00:17:18.805 line:-1 align:center
+with the additional cost of ray traversal.
+
+
+288
+00:17:18,839 --> 00:17:22,943 line:-2
+In a frame with acceleration structure
+building and ray tracing,
+
+
+289
+00:17:22,976 --> 00:17:27,014 line:-2
+using 3 levels of instancing allows you
+to reduce build time
+
+
+290
+00:17:27.047 --> 00:17:32.352 line:-2 align:center
+with only minor impact on trace time,
+overall reducing the frame time.
+
+
+291
+00:17:32,386 --> 00:17:36,523 line:-2
+Multi-level instancing is a great tool
+to reduce memory usage
+
+
+292
+00:17:36.557 --> 00:17:38.158 line:-1 align:center
+and speed up rebuilds.
+
+
+293
+00:17:38.192 --> 00:17:42.763 line:-2 align:center
+You also have other ways you can optimize
+your Metal ray tracing apps.
+
+
+294
+00:17:42,796 --> 00:17:45,499 line:-1
+One of them is Build parallelization.
+
+
+295
+00:17:46.934 --> 00:17:50.137 line:-2 align:center
+A typical application
+will need to build or update
+
+
+296
+00:17:50,170 --> 00:17:51,805 line:-1
+many acceleration structures
+
+
+297
+00:17:51,839 --> 00:17:55,542 line:-2
+representing different scenes
+and different parts of a scene.
+
+
+298
+00:17:55.576 --> 00:18:00.380 line:-2 align:center
+You can greatly reduce your start-up time
+by running these builds in parallel.
+
+
+299
+00:18:01,715 --> 00:18:04,618 line:-2
+Whenever you can,
+be sure to batch your builds
+
+
+300
+00:18:04,651 --> 00:18:07,754 line:-2
+by encoding multiple builds
+to the same command encoder
+
+
+301
+00:18:07,788 --> 00:18:09,990 line:-1
+so they can run in parallel.
+
+
+302
+00:18:10,023 --> 00:18:13,093 line:-2
+You will want to parallelize
+as many builds as you can
+
+
+303
+00:18:13.126 --> 00:18:17.297 line:-2 align:center
+while ensuring
+that the working set fits in memory.
+
+
+304
+00:18:17,331 --> 00:18:21,635 line:-2
+Also remember that after
+an acceleration structure build completes,
+
+
+305
+00:18:21,668 --> 00:18:24,371 line:-1
+the scratch buffer is no longer needed.
+
+
+306
+00:18:24.404 --> 00:18:27.741 line:-2 align:center
+This means that you can re-use
+the scratch buffers from one batch
+
+
+307
+00:18:27,774 --> 00:18:31,979 line:-2
+of acceleration structure builds
+to the next.
+
+
+308
+00:18:32.012 --> 00:18:34.648 line:-2 align:center
+Sometimes the best way to reduce
+the time spent
+
+
+309
+00:18:34.681 --> 00:18:39.353 line:-2 align:center
+rebuilding acceleration structures
+is to avoid rebuilding altogether.
+
+
+310
+00:18:39,386 --> 00:18:43,323 line:-2
+This is where
+acceleration structure refitting comes in.
+
+
+311
+00:18:43.357 --> 00:18:46.026 line:-2 align:center
+When Metal builds
+an acceleration structure,
+
+
+312
+00:18:46.059 --> 00:18:49.930 line:-2 align:center
+it groups nearby primitives
+into a hierarchy of boxes.
+
+
+313
+00:18:49.963 --> 00:18:51.765 line:-1 align:center
+If your primitives move,
+
+
+314
+00:18:51,798 --> 00:18:55,302 line:-2
+those boxes no longer
+accurately represent the scene,
+
+
+315
+00:18:55,335 --> 00:18:58,672 line:-2
+and the acceleration structure
+needs to be updated.
+
+
+316
+00:18:58.705 --> 00:19:01.375 line:-1 align:center
+But if the geometry only changes slightly,
+
+
+317
+00:19:01.408 --> 00:19:04.311 line:-2 align:center
+then the hierarchy
+may still be reasonable.
+
+
+318
+00:19:04,344 --> 00:19:07,881 line:-2
+Instead of building
+a new acceleration structure from scratch,
+
+
+319
+00:19:07.915 --> 00:19:11.618 line:-2 align:center
+Metal can refit the existing
+acceleration structure
+
+
+320
+00:19:11,652 --> 00:19:16,123 line:-2
+to reflect the new positions
+of primitives in your geometry.
+
+
+321
+00:19:16,156 --> 00:19:21,361 line:-2
+This is cheaper than rebuilding
+the acceleration structure from scratch.
+
+
+322
+00:19:21,395 --> 00:19:25,199 line:-2
+Refit requires a scratch buffer
+like a build operation.
+
+
+323
+00:19:25.232 --> 00:19:29.703 line:-2 align:center
+The size of the refit scratch buffer
+is in the same struct you used earlier
+
+
+324
+00:19:29.736 --> 00:19:32.539 line:-1 align:center
+to allocate the acceleration structure.
+
+
+325
+00:19:32,573 --> 00:19:35,209 line:-1
+The refit operation runs on the GPU
+
+
+326
+00:19:35,242 --> 00:19:39,046 line:-2
+and is encoded with an acceleration
+structure command encoder.
+
+
+327
+00:19:39.079 --> 00:19:43.884 line:-2 align:center
+The refit can operate in-place or into
+a different acceleration structure.
+
+
+328
+00:19:44.885 --> 00:19:47.187 line:-1 align:center
+Finally, compaction is a great way
+
+
+329
+00:19:47,221 --> 00:19:51,658 line:-2
+to reduce the size
+of your acceleration structures in memory.
+
+
+330
+00:19:51,692 --> 00:19:54,228 line:-2
+When you first build
+an acceleration structure,
+
+
+331
+00:19:54,261 --> 00:19:57,531 line:-2
+Metal can't know
+exactly how much memory it needs,
+
+
+332
+00:19:57.564 --> 00:20:01.101 line:-1 align:center
+so it has to make a conservative estimate.
+
+
+333
+00:20:01,134 --> 00:20:03,770 line:-2
+Once you've built
+the acceleration structure,
+
+
+334
+00:20:03,804 --> 00:20:08,675 line:-2
+Metal can calculate the minimum size
+needed to represent it.
+
+
+335
+00:20:08,709 --> 00:20:12,546 line:-2
+With compaction, you can allocate
+a new acceleration structure
+
+
+336
+00:20:12,579 --> 00:20:15,916 line:-2
+with the minimal size,
+and then use the GPU
+
+
+337
+00:20:15.949 --> 00:20:19.820 line:-2 align:center
+to copy from the current
+acceleration structure to the new one.
+
+
+338
+00:20:19,853 --> 00:20:24,491 line:-2
+This is especially valuable
+for primitive acceleration structures.
+
+
+339
+00:20:24,525 --> 00:20:26,760 line:-1
+To use compaction, encode a command
+
+
+340
+00:20:26,793 --> 00:20:31,565 line:-2
+to calculate the compacted size
+of your acceleration structure on the GPU.
+
+
+341
+00:20:31,598 --> 00:20:33,200 line:-1
+When you execute the command,
+
+
+342
+00:20:33.233 --> 00:20:38.172 line:-2 align:center
+Metal will write the compacted size
+to a buffer that you provide.
+
+
+343
+00:20:38,205 --> 00:20:40,274 line:-1
+Once you've read the compacted size,
+
+
+344
+00:20:40,307 --> 00:20:43,744 line:-2
+you can allocate a new
+acceleration structure with that size
+
+
+345
+00:20:43,777 --> 00:20:46,613 line:-2
+and then encode
+a "copy and compact" operation
+
+
+346
+00:20:46,647 --> 00:20:50,050 line:-2
+from the old
+to the new acceleration structure.
+
+
+347
+00:20:50.083 --> 00:20:52.386 line:-1 align:center
+After this command buffer has completed,
+
+
+348
+00:20:52.419 --> 00:20:55.722 line:-2 align:center
+you can release
+the original acceleration structure.
+
+
+349
+00:20:55,756 --> 00:20:59,359 align:center
+To learn more about optimizing
+your Metal ray tracing apps,
+
+
+350
+00:20:59,393 --> 00:21:04,932 align:center
+check out the 2022 "Maximizing your Metal
+ray tracing performance" session.
+
+
+351
+00:21:04,965 --> 00:21:08,602 line:-2
+In this section,
+I have discussed how to set up instancing,
+
+
+352
+00:21:08,635 --> 00:21:11,572 line:-2
+leverage the new
+multi-level instancing feature,
+
+
+353
+00:21:11,605 --> 00:21:14,842 line:-1
+and handle instancing at scale.
+
+
+354
+00:21:14.875 --> 00:21:19.012 line:-2 align:center
+Now it's time to intersect rays
+with the scene.
+
+
+355
+00:21:19.046 --> 00:21:22.282 line:-2 align:center
+In Metal, you intersect rays
+in a GPU function
+
+
+356
+00:21:22,316 --> 00:21:24,618 line:-1
+that executes as part of a command.
+
+
+357
+00:21:24,651 --> 00:21:29,890 line:-2
+On Apple Silicon you can intersect rays
+in both compute and render commands,
+
+
+358
+00:21:29,923 --> 00:21:35,062 line:-2
+and on AMD and Intel you can intersect
+rays in compute commands.
+
+
+359
+00:21:35,095 --> 00:21:37,197 align:center
+To get ready to intersect rays,
+
+
+360
+00:21:37,231 --> 00:21:41,835 line:0
+bind your acceleration structure
+on the command encoder.
+
+
+361
+00:21:41.869 --> 00:21:45.005 line:-2 align:center
+Now you can intersect rays
+with this acceleration structure
+
+
+362
+00:21:45,038 --> 00:21:47,674 line:-1
+in your GPU function.
+
+
+363
+00:21:47.708 --> 00:21:51.612 line:-2 align:center
+Declare the function with
+an acceleration structure parameter,
+
+
+364
+00:21:51.645 --> 00:21:54.515 line:-1 align:center
+and create an intersector object.
+
+
+365
+00:21:54,548 --> 00:21:56,984 line:-1
+You can set properties on this intersector
+
+
+366
+00:21:57.017 --> 00:22:00.754 line:-2 align:center
+to configure ray intersection
+for the best performance.
+
+
+367
+00:22:00,787 --> 00:22:04,458 line:-2
+To intersect a ray with your scene,
+simply create a ray
+
+
+368
+00:22:04.491 --> 00:22:07.895 line:-2 align:center
+and call the intersect method
+on the intersector object,
+
+
+369
+00:22:07.928 --> 00:22:12.366 line:-2 align:center
+passing the ray and the acceleration
+structure as parameters.
+
+
+370
+00:22:12.399 --> 00:22:15.802 line:-2 align:center
+This returns everything you need to know
+about the intersection,
+
+
+371
+00:22:15.836 --> 00:22:18.438 line:-2 align:center
+like the kind of primitive
+the ray intersected,
+
+
+372
+00:22:18.472 --> 00:22:22.976 line:-2 align:center
+the distance to the intersection,
+the ID of the primitive, and more.
+
+
+373
+00:22:24,144 --> 00:22:27,548 line:-2
+To get more information about
+the triangle intersection point,
+
+
+374
+00:22:27.581 --> 00:22:30.250 line:-2 align:center
+add the "triangle data" tag
+to the intersector
+
+
+375
+00:22:30,284 --> 00:22:32,719 line:-1
+and "intersection result" types.
+
+
+376
+00:22:32,753 --> 00:22:36,323 line:-2
+This makes the triangle
+barycentric coordinates available
+
+
+377
+00:22:36.356 --> 00:22:39.393 line:-1 align:center
+in the intersection result.
+
+
+378
+00:22:39,426 --> 00:22:44,932 line:-2
+That covers intersecting rays
+with a primitive acceleration structure.
+
+
+379
+00:22:44.965 --> 00:22:50.204 line:-2 align:center
+Intersecting rays with an instance
+acceleration structure is very similar.
+
+
+380
+00:22:50,237 --> 00:22:53,173 line:0
+Bind your instance acceleration structure
+the same way
+
+
+381
+00:22:53,207 --> 00:22:57,077 line:0
+you bind a primitive acceleration
+structure,
+
+
+382
+00:22:57,110 --> 00:23:00,314 line:0
+and be sure to call useResource or useHeap
+
+
+383
+00:23:00,347 --> 00:23:02,816 align:center
+to make the acceleration structures
+referenced
+
+
+384
+00:23:02,850 --> 00:23:07,921 line:0
+in your instance acceleration structure
+available on the GPU.
+
+
+385
+00:23:07,955 --> 00:23:11,692 line:-2
+You only need to make a couple of changes
+to your GPU function
+
+
+386
+00:23:11,725 --> 00:23:16,430 line:-2
+to intersect rays with
+an instance acceleration structure.
+
+
+387
+00:23:16.463 --> 00:23:21.368 line:-2 align:center
+First add the instancing tag
+to the acceleration structure type.
+
+
+388
+00:23:21.401 --> 00:23:24.638 line:-2 align:center
+Then add the instancing
+and "max levels" tags
+
+
+389
+00:23:24.671 --> 00:23:27.941 line:-2 align:center
+to your intersector
+and "intersection result".
+
+
+390
+00:23:27.975 --> 00:23:31.945 line:-2 align:center
+The "max levels" tag specifies
+the number of levels of instancing
+
+
+391
+00:23:31,979 --> 00:23:34,381 line:-1
+in your acceleration structure.
+
+
+392
+00:23:34.414 --> 00:23:36.817 line:-1 align:center
+For example, the acceleration structure
+
+
+393
+00:23:36,850 --> 00:23:39,119 line:-1
+representing the Moana island scene
+
+
+394
+00:23:39,152 --> 00:23:42,055 line:-1
+is a three-level acceleration structure.
+
+
+395
+00:23:42,089 --> 00:23:45,325 line:-2
+The first level
+is the instance acceleration structure
+
+
+396
+00:23:45.359 --> 00:23:47.294 line:-1 align:center
+containing the whole scene.
+
+
+397
+00:23:47,327 --> 00:23:52,266 line:-2
+The second level has instances of corals,
+trees, and the terrain.
+
+
+398
+00:23:52,299 --> 00:23:55,836 line:-2
+The third level has instances
+of the parts of the trees,
+
+
+399
+00:23:55.869 --> 00:23:58.605 line:-1 align:center
+like leaves, flowers, and trunks.
+
+
+400
+00:23:58.639 --> 00:24:02.943 line:-2 align:center
+When a ray intersects this scene,
+it doesn't just intersect a primitive,
+
+
+401
+00:24:02,976 --> 00:24:06,914 line:-2
+but also the instances
+that contain the primitive.
+
+
+402
+00:24:06,947 --> 00:24:09,650 line:-1
+If a ray intersects a leaf of this tree,
+
+
+403
+00:24:09,683 --> 00:24:12,719 line:-2
+it also intersects
+an instance of the tree,
+
+
+404
+00:24:12.753 --> 00:24:15.722 line:-1 align:center
+and an instance of the leaf in the tree.
+
+
+405
+00:24:15,756 --> 00:24:19,092 line:-2
+Metal keeps track of this for you
+by recording the ID
+
+
+406
+00:24:19.126 --> 00:24:21.828 line:-1 align:center
+of each intersected instance.
+
+
+407
+00:24:21,862 --> 00:24:27,434 line:-2
+In this case, the first intersected
+instance is the tree with an ID of 6,
+
+
+408
+00:24:27.467 --> 00:24:32.706 line:-2 align:center
+and the second intersected instance
+is the leaf with an ID of 1.
+
+
+409
+00:24:32,739 --> 00:24:35,509 line:-2
+The ray could also intersect
+just one instance.
+
+
+410
+00:24:35.542 --> 00:24:38.278 line:-2 align:center
+For example,
+if the ray intersects the terrain,
+
+
+411
+00:24:38.312 --> 00:24:42.616 line:-2 align:center
+then Metal will only record the ID
+of the terrain instance.
+
+
+412
+00:24:42.649 --> 00:24:46.253 line:-2 align:center
+You can find the number of instances
+that were intersected
+
+
+413
+00:24:46,286 --> 00:24:50,424 line:-2
+and IDs of the intersected instances
+in the intersection result.
+
+
+414
+00:24:50,457 --> 00:24:54,628 line:-2
+That's how you can intersect rays
+with primitive acceleration structures
+
+
+415
+00:24:54.661 --> 00:24:57.231 line:-1 align:center
+and instance acceleration structures.
+
+
+416
+00:24:57,264 --> 00:25:01,869 line:-2
+There are a few things to keep in mind
+when using curve primitives.
+
+
+417
+00:25:01,902 --> 00:25:05,539 line:-2
+By default, Metal assumes
+you are not using curve primitives
+
+
+418
+00:25:05,572 --> 00:25:08,275 line:-1
+when you perform ray intersection.
+
+
+419
+00:25:08,308 --> 00:25:10,611 line:-2
+You can tell Metal
+that you are using curves
+
+
+420
+00:25:10,644 --> 00:25:15,215 line:-2
+by setting the geometry type
+on the intersector object.
+
+
+421
+00:25:15,249 --> 00:25:17,184 line:-1
+Once you've set the geometry type,
+
+
+422
+00:25:17,217 --> 00:25:19,286 line:-1
+you're ready to intersect curves.
+
+
+423
+00:25:19.319 --> 00:25:22.456 line:-2 align:center
+As before, find information
+about the intersection
+
+
+424
+00:25:22,489 --> 00:25:24,424 line:-1
+on the intersection result.
+
+
+425
+00:25:24,458 --> 00:25:26,793 line:-1
+If you use the "curve data" tag,
+
+
+426
+00:25:26.827 --> 00:25:31.098 line:-2 align:center
+then the intersection result
+also contains the curve parameter.
+
+
+427
+00:25:31.131 --> 00:25:34.401 line:-2 align:center
+This is the value you can plug into
+the curve's basis function
+
+
+428
+00:25:34,434 --> 00:25:38,639 line:-2
+to compute the point along the curve
+where it intersected the ray.
+
+
+429
+00:25:38,672 --> 00:25:42,976 line:-2
+These functions are implemented for you
+in the Metal Shading Language.
+
+
+430
+00:25:43,010 --> 00:25:47,347 line:-2
+You can learn more in
+the Metal Shading Language specification.
+
+
+431
+00:25:47.381 --> 00:25:52.786 line:-2 align:center
+In many applications, curve geometry is
+represented with just one kind of curve.
+
+
+432
+00:25:52,819 --> 00:25:55,088 line:-2
+For example,
+all the curves in your scene
+
+
+433
+00:25:55,122 --> 00:25:57,591 line:-1
+might be expressed as cubic bezier curves,
+
+
+434
+00:25:57,624 --> 00:25:59,860 line:-1
+with circular cross sections.
+
+
+435
+00:25:59.893 --> 00:26:03.897 line:-2 align:center
+In this case, you can tell Metal
+what kind of curves your scene uses
+
+
+436
+00:26:03,931 --> 00:26:08,302 line:-2
+by setting the properties of your curves
+on the intersector object.
+
+
+437
+00:26:08,335 --> 00:26:12,940 line:-2
+This allows you to get the best
+performance when using curve primitives.
+
+
+438
+00:26:12,973 --> 00:26:16,109 line:-2
+That is how you can intersect rays
+with your scene.
+
+
+439
+00:26:16,143 --> 00:26:20,647 line:-2
+And you can use Xcode to debug
+and profile your raytracing workloads.
+
+
+440
+00:26:22,249 --> 00:26:26,253 line:-2
+One of the tools at your disposal when
+dealing with difficult to debug problems
+
+
+441
+00:26:26,286 --> 00:26:27,955 line:-1
+is Shader Validation.
+
+
+442
+00:26:27,988 --> 00:26:30,490 line:-1
+It performs runtime checks in your shaders
+
+
+443
+00:26:30.524 --> 00:26:35.495 line:-2 align:center
+and catches issues
+which may lead to crashes or corruptions.
+
+
+444
+00:26:35.529 --> 00:26:38.699 line:-2 align:center
+Shader Validation now covers
+all of the Metal API,
+
+
+445
+00:26:38.732 --> 00:26:41.568 line:-1 align:center
+including the latest ray tracing features.
+
+
+446
+00:26:41,602 --> 00:26:47,107 line:-2
+In addition, Shader Validation has greatly
+reduced impact on shader compilation time.
+
+
+447
+00:26:47.140 --> 00:26:51.678 line:-2 align:center
+This is extremely helpful when you are
+working with long and complex shaders,
+
+
+448
+00:26:51,712 --> 00:26:55,148 line:-2
+like those commonly found
+in ray tracing applications.
+
+
+449
+00:26:55.182 --> 00:26:58.285 line:-2 align:center
+Another tool that can help you
+is the state of the art
+
+
+450
+00:26:58.318 --> 00:27:00.187 line:-1 align:center
+Acceleration Structure viewer.
+
+
+451
+00:27:00.220 --> 00:27:04.725 line:-2 align:center
+It enables you to inspect the scene
+which you use for intersection testing.
+
+
+452
+00:27:04,758 --> 00:27:07,628 line:-2
+When I open
+the Acceleration Structure viewer,
+
+
+453
+00:27:07.661 --> 00:27:11.932 line:-2 align:center
+I get an outline on the left for
+navigating the individual building blocks
+
+
+454
+00:27:11.965 --> 00:27:16.203 line:-2 align:center
+in the acceleration structure
+down to the geometry primitives.
+
+
+455
+00:27:16,236 --> 00:27:21,108 line:-2
+Here, it lists the individual triangles
+that make up the triangle geometry.
+
+
+456
+00:27:21,141 --> 00:27:23,177 line:-1
+On the right, I have a viewport,
+
+
+457
+00:27:23,210 --> 00:27:29,149 line:-2
+where I can inspect the acceleration
+structure in various highlighting modes.
+
+
+458
+00:27:29,183 --> 00:27:33,654 line:-2
+For example, the "Axis-Aligned Bounding
+Box Traversals" highlighting mode
+
+
+459
+00:27:33.687 --> 00:27:37.257 line:-2 align:center
+can visualize areas
+with deeper levels of traversals,
+
+
+460
+00:27:37,291 --> 00:27:41,195 line:-2
+which correspond to
+more expensive intersection testing.
+
+
+461
+00:27:41,228 --> 00:27:43,363 line:-1
+As I move the pointer over the scene,
+
+
+462
+00:27:43.397 --> 00:27:46.366 line:-2 align:center
+the inspector updates
+with the number of intersections
+
+
+463
+00:27:46,400 --> 00:27:50,037 line:-2
+which a ray would
+hit in the pointed direction.
+
+
+464
+00:27:50,070 --> 00:27:53,574 line:-2
+Another example is
+the Acceleration Structure highlight mode.
+
+
+465
+00:27:53.607 --> 00:27:58.412 line:-2 align:center
+This visualizes the acceleration
+structures in different colors.
+
+
+466
+00:27:58,445 --> 00:28:03,350 line:-2
+The Acceleration Structure viewer supports
+the new multi-level instancing feature
+
+
+467
+00:28:03.383 --> 00:28:04.952 line:-1 align:center
+and curve geometries.
+
+
+468
+00:28:04,985 --> 00:28:06,987 line:-1
+When I move the camera in the viewport,
+
+
+469
+00:28:07,020 --> 00:28:10,390 line:-2
+I can find instance acceleration
+structures for some trees
+
+
+470
+00:28:10,424 --> 00:28:13,427 line:-1
+and curves for some foliage.
+
+
+471
+00:28:13,460 --> 00:28:16,096 line:-1
+To identify an acceleration structure,
+
+
+472
+00:28:16,129 --> 00:28:20,167 line:-2
+I can click in the viewport
+to reveal it in the outline.
+
+
+473
+00:28:20.200 --> 00:28:23.504 line:-2 align:center
+Now, take a closer look
+at the acceleration structure
+
+
+474
+00:28:23,537 --> 00:28:25,839 line:-1
+for these palm leaves.
+
+
+475
+00:28:25,873 --> 00:28:30,177 line:-2
+In this acceleration structure,
+the palm leaves consist of curves.
+
+
+476
+00:28:30.210 --> 00:28:33.547 line:-2 align:center
+I can change the viewport to the
+Primitive highlight mode
+
+
+477
+00:28:33.580 --> 00:28:36.783 line:-1 align:center
+to visualize the curve segments.
+
+
+478
+00:28:36.817 --> 00:28:41.154 line:-2 align:center
+To better inspect the curve segments,
+I'll zoom in a little bit.
+
+
+479
+00:28:41,188 --> 00:28:44,758 line:-2
+Similar to selecting acceleration
+structures in the scene earlier,
+
+
+480
+00:28:44,791 --> 00:28:48,262 line:-1
+here, I can click to select each segment.
+
+
+481
+00:28:48,295 --> 00:28:52,733 line:-2
+Another useful tool at your disposal
+when examining a ray tracing workload
+
+
+482
+00:28:52,766 --> 00:28:54,168 line:-1
+is Shader Debugger.
+
+
+483
+00:28:54,201 --> 00:28:58,872 line:-2
+This can help you with troubleshooting
+issues in your shader code.
+
+
+484
+00:28:58.906 --> 00:29:02.409 line:-2 align:center
+Here, I'm at a compute dispatch
+which performs intersection testing
+
+
+485
+00:29:02.442 --> 00:29:03.544 line:-1 align:center
+in the shader.
+
+
+486
+00:29:03,577 --> 00:29:07,881 line:-2
+To begin debugging my shader,
+I can the Shader Debugging button,
+
+
+487
+00:29:07,915 --> 00:29:12,219 line:-2
+choose a thread in the popover,
+and then click the Debug button.
+
+
+488
+00:29:13.921 --> 00:29:16.256 line:-1 align:center
+After it finishes gathering data,
+
+
+489
+00:29:16.290 --> 00:29:21.828 line:-2 align:center
+I can examine the value for each variable
+at any point during shader execution.
+
+
+490
+00:29:21,862 --> 00:29:25,332 line:-2
+Take a closer look at the value
+for primitive ID.
+
+
+491
+00:29:25.365 --> 00:29:27.768 line:-1 align:center
+To provide more debugging context,
+
+
+492
+00:29:27.801 --> 00:29:31.772 line:-2 align:center
+Shader Debugger also gives me data
+from the neighboring threads.
+
+
+493
+00:29:31,805 --> 00:29:34,408 line:-2
+Here, I can hover the pointer
+over the value view
+
+
+494
+00:29:34,441 --> 00:29:37,811 line:-2
+to inspect the primitive IDs
+from the same thread group.
+
+
+495
+00:29:39,012 --> 00:29:43,250 line:-2
+Performance is another important aspect
+of any app.
+
+
+496
+00:29:43,283 --> 00:29:48,355 line:-2
+The Profiling timeline gives an overview
+of the ray tracing workload performance,
+
+
+497
+00:29:48,388 --> 00:29:54,828 line:-2
+allowing you to inspect and correlate
+various performance metrics side by side.
+
+
+498
+00:29:54,862 --> 00:29:57,698 line:-2
+In addition,
+I can change the Debug navigator
+
+
+499
+00:29:57,731 --> 00:30:00,767 line:-2
+to view all the pipeline states
+in the workload.
+
+
+500
+00:30:00,801 --> 00:30:02,769 line:-1
+And with the shader profiling data,
+
+
+501
+00:30:02.803 --> 00:30:08.342 line:-2 align:center
+the navigator lists the most expensive
+pipeline states at the top.
+
+
+502
+00:30:08,375 --> 00:30:12,446 line:-2
+Further expanding a pipeline state
+reveals the shader code.
+
+
+503
+00:30:12,479 --> 00:30:16,517 line:-2
+After opening a shader, I can get
+the per-line shader profiling insights
+
+
+504
+00:30:16,550 --> 00:30:22,422 line:-2
+about where and how each individual shader
+spends its execution time.
+
+
+505
+00:30:22.456 --> 00:30:25.692 line:-2 align:center
+When I move the pointer over the pie-chart
+in the sidebar,
+
+
+506
+00:30:25,726 --> 00:30:28,562 line:-2
+it shows a popover
+with more detailed breakdown
+
+
+507
+00:30:28,595 --> 00:30:31,465 line:-1
+of the cost at that line of code.
+
+
+508
+00:30:31,498 --> 00:30:35,169 line:-2
+These tools support
+all of Metal's new ray tracing features,
+
+
+509
+00:30:35,202 --> 00:30:38,105 line:-2
+and can offer great debugging
+and profiling aids
+
+
+510
+00:30:38,138 --> 00:30:40,841 line:-1
+when you're working on your Metal apps.
+
+
+511
+00:30:42.009 --> 00:30:45.679 line:-2 align:center
+Metal ray tracing also supports
+many more features such as:
+
+
+512
+00:30:45,712 --> 00:30:50,784 line:-2
+Primitive and instance motion for
+animating scenes in production renderers,
+
+
+513
+00:30:50.817 --> 00:30:54.721 line:-2 align:center
+custom intersection functions,
+for customizing ray intersection
+
+
+514
+00:30:54.755 --> 00:30:57.491 line:-1 align:center
+with enhancements like alpha testing,
+
+
+515
+00:30:57,524 --> 00:31:02,896 line:-2
+and intersection query,
+for portability from query-based APIs.
+
+
+516
+00:31:02.930 --> 00:31:05.999 line:-2 align:center
+The Metal Ray Tracing API,
+Language and Tools
+
+
+517
+00:31:06,033 --> 00:31:10,637 line:-2
+support real time rendering apps like
+games, and production renderers.
+
+
+518
+00:31:10,671 --> 00:31:14,808 line:-2
+You can use the latest
+Metal Ray Tracing API to build your scenes
+
+
+519
+00:31:14.842 --> 00:31:19.780 line:-2 align:center
+using primitive acceleration structures,
+including geometry like curves.
+
+
+520
+00:31:19.813 --> 00:31:24.251 line:-2 align:center
+Instancing and especially
+the new multi-level instancing feature
+
+
+521
+00:31:24.284 --> 00:31:28.589 line:-2 align:center
+enables you to scale to larger,
+more complex scenes.
+
+
+522
+00:31:28.622 --> 00:31:33.093 line:-2 align:center
+Your GPU functions can call
+the Metal Ray Tracing APIs directly.
+
+
+523
+00:31:33.126 --> 00:31:38.298 line:-2 align:center
+And finally, Xcode can help you
+in debugging and profiling your app.
+
+
+524
+00:31:38,332 --> 00:31:41,535 align:center
+Be sure to check out
+the previous ray tracing talks
+
+
+525
+00:31:41,568 --> 00:31:44,538 line:0
+where we have covered many of these topics
+in more detail,
+
+
+526
+00:31:44,571 --> 00:31:47,441 align:center
+as well as our sample code
+and documentation.
+
+
+527
+00:31:48.375 --> 00:31:49.977 line:-1 align:center
+Thanks for watching.
+
+
+528
+00:31:50,010 --> 00:31:53,013 line:-1
+♪ ♪
+

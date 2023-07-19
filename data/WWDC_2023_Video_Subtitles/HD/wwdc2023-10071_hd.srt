@@ -1,0 +1,2128 @@
+2
+00:00:00.067 --> 00:00:03.003 line:-1 position:50%
+♪ Mellow instrumental hip-hop ♪
+
+
+3
+00:00:03,003 --> 00:00:10,477 size:2% align:right line:0
+♪
+
+
+4
+00:00:10.477 --> 00:00:12.546 line:-1 position:50%
+Howdy, I'm Chris.
+
+
+5
+00:00:12.546 --> 00:00:14.581 line:-1 position:50%
+I'm an engineer
+on the AVFoundation team,
+
+
+6
+00:00:14,581 --> 00:00:16,850 line:-1
+and I'd like to welcome you
+to our session.
+
+
+7
+00:00:16,850 --> 00:00:19,219 line:-1
+In this talk, we're going
+to look at how to prepare
+
+
+8
+00:00:19.219 --> 00:00:23.690 line:-1 position:50%
+and deliver streaming content
+for spatial experiences.
+
+
+9
+00:00:23.690 --> 00:00:25.659 line:-1 position:50%
+We'll start with a brief review
+of the current steps
+
+
+10
+00:00:25.659 --> 00:00:28.128 line:-1 position:50%
+in producing, preparing,
+and delivering 2D media
+
+
+11
+00:00:28,128 --> 00:00:30,030 line:-1
+using HTTP Live Streaming.
+
+
+12
+00:00:30.030 --> 00:00:32.466 line:-1 position:50%
+also known as HLS.
+
+
+13
+00:00:32.466 --> 00:00:35.068 line:-1 position:50%
+With 2D content preparation
+and delivery covered,
+
+
+14
+00:00:35,068 --> 00:00:36,970 line:-1
+we'll turn
+to 3D video content --
+
+
+15
+00:00:36,970 --> 00:00:41,041 line:-1
+what's supported and updates
+to the steps just described.
+
+
+16
+00:00:41,041 --> 00:00:42,576 line:-1
+Considering
+the content pipeline,
+
+
+17
+00:00:42.576 --> 00:00:46.747 line:-1 position:50%
+we'll start with media encoding
+of video, audio, and captions.
+
+
+18
+00:00:46,747 --> 00:00:49,416 line:-1
+Then, those media resources
+need to be packaged,
+
+
+19
+00:00:49.416 --> 00:00:51.151 line:-1 position:50%
+ready for HLS delivery.
+
+
+20
+00:00:51.151 --> 00:00:54.821 line:-1 position:50%
+This is how 2D content
+is delivered today.
+
+
+21
+00:00:54.821 --> 00:00:56.189 line:-1 position:50%
+The goal of delivering
+3D content
+
+
+22
+00:00:56.189 --> 00:00:58.859 line:-1 position:50%
+is to build upon current
+2D processes.
+
+
+23
+00:00:58,859 --> 00:01:02,396 line:-1
+HLS adds new support for
+fragmented MP4 timed metadata
+
+
+24
+00:01:02.396 --> 00:01:05.265 line:-1 position:50%
+that allows
+an important adaptation.
+
+
+25
+00:01:05,265 --> 00:01:07,501 line:-1
+Please note
+the HTTP Live Streaming page
+
+
+26
+00:01:07.501 --> 00:01:10.070 line:-1 position:50%
+on the Apple Developer website,
+which provides links
+
+
+27
+00:01:10.070 --> 00:01:12.739 line:-1 position:50%
+to documentation, tools,
+example streams,
+
+
+28
+00:01:12,739 --> 00:01:14,841 line:-1
+developer forums,
+and other resources.
+
+
+29
+00:01:14.841 --> 00:01:16.944 line:-1 position:50%
+This is where more details
+covered in this talk
+
+
+30
+00:01:16,944 --> 00:01:19,780 line:-1
+will be made available
+over time.
+
+
+31
+00:01:19,780 --> 00:01:22,249 line:-1
+Our goal is that delivering
+2D audiovisual content
+
+
+32
+00:01:22.249 --> 00:01:25.986 line:-1 position:50%
+to this platform should be the
+same as all our other platforms.
+
+
+33
+00:01:25,986 --> 00:01:28,555 line:-1
+This is achieved by building
+upon Apple Media technology
+
+
+34
+00:01:28,555 --> 00:01:32,659 line:-1
+such as HTTP Live Streaming,
+AVFoundation, Core Media,
+
+
+35
+00:01:32,659 --> 00:01:34,328 line:-1
+and standards-based formats
+
+
+36
+00:01:34.328 --> 00:01:36.730 line:-1 position:50%
+such as the ISO-based
+media file format,
+
+
+37
+00:01:36,730 --> 00:01:39,399 line:-1
+often thought of as MPEG-4.
+
+
+38
+00:01:39,399 --> 00:01:40,934 line:-1
+This is done all
+while supporting
+
+
+39
+00:01:40,934 --> 00:01:43,403 line:-1
+a new spatial
+experiences paradigm.
+
+
+40
+00:01:43,403 --> 00:01:45,973 position:50%
+For a deep dive into how
+to best support playback
+
+
+41
+00:01:45,973 --> 00:01:48,742 position:50%
+of audiovisual media,
+see the session
+
+
+42
+00:01:48,742 --> 00:01:53,113 position:50%
+"Create a great spatial
+experience for video playback."
+
+
+43
+00:01:53,113 --> 00:01:55,716 line:-1
+For video,
+encode the source video.
+
+
+44
+00:01:55.716 --> 00:01:58.051 line:-1 position:50%
+Edit it to the right length
+and color correct it
+
+
+45
+00:01:58,051 --> 00:02:00,487 line:-1
+for the bitrate tiers
+that matter to you.
+
+
+46
+00:02:00.487 --> 00:02:02.322 line:-1 position:50%
+Here you'll make choices
+of how you configure
+
+
+47
+00:02:02.322 --> 00:02:04.691 line:-1 position:50%
+and use video encoders
+such as HEVC,
+
+
+48
+00:02:04,691 --> 00:02:07,094 line:-1
+short for High Efficiency
+Video Coding.
+
+
+49
+00:02:07,094 --> 00:02:09,429 line:-1
+While support for existing
+2D audiovisual media
+
+
+50
+00:02:09,429 --> 00:02:12,399 line:-1
+you deliver to other Apple
+platforms is fully supported,
+
+
+51
+00:02:12,399 --> 00:02:15,502 line:-1
+take note of these
+playback capabilities.
+
+
+52
+00:02:15.502 --> 00:02:18.605 line:-1 position:50%
+This platform supports playback
+of up to 4K resolution,
+
+
+53
+00:02:18,605 --> 00:02:21,608 line:-1
+allowing your highest-quality
+video to be experienced.
+
+
+54
+00:02:21,608 --> 00:02:24,311 line:-1
+The display's refresh rate
+is 90 Hertz,
+
+
+55
+00:02:24.311 --> 00:02:26.413 line:-1 position:50%
+And for 24-frames-per-second
+video,
+
+
+56
+00:02:26,413 --> 00:02:29,850 line:-1
+a special 96-hertz mode
+may be used automatically.
+
+
+57
+00:02:29,850 --> 00:02:33,854 line:-1
+There's support for standard
+and high dynamic range.
+
+
+58
+00:02:33.854 --> 00:02:36.023 line:-1 position:50%
+For your video's
+corresponding audio,
+
+
+59
+00:02:36.023 --> 00:02:38.392 line:-1 position:50%
+identify and produce the number
+of source audio streams
+
+
+60
+00:02:38,392 --> 00:02:39,960 line:-1
+you need.
+
+
+61
+00:02:39.960 --> 00:02:41.962 line:-1 position:50%
+The number depends upon
+the set of spoken languages
+
+
+62
+00:02:41,962 --> 00:02:45,132 line:-1
+you are targeting
+and the roles of that audio.
+
+
+63
+00:02:45.132 --> 00:02:47.234 line:-1 position:50%
+One role might
+be main dialogue,
+
+
+64
+00:02:47.234 --> 00:02:49.936 line:-1 position:50%
+another, audio descriptions.
+
+
+65
+00:02:49,936 --> 00:02:53,607 line:-1
+Encode these sources
+for delivery with HLS in mind.
+
+
+66
+00:02:53,607 --> 00:02:55,675 line:-1
+You may want to deliver
+Spatial Audio,
+
+
+67
+00:02:55.675 --> 00:02:58.412 line:-1 position:50%
+along with a fallback
+stereo audio track.
+
+
+68
+00:02:58,412 --> 00:03:00,914 line:-1
+This ensures a great experience
+for those devices
+
+
+69
+00:03:00.914 --> 00:03:04.584 line:-1 position:50%
+supporting Spatial Audio and
+reliable playback everywhere.
+
+
+70
+00:03:04,584 --> 00:03:07,054 line:-1
+The HLS Developer page
+has links to documentation
+
+
+71
+00:03:07,054 --> 00:03:08,955 line:-1
+on preparing audio.
+
+
+72
+00:03:08,955 --> 00:03:10,490 line:-1
+And then there are captions.
+
+
+73
+00:03:10.490 --> 00:03:14.361 line:-1 position:50%
+Here, captions includes both
+subtitles and closed captions
+
+
+74
+00:03:14,361 --> 00:03:16,730 line:-1
+to cover different
+languages and roles.
+
+
+75
+00:03:16.730 --> 00:03:18.965 line:-1 position:50%
+The term "subtitles"
+is used for transcriptions
+
+
+76
+00:03:18.965 --> 00:03:20.934 line:-1 position:50%
+of spoken text
+providing translations
+
+
+77
+00:03:20,934 --> 00:03:22,269 line:-1
+in different languages
+for viewers
+
+
+78
+00:03:22.269 --> 00:03:25.072 line:-1 position:50%
+that may not speak the language
+or for establishing
+
+
+79
+00:03:25,072 --> 00:03:27,207 line:-1
+the settings time and place.
+
+
+80
+00:03:27,207 --> 00:03:29,476 line:-1
+Closed captions is like
+subtitles but is intended
+
+
+81
+00:03:29,476 --> 00:03:32,079 line:-1
+when the audio can't
+be heard by the viewer.
+
+
+82
+00:03:32,079 --> 00:03:33,780 line:-1
+Close captions provide
+a transcription
+
+
+83
+00:03:33,780 --> 00:03:36,516 line:-1
+of not only the dialogue
+but also of sound effects
+
+
+84
+00:03:36.516 --> 00:03:38.385 line:-1 position:50%
+and other relevant audio cues.
+
+
+85
+00:03:38,385 --> 00:03:39,920 line:-1
+There might also be subtitles
+
+
+86
+00:03:39,920 --> 00:03:42,089 line:-1
+for the Deaf
+and hard of hearing, SDH,
+
+
+87
+00:03:42.089 --> 00:03:44.124 line:-1 position:50%
+serving the same purpose.
+
+
+88
+00:03:44,124 --> 00:03:46,726 line:-1
+Akin to video
+and audio encoding,
+
+
+89
+00:03:46.726 --> 00:03:49.096 line:-1 position:50%
+you should produce
+caption files and formats
+
+
+90
+00:03:49,096 --> 00:03:52,899 line:-1
+supported by HLS,
+most commonly WebVTT.
+
+
+91
+00:03:52.899 --> 00:03:55.635 line:-1 position:50%
+With source video, audio,
+and captions in hand,
+
+
+92
+00:03:55.635 --> 00:03:57.938 line:-1 position:50%
+next comes packaging.
+
+
+93
+00:03:57,938 --> 00:04:00,974 position:50%
+Packaging is a process that
+transforms the source media
+
+
+94
+00:04:00,974 --> 00:04:04,444 line:0
+into various types of segments
+for reliable delivery.
+
+
+95
+00:04:04,444 --> 00:04:06,413 position:50%
+This can be done
+with Apple's HLS tools
+
+
+96
+00:04:06,413 --> 00:04:09,749 line:0
+available at the earlier
+HLS streaming page.
+
+
+97
+00:04:09.749 --> 00:04:12.652 line:-1 position:50%
+Some content providers might use
+their own production tools,
+
+
+98
+00:04:12.652 --> 00:04:14.621 line:-1 position:50%
+hardware, or workflows.
+
+
+99
+00:04:14,621 --> 00:04:16,590 line:-1
+Others might be vendors
+delivering those services
+
+
+100
+00:04:16,590 --> 00:04:18,892 line:-1
+and tools to the first group.
+
+
+101
+00:04:18,892 --> 00:04:21,795 line:-1
+The goal of packaging is to
+produce a set of media segments,
+
+
+102
+00:04:21.795 --> 00:04:24.064 line:-1 position:50%
+the media playlists
+that drive their use,
+
+
+103
+00:04:24,064 --> 00:04:27,467 line:-1
+and a multivariant playlist
+that ties them all together.
+
+
+104
+00:04:27.467 --> 00:04:32.072 line:-1 position:50%
+Two kinds of HLS media segments
+are most typically used today.
+
+
+105
+00:04:32,072 --> 00:04:34,407 line:-1
+Fragmented MP4 media segments
+are produced by starting
+
+
+106
+00:04:34,407 --> 00:04:37,677 line:-1
+with an already encoded movie
+file of video or audio
+
+
+107
+00:04:37.677 --> 00:04:39.913 line:-1 position:50%
+and generating
+a number of resources.
+
+
+108
+00:04:39,913 --> 00:04:42,616 line:0
+These resources are known
+as media segments.
+
+
+109
+00:04:42,616 --> 00:04:44,117 position:50%
+It is these segments
+that are retrieved
+
+
+110
+00:04:44,117 --> 00:04:47,420 line:0
+by client devices
+during playback.
+
+
+111
+00:04:47,420 --> 00:04:50,223 line:0
+Subtitle files also
+require segmenting.
+
+
+112
+00:04:50,223 --> 00:04:52,292 position:50%
+This is done with
+a subtitle-segmenting tool
+
+
+113
+00:04:52,292 --> 00:04:54,461 line:0
+to generate media segments.
+
+
+114
+00:04:54,461 --> 00:04:56,796 line:0
+A source WebVTT file may
+be split into any number
+
+
+115
+00:04:56,796 --> 00:05:01,134 line:0
+of WebVTT files for
+the target segment duration.
+
+
+116
+00:05:01,134 --> 00:05:03,637 line:0
+Finally, the collection
+of HLS resources
+
+
+117
+00:05:03,637 --> 00:05:07,240 line:0
+is hosted on a web server
+for HTTP delivery.
+
+
+118
+00:05:07,240 --> 00:05:10,343 position:50%
+This might be to one server
+that serves clients directly
+
+
+119
+00:05:10,343 --> 00:05:13,647 position:50%
+or to an origin server used
+with a content delivery network,
+
+
+120
+00:05:13,647 --> 00:05:15,182 position:50%
+or a CDN.
+
+
+121
+00:05:15,182 --> 00:05:16,883 line:-1
+Either way,
+it is these resources
+
+
+122
+00:05:16.883 --> 00:05:20.820 line:-1 position:50%
+that are delivered
+to client devices for playback.
+
+
+123
+00:05:20.820 --> 00:05:22.455 line:-1 position:50%
+Now that we've reviewed
+the 2D production
+
+
+124
+00:05:22,455 --> 00:05:25,592 line:-1
+and delivery pipeline,
+let's turn to 3D content
+
+
+125
+00:05:25.592 --> 00:05:27.627 line:-1 position:50%
+and the differences
+taking advantage
+
+
+126
+00:05:27.627 --> 00:05:29.796 line:-1 position:50%
+of new spatial capabilities.
+
+
+127
+00:05:29.796 --> 00:05:31.264 line:-1 position:50%
+We will again look
+at source encoding,
+
+
+128
+00:05:31.264 --> 00:05:33.633 line:-1 position:50%
+packaging, and delivery,
+focusing on differences
+
+
+129
+00:05:33.633 --> 00:05:37.904 line:-1 position:50%
+between 2D content
+and 3D stereoscopic content.
+
+
+130
+00:05:37.904 --> 00:05:40.774 line:-1 position:50%
+So, we're talking
+about 3D video.
+
+
+131
+00:05:40,774 --> 00:05:42,742 line:-1
+Let's deconstruct this term.
+
+
+132
+00:05:42.742 --> 00:05:45.512 line:-1 position:50%
+First, it's video,
+so a sequence of frames
+
+
+133
+00:05:45.512 --> 00:05:48.348 line:-1 position:50%
+in a movie track
+or a network stream.
+
+
+134
+00:05:48,348 --> 00:05:51,451 position:50%
+The "3D" in "3D video"
+is used interchangeably
+
+
+135
+00:05:51,451 --> 00:05:53,853 line:0
+with stereoscopic,
+which provides an image
+
+
+136
+00:05:53,853 --> 00:05:56,523 line:0
+for the left eye,
+and another very similar image
+
+
+137
+00:05:56,523 --> 00:06:01,061 line:0
+from a slightly different
+perspective for the right eye.
+
+
+138
+00:06:01,061 --> 00:06:03,763 position:50%
+These differences between
+the left and right images,
+
+
+139
+00:06:03,763 --> 00:06:06,066 position:50%
+called parallax,
+causes you to perceive
+
+
+140
+00:06:06,066 --> 00:06:09,402 line:0
+three-dimensional depth
+in the video when presented.
+
+
+141
+00:06:09.402 --> 00:06:12.172 line:-1 position:50%
+While there are choices in how
+3D video frames might be carried
+
+
+142
+00:06:12,172 --> 00:06:14,975 line:-1
+there are some guiding
+principles that seem useful.
+
+
+143
+00:06:14,975 --> 00:06:17,577 line:-1
+By using a single video track
+for all stereo frames,
+
+
+144
+00:06:17,577 --> 00:06:21,381 line:-1
+traditional production with
+2D video tracks is preserved.
+
+
+145
+00:06:21.381 --> 00:06:23.783 line:-1 position:50%
+Both the left and right
+images or views,
+
+
+146
+00:06:23.783 --> 00:06:26.753 line:-1 position:50%
+for any display time is
+in a single compressed frame.
+
+
+147
+00:06:26.753 --> 00:06:28.755 line:-1 position:50%
+If you have a frame
+in your hands,
+
+
+148
+00:06:28.755 --> 00:06:31.758 line:-1 position:50%
+you have both views
+or the stereo pair.
+
+
+149
+00:06:31.758 --> 00:06:33.360 line:-1 position:50%
+It should be efficient,
+
+
+150
+00:06:33,360 --> 00:06:36,496 line:-1
+ideally, it's supported
+by Apple silicon,
+
+
+151
+00:06:36,496 --> 00:06:38,164 line:-1
+and to the greatest
+degree possible,
+
+
+152
+00:06:38.164 --> 00:06:41.334 line:-1 position:50%
+it should be decodable
+by non-3D-aware playback,
+
+
+153
+00:06:41.334 --> 00:06:45.372 line:-1 position:50%
+allowing the video to be
+auditioned in 2D workflows.
+
+
+154
+00:06:45,372 --> 00:06:48,041 line:-1
+To deliver stereo frames,
+we introduce the use
+
+
+155
+00:06:48,041 --> 00:06:52,212 line:-1
+of multiview HEVC,
+also called "MV-HEVC."
+
+
+156
+00:06:52,212 --> 00:06:54,214 line:-1
+It's an extension of HEVC.
+
+
+157
+00:06:54,214 --> 00:06:56,683 line:-1
+The "MV" is multiview.
+
+
+158
+00:06:56,683 --> 00:06:58,718 line:-1
+Carrying more than one view
+in each frame,
+
+
+159
+00:06:58,718 --> 00:06:59,853 line:-1
+each frame has a pair
+
+
+160
+00:06:59.853 --> 00:07:03.256 line:-1 position:50%
+of compressed
+left and right images.
+
+
+161
+00:07:03,256 --> 00:07:06,760 line:-1
+Because MV-HEVC
+is HEVC at its heart,
+
+
+162
+00:07:06.760 --> 00:07:08.695 line:-1 position:50%
+Apple silicon supports it.
+
+
+163
+00:07:08,695 --> 00:07:11,898 line:-1
+In MV-HEVC stores
+the base HEVC 2D view
+
+
+164
+00:07:11.898 --> 00:07:14.167 line:-1 position:50%
+in each compressed frame.
+
+
+165
+00:07:14,167 --> 00:07:16,736 line:-1
+Encoding determines
+a difference, or delta,
+
+
+166
+00:07:16,736 --> 00:07:18,438 line:-1
+between the left
+and right images.
+
+
+167
+00:07:18.438 --> 00:07:20.907 line:-1 position:50%
+This technique,
+known as 2D Plus Delta,
+
+
+168
+00:07:20,907 --> 00:07:22,942 line:-1
+means that 2D decoders
+can find and use
+
+
+169
+00:07:22,942 --> 00:07:26,046 line:-1
+the base 2D view,
+for example the left eye.
+
+
+170
+00:07:26,046 --> 00:07:28,315 line:0
+But 3D decoders can calculate
+the other view
+
+
+171
+00:07:28,315 --> 00:07:31,885 position:50%
+to present both views
+to the corresponding eyes.
+
+
+172
+00:07:31,885 --> 00:07:34,187 line:0
+Efficiency is achieved
+because the differences
+
+
+173
+00:07:34,187 --> 00:07:37,724 line:0
+between base 2D images
+uses standard HEVC techniques,
+
+
+174
+00:07:37,724 --> 00:07:40,660 line:0
+and just the differences between
+the left and right eye views
+
+
+175
+00:07:40,660 --> 00:07:45,065 line:0
+are described
+in the stereo frames.
+
+
+176
+00:07:45.065 --> 00:07:46.466 line:-1 position:50%
+The video format description,
+
+
+177
+00:07:46,466 --> 00:07:48,468 line:-1
+or the visual sample entry
+in MPEG-4,
+
+
+178
+00:07:48,468 --> 00:07:52,639 line:-1
+indicates the coding type,
+the codec,
+
+
+179
+00:07:52.639 --> 00:07:55.008 line:-1 position:50%
+the dimensions of each view,
+
+
+180
+00:07:55.008 --> 00:08:00.246 line:-1 position:50%
+and other details necessary
+to decode the video frames.
+
+
+181
+00:08:00,246 --> 00:08:02,649 line:-1
+A new extension
+to the video format description
+
+
+182
+00:08:02,649 --> 00:08:03,883 line:-1
+is introduced.
+
+
+183
+00:08:03.883 --> 00:08:05.919 line:-1 position:50%
+Termed the
+Video Extended Usage box,
+
+
+184
+00:08:05,919 --> 00:08:08,655 line:-1
+it serves as a lightweight,
+easily discoverable signal
+
+
+185
+00:08:08,655 --> 00:08:10,457 line:-1
+that the video is stereoscopic,
+
+
+186
+00:08:10.457 --> 00:08:12.826 line:-1 position:50%
+and which stereo eye
+views are present.
+
+
+187
+00:08:12,826 --> 00:08:15,929 line:-1
+For HLS delivery, this will be
+both left and right.
+
+
+188
+00:08:15,929 --> 00:08:18,898 line:-1
+A specification describing
+this new VEXU box
+
+
+189
+00:08:18,898 --> 00:08:21,034 line:-1
+is available with the SDK.
+
+
+190
+00:08:21.034 --> 00:08:23.036 line:-1 position:50%
+Its structure will evolve,
+and that will be described
+
+
+191
+00:08:23.036 --> 00:08:25.672 line:-1 position:50%
+in the specification.
+
+
+192
+00:08:25.672 --> 00:08:29.542 line:-1 position:50%
+Like 2D content,
+3D video uses HEVC,
+
+
+193
+00:08:29.542 --> 00:08:33.146 line:-1 position:50%
+except this time,
+the variation called MV-HEVC.
+
+
+194
+00:08:33,146 --> 00:08:36,116 line:-1
+This is required to carry
+the stereoscopic views.
+
+
+195
+00:08:36,116 --> 00:08:39,052 line:-1
+Like with 2D production,
+local movies with MV-HEVC
+
+
+196
+00:08:39.052 --> 00:08:43.656 line:-1 position:50%
+can be used and should behave
+like other 2D video.
+
+
+197
+00:08:43,656 --> 00:08:45,592 line:-1
+Having both a left
+and a right image
+
+
+198
+00:08:45.592 --> 00:08:47.060 line:-1 position:50%
+presented to
+the corresponding eye
+
+
+199
+00:08:47,060 --> 00:08:49,429 line:-1
+produces a perception
+of stereoscopic depth,
+
+
+200
+00:08:49,429 --> 00:08:51,464 line:-1
+providing a sense
+of relative depth.
+
+
+201
+00:08:53,600 --> 00:08:56,035 line:-1
+An object in the video scene
+might be perceived nearer
+
+
+202
+00:08:56.035 --> 00:08:58.838 line:-1 position:50%
+or farther than another
+due to the differing amounts
+
+
+203
+00:08:58.838 --> 00:09:00.273 line:-1 position:50%
+of parallax.
+
+
+204
+00:09:00,273 --> 00:09:02,308 line:-1
+Three primary zones
+of stereoscopic depth
+
+
+205
+00:09:02,308 --> 00:09:03,643 line:-1
+can be defined.
+
+
+206
+00:09:03,643 --> 00:09:07,380 line:-1
+They are the screen plane
+with no parallax cues;
+
+
+207
+00:09:07,380 --> 00:09:09,783 line:-1
+negative parallax,
+which will cause objects
+
+
+208
+00:09:09.783 --> 00:09:12.185 line:-1 position:50%
+to be perceived in front
+of the screen plane;
+
+
+209
+00:09:12,185 --> 00:09:14,921 line:-1
+and positive parallax,
+which will cause objects
+
+
+210
+00:09:14.921 --> 00:09:17.590 line:-1 position:50%
+to be perceived
+behind the screen plane.
+
+
+211
+00:09:17.590 --> 00:09:20.326 line:-1 position:50%
+If an element like a caption
+is rendered with no parallax
+
+
+212
+00:09:20.326 --> 00:09:23.163 line:-1 position:50%
+in the same area of the frame
+as negative parallax cues,
+
+
+213
+00:09:23.163 --> 00:09:25.064 line:-1 position:50%
+then a depth conflict
+will be created
+
+
+214
+00:09:25.064 --> 00:09:27.767 line:-1 position:50%
+and cause discomfort
+when viewing.
+
+
+215
+00:09:27.767 --> 00:09:29.602 line:-1 position:50%
+Question.
+
+
+216
+00:09:29,602 --> 00:09:32,806 line:-1
+Given stereoscopic parallax and
+potential for depth conflict,
+
+
+217
+00:09:32,806 --> 00:09:35,508 line:-1
+how involved is producing
+captions for 3D video?
+
+
+218
+00:09:35,508 --> 00:09:37,544 line:-1
+Can we support the following?
+
+
+219
+00:09:37,544 --> 00:09:40,480 position:50%
+Playback works
+for horizontal captions,
+
+
+220
+00:09:40,480 --> 00:09:42,115 line:0
+playback works
+across languages,
+
+
+221
+00:09:42,115 --> 00:09:44,517 position:50%
+including for vertical captions,
+
+
+222
+00:09:44,517 --> 00:09:47,053 position:50%
+and playback works
+when accessibility settings
+
+
+223
+00:09:47,053 --> 00:09:52,425 line:0
+is used to adjust the user's
+preferred caption sizing.
+
+
+224
+00:09:52.425 --> 00:09:54.661 line:-1 position:50%
+Well, the answer is yes.
+
+
+225
+00:09:54.661 --> 00:09:57.630 line:-1 position:50%
+With stereoscopic video using
+the approach I'll next describe,
+
+
+226
+00:09:57.630 --> 00:10:00.033 line:-1 position:50%
+captions should just work as is,
+
+
+227
+00:10:00.033 --> 00:10:02.569 line:-1 position:50%
+while also allowing
+the same 2D caption assets
+
+
+228
+00:10:02,569 --> 00:10:05,972 line:-1
+to be shared between
+2D and 3D experiences.
+
+
+229
+00:10:05,972 --> 00:10:08,608 line:-1
+This is possible by including
+the new timed metadata
+
+
+230
+00:10:08,608 --> 00:10:11,344 line:-1
+I mentioned earlier.
+
+
+231
+00:10:11,344 --> 00:10:14,280 line:-1
+With stereoscopic video,
+avoiding depth conflict
+
+
+232
+00:10:14,280 --> 00:10:17,417 line:-1
+and visual elements overlaying
+the video is important.
+
+
+233
+00:10:17,417 --> 00:10:19,452 line:-1
+Instead of requiring
+new caption formats
+
+
+234
+00:10:19,452 --> 00:10:21,554 line:-1
+or changes to existing formats,
+
+
+235
+00:10:21.554 --> 00:10:25.225 line:-1 position:50%
+we offer a way to characterize
+each video frame's parallax.
+
+
+236
+00:10:25.225 --> 00:10:27.360 line:-1 position:50%
+This can vary across the frame
+with some areas
+
+
+237
+00:10:27,360 --> 00:10:30,730 line:-1
+apparently closer and some
+farther from the viewer.
+
+
+238
+00:10:30,730 --> 00:10:32,932 line:-1
+We call this a parallax contour,
+
+
+239
+00:10:32,932 --> 00:10:35,702 line:-1
+and it is recorded as metadata
+in a metadata track
+
+
+240
+00:10:35,702 --> 00:10:38,905 line:-1
+that is synchronized
+with a video track's frames.
+
+
+241
+00:10:38,905 --> 00:10:41,975 line:-1
+If we tile the 3D video
+and indicate the depth parallax
+
+
+242
+00:10:41,975 --> 00:10:43,009 line:-1
+for each tile,
+
+
+243
+00:10:43.009 --> 00:10:45.879 line:-1 position:50%
+we can use that to ensure
+that captions never interfere
+
+
+244
+00:10:45,879 --> 00:10:48,147 line:-1
+with elements
+in the stereo video.
+
+
+245
+00:10:48,147 --> 00:10:50,316 line:-1
+During playback,
+the parallax of the caption
+
+
+246
+00:10:50,316 --> 00:10:55,154 line:-1
+will be automatically adjusted
+to avoid depth conflict.
+
+
+247
+00:10:55,154 --> 00:10:58,157 line:0
+Each metadata item with such
+a parallax video contour
+
+
+248
+00:10:58,157 --> 00:11:00,793 position:50%
+describes a 2D tiling
+of the associated video
+
+
+249
+00:11:00,793 --> 00:11:04,464 position:50%
+with the minimum parallax
+value associated with each tile.
+
+
+250
+00:11:04,464 --> 00:11:06,766 line:0
+Each video frame's presentation
+should be associated
+
+
+251
+00:11:06,766 --> 00:11:10,436 line:0
+with a metadata item describing
+the video frame's contour.
+
+
+252
+00:11:10,436 --> 00:11:13,072 position:50%
+We recommend a 10 by 10 tiling
+as a good balance
+
+
+253
+00:11:13,072 --> 00:11:15,608 position:50%
+between storage and resolution
+to characterize
+
+
+254
+00:11:15,608 --> 00:11:20,079 position:50%
+different areas of parallax
+in the video.
+
+
+255
+00:11:20,079 --> 00:11:22,549 line:-1
+Considering how this parallax
+metadata is produced,
+
+
+256
+00:11:22,549 --> 00:11:25,285 line:-1
+start with left and right views
+for each frame.
+
+
+257
+00:11:25,285 --> 00:11:26,352 line:-1
+This can be done in production
+
+
+258
+00:11:26,352 --> 00:11:28,087 line:-1
+with two synchronized
+video tracks
+
+
+259
+00:11:28.087 --> 00:11:30.490 line:-1 position:50%
+and doesn't require MV-HEVC.
+
+
+260
+00:11:30.490 --> 00:11:33.826 line:-1 position:50%
+Then, perform parallax
+or disparity analysis to create
+
+
+261
+00:11:33,826 --> 00:11:37,497 line:-1
+parallax information suitable
+for describing the tiling.
+
+
+262
+00:11:37,497 --> 00:11:39,732 line:-1
+For each stereo frame,
+this is then packaged
+
+
+263
+00:11:39,732 --> 00:11:42,435 line:-1
+in a metadata payload
+for the next step.
+
+
+264
+00:11:42,435 --> 00:11:45,071 line:-1
+A specification describing
+the format of this metadata
+
+
+265
+00:11:45.071 --> 00:11:48.541 line:-1 position:50%
+is available with the SDK.
+
+
+266
+00:11:48.541 --> 00:11:51.544 line:-1 position:50%
+This parallax information is
+packaged in metadata samples
+
+
+267
+00:11:51,544 --> 00:11:53,980 line:-1
+and written into a timed
+metadata track.
+
+
+268
+00:11:53,980 --> 00:11:55,648 line:-1
+The metadata track
+will be associated
+
+
+269
+00:11:55.648 --> 00:12:00.053 line:-1 position:50%
+with the corresponding video
+it describes.
+
+
+270
+00:12:00.053 --> 00:12:02.889 line:-1 position:50%
+The metadata and video track
+should be multiplexed
+
+
+271
+00:12:02.889 --> 00:12:05.024 line:-1 position:50%
+with the video so that
+HLS packaging will produce
+
+
+272
+00:12:05,024 --> 00:12:10,063 line:-1
+video segments with both the
+video and the parallax metadata.
+
+
+273
+00:12:10,063 --> 00:12:11,998 line:-1
+Captions you might
+already produce for 2D
+
+
+274
+00:12:11,998 --> 00:12:14,634 line:-1
+can be reused with 3D.
+
+
+275
+00:12:14,634 --> 00:12:16,669 line:-1
+This means the processes
+used today
+
+
+276
+00:12:16,669 --> 00:12:18,004 line:-1
+or the vendor
+you might work with
+
+
+277
+00:12:18,004 --> 00:12:21,741 line:-1
+can continue to work in 2D
+with your 3D production.
+
+
+278
+00:12:21,741 --> 00:12:24,677 line:-1
+Also, this means
+your 3D content is agnostic
+
+
+279
+00:12:24,677 --> 00:12:27,981 line:-1
+to the choice of languages,
+horizontal and vertical layout,
+
+
+280
+00:12:27,981 --> 00:12:30,149 line:-1
+or potential use of
+accessibility subtitle
+
+
+281
+00:12:30,149 --> 00:12:32,552 line:-1
+preferences by users.
+
+
+282
+00:12:32,552 --> 00:12:35,021 line:-1
+By adding the described
+parallax metadata,
+
+
+283
+00:12:35,021 --> 00:12:38,091 line:-1
+the platform adapts dynamically
+to the parallax metadata
+
+
+284
+00:12:38.091 --> 00:12:40.493 line:-1 position:50%
+you build.
+
+
+285
+00:12:40.493 --> 00:12:43.863 line:-1 position:50%
+As for audio use with 3D video,
+you can use the same audio use
+
+
+286
+00:12:43,863 --> 00:12:45,898 line:-1
+for 2D delivery.
+
+
+287
+00:12:45,898 --> 00:12:47,800 line:-1
+As the platform
+supports head tracking,
+
+
+288
+00:12:47.800 --> 00:12:50.903 line:-1 position:50%
+consider using
+a Spatial Audio format.
+
+
+289
+00:12:50,903 --> 00:12:54,007 line:-1
+To share the same audio
+between 2D and 3D experiences,
+
+
+290
+00:12:54,007 --> 00:12:55,808 line:-1
+the video should
+match timingwise,
+
+
+291
+00:12:55.808 --> 00:12:57.210 line:-1 position:50%
+having the same edits.
+
+
+292
+00:12:57,210 --> 00:12:59,879 line:-1
+If they differ, you will need
+to separate audio tracks
+
+
+293
+00:12:59,879 --> 00:13:03,683 line:-1
+between the 2D and 3D assets.
+
+
+294
+00:13:03,683 --> 00:13:06,686 position:50%
+Turning to packaging of 3D,
+updated HLS tools
+
+
+295
+00:13:06,686 --> 00:13:09,055 position:50%
+take care of the details,
+with 3D assets
+
+
+296
+00:13:09,055 --> 00:13:12,525 line:0
+making the process nearly
+identical to that with 2D.
+
+
+297
+00:13:12,525 --> 00:13:15,995 line:0
+Most production systems,
+which do not use Apple's tools,
+
+
+298
+00:13:15,995 --> 00:13:18,698 position:50%
+will be able to use the new
+specs that are being released
+
+
+299
+00:13:18,698 --> 00:13:21,734 position:50%
+to build equivalent
+functionality.
+
+
+300
+00:13:21.734 --> 00:13:24.504 line:-1 position:50%
+If you're building your own
+playlists or inspecting them,
+
+
+301
+00:13:24.504 --> 00:13:27.473 line:-1 position:50%
+take note of a few changes.
+
+
+302
+00:13:27,473 --> 00:13:30,743 line:-1
+REQ-VIDEO-LAYOUT is a new tag
+for video streams
+
+
+303
+00:13:30,743 --> 00:13:33,246 line:-1
+to indicate video
+is stereoscopic.
+
+
+304
+00:13:33,246 --> 00:13:37,116 line:-1
+The attribute value indicates
+if the video is stereo or not.
+
+
+305
+00:13:37.116 --> 00:13:39.352 line:-1 position:50%
+Note that if your asset
+is loaded as 3D,
+
+
+306
+00:13:39.352 --> 00:13:42.755 line:-1 position:50%
+it won't switch to 2D
+or vice versa.
+
+
+307
+00:13:42,755 --> 00:13:45,858 line:-1
+2D Video is unchanged
+and can be mixed with 3D video
+
+
+308
+00:13:45.858 --> 00:13:48.227 line:-1 position:50%
+in the same playlist.
+
+
+309
+00:13:48.227 --> 00:13:51.464 line:-1 position:50%
+REQ-VIDEO-LAYOUT requires
+a new version of the HLS spec,
+
+
+310
+00:13:51,464 --> 00:13:53,933 line:-1
+so the version is updated to 12.
+
+
+311
+00:13:53,933 --> 00:13:57,937 line:-1
+This is documented with the SDK.
+
+
+312
+00:13:57.937 --> 00:13:59.639 line:-1 position:50%
+Here's an example
+multivariant playlist
+
+
+313
+00:13:59.639 --> 00:14:02.408 line:-1 position:50%
+with the change of
+the version number to 12,
+
+
+314
+00:14:02.408 --> 00:14:06.479 line:-1 position:50%
+and using REQ-VIDEO-LAYOUT
+for the 3D video stream.
+
+
+315
+00:14:06,479 --> 00:14:08,514 line:-1
+For the best
+navigation experience,
+
+
+316
+00:14:08.514 --> 00:14:10.917 line:-1 position:50%
+you should include
+a 2D iFrame stream
+
+
+317
+00:14:10,917 --> 00:14:15,221 line:-1
+to the multivariant playlist
+to support thumbnail scrubbing.
+
+
+318
+00:14:15,221 --> 00:14:21,360 line:-1
+Finally, HLS delivery works
+the same with 3D assets.
+
+
+319
+00:14:21,360 --> 00:14:23,262 line:-1
+Delivering 3D assets
+is largely the same
+
+
+320
+00:14:23,262 --> 00:14:25,465 line:-1
+as delivering 2D assets,
+but there are some things
+
+
+321
+00:14:25.465 --> 00:14:27.934 line:-1 position:50%
+you can do to optimize
+the experience.
+
+
+322
+00:14:27.934 --> 00:14:30.903 line:-1 position:50%
+Prepare your source assets,
+noting to use MV-HEVC
+
+
+323
+00:14:30,903 --> 00:14:31,904 line:-1
+for 3D video,
+
+
+324
+00:14:31.904 --> 00:14:34.640 line:-1 position:50%
+and including the new parallax
+contour metadata.
+
+
+325
+00:14:34.640 --> 00:14:37.543 line:-1 position:50%
+Audio and caption production
+can be the same.
+
+
+326
+00:14:37,543 --> 00:14:40,012 line:-1
+Use updated packaging to produce
+the relevant segments
+
+
+327
+00:14:40.012 --> 00:14:41.347 line:-1 position:50%
+and playlists.
+
+
+328
+00:14:41,347 --> 00:14:44,383 line:-1
+Hosting remains the same.
+
+
+329
+00:14:44.383 --> 00:14:46.452 line:-1 position:50%
+Before closing,
+I want to emphasize
+
+
+330
+00:14:46,452 --> 00:14:48,955 line:-1
+that visual comfort is a key
+content-design goal
+
+
+331
+00:14:48.955 --> 00:14:50.857 line:-1 position:50%
+for 3D experiences.
+
+
+332
+00:14:50,857 --> 00:14:52,759 line:-1
+3D content should be
+comfortable to watch
+
+
+333
+00:14:52,759 --> 00:14:55,228 line:-1
+for sufficiently long durations.
+
+
+334
+00:14:55.228 --> 00:14:57.463 line:-1 position:50%
+Some 3D content characteristics
+that could potentially
+
+
+335
+00:14:57,463 --> 00:15:00,233 line:-1
+cause comfort issues
+include extreme parallax,
+
+
+336
+00:15:00,233 --> 00:15:02,001 line:-1
+both negative and positive,
+
+
+337
+00:15:02.001 --> 00:15:05.171 line:-1 position:50%
+high motion in the content
+causing focusing difficulties;
+
+
+338
+00:15:05.171 --> 00:15:06.405 line:-1 position:50%
+as well as depth conflicts
+
+
+339
+00:15:06.405 --> 00:15:09.475 line:-1 position:50%
+resulting from something
+termed "window violations."
+
+
+340
+00:15:09,475 --> 00:15:11,611 line:-1
+Screen size may affect
+viewing comfort,
+
+
+341
+00:15:11,611 --> 00:15:13,045 line:-1
+depending on how much
+of the screen
+
+
+342
+00:15:13,045 --> 00:15:16,315 line:-1
+is in the viewer's
+horizontal field of view.
+
+
+343
+00:15:16.315 --> 00:15:18.184 line:-1 position:50%
+Note that the user can affect
+the screen size
+
+
+344
+00:15:18,184 --> 00:15:21,888 line:-1
+by positioning it
+nearer or farther.
+
+
+345
+00:15:21.888 --> 00:15:24.557 line:-1 position:50%
+So in our journey, we've
+looked at 2D and 3D delivery
+
+
+346
+00:15:24.557 --> 00:15:27.193 line:-1 position:50%
+with HTTP Live Streaming.
+
+
+347
+00:15:27.193 --> 00:15:30.596 line:-1 position:50%
+For video, I introduced MV-HEVC.
+
+
+348
+00:15:30.596 --> 00:15:33.032 line:-1 position:50%
+For audio, we noted
+that the same audio streams
+
+
+349
+00:15:33,032 --> 00:15:35,668 line:-1
+can be used across 2D and 3D.
+
+
+350
+00:15:35.668 --> 00:15:38.337 line:-1 position:50%
+For captions, the same streams
+can likewise be used
+
+
+351
+00:15:38,337 --> 00:15:40,840 line:-1
+across 2D and 3D.
+
+
+352
+00:15:40,840 --> 00:15:42,975 line:-1
+Finally, a new
+timed metadata format
+
+
+353
+00:15:42,975 --> 00:15:46,045 line:-1
+is introduced to characterize
+the 3D videos' parallax,
+
+
+354
+00:15:46.045 --> 00:15:49.215 line:-1 position:50%
+allowing the same captions
+to be used.
+
+
+355
+00:15:49,215 --> 00:15:52,118 line:-1
+To wrap up, we've made it
+as easy as possible
+
+
+356
+00:15:52,118 --> 00:15:55,822 line:-1
+to bring your existing 2D
+content to a spatial experience.
+
+
+357
+00:15:55.822 --> 00:15:59.058 line:-1 position:50%
+With some small modifications
+to your current 2D pipeline,
+
+
+358
+00:15:59.058 --> 00:16:02.595 line:-1 position:50%
+you can support 3D content
+using MV-HEVC.
+
+
+359
+00:16:02.595 --> 00:16:05.331 line:-1 position:50%
+You can even continue to use
+all your existing captions
+
+
+360
+00:16:05.331 --> 00:16:06.866 line:-1 position:50%
+from 2D assets.
+
+
+361
+00:16:06.866 --> 00:16:08.634 line:-1 position:50%
+But if you provide
+timed metadata,
+
+
+362
+00:16:08,634 --> 00:16:10,169 line:-1
+those captions can be
+unobscured
+
+
+363
+00:16:10,169 --> 00:16:12,872 line:-1
+and provide a comfortable
+viewing experience.
+
+
+364
+00:16:12,872 --> 00:16:15,074 position:50%
+Watch our companion session
+for considerations
+
+
+365
+00:16:15,074 --> 00:16:18,511 position:50%
+in implementing
+playback of video.
+
+
+366
+00:16:18,511 --> 00:16:21,280 line:-1
+We look forward to the great new
+content you'll be delivering.
+
+
+367
+00:16:21,280 --> 00:16:23,115 line:-1
+Thanks for joining us today.
+
+
+368
+00:16:23,115 --> 00:16:26,085 size:2% position:90% line:0
+♪
+

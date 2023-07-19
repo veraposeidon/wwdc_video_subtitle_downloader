@@ -1,0 +1,1631 @@
+2
+00:00:00.334 --> 00:00:07.341 line:-1
+♪ ♪
+
+
+3
+00:00:10.010 --> 00:00:14.414 line:-2
+Sophia: Hello, and welcome
+to "Generalize APIs with parameter packs."
+
+
+4
+00:00:14.448 --> 00:00:17.985 line:-2
+My name is Sophia,
+and I work on the Swift compiler team.
+
+
+5
+00:00:18.018 --> 00:00:20.721 line:-2
+Today I will be talking to you
+about Swift parameter packs
+
+
+6
+00:00:20.754 --> 00:00:25.259 line:-2
+and how they provide a new dimension
+of flexibility with generic programming.
+
+
+7
+00:00:26,326 --> 00:00:30,664
+This is an advanced talk, and it builds
+upon the existing generics system.
+
+
+8
+00:00:30,697 --> 00:00:32,366
+If you are unfamiliar with the topic,
+
+
+9
+00:00:32,399 --> 00:00:37,004
+I encourage you to watch
+"Embrace Swift generics" from WWDC22.
+
+
+10
+00:00:37.037 --> 00:00:39.940 line:-2
+Today, I will walk you through
+the types of problems
+
+
+11
+00:00:39.973 --> 00:00:42.009 line:-1
+that parameter packs can solve,
+
+
+12
+00:00:42.042 --> 00:00:45.812 line:-2
+how to think about parameter packs
+when you encounter them in libraries,
+
+
+13
+00:00:45.846 --> 00:00:47.948 line:-2
+and finally,
+I will dive into how to implement
+
+
+14
+00:00:47.981 --> 00:00:51.485 line:-2
+your own code
+that utilizes parameter packs.
+
+
+15
+00:00:51.518 --> 00:00:55.522 line:-2
+Before I jump into parameter packs,
+it is important to know why they exist.
+
+
+16
+00:00:55.556 --> 00:01:00.594 line:-2
+So I will begin by talking a little bit
+about generics and then variadics.
+
+
+17
+00:01:00.627 --> 00:01:04.731 line:-2
+The code you write is
+fundamentally composed of two categories:
+
+
+18
+00:01:04.765 --> 00:01:07.467 line:-1
+values and types.
+
+
+19
+00:01:07.501 --> 00:01:09.970 line:-2
+You can abstract over values
+by writing functions
+
+
+20
+00:01:10.003 --> 00:01:13.273 line:-2
+that accept different values
+as parameters.
+
+
+21
+00:01:13.307 --> 00:01:16.109 line:-2
+An example could be
+a radians(from:) function
+
+
+22
+00:01:16.143 --> 00:01:20.480 line:-2
+that as input will accept
+any Double value representing degrees
+
+
+23
+00:01:20.514 --> 00:01:25.485 line:-2
+and for output will return
+a new Double value representing radians.
+
+
+24
+00:01:25.519 --> 00:01:28.689 line:-2
+You can abstract over types
+by writing generic code
+
+
+25
+00:01:28.722 --> 00:01:31.525 line:-2
+that accepts varying types
+for its parameters.
+
+
+26
+00:01:31.558 --> 00:01:34.795 line:-2
+For example,
+the standard library Array type
+
+
+27
+00:01:34.828 --> 00:01:39.333 line:-2
+is designed to hold any form of data
+that you might wish to fill it with.
+
+
+28
+00:01:39.366 --> 00:01:42.903 line:-2
+It has an Element type parameter
+which is a placeholder
+
+
+29
+00:01:42.936 --> 00:01:47.474 line:-2
+for the concrete type that you will use
+for a given instance of an Array.
+
+
+30
+00:01:47.508 --> 00:01:51.311 line:-2
+In both cases,
+concrete values or concrete types
+
+
+31
+00:01:51.345 --> 00:01:53.947 line:-2
+are passed as arguments
+to the abstraction.
+
+
+32
+00:01:53.981 --> 00:01:59.119 line:-2
+Most generic code abstracts
+over both types and values.
+
+
+33
+00:01:59.152 --> 00:02:03.790 line:-2
+To explore this, I am going to write
+some code to send queries to a server.
+
+
+34
+00:02:04.791 --> 00:02:09.530 line:-2
+Its basic implementation will receive
+a Request of some Payload type,
+
+
+35
+00:02:09.563 --> 00:02:12.065 line:-2
+then it will pass that
+as a query to the server,
+
+
+36
+00:02:12.099 --> 00:02:16.003 line:-2
+and finally return a server response
+of type Payload.
+
+
+37
+00:02:16.036 --> 00:02:18.405 line:-1
+The function has one parameter,
+
+
+38
+00:02:18.438 --> 00:02:21.808 line:-2
+but I want to support querying
+multiple requests in the same call.
+
+
+39
+00:02:21.842 --> 00:02:26.980 line:-2
+For the ability to have a variable number
+of arguments, we have variadic parameters.
+
+
+40
+00:02:27.014 --> 00:02:31.218 line:-2
+Variadic parameters allow
+for a function to flexibly accept
+
+
+41
+00:02:31.251 --> 00:02:34.454 line:-1
+any number of arguments of a single type.
+
+
+42
+00:02:34.488 --> 00:02:37.157 line:-1
+But variadic parameters have limitations.
+
+
+43
+00:02:37.191 --> 00:02:40.961 line:-2
+For example,
+you might want to map the given arguments
+
+
+44
+00:02:40.994 --> 00:02:45.365 line:-2
+to a tuple whose length is the same
+as the number of arguments.
+
+
+45
+00:02:45.399 --> 00:02:48.602 line:-2
+However, with variadic parameters,
+there is no way to declare
+
+
+46
+00:02:48.635 --> 00:02:52.039 line:-2
+a return type that is based
+on the argument length.
+
+
+47
+00:02:52.072 --> 00:02:56.777 line:-2
+There also is no way for variadic
+parameters to accept varying types
+
+
+48
+00:02:56.810 --> 00:03:00.614 line:-2
+without using type erasure,
+and therefore no way to preserve
+
+
+49
+00:03:00.647 --> 00:03:04.151 line:-2
+the specific static type information
+of each argument.
+
+
+50
+00:03:04.184 --> 00:03:08.989 line:-2
+What we lack with the generics system
+and variadic parameters is the ability
+
+
+51
+00:03:09.022 --> 00:03:14.695 line:-2
+to both preserve type information
+and vary the number of arguments.
+
+
+52
+00:03:14.728 --> 00:03:18.031 line:-2
+Today, the only way to do this
+is with overloading,
+
+
+53
+00:03:18.065 --> 00:03:22.903 line:-2
+which forces you to choose an upper bound
+of the number of arguments you support.
+
+
+54
+00:03:22.936 --> 00:03:26.907 line:-2
+I wonder, will two parameters be enough?
+Probably not.
+
+
+55
+00:03:26.940 --> 00:03:29.843 line:-1
+Handling up to three parameters is better.
+
+
+56
+00:03:29.877 --> 00:03:31.812 line:-1
+But what if we want four?
+
+
+57
+00:03:31.845 --> 00:03:35.649 line:-2
+This overloading pattern,
+as well as its limitations, are pervasive
+
+
+58
+00:03:35.682 --> 00:03:40.153 line:-2
+across APIs that conceptually handle
+varying numbers of type parameters.
+
+
+59
+00:03:40,187 --> 00:03:42,956
+This approach has
+the downside of redundancy,
+
+
+60
+00:03:42,990 --> 00:03:47,394
+but more importantly, it forces
+choosing an arbitrary upper limit
+
+
+61
+00:03:47,427 --> 00:03:50,397
+to the number of arguments
+that will be supported.
+
+
+62
+00:03:50,430 --> 00:03:54,801
+Exceeding whatever limit was chosen
+will result in a compiler error
+
+
+63
+00:03:54,835 --> 00:03:56,537
+about extra arguments.
+
+
+64
+00:03:56.570 --> 00:04:00.807 line:-2
+This is the kind of problem
+that parameter packs solve.
+
+
+65
+00:04:00.841 --> 00:04:04.444 line:-2
+If you find yourself
+falling into this overloading pattern,
+
+
+66
+00:04:04.478 --> 00:04:08.282 line:-2
+then that is a strong sign
+that you want to use parameter packs.
+
+
+67
+00:04:08.315 --> 00:04:12.786 line:-2
+In Swift 5.9, the generics system
+is gaining first class support
+
+
+68
+00:04:12.819 --> 00:04:14.888 line:-1
+for abstraction over argument length
+
+
+69
+00:04:14.922 --> 00:04:18.759 line:-2
+with a new construct
+called "parameter packs."
+
+
+70
+00:04:18.792 --> 00:04:21.461 line:-2
+I'm now going to talk
+about what parameter packs mean
+
+
+71
+00:04:21.495 --> 00:04:24.131 line:-1
+when you see them in APIs.
+
+
+72
+00:04:24.164 --> 00:04:28.168 line:-2
+In code, most of the time,
+you work with a single type or value.
+
+
+73
+00:04:28.202 --> 00:04:32.539 line:-2
+A parameter pack can hold
+any quantity of types or values
+
+
+74
+00:04:32.573 --> 00:04:37.077 line:-2
+and pack them together to pass them
+as an argument to a function.
+
+
+75
+00:04:37.110 --> 00:04:41.682 line:-2
+A pack that holds individual types
+is called a type pack.
+
+
+76
+00:04:41.715 --> 00:04:44.885 line:-2
+For example,
+you could have a type pack that holds
+
+
+77
+00:04:44.918 --> 00:04:49.523 line:-2
+three individual types:
+Bool, Int, and String.
+
+
+78
+00:04:49.556 --> 00:04:54.428 line:-2
+A pack that holds individual values
+is called a value pack.
+
+
+79
+00:04:54.461 --> 00:04:57.564 line:-2
+For example,
+you could have a value pack that holds
+
+
+80
+00:04:57.598 --> 00:05:02.302 line:-2
+three individual values: true,
+the number 10, and an empty string.
+
+
+81
+00:05:02.336 --> 00:05:05.472 line:-2
+Type packs and value packs
+are used together.
+
+
+82
+00:05:05.506 --> 00:05:08.742 line:-1
+A type pack provides each individual type
+
+
+83
+00:05:08.775 --> 00:05:12.012 line:-1
+for each individual value in a value pack.
+
+
+84
+00:05:12.045 --> 00:05:15.749 line:-2
+The corresponding type and value
+are at the same position
+
+
+85
+00:05:15.782 --> 00:05:17.518 line:-1
+in their respective packs.
+
+
+86
+00:05:17.551 --> 00:05:22.523 line:-2
+At position 0,
+the type of the value true is Bool.
+
+
+87
+00:05:22.556 --> 00:05:27.561 line:-2
+At position 1, the type
+of the integer literal 10 is Int.
+
+
+88
+00:05:27.594 --> 00:05:32.032 line:-2
+And at position 2, the type
+of the empty string literal is String.
+
+
+89
+00:05:32.065 --> 00:05:35.802 line:-2
+Parameter packs allow you
+to write one piece of generic code
+
+
+90
+00:05:35.836 --> 00:05:39.139 line:-2
+that works with every individual element
+in a pack.
+
+
+91
+00:05:39.173 --> 00:05:42.342 line:-2
+This concept might sound familiar
+because you're already used
+
+
+92
+00:05:42.376 --> 00:05:46.046 line:-2
+to writing one piece of code that works
+with different, individual elements
+
+
+93
+00:05:46.079 --> 00:05:48.415 line:-1
+when you use Collections in Swift.
+
+
+94
+00:05:48.448 --> 00:05:51.618 line:-2
+The way that you write such code
+is through iteration.
+
+
+95
+00:05:51.652 --> 00:05:54.855 line:-1
+For example, the body of a for-in loop
+
+
+96
+00:05:54.888 --> 00:05:58.392 line:-2
+operates on each individual element
+of an array.
+
+
+97
+00:05:58.425 --> 00:06:03.030 line:-2
+What makes parameter packs different
+from collections is that each element
+
+
+98
+00:06:03.063 --> 00:06:06.033 line:-1
+in the pack has a different static type,
+
+
+99
+00:06:06.066 --> 00:06:08.836 line:-2
+and you can work with packs
+at the type-level.
+
+
+100
+00:06:08.869 --> 00:06:11.405 line:-2
+Normally,
+you write generic code that works
+
+
+101
+00:06:11.438 --> 00:06:16.777 line:-2
+with different concrete types by declaring
+a type parameter inside angle brackets.
+
+
+102
+00:06:16.810 --> 00:06:21.381 line:-2
+In Swift 5.9, you can declare a pack
+of type parameters
+
+
+103
+00:06:21.415 --> 00:06:24.084 line:-1
+with the keyword "each".
+
+
+104
+00:06:24.117 --> 00:06:26.687 line:-1
+Instead of having a single type parameter,
+
+
+105
+00:06:26.720 --> 00:06:31.425 line:-2
+the function accepts each Payload type
+that you want to query.
+
+
+106
+00:06:31.458 --> 00:06:34.728 line:-1
+This is called a type parameter pack.
+
+
+107
+00:06:34.761 --> 00:06:39.366 line:-2
+In order for the names of type packs
+and value packs to read naturally,
+
+
+108
+00:06:39.399 --> 00:06:43.270 line:-2
+use a singular naming convention,
+such as "each Payload"
+
+
+109
+00:06:43.303 --> 00:06:45.839 line:-1
+rather than "each Payloads".
+
+
+110
+00:06:45.873 --> 00:06:48.775 line:-1
+Generic code that uses parameter packs
+
+
+111
+00:06:48.809 --> 00:06:53.780 line:-2
+can operate on each Payload individually
+using repetition patterns.
+
+
+112
+00:06:53.814 --> 00:06:57.784 line:-2
+A repetition pattern is expressed
+using the 'repeat' keyword,
+
+
+113
+00:06:57.818 --> 00:07:00.888 line:-2
+followed by a type
+called the pattern type.
+
+
+114
+00:07:15.402 --> 00:07:19.106 line:-2
+with individual pack elements
+at every iteration.
+
+
+115
+00:07:19.139 --> 00:07:22.176 line:-2
+Let's see how this replacement works
+with a concrete type pack
+
+
+116
+00:07:22.209 --> 00:07:24.811 line:-1
+containing Bool, Int, and String.
+
+
+117
+00:07:24.845 --> 00:07:27.581 line:-1
+The pattern will be repeated three times
+
+
+118
+00:07:27.614 --> 00:07:31.685 line:-2
+and the placeholder 'each Payload'
+is replaced with the concrete type
+
+
+119
+00:07:31.718 --> 00:07:34.521 line:-1
+in the pack during each repetition.
+
+
+120
+00:07:34.555 --> 00:07:37.891 line:-2
+The result is
+a comma-separated list of types:
+
+
+121
+00:07:37.925 --> 00:07:42.462 line:-2
+Request of Bool, Request of Int,
+and Request of String.
+
+
+122
+00:07:42.496 --> 00:07:47.367 line:-2
+Because repetition patterns produce
+comma-separated lists of types,
+
+
+123
+00:07:47.401 --> 00:07:52.873 line:-2
+they can only be used in positions that
+naturally accept comma-separated lists.
+
+
+124
+00:07:52.906 --> 00:07:56.243 line:-2
+This includes types
+wrapped in parentheses,
+
+
+125
+00:07:56.276 --> 00:07:59.780 line:-2
+which are either a tuple type
+or a single type.
+
+
+126
+00:07:59.813 --> 00:08:03.150 line:-2
+Additionally, they can be used
+in function parameter lists,
+
+
+127
+00:08:03.183 --> 00:08:07.054 line:-2
+and repetition patterns can be used
+in generic argument lists.
+
+
+128
+00:08:07.087 --> 00:08:11.692 line:-2
+Using a repetition pattern
+as the type of a function parameter
+
+
+129
+00:08:11.725 --> 00:08:16.663 line:-2
+turns that function parameter
+into a value parameter pack.
+
+
+130
+00:08:16.697 --> 00:08:21.835 line:-2
+This enables the caller to pass in
+an arbitrary number of Request instances,
+
+
+131
+00:08:21.869 --> 00:08:27.040 line:-2
+and the argument values will be collected
+into a pack and passed to the function.
+
+
+132
+00:08:27.074 --> 00:08:30.477 line:-2
+That covers the fundamental concept
+of parameter packs
+
+
+133
+00:08:30.511 --> 00:08:32.646 line:-1
+and the syntax that is used.
+
+
+134
+00:08:32.679 --> 00:08:36.149 line:-2
+Next, to demonstrate
+how they can simplify as well as extend
+
+
+135
+00:08:36.183 --> 00:08:40.120 line:-2
+the functionality of APIs,
+let's return to our query API.
+
+
+136
+00:08:52.332 --> 00:08:58.172 line:-2
+Each overload has 1, 2, 3,
+and 4 type parameters, respectively.
+
+
+137
+00:08:58.205 --> 00:09:01.942 line:-2
+Each overload maps each type parameter
+to a Request
+
+
+138
+00:09:01.975 --> 00:09:04.545 line:-1
+over that type in the parameter list.
+
+
+139
+00:09:04.578 --> 00:09:09.716 line:-2
+And each overload contains a list
+of each type parameter in the return type.
+
+
+140
+00:09:09.750 --> 00:09:13.387 line:-2
+Using parameter packs,
+these 4 overloads can be collapsed
+
+
+141
+00:09:13.420 --> 00:09:15.756 line:-1
+down into a single function.
+
+
+142
+00:09:15.789 --> 00:09:18.825 line:-2
+Let's first consider
+the type parameter declarations,
+
+
+143
+00:09:18.859 --> 00:09:22.496 line:-2
+then the function parameter list,
+and finally the return type.
+
+
+144
+00:09:22.529 --> 00:09:27.634 line:-2
+Each type parameter can be collapsed down
+into a type parameter pack.
+
+
+145
+00:09:27.668 --> 00:09:33.507 line:-2
+Each individual Request parameter can be
+collapsed down to a value parameter pack.
+
+
+146
+00:09:33.540 --> 00:09:36.944 line:-2
+And the return type can be collapsed down
+into a tuple
+
+
+147
+00:09:36.977 --> 00:09:40.247 line:-2
+constructed by repeating
+each Payload type.
+
+
+148
+00:09:40.280 --> 00:09:42.115 line:-1
+Now you have one query function
+
+
+149
+00:09:42.149 --> 00:09:44.818 line:-2
+that can handle
+any number of request arguments.
+
+
+150
+00:09:44.852 --> 00:09:49.756 line:-2
+Because the function parameter
+and return type are both dependent types
+
+
+151
+00:09:49.790 --> 00:09:52.960 line:-1
+of the type parameter pack 'each Payload,'
+
+
+152
+00:09:52.993 --> 00:09:56.129 line:-2
+you know that the length
+of the function's value parameter pack
+
+
+153
+00:09:56.163 --> 00:10:00.267 line:-2
+will always match the number of elements
+in the tuple that is returned.
+
+
+154
+00:10:00.300 --> 00:10:03.637 line:-2
+Now that I have adopted
+parameter packs in this API,
+
+
+155
+00:10:03.670 --> 00:10:07.674 line:-2
+you can call this single query function
+with one argument
+
+
+156
+00:10:07.708 --> 00:10:10.577 line:-2
+or with three arguments
+or any amount you wish.
+
+
+157
+00:10:10.611 --> 00:10:13.580 line:-2
+Parameter packs handle
+all argument lengths the same way.
+
+
+158
+00:10:13.614 --> 00:10:17.150 line:-2
+Let's focus on the call
+with three arguments.
+
+
+159
+00:10:17.184 --> 00:10:21.054 line:-2
+The concrete argument pack is inferred
+from the arguments at the call-site.
+
+
+160
+00:10:21.088 --> 00:10:24.625 line:-2
+Every concrete type
+for the placeholders 'each Payload'
+
+
+161
+00:10:24.658 --> 00:10:28.428 line:-2
+is collected from the argument list
+into a type pack.
+
+
+162
+00:10:28.462 --> 00:10:33.700 line:-2
+And the concrete type pack is
+substituted in to produce the return type.
+
+
+163
+00:10:33.734 --> 00:10:38.672 line:-2
+'each Payload' appears
+in the parameter list and the return type.
+
+
+164
+00:10:48.148 --> 00:10:52.119 line:-2
+In the end, the code that is run
+is equivalent to an iteration
+
+
+165
+00:10:52.152 --> 00:10:55.122 line:-1
+over all three types of the type pack.
+
+
+166
+00:11:00.661 --> 00:11:04.531 line:-2
+Suppose that our query payloads
+should be Equatable.
+
+
+167
+00:11:04.565 --> 00:11:08.135 line:-2
+By adding a colon
+and the protocol name Equatable
+
+
+168
+00:11:08.168 --> 00:11:10.404 line:-1
+following the type parameter pack,
+
+
+169
+00:11:10.437 --> 00:11:15.375 line:-2
+every element in the Payload pack is
+required to conform to Equatable.
+
+
+170
+00:11:15.409 --> 00:11:18.846 line:-2
+More general requirements can be
+declared with a 'where' clause,
+
+
+171
+00:11:18.879 --> 00:11:20.948 line:-1
+just like ordinary generics.
+
+
+172
+00:11:20.981 --> 00:11:25.552 line:-2
+Remembering that parameter packs
+can contain zero or more arguments,
+
+
+173
+00:11:25.586 --> 00:11:28.422 line:-2
+you may be thinking
+that this server query API
+
+
+174
+00:11:28.455 --> 00:11:32.059 line:-2
+has no particular reason
+to accept zero arguments.
+
+
+175
+00:11:32.092 --> 00:11:36.530 line:-2
+Fortunately, there is a simple technique
+to require a minimum argument length.
+
+
+176
+00:11:36.563 --> 00:11:40.367 line:-2
+In this case,
+I want to require at least one argument,
+
+
+177
+00:11:40.400 --> 00:11:42.970 line:-1
+to give the function something to do.
+
+
+178
+00:11:43.003 --> 00:11:46.240 line:-2
+To achieve this,
+I add a regular type parameter
+
+
+179
+00:11:46.273 --> 00:11:48.642 line:-1
+preceding the type parameter pack
+
+
+180
+00:11:48.675 --> 00:11:53.180 line:-2
+and a corresponding value parameter
+preceding the value parameter pack.
+
+
+181
+00:11:53.213 --> 00:11:55.516 line:-1
+Any constraints on the type parameter pack
+
+
+182
+00:11:55.549 --> 00:11:58.418 line:-2
+should be applied
+to the new type parameter as well,
+
+
+183
+00:11:58.452 --> 00:12:01.588 line:-2
+which, in this example,
+is conformance to Equatable.
+
+
+184
+00:12:01.622 --> 00:12:05.559 line:-2
+Now callers to your function
+must provide at least one argument.
+
+
+185
+00:12:05.592 --> 00:12:07.694 line:-2
+At this point,
+we have covered the foundation
+
+
+186
+00:12:07.728 --> 00:12:12.065 line:-2
+of what parameter packs solve
+and how to read them in an API.
+
+
+187
+00:12:12.099 --> 00:12:16.670 line:-2
+Next, let's go over how to implement code
+that uses parameter packs.
+
+
+188
+00:12:16.703 --> 00:12:20.107 line:-2
+We're going to build out
+the implementation of the server query
+
+
+189
+00:12:20.140 --> 00:12:21.942 line:-1
+using parameter packs.
+
+
+190
+00:12:21.975 --> 00:12:25.012 line:-1
+The query function accepts a value pack
+
+
+191
+00:12:25.045 --> 00:12:27.814 line:-2
+where every individual element
+is a Request
+
+
+192
+00:12:27.848 --> 00:12:30.817 line:-1
+over every element in the type pack.
+
+
+193
+00:12:48.569 --> 00:12:51.104 line:-1
+for every item in the value pack.
+
+
+194
+00:12:51.138 --> 00:12:54.842 line:-2
+You can express this
+using repetition patterns.
+
+
+195
+00:12:54.875 --> 00:12:58.612 line:-2
+Repetition patterns are expressed
+using the same syntax
+
+
+196
+00:12:58.645 --> 00:13:01.281 line:-1
+at the type-level and at the value-level.
+
+
+197
+00:13:01.315 --> 00:13:06.920 line:-2
+At the value level, the 'repeat' keyword
+is followed by the pattern expression.
+
+
+198
+00:13:06.954 --> 00:13:10.991 line:-2
+The pattern expression will contain
+one or more value packs.
+
+
+199
+00:13:11.024 --> 00:13:14.228 line:-2
+The pack is iterated
+through every value it contains,
+
+
+200
+00:13:14.261 --> 00:13:17.197 line:-2
+and the expression is evaluated
+once per value.
+
+
+201
+00:13:17.231 --> 00:13:21.768 line:-2
+To produce a list of all evaluation
+results contained within a tuple,
+
+
+202
+00:13:21,802 --> 00:13:25,105
+you can wrap the pattern expression
+in parentheses.
+
+
+203
+00:13:25,138 --> 00:13:28,742
+If the value pack that is passed
+to the function is empty,
+
+
+204
+00:13:28,775 --> 00:13:31,144
+the result will be the empty tuple.
+
+
+205
+00:13:31,178 --> 00:13:36,049
+If the value pack has a single element,
+the result will be another single value.
+
+
+206
+00:13:36,083 --> 00:13:40,721
+If the value pack has multiple elements,
+the result will be a tuple.
+
+
+207
+00:13:40,754 --> 00:13:41,822
+And that's it.
+
+
+208
+00:13:41.855 --> 00:13:45.826 line:-2
+Now, we have a query function
+that accepts a value pack of results,
+
+
+209
+00:13:45.859 --> 00:13:48.495 line:-1
+evaluates every individual request,
+
+
+210
+00:13:48.529 --> 00:13:52.866 line:-2
+and returns the result
+of every request together in a tuple.
+
+
+211
+00:13:52.900 --> 00:13:57.905 line:-2
+This is the foundation of how you make use
+of parameter packs in your code.
+
+
+212
+00:13:57.938 --> 00:14:01.441 line:-2
+This continues to be far less code
+than the earlier example
+
+
+213
+00:14:01.475 --> 00:14:04.978 line:-2
+that used multiple overloads
+rather than parameter packs,
+
+
+214
+00:14:05.012 --> 00:14:08.615 line:-2
+and that version didn't even have
+an implementation.
+
+
+215
+00:14:08.649 --> 00:14:11.652 line:-2
+Maintenance is easier,
+and errors that often arise
+
+
+216
+00:14:11.685 --> 00:14:13.987 line:-1
+from repetitive code patterns are gone.
+
+
+217
+00:14:14.021 --> 00:14:16.890 line:-1
+Now let's add a little more flexibility.
+
+
+218
+00:14:16.924 --> 00:14:22.829 line:-2
+I'm going to refactor my example
+to: enable the query API to store state,
+
+
+219
+00:14:35.342 --> 00:14:37.277 line:-1
+and lift the type parameter pack
+
+
+220
+00:14:37.311 --> 00:14:40.247 line:-2
+from the query method
+to the Evaluator type.
+
+
+221
+00:14:40.280 --> 00:14:44.117 line:-2
+The Evaluator struct can store
+the request pack in a stored property
+
+
+222
+00:14:44.151 --> 00:14:47.487 line:-2
+by wrapping it in parentheses
+to make it a tuple value.
+
+
+223
+00:14:47.521 --> 00:14:50.924 line:-2
+Given a concrete Payload type
+argument pack,
+
+
+224
+00:14:50.958 --> 00:14:54.228 line:-2
+the 'item' variable will either be
+a single request
+
+
+225
+00:14:54.261 --> 00:14:57.064 line:-1
+or a tuple of every request.
+
+
+226
+00:14:57.097 --> 00:15:00.801 line:-2
+Next, I'll change Request
+from a struct to a protocol
+
+
+227
+00:15:00.834 --> 00:15:04.171 line:-1
+that has an associated type named Output.
+
+
+228
+00:15:04.204 --> 00:15:09.042 line:-2
+And I will add another associated type
+to the Request protocol named Input.
+
+
+229
+00:15:09.076 --> 00:15:12.279 line:-2
+I will then update
+the evaluate method in Request
+
+
+230
+00:15:12.312 --> 00:15:15.282 line:-2
+to make its argument
+the protocol's Input type.
+
+
+231
+00:15:15.315 --> 00:15:17.417 line:-1
+This enables the method's return type
+
+
+232
+00:15:17.451 --> 00:15:20.320 line:-2
+to differ from that
+of the argument's type.
+
+
+233
+00:15:20.354 --> 00:15:23.190 line:-2
+After this,
+I update the Evaluator to require
+
+
+234
+00:15:23.223 --> 00:15:26.793 line:-1
+all Payload types to conform to Request
+
+
+235
+00:15:26.827 --> 00:15:30.464 line:-2
+and correspondingly update
+the 'item' stored property
+
+
+236
+00:15:30.497 --> 00:15:33.567 line:-1
+to now be simply of type 'each Payload.'
+
+
+237
+00:15:33.600 --> 00:15:36.170 line:-1
+However, at this point, the name "Payload"
+
+
+238
+00:15:36.203 --> 00:15:40.274 line:-2
+for Evaluator's type parameter pack
+doesn't really fit.
+
+
+239
+00:15:40.307 --> 00:15:43.844 line:-2
+Payload is no longer
+what is contained within a Request
+
+
+240
+00:15:43.877 --> 00:15:46.914 line:-2
+but instead conforms
+to the entirety of Request.
+
+
+241
+00:15:46.947 --> 00:15:50.450 line:-2
+Therefore, we will change
+the name of Payload to be Request
+
+
+242
+00:15:50.484 --> 00:15:53.887 line:-2
+and the name of the protocol
+to be RequestProtocol.
+
+
+243
+00:15:53.921 --> 00:15:58.325 line:-2
+The query method can now accept
+a pack of each Request's Input type,
+
+
+244
+00:15:58.358 --> 00:16:02.596 line:-2
+and it will return a list
+of each Request's Output type.
+
+
+245
+00:16:02.629 --> 00:16:06.400 line:-2
+Finally, the new parameter 'input'
+to the query method
+
+
+246
+00:16:06.433 --> 00:16:08.902 line:-2
+simply needs to be passed along
+to the calls
+
+
+247
+00:16:08.936 --> 00:16:11.171 line:-1
+to every item's evaluate method.
+
+
+248
+00:16:11.205 --> 00:16:14.007 line:-2
+Now we are able to have
+a different type returned
+
+
+249
+00:16:14.041 --> 00:16:17.077 line:-2
+from the server's response
+than the type of data
+
+
+250
+00:16:17.110 --> 00:16:19.179 line:-1
+that we include inside our query.
+
+
+251
+00:16:19.213 --> 00:16:22.883 line:-2
+You can know that the length
+of the method's value argument pack
+
+
+252
+00:16:22.916 --> 00:16:26.053 line:-2
+will match the length of the value pack
+that is returned
+
+
+253
+00:16:40.434 --> 00:16:43.403 line:-2
+if you were to want to exit early
+from the iteration.
+
+
+254
+00:16:43.437 --> 00:16:45.906 line:-2
+Perhaps it is the case
+that the consequences
+
+
+255
+00:16:45.939 --> 00:16:48.809 line:-2
+of a collection of queries
+should only take effect
+
+
+256
+00:16:48.842 --> 00:16:50.811 line:-1
+if every query is successful.
+
+
+257
+00:16:50.844 --> 00:16:53.514 line:-1
+Throwing errors can be used for this.
+
+
+258
+00:16:53.547 --> 00:16:57.384 line:-2
+In our example, you could update
+RequestProtocol's evaluate method
+
+
+259
+00:16:57.417 --> 00:16:58.852 line:-1
+to be a throwing function
+
+
+260
+00:16:58.886 --> 00:17:02.022 line:-2
+and modify the return type
+of Evaluator's query method
+
+
+261
+00:17:02.055 --> 00:17:03.423 line:-1
+to be optional.
+
+
+262
+00:17:03.457 --> 00:17:07.394 line:-2
+You can move the body of the query method
+into a do-catch statement,
+
+
+263
+00:17:07.427 --> 00:17:10.330 line:-2
+placing the return statement
+within the do clause
+
+
+264
+00:17:10.364 --> 00:17:12.666 line:-1
+and returning nil from the catch clause.
+
+
+265
+00:17:12.699 --> 00:17:17.204 line:-2
+Now any individual query's evaluation
+is able to halt iteration
+
+
+266
+00:17:17.237 --> 00:17:20.274 line:-2
+over all of the queries,
+if that might be needed.
+
+
+267
+00:17:20.307 --> 00:17:24.444 line:-2
+In this session, we have talked
+about how parameter packs allow you
+
+
+268
+00:17:24.478 --> 00:17:29.449 line:-2
+to abstract over types as well as
+the number of arguments in generic code.
+
+
+269
+00:17:29.483 --> 00:17:32.085 line:-2
+We walked through
+how you can use parameter packs
+
+
+270
+00:17:32.119 --> 00:17:35.556 line:-2
+to both simplify and remove limitations
+in your code
+
+
+271
+00:17:35.589 --> 00:17:38.125 line:-1
+by writing a single generic implementation
+
+
+272
+00:17:38.158 --> 00:17:41.695 line:-2
+that previously would have required
+numerous overloads.
+
+
+273
+00:17:41.728 --> 00:17:44.598 line:-2
+Finally, we wrote code
+to implement sending queries
+
+
+274
+00:17:44.631 --> 00:17:48.035 line:-2
+to a server
+while utilizing parameter packs.
+
+
+275
+00:17:48,068 --> 00:17:49,736
+To learn more about generics,
+
+
+276
+00:17:49,770 --> 00:17:54,541
+check out the session
+"Embrace Swift generics" from WWDC22.
+
+
+277
+00:17:54,575 --> 00:17:57,511
+And to learn more about protocols
+and type erasure,
+
+
+278
+00:17:57,544 --> 00:18:01,148
+check out the session
+"Design protocol interfaces in Swift"
+
+
+279
+00:18:01,181 --> 00:18:03,483
+from WWDC22.
+
+
+280
+00:18:03.517 --> 00:18:07.688 line:-2
+Swift parameter packs are a powerful tool
+to expand what is possible
+
+
+281
+00:18:07.721 --> 00:18:10.390 line:-2
+in your generic code
+while also enabling you
+
+
+282
+00:18:10.424 --> 00:18:13.293 line:-1
+to simplify common generic patterns.
+
+
+283
+00:18:13.327 --> 00:18:15.429 line:-2
+We can't wait to see
+what you build with them.
+
+
+284
+00:18:15.462 --> 00:18:17.097 line:-1
+Thank you for watching.
+

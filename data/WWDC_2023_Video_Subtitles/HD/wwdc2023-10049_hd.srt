@@ -1,0 +1,2201 @@
+2
+00:00:00.334 --> 00:00:07.341 line:-1
+♪ ♪
+
+
+3
+00:00:10.444 --> 00:00:14.214 line:-2
+Ben: Hi, I'm Ben Levine,
+an engineer on the Core ML team.
+
+
+4
+00:00:14.248 --> 00:00:16.149 line:-1
+Today, I'm going to talk about what's new
+
+
+5
+00:00:16.183 --> 00:00:19.419 line:-2
+when it comes to integrating Core ML
+into your app.
+
+
+6
+00:00:19.453 --> 00:00:23.557 line:-2
+Building intelligent experiences
+in your app has never been easier.
+
+
+7
+00:00:23.590 --> 00:00:26.426 line:-1
+The Xcode SDK provides a solid foundation
+
+
+8
+00:00:26.460 --> 00:00:30.197 line:-2
+for leveraging and deploying
+machine learning-powered features.
+
+
+9
+00:00:30.230 --> 00:00:33.100 line:-2
+A set of domain specific frameworks
+give you access
+
+
+10
+00:00:33.133 --> 00:00:36.670 line:-2
+to built-in intelligence
+through simple APIs.
+
+
+11
+00:00:36.703 --> 00:00:42.476 line:-2
+The capabilities they provide are powered
+by models trained and optimized by Apple.
+
+
+12
+00:00:42.509 --> 00:00:45.779 line:-1
+These models are executed via Core ML.
+
+
+13
+00:00:45.812 --> 00:00:47.814 line:-1
+The Core ML framework provides the engine
+
+
+14
+00:00:47.848 --> 00:00:50.851 line:-2
+for running machine learning models
+on-device.
+
+
+15
+00:00:50.884 --> 00:00:55.389 line:-2
+It allows you to easily deploy models
+customized for your app.
+
+
+16
+00:00:55.422 --> 00:00:58.592 line:-2
+It abstracts away the hardware details
+while leveraging
+
+
+17
+00:00:58.625 --> 00:01:02.062 line:-2
+the high-performance compute capabilities
+of Apple silicon
+
+
+18
+00:01:02.095 --> 00:01:05.666 line:-2
+with help from the Accelerate
+and Metal family of frameworks.
+
+
+19
+00:01:05.699 --> 00:01:10.470 line:-2
+Core ML's mission is to help you integrate
+machine learning models into your app.
+
+
+20
+00:01:10,504 --> 00:01:15,375
+This year, our focus for Core ML
+was performance and flexibility.
+
+
+21
+00:01:15,409 --> 00:01:18,846
+We made improvements in our workflow,
+API surface,
+
+
+22
+00:01:18,879 --> 00:01:21,715
+and also our underlying inference engine.
+
+
+23
+00:01:21.748 --> 00:01:25.085 line:-2
+Before jumping into the workflow
+and highlighting new opportunities
+
+
+24
+00:01:25.118 --> 00:01:27.888 line:-2
+for you to optimize
+your Core ML integration,
+
+
+25
+00:01:27.921 --> 00:01:30.691 line:-2
+here's an idea
+of the potential performance benefits
+
+
+26
+00:01:30.724 --> 00:01:34.595 line:-2
+that you can get automatically
+by just updating to the latest OS.
+
+
+27
+00:01:36.496 --> 00:01:41.068 line:-2
+When comparing the relative
+prediction time between iOS 16 and 17,
+
+
+28
+00:01:41.101 --> 00:01:46.240 line:-2
+you'll observe that iOS 17 is
+simply faster for many of your models.
+
+
+29
+00:01:46.273 --> 00:01:49.109 line:-2
+This speedup in the inference engine
+comes with the OS
+
+
+30
+00:01:49.142 --> 00:01:51.912 line:-2
+and doesn't require
+re-compilation of your models
+
+
+31
+00:01:51.945 --> 00:01:54.915 line:-1
+or making any changes to your code.
+
+
+32
+00:01:54.948 --> 00:01:58.218 line:-2
+The same is true
+for other platforms as well.
+
+
+33
+00:01:58.252 --> 00:02:02.489 line:-2
+Naturally, the amount of speedup
+is model and hardware dependent.
+
+
+34
+00:02:02.523 --> 00:02:05.826 line:-2
+Moving to the agenda, I'll start
+with an overview of the workflow
+
+
+35
+00:02:05.859 --> 00:02:08.695 line:-1
+when integrating Core ML into your app.
+
+
+36
+00:02:08.729 --> 00:02:11.832 line:-2
+Along the way,
+I'll highlight optimization opportunities
+
+
+37
+00:02:11.865 --> 00:02:14.101 line:-1
+for different parts of the workflow.
+
+
+38
+00:02:14.134 --> 00:02:18.205 line:-2
+Then I'll focus on model integration
+and discuss new APIs and behavior
+
+
+39
+00:02:18.238 --> 00:02:22.009 line:-1
+for compute availability, model lifecycle,
+
+
+40
+00:02:22.042 --> 00:02:24.578 line:-1
+and asynchronous prediction
+
+
+41
+00:02:24.611 --> 00:02:28.749 line:-2
+I'll start with an overview
+of the Core ML workflow.
+
+
+42
+00:02:28.782 --> 00:02:32.352 line:-2
+There are two phases
+for integrating Core ML into your app.
+
+
+43
+00:02:32.386 --> 00:02:34.121 line:-1
+First is developing your model,
+
+
+44
+00:02:34.154 --> 00:02:37.758 line:-2
+and second is using that model
+within your app.
+
+
+45
+00:02:37.791 --> 00:02:41.261 line:-2
+For model development,
+you have several options.
+
+
+46
+00:02:41.295 --> 00:02:46.567 line:-2
+One of the most convenient ways to develop
+your own model is to use Create ML.
+
+
+47
+00:02:46.600 --> 00:02:50.671 line:-2
+Create ML provides various templates
+for common machine learning tasks
+
+
+48
+00:02:50.704 --> 00:02:55.275 line:-2
+and can leverage the highly optimized
+models built into the OS.
+
+
+49
+00:02:55.309 --> 00:02:57.611 line:-2
+It guides you through
+the model development workflow
+
+
+50
+00:02:57,644 --> 00:03:00,948
+and lets you interactively evaluate
+the results.
+
+
+51
+00:03:00,981 --> 00:03:04,318
+If you want to learn more,
+check out this year's Create ML video.
+
+
+52
+00:03:05.953 --> 00:03:08.689 line:-2
+Another way to develop a model
+is to train one
+
+
+53
+00:03:08.722 --> 00:03:12.526 line:-2
+using one of several
+python machine learning frameworks.
+
+
+54
+00:03:12.559 --> 00:03:18.298 line:-2
+Then, use the CoreMLTools python package
+to convert to the Core ML model format.
+
+
+55
+00:03:18.332 --> 00:03:21.168 line:-2
+Last, it's important
+you evaluate your model
+
+
+56
+00:03:21.201 --> 00:03:25.572 line:-2
+both in terms of accuracy
+and performance on Apple hardware.
+
+
+57
+00:03:25.606 --> 00:03:29.076 line:-2
+Using feedback from evaluation
+often results in revisiting
+
+
+58
+00:03:29.109 --> 00:03:32.646 line:-2
+some of these steps
+to further optimize your model.
+
+
+59
+00:03:32.679 --> 00:03:36.850 line:-2
+There are many opportunities
+for optimization in these steps.
+
+
+60
+00:03:36.884 --> 00:03:41.455 line:-2
+For training, how you collect and choose
+your training data is important.
+
+
+61
+00:03:41.488 --> 00:03:44.358 line:-2
+It should be consistent
+with the data being passed to the model
+
+
+62
+00:03:44.391 --> 00:03:47.728 line:-2
+when it's deployed
+and in your users' hands.
+
+
+63
+00:03:47.761 --> 00:03:51.064 line:-2
+The model architecture you choose
+is also important.
+
+
+64
+00:03:51.098 --> 00:03:54.935 line:-2
+You may be exploring multiple options,
+each with their own tradeoffs
+
+
+65
+00:03:54.968 --> 00:04:00.274 line:-2
+between training data requirements,
+accuracy, size, and performance.
+
+
+66
+00:04:00.307 --> 00:04:03.977 line:-2
+Many of these tradeoffs may not be
+fully visible at training time
+
+
+67
+00:04:04.011 --> 00:04:07.181 line:-2
+and require a few iterations
+through the full development flow.
+
+
+68
+00:04:07.948 --> 00:04:10.184 line:-1
+Next is model conversion.
+
+
+69
+00:04:10.217 --> 00:04:13.620 line:-2
+Core ML tools offers various options
+to help optimize
+
+
+70
+00:04:13.654 --> 00:04:18.959 line:-2
+the converted model's precision,
+footprint, and computation cost.
+
+
+71
+00:04:18.992 --> 00:04:21.929 line:-2
+You can select input and output formats
+that best match
+
+
+72
+00:04:21.962 --> 00:04:25.766 line:-2
+your app's data flow
+to avoid unnecessary copies.
+
+
+73
+00:04:25.799 --> 00:04:29.469 line:-2
+If your input shape can vary,
+you can specify that variation,
+
+
+74
+00:04:29.503 --> 00:04:31.405 line:-1
+rather than choosing just one shape
+
+
+75
+00:04:31.438 --> 00:04:35.976 line:-2
+or switching amongst
+multiple shape-specific models.
+
+
+76
+00:04:36.009 --> 00:04:39.313 line:-2
+Compute precision can also be
+explicitly set for the whole model
+
+
+77
+00:04:39.346 --> 00:04:41.748 line:-1
+or individual operations.
+
+
+78
+00:04:41.782 --> 00:04:46.286 line:-1
+Both float32 and float16 are available.
+
+
+79
+00:04:46.320 --> 00:04:48.856 line:-2
+In addition to the precision
+of computation,
+
+
+80
+00:04:48.889 --> 00:04:53.861 line:-2
+you also have some control over
+how your model parameters are represented.
+
+
+81
+00:04:53.894 --> 00:04:56.330 line:-1
+CoreMLTools comes with a set of utilities
+
+
+82
+00:04:56.363 --> 00:05:00.300 line:-2
+for post-training weight quantization
+and compression.
+
+
+83
+00:05:00.334 --> 00:05:04.204 line:-2
+These utilities can help you significantly
+reduce the footprint of your model
+
+
+84
+00:05:04.238 --> 00:05:06.640 line:-1
+and improve performance on-device.
+
+
+85
+00:05:06.673 --> 00:05:12.212 line:-2
+However, to achieve these benefits,
+there is some tradeoff in accuracy.
+
+
+86
+00:05:12.246 --> 00:05:15.749 line:-2
+There are some new tools
+to help you in this space
+
+
+87
+00:05:15.782 --> 00:05:20.087 line:-2
+There's a new optimize submodule
+in the CoreMLTools package.
+
+
+88
+00:05:20.120 --> 00:05:23.724 line:-2
+It unifies and updates
+the post-training compression utilities
+
+
+89
+00:05:23.757 --> 00:05:28.595 line:-2
+and adds new quantization-aware
+training extensions for PyTorch.
+
+
+90
+00:05:28.629 --> 00:05:31.665 line:-2
+This gives you access
+to data-driven optimizations
+
+
+91
+00:05:31.698 --> 00:05:35.869 line:-2
+to help preserve accuracy
+for quantized models during training.
+
+
+92
+00:05:35.903 --> 00:05:40.107 line:-2
+This is coupled with new operations
+which support activation quantization
+
+
+93
+00:05:40.140 --> 00:05:43.744 line:-1
+in Core ML's ML Program model type.
+
+
+94
+00:05:43,777 --> 00:05:45,078
+Check out this year's session
+
+
+95
+00:05:45,112 --> 00:05:48,549
+on compressing machine learning models
+with Core ML to learn more.
+
+
+96
+00:05:50.250 --> 00:05:52.452 line:-1
+Next is evaluation.
+
+
+97
+00:05:52.486 --> 00:05:55.556 line:-2
+One option to evaluate your model
+is to run predictions
+
+
+98
+00:05:55.589 --> 00:06:00.194 line:-2
+on the converted model directly from
+your python code with CoreMLTools.
+
+
+99
+00:06:00.227 --> 00:06:03.964 line:-2
+It will use the same Core ML inference
+stack that your app code will use
+
+
+100
+00:06:03.997 --> 00:06:07.301 line:-2
+and lets you quickly check
+how your choices during model conversion
+
+
+101
+00:06:07.334 --> 00:06:11.305 line:-2
+affect the model's accuracy
+and performance.
+
+
+102
+00:06:11.338 --> 00:06:13.574 line:-1
+Xcode also provides some helpful tools
+
+
+103
+00:06:13.607 --> 00:06:18.345 line:-2
+when it comes to evaluation
+and exploration of your models.
+
+
+104
+00:06:18.378 --> 00:06:22.249 line:-2
+Model previews are available
+for many common model types.
+
+
+105
+00:06:22.282 --> 00:06:25.185 line:-2
+This lets you provide
+some sample inputs to the model
+
+
+106
+00:06:25.219 --> 00:06:30.190 line:-2
+and preview the predicted output
+without having to write any code.
+
+
+107
+00:06:30.224 --> 00:06:32.759 line:-2
+Core ML performance reports
+provide you a breakdown
+
+
+108
+00:06:32.793 --> 00:06:36.830 line:-2
+of model computation performance
+for load, prediction,
+
+
+109
+00:06:36.864 --> 00:06:40.367 line:-2
+and compilation times
+on any attached device.
+
+
+110
+00:06:40.400 --> 00:06:43.737 line:-2
+Note that this can be useful
+to evaluate model architectures
+
+
+111
+00:06:43.770 --> 00:06:45.339 line:-1
+even before you've trained them.
+
+
+112
+00:06:46.273 --> 00:06:48.742 line:-2
+Now, stepping back
+to the overall workflow,
+
+
+113
+00:06:48.775 --> 00:06:52.446 line:-1
+the next topic is model integration.
+
+
+114
+00:06:52.479 --> 00:06:55.916 line:-2
+Model integration is a part
+of developing your app.
+
+
+115
+00:06:55.949 --> 00:06:58.552 line:-2
+Just like any other resource
+you use in your app,
+
+
+116
+00:06:58.585 --> 00:07:02.589 line:-2
+you want to carefully manage and optimize
+how you use your Core ML model.
+
+
+117
+00:07:04.057 --> 00:07:06.760 line:-2
+There are three steps
+in model integration.
+
+
+118
+00:07:06.793 --> 00:07:09.730 line:-2
+You first write
+the application code to use the model.
+
+
+119
+00:07:09.763 --> 00:07:12.366 line:-2
+You have code
+for where and when to load the model,
+
+
+120
+00:07:12.399 --> 00:07:17.070 line:-2
+how to prepare the model's input data,
+make predictions, and use the results.
+
+
+121
+00:07:18.372 --> 00:07:21.742 line:-2
+Then you compile this code
+along with the model.
+
+
+122
+00:07:21.775 --> 00:07:27.247 line:-2
+And third, you test, run, and profile
+the model running within your app.
+
+
+123
+00:07:27.281 --> 00:07:30.317 line:-2
+When it comes to profiling,
+you may find the Core ML
+
+
+124
+00:07:30.350 --> 00:07:33.253 line:-1
+and Neural Engine instruments helpful.
+
+
+125
+00:07:33.287 --> 00:07:36.924 line:-2
+This is also an iterative process
+of design and optimization
+
+
+126
+00:07:36.957 --> 00:07:39.693 line:-1
+until you're ready to ship.
+
+
+127
+00:07:39.726 --> 00:07:44.231 line:-2
+There are several new additions this year
+for optimizing your model integration.
+
+
+128
+00:07:44.264 --> 00:07:46.366 line:-1
+First is compute availability.
+
+
+129
+00:07:46.400 --> 00:07:49.469 line:-2
+Core ML is supported
+on all Apple platforms
+
+
+130
+00:07:49.503 --> 00:07:52.172 line:-2
+and by default considers
+all available compute
+
+
+131
+00:07:52.206 --> 00:07:54.541 line:-1
+to optimize its execution.
+
+
+132
+00:07:54,575 --> 00:07:59,746
+This includes the CPU, GPU,
+and Neural Engine when available.
+
+
+133
+00:07:59,780 --> 00:08:04,585
+However, the performance characteristics
+and availability of these compute devices
+
+
+134
+00:08:04,618 --> 00:08:08,288
+varies across supported hardware
+your app may run on.
+
+
+135
+00:08:08.322 --> 00:08:12.092 line:-2
+This may impact your users' experience
+with your ML powered features
+
+
+136
+00:08:12.125 --> 00:08:15.963 line:-2
+or influence your choice
+in models and configurations.
+
+
+137
+00:08:15.996 --> 00:08:19.299 line:-2
+For example,
+some experiences may require models
+
+
+138
+00:08:19.333 --> 00:08:24.271 line:-2
+running on the Neural Engine
+to meet performance or power requirements.
+
+
+139
+00:08:24.304 --> 00:08:29.743 line:-2
+There's now a new API for runtime
+inspection of compute device availability.
+
+
+140
+00:08:29.776 --> 00:08:34.114 line:-2
+The MLComputeDevice enum captures
+the type of compute device
+
+
+141
+00:08:34.147 --> 00:08:39.319 line:-2
+and the specific compute device's
+properties within its associated value.
+
+
+142
+00:08:39.353 --> 00:08:43.423 line:-2
+With the availableComputeDevices
+property on MLModel,
+
+
+143
+00:08:43.457 --> 00:08:47.794 line:-2
+you can inspect what devices
+are available to Core ML.
+
+
+144
+00:08:47.828 --> 00:08:52.432 line:-2
+For example, this code checks
+if there is a Neural Engine available.
+
+
+145
+00:08:52.466 --> 00:08:55.035 line:-2
+More specifically,
+it checks if the collection
+
+
+146
+00:08:55.068 --> 00:09:00.007 line:-2
+of all available compute devices
+contains one whose type is Neural Engine.
+
+
+147
+00:09:00.040 --> 00:09:04.578 line:-2
+The next topic for model integration
+is understanding the model lifecycle.
+
+
+148
+00:09:04.611 --> 00:09:08.148 line:-2
+I'll start by reviewing
+the different model asset types.
+
+
+149
+00:09:08.182 --> 00:09:12.419 line:-2
+There are two kinds:
+source models and compiled models.
+
+
+150
+00:09:12.452 --> 00:09:17.357 line:-2
+The source model has a file extension
+of MLModel or MLPackage.
+
+
+151
+00:09:17.391 --> 00:09:21.662 line:-2
+It's an open format
+designed for construction and editing.
+
+
+152
+00:09:21.695 --> 00:09:25.532 line:-2
+The compiled model has
+a file extension of MLModelC.
+
+
+153
+00:09:25.566 --> 00:09:28.435 line:-1
+It's designed for runtime access.
+
+
+154
+00:09:28.468 --> 00:09:32.673 line:-2
+In most cases,
+you add a source model to your app target,
+
+
+155
+00:09:32.706 --> 00:09:37.277 line:-2
+then Xcode compiles the model
+and puts it in the app's resources.
+
+
+156
+00:09:37.311 --> 00:09:42.216 line:-2
+At runtime, in order to use your model,
+you instantiate an MLModel.
+
+
+157
+00:09:43.383 --> 00:09:46.687 line:-2
+Instantiation takes a URL
+to its compiled form
+
+
+158
+00:09:46.720 --> 00:09:49.690 line:-1
+and an optional configuration.
+
+
+159
+00:09:49.723 --> 00:09:53.227 line:-2
+The resulting MLModel has loaded
+all the necessary resources
+
+
+160
+00:09:53.260 --> 00:09:56.964 line:-2
+for optimal inference
+based on the specified configuration
+
+
+161
+00:09:56.997 --> 00:10:00.667 line:-1
+and device-specific hardware capabilities.
+
+
+162
+00:10:00.701 --> 00:10:04.872 line:-2
+Here's a deeper look
+into what happens during this load.
+
+
+163
+00:10:04.905 --> 00:10:07.174 line:-1
+First, Core ML checks a cache
+
+
+164
+00:10:07.207 --> 00:10:09.877 line:-2
+to see if it has already specialized
+the model
+
+
+165
+00:10:09.910 --> 00:10:12.946 line:-1
+based on the configuration and device.
+
+
+166
+00:10:12.980 --> 00:10:17.851 line:-2
+If it has, it loads the required resources
+from the cache and returns.
+
+
+167
+00:10:17.885 --> 00:10:20.621 line:-1
+This is called a cached load.
+
+
+168
+00:10:20,654 --> 00:10:23,757
+If the configuration was not found
+in the cache,
+
+
+169
+00:10:23,790 --> 00:10:27,961
+it then triggers
+a device-specialized compilation for it.
+
+
+170
+00:10:27,995 --> 00:10:31,698
+Once this process completes,
+it adds the output to the cache
+
+
+171
+00:10:31,732 --> 00:10:34,067
+and finishes the load from there.
+
+
+172
+00:10:34,101 --> 00:10:37,271
+This is called an uncached load.
+
+
+173
+00:10:37,304 --> 00:10:42,009
+For certain models, the uncached load
+can take a significant amount of time.
+
+
+174
+00:10:42,042 --> 00:10:45,846
+However, it's focused on optimizing
+the model for the device
+
+
+175
+00:10:45,879 --> 00:10:48,949
+and making subsequent loads
+as fast as possible.
+
+
+176
+00:10:50.284 --> 00:10:54.354 line:-2
+During device specialization,
+Core ML first parses the model
+
+
+177
+00:10:54.388 --> 00:10:58.125 line:-2
+and applies general optimization passes
+to it.
+
+
+178
+00:10:58.158 --> 00:11:02.196 line:-2
+It then segments the chain of operations
+for specific compute devices
+
+
+179
+00:11:02.229 --> 00:11:06.567 line:-2
+based on the estimated performance
+and hardware availability.
+
+
+180
+00:11:06.600 --> 00:11:09.803 line:-1
+This segmentation is then cached.
+
+
+181
+00:11:09,837 --> 00:11:12,406
+The last step is for each of the segments
+to go through
+
+
+182
+00:11:12,439 --> 00:11:14,708
+a compute device specific compilation
+
+
+183
+00:11:14,741 --> 00:11:17,511
+for the compute device they were assigned.
+
+
+184
+00:11:17,544 --> 00:11:20,314
+This compilation includes
+further optimizations
+
+
+185
+00:11:20,347 --> 00:11:22,282
+for the specific compute device
+
+
+186
+00:11:22,316 --> 00:11:26,253
+and outputs an artifact
+that the compute device can run.
+
+
+187
+00:11:26,286 --> 00:11:29,223
+Once complete,
+Core ML caches these artifacts
+
+
+188
+00:11:29,256 --> 00:11:31,658
+to be used for subsequent model loads.
+
+
+189
+00:11:33.894 --> 00:11:38.065 line:-2
+Core ML caches
+the specialized assets on the disk.
+
+
+190
+00:11:38.098 --> 00:11:42.135 line:-2
+They're tied to the model's path
+and configuration.
+
+
+191
+00:11:42.169 --> 00:11:48.008 line:-2
+These assets are meant to persist across
+app launches and reboots of your device.
+
+
+192
+00:11:48,041 --> 00:11:51,144
+When the device's free disk space
+is running short,
+
+
+193
+00:11:51,178 --> 00:11:53,180
+there has been a system update,
+
+
+194
+00:11:53,213 --> 00:11:56,383
+or the compiled model has been
+deleted or modified,
+
+
+195
+00:11:56,416 --> 00:11:59,386
+the operating system deletes the cache.
+
+
+196
+00:11:59,419 --> 00:12:04,258
+If this happens, the next model load will
+perform the device specialization again.
+
+
+197
+00:12:05.626 --> 00:12:09.363 line:-2
+In order to find out whether or not
+your model load is hitting the cache,
+
+
+198
+00:12:09.396 --> 00:12:11.532 line:-2
+you can trace your app
+with the Core ML Instrument
+
+
+199
+00:12:11.565 --> 00:12:13.567 line:-1
+and look at the load event.
+
+
+200
+00:12:13.600 --> 00:12:18.105 line:-2
+If it has the label "prepare and cache,"
+then it was an uncached load,
+
+
+201
+00:12:18.138 --> 00:12:20.774 line:-2
+so Core ML performed
+the device specialization
+
+
+202
+00:12:20.807 --> 00:12:23.243 line:-1
+and cached the result.
+
+
+203
+00:12:23.277 --> 00:12:27.514 line:-2
+If the load event has the label "cached,"
+then it was a cached load
+
+
+204
+00:12:27.548 --> 00:12:30.417 line:-1
+and did not incur a device specialization.
+
+
+205
+00:12:30.450 --> 00:12:34.922 line:-2
+This is new
+specifically for MLProgram models.
+
+
+206
+00:12:34.955 --> 00:12:37.891 line:-2
+Core ML performance reports
+can also give you visibility
+
+
+207
+00:12:37.925 --> 00:12:40.260 line:-1
+into the cost of a load.
+
+
+208
+00:12:40.294 --> 00:12:43.297 line:-2
+By default,
+it shows the median cached load.
+
+
+209
+00:12:45.632 --> 00:12:49.970 line:-2
+It now has the option to display
+uncached load times as well.
+
+
+210
+00:12:50.003 --> 00:12:54.408 line:-2
+Since loading a model can be expensive
+in terms of latency and memory,
+
+
+211
+00:12:54.441 --> 00:12:56.310 line:-1
+here are some general best practices.
+
+
+212
+00:12:57.544 --> 00:13:01.682 line:-2
+First, don't load models
+during your app's launch on the UI thread.
+
+
+213
+00:13:01.715 --> 00:13:05.085 line:-2
+Instead, consider using
+the async loading API
+
+
+214
+00:13:05.118 --> 00:13:07.988 line:-1
+or lazily load the model.
+
+
+215
+00:13:08.021 --> 00:13:12.092 line:-2
+Next, keep the model loaded
+if the application will likely be running
+
+
+216
+00:13:12.125 --> 00:13:15.295 line:-2
+many predictions in a row,
+rather than reloading the model
+
+
+217
+00:13:15.329 --> 00:13:18.298 line:-1
+for each prediction in the sequence.
+
+
+218
+00:13:18.332 --> 00:13:23.103 line:-2
+Lastly, you can unload the model
+if your app won't use it for a while.
+
+
+219
+00:13:23.136 --> 00:13:25.305 line:-1
+This can help alleviate memory pressure,
+
+
+220
+00:13:25.339 --> 00:13:29.042 line:-2
+and thanks to the caching,
+subsequent loads should be faster.
+
+
+221
+00:13:29.076 --> 00:13:31.778 line:-2
+Once your model is loaded,
+it's time to think about
+
+
+222
+00:13:31.812 --> 00:13:33.780 line:-1
+running predictions with the model.
+
+
+223
+00:13:33.814 --> 00:13:36.984 line:-2
+I'll jump into a demo
+to show the new async options.
+
+
+224
+00:13:38.051 --> 00:13:42.155 line:-2
+To show the new async prediction API,
+I'll be using an app which displays
+
+
+225
+00:13:42.189 --> 00:13:46.593 line:-2
+a gallery of images and allows
+for applying filters to the images.
+
+
+226
+00:13:46.627 --> 00:13:50.297 line:-2
+I'll focus on a colorizing filter
+that uses a Core ML model
+
+
+227
+00:13:50.330 --> 00:13:52.566 line:-1
+which takes a grayscale image as input
+
+
+228
+00:13:52.599 --> 00:13:55.435 line:-2
+and outputs a colorized version
+of the image.
+
+
+229
+00:13:55.469 --> 00:13:58.405 line:-1
+Here's an example of the app in action.
+
+
+230
+00:13:58.438 --> 00:14:02.176 line:-2
+It starts by loading the original images,
+which are in grayscale,
+
+
+231
+00:14:02.209 --> 00:14:05.412 line:-2
+and then once I select
+the Colorized image mode,
+
+
+232
+00:14:05.445 --> 00:14:08.849 line:-1
+it colorizes the images using Core ML.
+
+
+233
+00:14:08.882 --> 00:14:13.120 line:-2
+As I scroll down,
+the model is definitely working,
+
+
+234
+00:14:13.153 --> 00:14:15.722 line:-1
+but it's a bit slower than I expected.
+
+
+235
+00:14:15.756 --> 00:14:19.059 line:-1
+Also, if I scroll far down,
+
+
+236
+00:14:19.092 --> 00:14:23.096 line:-2
+I notice that it takes quite a while
+for the images to be colorized.
+
+
+237
+00:14:24.731 --> 00:14:27.868 line:-2
+As I scroll back up,
+it looks like it was spending time
+
+
+238
+00:14:27.901 --> 00:14:30.737 line:-2
+colorizing all of the images
+along the way.
+
+
+239
+00:14:30.771 --> 00:14:34.942 line:-2
+But in my SwiftUI code,
+I'm using a LazyVGrid to hold the images,
+
+
+240
+00:14:34.975 --> 00:14:38.879 line:-2
+so it should be cancelling tasks
+when views go off screen.
+
+
+241
+00:14:38.912 --> 00:14:41.181 line:-2
+Let me take a look
+at my current implementation
+
+
+242
+00:14:41.215 --> 00:14:44.051 line:-2
+to try to understand
+why the performance is lacking
+
+
+243
+00:14:44.084 --> 00:14:47.921 line:-2
+and also why it doesn't respect
+tasks being cancelled.
+
+
+244
+00:14:47.955 --> 00:14:50.424 line:-1
+This is the implementation.
+
+
+245
+00:14:50.457 --> 00:14:53.794 line:-2
+Since the synchronous prediction API
+is not thread safe,
+
+
+246
+00:14:53.827 --> 00:14:58.332 line:-2
+the app has to ensure that predictions
+are run serially on the model.
+
+
+247
+00:14:58.365 --> 00:15:01.602 line:-2
+This is achieved by making
+ColorizingService an actor,
+
+
+248
+00:15:01.635 --> 00:15:06.473 line:-2
+which will only allow one call
+to the colorize method at a time.
+
+
+249
+00:15:06.507 --> 00:15:08.642 line:-1
+This actor owns the colorizerModel,
+
+
+250
+00:15:08.675 --> 00:15:11.845 line:-2
+which is the auto-generated interface
+that is produced for the model
+
+
+251
+00:15:11.879 --> 00:15:14.214 line:-1
+bundled with the app.
+
+
+252
+00:15:14.248 --> 00:15:18.018 line:-2
+The colorize method
+currently performs two operations.
+
+
+253
+00:15:18.051 --> 00:15:20.420 line:-1
+It first prepares the input for the model,
+
+
+254
+00:15:20.454 --> 00:15:24.925 line:-2
+which involves resizing the image
+to match the model's input size.
+
+
+255
+00:15:24.958 --> 00:15:29.463 line:-2
+It then runs the input through the model
+and gets the colorized output.
+
+
+256
+00:15:29.496 --> 00:15:32.432 line:-2
+I went ahead and captured
+an Instruments trace of the app
+
+
+257
+00:15:32.466 --> 00:15:34.968 line:-2
+running with the Core ML
+Instruments template.
+
+
+258
+00:15:36.970 --> 00:15:38.705 line:-1
+When looking at the Instruments trace,
+
+
+259
+00:15:38.739 --> 00:15:41.074 line:-2
+it shows that the predictions
+are run serially,
+
+
+260
+00:15:41.108 --> 00:15:44.545 line:-1
+which is ensured by the actor isolation.
+
+
+261
+00:15:44.578 --> 00:15:47.381 line:-2
+However, there are gaps
+around each prediction
+
+
+262
+00:15:47.414 --> 00:15:48.982 line:-1
+before the next one is run,
+
+
+263
+00:15:49.016 --> 00:15:52.119 line:-2
+which is contributing
+to the lack of performance.
+
+
+264
+00:15:52.152 --> 00:15:55.522 line:-2
+These are a result of the actor isolation
+being wrapped around
+
+
+265
+00:15:55.556 --> 00:15:59.593 line:-2
+not only the model prediction
+but also the input preparation.
+
+
+266
+00:15:59.626 --> 00:16:04.198 line:-2
+One improvement would be to mark the input
+preparation as a non-isolated method,
+
+
+267
+00:16:04.231 --> 00:16:08.735 line:-2
+so it won't block the next
+colorize request from entering the actor.
+
+
+268
+00:16:08.769 --> 00:16:11.872 line:-2
+While this would help,
+the Core ML predictions themselves
+
+
+269
+00:16:11.905 --> 00:16:15.642 line:-2
+would still be serialized,
+which is the bottleneck of my processing.
+
+
+270
+00:16:15.676 --> 00:16:19.847 line:-2
+To take advantage of concurrency
+for the Core ML predictions themselves,
+
+
+271
+00:16:19.880 --> 00:16:23.817 line:-2
+an option I can consider
+is the batch prediction API.
+
+
+272
+00:16:23.851 --> 00:16:27.487 line:-2
+It takes in a batch of inputs
+and runs them through the model.
+
+
+273
+00:16:27.521 --> 00:16:32.092 line:-2
+Under the hood, Core ML will take
+advantage of concurrency when possible.
+
+
+274
+00:16:32.125 --> 00:16:34.194 line:-2
+Making a batch version
+of the colorize method
+
+
+275
+00:16:34.228 --> 00:16:35.963 line:-1
+is pretty straightforward.
+
+
+276
+00:16:35.996 --> 00:16:39.166 line:-2
+However, the challenging part
+is figuring out how I'll collect
+
+
+277
+00:16:39.199 --> 00:16:42.970 line:-2
+the inputs into a batch
+and pass them to this method.
+
+
+278
+00:16:43.003 --> 00:16:45.472 line:-2
+There are actually multiple aspects
+of this use case
+
+
+279
+00:16:45.506 --> 00:16:49.176 line:-2
+that make it difficult
+to use the batch prediction API.
+
+
+280
+00:16:49.209 --> 00:16:54.281 line:-2
+The batch API is best used when there's
+a known quantity of work to be done.
+
+
+281
+00:16:54.314 --> 00:16:58.385 line:-2
+In this case, the amount of images
+to be processed is not fixed
+
+
+282
+00:16:58.418 --> 00:17:02.823 line:-2
+but a function of screen size
+and the amount of scrolling done.
+
+
+283
+00:17:02.856 --> 00:17:06.326 line:-2
+I can pick a batch size myself,
+but I'll have to handle cases
+
+
+284
+00:17:06.360 --> 00:17:11.031 line:-2
+where the batch size isn't met
+but still needs to be processed.
+
+
+285
+00:17:11.064 --> 00:17:13.767 line:-1
+Also, I'll have a different UI experience
+
+
+286
+00:17:13.800 --> 00:17:17.171 line:-1
+where images are colorized in batches.
+
+
+287
+00:17:17.204 --> 00:17:22.042 line:-2
+Lastly, I won't be able to cancel a batch
+even if the user scrolls away from it.
+
+
+288
+00:17:23.143 --> 00:17:26.246 line:-2
+Because of these challenges,
+I'd rather stick with an API
+
+
+289
+00:17:26.280 --> 00:17:28.515 line:-1
+that handles one prediction at a time.
+
+
+290
+00:17:29.483 --> 00:17:33.420 line:-2
+This is where the new async prediction API
+can be very useful.
+
+
+291
+00:17:33.453 --> 00:17:38.892 line:-2
+It's thread safe and works well for using
+Core ML alongside Swift concurrency.
+
+
+292
+00:17:38.926 --> 00:17:41.528 line:-1
+To switch to an async design for the code,
+
+
+293
+00:17:41.562 --> 00:17:45.432 line:-2
+I first changed the colorize method
+to be async.
+
+
+294
+00:17:45.465 --> 00:17:48.802 line:-2
+I then added the await keyword
+in front of the prediction call,
+
+
+295
+00:17:48.836 --> 00:17:53.240 line:-2
+which is required to use
+the new async version of the API.
+
+
+296
+00:17:53.273 --> 00:17:57.044 line:-2
+Then I changed ColorizingService
+to be a class rather than an actor.
+
+
+297
+00:17:57.077 --> 00:18:00.948 line:-2
+That way, multiple images can be
+colorized concurrently.
+
+
+298
+00:18:00.981 --> 00:18:05.185 line:-2
+Lastly, I added a cancellation check
+to the start of the method.
+
+
+299
+00:18:05.219 --> 00:18:09.256 line:-2
+The async prediction API will do its best
+to respond to cancellation,
+
+
+300
+00:18:09.289 --> 00:18:12.759 line:-2
+especially when multiple predictions
+are requested concurrently,
+
+
+301
+00:18:12.793 --> 00:18:16.530 line:-2
+but it's best to include an extra check
+at the start in this case.
+
+
+302
+00:18:16.563 --> 00:18:18.999 line:-2
+That way, it also avoids
+preparing the inputs
+
+
+303
+00:18:19.032 --> 00:18:23.504 line:-2
+if the task was cancelled before
+the colorize method was even entered.
+
+
+304
+00:18:23.537 --> 00:18:26.473 line:-2
+Now I'll make these changes
+and re-run the app.
+
+
+305
+00:18:27.508 --> 00:18:31.044 line:-2
+Just as before,
+I'll set it to Colorized mode.
+
+
+306
+00:18:31.078 --> 00:18:35.516 line:-2
+I can already see the images are
+being colorized much faster.
+
+
+307
+00:18:35.549 --> 00:18:38.886 line:-1
+And if I do a quick scroll to the bottom,
+
+
+308
+00:18:38.919 --> 00:18:41.788 line:-1
+the images load almost immediately.
+
+
+309
+00:18:41.822 --> 00:18:44.057 line:-1
+Scrolling up a bit,
+
+
+310
+00:18:44.091 --> 00:18:47.961 line:-2
+I can verify the images are being
+colorized as I scroll back up,
+
+
+311
+00:18:47.995 --> 00:18:51.832 line:-2
+which means that the colorize calls
+were successfully cancelled the first time
+
+
+312
+00:18:51.865 --> 00:18:55.169 line:-1
+when I did the quick swipe to the bottom.
+
+
+313
+00:18:55.202 --> 00:19:00.207 line:-2
+When looking at a trace
+using this new async design,
+
+
+314
+00:19:00.240 --> 00:19:04.645 line:-2
+it shows the predictions are being run
+on multiple images concurrently.
+
+
+315
+00:19:04.678 --> 00:19:08.949 line:-2
+This is denoted by multiple
+prediction intervals stacked vertically.
+
+
+316
+00:19:08.982 --> 00:19:11.818 line:-2
+Since this model runs
+partially on the Neural Engine,
+
+
+317
+00:19:11.852 --> 00:19:16.356 line:-2
+it can also be observed
+in the Neural Engine Instrument as well.
+
+
+318
+00:19:16,390 --> 00:19:20,761
+With the initial implementation,
+which colorized the images serially,
+
+
+319
+00:19:20,794 --> 00:19:25,299
+colorizing the initial view of images
+without scrolling took about two seconds.
+
+
+320
+00:19:26,433 --> 00:19:29,036
+After switching
+to the async implementation,
+
+
+321
+00:19:29,069 --> 00:19:31,438
+which colorized the images concurrently,
+
+
+322
+00:19:31,471 --> 00:19:35,375
+that time was cut in half
+to about one second.
+
+
+323
+00:19:35.409 --> 00:19:38.779 line:-2
+So overall, I was able to achieve
+about a 2x improvement
+
+
+324
+00:19:38.812 --> 00:19:42.850 line:-2
+in total throughput by taking advantage
+of the async prediction API
+
+
+325
+00:19:42.883 --> 00:19:46.653 line:-1
+and concurrency with my Colorizer model.
+
+
+326
+00:19:46.687 --> 00:19:50.858 line:-2
+However, it's important to note
+that the amount a given model and use case
+
+
+327
+00:19:50.891 --> 00:19:55.062 line:-2
+may benefit from a concurrent design
+heavily depends on several factors,
+
+
+328
+00:19:55.095 --> 00:19:58.532 line:-1
+which include the model's operations,
+
+
+329
+00:19:58.565 --> 00:20:01.568 line:-2
+the compute units
+and hardware combination,
+
+
+330
+00:20:01.602 --> 00:20:05.672 line:-2
+and other work
+that the compute devices may be busy with.
+
+
+331
+00:20:05.706 --> 00:20:09.476 line:-2
+Also, the ML program
+and Pipeline model types will provide
+
+
+332
+00:20:09.510 --> 00:20:12.846 line:-2
+the best performance improvements
+from running predictions concurrently.
+
+
+333
+00:20:14.381 --> 00:20:17.351 line:-2
+Overall, when adding concurrency
+to your app,
+
+
+334
+00:20:17.384 --> 00:20:19.453 line:-1
+you should carefully profile the workload
+
+
+335
+00:20:19.486 --> 00:20:22.322 line:-2
+to make sure it's actually benefiting
+your use case.
+
+
+336
+00:20:23.857 --> 00:20:27.561 line:-2
+Another important thing to keep in mind
+when adding concurrency to your app
+
+
+337
+00:20:27.594 --> 00:20:29.730 line:-1
+is memory usage.
+
+
+338
+00:20:29.763 --> 00:20:33.934 line:-2
+Having many sets of model inputs
+and outputs loaded in memory concurrently
+
+
+339
+00:20:33.967 --> 00:20:37.638 line:-2
+can greatly increase the peak memory usage
+of your application.
+
+
+340
+00:20:37.671 --> 00:20:40.607 line:-2
+You can profile this by combining
+the Core ML Instrument
+
+
+341
+00:20:40.641 --> 00:20:43.243 line:-1
+with the Allocations Instrument.
+
+
+342
+00:20:44.444 --> 00:20:47.848 line:-2
+The trace is showing that the memory usage
+of my app is rising quickly
+
+
+343
+00:20:47.881 --> 00:20:51.718 line:-2
+as I load many inputs into memory
+to run through the colorizer model.
+
+
+344
+00:20:53.887 --> 00:20:58.492 line:-2
+A potential issue is that the colorize
+method from my code has no flow control,
+
+
+345
+00:20:58.525 --> 00:21:03.330 line:-2
+so the amount of images being colorized
+concurrently has no fixed limit.
+
+
+346
+00:21:03.363 --> 00:21:07.334 line:-2
+This may not be an issue
+if the model inputs and outputs are small.
+
+
+347
+00:21:07.367 --> 00:21:10.070 line:-2
+However, if they're large,
+then having many sets
+
+
+348
+00:21:10.103 --> 00:21:13.173 line:-2
+of these inputs and outputs
+in memory at the same time
+
+
+349
+00:21:13.207 --> 00:21:16.043 line:-2
+can greatly increase
+the peak memory usage of the app.
+
+
+350
+00:21:17.778 --> 00:21:20.814 line:-2
+A way to improve this would be
+to add logic which limits
+
+
+351
+00:21:20.848 --> 00:21:24.117 line:-2
+the maximum amount
+of in-flight predictions.
+
+
+352
+00:21:24.151 --> 00:21:28.155 line:-2
+This will result in less inputs
+and outputs loaded in memory concurrently,
+
+
+353
+00:21:28.188 --> 00:21:32.893 line:-2
+which will decrease the peak memory usage
+while running predictions.
+
+
+354
+00:21:32.926 --> 00:21:37.064 line:-2
+In this example, if there are
+already two items being worked on,
+
+
+355
+00:21:37.097 --> 00:21:41.602 line:-2
+it defers new work items
+until a previous one has completed.
+
+
+356
+00:21:41.635 --> 00:21:45.172 line:-2
+The best strategy will depend
+on your use case.
+
+
+357
+00:21:45.205 --> 00:21:48.208 line:-2
+For example,
+when streaming data from a camera,
+
+
+358
+00:21:48.242 --> 00:21:51.778 line:-2
+you may simply want to drop work
+instead of deferring it.
+
+
+359
+00:21:51.812 --> 00:21:55.082 line:-2
+This way, you avoid accumulating frames
+and doing work
+
+
+360
+00:21:55.115 --> 00:21:58.185 line:-1
+that's no longer temporally relevant.
+
+
+361
+00:21:58.218 --> 00:22:01.321 line:-2
+Stepping back a bit,
+here's some general guidance
+
+
+362
+00:22:01.355 --> 00:22:03.557 line:-2
+on when to use
+the different prediction APIs.
+
+
+363
+00:22:04.892 --> 00:22:06.827 line:-1
+If you're in a synchronous context
+
+
+364
+00:22:06.860 --> 00:22:10.030 line:-2
+and the time between each input
+being available is large
+
+
+365
+00:22:10.063 --> 00:22:11.932 line:-1
+compared to the model latency,
+
+
+366
+00:22:11.965 --> 00:22:15.369 line:-1
+then the sync prediction API works well.
+
+
+367
+00:22:15.402 --> 00:22:18.272 line:-2
+If your inputs become available
+in batches,
+
+
+368
+00:22:18.305 --> 00:22:20.641 line:-2
+then the batch prediction API
+is a natural fit.
+
+
+369
+00:22:22,176 --> 00:22:24,044
+If you're in an async context
+
+
+370
+00:22:24,077 --> 00:22:28,749
+and have a large amount of inputs
+becoming available individually over time,
+
+
+371
+00:22:28,782 --> 00:22:32,753
+that's when the async API
+can be most useful.
+
+
+372
+00:22:32.786 --> 00:22:36.256 line:-2
+To wrap up,
+as you move through the Core ML workflow,
+
+
+373
+00:22:36.290 --> 00:22:38.759 line:-2
+there are many opportunities
+for optimization
+
+
+374
+00:22:38.792 --> 00:22:42.896 line:-2
+during both model development
+and model integration.
+
+
+375
+00:22:42.930 --> 00:22:47.100 line:-2
+New compute availability APIs
+can help you make decisions at runtime
+
+
+376
+00:22:47.134 --> 00:22:51.238 line:-2
+based on what hardware is available
+on the device.
+
+
+377
+00:22:51.271 --> 00:22:54.308 line:-2
+Understanding the model lifecycle
+and caching behavior
+
+
+378
+00:22:54.341 --> 00:22:59.379 line:-2
+can help you best decide when and where
+to load and unload your model.
+
+
+379
+00:22:59.413 --> 00:23:02.549 line:-2
+And lastly,
+the async prediction API can help you
+
+
+380
+00:23:02.583 --> 00:23:05.586 line:-2
+integrate Core ML
+with other async Swift code
+
+
+381
+00:23:05.619 --> 00:23:09.690 line:-2
+and also improve throughput
+by supporting concurrent predictions.
+
+
+382
+00:23:09.723 --> 00:23:13.927 line:-2
+This was Ben from the Core ML team,
+and I am not an AI.
+

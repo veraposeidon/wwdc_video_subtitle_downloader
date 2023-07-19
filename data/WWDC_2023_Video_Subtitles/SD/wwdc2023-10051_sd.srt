@@ -1,0 +1,1978 @@
+2
+00:00:00,501 --> 00:00:08,509 line:-1
+♪ ♪
+
+
+3
+00:00:10.511 --> 00:00:14.915 line:-2 align:center
+David: Hi, I'm David Ilenwabor,
+an Engineer on the ShazamKit team.
+
+
+4
+00:00:15.983 --> 00:00:21.054 line:-2 align:center
+ShazamKit is a framework that allows you
+to bring audio recognition to your apps.
+
+
+5
+00:00:21.088 --> 00:00:24.625 line:-2 align:center
+You can match audio against
+Shazam's vast music catalog
+
+
+6
+00:00:24,658 --> 00:00:29,429 line:-2
+or match against your own prerecorded
+audio using custom catalogs.
+
+
+7
+00:00:29,463 --> 00:00:32,299 line:-1
+2022 saw some great updates to ShazamKit
+
+
+8
+00:00:32,332 --> 00:00:36,170 line:-2
+which improved working
+with custom catalogs at scale.
+
+
+9
+00:00:36.203 --> 00:00:39.506 line:-2 align:center
+There was the introduction of
+the Shazam CLI
+
+
+10
+00:00:39.540 --> 00:00:43.610 line:-2 align:center
+to handle heavy workflow
+when using custom catalogs,
+
+
+11
+00:00:43.644 --> 00:00:47.014 line:-2 align:center
+time restricted media items
+for better syncing,
+
+
+12
+00:00:47.047 --> 00:00:49.583 line:-2 align:center
+and frequency skewing
+to differentiate between
+
+
+13
+00:00:49,616 --> 00:00:52,619 line:-1
+two similar sounding bits of audio.
+
+
+14
+00:00:52,653 --> 00:00:55,022 align:center
+If you're not already familiar
+with how these work,
+
+
+15
+00:00:55,055 --> 00:00:59,826 line:0
+check out the Create Custom catalogs
+at scale with ShazamKit video.
+
+
+16
+00:00:59.860 --> 00:01:02.296 line:-1 align:center
+But to give a quick overview,
+
+
+17
+00:01:02.329 --> 00:01:04.364 line:-1 align:center
+ShazamKit lets you perform a match
+
+
+18
+00:01:04.398 --> 00:01:09.303 line:-2 align:center
+by converting audio
+into a special format called Signatures.
+
+
+19
+00:01:09,336 --> 00:01:11,905 line:-1
+You can pass in a stream of audio buffers
+
+
+20
+00:01:11,939 --> 00:01:16,310 line:-2
+or the signature data
+into a ShazamKit session.
+
+
+21
+00:01:16,343 --> 00:01:19,112 line:-2
+The session then uses the signature
+to find a match
+
+
+22
+00:01:19.146 --> 00:01:23.417 line:-1 align:center
+in the Shazam Catalog or a Custom catalog.
+
+
+23
+00:01:23.450 --> 00:01:26.854 line:-2 align:center
+If there's a match,
+the session returns a match object
+
+
+24
+00:01:26,887 --> 00:01:31,191 line:-2
+with media items that represent
+the metadata of the match.
+
+
+25
+00:01:31,225 --> 00:01:35,028 line:-2
+You can then display the media items
+in your app.
+
+
+26
+00:01:35.062 --> 00:01:38.732 line:-2 align:center
+ShazamKit can perform a match
+by generating a signature
+
+
+27
+00:01:38.765 --> 00:01:42.536 line:-2 align:center
+from a stream of audio buffers
+or using a signature file
+
+
+28
+00:01:42.569 --> 00:01:45.272 line:-1 align:center
+which can be stored on disk.
+
+
+29
+00:01:45.305 --> 00:01:47.441 line:-1 align:center
+Signatures are irreversible
+
+
+30
+00:01:47,474 --> 00:01:51,712 line:-2
+which means it is not possible
+to reconstruct the original recording
+
+
+31
+00:01:51,745 --> 00:01:53,413 line:-1
+from a signature.
+
+
+32
+00:01:53,447 --> 00:01:57,384 line:-2
+This protects the privacy
+of our customers.
+
+
+33
+00:01:57,417 --> 00:02:01,922 line:-2
+A catalog is a group of signatures
+with their associated media items
+
+
+34
+00:02:01,955 --> 00:02:06,059 line:-1
+and a match occurs when a query signature
+
+
+35
+00:02:06.093 --> 00:02:11.532 line:-2 align:center
+sufficiently matches part of
+a reference signature in a catalog.
+
+
+36
+00:02:11.565 --> 00:02:15.269 line:-2 align:center
+Matches can occur even when
+the query signature is noisy,
+
+
+37
+00:02:15,302 --> 00:02:18,572 line:-1
+such as music playing in a restaurant.
+
+
+38
+00:02:18.605 --> 00:02:20.307 line:-1 align:center
+Now that I've covered that,
+
+
+39
+00:02:20.340 --> 00:02:24.111 line:-2 align:center
+I'll move on to the exciting new updates
+in ShazamKit this year.
+
+
+40
+00:02:24.144 --> 00:02:26.747 line:-2 align:center
+In this session,
+I'll go through new changes
+
+
+41
+00:02:26.780 --> 00:02:30.050 line:-1 align:center
+for recognizing audio with ShazamKit,
+
+
+42
+00:02:30.083 --> 00:02:33.220 line:-2 align:center
+then I'll talk about
+the Shazam Library API,
+
+
+43
+00:02:33.253 --> 00:02:37.424 line:-2 align:center
+which has been redefined
+with exciting new functionality.
+
+
+44
+00:02:37,457 --> 00:02:40,694 line:-2
+Finally, I'll take you through
+some best practices
+
+
+45
+00:02:40,727 --> 00:02:44,932 line:-2
+for creating better app experiences
+with ShazamKit.
+
+
+46
+00:02:44,965 --> 00:02:47,534 line:-2
+Before I get started,
+I suggest you download
+
+
+47
+00:02:47.568 --> 00:02:51.905 line:-2 align:center
+the attached sample code project
+on the developer portal.
+
+
+48
+00:02:51.939 --> 00:02:56.109 line:-2 align:center
+I will be making use
+of this project throughout this video.
+
+
+49
+00:02:56,143 --> 00:02:59,146 line:-2
+There's a lot to cover,
+so I'll get started.
+
+
+50
+00:03:00.447 --> 00:03:04.318 line:-1 align:center
+First off, Audio recognition.
+
+
+51
+00:03:04,351 --> 00:03:08,455 line:-2
+The process of using ShazamKit
+to recognize audio from the microphone
+
+
+52
+00:03:08.488 --> 00:03:11.325 line:-1 align:center
+can be summarized in the following steps.
+
+
+53
+00:03:11,358 --> 00:03:15,729 line:-2
+First, ask for microphone permissions
+from the user.
+
+
+54
+00:03:15,762 --> 00:03:20,267 line:-2
+Then, start recording
+after permissions have been granted.
+
+
+55
+00:03:20,300 --> 00:03:24,404 line:-2
+Next, pass in the recorded audio buffers
+to ShazamKit,
+
+
+56
+00:03:24,438 --> 00:03:27,441 line:-1
+and finally, handle the result.
+
+
+57
+00:03:27,474 --> 00:03:32,913 line:-2
+To demonstrate this, I've built a demo app
+which you can find in the sample project.
+
+
+58
+00:03:32.946 --> 00:03:36.049 line:-2 align:center
+I love dancing,
+and to keep up with the latest trends,
+
+
+59
+00:03:36.083 --> 00:03:40.821 line:-2 align:center
+I built an app to help me discover
+trending dance moves to a song.
+
+
+60
+00:03:40,854 --> 00:03:44,157 line:-2
+The app works by listening
+to audio using the microphone,
+
+
+61
+00:03:44,191 --> 00:03:46,960 line:-1
+and proceeds to find a dance video.
+
+
+62
+00:03:46,994 --> 00:03:50,764 line:-2
+So for example,
+I can ask Siri to help me find a song.
+
+
+63
+00:03:50,797 --> 00:03:54,701 line:-1
+Hey, Siri, play "Push It" by Dukes.
+
+
+64
+00:03:56.003 --> 00:03:58.138 line:-1 align:center
+Siri: Now playing "Push It" by Dukes.
+
+
+65
+00:03:58,172 --> 00:04:02,643 line:-2
+David: Then, I can tap the Learn The Dance
+button to start recording.
+
+
+66
+00:04:02,676 --> 00:04:05,679 line:-1
+♪ ♪
+
+
+67
+00:04:05,712 --> 00:04:07,781 line:-1
+ShazamKit recognizes the song
+
+
+68
+00:04:07,814 --> 00:04:11,718 line:-2
+and the app searches for
+an appropriate dance video to go with it.
+
+
+69
+00:04:11,752 --> 00:04:14,288 line:-1
+Seems like I got one. Hmm!
+
+
+70
+00:04:14,321 --> 00:04:17,124 line:-2
+Looks like my twin Dancing Dave is showing
+me some moves.
+
+
+71
+00:04:17,157 --> 00:04:19,626 line:-1
+This looks exciting.
+
+
+72
+00:04:19,660 --> 00:04:22,930 line:-1
+So how was this implemented?
+
+
+73
+00:04:22,963 --> 00:04:25,866 line:-1
+Let me take you through the code.
+
+
+74
+00:04:25.899 --> 00:04:30.170 line:-2 align:center
+Here I have the sample project
+opened in Xcode.
+
+
+75
+00:04:30.204 --> 00:04:34.808 line:-2 align:center
+I have added the microphone usage
+description in my info.plist file
+
+
+76
+00:04:34,842 --> 00:04:38,045 line:-2
+which is used
+to request microphone access.
+
+
+77
+00:04:38,078 --> 00:04:41,281 line:-2
+I also have a host of SwiftUI views
+for the home screen
+
+
+78
+00:04:41,315 --> 00:04:43,483 line:-1
+and the dance video screen.
+
+
+79
+00:04:43.517 --> 00:04:48.622 line:-2 align:center
+However, this Matcher class is where all
+the magic of audio recognition happens.
+
+
+80
+00:04:49.923 --> 00:04:55.529 line:-2 align:center
+On initialization, I have a method
+to configure and set up the audio engine.
+
+
+81
+00:04:55,562 --> 00:04:59,867 line:-2
+In this method,
+I install a tap to receive PCMbuffers
+
+
+82
+00:04:59,900 --> 00:05:03,070 line:-1
+and prepare the audio engine.
+
+
+83
+00:05:03.103 --> 00:05:08.842 line:-2 align:center
+Also, I have a match method which is called
+when I tap on the Learn The Dance button.
+
+
+84
+00:05:08,876 --> 00:05:11,111 line:-1
+I request for recording permission,
+
+
+85
+00:05:11.144 --> 00:05:17.150 line:-2 align:center
+and if this is granted, I call start
+on the audio engine to begin recording.
+
+
+86
+00:05:17.184 --> 00:05:20.654 line:-1 align:center
+Next, I tell the UI matching has started,
+
+
+87
+00:05:20.687 --> 00:05:23.824 line:-1 align:center
+then I call session.results
+
+
+88
+00:05:23.857 --> 00:05:27.394 line:-2 align:center
+and wait for an async sequence
+of match results.
+
+
+89
+00:05:27,427 --> 00:05:29,263 line:-1
+After receiving a result,
+
+
+90
+00:05:29.296 --> 00:05:32.299 line:-1 align:center
+I set the match object if it was a match,
+
+
+91
+00:05:32,332 --> 00:05:36,803 line:-1
+and I handle the no match and error cases.
+
+
+92
+00:05:36.837 --> 00:05:42.142 line:-2 align:center
+This class also has a stopRecording
+Function in which I stop the audio engine.
+
+
+93
+00:05:43,210 --> 00:05:47,147 line:-2
+This works great,
+but notice how I have a lot of setup code
+
+
+94
+00:05:47.181 --> 00:05:51.518 line:-2 align:center
+to configure the audio engine
+before I can receive audio buffers.
+
+
+95
+00:05:51,552 --> 00:05:53,754 line:-1
+This can be challenging to get right,
+
+
+96
+00:05:53,787 --> 00:05:57,758 line:-2
+especially if you aren't familiar
+with audio programming.
+
+
+97
+00:05:57.791 --> 00:06:01.428 line:-2 align:center
+And so, to make recording
+and matching easier,
+
+
+98
+00:06:01.461 --> 00:06:06.166 line:-2 align:center
+we've introduced a new API
+called SHManagedSession.
+
+
+99
+00:06:06,200 --> 00:06:11,038 line:-2
+Managed Session automatically takes care
+of starting the recording for you
+
+
+100
+00:06:11.071 --> 00:06:14.374 line:-2 align:center
+without the hassle
+of setting up audio buffers.
+
+
+101
+00:06:14.408 --> 00:06:18.111 line:-1 align:center
+This makes it very easy to set up and use.
+
+
+102
+00:06:19,046 --> 00:06:22,316 line:-2
+Microphone permission is required
+to use Managed Session.
+
+
+103
+00:06:22.349 --> 00:06:26.920 line:-2 align:center
+Without this permission,
+the session cannot start recording.
+
+
+104
+00:06:26,954 --> 00:06:31,658 line:-2
+Therefore, it is important you add
+the Microphone usage description entry
+
+
+105
+00:06:31.692 --> 00:06:35.729 line:-1 align:center
+to the info.plist file of your app.
+
+
+106
+00:06:35,762 --> 00:06:38,332 line:-1
+Managed Session will use this description
+
+
+107
+00:06:38,365 --> 00:06:41,802 line:-2
+when asking for microphone access
+from the user.
+
+
+108
+00:06:41,835 --> 00:06:46,073 line:-1
+So how can I use this API in code?
+
+
+109
+00:06:46.106 --> 00:06:51.178 line:-2 align:center
+First, I'll create an instance
+of SHManagedSession,
+
+
+110
+00:06:51,211 --> 00:06:55,682 line:-2
+then I can wait on a result
+by calling the result method.
+
+
+111
+00:06:55,716 --> 00:07:00,954 line:-2
+This method returns an enum which has
+three states that can either be a match,
+
+
+112
+00:07:00,988 --> 00:07:04,157 line:-1
+NoMatch, or an error.
+
+
+113
+00:07:04.191 --> 00:07:08.428 line:-2 align:center
+Next, I can switch over the result,
+using the returned media items
+
+
+114
+00:07:08,462 --> 00:07:11,031 line:-1
+in the case of a match,
+
+
+115
+00:07:11,064 --> 00:07:15,102 line:-1
+and handling the no match and error cases.
+
+
+116
+00:07:15.135 --> 00:07:17.971 line:-2 align:center
+And what if I want to have
+a longer recording session
+
+
+117
+00:07:18,005 --> 00:07:21,375 line:-1
+that can return many results over time?
+
+
+118
+00:07:21.408 --> 00:07:25.445 line:-2 align:center
+Well, I can do this by using
+the async sequence results property
+
+
+119
+00:07:25,479 --> 00:07:27,247 line:-1
+on managedSession.
+
+
+120
+00:07:27.281 --> 00:07:32.219 line:-2 align:center
+I can use each result that's received
+from the sequence just as before.
+
+
+121
+00:07:32,252 --> 00:07:37,124 line:-2
+This ensures I can keep recording audio
+for long periods.
+
+
+122
+00:07:37,157 --> 00:07:42,496 line:-2
+Finally, I can stop matching
+by calling cancel on managedSession.
+
+
+123
+00:07:42.529 --> 00:07:47.301 line:-2 align:center
+This cancels any currently running
+match attempt and stops recording.
+
+
+124
+00:07:47,334 --> 00:07:48,402 line:-1
+And that's it.
+
+
+125
+00:07:48.435 --> 00:07:51.238 line:-2 align:center
+With Managed Session,
+it's just a few lines of code
+
+
+126
+00:07:51,271 --> 00:07:55,943 line:-2
+to start recording
+and receive a result after matching.
+
+
+127
+00:07:55.976 --> 00:07:59.746 line:-2 align:center
+Going back to my app, I'm going to update
+the Matcher implementation
+
+
+128
+00:07:59,780 --> 00:08:01,815 line:-1
+to use managedSession.
+
+
+129
+00:08:01.849 --> 00:08:05.886 line:-2 align:center
+I can replace all instances of
+SHSession with SHManagedSession.
+
+
+130
+00:08:13.227 --> 00:08:18.131 line:-2 align:center
+Then, I can delete the configure
+audio engine method and its usage.
+
+
+131
+00:08:20,934 --> 00:08:23,704 line:-2
+And in the match method,
+I can delete the calls to request
+
+
+132
+00:08:23.737 --> 00:08:27.441 line:-2 align:center
+recording permission
+and to start the audio engine.
+
+
+133
+00:08:29.977 --> 00:08:32.513 line:-1 align:center
+Finally, in the stopRecording method,
+
+
+134
+00:08:32.546 --> 00:08:35.782 line:-2 align:center
+I can replace the existing code
+to stop the audio engine
+
+
+135
+00:08:35,816 --> 00:08:39,019 line:-2
+with just a call
+to managedSession's cancel method.
+
+
+136
+00:08:43.524 --> 00:08:48.629 line:-2 align:center
+Now, I'll run the app to make sure
+everything is still working as expected.
+
+
+137
+00:08:48.662 --> 00:08:52.799 line:-1 align:center
+Hey, Siri, play "Push It" by Dukes.
+
+
+138
+00:08:53,967 --> 00:08:55,636 line:-1
+Siri: Here's "Push It" by Dukes.
+
+
+139
+00:08:55,669 --> 00:08:57,404 line:-1
+♪ ♪
+
+
+140
+00:08:57,437 --> 00:08:58,805 line:-1
+Exciting!
+
+
+141
+00:08:58.839 --> 00:09:00.574 line:-1 align:center
+Everything is still working fine,
+
+
+142
+00:09:00,607 --> 00:09:05,812 line:-2
+but this time, the code is even better
+and cleaner with Managed Session.
+
+
+143
+00:09:06,647 --> 00:09:07,915 line:-1
+That's not all.
+
+
+144
+00:09:07,948 --> 00:09:11,585 line:-2
+There's even more
+to Managed Session to talk about.
+
+
+145
+00:09:11.618 --> 00:09:14.655 line:-2 align:center
+Depending on your use case,
+you may want managedSession
+
+
+146
+00:09:14,688 --> 00:09:17,991 line:-2
+to prepare for a match attempt
+ahead of time.
+
+
+147
+00:09:18,025 --> 00:09:23,163 line:-2
+Preparing a Managed Session makes
+the session more responsive when matching.
+
+
+148
+00:09:23,197 --> 00:09:26,967 line:-2
+It also preallocates the necessary
+resources needed for a match
+
+
+149
+00:09:27.000 --> 00:09:31.438 line:-2 align:center
+and, it starts prerecording
+in anticipation of a match attempt.
+
+
+150
+00:09:32,673 --> 00:09:35,442 line:-2
+To give you an idea of the benefits
+of using prepare,
+
+
+151
+00:09:35.475 --> 00:09:38.512 line:-2 align:center
+here's a timeline representing
+the behavior of the session
+
+
+152
+00:09:38,545 --> 00:09:40,914 line:-1
+without calling prepare.
+
+
+153
+00:09:40.948 --> 00:09:45.485 line:-2 align:center
+When you ask for a result,
+the session allocates the resources
+
+
+154
+00:09:45,519 --> 00:09:47,421 line:-1
+for the match attempt,
+
+
+155
+00:09:47,454 --> 00:09:50,123 line:-1
+then starts recording,
+
+
+156
+00:09:50.157 --> 00:09:53.327 line:-1 align:center
+finally, it returns a match.
+
+
+157
+00:09:53,360 --> 00:09:55,495 line:-1
+However, when you call prepare,
+
+
+158
+00:09:55,529 --> 00:10:00,634 line:-2
+the session immediately preallocates
+the resources and starts prerecording.
+
+
+159
+00:10:00.667 --> 00:10:02.736 line:-1 align:center
+Then, when you ask for a result,
+
+
+160
+00:10:02.769 --> 00:10:07.241 line:-2 align:center
+the session returns a match
+faster than before.
+
+
+161
+00:10:07.274 --> 00:10:10.677 line:-2 align:center
+To do this in code,
+I can simply call the prepare method
+
+
+162
+00:10:10,711 --> 00:10:13,413 line:-1
+before I ask for a result.
+
+
+163
+00:10:13.447 --> 00:10:15.749 line:-1 align:center
+Calling this method is entirely up to you
+
+
+164
+00:10:15.782 --> 00:10:18.919 line:-2 align:center
+and ShazamKit will call it
+on your behalf if necessary.
+
+
+165
+00:10:20,087 --> 00:10:22,289 line:-1
+Now, you might be wondering,
+
+
+166
+00:10:22.322 --> 00:10:25.425 line:-2 align:center
+"How do I track
+the current behavior of the session?
+
+
+167
+00:10:25,459 --> 00:10:28,362 line:-1
+"For example, in a long running session,
+
+
+168
+00:10:28.395 --> 00:10:31.431 line:-1 align:center
+"how do I know it's recording or matching
+
+
+169
+00:10:31.465 --> 00:10:33.767 line:-1 align:center
+or doing something else?"
+
+
+170
+00:10:33.800 --> 00:10:37.838 line:-2 align:center
+To help with this, Managed Session has
+a property called state
+
+
+171
+00:10:37,871 --> 00:10:41,575 line:-2
+which represents
+the current state of the session.
+
+
+172
+00:10:41,608 --> 00:10:45,279 line:-2
+The three states are
+idle,
+
+
+173
+00:10:45.312 --> 00:10:49.750 line:-1 align:center
+prerecording, and matching.
+
+
+174
+00:10:49,783 --> 00:10:55,455 line:-2
+In the idle state, the session is neither
+recording nor making a match attempt.
+
+
+175
+00:10:55,489 --> 00:10:59,760 line:-2
+This is the case if the session
+just completed a single match attempt
+
+
+176
+00:10:59.793 --> 00:11:02.563 line:-1 align:center
+or you call cancel,
+
+
+177
+00:11:02,596 --> 00:11:07,034 line:-2
+or the session terminates
+the async sequence of results
+
+
+178
+00:11:07,067 --> 00:11:10,671 line:-1
+when carrying out multiple matches.
+
+
+179
+00:11:10,704 --> 00:11:15,108 line:-2
+Prerecording represents the state
+after the session has been prepared.
+
+
+180
+00:11:15,142 --> 00:11:19,079 line:-2
+In this state, all the necessary resources
+for matching are ready
+
+
+181
+00:11:19,112 --> 00:11:23,183 line:-2
+and the session is prerecording
+for a match attempt.
+
+
+182
+00:11:23,217 --> 00:11:28,288 line:-2
+You can then proceed with matching
+or cancel prerecording.
+
+
+183
+00:11:28,322 --> 00:11:30,490 line:-1
+Matching is the third possible state
+
+
+184
+00:11:30.524 --> 00:11:34.862 line:-2 align:center
+which indicates the session is making
+at least one match attempt.
+
+
+185
+00:11:34.895 --> 00:11:38.799 line:-2 align:center
+Calling prepare in this state
+will be ignored by the session.
+
+
+186
+00:11:38.832 --> 00:11:41.368 line:-2 align:center
+Here's an example of how
+the managedSession state
+
+
+187
+00:11:41.401 --> 00:11:45.439 line:-2 align:center
+could be used in SwiftUI
+to drive view behavior.
+
+
+188
+00:11:45.472 --> 00:11:51.345 line:-2 align:center
+Here, I have the sample implementation
+of a subview from the demo app.
+
+
+189
+00:11:51,378 --> 00:11:54,281 line:-2
+I have implemented different behaviors
+for this view
+
+
+190
+00:11:54,314 --> 00:11:58,018 line:-1
+if the state is idle or matching.
+
+
+191
+00:11:58,051 --> 00:12:00,687 line:-2
+Currently,
+the state of the session is idle
+
+
+192
+00:12:00,721 --> 00:12:04,992 line:-1
+and the text view is set to Hear Music.
+
+
+193
+00:12:05,025 --> 00:12:10,364 line:-2
+Also, I have a conditional that checks
+if the state is matching or not.
+
+
+194
+00:12:10,397 --> 00:12:14,067 line:-2
+If it is,
+I display a progress view,
+
+
+195
+00:12:14.101 --> 00:12:18.505 line:-2 align:center
+and if it's not,
+I display the Learn the Dance button.
+
+
+196
+00:12:18,539 --> 00:12:20,607 line:-1
+Since the state is currently idle,
+
+
+197
+00:12:20,641 --> 00:12:24,711 line:-1
+the Learn the Dance button is displayed.
+
+
+198
+00:12:24.745 --> 00:12:26.213 line:-1 align:center
+When I tap on the button,
+
+
+199
+00:12:26,246 --> 00:12:31,585 line:-2
+the state changes to matching
+and my UI automatically refreshes.
+
+
+200
+00:12:31.618 --> 00:12:34.588 line:-1 align:center
+This time the text is set to Matching
+
+
+201
+00:12:34,621 --> 00:12:37,891 line:-1
+and the progress view replaces the button
+
+
+202
+00:12:37,925 --> 00:12:41,195 line:-1
+since matching has commenced.
+
+
+203
+00:12:41.228 --> 00:12:43.497 line:-1 align:center
+Whenever the state of the session changes,
+
+
+204
+00:12:43,530 --> 00:12:45,999 line:-2
+SwiftUI will automatically
+refresh your views
+
+
+205
+00:12:46,033 --> 00:12:50,137 line:-2
+to respond to those changes
+without any extra work.
+
+
+206
+00:12:50.170 --> 00:12:54.208 line:-2 align:center
+And this is because managedSession
+conforms to Observable,
+
+
+207
+00:12:54.241 --> 00:12:58.312 line:-2 align:center
+which is a new Swift type that
+makes objects automatically communicate
+
+
+208
+00:12:58,345 --> 00:13:00,781 line:-1
+their changes to observers.
+
+
+209
+00:13:00,814 --> 00:13:06,620 line:-2
+Therefore, SwiftUI can easily respond
+to any state changes of managedSession.
+
+
+210
+00:13:06,653 --> 00:13:08,555 line:0
+To learn more about Observable,
+
+
+211
+00:13:08,589 --> 00:13:11,992 align:center
+check out the Discover Observation
+of SwiftUI video.
+
+
+212
+00:13:12.960 --> 00:13:15.128 line:-1 align:center
+Now that I've covered audio recognition,
+
+
+213
+00:13:15,162 --> 00:13:17,898 line:-1
+I'll talk about the Shazam library.
+
+
+214
+00:13:19,032 --> 00:13:23,370 line:-2
+In 2021, ShazamKit provided an API
+to allow developers
+
+
+215
+00:13:23,403 --> 00:13:26,139 line:-2
+to write a match result
+to the Shazam Library,
+
+
+216
+00:13:26.173 --> 00:13:29.376 line:-1 align:center
+provided it has a valid Shazam ID.
+
+
+217
+00:13:29,409 --> 00:13:34,248 line:-2
+This means that it corresponds to a song
+in the Shazam Catalog.
+
+
+218
+00:13:34,281 --> 00:13:38,986 line:-2
+The added item is visible in the Control
+Center Music Recognition module
+
+
+219
+00:13:39,019 --> 00:13:41,989 line:-1
+and the Shazam app if installed.
+
+
+220
+00:13:42,022 --> 00:13:45,492 line:-1
+It is also synced across devices.
+
+
+221
+00:13:45,526 --> 00:13:49,029 line:-2
+There is no special permission required
+to write to the Shazam library,
+
+
+222
+00:13:49,062 --> 00:13:54,201 line:-2
+but I recommend you avoid storing content
+in it without making customers aware,
+
+
+223
+00:13:54,234 --> 00:13:59,840 line:-2
+as all songs saved in the library will
+be attributed to the app that added them.
+
+
+224
+00:13:59,873 --> 00:14:01,742 line:-1
+Here, the second song in the list
+
+
+225
+00:14:01,775 --> 00:14:05,145 line:-2
+is attributed
+to the ShazamKit Dance Finder app.
+
+
+226
+00:14:06,580 --> 00:14:11,185 line:-2
+Over the years, usage of this API
+presented different use cases
+
+
+227
+00:14:11,218 --> 00:14:13,187 line:-1
+and led to some drawbacks.
+
+
+228
+00:14:13,220 --> 00:14:18,592 line:-2
+For example, what if you wanted to
+view items you've added in your own app?
+
+
+229
+00:14:18.625 --> 00:14:22.563 line:-2 align:center
+The go-to solution would be managing
+your own local storage
+
+
+230
+00:14:22,596 --> 00:14:27,134 line:-2
+which can be tedious to handle
+and prone to bugs.
+
+
+231
+00:14:27,167 --> 00:14:28,735 line:-1
+Because of these drawbacks,
+
+
+232
+00:14:28.769 --> 00:14:32.506 line:-2 align:center
+a new class has been introduced
+called SHLibrary.
+
+
+233
+00:14:32.539 --> 00:14:34.474 line:-1 align:center
+I recommend adopting SHLibrary,
+
+
+234
+00:14:34,508 --> 00:14:36,743 line:-1
+as it offers more extensive features
+
+
+235
+00:14:36,777 --> 00:14:40,314 line:-2
+compared to
+the previous SHMediaLibrary class.
+
+
+236
+00:14:40,347 --> 00:14:43,784 line:-2
+Some of the core features
+of SHLibrary include
+
+
+237
+00:14:43.817 --> 00:14:46.520 line:-1 align:center
+adding media items to the Shazam Library,
+
+
+238
+00:14:46,553 --> 00:14:51,291 line:-2
+which works the same way as the
+corresponding method in SHMediaLibrary;
+
+
+239
+00:14:51.325 --> 00:14:53.393 line:-1 align:center
+reading media items;
+
+
+240
+00:14:53,427 --> 00:14:57,064 line:-1
+and deleting media items from the library.
+
+
+241
+00:14:57.097 --> 00:15:02.636 line:-2 align:center
+Note that your app can only read and
+delete what it has added to the library.
+
+
+242
+00:15:02.669 --> 00:15:06.607 line:-2 align:center
+Items returned when you read
+are specific to your app
+
+
+243
+00:15:06,640 --> 00:15:09,977 line:-1
+and do not represent the entire library.
+
+
+244
+00:15:10,010 --> 00:15:16,316 line:-2
+Also, attempting to delete a media item
+your app hasn't added will throw an error.
+
+
+245
+00:15:16,350 --> 00:15:20,287 line:-2
+Next, I'm going to explain
+how to use SHLibrary.
+
+
+246
+00:15:21,522 --> 00:15:26,226 line:-2
+Adding with SHLibrary is as simple
+as calling the addItems method
+
+
+247
+00:15:26.260 --> 00:15:29.196 line:-1 align:center
+of the default library object.
+
+
+248
+00:15:29.229 --> 00:15:33.734 line:-2 align:center
+This method takes in an array
+of media items to be added.
+
+
+249
+00:15:33,767 --> 00:15:36,370 line:-2
+Reading from the library
+is equally simple.
+
+
+250
+00:15:36.403 --> 00:15:39.006 line:-2 align:center
+As an example,
+here's how you can read items
+
+
+251
+00:15:39,039 --> 00:15:42,910 line:-2
+from the library
+and populate a List view in SwiftUI.
+
+
+252
+00:15:42.943 --> 00:15:46.146 line:-2 align:center
+You simply pass in the items property
+of the library object
+
+
+253
+00:15:46.180 --> 00:15:48.882 line:-1 align:center
+into the list initializer.
+
+
+254
+00:15:48,916 --> 00:15:52,886 line:-2
+SHLibrary also conforms to
+the new Swift Observable type,
+
+
+255
+00:15:52,920 --> 00:15:56,723 line:-2
+therefore, your SwiftUI views
+will automatically reload
+
+
+256
+00:15:56.757 --> 00:15:59.593 line:-1 align:center
+when there's a change.
+
+
+257
+00:15:59,626 --> 00:16:03,297 line:-2
+You can also read from the library
+in a non-UI context.
+
+
+258
+00:16:03,330 --> 00:16:07,668 line:-2
+For example, if I want to retrieve
+the most popular genre of a user
+
+
+259
+00:16:07.701 --> 00:16:10.070 line:-1 align:center
+from their synced Shazams,
+
+
+260
+00:16:10.103 --> 00:16:13.507 line:-2 align:center
+I can ask for the current items
+of the library.
+
+
+261
+00:16:13,540 --> 00:16:15,909 line:-1
+Then, once I have this,
+
+
+262
+00:16:15,943 --> 00:16:20,347 line:-2
+I can filter through the array of items
+to get all the returned genres,
+
+
+263
+00:16:20,380 --> 00:16:24,885 line:-2
+and count the genre
+with the highest frequency.
+
+
+264
+00:16:24.918 --> 00:16:28.989 line:-2 align:center
+Finally, I can remove items from
+the library by calling removeItems
+
+
+265
+00:16:29.022 --> 00:16:30.991 line:-1 align:center
+on the library object,
+
+
+266
+00:16:31,024 --> 00:16:34,661 line:-2
+passing in the array of media items
+to be removed.
+
+
+267
+00:16:34,695 --> 00:16:36,029 line:-1
+Going back to my app,
+
+
+268
+00:16:36.063 --> 00:16:38.432 line:-2 align:center
+since I've added recognized songs
+to my library,
+
+
+269
+00:16:38,465 --> 00:16:42,202 line:-2
+I can use the new SHLibrary
+to read these songs.
+
+
+270
+00:16:42,236 --> 00:16:43,804 line:-1
+In the RecentDancesView,
+
+
+271
+00:16:43,837 --> 00:16:47,140 line:-2
+I have a List which contains
+an empty array of mediaItems
+
+
+272
+00:16:47,174 --> 00:16:49,109 line:-1
+in the initializer.
+
+
+273
+00:16:49.142 --> 00:16:52.579 line:-2 align:center
+I'll replace the empty array with items
+from SHLibrary
+
+
+274
+00:16:52,613 --> 00:16:55,649 line:-1
+to automatically read my library items.
+
+
+275
+00:16:58,485 --> 00:17:00,521 line:-1
+I'll run the app with these changes.
+
+
+276
+00:17:02.823 --> 00:17:04.424 line:-1 align:center
+As soon as the app loads,
+
+
+277
+00:17:04,458 --> 00:17:09,096 line:-2
+I receive a list of songs which the app
+has added to the Shazam Library.
+
+
+278
+00:17:09.129 --> 00:17:12.399 line:-2 align:center
+With SHLibrary,
+I get this functionality for free,
+
+
+279
+00:17:12.432 --> 00:17:16.303 line:-2 align:center
+and I don't need to maintain a database
+of matched songs.
+
+
+280
+00:17:16,336 --> 00:17:19,873 line:-2
+Next up, I'll add a Swipe to delete action
+on each row,
+
+
+281
+00:17:19,907 --> 00:17:22,109 line:-1
+so I can delete a song from the library.
+
+
+282
+00:17:24,745 --> 00:17:27,481 line:-1
+I can add a swipeAction on the row view.
+
+
+283
+00:17:29.383 --> 00:17:31.652 line:-1 align:center
+Then when the swiped button is tapped,
+
+
+284
+00:17:31.685 --> 00:17:34.988 line:-2 align:center
+I can call the removeItems method
+of SHLibrary,
+
+
+285
+00:17:35.022 --> 00:17:38.458 line:-2 align:center
+passing in the media item
+that is to be deleted.
+
+
+286
+00:17:42,429 --> 00:17:46,333 line:-2
+Now that's done,
+I'll run the app with these changes.
+
+
+287
+00:17:46,366 --> 00:17:49,403 line:-1
+I've got the app open on my iPad as well.
+
+
+288
+00:17:49,436 --> 00:17:52,139 line:-1
+I can swipe on an item on my iPhone,
+
+
+289
+00:17:52,172 --> 00:17:54,875 line:-1
+and tap the delete button.
+
+
+290
+00:17:54,908 --> 00:17:57,344 line:-2
+The changes are synced
+and the deleted item
+
+
+291
+00:17:57.377 --> 00:18:00.113 line:-1 align:center
+is also removed from the list on the iPad.
+
+
+292
+00:18:00,147 --> 00:18:01,982 line:-1
+This is amazing.
+
+
+293
+00:18:02,015 --> 00:18:05,552 line:-2
+Now that you've learned
+how to use the new library APIs
+
+
+294
+00:18:05,586 --> 00:18:09,723 line:-2
+and how you can make use
+of Managed Session to handle recording,
+
+
+295
+00:18:09,756 --> 00:18:12,159 line:-1
+I'll take you through some best practices
+
+
+296
+00:18:12.192 --> 00:18:16.563 line:-2 align:center
+and offer some tips when using some of
+the new features introduced this year.
+
+
+297
+00:18:16,597 --> 00:18:20,934 line:-2
+SHManagedSession and SHSession
+are closely related.
+
+
+298
+00:18:20.968 --> 00:18:25.639 line:-2 align:center
+They can achieve almost the same thing,
+albeit in different ways.
+
+
+299
+00:18:25.672 --> 00:18:31.311 line:-2 align:center
+Use managedSession when you want to let
+ShazamKit handle the recording for you.
+
+
+300
+00:18:31.345 --> 00:18:34.615 line:-2 align:center
+Use SHSession when you are generating
+the audio buffers
+
+
+301
+00:18:34,648 --> 00:18:37,351 line:-1
+and passing them into the framework.
+
+
+302
+00:18:37.384 --> 00:18:43.357 line:-2 align:center
+Use managedSession to recognize audio
+coming from the microphone or an AirPod.
+
+
+303
+00:18:43,390 --> 00:18:46,927 line:-2
+Use SHSession when you want to only
+recognize audio
+
+
+304
+00:18:46.960 --> 00:18:49.763 line:-1 align:center
+streaming from the microphone.
+
+
+305
+00:18:49,796 --> 00:18:54,434 line:-2
+Matching arbitrary signatures
+with managedSession is not supported.
+
+
+306
+00:18:54,468 --> 00:18:57,104 line:-2
+Therefore,
+if you have a signature file
+
+
+307
+00:18:57.137 --> 00:19:02.442 line:-2 align:center
+or loaded signature data in memory,
+use SHSession to match it.
+
+
+308
+00:19:02.476 --> 00:19:07.614 line:-2 align:center
+Finally, managedSsession automatically
+handles audio formats for the matching,
+
+
+309
+00:19:07,648 --> 00:19:13,320 line:-2
+while SHSession allows matching
+with multiple PCM audio formats.
+
+
+310
+00:19:14,388 --> 00:19:17,191 line:-1
+Speaking of audio formats in SHSession,
+
+
+311
+00:19:17,224 --> 00:19:20,027 line:-1
+previously, the matchStreamingBuffer
+
+
+312
+00:19:20.060 --> 00:19:22.996 line:-2 align:center
+method only allowed
+matching PCM audio buffers
+
+
+313
+00:19:23.030 --> 00:19:27.568 line:-2 align:center
+with specific format settings
+at these sample rates.
+
+
+314
+00:19:27.601 --> 00:19:32.773 line:-2 align:center
+Audio buffers with unsupported
+settings resulted in a NoMatch.
+
+
+315
+00:19:32.806 --> 00:19:36.543 line:-2 align:center
+With this release,
+SHSession now supports PCM buffers
+
+
+316
+00:19:36,577 --> 00:19:41,215 line:-2
+with most format settings,
+sampled at a range of rates.
+
+
+317
+00:19:41.248 --> 00:19:44.618 line:-2 align:center
+You can pass in these buffers
+and SHSession will handle
+
+
+318
+00:19:44,651 --> 00:19:48,121 line:-1
+the format conversion for you.
+
+
+319
+00:19:48,155 --> 00:19:51,625 line:-2
+Finally,
+if you have two or more bits of audio
+
+
+320
+00:19:51,658 --> 00:19:54,428 line:-1
+that sound similar in a custom catalog,
+
+
+321
+00:19:54,461 --> 00:19:59,066 line:-2
+ShazamKit can now return all the matches
+from the custom catalog
+
+
+322
+00:19:59,099 --> 00:20:04,872 line:-2
+when you pass in a query signature that
+matches multiple reference signatures.
+
+
+323
+00:20:04,905 --> 00:20:08,575 line:-2
+The matches are returned,
+sorted by the best match quality
+
+
+324
+00:20:08,609 --> 00:20:11,879 line:-2
+and you can filter for
+the appropriate match result you want.
+
+
+325
+00:20:12.813 --> 00:20:16.183 line:-2 align:center
+As a tip, properly annotate
+the reference signatures
+
+
+326
+00:20:16.216 --> 00:20:19.753 line:-2 align:center
+that sound similar
+in their respective metadata,
+
+
+327
+00:20:19,786 --> 00:20:22,990 line:-2
+so you can distinguish
+between which result you want.
+
+
+328
+00:20:24,291 --> 00:20:27,794 line:-2
+Here's an example
+of how you can achieve this.
+
+
+329
+00:20:27.828 --> 00:20:33.500 line:-2 align:center
+Say I have a television show where
+every episode has the same intro sound.
+
+
+330
+00:20:33.534 --> 00:20:36.170 line:-1 align:center
+I can generate a televisionShowCatalog
+
+
+331
+00:20:36,203 --> 00:20:40,607 line:-2
+with reference signatures
+representing each episode.
+
+
+332
+00:20:40.641 --> 00:20:43.510 line:-1 align:center
+I can create a session using this catalog,
+
+
+333
+00:20:43.544 --> 00:20:46.380 line:-1 align:center
+and when matching the intro section,
+
+
+334
+00:20:46,413 --> 00:20:51,885 line:-2
+ShazamKit will return a match result
+with mediaItems of each episode.
+
+
+335
+00:20:51,919 --> 00:20:54,288 line:-1
+I can then filter through the mediaItems
+
+
+336
+00:20:54.321 --> 00:20:57.925 line:-2 align:center
+and only return mediaItems
+for a particular episode,
+
+
+337
+00:20:57.958 --> 00:21:00.994 line:-1 align:center
+say Episode 2, for example.
+
+
+338
+00:21:01,028 --> 00:21:03,664 line:-1
+This is how proper annotation helps.
+
+
+339
+00:21:05.465 --> 00:21:08.535 line:-2 align:center
+Now that I've gone through
+all the exciting updates this year,
+
+
+340
+00:21:08,569 --> 00:21:11,138 line:-2
+I'll conclude by switching back
+to my wonderful app
+
+
+341
+00:21:11,171 --> 00:21:14,174 line:-1
+and attempt to learn one more dance.
+
+
+342
+00:21:14,208 --> 00:21:17,611 line:-1
+I'll switch to my AirPods and play a song.
+
+
+343
+00:21:17.644 --> 00:21:20.214 line:-2 align:center
+Since I am using Managed Session
+in the app,
+
+
+344
+00:21:20.247 --> 00:21:22.616 line:-2 align:center
+it can listen to the audio
+playing in the AirPod
+
+
+345
+00:21:22.649 --> 00:21:25.052 line:-1 align:center
+and find a dance video for me.
+
+
+346
+00:21:25,085 --> 00:21:28,322 line:-2
+I'm going to press on the touch control
+of my AirPods to play a song
+
+
+347
+00:21:28,355 --> 00:21:31,558 line:-1
+and wait for the app to detect the audio.
+
+
+348
+00:21:35,762 --> 00:21:36,930 line:-1
+Sweet!
+
+
+349
+00:21:36,964 --> 00:21:40,167 line:-2
+Looks like Dancing Dave is showing off
+a couple of Afrobeat moves,
+
+
+350
+00:21:40,200 --> 00:21:43,937 line:-2
+which I'll try my best to learn
+after this talk.
+
+
+351
+00:21:43,971 --> 00:21:47,341 line:-2
+I hope you're as excited as we are
+with these new updates.
+
+
+352
+00:21:47,374 --> 00:21:51,278 line:-2
+Thank you for joining,
+and have a great WWDC.
+
+
+353
+00:21:51,311 --> 00:21:54,414 line:-1
+♪ ♪
+

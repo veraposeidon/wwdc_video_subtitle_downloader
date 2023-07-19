@@ -1,0 +1,1450 @@
+2
+00:00:00.334 --> 00:00:06.340 line:-1 align:center
+♪ ♪
+
+
+3
+00:00:10,911 --> 00:00:11,812 line:-1
+Nivash: Hello, everyone.
+
+
+4
+00:00:11,845 --> 00:00:14,314 line:-1
+I’m Nivash Raaja Karukankaatur Murugasamy,
+
+
+5
+00:00:14.348 --> 00:00:16.650 line:-2 align:center
+an Engineer in
+Core Location Frameworks team.
+
+
+6
+00:00:16,683 --> 00:00:19,186 line:-2
+Welcome to my talk on
+Core Location Monitor.
+
+
+7
+00:00:19.219 --> 00:00:23.790 line:-2 align:center
+I’m really excited to talk about
+our new CLMonitor API.
+
+
+8
+00:00:23,824 --> 00:00:28,462 line:-2
+It enables you to write simple
+yet powerful monitoring logic
+
+
+9
+00:00:28.495 --> 00:00:31.765 line:-1 align:center
+with just few lines of code in Swift.
+
+
+10
+00:00:31,798 --> 00:00:36,904 line:-2
+You just create a monitor,
+add conditions, and await events.
+
+
+11
+00:00:36.937 --> 00:00:39.773 line:-2 align:center
+There it is.
+Hello, CLMonitor!
+
+
+12
+00:00:39.806 --> 00:00:43.877 line:-2 align:center
+Let’s go into the details of
+CLMonitor API.
+
+
+13
+00:00:43,911 --> 00:00:48,048 line:-2
+I will begin with an overview
+of the CLMonitor API,
+
+
+14
+00:00:48,081 --> 00:00:54,621 line:-2
+our new simple yet powerful way to
+monitor for user’s location or beacons.
+
+
+15
+00:00:54,655 --> 00:00:58,358 line:-2
+Then, I’ll tell you about the types
+of conditions you can monitor
+
+
+16
+00:00:58,392 --> 00:01:02,129 line:-1
+and how you can add or remove them.
+
+
+17
+00:01:02.162 --> 00:01:05.532 line:-1 align:center
+Then, I will go over monitoring records,
+
+
+18
+00:01:05,566 --> 00:01:10,704 line:-2
+what they contain, and how you can
+access them during your app’s lifecycle.
+
+
+19
+00:01:10,737 --> 00:01:13,774 line:-2
+Followed by the steps you will need to
+take in your app
+
+
+20
+00:01:13.807 --> 00:01:17.945 line:-2 align:center
+if any of the monitored conditions
+encounter an event.
+
+
+21
+00:01:17,978 --> 00:01:21,481 line:-2
+And finally, I’ll wrap up with
+some requirements and recommendations
+
+
+22
+00:01:21,515 --> 00:01:25,385 line:-1
+that will help you when using CLMonitor.
+
+
+23
+00:01:25.419 --> 00:01:28.822 line:-2 align:center
+First, let’s take a look at
+what a monitor is
+
+
+24
+00:01:28,856 --> 00:01:31,658 line:-1
+and how you can create one for monitoring.
+
+
+25
+00:01:33.026 --> 00:01:35.929 line:-1 align:center
+CLMonitor is a top level Swift actor
+
+
+26
+00:01:35.963 --> 00:01:39.933 line:-2 align:center
+and each CLMonitor instance acts as
+a gateway to monitoring.
+
+
+27
+00:01:39.967 --> 00:01:43.370 line:-2 align:center
+As it is an actor, it relieves you from
+the overhead of thread
+
+
+28
+00:01:43.403 --> 00:01:45.472 line:-1 align:center
+and task synchronization.
+
+
+29
+00:01:45,506 --> 00:01:51,278 line:-2
+So accessing the contents of CLMonitor or
+adding or removing a condition at any time
+
+
+30
+00:01:51,311 --> 00:01:53,447 line:-1
+just needs to be awaited.
+
+
+31
+00:01:53,480 --> 00:01:56,750 line:0
+To create a monitor,
+you call the monitor’s init method
+
+
+32
+00:01:56,783 --> 00:01:58,952 align:center
+with an alpha-numeric string.
+
+
+33
+00:01:58,986 --> 00:02:03,557 line:0
+If there is no prior monitor existing with
+that name, a new one will be created.
+
+
+34
+00:02:03,590 --> 00:02:06,827 line:0
+Otherwise, the existing one
+will be opened.
+
+
+35
+00:02:06,860 --> 00:02:10,831 align:center
+Either way, the monitor instance
+will be returned.
+
+
+36
+00:02:10,864 --> 00:02:16,136 align:center
+Note that only one instance with
+a given name can be open at any moment.
+
+
+37
+00:02:16,170 --> 00:02:20,240 align:center
+The entity that is being monitored is
+called a condition.
+
+
+38
+00:02:20,274 --> 00:02:23,777 line:0
+You can add a condition to
+a CLMonitor instance for monitoring
+
+
+39
+00:02:23,810 --> 00:02:28,015 align:center
+and associate it with an identifier
+using the add method.
+
+
+40
+00:02:28,048 --> 00:02:30,951 align:center
+The identifier is an alphanumeric string.
+
+
+41
+00:02:30.984 --> 00:02:34.588 line:-2 align:center
+For instance, "Work" in this example
+uniquely identifies
+
+
+42
+00:02:34,621 --> 00:02:39,226 line:-2
+the record of a condition that is
+satisfied when the user is at work.
+
+
+43
+00:02:39.259 --> 00:02:43.897 line:-2 align:center
+The record object and its contents
+will be accessible by this identifier
+
+
+44
+00:02:43.931 --> 00:02:47.334 line:-2 align:center
+and the condition will be monitored
+until it is removed.
+
+
+45
+00:02:47,367 --> 00:02:49,937 line:-2
+You can remove the condition
+from monitoring by calling remove
+
+
+46
+00:02:49,970 --> 00:02:52,239 line:-1
+with the same identifier.
+
+
+47
+00:02:52.272 --> 00:02:56.476 line:-2 align:center
+Removing a condition
+removes the corresponding record as well.
+
+
+48
+00:02:56.510 --> 00:02:59.413 line:-2 align:center
+Now that you know
+how to create a monitor instance
+
+
+49
+00:02:59,446 --> 00:03:01,582 line:-1
+and how it relates to conditions,
+
+
+50
+00:03:01.615 --> 00:03:04.384 line:-2 align:center
+let’s take a look at the types of
+conditions available,
+
+
+51
+00:03:04.418 --> 00:03:07.821 line:-2 align:center
+and how you can create one
+and add it for monitoring.
+
+
+52
+00:03:07.855 --> 00:03:10.991 line:-2 align:center
+There are two types of conditions
+supported in iOS.
+
+
+53
+00:03:11.024 --> 00:03:14.828 line:-1 align:center
+First, CircularGeographicCondition.
+
+
+54
+00:03:14.862 --> 00:03:19.766 line:-2 align:center
+A circular geographic condition is defined
+by a center and a radius.
+
+
+55
+00:03:19.800 --> 00:03:24.037 line:-2 align:center
+The center defines the geographical
+location of the condition.
+
+
+56
+00:03:24,071 --> 00:03:27,107 line:-2
+The radius defines the area
+under which the condition
+
+
+57
+00:03:27,140 --> 00:03:29,009 line:-1
+will be considered satisfied.
+
+
+58
+00:03:29,042 --> 00:03:31,044 line:-1
+Anywhere outside of that area,
+
+
+59
+00:03:31.078 --> 00:03:34.014 line:-2 align:center
+we will report the condition
+as unsatisfied.
+
+
+60
+00:03:34,047 --> 00:03:39,853 line:-2
+This is similar to CLCircularRegion in
+iOS 16 and prior releases.
+
+
+61
+00:03:39,887 --> 00:03:43,724 line:-2
+You define a center by constructing
+a CLLocationCoordinate2D
+
+
+62
+00:03:43,757 --> 00:03:46,593 line:-2
+with the latitude
+and longitude of interest.
+
+
+63
+00:03:46,627 --> 00:03:49,563 line:-2
+Then you create
+the CircularGeographicCondition
+
+
+64
+00:03:49.596 --> 00:03:54.501 line:-2 align:center
+with that center
+and the radius of interest.
+
+
+65
+00:03:54.535 --> 00:03:59.740 line:-2 align:center
+The other type of condition supported
+in iOS is BeaconIdentityCondition.
+
+
+66
+00:03:59.773 --> 00:04:03.844 line:-2 align:center
+BeaconIdentityCondition is similar to
+CLBeaconIdentityConstraint
+
+
+67
+00:04:03,877 --> 00:04:09,616 line:-2
+or CLBeaconRegion that you may have used
+in iOS 16 and earlier releases.
+
+
+68
+00:04:09,650 --> 00:04:12,819 line:-2
+If your company has multiple sites
+at different locations,
+
+
+69
+00:04:12,853 --> 00:04:15,556 line:-2
+you can deploy beacons to detect
+in your app
+
+
+70
+00:04:15,589 --> 00:04:20,194 line:-2
+if the user is at any one of your sites, or
+at a specific site,
+
+
+71
+00:04:20,227 --> 00:04:23,564 line:-2
+or even at a specific section of
+a specific site.
+
+
+72
+00:04:25,232 --> 00:04:28,702 line:-2
+Consider Apple’s cafeterias as
+a simple example,
+
+
+73
+00:04:28.735 --> 00:04:31.471 line:-1 align:center
+available in offices at multiple sites.
+
+
+74
+00:04:31,505 --> 00:04:34,107 line:-2
+Let's see how beacons could be
+deployed effectively
+
+
+75
+00:04:34.141 --> 00:04:37.911 line:-2 align:center
+to enable location based behavior in
+an associated app.
+
+
+76
+00:04:37,945 --> 00:04:42,649 line:-2
+And as we go, I will talk about how that
+app can monitor for these beacons
+
+
+77
+00:04:42.683 --> 00:04:45.519 line:-2 align:center
+by using different flavors of
+BeaconIdentityCondition
+
+
+78
+00:04:45,552 --> 00:04:47,888 line:-1
+under different situations.
+
+
+79
+00:04:47.921 --> 00:04:51.291 line:-2 align:center
+Let's take a brief look at
+what defines a beacon.
+
+
+80
+00:04:51,325 --> 00:04:56,363 line:-2
+It contains a UUID string,
+a major number, and a minor number.
+
+
+81
+00:04:56,396 --> 00:05:00,634 line:-2
+With BeaconIdentityCondition,
+you can monitor for a specific beacon
+
+
+82
+00:05:00.667 --> 00:05:06.406 line:-2 align:center
+by specifying all three:
+UUID, major, and minor.
+
+
+83
+00:05:06.440 --> 00:05:09.409 line:-2 align:center
+Or you can wildcard to match
+any single beacon
+
+
+84
+00:05:09.443 --> 00:05:15.983 line:-2 align:center
+from a group of beacons by specifying
+just UUID and major, or just UUID alone.
+
+
+85
+00:05:16.016 --> 00:05:19.686 line:-2 align:center
+When you leave the minor
+or the major and minor unspecified,
+
+
+86
+00:05:19.720 --> 00:05:23.257 line:-2 align:center
+a beacon with any values for
+those properties could match.
+
+
+87
+00:05:23.290 --> 00:05:25.893 line:-2 align:center
+Let see how we can use this
+in our example.
+
+
+88
+00:05:25.926 --> 00:05:32.032 line:-2 align:center
+We could deploy beacons at these cafeteria
+sites with all having the same UUID.
+
+
+89
+00:05:32,065 --> 00:05:36,637 line:-2
+And, in the app,
+a BeaconIdentityCondition could be created
+
+
+90
+00:05:36,670 --> 00:05:38,872 line:-1
+to monitor for this UUID.
+
+
+91
+00:05:38,906 --> 00:05:43,076 line:-2
+Then, if a user nears
+one of these beacons,
+
+
+92
+00:05:43.110 --> 00:05:45.112 line:-1 align:center
+the condition will become satisfied.
+
+
+93
+00:05:45,145 --> 00:05:49,016 line:-2
+Otherwise,
+it will be determined as unsatisfied.
+
+
+94
+00:05:49.049 --> 00:05:51.652 line:-1 align:center
+In code, you can do this
+
+
+95
+00:05:51,685 --> 00:05:57,391 line:-2
+by calling the init method
+that specifies only the UUID.
+
+
+96
+00:05:57.424 --> 00:06:00.527 line:-2 align:center
+Now that we have deployed beacons
+at the required locations,
+
+
+97
+00:06:00,561 --> 00:06:05,499 line:-2
+you might be interested to detect
+if a user is at one of the specific sites.
+
+
+98
+00:06:05.532 --> 00:06:11.939 line:-2 align:center
+In this case, let's see how to monitor
+whether a user is at the Apple Park site.
+
+
+99
+00:06:11.972 --> 00:06:15.042 line:-2 align:center
+To achieve this, the beacons deployed at
+each site
+
+
+100
+00:06:15.075 --> 00:06:17.544 line:-1 align:center
+will have to share a unique major number.
+
+
+101
+00:06:17,578 --> 00:06:21,915 line:-2
+Then, in your app, you can monitor for
+a BeaconIdentityCondition
+
+
+102
+00:06:21,949 --> 00:06:25,619 line:-1
+with that major and the overall UUID.
+
+
+103
+00:06:25,652 --> 00:06:28,889 line:-2
+The condition’s state will be determined
+as satisfied
+
+
+104
+00:06:28,922 --> 00:06:31,491 line:-1
+only when the device is at that site
+
+
+105
+00:06:31,525 --> 00:06:36,463 line:-2
+where the beacons match both UUID
+and major values.
+
+
+106
+00:06:36.496 --> 00:06:39.499 line:-1 align:center
+It will remain unsatisfied at other sites.
+
+
+107
+00:06:39,533 --> 00:06:43,170 line:-2
+In code, you can create
+a BeaconIdentityCondition
+
+
+108
+00:06:43.203 --> 00:06:48.408 line:-2 align:center
+by calling the init method that specifies
+only UUID and major.
+
+
+109
+00:06:50.410 --> 00:06:54.882 line:-2 align:center
+Now you know how to monitor for all sites
+or a specific site.
+
+
+110
+00:06:54,915 --> 00:07:01,221 line:-2
+But you can also monitor for a specific
+section within a specific site as well.
+
+
+111
+00:07:01,255 --> 00:07:05,659 line:-2
+This can be achieved by deploying beacons
+at different locations--
+
+
+112
+00:07:05,692 --> 00:07:07,528 line:-1
+say, cuisine stations--
+
+
+113
+00:07:07,561 --> 00:07:10,664 line:-2
+within each site with
+corresponding minor values.
+
+
+114
+00:07:10.697 --> 00:07:14.735 line:-2 align:center
+In your app, you can monitor for
+a BeaconIdentityCondition
+
+
+115
+00:07:14.768 --> 00:07:19.273 line:-2 align:center
+for a specific minor value
+along with UUID and major.
+
+
+116
+00:07:19,306 --> 00:07:23,577 line:-2
+Such a condition would become satisfied
+only when the beacon with that minor
+
+
+117
+00:07:23,610 --> 00:07:27,948 line:-2
+as well as the overall UUID
+and major is detected.
+
+
+118
+00:07:27.981 --> 00:07:32.119 line:-2 align:center
+In code, this means
+creating a BeaconIdentityCondition
+
+
+119
+00:07:32.152 --> 00:07:38.025 line:-1 align:center
+by passing in the UUID, major, and minor.
+
+
+120
+00:07:38.058 --> 00:07:43.397 line:-2 align:center
+When creating a BeaconIdentityCondition,
+use the init method that suits your need.
+
+
+121
+00:07:43.430 --> 00:07:48.535 line:-2 align:center
+OK, now that you know how to create
+different types and flavors of condition,
+
+
+122
+00:07:48,569 --> 00:07:52,039 line:-2
+let’s take a look at how you can add them
+for monitoring.
+
+
+123
+00:07:53,507 --> 00:07:56,910 line:-2
+You can add a condition for monitoring by
+calling the add method
+
+
+124
+00:07:56.944 --> 00:08:01.849 line:-2 align:center
+with an alphanumeric string called
+identifier on your CLMonitor instance.
+
+
+125
+00:08:01,882 --> 00:08:05,953 line:-2
+The condition would be associated with
+the identifier.
+
+
+126
+00:08:05.986 --> 00:08:09.723 line:-2 align:center
+If a condition is already being monitored
+with the given identifier,
+
+
+127
+00:08:09.756 --> 00:08:13.727 line:-2 align:center
+it will be replaced with the new condition
+that is passed in.
+
+
+128
+00:08:13,760 --> 00:08:16,964 line:-2
+When you add a condition,
+it's initial state will be unknown
+
+
+129
+00:08:16,997 --> 00:08:20,667 line:-1
+until determined by Core Location.
+
+
+130
+00:08:20.701 --> 00:08:22.336 line:-1 align:center
+There might be instances where
+
+
+131
+00:08:22.369 --> 00:08:26.139 line:-2 align:center
+you are aware of the current state of
+the condition before you add it.
+
+
+132
+00:08:26.173 --> 00:08:29.443 line:-2 align:center
+In those cases, you can override
+the default initial state
+
+
+133
+00:08:29,476 --> 00:08:33,146 line:-2
+by passing the state
+when adding for monitoring.
+
+
+134
+00:08:33,180 --> 00:08:37,384 line:-2
+In this example, let’s assume that
+your app deduces that
+
+
+135
+00:08:37,417 --> 00:08:43,056 line:-2
+you’re not at Apple Park site and so
+expects the condition to be unsatisfied.
+
+
+136
+00:08:43,090 --> 00:08:46,827 line:-2
+You can add "assuming: .unsatisfied"
+to your call.
+
+
+137
+00:08:46.860 --> 00:08:50.964 line:-2 align:center
+Then, monitoring will begin with state
+set to unsatisfied.
+
+
+138
+00:08:50,998 --> 00:08:52,633 line:-1
+But not to worry.
+
+
+139
+00:08:52,666 --> 00:08:54,801 line:-1
+If your assumption of the state is wrong,
+
+
+140
+00:08:54,835 --> 00:08:58,805 line:-2
+Core Location will give you
+the correct state once it is determined.
+
+
+141
+00:08:58.839 --> 00:09:02.342 line:-2 align:center
+To remove a condition from monitoring, you
+can call the remove method
+
+
+142
+00:09:02.376 --> 00:09:07.581 line:-2 align:center
+with the identifier that was passed
+when the condition was added.
+
+
+143
+00:09:07.614 --> 00:09:11.451 line:-2 align:center
+Now you know what a condition is,
+what types are supported,
+
+
+144
+00:09:11.485 --> 00:09:14.488 line:-2 align:center
+and how to add or remove one
+from monitoring.
+
+
+145
+00:09:14.521 --> 00:09:17.257 line:-2 align:center
+Let’s take a detailed look at
+the contents of a record
+
+
+146
+00:09:17,291 --> 00:09:21,161 line:-2
+and how you can get a record
+or all the records in a monitor
+
+
+147
+00:09:21,195 --> 00:09:23,063 line:-1
+to inspect at any time.
+
+
+148
+00:09:23,096 --> 00:09:27,968 align:center
+If you can recall from the earlier slide,
+when you add a condition for monitoring,
+
+
+149
+00:09:28,001 --> 00:09:34,908 align:center
+Core Location creates a record
+and adds the condition in that record.
+
+
+150
+00:09:34,942 --> 00:09:40,814 line:0
+In addition to the condition, a record
+contains another object called event.
+
+
+151
+00:09:42,816 --> 00:09:45,118 align:center
+The event contains the state
+
+
+152
+00:09:45,152 --> 00:09:48,088 align:center
+representing the current observed state
+of the condition,
+
+
+153
+00:09:48,121 --> 00:09:52,259 align:center
+whether satisfied, unsatisfied,
+or unknown,
+
+
+154
+00:09:52,292 --> 00:09:56,997 line:0
+and the date and time at which
+the condition encountered the state.
+
+
+155
+00:09:57,030 --> 00:10:03,470 line:0
+now you might wonder why there is another
+instance of condition in the event.
+
+
+156
+00:10:03,504 --> 00:10:05,772 line:0
+This is called the refinement.
+
+
+157
+00:10:05,806 --> 00:10:07,875 line:0
+What is it for?
+
+
+158
+00:10:07,908 --> 00:10:11,245 line:-2
+If you can recall from
+BeaconIdentityCondition,
+
+
+159
+00:10:11,278 --> 00:10:14,648 line:-1
+your app can monitor just for UUID ,
+
+
+160
+00:10:14.681 --> 00:10:16.817 line:-1 align:center
+or UUID and major,
+
+
+161
+00:10:16,850 --> 00:10:21,655 line:-1
+or UUID along with major and minor.
+
+
+162
+00:10:21,688 --> 00:10:25,859 line:-2
+If a condition with major and minor
+wildcarded becomes satisfied,
+
+
+163
+00:10:25.893 --> 00:10:30.163 line:-2 align:center
+that event will be delivered with
+the refinement populated.
+
+
+164
+00:10:30.197 --> 00:10:33.066 line:-2 align:center
+That refinement condition will carry
+the UUID
+
+
+165
+00:10:33.100 --> 00:10:37.437 line:-2 align:center
+but also the major and minor information
+of the observed beacon.
+
+
+166
+00:10:37,471 --> 00:10:40,374 line:-2
+Then, once the condition becomes
+unsatisfied,
+
+
+167
+00:10:40.407 --> 00:10:42.676 line:-1 align:center
+the refinement will be reset to nil.
+
+
+168
+00:10:43,277 --> 00:10:46,313 line:0
+There can be multiple instance of record
+
+
+169
+00:10:46,346 --> 00:10:50,150 line:0
+with each record uniquely addressed
+by the identifier passed in
+
+
+170
+00:10:50,184 --> 00:10:52,452 line:0
+when the condition was added.
+
+
+171
+00:10:52,486 --> 00:10:54,721 line:0
+All the records of your monitors,
+
+
+172
+00:10:54,755 --> 00:10:57,991 align:center
+associating conditions with
+lastEvents and identifiers,
+
+
+173
+00:10:58,025 --> 00:11:00,060 align:center
+are stored with your app.
+
+
+174
+00:11:00,093 --> 00:11:03,764 line:0
+This enables you to query conditions and
+their corresponding states
+
+
+175
+00:11:03,797 --> 00:11:06,433 align:center
+as last observed at any time.
+
+
+176
+00:11:06,466 --> 00:11:08,368 align:center
+Let’s see what that looks like in code.
+
+
+177
+00:11:09.069 --> 00:11:11.939 line:-2 align:center
+To retrieve a record associated with
+a condition,
+
+
+178
+00:11:11,972 --> 00:11:14,975 line:-2
+you can call the record method
+with its identifier.
+
+
+179
+00:11:15.008 --> 00:11:18.445 line:-2 align:center
+If no condition is being monitored with
+the identifier you passed,
+
+
+180
+00:11:18,478 --> 00:11:20,480 line:-1
+nil will be returned.
+
+
+181
+00:11:20,514 --> 00:11:23,217 line:-2
+You can then get the underlying
+monitored condition
+
+
+182
+00:11:23,250 --> 00:11:26,253 line:-1
+by accessing the condition property.
+
+
+183
+00:11:26,286 --> 00:11:31,859 line:-2
+And you can get the lastEvent delivered
+to your app for that condition
+
+
+184
+00:11:31,892 --> 00:11:35,095 line:-1
+by accessing the lastEvent property.
+
+
+185
+00:11:35.128 --> 00:11:39.733 line:-2 align:center
+Then, from the event, you can get
+the most recently observed state,
+
+
+186
+00:11:39.766 --> 00:11:42.402 line:-1 align:center
+date, and refinement.
+
+
+187
+00:11:42.436 --> 00:11:45.339 line:-1 align:center
+Now you know how to retrieve one record.
+
+
+188
+00:11:45,372 --> 00:11:47,841 line:-1
+How do you get all the monitoring records?
+
+
+189
+00:11:47.875 --> 00:11:50.143 line:-2 align:center
+Do you need to keep track of
+all the identifiers?
+
+
+190
+00:11:51,111 --> 00:11:53,046 line:-1
+Well, you don’t have to.
+
+
+191
+00:11:53.080 --> 00:11:58.452 line:-2 align:center
+We maintain the list for you in
+the identifiers property on your monitor.
+
+
+192
+00:11:58,485 --> 00:12:04,658 line:-2
+You can easily iterate over it
+to retrieve each record and its contents.
+
+
+193
+00:12:04,691 --> 00:12:08,195 line:-2
+Now that you know how to access
+the contents of a record,
+
+
+194
+00:12:08.228 --> 00:12:12.199 line:-2 align:center
+let’s see how to consume events
+as changes occur.
+
+
+195
+00:12:12,232 --> 00:12:14,968 line:-2
+The code to receive an event
+can be implemented
+
+
+196
+00:12:15,002 --> 00:12:17,738 line:-1
+using a simple loop wrapped in a Task.
+
+
+197
+00:12:17.771 --> 00:12:21.074 line:-2 align:center
+When Core Location observes a state
+for a monitored condition
+
+
+198
+00:12:21,108 --> 00:12:23,911 line:-2
+which differs from the state reported in
+the lastEvent,
+
+
+199
+00:12:23,944 --> 00:12:26,713 line:-2
+then Core Location will deliver a new
+event
+
+
+200
+00:12:26.747 --> 00:12:29.950 line:-2 align:center
+through the events async sequence property
+on your monitor
+
+
+201
+00:12:29.983 --> 00:12:33.587 line:-1 align:center
+which resumes the awaiting loop.
+
+
+202
+00:12:33,620 --> 00:12:36,757 line:-2
+The event object delivered brings you
+the new state
+
+
+203
+00:12:36,790 --> 00:12:40,561 line:-2
+and the identifier of
+the condition affected.
+
+
+204
+00:12:40.594 --> 00:12:45.065 line:-2 align:center
+Or, while processing the new event,
+you can also use the identifier
+
+
+205
+00:12:45,098 --> 00:12:51,038 line:-2
+to get the record and
+the lastEvent for that condition.
+
+
+206
+00:12:51.071 --> 00:12:56.376 line:-2 align:center
+We can use that information to get more
+context on what has happened now.
+
+
+207
+00:12:56.410 --> 00:12:57.511 line:-1 align:center
+There it is!
+
+
+208
+00:12:57.544 --> 00:13:01.815 line:-1 align:center
+Our simple greeter program is complete.
+
+
+209
+00:13:01.849 --> 00:13:07.621 line:-2 align:center
+Now that you know how CLMonitor works,
+I have some advice on how to use it best.
+
+
+210
+00:13:08.288 --> 00:13:11.458 line:-1 align:center
+Let's begin with three key requirements.
+
+
+211
+00:13:11,491 --> 00:13:16,196 line:-2
+First, you can have multiple monitors
+with different names
+
+
+212
+00:13:16,230 --> 00:13:18,665 line:-2
+to separate handling of
+different conditions,
+
+
+213
+00:13:18.699 --> 00:13:24.204 line:-2 align:center
+but you must instantiate only one at time
+for a given name.
+
+
+214
+00:13:24,238 --> 00:13:29,977 line:-2
+Because CLMonitor maintains the state of
+the conditions that it is monitoring,
+
+
+215
+00:13:30,010 --> 00:13:32,679 line:-2
+trying to initialize another one
+with the same name
+
+
+216
+00:13:32.713 --> 00:13:35.849 line:-1 align:center
+could result in undesired behavior.
+
+
+217
+00:13:35,883 --> 00:13:40,120 line:-2
+Second, because events can arrive
+unpredictably,
+
+
+218
+00:13:40.153 --> 00:13:45.959 line:-2 align:center
+it's best to always have a Task awaiting
+on your monitor’s events sequence.
+
+
+219
+00:13:45,993 --> 00:13:51,265 line:-2
+An event can only become the lastEvent
+of some record after you have handled it.
+
+
+220
+00:13:51,298 --> 00:13:55,736 line:-2
+So, if a condition changes state
+while you’re not awaiting events,
+
+
+221
+00:13:55.769 --> 00:13:59.907 line:-2 align:center
+your monitor will not reflect
+the new state until you do.
+
+
+222
+00:13:59.940 --> 00:14:03.243 line:-1 align:center
+Finally, if your app has been terminated,
+
+
+223
+00:14:03,277 --> 00:14:06,213 line:-2
+when any monitored conditions encounter
+an event,
+
+
+224
+00:14:06,246 --> 00:14:08,682 line:-2
+Core Location will launch your app in the
+background
+
+
+225
+00:14:08,715 --> 00:14:11,785 line:-2
+as long as it is authorized
+to receive user location.
+
+
+226
+00:14:11.818 --> 00:14:14.821 line:-2 align:center
+That means your app needs to
+reinit monitor
+
+
+227
+00:14:14,855 --> 00:14:17,658 line:-1
+and await events whenever it is launched
+
+
+228
+00:14:17,691 --> 00:14:21,862 line:-2
+if it remains interested in the state
+of conditions it is monitoring.
+
+
+229
+00:14:21.895 --> 00:14:23.864 line:-1 align:center
+One way to do this is by listening to
+
+
+230
+00:14:23,897 --> 00:14:28,068 line:-2
+didFinishLaunchingWithOptions
+app delegate callback.
+
+
+231
+00:14:29,069 --> 00:14:32,172 line:-2
+As the new API results in
+launching behavior,
+
+
+232
+00:14:32.206 --> 00:14:36.310 line:-2 align:center
+I strongly recommend using CLMonitor
+only from your app.
+
+
+233
+00:14:36,343 --> 00:14:41,114 line:-2
+Using it in widgets or plug-ins
+will launch your app instead,
+
+
+234
+00:14:41,148 --> 00:14:47,354 line:-2
+and complicate ensuring that only one
+monitor exists for a given name at a time.
+
+
+235
+00:14:47.387 --> 00:14:50.390 line:-1 align:center
+Finally, I mentioned this earlier:
+
+
+236
+00:14:50.424 --> 00:14:53.727 line:-1 align:center
+conditions and their states persist,
+
+
+237
+00:14:53.760 --> 00:14:58.365 line:-2 align:center
+and events are generated when
+CLMonitor observes a change of state
+
+
+238
+00:14:58,398 --> 00:15:00,667 line:-1
+in one of the conditions it is monitoring,
+
+
+239
+00:15:00.701 --> 00:15:06.006 line:-2 align:center
+so I strongly recommend looking at those
+states as CLMonitor represents them
+
+
+240
+00:15:06,039 --> 00:15:09,243 line:-2
+rather than maintaining them
+in your own table
+
+
+241
+00:15:09.276 --> 00:15:12.613 line:-1 align:center
+then get out of sync with arriving events.
+
+
+242
+00:15:12,646 --> 00:15:17,751 line:-2
+That said, some applications,
+such as SwiftUI visualization,
+
+
+243
+00:15:17,784 --> 00:15:20,554 line:-2
+may require a separate representation
+be kept.
+
+
+244
+00:15:20,587 --> 00:15:24,358 line:-2
+If you need to do that,
+reserve that representation for SwiftUI
+
+
+245
+00:15:24,391 --> 00:15:27,828 line:-2
+and don’t use it to reason about
+expected events.
+
+
+246
+00:15:27,861 --> 00:15:30,464 line:-1
+So that’s CLMonitor!
+
+
+247
+00:15:30,497 --> 00:15:32,733 line:-1
+I’m really excited about our new API.
+
+
+248
+00:15:32,766 --> 00:15:34,301 line:-1
+Try it out!
+
+
+249
+00:15:34,334 --> 00:15:37,938 line:-2
+We hope it will greatly improve
+your monitoring experience.
+
+
+250
+00:15:37,971 --> 00:15:40,307 line:-1
+We would love to hear your feedback.
+
+
+251
+00:15:40.340 --> 00:15:44.411 line:-2 align:center
+We also have a sample app
+that demonstrates CLMonitor in action.
+
+
+252
+00:15:44,444 --> 00:15:47,648 line:-2
+It is available in the resources section
+of this video.
+
+
+253
+00:15:47,681 --> 00:15:50,184 line:-1
+Download it and give it a try.
+
+
+254
+00:15:50,217 --> 00:15:54,888 line:0
+Finally, checkout the session by
+my colleague Siraj on location updates.
+
+
+255
+00:15:55,389 --> 00:15:56,456 line:-1
+Thanks for watching!
+

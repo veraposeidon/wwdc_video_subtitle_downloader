@@ -1,0 +1,1113 @@
+2
+00:00:00.334 --> 00:00:06.340 line:-1 align:center
+♪ ♪
+
+
+3
+00:00:10,310 --> 00:00:15,516 line:-2
+Grant: Hi, my name is Grant.
+I’m an Engineer on the Accessibility Team.
+
+
+4
+00:00:15.549 --> 00:00:19.686 line:-2 align:center
+Many people use speech synthesis
+across Apple platforms
+
+
+5
+00:00:19.720 --> 00:00:23.156 line:-2 align:center
+and some people rely on
+synthesizer voices.
+
+
+6
+00:00:23.190 --> 00:00:26.527 line:-2 align:center
+These voices are
+a window into their devices.
+
+
+7
+00:00:26,560 --> 00:00:31,298 line:-2
+Therefore, the voices they choose
+are often a very personal choice.
+
+
+8
+00:00:31.732 --> 00:00:37.704 line:-2 align:center
+People using speech synthesis on iOS can
+already choose from many different voices.
+
+
+9
+00:00:37,738 --> 00:00:41,775 line:-2
+Let’s take a look at how
+you can provide even more.
+
+
+10
+00:00:41.808 --> 00:00:46.713 line:-2 align:center
+First, we’ll talk about what
+Speech Synthesis Markup Language is,
+
+
+11
+00:00:46.747 --> 00:00:51.118 line:-2 align:center
+how it can bring immersive
+speech output to your custom voices,
+
+
+12
+00:00:51,151 --> 00:00:55,055 line:-2
+and why your speech provider
+should adopt it.
+
+
+13
+00:00:55,088 --> 00:00:59,993 line:-2
+Next, we’ll walk through how you can
+implement a speech synthesis provider
+
+
+14
+00:01:00.027 --> 00:01:05.399 line:-2 align:center
+to bring your synthesizer
+and voice experiences across the device.
+
+
+15
+00:01:05.432 --> 00:01:09.069 line:-2 align:center
+And finally,
+we’ll dive into Personal Voice.
+
+
+16
+00:01:09,102 --> 00:01:11,205 line:-1
+This is a new feature.
+
+
+17
+00:01:11.238 --> 00:01:14.041 line:-1 align:center
+Now, people can record their voice
+
+
+18
+00:01:14,074 --> 00:01:18,545 line:-2
+and then generate a synthesized voice
+from those recordings.
+
+
+19
+00:01:18,579 --> 00:01:24,651 line:-2
+So now, you can synthesize speech with
+the user's own personal voice.
+
+
+20
+00:01:24,685 --> 00:01:29,256 line:-1
+Let’s start by taking a look at SSML.
+
+
+21
+00:01:29.289 --> 00:01:35.629 line:-2 align:center
+SSML is a W3C standard for
+representing spoken text.
+
+
+22
+00:01:35.662 --> 00:01:38.999 line:-1 align:center
+SSML Speech is represented declaratively
+
+
+23
+00:01:39,032 --> 00:01:43,804 line:-2
+using XML format with various tags
+and attributes.
+
+
+24
+00:01:43,837 --> 00:01:49,676 line:-2
+You can use these tags to control
+speech properties like rate and pitch.
+
+
+25
+00:01:49.710 --> 00:01:53.280 line:-1 align:center
+SSML is used in first-party synthesizers.
+
+
+26
+00:01:53,313 --> 00:01:56,183 line:-1
+This includes WebSpeech in WebKit
+
+
+27
+00:01:56.216 --> 00:02:00.387 line:-2 align:center
+and is the standard input for
+speech synthesizers.
+
+
+28
+00:02:00,420 --> 00:02:03,724 line:-1
+Let’s take a look at how you can use SSML.
+
+
+29
+00:02:04.491 --> 00:02:07.494 line:-2 align:center
+Take this example phrase
+that has a pause in it.
+
+
+30
+00:02:07.528 --> 00:02:11.064 line:-1 align:center
+We can represent this pause in SSML.
+
+
+31
+00:02:11.098 --> 00:02:13.967 line:-1 align:center
+We’ll start with our "hello" string,
+
+
+32
+00:02:14.001 --> 00:02:18.205 line:-2 align:center
+add our one second pause using an SSML
+break tag,
+
+
+33
+00:02:18,238 --> 00:02:21,842 line:-2
+and finish by speeding up
+"nice to meet you!"
+
+
+34
+00:02:21.875 --> 00:02:25.379 line:-1 align:center
+We do this by adding an SSML prosody tag
+
+
+35
+00:02:25,412 --> 00:02:29,583 line:-1
+and setting the rate attribute to 200%.
+
+
+36
+00:02:29,616 --> 00:02:36,223 line:-2
+Now we can take this SSML and create
+an AVSpeechUtterance to speak with.
+
+
+37
+00:02:36,256 --> 00:02:39,826 line:-2
+Next, let’s take a look at
+how you can implement
+
+
+38
+00:02:39,860 --> 00:02:42,296 line:-1
+your own speech synthesizer voices.
+
+
+39
+00:02:43,330 --> 00:02:45,732 line:-1
+So what is a speech synthesizer?
+
+
+40
+00:02:45,766 --> 00:02:49,670 line:-2
+A speech synthesizer receives some text
+and information
+
+
+41
+00:02:49.703 --> 00:02:53.874 line:-2 align:center
+about desired speech properties in
+the form of SSML
+
+
+42
+00:02:53,907 --> 00:02:57,511 line:-2
+and provides an audio representation of
+that text.
+
+
+43
+00:02:58.178 --> 00:03:01.949 line:-2 align:center
+Suppose you have a synthesizer with
+great new voices
+
+
+44
+00:03:01,982 --> 00:03:06,687 line:-2
+and you want to bring it to
+iOS, macOS, and iPadOS.
+
+
+45
+00:03:06,720 --> 00:03:09,389 line:-2
+Speech synthesis providers allow you
+to implement
+
+
+46
+00:03:09,423 --> 00:03:13,861 line:-2
+your own speech synthesizers and voices
+into our platforms
+
+
+47
+00:03:13,894 --> 00:03:18,098 line:-2
+to give even more personalization
+to users beyond system voices.
+
+
+48
+00:03:19.199 --> 00:03:21.201 line:-1 align:center
+Let’s see how this works.
+
+
+49
+00:03:21,235 --> 00:03:26,306 line:-2
+Speech Synthesis provider audio unit
+extensions will be embedded in a host app
+
+
+50
+00:03:26.340 --> 00:03:30.911 line:-2 align:center
+and will receive speech requests
+in the form of SSML.
+
+
+51
+00:03:30.944 --> 00:03:36.083 line:-2 align:center
+The extension will be responsible for
+rendering audio for the SSML input
+
+
+52
+00:03:36,116 --> 00:03:40,187 line:-2
+and optionally returning markers
+indicating where words occur
+
+
+53
+00:03:40.220 --> 00:03:42.823 line:-1 align:center
+within those audio buffers.
+
+
+54
+00:03:42,856 --> 00:03:46,827 line:-2
+The system will then manage
+all playback for that speech request.
+
+
+55
+00:03:46,860 --> 00:03:49,930 line:-2
+You don't need to handle
+any audio session management;
+
+
+56
+00:03:49,963 --> 00:03:54,835 line:-2
+it's managed internally by
+the Speech Synthesis Provider framework.
+
+
+57
+00:03:55.402 --> 00:03:58.372 line:-2 align:center
+Now that we understand
+what a synthesizer is,
+
+
+58
+00:03:58,405 --> 00:04:01,542 line:-2
+we can start to build
+a speech synthesizer extension.
+
+
+59
+00:04:02.509 --> 00:04:07.648 line:-2 align:center
+Let’s start by creating a new
+Audio Unit Extension app project in Xcode,
+
+
+60
+00:04:07,681 --> 00:04:11,185 line:-2
+then select the "Speech Synthesizer"
+Audio Unit Type
+
+
+61
+00:04:11,218 --> 00:04:15,589 line:-2
+and provide a four character subtype
+identifier for your synthesizer,
+
+
+62
+00:04:15.622 --> 00:04:20.494 line:-2 align:center
+as well as a four character identifier
+for you as a manufacturer.
+
+
+63
+00:04:20,527 --> 00:04:23,397 line:-2
+Audio unit extensions are
+the core architecture
+
+
+64
+00:04:23,430 --> 00:04:26,967 line:-2
+upon which speech synthesizer extensions
+have been built.
+
+
+65
+00:04:27.000 --> 00:04:30.571 line:-2 align:center
+They allow your synthesizer to run
+in an extension process
+
+
+66
+00:04:30,604 --> 00:04:32,739 line:-1
+instead of in your host app process.
+
+
+67
+00:04:33,874 --> 00:04:36,743 line:-2
+Our app is going to provide
+a simple interface
+
+
+68
+00:04:36.777 --> 00:04:42.249 line:-2 align:center
+for buying and selecting a voice that
+our extension will synthesize speech for.
+
+
+69
+00:04:42.282 --> 00:04:48.021 line:-2 align:center
+We’ll start by creating a list view that
+shows our available voices for purchase.
+
+
+70
+00:04:48.055 --> 00:04:51.825 line:-2 align:center
+Each voice cell will show
+the voice name and a buy button.
+
+
+71
+00:04:52,826 --> 00:04:56,697 align:center
+Next, I will populate my list
+with some voices.
+
+
+72
+00:04:56,730 --> 00:05:03,237 line:0
+Here, WWDCVoice is a simple struct
+holding the voice name and identifier.
+
+
+73
+00:05:04,238 --> 00:05:09,176 line:0
+We also need a state variable
+for keeping track of purchased voices
+
+
+74
+00:05:09,209 --> 00:05:12,980 align:center
+and a new section to display them.
+
+
+75
+00:05:13,013 --> 00:05:17,351 line:0
+Next, let’s create a function
+for purchasing a voice.
+
+
+76
+00:05:17,384 --> 00:05:21,121 align:center
+Here we can add the newly purchased voice
+to our list
+
+
+77
+00:05:21,154 --> 00:05:23,757 align:center
+and update our UI accordingly.
+
+
+78
+00:05:23,790 --> 00:05:27,694 line:0
+Take note of
+the AVSpeechSynthesisProviderVoice method
+
+
+79
+00:05:27,728 --> 00:05:29,730 align:center
+updateSpeechVoices.
+
+
+80
+00:05:29,763 --> 00:05:33,367 align:center
+That is how your app can signal that
+the set of available voices
+
+
+81
+00:05:33,400 --> 00:05:35,502 align:center
+for your synthesizer has changed
+
+
+82
+00:05:35,536 --> 00:05:39,106 align:center
+and the system voice list
+should be rebuilt.
+
+
+83
+00:05:39,139 --> 00:05:41,608 line:0
+In our example, we can make this call
+
+
+84
+00:05:41,642 --> 00:05:46,046 line:0
+after completing an in-app purchase
+for a voice.
+
+
+85
+00:05:46,079 --> 00:05:50,450 line:-2
+We also need a way to keep tabs
+on which voices are available
+
+
+86
+00:05:50,484 --> 00:05:53,120 line:-1
+in our speech synthesizer extension.
+
+
+87
+00:05:53,153 --> 00:05:56,790 line:-2
+This can be done by creating
+an instance of UserDefaults
+
+
+88
+00:05:56,823 --> 00:05:59,660 line:-1
+that will be shared through an app group.
+
+
+89
+00:05:59.693 --> 00:06:02.663 line:-2 align:center
+An app group will allow us to share
+this voice list
+
+
+90
+00:06:02.696 --> 00:06:05.499 line:-1 align:center
+between our host app and our extension.
+
+
+91
+00:06:05,532 --> 00:06:07,935 line:-1
+We are explicitly specifying a suite name
+
+
+92
+00:06:07,968 --> 00:06:11,104 line:-2
+that we provided when creating
+the app group.
+
+
+93
+00:06:11.138 --> 00:06:15.509 line:-2 align:center
+This ensures the host app and extension
+read from the same domain.
+
+
+94
+00:06:16,276 --> 00:06:18,879 line:0
+Taking a look back at
+the purchase function,
+
+
+95
+00:06:18,912 --> 00:06:21,882 line:0
+I have implemented a method to update
+my user defaults
+
+
+96
+00:06:21,915 --> 00:06:24,985 align:center
+when a new voice is purchased.
+
+
+97
+00:06:25,018 --> 00:06:28,422 line:0
+AVSpeechSynthesizer also has new API
+
+
+98
+00:06:28,455 --> 00:06:31,792 line:0
+to listen for a change in
+available system voices.
+
+
+99
+00:06:31,825 --> 00:06:36,163 line:0
+The set of system voices can change
+when a user deletes a voice
+
+
+100
+00:06:36,196 --> 00:06:38,031 align:center
+or downloads a new one.
+
+
+101
+00:06:38,065 --> 00:06:42,236 align:center
+You can subscribe to
+the availableVoicesDidChangeNotification
+
+
+102
+00:06:42,269 --> 00:06:46,573 align:center
+to update your list of voices
+based on these changes.
+
+
+103
+00:06:47,341 --> 00:06:50,844 align:center
+Now that our host app is done,
+let's fill in the audio unit,
+
+
+104
+00:06:50,878 --> 00:06:53,380 align:center
+which consists of four key components.
+
+
+105
+00:06:54,381 --> 00:06:57,985 line:-2
+The first thing we’ll need to add is
+some way to inform the system of
+
+
+106
+00:06:58.018 --> 00:07:01.622 line:-1 align:center
+what voices our synthesizer will provide.
+
+
+107
+00:07:01.655 --> 00:07:05.425 line:-2 align:center
+This is accomplished by overriding
+the speechVoices getter
+
+
+108
+00:07:05,459 --> 00:07:08,028 line:-1
+to provide a list of voices
+
+
+109
+00:07:08.061 --> 00:07:13.433 line:-2 align:center
+and reading from our app group
+UserDefaults domain we specified earlier.
+
+
+110
+00:07:13.467 --> 00:07:15.536 line:-1 align:center
+For each item in our voice list,
+
+
+111
+00:07:15,569 --> 00:07:21,942 line:-2
+we’ll construct a US English
+AVSpeechSynthesisProviderVoice.
+
+
+112
+00:07:21,975 --> 00:07:25,846 line:-2
+Next, we need some way for
+the system to tell the synthesizer
+
+
+113
+00:07:25.879 --> 00:07:27.948 line:-1 align:center
+what text to synthesize.
+
+
+114
+00:07:27,981 --> 00:07:30,918 line:-2
+The synthesizeSpeechRequest method
+will be called
+
+
+115
+00:07:30,951 --> 00:07:33,420 line:-2
+when the system wants to signal to
+an extension
+
+
+116
+00:07:33,453 --> 00:07:36,557 line:-2
+that it should start synthesizing
+some text.
+
+
+117
+00:07:36.590 --> 00:07:39.326 line:-2 align:center
+The argument to this method will be
+an instance of
+
+
+118
+00:07:39,359 --> 00:07:42,196 line:-1
+AVSpeechSynthesisProviderRequest
+
+
+119
+00:07:42,229 --> 00:07:46,466 line:-2
+containing SSML
+and which voice to speak with.
+
+
+120
+00:07:46.500 --> 00:07:49.002 line:-2 align:center
+Next, I’ll call a helper method
+I’ve created
+
+
+121
+00:07:49.036 --> 00:07:51.538 line:-1 align:center
+in my speech engine implementation.
+
+
+122
+00:07:51.572 --> 00:07:56.276 line:-2 align:center
+In this example, my getAudioBuffer method
+will generate audio data
+
+
+123
+00:07:56.310 --> 00:08:01.615 line:-2 align:center
+based on the voice specified in
+the request and the SSML input.
+
+
+124
+00:08:01,648 --> 00:08:05,886 line:-2
+We’ll also set an instance variable,
+called framePosition, to 0
+
+
+125
+00:08:05,919 --> 00:08:08,856 line:-2
+in order to keep track of how many frames
+we’ve rendered
+
+
+126
+00:08:08,889 --> 00:08:13,861 line:-2
+as the render block is called
+and we copy frames out of the buffer.
+
+
+127
+00:08:13,894 --> 00:08:19,166 line:-2
+The system also needs a way to signal to
+a synthesizer to stop synthesizing audio
+
+
+128
+00:08:19,199 --> 00:08:21,768 line:-1
+and discard the current speech request.
+
+
+129
+00:08:21,802 --> 00:08:24,605 line:-2
+This is accomplished with
+cancelSpeechRequest,
+
+
+130
+00:08:24,638 --> 00:08:27,908 line:-2
+where we will simply discard
+the current buffer.
+
+
+131
+00:08:27,941 --> 00:08:31,178 line:-2
+Finally, we need to implement
+the render block.
+
+
+132
+00:08:31,211 --> 00:08:35,249 line:-2
+The render block is called by the system
+with a desired frameCount.
+
+
+133
+00:08:35.282 --> 00:08:39.520 line:-2 align:center
+The audio unit is then responsible for
+filling the requested number of frames
+
+
+134
+00:08:39,553 --> 00:08:42,456 line:-1
+into the outputAudioBuffer.
+
+
+135
+00:08:42,489 --> 00:08:46,660 line:0
+Next, we will set ourselves up
+with a reference to the target buffer
+
+
+136
+00:08:46,693 --> 00:08:49,263 align:center
+and the buffer we generated
+and stored earlier
+
+
+137
+00:08:49,296 --> 00:08:53,300 line:0
+during the synthesizeSpeechRequest call.
+
+
+138
+00:08:53,333 --> 00:08:57,538 align:center
+Then, we’ll copy the frames
+into the target buffer.
+
+
+139
+00:08:57,571 --> 00:09:01,475 align:center
+And then finally, once the audio unit has
+exhausted all the buffers
+
+
+140
+00:09:01,508 --> 00:09:03,277 line:0
+for the current speech request,
+
+
+141
+00:09:03,310 --> 00:09:08,515 line:0
+the actionFlags argument should be set to
+offlineUnitRenderAction_Complete
+
+
+142
+00:09:08,549 --> 00:09:11,652 align:center
+to signal to the system that rendering has
+completed
+
+
+143
+00:09:11,685 --> 00:09:14,521 line:0
+and there are no more audio buffers
+to be rendered.
+
+
+144
+00:09:14,555 --> 00:09:16,056 align:center
+Let's see it in action!
+
+
+145
+00:09:16,890 --> 00:09:19,459 line:-1
+This is my speech synthesizer app.
+
+
+146
+00:09:19,493 --> 00:09:23,864 line:-2
+I will purchase a voice and navigate to
+a view where I can synthesize speech
+
+
+147
+00:09:23.897 --> 00:09:27.201 line:-1 align:center
+using my new voice and speech engine.
+
+
+148
+00:09:27,234 --> 00:09:31,405 line:-2
+First, I will give the synthesizer
+an input of "hello."
+
+
+149
+00:09:34.942 --> 00:09:36.910 line:-1 align:center
+Synthesized voice: Hello.
+
+
+150
+00:09:36.944 --> 00:09:39.479 line:-1 align:center
+Grant: Then I’ll give the input "goodbye."
+
+
+151
+00:09:41,481 --> 00:09:43,483 line:-1
+Synthesized voice: Goodbye.
+
+
+152
+00:09:43.917 --> 00:09:46.520 line:-2 align:center
+Grant: We’ve now implemented
+a synthesis provider
+
+
+153
+00:09:46.553 --> 00:09:51.592 line:-2 align:center
+and created a hosting app that provides
+voices you can use across the system,
+
+
+154
+00:09:51,625 --> 00:09:54,261 line:-1
+from VoiceOver to your own apps!
+
+
+155
+00:09:54,294 --> 00:09:58,932 line:-2
+We can't wait to see what new voices
+and text-to-speech experiences you craft
+
+
+156
+00:09:58,966 --> 00:10:01,702 line:-1
+using these APIs.
+
+
+157
+00:10:01,735 --> 00:10:05,906 line:-2
+Let’s move on and talk about
+a new feature called Personal Voice.
+
+
+158
+00:10:06,773 --> 00:10:11,345 line:-2
+People can now record and
+recreate their voice on iOS and macOS
+
+
+159
+00:10:11.378 --> 00:10:13.447 line:-1 align:center
+using the power of their device.
+
+
+160
+00:10:14,147 --> 00:10:19,186 line:-2
+Your Personal Voice is generated
+on the device and not on a server.
+
+
+161
+00:10:19.219 --> 00:10:22.856 line:-2 align:center
+This voice will appear amongst
+the rest of the System voices
+
+
+162
+00:10:22.890 --> 00:10:26.660 line:-2 align:center
+and can be used with
+a new feature called Live Speech.
+
+
+163
+00:10:26,693 --> 00:10:33,267 line:-2
+Live Speech is a type-to-speak feature
+on iOS, iPadOS, macOS, and watchOS
+
+
+164
+00:10:33,300 --> 00:10:38,338 line:-2
+that lets a person synthesize speech with
+their own voice on the fly.
+
+
+165
+00:10:38.805 --> 00:10:42.209 line:-2 align:center
+You can request access to synthesize
+speech with these voices
+
+
+166
+00:10:42,242 --> 00:10:46,647 line:-2
+using a new request authorization API
+for Personal Voice.
+
+
+167
+00:10:46.680 --> 00:10:50.050 line:-2 align:center
+Keep in mind that usage of
+Personal Voice is sensitive
+
+
+168
+00:10:50.083 --> 00:10:52.486 line:-2 align:center
+and should be primarily used
+for augmentative
+
+
+169
+00:10:52.519 --> 00:10:55.255 line:-1 align:center
+or alternative communication apps.
+
+
+170
+00:10:55,289 --> 00:10:59,560 line:-2
+Let’s checkout an AAC app
+I’ve made to use Personal Voice.
+
+
+171
+00:11:00.527 --> 00:11:02.362 line:-1 align:center
+My app has two buttons
+
+
+172
+00:11:02.396 --> 00:11:06.967 line:-2 align:center
+that will speak common phrases
+I find myself saying at WWDC
+
+
+173
+00:11:07.000 --> 00:11:11.238 line:-2 align:center
+and a button for requesting access
+to use Personal Voice.
+
+
+174
+00:11:11,271 --> 00:11:14,741 line:-2
+Authorization can be requested
+with a new API
+
+
+175
+00:11:14,775 --> 00:11:20,247 line:-2
+called requestPersonalVoiceAuthorization
+on AVSpeechSynthesizer.
+
+
+176
+00:11:20,280 --> 00:11:24,985 line:-2
+Once authorized, Personal Voices will
+appear alongside System voices
+
+
+177
+00:11:25.018 --> 00:11:29.489 line:-2 align:center
+in the AVSpeechSynthesisVoice API
+speechVoices
+
+
+178
+00:11:29,523 --> 00:11:33,093 line:-2
+and will be denoted with a new voiceTrait
+called isPersonalVoice.
+
+
+179
+00:11:34,094 --> 00:11:39,032 line:0
+Now that I have access to Personal Voice,
+I can use it to speak with.
+
+
+180
+00:11:40,033 --> 00:11:43,804 line:-2
+Let’s check out a demo of
+Personal Voice in action.
+
+
+181
+00:11:43.837 --> 00:11:49.142 line:-2 align:center
+First, I’ll tap the “Use Personal Voice”
+button to request authorization,
+
+
+182
+00:11:49.176 --> 00:11:54.081 line:-2 align:center
+and once authorized,
+I can tap a symbol to hear my voice.
+
+
+183
+00:11:54.114 --> 00:11:58.886 line:-2 align:center
+Personal voice: Hi, my name is Grant.
+Welcome to WWDC23.
+
+
+184
+00:11:58.919 --> 00:12:00.254 line:-1 align:center
+Grant: Isn’t that amazing?
+
+
+185
+00:12:00.287 --> 00:12:03.390 line:-2 align:center
+And now you can use these voices
+in your apps, too.
+
+
+186
+00:12:04,558 --> 00:12:06,860 line:-1
+Now that we discussed SSML,
+
+
+187
+00:12:06,894 --> 00:12:09,429 line:-2
+you should use it to
+standardize speech input
+
+
+188
+00:12:09.463 --> 00:12:13.000 line:-2 align:center
+and build a rich speech experience
+in your apps.
+
+
+189
+00:12:13,033 --> 00:12:16,537 line:-2
+We also walked through
+how to implement your Speech Synthesizer
+
+
+190
+00:12:16.570 --> 00:12:21.141 line:-2 align:center
+into Apple platforms, so now you can
+provide great new speech voices
+
+
+191
+00:12:21.175 --> 00:12:24.111 line:-1 align:center
+that people can use across the system.
+
+
+192
+00:12:24,144 --> 00:12:26,613 line:-1
+And finally, with Personal Voice,
+
+
+193
+00:12:26.647 --> 00:12:31.018 line:-2 align:center
+you can bring even more of a personal
+touch to synthesis in your apps,
+
+
+194
+00:12:31,051 --> 00:12:35,522 line:-2
+especially for people who may be
+at risk of losing their own voice.
+
+
+195
+00:12:35,556 --> 00:12:40,561 line:-2
+We are super excited to see what
+experiences you create using these APIs.
+
+
+196
+00:12:40.594 --> 00:12:41.562 line:-1 align:center
+Thanks for watching.
+

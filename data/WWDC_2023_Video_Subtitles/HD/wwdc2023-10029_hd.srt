@@ -1,0 +1,1918 @@
+2
+00:00:00.334 --> 00:00:07.341 line:-1
+♪ ♪
+
+
+3
+00:00:10.010 --> 00:00:14.715 line:-2
+Calvin: Hi. I'm Calvin Gaisford,
+an engineer on the watchOS team.
+
+
+4
+00:00:14.748 --> 00:00:18.652 line:-2
+In this code-along session, we'll build
+a widget for the new Smart Stack
+
+
+5
+00:00:18.685 --> 00:00:20.087 line:-1
+on Apple Watch.
+
+
+6
+00:00:20.120 --> 00:00:22.723 line:-2
+We'll walk you through the whole process
+of building a Widget
+
+
+7
+00:00:22.756 --> 00:00:25.359 line:-1
+using an AppIntent configuration.
+
+
+8
+00:00:25.392 --> 00:00:30.063 line:-2
+In the process, we'll be using
+the latest WidgetKit and SwiftUI updates.
+
+
+9
+00:00:31.164 --> 00:00:34.434 line:-2
+We'll use the Backyard Birds app
+for our code-along.
+
+
+10
+00:00:34.468 --> 00:00:37.070 line:-2
+Backyard Birds is an app
+that lets you create
+
+
+11
+00:00:37.104 --> 00:00:41.108 line:-2
+and manage backyards
+that attract visiting birds.
+
+
+12
+00:00:41.141 --> 00:00:43.911 line:-1
+Our widget will show a backyard's status.
+
+
+13
+00:00:43.944 --> 00:00:46.713 line:-2
+If a bird is visiting,
+it will show the bird
+
+
+14
+00:00:46.747 --> 00:00:49.716 line:-1
+and also include the backyard's status.
+
+
+15
+00:00:49.750 --> 00:00:52.719 line:-2
+The widget will provide relevant dates
+to the Smart Stack
+
+
+16
+00:00:52.753 --> 00:00:57.291 line:-2
+so it can prioritize our widget
+when it's most relevant.
+
+
+17
+00:00:57.324 --> 00:01:01.061 line:-2
+If you want to follow along,
+you can download the sample code
+
+
+18
+00:01:01.094 --> 00:01:06.900 line:-2
+associated with this session
+and open the Backyard Birds Xcode project.
+
+
+19
+00:01:06.934 --> 00:01:09.570 line:-2
+We've already added a Widget Extension
+to the project
+
+
+20
+00:01:09.603 --> 00:01:15.108 line:-2
+which generated some files,
+including the BackyardVisitorsWidget file.
+
+
+21
+00:01:15.142 --> 00:01:19.112 line:-2
+We'll spend most of our time
+updating this file.
+
+
+22
+00:01:19.146 --> 00:01:20.881 line:-1
+Here's what we'll cover.
+
+
+23
+00:01:20.914 --> 00:01:25.285 line:-2
+First, we'll take a look at the widget
+structure which defines our widget.
+
+
+24
+00:01:25.319 --> 00:01:30.090 line:-2
+We'll also do a quick overview
+of the widget configuration intent.
+
+
+25
+00:01:30.123 --> 00:01:33.727 line:-2
+Then, we'll customize
+our TimelineEntry structure
+
+
+26
+00:01:33.760 --> 00:01:38.999 line:-2
+to hold data for our widget views,
+and we'll build out our timeline.
+
+
+27
+00:01:39.032 --> 00:01:42.736 line:-2
+Once our timeline has the data
+we need to enable previews,
+
+
+28
+00:01:42.769 --> 00:01:46.306 line:-1
+we'll build out our widget's views.
+
+
+29
+00:01:46.340 --> 00:01:51.979 line:-2
+After our views are built,
+we'll return to finish up the timeline.
+
+
+30
+00:01:52.012 --> 00:01:55.182 line:-2
+Finally, we'll look
+at the Relevant Intent Manager
+
+
+31
+00:01:55.215 --> 00:01:59.219 line:-2
+and set intents for dates
+when our widget should be prioritized
+
+
+32
+00:01:59.253 --> 00:02:02.589 line:-1
+on the watchOS Smart Stack.
+
+
+33
+00:02:02.623 --> 00:02:05.192 line:-2
+Let's get started
+with the widget configuration
+
+
+34
+00:02:05.225 --> 00:02:08.262 line:-2
+by looking at the widget structure
+in our code.
+
+
+35
+00:02:10.397 --> 00:02:14.735 line:-2
+The widget structure is where
+a widget's configuration is defined.
+
+
+36
+00:02:14.768 --> 00:02:18.805 line:-2
+New in watchOS
+are AppIntentConfigurations.
+
+
+37
+00:02:18.839 --> 00:02:23.544 line:-2
+We'll be using an AppIntentConfiguration
+in our widget.
+
+
+38
+00:02:23.577 --> 00:02:27.714 line:-2
+The configuration intent, provider,
+and view were all stubbed out
+
+
+39
+00:02:27.748 --> 00:02:30.117 line:-1
+when we created the WidgetExtension.
+
+
+40
+00:02:30.150 --> 00:02:32.953 line:-2
+We'll be looking at each one
+and implementing them
+
+
+41
+00:02:32.986 --> 00:02:36.590 line:-1
+for our Backyard Birds widget.
+
+
+42
+00:02:36.623 --> 00:02:38.592 line:-1
+This widget definition looks good,
+
+
+43
+00:02:38.625 --> 00:02:43.931 line:-2
+so let's move on and look
+at the WidgetConfigurationIntent.
+
+
+44
+00:02:43.964 --> 00:02:47.334 line:-2
+Our widget is using
+an App Intent Configuration
+
+
+45
+00:02:47.367 --> 00:02:49.870 line:-1
+to allow it to do two things.
+
+
+46
+00:02:49.903 --> 00:02:54.208 line:-2
+First, our widget can provide
+a set of pre-configured widgets
+
+
+47
+00:02:54.241 --> 00:02:57.110 line:-1
+in the watchOS widget gallery.
+
+
+48
+00:02:57.144 --> 00:02:59.046 line:-1
+In the case of Backyard Birds,
+
+
+49
+00:02:59.079 --> 00:03:04.184 line:-2
+we'll provide a configuration
+for each yard in our app.
+
+
+50
+00:03:04.218 --> 00:03:08.555 line:-2
+Second, the WidgetConfigurationIntent
+will be used to specify dates
+
+
+51
+00:03:08.589 --> 00:03:11.191 line:-1
+when our widget is most relevant.
+
+
+52
+00:03:11.225 --> 00:03:13.460 line:-1
+The Smart Stack will use this information
+
+
+53
+00:03:13.493 --> 00:03:16.263 line:-2
+to prioritize our widget
+in the Smart Stack.
+
+
+54
+00:03:17.464 --> 00:03:20.834 line:-2
+Let's look at our widget's
+Configuration App Intent.
+
+
+55
+00:03:20.868 --> 00:03:25.172 line:-2
+Each yard in Backyard Birds
+has a unique ID.
+
+
+56
+00:03:25.205 --> 00:03:29.443 line:-2
+I've already added a parameter
+named backyardID,
+
+
+57
+00:03:29.476 --> 00:03:32.546 line:-2
+so this can be used
+to create a set of widget intents,
+
+
+58
+00:03:32.579 --> 00:03:36.683 line:-2
+one for each yard
+identified by their backyard ID.
+
+
+59
+00:03:36,717 --> 00:03:41,221
+For the widgets we're building,
+that's the only parameter we need.
+
+
+60
+00:03:41,255 --> 00:03:43,156
+To learn more about App Intents
+
+
+61
+00:03:43,190 --> 00:03:46,226
+and how to further use
+WidgetConfigurationIntent,
+
+
+62
+00:03:46,260 --> 00:03:48,996
+check out these sessions
+about App Intents.
+
+
+63
+00:03:49.930 --> 00:03:54.268 line:-2
+We have our widget structure defined
+and a WidgetConfigurationIntent
+
+
+64
+00:03:54.301 --> 00:03:56.703 line:-1
+that can hold a backyard ID.
+
+
+65
+00:03:56.737 --> 00:03:58.972 line:-1
+Let's move on to our widget timeline
+
+
+66
+00:03:59.006 --> 00:04:02.543 line:-2
+and take a look
+at our TimelineEntry structure.
+
+
+67
+00:04:02.576 --> 00:04:07.247 line:-2
+The TimelineEntry structure will hold
+all of the data our widget views will need
+
+
+68
+00:04:07.281 --> 00:04:10.050 line:-2
+to render themselves
+for a particular date.
+
+
+69
+00:04:10.083 --> 00:04:13.086 line:-1
+Back in the BackyardVisitorsWidget file,
+
+
+70
+00:04:13.120 --> 00:04:16.456 line:-2
+locate the generated
+SimpleEntry structure.
+
+
+71
+00:04:18.792 --> 00:04:23.597 line:-2
+The date and configuration properties
+were added when this file was generated.
+
+
+72
+00:04:23.630 --> 00:04:26.099 line:-2
+We need to define
+any additional properties
+
+
+73
+00:04:26.133 --> 00:04:29.469 line:-1
+our widget views will need.
+
+
+74
+00:04:29.503 --> 00:04:32.239 line:-2
+Our widget is going to show
+a backyard's status
+
+
+75
+00:04:32.272 --> 00:04:35.776 line:-1
+with its name, food, and water status.
+
+
+76
+00:04:35.809 --> 00:04:41.248 line:-2
+If a bird is visiting, it's going to show
+the visiting bird and the bird's name.
+
+
+77
+00:04:41.281 --> 00:04:45.886 line:-2
+If there isn't a bird, it will show
+how many birds have visited the yard.
+
+
+78
+00:04:45.919 --> 00:04:48.488 line:-1
+To display information about the yard,
+
+
+79
+00:04:48.522 --> 00:04:51.091 line:-2
+we'll use a structure
+from the Backyard Birds app
+
+
+80
+00:04:51.124 --> 00:04:54.061 line:-2
+that holds all of the information
+about a backyard
+
+
+81
+00:04:54.094 --> 00:04:56.263 line:-1
+for a given point in time.
+
+
+82
+00:04:56.296 --> 00:05:00.868 line:-2
+This is important since
+the TimelineEntry may have a future date.
+
+
+83
+00:05:00.901 --> 00:05:04.905 line:-2
+Let's add the backyard property
+to our TimelineEntry.
+
+
+84
+00:05:10.277 --> 00:05:13.013 line:-1
+Now, let's add a few computed properties
+
+
+85
+00:05:13.046 --> 00:05:16.517 line:-2
+based on the backyard property
+we just added.
+
+
+86
+00:05:16.550 --> 00:05:20.153 line:-2
+First, let's add a bird property
+so the widget views can check
+
+
+87
+00:05:20.187 --> 00:05:23.190 line:-1
+if a bird is visiting and display it.
+
+
+88
+00:05:28.061 --> 00:05:31.298 line:-2
+Now let's add two more properties
+that our views will use
+
+
+89
+00:05:31.331 --> 00:05:34.334 line:-1
+to show more information about the yard.
+
+
+90
+00:05:38.338 --> 00:05:42.142 line:-2
+waterDuration and foodDuration
+will be used in the view
+
+
+91
+00:05:42.176 --> 00:05:45.612 line:-2
+to show how long
+the water and food will last.
+
+
+92
+00:05:45.646 --> 00:05:47.915 line:-2
+These are calculated
+from the date property
+
+
+93
+00:05:47.948 --> 00:05:49.449 line:-1
+in the TimelineEntry.
+
+
+94
+00:05:51.885 --> 00:05:55.522 line:-2
+A TimelineEntry also has
+a property named relevance
+
+
+95
+00:05:55.556 --> 00:05:58.692 line:-2
+that, if implemented, can tell
+the watchOS Smart Stack
+
+
+96
+00:05:58.725 --> 00:06:01.795 line:-1
+which timeline entries are most important.
+
+
+97
+00:06:01.828 --> 00:06:05.132 line:-2
+Let's add the relevance property
+to our TimelineEntry.
+
+
+98
+00:06:08.235 --> 00:06:11.738 line:-2
+Inside, let's check to see
+if the backyard has a visitor
+
+
+99
+00:06:11.772 --> 00:06:13.774 line:-1
+for the TimelineEntry's date.
+
+
+100
+00:06:16.543 --> 00:06:21.915 line:-2
+If there is a visiting bird, we'll return
+a TimelineEntryRelevance structure.
+
+
+101
+00:06:25.185 --> 00:06:29.289 line:-2
+The TimelineEntryRelevance structure
+takes two parameters,
+
+
+102
+00:06:29.323 --> 00:06:32.559 line:-1
+a score and a duration.
+
+
+103
+00:06:32.593 --> 00:06:34.795 line:-1
+The score is used to prioritize an entry
+
+
+104
+00:06:34.828 --> 00:06:39.166 line:-2
+against other entries
+in the same timeline.
+
+
+105
+00:06:39.199 --> 00:06:43.370 line:-2
+We'll set the score to 10
+to rank an entry with a visitor
+
+
+106
+00:06:43.403 --> 00:06:46.106 line:-1
+higher than an entry without a visitor.
+
+
+107
+00:06:46.139 --> 00:06:49.810 line:-2
+This value is arbitrary and can
+have any range of values
+
+
+108
+00:06:49.843 --> 00:06:52.880 line:-1
+needed to rank entries in your timeline.
+
+
+109
+00:06:52.913 --> 00:06:55.215 line:-2
+The duration is used
+to tell the Smart Stack
+
+
+110
+00:06:55.249 --> 00:06:58.552 line:-1
+how long this relevance entry is valid.
+
+
+111
+00:06:58.585 --> 00:07:03.624 line:-2
+We've set the duration to last
+until the visitor's endDate.
+
+
+112
+00:07:03.657 --> 00:07:06.960 line:-2
+If there isn't a visitor,
+let's return a Relevance structure
+
+
+113
+00:07:06.994 --> 00:07:08.829 line:-1
+with a score of zero
+
+
+114
+00:07:12.966 --> 00:07:17.738 line:-2
+This will tell the Smart Stack
+which timeline entries are most important.
+
+
+115
+00:07:17.771 --> 00:07:20.407 line:-2
+Depending on what else
+is happening at the time,
+
+
+116
+00:07:20.440 --> 00:07:24.778 line:-2
+our Widget may be raised in priority
+on the watchOS Smart Stack.
+
+
+117
+00:07:27.114 --> 00:07:31.118 line:-2
+Our TimelineEntry looks great and has
+everything our widget views need
+
+
+118
+00:07:31.151 --> 00:07:32.920 line:-1
+to render properly.
+
+
+119
+00:07:32.953 --> 00:07:36.590 line:-2
+Let's move on
+and build out our TimelineProvider.
+
+
+120
+00:07:36,623 --> 00:07:41,528
+There are four functions we need
+to complete for our TimelineProvider:
+
+
+121
+00:07:41,562 --> 00:07:44,531
+placeholder, snapshot,
+
+
+122
+00:07:44,565 --> 00:07:49,670
+timeline, and recommendations.
+
+
+123
+00:07:49.703 --> 00:07:52.739 line:-2
+The placeholder function is used
+when the widget displays
+
+
+124
+00:07:52.773 --> 00:07:56.043 line:-2
+for the first time
+and should return quickly.
+
+
+125
+00:07:56.076 --> 00:07:59.446 line:-2
+Since we updated our TimelineEntry
+to take a backyard,
+
+
+126
+00:07:59.479 --> 00:08:01.582 line:-1
+we need to supply one.
+
+
+127
+00:08:01.615 --> 00:08:06.119 line:-2
+Let's fix that by adding a random backyard
+from the app's data model.
+
+
+128
+00:08:10.924 --> 00:08:14.127 line:-1
+That's good. Let's move on.
+
+
+129
+00:08:14.161 --> 00:08:19.132 line:-2
+The snapshot function is used
+when a widget is in transient situations.
+
+
+130
+00:08:19.166 --> 00:08:23.203 line:-2
+This function should return quickly,
+so using sample data is fine
+
+
+131
+00:08:23.237 --> 00:08:27.074 line:-2
+as long as it doesn't take
+more than a few seconds to fetch.
+
+
+132
+00:08:27.107 --> 00:08:30.377 line:-2
+We can do that same thing we did
+in the placeholder function
+
+
+133
+00:08:30.410 --> 00:08:32.746 line:-1
+and pass a random yard.
+
+
+134
+00:08:36.917 --> 00:08:40.787 line:-1
+That looks good, but we could do better.
+
+
+135
+00:08:40.821 --> 00:08:44.858 line:-2
+The snapshot function is passed
+a configuration intent
+
+
+136
+00:08:44.892 --> 00:08:49.196 line:-2
+which has the backyardID property
+that we added earlier.
+
+
+137
+00:08:49.229 --> 00:08:52.332 line:-2
+Our data is all local,
+so we can quickly look up
+
+
+138
+00:08:52.366 --> 00:08:57.504 line:-2
+and return the proper backyard
+rather than using a random backyard.
+
+
+139
+00:08:57.538 --> 00:09:02.376 line:-2
+Let's get the configured backyard
+from the backyardID in the configuration.
+
+
+140
+00:09:04.745 --> 00:09:09.416 line:-2
+Now let's check the backyard and see
+if we can get a visitorEvent from it.
+
+
+141
+00:09:13.153 --> 00:09:16.657 line:-2
+Let's return an entry
+configured with a visitor's date,
+
+
+142
+00:09:16.690 --> 00:09:18.525 line:-1
+and if we don't have a visitor,
+
+
+143
+00:09:18.559 --> 00:09:21.728 line:-2
+we'll return the configured yard
+with the current date.
+
+
+144
+00:09:24.464 --> 00:09:26.900 line:-2
+This will provide a better preview
+for the user
+
+
+145
+00:09:26.934 --> 00:09:31.271 line:-2
+since it will show
+the configured backyard.
+
+
+146
+00:09:31.305 --> 00:09:33.974 line:-1
+Before we dive into the timeline function,
+
+
+147
+00:09:34.007 --> 00:09:37.344 line:-2
+I want to turn on
+the Xcode canvas preview.
+
+
+148
+00:09:37.377 --> 00:09:42.216 line:-2
+Let's fix the last SimpleEntry and give it
+a backyard so we can see the preview.
+
+
+149
+00:09:48.655 --> 00:09:51.358 line:-1
+Now let's turn on the canvas.
+
+
+150
+00:09:56,163 --> 00:10:00,601
+New in Xcode is the ability
+to preview a widget timeline.
+
+
+151
+00:10:00,634 --> 00:10:04,137
+The canvas is showing a preview
+of the rectangular widget,
+
+
+152
+00:10:04,171 --> 00:10:07,040
+and at the bottom is a series
+of TimelineEntries
+
+
+153
+00:10:07,074 --> 00:10:09,510
+that make up the widget's timeline.
+
+
+154
+00:10:09.543 --> 00:10:12.112 line:-2
+The canvas preview is using
+the default view
+
+
+155
+00:10:12.145 --> 00:10:15.048 line:-2
+that was generated
+when we added the widget.
+
+
+156
+00:10:15.082 --> 00:10:19.019 line:-2
+Before we finish the timeline provider,
+let's go build out our view
+
+
+157
+00:10:19.052 --> 00:10:22.589 line:-2
+so we can better visualize our timelines
+as we build it.
+
+
+158
+00:10:22.623 --> 00:10:27.761 line:-1
+Locate the BackyardBirdsWidgetEntryView.
+
+
+159
+00:10:27.794 --> 00:10:31.031 line:-2
+Let's add an environment property
+for the widgetFamily
+
+
+160
+00:10:31.064 --> 00:10:34.401 line:-2
+so we can build views
+specifically for each family.
+
+
+161
+00:10:37.871 --> 00:10:40.507 line:-2
+Let's replace the body
+with a switch statement
+
+
+162
+00:10:40.541 --> 00:10:44.545 line:-2
+so we can implement a view
+for each accessoryWidget family.
+
+
+163
+00:10:49.616 --> 00:10:53.253 line:-2
+Now, let's create a case
+for accessoryRectangular
+
+
+164
+00:10:53.287 --> 00:10:56.156 line:-2
+with a view that takes an entry
+as a parameter.
+
+
+165
+00:10:56.190 --> 00:10:58.358 line:-1
+We'll implement this view below.
+
+
+166
+00:11:01.028 --> 00:11:04.231 line:-2
+The rectangular view is unique,
+in that it will be the view
+
+
+167
+00:11:04.264 --> 00:11:08.035 line:-2
+of our widget
+shown in the watchOS Smart Stack.
+
+
+168
+00:11:08.068 --> 00:11:11.405 line:-2
+For our rectangular view,
+we'll follow a common pattern
+
+
+169
+00:11:11.438 --> 00:11:17.044 line:-2
+where we'll have an image on the left
+and three lines of text on the right.
+
+
+170
+00:11:17.077 --> 00:11:19.146 line:-1
+Let's go to the bottom of the file
+
+
+171
+00:11:19.179 --> 00:11:22.516 line:-2
+and we'll create
+the RectangularBackyardView.
+
+
+172
+00:11:26.653 --> 00:11:29.790 line:-2
+The view uses the TimelineEntry
+we modified earlier
+
+
+173
+00:11:29.823 --> 00:11:32.192 line:-1
+to contain the backyard data.
+
+
+174
+00:11:32.226 --> 00:11:35.295 line:-2
+Before we continue,
+let's switch our canvas view
+
+
+175
+00:11:35.329 --> 00:11:38.165 line:-1
+to the Smart Stack Rectangular view.
+
+
+176
+00:11:42.970 --> 00:11:46.974 line:-2
+This will let us visualize the widget
+as we build it.
+
+
+177
+00:11:47.007 --> 00:11:50.143 line:-2
+Now let's put an image
+and three lines of text
+
+
+178
+00:11:50.177 --> 00:11:52.179 line:-1
+in our view's HStack.
+
+
+179
+00:11:58.018 --> 00:12:01.855 line:-2
+Look at the preview.
+That's not exactly it.
+
+
+180
+00:12:01.889 --> 00:12:05.225 line:-2
+Let's put the lines of text
+in their own VStack.
+
+
+181
+00:12:09.830 --> 00:12:12.299 line:-1
+Okay, that's close.
+
+
+182
+00:12:12.332 --> 00:12:15.969 line:-2
+Let's put actual data
+into the view from the entry.
+
+
+183
+00:12:16.003 --> 00:12:20.240 line:-2
+First, we'll use a ComposedBird view
+from the Backyard Birds app
+
+
+184
+00:12:20.274 --> 00:12:22.109 line:-1
+that can display a bird.
+
+
+185
+00:12:26.914 --> 00:12:29.783 line:-2
+The bird is optional,
+so we need to unwrap it.
+
+
+186
+00:12:29.816 --> 00:12:34.488 line:-2
+Let's put the ComposedBird view
+and VStack inside an if-let check
+
+
+187
+00:12:34.521 --> 00:12:36.857 line:-1
+to see if there is a bird in the entry.
+
+
+188
+00:12:42.329 --> 00:12:45.365 line:-2
+If there isn't a bird,
+let's put an image of a fountain
+
+
+189
+00:12:45.399 --> 00:12:48.402 line:-1
+for the yard and text that shows no bird.
+
+
+190
+00:12:53.740 --> 00:12:57.344 line:-2
+We can now go through the timeline
+and see entries that show a bird
+
+
+191
+00:12:57.377 --> 00:13:01.215 line:-2
+with three lines of text
+and entries that show no bird.
+
+
+192
+00:13:07,054 --> 00:13:11,458
+Let's fill out the details
+for the case where there is a bird first.
+
+
+193
+00:13:11,491 --> 00:13:14,962
+For the first line,
+we'll show the bird's name,
+
+
+194
+00:13:14,995 --> 00:13:19,833
+the second line, the backyard's name,
+and the third line, we'll add information
+
+
+195
+00:13:19,867 --> 00:13:22,536
+about the yard's food and water.
+
+
+196
+00:13:28,408 --> 00:13:30,377
+For the case where there is no bird,
+
+
+197
+00:13:30,410 --> 00:13:34,414
+let's show the yard name,
+the food and water information,
+
+
+198
+00:13:34,448 --> 00:13:37,284
+and then the number of visitors
+to this yard.
+
+
+199
+00:13:42.623 --> 00:13:44.791 line:-1
+Let's see what our entries look like.
+
+
+200
+00:13:50.764 --> 00:13:54.635 line:-2
+That's great,
+but let's fix up the layout a bit.
+
+
+201
+00:13:54.668 --> 00:13:57.938 line:-1
+First, let's update the ComposedBird.
+
+
+202
+00:13:57.971 --> 00:14:01.475 line:-2
+Let's make the view scaledToFit
+and make it widgetAccentable
+
+
+203
+00:14:01.508 --> 00:14:06.647 line:-2
+so it will tint when used
+on a watch face that is tinted.
+
+
+204
+00:14:06.680 --> 00:14:11.351 line:-2
+On the bird's name, let's add
+the headline font, make it scale,
+
+
+205
+00:14:11.385 --> 00:14:15.789 line:-2
+and also make it widgetAccentable
+so it tints with the watch face.
+
+
+206
+00:14:15.822 --> 00:14:18.926 line:-2
+We'll also make the text take on
+the color of the bird's wing
+
+
+207
+00:14:18.959 --> 00:14:20.961 line:-1
+using a foregroundStyle.
+
+
+208
+00:14:25.098 --> 00:14:27.935 line:-2
+Let's add the scale factor
+to both of our other views
+
+
+209
+00:14:27.968 --> 00:14:29.970 line:-1
+in case the names go long.
+
+
+210
+00:14:35,776 --> 00:14:39,780
+Let's set the foregroundStyle
+of the last line to secondary.
+
+
+211
+00:14:43,250 --> 00:14:46,053
+Finally, let's make our stack
+leading aligned
+
+
+212
+00:14:46,086 --> 00:14:48,589
+so our three text views are aligned.
+
+
+213
+00:14:53.260 --> 00:14:55.162 line:-1
+Our view looks pretty good.
+
+
+214
+00:14:55.195 --> 00:14:58.699 line:-2
+Let's apply all of these same updates
+to the views in the else statement
+
+
+215
+00:14:58.732 --> 00:15:00.400 line:-1
+when there isn't a bird.
+
+
+216
+00:15:06.740 --> 00:15:09.076 line:-1
+Now our widget is looking better.
+
+
+217
+00:15:15.182 --> 00:15:20.487 line:-2
+Notice our widget has different spacing
+when showing a bird or a yard.
+
+
+218
+00:15:20.521 --> 00:15:25.692 line:-2
+Let's make those match by adding a frame
+to the bird view and the image view.
+
+
+219
+00:15:35.602 --> 00:15:39.773 line:-2
+We'll also add frames to the VStacks
+so they align properly.
+
+
+220
+00:15:48.649 --> 00:15:51.685 line:-2
+There's one more option we need to add
+to finish our widget
+
+
+221
+00:15:51.718 --> 00:15:54.054 line:-1
+for the watchOS Smart Stack.
+
+
+222
+00:15:54.087 --> 00:15:57.758 line:-1
+New in SwiftUI is the containerBackground.
+
+
+223
+00:15:57.791 --> 00:16:02.095 line:-2
+Let's replace the containerBackground
+with a gradient from the backyard.
+
+
+224
+00:16:02,129 --> 00:16:05,966
+We'll set the containersBackground
+placement to be a widget.
+
+
+225
+00:16:10,804 --> 00:16:14,474
+The containerBackground is
+selectively used by the system
+
+
+226
+00:16:14,508 --> 00:16:17,644
+and here will only appear
+in the watchOS Smart Stack
+
+
+227
+00:16:17,678 --> 00:16:19,680
+and not on the watch face.
+
+
+228
+00:16:22,316 --> 00:16:25,586
+Now our view is ready
+for the watchOS Smart Stack.
+
+
+229
+00:16:25.619 --> 00:16:29.690 line:-2
+The view looks great,
+so let's go back to our TimelineProvider
+
+
+230
+00:16:29.723 --> 00:16:32.059 line:-1
+and finish building out the timeline.
+
+
+231
+00:16:33.293 --> 00:16:35.829 line:-2
+The timeline function is where
+a widget generates
+
+
+232
+00:16:35.863 --> 00:16:37.831 line:-1
+a collection of timeline entries
+
+
+233
+00:16:37.865 --> 00:16:40.868 line:-2
+that contain data
+to render the widget's view.
+
+
+234
+00:16:40.901 --> 00:16:45.072 line:-2
+This is the workhorse-function
+of a widget.
+
+
+235
+00:16:45.105 --> 00:16:49.510 line:-2
+Right now it's generating five entries
+with random backyard data.
+
+
+236
+00:16:49.543 --> 00:16:54.281 line:-2
+Let's replace that
+with a timeline full of bird visits.
+
+
+237
+00:16:54.314 --> 00:16:58.318 line:-2
+At the top of the function
+is an array of TimelineEntries.
+
+
+238
+00:16:58.352 --> 00:17:01.722 line:-1
+We'll use this to build our timeline.
+
+
+239
+00:17:01.755 --> 00:17:05.325 line:-2
+First, let's remove
+the generated timeline code.
+
+
+240
+00:17:07.961 --> 00:17:11.798 line:-2
+Now, let's get the configured yard
+using the backyardID
+
+
+241
+00:17:11.832 --> 00:17:14.001 line:-1
+from the ConfigurationAppIntent.
+
+
+242
+00:17:17.037 --> 00:17:19.373 line:-2
+The backyard structure has
+a property on it
+
+
+243
+00:17:19.406 --> 00:17:22.843 line:-2
+that contains all of the visitorEvents
+for that yard.
+
+
+244
+00:17:22.876 --> 00:17:26.914 line:-2
+Let's iterate on the visitorEvents
+for the retrieved yard.
+
+
+245
+00:17:26.947 --> 00:17:30.350 line:-2
+For each event,
+let's create a TimelineEntry that contains
+
+
+246
+00:17:30.384 --> 00:17:35.055 line:-2
+the startDate of the visitorEvent
+and pass in the configured backyard.
+
+
+247
+00:17:39.493 --> 00:17:44.464 line:-2
+Our timeline preview updated.
+Let's see how it changed.
+
+
+248
+00:17:44.498 --> 00:17:49.002 line:-2
+Now as we select our timeline entries,
+we see birds appearing.
+
+
+249
+00:17:49.036 --> 00:17:53.240 line:-2
+That's what we expected.
+However, every entry has a visitor.
+
+
+250
+00:17:53.273 --> 00:17:57.311 line:-2
+We need to add entries
+for when the birds leave too.
+
+
+251
+00:17:57.344 --> 00:18:01.548 line:-2
+Let's create a second entry
+and use the visitorEvent's endDate.
+
+
+252
+00:18:01.582 --> 00:18:05.919 line:-2
+We'll use the same backyard
+and append the entry to the entries array.
+
+
+253
+00:18:11.024 --> 00:18:13.360 line:-1
+Let's look at the timeline now.
+
+
+254
+00:18:15.762 --> 00:18:18.899 line:-2
+Okay, we have entries
+for when the birds visit
+
+
+255
+00:18:18.932 --> 00:18:20.667 line:-1
+and when they leave.
+
+
+256
+00:18:20.701 --> 00:18:25.672 line:-2
+Our widget timeline looks great,
+and this new timeline preview is amazing.
+
+
+257
+00:18:25.706 --> 00:18:29.877 line:-2
+It's going to make building widgets
+and timelines a lot easier.
+
+
+258
+00:18:31.578 --> 00:18:34.381 line:-2
+Finally, let's implement
+the timeline provider's
+
+
+259
+00:18:34.414 --> 00:18:37.384 line:-1
+recommendations function.
+
+
+260
+00:18:37.417 --> 00:18:41.355 line:-2
+Here, we need to return an array
+of AppIntentRecommendations
+
+
+261
+00:18:41.388 --> 00:18:44.458 line:-2
+which will contain
+our WidgetConfigurationIntent,
+
+
+262
+00:18:44.491 --> 00:18:47.127 line:-1
+which holds a backyardID.
+
+
+263
+00:18:47.160 --> 00:18:50.163 line:-1
+Let's remove the default implementation.
+
+
+264
+00:18:52.699 --> 00:18:55.869 line:-2
+Let's create an array
+of recommendations to return.
+
+
+265
+00:18:58,605 --> 00:19:02,075
+Next, we want to create
+a recommendation for each backyard
+
+
+266
+00:19:02,109 --> 00:19:06,113
+in our app, so let's iterate
+through all of the backyards.
+
+
+267
+00:19:09,016 --> 00:19:12,686
+For each backyard,
+we'll create a ConfigurationAppIntent
+
+
+268
+00:19:12,719 --> 00:19:14,888
+and set the backyardID.
+
+
+269
+00:19:17,658 --> 00:19:21,695
+And finally,
+let's create an AppIntentRecommendation
+
+
+270
+00:19:21,728 --> 00:19:25,832
+using the ConfigurationIntent
+and add it to our array.
+
+
+271
+00:19:25,866 --> 00:19:28,869
+We'll us the backyard's name
+as a description.
+
+
+272
+00:19:31.872 --> 00:19:34.975 line:-2
+The recommendations function
+will now provide a list
+
+
+273
+00:19:35.008 --> 00:19:38.712 line:-2
+of widget configurations,
+one for each backyard,
+
+
+274
+00:19:38.745 --> 00:19:41.481 line:-2
+in the widget gallery
+when a person is selecting
+
+
+275
+00:19:41.515 --> 00:19:44.885 line:-1
+a Backyard Birds widget.
+
+
+276
+00:19:44.918 --> 00:19:47.020 line:-1
+Congratulations.
+
+
+277
+00:19:47.054 --> 00:19:50.190 line:-2
+You've now built a widget on watchOS
+that will surface
+
+
+278
+00:19:50.224 --> 00:19:54.995 line:-2
+as a watch face complication
+and the watchOS Smart Stack.
+
+
+279
+00:19:55.028 --> 00:19:57.631 line:-2
+Earlier, we talked a little bit
+about relevance
+
+
+280
+00:19:57.664 --> 00:20:01.668 line:-2
+when we implemented the relevance property
+on our TimelineEntry,
+
+
+281
+00:20:01.702 --> 00:20:04.505 line:-1
+but there is more we can do.
+
+
+282
+00:20:04.538 --> 00:20:08.175 line:-2
+Each yard in Backyard Birds app
+keeps track of the water
+
+
+283
+00:20:08.208 --> 00:20:10.711 line:-1
+and food available for birds.
+
+
+284
+00:20:10.744 --> 00:20:15.048 line:-2
+Our new widget
+is also gonna show that information.
+
+
+285
+00:20:15.082 --> 00:20:18.585 line:-2
+We can provide the system
+a list of relevant intents
+
+
+286
+00:20:18.619 --> 00:20:23.557 line:-2
+during the time periods when we know
+the water or food is running low.
+
+
+287
+00:20:23.590 --> 00:20:26.860 line:-2
+Our widget will be prioritized
+during those times,
+
+
+288
+00:20:26.894 --> 00:20:29.830 line:-2
+letting people know
+their yards need attention.
+
+
+289
+00:20:31.031 --> 00:20:33.934 line:-2
+Back in our code,
+let's create a new function
+
+
+290
+00:20:33.967 --> 00:20:38.272 line:-2
+that will build relevant intents
+for any of our possible widgets
+
+
+291
+00:20:38.305 --> 00:20:42.843 line:-2
+and then update the RelevantIntentManager
+with those intents.
+
+
+292
+00:20:42.876 --> 00:20:48.215 line:-2
+We'll create a new function
+named updateBackyardRelevantIntents.
+
+
+293
+00:20:55.656 --> 00:20:59.660 line:-2
+In the function,
+we need an array of relevantIntents.
+
+
+294
+00:21:03.497 --> 00:21:07.501 line:-2
+And we'll update
+the RelevantIntentManager with that array.
+
+
+295
+00:21:10.103 --> 00:21:12.706 line:-1
+To fill out the relevantIntents array,
+
+
+296
+00:21:12.739 --> 00:21:17.211 line:-2
+we'll loop through
+all of the backyards in the app.
+
+
+297
+00:21:17.244 --> 00:21:21.215 line:-2
+Next, we'll create
+a configurationIntent for the backyard
+
+
+298
+00:21:21.248 --> 00:21:26.920 line:-2
+and set the backyardID
+to the current backyard.
+
+
+299
+00:21:26.954 --> 00:21:30.424 line:-2
+We'll create a RelevantContext
+based on dates.
+
+
+300
+00:21:30.457 --> 00:21:34.494 line:-2
+In this case, we'll use
+the backyard's future low food date
+
+
+301
+00:21:34.528 --> 00:21:36.864 line:-1
+and the future empty food date.
+
+
+302
+00:21:40.167 --> 00:21:43.604 line:-1
+Finally, we'll create a relevantIntent.
+
+
+303
+00:21:43.637 --> 00:21:48.308 line:-2
+We'll use the configurationIntent
+for our widget, our widget's kind,
+
+
+304
+00:21:48.342 --> 00:21:50.844 line:-2
+and the relevantDateContext
+we just created
+
+
+305
+00:21:50.878 --> 00:21:52.880 line:-1
+and append this to our array.
+
+
+306
+00:21:56.049 --> 00:21:59.520 line:-2
+Now, let's do the same thing
+for the backyard's lowWater
+
+
+307
+00:21:59.553 --> 00:22:01.555 line:-1
+and emptyWater dates.
+
+
+308
+00:22:05,759 --> 00:22:07,394
+That looks good.
+
+
+309
+00:22:07,427 --> 00:22:10,264
+Now the RelevantIntentManager
+has the date ranges
+
+
+310
+00:22:10,297 --> 00:22:15,869
+when each possible configuration
+of our widget has a higher relevance.
+
+
+311
+00:22:15,903 --> 00:22:18,705
+Let's go add this function
+into key components
+
+
+312
+00:22:18,739 --> 00:22:22,476
+so the relevantIntents are updated
+when appropriate.
+
+
+313
+00:22:22,509 --> 00:22:27,381
+First, let's go back to the timeline
+function in the timeline provider.
+
+
+314
+00:22:27.414 --> 00:22:30.751 line:-2
+Let's call our function
+just before we return the timeline.
+
+
+315
+00:22:33.053 --> 00:22:35.322 line:-2
+This will keep the relevantIntents
+up-to-date
+
+
+316
+00:22:35.355 --> 00:22:39.326 line:-1
+every time we update our widget timeline.
+
+
+317
+00:22:39.359 --> 00:22:43.063 line:-2
+Let's also go over
+to the Backyard Birds app.
+
+
+318
+00:22:43.096 --> 00:22:46.400 line:-2
+The Backyard Birds app has
+a detail view for each yard
+
+
+319
+00:22:46.433 --> 00:22:51.438 line:-2
+and provides a page where a person can
+refill the food and water.
+
+
+320
+00:22:51.471 --> 00:22:55.075 line:-2
+This is also an ideal place
+to update the relevantIntents
+
+
+321
+00:22:55.108 --> 00:22:59.046 line:-2
+since the food
+and water supply can change.
+
+
+322
+00:22:59.079 --> 00:23:02.416 line:-2
+In the BackyardContentTab,
+we'll add a Task
+
+
+323
+00:23:02.449 --> 00:23:05.919 line:-2
+with our updateBackyardRelevantIntents
+function
+
+
+324
+00:23:05.953 --> 00:23:09.756 line:-1
+when the Refill button is tapped.
+
+
+325
+00:23:09.790 --> 00:23:13.227 line:-2
+Since we know the food and water
+has just been updated,
+
+
+326
+00:23:13.260 --> 00:23:17.931 line:-2
+we should also make a call into WidgetKit
+and reload our widget's timeline.
+
+
+327
+00:23:20.267 --> 00:23:22.903 line:-1
+Now our relevant intents will be updated
+
+
+328
+00:23:22.936 --> 00:23:25.105 line:-1
+and our widget's timeline will reload
+
+
+329
+00:23:25.138 --> 00:23:28.809 line:-2
+when a person refills the water and food
+in a yard.
+
+
+330
+00:23:30.844 --> 00:23:34.014 line:-2
+We've now built a widget
+for the watchOS Smart Stack
+
+
+331
+00:23:34.047 --> 00:23:36.316 line:-2
+and we've updated
+the RelevantIntentManager
+
+
+332
+00:23:36.350 --> 00:23:41.321 line:-2
+with date intents to prioritize
+our widget when it's most relevant.
+
+
+333
+00:23:41.355 --> 00:23:43.290 line:-1
+Thanks for following along.
+
+
+334
+00:23:43.323 --> 00:23:48.729 line:-2
+We look forward to seeing widgets
+you build for the watchOS Smart Stack.
+
+
+335
+00:23:48,762 --> 00:23:54,334
+For more information about widgets,
+the Smart Stack, and App Intents,
+
+
+336
+00:23:54,368 --> 00:23:56,803
+check out these sessions.
+
+
+337
+00:23:56.837 --> 00:24:00.807 line:-1
+Be adventurous and never stop coding.
+

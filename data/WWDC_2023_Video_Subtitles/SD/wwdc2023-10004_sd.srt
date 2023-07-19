@@ -1,0 +1,1432 @@
+2
+00:00:00.334 --> 00:00:07.341 line:-1
+♪ ♪
+
+
+3
+00:00:10.511 --> 00:00:12.212 line:-1
+Shawn: Hi, I am Shawn.
+
+
+4
+00:00:12.246 --> 00:00:15.916 line:-2
+I am an engineer
+on the Internet Technologies team.
+
+
+5
+00:00:15.949 --> 00:00:20.854 line:-2
+Today, we are going to talk about
+reducing network delays in your app
+
+
+6
+00:00:20.888 --> 00:00:23.190 line:-1
+with L4S.
+
+
+7
+00:00:23.223 --> 00:00:27.361 line:-1
+L4S stands for Low Latency,
+
+
+8
+00:00:27.394 --> 00:00:30.931 line:-1
+Low Loss, and Scalable throughput.
+
+
+9
+00:00:30.964 --> 00:00:33.233 line:-1
+It is an incredible technology
+
+
+10
+00:00:33.267 --> 00:00:37.137 line:-2
+that dramatically improves
+the performance of apps
+
+
+11
+00:00:37.171 --> 00:00:41.842 line:-2
+where network latency can impact
+the user experience.
+
+
+12
+00:00:41.875 --> 00:00:45.512 line:-2
+To name just a few benefits,
+it can help your app
+
+
+13
+00:00:45.546 --> 00:00:49.950 line:-2
+reduce content load time,
+improve video quality,
+
+
+14
+00:00:49.983 --> 00:00:53.720 line:-2
+and bring more responsive collaboration
+between users.
+
+
+15
+00:00:54.821 --> 00:00:58.792 line:-1
+Today, we'll first explore how L4S works
+
+
+16
+00:00:58.825 --> 00:01:01.695 line:-1
+and how it reduces network delays.
+
+
+17
+00:01:01.728 --> 00:01:06.700 line:-2
+Then, we will go over
+how to prepare your app for L4S
+
+
+18
+00:01:06.733 --> 00:01:10.204 line:-1
+and how to turn on L4S on your server.
+
+
+19
+00:01:10.237 --> 00:01:13.574 line:-2
+Finally, we will talk about
+the steps you can take
+
+
+20
+00:01:13.607 --> 00:01:17.778 line:-2
+to configure an L4S network
+and test your app.
+
+
+21
+00:01:17.811 --> 00:01:22.816 line:-2
+First, let's explore the benefits of L4S
+and how it works.
+
+
+22
+00:01:24.251 --> 00:01:27.087 line:-2
+A busy network can be
+especially challenging
+
+
+23
+00:01:27.120 --> 00:01:32.459 line:-2
+for apps that depend on features
+like real-time audio and video.
+
+
+24
+00:01:32.492 --> 00:01:36.230 line:-2
+When the network is used
+by many devices at once,
+
+
+25
+00:01:36.263 --> 00:01:40.734 line:-2
+it can often cause
+high latency and packet loss
+
+
+26
+00:01:40.767 --> 00:01:43.070 line:-1
+in these types of apps.
+
+
+27
+00:01:43.103 --> 00:01:46.139 line:-2
+For example,
+you might have experienced delays
+
+
+28
+00:01:46.173 --> 00:01:48.809 line:-1
+or video stalls during a video call
+
+
+29
+00:01:48.842 --> 00:01:52.446 line:-2
+when someone else using the same network
+is watching a movie
+
+
+30
+00:01:52.479 --> 00:01:54.915 line:-1
+or downloading a video game.
+
+
+31
+00:01:54.948 --> 00:01:59.620 line:-2
+To show you how much L4S can help
+in such a difficult situation,
+
+
+32
+00:01:59.653 --> 00:02:01.488 line:-1
+we have made a sample app
+
+
+33
+00:02:01.522 --> 00:02:05.659 line:-2
+that makes video calls
+between two devices.
+
+
+34
+00:02:05.692 --> 00:02:08.829 line:-2
+I will show you two video calls
+with my sample app
+
+
+35
+00:02:08.862 --> 00:02:10.898 line:-1
+made at different times,
+
+
+36
+00:02:10.931 --> 00:02:16.103 line:-2
+one without L4S
+and the other with L4S turned on.
+
+
+37
+00:02:16.136 --> 00:02:20.073 line:-2
+For both these calls,
+I used the same constrained network
+
+
+38
+00:02:20.107 --> 00:02:22.142 line:-1
+with low bandwidth.
+
+
+39
+00:02:22.176 --> 00:02:26.213 line:-2
+In addition,
+there are also multiple other devices
+
+
+40
+00:02:26.246 --> 00:02:30.717 line:-2
+actively using the same network
+at the same time.
+
+
+41
+00:02:30.751 --> 00:02:33.954 line:-1
+Let's see this in action.
+
+
+42
+00:02:33.987 --> 00:02:39.259 line:-2
+You will notice a remarkable difference
+in video quality between the two calls.
+
+
+43
+00:02:39.293 --> 00:02:43.163 line:-2
+The legacy one shows
+occasional video stalls and delays,
+
+
+44
+00:02:43.197 --> 00:02:45.165 line:-1
+especially during motion.
+
+
+45
+00:02:45.199 --> 00:02:49.970 line:-2
+However, with L4S,
+the video is smooth and responsive,
+
+
+46
+00:02:50.003 --> 00:02:53.106 line:-1
+without any significant delays.
+
+
+47
+00:02:53.140 --> 00:02:57.845 line:-2
+Now let's analyze the video calls
+we have just witnessed
+
+
+48
+00:02:57.878 --> 00:03:00.714 line:-1
+to understand what was happening.
+
+
+49
+00:03:00.747 --> 00:03:04.952 line:-2
+In this demo,
+L4S allowed our app to achieve
+
+
+50
+00:03:04.985 --> 00:03:10.691 line:-2
+significant improvements
+across all key networking metrics.
+
+
+51
+00:03:10.724 --> 00:03:15.896 line:-2
+First, let's look at the distribution
+of round trip time of packets
+
+
+52
+00:03:15.929 --> 00:03:18.165 line:-1
+during these video calls.
+
+
+53
+00:03:18.198 --> 00:03:21.101 line:-2
+A shorter round trip time
+indicates a lower
+
+
+54
+00:03:21.134 --> 00:03:24.204 line:-1
+and better latency on the network.
+
+
+55
+00:03:24.238 --> 00:03:30.344 line:-2
+For an interactive app like this,
+the tail latency is extremely important,
+
+
+56
+00:03:30.377 --> 00:03:35.315 line:-2
+as it shows the worst case
+that a user experiences.
+
+
+57
+00:03:35.349 --> 00:03:38.418 line:-2
+Our test network has
+a minimum round trip time
+
+
+58
+00:03:38.452 --> 00:03:40.854 line:-1
+of 20 milliseconds.
+
+
+59
+00:03:40.888 --> 00:03:43.557 line:-1
+However, without L4S,
+
+
+60
+00:03:43.590 --> 00:03:49.730 line:-2
+packets experienced a round trip time
+of up to 45 milliseconds.
+
+
+61
+00:03:49.763 --> 00:03:53.867 line:-2
+But with L4S turned on,
+even the worst-case latency
+
+
+62
+00:03:53.901 --> 00:03:56.370 line:-1
+was cut by 50%
+
+
+63
+00:03:56.403 --> 00:04:00.240 line:-1
+and reduced to less than 25 milliseconds.
+
+
+64
+00:04:01.542 --> 00:04:05.078 line:-1
+Next, let's look at packet loss.
+
+
+65
+00:04:05.112 --> 00:04:07.314 line:-1
+A lower packet loss represents
+
+
+66
+00:04:07.347 --> 00:04:11.451 line:-2
+a more reliable connection
+between devices.
+
+
+67
+00:04:11.485 --> 00:04:16.790 line:-2
+With the legacy one,
+packet loss rate reached over 40%.
+
+
+68
+00:04:16.823 --> 00:04:22.629 line:-2
+But with L4S, packet loss
+in our video call was nearly eliminated.
+
+
+69
+00:04:22.663 --> 00:04:28.101 line:-2
+That means much fewer frame drops
+or stalls due to loss of data.
+
+
+70
+00:04:28.135 --> 00:04:32.406 line:-2
+The improved latency
+and packet loss rate translated directly
+
+
+71
+00:04:32.439 --> 00:04:36.443 line:-2
+into better rendering metrics
+of our video call.
+
+
+72
+00:04:36.476 --> 00:04:40.047 line:-2
+First, let's look
+at the video stall percentage.
+
+
+73
+00:04:40.080 --> 00:04:45.485 line:-2
+A lower stall percentage means
+fewer freezes during a video call.
+
+
+74
+00:04:45.519 --> 00:04:48.722 line:-1
+Without L4S, we experienced video stalls
+
+
+75
+00:04:48.755 --> 00:04:52.059 line:-1
+in our app from time to time.
+
+
+76
+00:04:52,092 --> 00:04:58,098
+But with L4S, video stalls were
+almost completely eliminated.
+
+
+77
+00:04:59.967 --> 00:05:03.971 line:-2
+Next, let's look
+at received video frame rate.
+
+
+78
+00:05:04.004 --> 00:05:07.841 line:-2
+A higher and more consistent
+received video frame rate
+
+
+79
+00:05:07.875 --> 00:05:11.745 line:-1
+means a richer and smoother video call.
+
+
+80
+00:05:11.778 --> 00:05:15.082 line:-1
+With L4S, received video frame rate
+
+
+81
+00:05:15.115 --> 00:05:20.087 line:-2
+was above 25 frames per second
+for most of the time.
+
+
+82
+00:05:20.120 --> 00:05:26.527 line:-2
+However, the legacy one sometimes dropped
+to as low as 0 frame per second,
+
+
+83
+00:05:26.560 --> 00:05:30.230 line:-1
+which means a complete video stall.
+
+
+84
+00:05:30.264 --> 00:05:35.102 line:-2
+Altogether, these improvements give
+a much better user experience
+
+
+85
+00:05:35.135 --> 00:05:37.671 line:-1
+even in a constrained network.
+
+
+86
+00:05:37.704 --> 00:05:41.074 line:-2
+You can bring
+these same improvements to your app
+
+
+87
+00:05:41.108 --> 00:05:44.077 line:-1
+by adopting L4S.
+
+
+88
+00:05:44.111 --> 00:05:47.848 line:-1
+Now, let's take a look at how L4S works.
+
+
+89
+00:05:49.583 --> 00:05:52.019 line:-1
+We see such remarkable improvements,
+
+
+90
+00:05:52.052 --> 00:05:57.824 line:-2
+because L4S reduces queueing
+and packet loss.
+
+
+91
+00:05:57.858 --> 00:06:02.663 line:-2
+Let's first take a look
+at how a queue builds up in a network.
+
+
+92
+00:06:02.696 --> 00:06:05.165 line:-1
+When a packet is sent from your app,
+
+
+93
+00:06:05.199 --> 00:06:08.368 line:-2
+it is routed
+through different network hops
+
+
+94
+00:06:08.402 --> 00:06:10.704 line:-1
+before reaching your server.
+
+
+95
+00:06:10.737 --> 00:06:16.076 line:-2
+This set of hops your packet traverses
+is called a network path.
+
+
+96
+00:06:17.277 --> 00:06:21.448 line:-2
+On a path through a network,
+you can only deliver data end-to-end
+
+
+97
+00:06:21.481 --> 00:06:25.252 line:-2
+at the rate that is supported
+by the slowest hop,
+
+
+98
+00:06:25.285 --> 00:06:28.689 line:-1
+which is called the bottleneck.
+
+
+99
+00:06:28.722 --> 00:06:32.793 line:-2
+For many people, this is their
+internet service provider connection,
+
+
+100
+00:06:32.826 --> 00:06:35.395 line:-1
+and the highest rate it can handle packets
+
+
+101
+00:06:35.429 --> 00:06:39.766 line:-2
+determines the maximum throughput
+supported on the path.
+
+
+102
+00:06:39.800 --> 00:06:42.503 line:-2
+If the sender exceeds
+the maximum throughput,
+
+
+103
+00:06:42.536 --> 00:06:48.242 line:-2
+a queue will form at the bottleneck,
+causing delays for subsequent packets.
+
+
+104
+00:06:48.275 --> 00:06:51.745 line:-2
+Without L4S,
+the queue will continue to grow
+
+
+105
+00:06:51.778 --> 00:06:55.849 line:-2
+until the queue cannot accommodate
+any more packets.
+
+
+106
+00:06:55.883 --> 00:06:58.619 line:-1
+When that happens, packets are dropped,
+
+
+107
+00:06:58.652 --> 00:07:02.656 line:-1
+harming both latency and throughput.
+
+
+108
+00:07:02.689 --> 00:07:06.193 line:-2
+L4S solves this problem
+through a collaboration
+
+
+109
+00:07:06.226 --> 00:07:10.931 line:-2
+between the client, the server,
+and the bottleneck.
+
+
+110
+00:07:10.964 --> 00:07:14.635 line:-2
+With L4S,
+a client or server sending packets
+
+
+111
+00:07:14.668 --> 00:07:19.206 line:-2
+needs to signal that they will cooperate
+to manage network congestion.
+
+
+112
+00:07:20.574 --> 00:07:24.845 line:-2
+To do this, an L4S-capable sender
+will use a technology
+
+
+113
+00:07:24.878 --> 00:07:28.515 line:-1
+called Explicit Congestion Notification,
+
+
+114
+00:07:28.549 --> 00:07:31.985 line:-1
+also known as ECN.
+
+
+115
+00:07:32.019 --> 00:07:36.557 line:-2
+When transmitting a packet,
+the sender indicates support for L4S
+
+
+116
+00:07:36.590 --> 00:07:40.627 line:-2
+by using the ECN bits
+in the packet's IP header.
+
+
+117
+00:07:40.661 --> 00:07:43.864 line:-1
+When an L4S hop receives these packets,
+
+
+118
+00:07:43.897 --> 00:07:47.734 line:-2
+it will apply
+L4S queue management to them.
+
+
+119
+00:07:49.436 --> 00:07:52.573 line:-2
+When a queue starts to build up
+at the bottleneck,
+
+
+120
+00:07:52.606 --> 00:07:56.610 line:-2
+L4S queue management will indicate
+that there is congestion
+
+
+121
+00:07:56.643 --> 00:08:01.448 line:-2
+by setting a different ECN label
+on the packets.
+
+
+122
+00:08:01.481 --> 00:08:05.319 line:-2
+This label indicates that the network has
+experienced congestion
+
+
+123
+00:08:05.352 --> 00:08:09.022 line:-1
+before forwarding them to the next hop.
+
+
+124
+00:08:09.056 --> 00:08:13.493 line:-2
+Upon receiving these packets,
+the receiver counts the number of packets
+
+
+125
+00:08:13.527 --> 00:08:17.397 line:-2
+marked with the congestion label
+and reports the number
+
+
+126
+00:08:17.431 --> 00:08:20.100 line:-1
+back to the sender.
+
+
+127
+00:08:20.133 --> 00:08:22.302 line:-1
+When the sender receives this number,
+
+
+128
+00:08:22.336 --> 00:08:26.840 line:-2
+it uses this feedback to understand
+the congestion on the network.
+
+
+129
+00:08:26.874 --> 00:08:29.543 line:-1
+The sender then adjusts its sending rate
+
+
+130
+00:08:29.576 --> 00:08:32.880 line:-2
+according to the level of congestion
+at the bottleneck,
+
+
+131
+00:08:32.913 --> 00:08:36.617 line:-2
+so that it does not exceed
+the maximum throughput.
+
+
+132
+00:08:36.650 --> 00:08:39.987 line:-2
+With an adjusted sending rate,
+the sender can avoid
+
+
+133
+00:08:40.020 --> 00:08:43.557 line:-2
+building a large queue of packets
+at the bottleneck.
+
+
+134
+00:08:43.590 --> 00:08:46.560 line:-1
+This allows L4S to maximize its throughput
+
+
+135
+00:08:46.593 --> 00:08:52.132 line:-2
+and achieve low end-to-end latency
+at the same time.
+
+
+136
+00:08:52.165 --> 00:08:55.369 line:-1
+Now, let's explore what you need to do
+
+
+137
+00:08:55.402 --> 00:09:00.874 line:-2
+to enable this collaboration
+to deliver these benefits to your users.
+
+
+138
+00:09:00.908 --> 00:09:06.346 line:-2
+First, let's discuss
+how you can prepare your app for L4S.
+
+
+139
+00:09:06.380 --> 00:09:11.418 line:-2
+Using networking APIs in URLSession
+and Network framework
+
+
+140
+00:09:11.451 --> 00:09:15.989 line:-1
+is the best way to adopt L4S in your app.
+
+
+141
+00:09:16.023 --> 00:09:21.128 line:-2
+If your app uses HTTP/3
+or QUIC within these frameworks,
+
+
+142
+00:09:21.161 --> 00:09:24.565 line:-1
+L4S support is automatically built in.
+
+
+143
+00:09:24.598 --> 00:09:29.102 line:-2
+You don't have to make
+any code changes to your app.
+
+
+144
+00:09:29.136 --> 00:09:34.508 line:-2
+Alternatively,
+if your app uses HTTP/2 or TCP,
+
+
+145
+00:09:34.541 --> 00:09:39.479 line:-2
+iOS 17 and macOS Sonoma have
+built-in L4S support
+
+
+146
+00:09:39.513 --> 00:09:42.649 line:-1
+for downloads on these protocols.
+
+
+147
+00:09:42.683 --> 00:09:46.954 line:-2
+These are the best ways
+to add L4S support to your app
+
+
+148
+00:09:46.987 --> 00:09:52.292 line:-2
+because they do not require
+any code changes.
+
+
+149
+00:09:52.326 --> 00:09:56.330 line:-2
+However, if your app uses
+a custom protocol,
+
+
+150
+00:09:56.363 --> 00:09:58.966 line:-2
+there are a few things
+you'll need to implement
+
+
+151
+00:09:58.999 --> 00:10:03.570 line:-1
+in order to support L4S in your app.
+
+
+152
+00:10:03.604 --> 00:10:06.707 line:-1
+RFC 9330 is a good starting point
+
+
+153
+00:10:06.740 --> 00:10:09.243 line:-1
+to learn about L4S requirements.
+
+
+154
+00:10:09.276 --> 00:10:12.312 line:-2
+You will need to implement
+a few new behaviors.
+
+
+155
+00:10:12.346 --> 00:10:14.915 line:-2
+For example,
+your protocol needs to understand
+
+
+156
+00:10:14.948 --> 00:10:17.851 line:-1
+L4S congestion feedback from the network
+
+
+157
+00:10:17.885 --> 00:10:21.455 line:-1
+and adjust its sending rate accordingly.
+
+
+158
+00:10:21.488 --> 00:10:26.894 line:-2
+To do that, you need to implement
+a scalable congestion control algorithm.
+
+
+159
+00:10:26.927 --> 00:10:30.764 line:-2
+Then, you need to make sure
+your app sends L4S traffic
+
+
+160
+00:10:30.797 --> 00:10:34.601 line:-2
+only when the network lets
+ECN bits pass through.
+
+
+161
+00:10:34.635 --> 00:10:38.438 line:-2
+To do that,
+implement an ECN validation mechanism
+
+
+162
+00:10:38.472 --> 00:10:43.210 line:-2
+that checks for any network issues
+that may be interfering with ECN,
+
+
+163
+00:10:43.243 --> 00:10:46.880 line:-1
+such as ECN bleaching.
+
+
+164
+00:10:46.914 --> 00:10:50.517 line:-2
+When acting as a receiver,
+your protocol also needs to have
+
+
+165
+00:10:50.551 --> 00:10:56.590 line:-2
+a relay mechanism to echo back
+the network's ECN feedback to the sender.
+
+
+166
+00:10:56.623 --> 00:11:00.127 line:-2
+If your implementation is
+based on Network framework,
+
+
+167
+00:11:00.160 --> 00:11:03.130 line:-2
+you can use the ECN property
+on your packet metadata
+
+
+168
+00:11:03.163 --> 00:11:08.368 line:-2
+to send and receive ECN flags
+for your custom protocol.
+
+
+169
+00:11:08.402 --> 00:11:12.072 line:-2
+If you are using sockets,
+you can use the set socket option
+
+
+170
+00:11:12.105 --> 00:11:17.845 line:-2
+or send and receive message system calls
+to send and receive ECN flags.
+
+
+171
+00:11:19.213 --> 00:11:23.984 line:-2
+Now we have covered
+how to prepare your app for L4S,
+
+
+172
+00:11:24.017 --> 00:11:27.988 line:-1
+let's explore how to set up your server.
+
+
+173
+00:11:28.021 --> 00:11:30.057 line:-1
+If your app uses QUIC,
+
+
+174
+00:11:30.090 --> 00:11:34.127 line:-2
+your server's implementation of QUIC
+also needs to support L4S
+
+
+175
+00:11:34.161 --> 00:11:36.263 line:-1
+and ECN markings.
+
+
+176
+00:11:36.296 --> 00:11:40.968 line:-2
+There are numerous QUIC implementations
+available on the server side.
+
+
+177
+00:11:41.001 --> 00:11:45.973 line:-2
+Ask your server provider
+about how to enable ECN and L4S.
+
+
+178
+00:11:46.006 --> 00:11:49.209 line:-2
+If they do not support
+sending L4S traffic yet,
+
+
+179
+00:11:49.243 --> 00:11:54.882 line:-2
+you can still enable ECN
+to receive L4S traffic on your server.
+
+
+180
+00:11:54.915 --> 00:11:59.987 line:-2
+Now is a great time to encourage them
+to fully support L4S.
+
+
+181
+00:12:01.054 --> 00:12:05.192 line:-2
+If your app is using TCP,
+you will need to add L4S support
+
+
+182
+00:12:05.225 --> 00:12:08.095 line:-1
+to your server's TCP implementation.
+
+
+183
+00:12:08.128 --> 00:12:12.232 line:-2
+For Linux based server,
+follow instructions on this GitHub page
+
+
+184
+00:12:12.266 --> 00:12:14.668 line:-1
+to add support to your server.
+
+
+185
+00:12:14.701 --> 00:12:17.271 line:-2
+You can also find more details
+from the article
+
+
+186
+00:12:17.304 --> 00:12:21.008 line:-1
+in the related items for this video.
+
+
+187
+00:12:21.041 --> 00:12:25.145 line:-2
+For all other server platforms,
+please consult your server provider,
+
+
+188
+00:12:25.179 --> 00:12:29.316 line:-2
+as there may be additional configurations
+or changes required
+
+
+189
+00:12:29.349 --> 00:12:31.818 line:-1
+in order to support L4S.
+
+
+190
+00:12:31.852 --> 00:12:37.391 line:-2
+Now that we have covered how your app
+and server can be set up for L4S,
+
+
+191
+00:12:37.424 --> 00:12:43.197 line:-2
+let's explore how to set up
+an L4S network to test your app.
+
+
+192
+00:12:43.230 --> 00:12:48.468 line:-2
+First, let's review
+what makes a network L4S-capable.
+
+
+193
+00:12:48.502 --> 00:12:52.539 line:-1
+The network must not block ECN markings.
+
+
+194
+00:12:52.573 --> 00:12:55.609 line:-2
+ECN markings are used
+to communicate information
+
+
+195
+00:12:55.642 --> 00:13:01.748 line:-2
+about the network between the sender,
+the bottleneck, and the receiver.
+
+
+196
+00:13:01.782 --> 00:13:07.421 line:-2
+If your network interferes
+with ECN markings, L4S will not work.
+
+
+197
+00:13:07.454 --> 00:13:09.957 line:-2
+The documentation has steps
+you can follow,
+
+
+198
+00:13:09.990 --> 00:13:13.694 line:-2
+along with additional tools,
+that you can use to verify
+
+
+199
+00:13:13.727 --> 00:13:17.364 line:-1
+if your network is ECN compatible.
+
+
+200
+00:13:17.397 --> 00:13:23.504 line:-2
+Next, the network bottleneck must support
+L4S queue management.
+
+
+201
+00:13:23.537 --> 00:13:28.075 line:-2
+This is essential to being able
+to see the benefits of L4S.
+
+
+202
+00:13:28.108 --> 00:13:32.145 line:-2
+Once you have verified
+that your network is ECN compatible,
+
+
+203
+00:13:32.179 --> 00:13:36.683 line:-2
+you just need to add L4S queue management
+to the bottleneck.
+
+
+204
+00:13:36.717 --> 00:13:40.988 line:-2
+To set up a test network
+that supports L4S queue management,
+
+
+205
+00:13:41.021 --> 00:13:44.424 line:-1
+the best way is to use Internet Sharing.
+
+
+206
+00:13:45.993 --> 00:13:50.998 line:-2
+In macOS Sonoma, Internet Sharing supports
+L4S queue management.
+
+
+207
+00:13:51.031 --> 00:13:55.769 line:-2
+When a device joins the network
+created by a Mac with Internet Sharing,
+
+
+208
+00:13:55.802 --> 00:13:58.872 line:-2
+the Mac itself becomes
+an additional network hop
+
+
+209
+00:13:58.906 --> 00:14:01.975 line:-1
+between the device and the server.
+
+
+210
+00:14:02.009 --> 00:14:05.679 line:-2
+If you configure the Mac to be
+the bottleneck on the network,
+
+
+211
+00:14:05.712 --> 00:14:11.185 line:-2
+it will apply L4S queue management
+to traffic going through it,
+
+
+212
+00:14:11.218 --> 00:14:15.255 line:-2
+allowing you to build
+a complete L4S network.
+
+
+213
+00:14:15.289 --> 00:14:18.392 line:-1
+To enable Internet Sharing in macOS,
+
+
+214
+00:14:18.425 --> 00:14:22.696 line:-2
+navigate to the Internet Sharing pane
+in System Settings.
+
+
+215
+00:14:22.729 --> 00:14:26.400 line:-2
+Click the disclosure button
+to choose the interface to share
+
+
+216
+00:14:26.433 --> 00:14:30.637 line:-2
+and the interface
+to which your test device will connect.
+
+
+217
+00:14:32.206 --> 00:14:36.143 line:-2
+To make the Mac act
+as a bottleneck on this network,
+
+
+218
+00:14:36.176 --> 00:14:38.645 line:-1
+you need to throttle its bandwidth.
+
+
+219
+00:14:38.679 --> 00:14:44.251 line:-2
+Use this ifconfig command in Terminal
+with the interface you are sharing,
+
+
+220
+00:14:44.284 --> 00:14:49.423 line:-2
+as well as the interface
+your device will connect to.
+
+
+221
+00:14:49.456 --> 00:14:51.992 line:-1
+Replace the interface name in this command
+
+
+222
+00:14:52.025 --> 00:14:55.095 line:-2
+with the name of the interfaces
+you are using,
+
+
+223
+00:14:55.128 --> 00:14:58.165 line:-1
+for example, en1.
+
+
+224
+00:14:58.198 --> 00:15:01.368 line:-1
+Then, join the network on your test device
+
+
+225
+00:15:01.401 --> 00:15:06.173 line:-2
+and test your app
+to see the benefits of L4S.
+
+
+226
+00:15:06.206 --> 00:15:09.076 line:-2
+To reverse
+the bandwidth throttling on the Mac,
+
+
+227
+00:15:09.109 --> 00:15:13.447 line:-2
+you can either reboot
+or run the same ifconfig command
+
+
+228
+00:15:13.480 --> 00:15:18.919 line:-2
+but change the bandwidth to 0
+instead of 10 megabits per second.
+
+
+229
+00:15:20.621 --> 00:15:23.790 line:-1
+In iOS 17 and macOS Sonoma,
+
+
+230
+00:15:23.824 --> 00:15:28.495 line:-2
+L4S will be progressively rolled out
+to a random set of users.
+
+
+231
+00:15:28.529 --> 00:15:31.665 line:-2
+To ensure your test device
+has L4S turned on,
+
+
+232
+00:15:31.698 --> 00:15:36.136 line:-2
+navigate to Developer Settings
+and turn on L4S.
+
+
+233
+00:15:36.170 --> 00:15:38.772 line:-1
+In macOS, you can enable L4S
+
+
+234
+00:15:38.805 --> 00:15:43.644 line:-2
+by running this defaults write command
+before testing.
+
+
+235
+00:15:43.677 --> 00:15:47.047 line:-2
+If your network or server
+does not support L4S,
+
+
+236
+00:15:47.080 --> 00:15:51.218 line:-2
+TCP and QUIC will continue to work
+in the legacy mode.
+
+
+237
+00:15:51.251 --> 00:15:53.820 line:-1
+However, you should turn L4S on
+
+
+238
+00:15:53.854 --> 00:15:58.592 line:-2
+and test your application
+to identify any issues.
+
+
+239
+00:15:58.625 --> 00:16:01.395 line:-2
+Provide feedback
+using the Feedback Assistant
+
+
+240
+00:16:01.428 --> 00:16:04.064 line:-1
+if any issues arise.
+
+
+241
+00:16:04.097 --> 00:16:07.167 line:-2
+The documentation also provides
+helpful information
+
+
+242
+00:16:07.201 --> 00:16:11.471 line:-2
+about debugging and testing L4S
+in your app.
+
+
+243
+00:16:11.505 --> 00:16:16.443 line:-2
+I am so excited that apps and networks
+are now able to support
+
+
+244
+00:16:16.476 --> 00:16:20.848 line:-2
+reduced latency
+and reduced packet loss with L4S.
+
+
+245
+00:16:21.982 --> 00:16:26.186 line:-2
+Test your app in iOS 17
+and macOS Sonoma today
+
+
+246
+00:16:26.220 --> 00:16:28.822 line:-1
+on networks that support L4S
+
+
+247
+00:16:28.856 --> 00:16:32.526 line:-1
+as well as on networks that do not.
+
+
+248
+00:16:32.559 --> 00:16:37.364 line:-2
+Work with your server or CDN provider
+to enable support for L4S
+
+
+249
+00:16:37.397 --> 00:16:42.369 line:-2
+on your app's servers,
+if they haven't already done so.
+
+
+250
+00:16:42.402 --> 00:16:46.974 line:-2
+Use the Feedback Assistant to report
+any issues you encounter
+
+
+251
+00:16:47.007 --> 00:16:49.910 line:-1
+with L4S turned on in your app.
+
+
+252
+00:16:49.943 --> 00:16:51.578 line:-1
+Thanks for watching.
+
+
+253
+00:16:51.612 --> 00:16:56.917 line:-2
+I am looking forward to building
+even better apps with you using L4S.
+
+
+254
+00:16:56.950 --> 00:16:59.453 line:-1
+♪ ♪
+

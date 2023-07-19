@@ -1,0 +1,805 @@
+2
+00:00:00.501 --> 00:00:08.509 line:-1
+♪ ♪
+
+
+3
+00:00:10.010 --> 00:00:14.581 line:-2
+Kathryn: Hi! I'm Kathryn, and I'm an
+engineer working on System Experience.
+
+
+4
+00:00:14.615 --> 00:00:17.851 line:-2
+Today I'm going to talk about
+the new locations for widgets,
+
+
+5
+00:00:17.885 --> 00:00:21.655 line:-2
+and how you can easily optimize
+your widget to look great everywhere.
+
+
+6
+00:00:21.688 --> 00:00:24.491 line:-2
+First, let's go over
+a quick history of widgets.
+
+
+7
+00:00:24.525 --> 00:00:27.895 line:-2
+iOS 14 introduced widgets
+on the Home screen,
+
+
+8
+00:00:27.928 --> 00:00:30.631 line:-2
+and iOS 16 brought widgets
+to the Lock screen,
+
+
+9
+00:00:30.664 --> 00:00:33.066 line:-1
+using the same easy WidgetKit API.
+
+
+10
+00:00:33.100 --> 00:00:37.538 line:-2
+This year, the widget ecosystem
+is expanding to four new locations:
+
+
+11
+00:00:37.571 --> 00:00:39.373 line:-1
+the desktop on Mac,
+
+
+12
+00:00:39.406 --> 00:00:41.375 line:-1
+the Lock screen on iPad,
+
+
+13
+00:00:41.408 --> 00:00:43.410 line:-1
+the new StandBy mode on iPhone,
+
+
+14
+00:00:43.443 --> 00:00:46.013 line:-1
+and the new Smart Stack on Apple Watch.
+
+
+15
+00:00:46.046 --> 00:00:49.483 line:-2
+This means that people will be able
+to see all of their favorite widgets
+
+
+16
+00:00:49.516 --> 00:00:51.485 line:-1
+in even more places.
+
+
+17
+00:00:51.518 --> 00:00:55.522 line:-2
+Your widget will be able to appear
+in all of these locations automatically,
+
+
+18
+00:00:55.556 --> 00:00:58.959 line:-2
+so it's important to make sure that it
+looks great no matter where it's shown.
+
+
+19
+00:00:58.992 --> 00:01:01.261 line:-1
+Thanks to iPhone Widgets On Mac,
+
+
+20
+00:01:01.295 --> 00:01:03.597 line:-2
+people will be able
+to use your widget on Mac
+
+
+21
+00:01:03.630 --> 00:01:05.999 line:-2
+even if you don't currently have
+a macOS app.
+
+
+22
+00:01:06.033 --> 00:01:08.769 line:-2
+My friends Devon and Graham
+have asked me to help them update
+
+
+23
+00:01:08.802 --> 00:01:11.939 line:-2
+their Emoji Rangers widget
+to get it ready for these new places.
+
+
+24
+00:01:11.972 --> 00:01:16.577 line:-2
+You might remember this project
+from WWDC20's "Widgets code-along",
+
+
+25
+00:01:16.610 --> 00:01:20.314 line:-2
+and WWDC22's
+"Complications and widgets: Reloaded".
+
+
+26
+00:01:20.347 --> 00:01:23.650 line:-2
+We'll start by going over
+the new content margins for widgets,
+
+
+27
+00:01:23.684 --> 00:01:26.553 line:-2
+and how to transition to them
+on Apple Watch.
+
+
+28
+00:01:26.587 --> 00:01:30.891 line:-2
+Next, we'll add an automatically
+removable background to our widget.
+
+
+29
+00:01:30.924 --> 00:01:34.761 line:-2
+Then, we'll modify our widget so that
+it can dynamically expand its layout
+
+
+30
+00:01:34.795 --> 00:01:36.663 line:-1
+to fit its environment.
+
+
+31
+00:01:36.697 --> 00:01:38.799 line:-2
+Finally, we'll make sure the elements
+in our widget
+
+
+32
+00:01:38.832 --> 00:01:40.868 line:-1
+are ready for vibrant rendering.
+
+
+33
+00:01:40.901 --> 00:01:42.135 line:-1
+Let’s get started.
+
+
+34
+00:01:42.169 --> 00:01:45.572 line:-2
+New for widgets this year
+are content margins.
+
+
+35
+00:01:45.606 --> 00:01:48.442 line:-2
+Content margins are padding
+which is automatically applied
+
+
+36
+00:01:48.475 --> 00:01:49.776 line:-1
+to your widget's body,
+
+
+37
+00:01:49.810 --> 00:01:53.814 line:-2
+preventing your content from getting to
+close to the edge of the widget container.
+
+
+38
+00:01:53.847 --> 00:01:56.016 line:-1
+These margins may be larger or smaller,
+
+
+39
+00:01:56.049 --> 00:01:59.686 line:-2
+depending on the environment
+where your widget is being shown.
+
+
+40
+00:01:59.720 --> 00:02:01.622 line:-1
+On watchOS 9 and below,
+
+
+41
+00:02:01.655 --> 00:02:04.024 line:-1
+widgets use the system-defined safe area
+
+
+42
+00:02:04.057 --> 00:02:06.960 line:-2
+to keep content from getting
+too close to the edge.
+
+
+43
+00:02:06.994 --> 00:02:09.963 line:-2
+Widgets could add modifiers like
+ignoresSafeArea to views
+
+
+44
+00:02:09.997 --> 00:02:13.033 line:-2
+to allow them to extend
+outside of the safe area.
+
+
+45
+00:02:13.066 --> 00:02:15.769 line:-2
+On watchOS 10 and above,
+safe areas in widgets
+
+
+46
+00:02:15.802 --> 00:02:18.305 line:-2
+have been replaced
+by the use of content margins.
+
+
+47
+00:02:18.338 --> 00:02:21.208 line:-2
+This means that modifiers like
+ignoresSafeArea
+
+
+48
+00:02:21.241 --> 00:02:23.610 line:-1
+no longer have any effect in widgets.
+
+
+49
+00:02:23.644 --> 00:02:27.581 line:-2
+For most widgets, this change
+won't affect how your widget looks.
+
+
+50
+00:02:27.614 --> 00:02:31.585 line:-2
+However, if your widget has content
+which used to ignore the safe area,
+
+
+51
+00:02:31.618 --> 00:02:33.487 line:-1
+you can still achieve this same effect
+
+
+52
+00:02:33.520 --> 00:02:38.425 line:-2
+by adding the contentMarginsDisabled
+modifier to your widget configuration.
+
+
+53
+00:02:38.458 --> 00:02:42.429 line:-2
+Then, for any content which should
+remain within the default content margins,
+
+
+54
+00:02:42.462 --> 00:02:44.531 line:-1
+simply add padding back in.
+
+
+55
+00:02:44.565 --> 00:02:47.568 line:-2
+You can use the widgetContentMargins
+environment variable
+
+
+56
+00:02:47.601 --> 00:02:50.470 line:-2
+to get the default margins
+for the current environment.
+
+
+57
+00:02:50.504 --> 00:02:53.774 line:-2
+Content margins, along with
+these new modifiers and variables,
+
+
+58
+00:02:53.807 --> 00:02:56.910 line:-2
+are available on every platform
+where widgets are shown.
+
+
+59
+00:02:56.944 --> 00:03:00.814 line:-2
+Now, let's add a removable background
+to our Emoji Rangers widget.
+
+
+60
+00:03:00.848 --> 00:03:05.319 line:-2
+Our existing accessory family of widgets
+automatically work on iPad Lock screen,
+
+
+61
+00:03:05.352 --> 00:03:07.321 line:-1
+just like on iPhone.
+
+
+62
+00:03:07.354 --> 00:03:10.991 line:-2
+iPad can also show system small widgets
+right alongside them.
+
+
+63
+00:03:11.024 --> 00:03:13.427 line:-2
+Here's what ours looks like
+on the Lock screen right now.
+
+
+64
+00:03:13.460 --> 00:03:15.829 line:-2
+We need to remove its background
+in this environment
+
+
+65
+00:03:15.863 --> 00:03:18.699 line:-2
+so that it matches
+the other widgets better.
+
+
+66
+00:03:18.732 --> 00:03:21.134 line:-1
+Luckily, doing this is super simple.
+
+
+67
+00:03:21.168 --> 00:03:24.705 line:-2
+Here I have the code for
+our systemSmall widget's view.
+
+
+68
+00:03:24.738 --> 00:03:27.341 line:-1
+Right now, it consists of an AvatarView
+
+
+69
+00:03:27.374 --> 00:03:31.245 line:-2
+layered on top of our gameBackground color
+using a ZStack.
+
+
+70
+00:03:31.278 --> 00:03:34.281 line:-2
+To make the background color removable,
+all we need to change
+
+
+71
+00:03:34.314 --> 00:03:37.417 line:-2
+is to add a containerBackground modifier
+to our View,
+
+
+72
+00:03:37.451 --> 00:03:41.722 line:-1
+and move our gameBackground color inside.
+
+
+73
+00:03:41.755 --> 00:03:44.458 line:-2
+Once we do that,
+the system can automatically take out
+
+
+74
+00:03:44.491 --> 00:03:48.529 line:-2
+our widget's background
+depending on where it's being shown.
+
+
+75
+00:03:48.562 --> 00:03:52.933 line:-2
+The Smart Stack on Apple Watch can also
+utilize this new containerBackground.
+
+
+76
+00:03:52.966 --> 00:03:55.569 line:-2
+By default,
+your accessoryRectangular widget
+
+
+77
+00:03:55.602 --> 00:03:59.239 line:-2
+will receive a dark material background
+in this environment.
+
+
+78
+00:03:59.273 --> 00:04:02.442 line:-2
+By adding that same
+containerBackground modifier to our view,
+
+
+79
+00:04:02.476 --> 00:04:05.779 line:-2
+the widget is placed on the same
+background as our other widgets,
+
+
+80
+00:04:05.812 --> 00:04:08.315 line:-1
+linking it with our app's visual identity.
+
+
+81
+00:04:08.348 --> 00:04:10.517 line:-1
+For a deeper dive on this new environment,
+
+
+82
+00:04:10.551 --> 00:04:14.388 line:-2
+check out "Design widgets for
+the Smart Stack on Apple Watch".
+
+
+83
+00:04:14.421 --> 00:04:17.090 line:-2
+Some widgets,
+like the Photos and Maps widgets,
+
+
+84
+00:04:17.124 --> 00:04:19.326 line:-2
+don't really have
+distinct foreground content,
+
+
+85
+00:04:19.359 --> 00:04:22.062 line:-2
+so there's no background
+which makes sense to remove.
+
+
+86
+00:04:22.095 --> 00:04:25.566 line:-2
+In this case, you can add
+the containerBackgroundRemovable modifier
+
+
+87
+00:04:25.599 --> 00:04:28.769 line:-2
+to your WidgetConfiguration,
+and set it to false.
+
+
+88
+00:04:29.603 --> 00:04:32.072 line:-2
+Now, let's make some optimizations
+to our layout
+
+
+89
+00:04:32.105 --> 00:04:35.075 line:-2
+for when we're on iPad Lock screen
+and StandBy mode.
+
+
+90
+00:04:35.976 --> 00:04:38.846 line:-2
+The Weather widget is a great example
+of how to change your layout
+
+
+91
+00:04:38.879 --> 00:04:40.948 line:-1
+when the widget background is removed.
+
+
+92
+00:04:43.750 --> 00:04:46.787 line:-2
+Notice how the widget still contains
+the same information,
+
+
+93
+00:04:46.820 --> 00:04:49.890 line:-2
+but it's been optimized
+to take advantage of the space.
+
+
+94
+00:04:49.923 --> 00:04:52.359 line:-2
+The content is pushed
+all the way to the edges,
+
+
+95
+00:04:52.392 --> 00:04:54.962 line:-1
+and important elements are enlarged.
+
+
+96
+00:04:54.995 --> 00:04:57.998 line:-2
+These tweaks make the widget
+easier to read from far away,
+
+
+97
+00:04:58.031 --> 00:05:01.668 line:-2
+and integrate it more seamlessly
+into StandBy mode.
+
+
+98
+00:05:01.702 --> 00:05:03.704 line:-1
+These layout changes also help the widget
+
+
+99
+00:05:03.737 --> 00:05:07.341 line:-2
+to blend in with accessory family
+widgets on iPad Lock screen,
+
+
+100
+00:05:07.374 --> 00:05:10.277 line:-2
+maintaining a more consistent look
+across every family.
+
+
+101
+00:05:10.310 --> 00:05:13.614 line:-2
+Let's move to Xcode to implement
+these changes in our own widget.
+
+
+102
+00:05:13.647 --> 00:05:16.049 line:-1
+Here I have the code for our AvatarView,
+
+
+103
+00:05:16.083 --> 00:05:18.385 line:-2
+which is what we use
+for our systemSmall widget.
+
+
+104
+00:05:18.418 --> 00:05:20.387 line:-1
+On the right, I can see a live preview
+
+
+105
+00:05:20.420 --> 00:05:23.190 line:-2
+of what our widget looks like
+in Xcode Previews.
+
+
+106
+00:05:23.223 --> 00:05:25.993 line:-2
+When shown in contexts where
+the container background is removed,
+
+
+107
+00:05:26.026 --> 00:05:30.264 line:-2
+the widgetContentMargins automatically
+shrink to bring our content edge-to-edge.
+
+
+108
+00:05:30.297 --> 00:05:33.033 line:-2
+We can detect whether the widget
+background has been removed
+
+
+109
+00:05:33.066 --> 00:05:36.470 line:-2
+using the showsWidgetContainerBackground
+environment variable.
+
+
+110
+00:05:36.503 --> 00:05:40.307 line:-2
+When it is, let's omit the details
+about our hero's level and XP
+
+
+111
+00:05:40.340 --> 00:05:44.444 line:-2
+from our HeroNameView,
+and instead show those details below.
+
+
+112
+00:05:46.313 --> 00:05:49.917 line:-2
+This will also make our hero's name larger
+when in this environment.
+
+
+113
+00:05:49.950 --> 00:05:52.219 line:-1
+Now when we toggle between these contexts,
+
+
+114
+00:05:52.252 --> 00:05:53.921 line:-1
+our layout changes automatically
+
+
+115
+00:05:53.954 --> 00:05:56.790 line:-2
+from our original view
+to our new enlarged view.
+
+
+116
+00:05:58.192 --> 00:06:00.093 line:-1
+Just like with accessory family widgets,
+
+
+117
+00:06:00.127 --> 00:06:01.762 line:-1
+our system family widgets are shown
+
+
+118
+00:06:01.795 --> 00:06:04.631 line:-2
+in the vibrant rendering mode
+on iPad Lock screen.
+
+
+119
+00:06:04.665 --> 00:06:07.501 line:-2
+This means that your widget
+will be<i> </i>desaturated,
+
+
+120
+00:06:07.534 --> 00:06:11.071 line:-2
+then colored appropriately
+for the Lock screen background.
+
+
+121
+00:06:11.104 --> 00:06:13.273 line:-2
+When rendered like this,
+issues with contrast
+
+
+122
+00:06:13.307 --> 00:06:15.409 line:-1
+can impact our widget's legibility.
+
+
+123
+00:06:15.442 --> 00:06:18.745 line:-2
+For example, our hero's avatar
+becomes difficult to distinguish
+
+
+124
+00:06:18.779 --> 00:06:20.047 line:-1
+from its circular backdrop.
+
+
+125
+00:06:20.080 --> 00:06:22.850 line:-2
+Let's hop back to Xcode,
+and modify our widget
+
+
+126
+00:06:22.883 --> 00:06:25.819 line:-2
+to remove that backdrop
+when in the vibrant rendering mode.
+
+
+127
+00:06:25.853 --> 00:06:27.821 line:-2
+Let’s check this out
+in StandBy Night mode.
+
+
+128
+00:06:27.855 --> 00:06:31.091 line:-2
+We can use the widgetRenderingMode
+environment variable
+
+
+129
+00:06:31.124 --> 00:06:34.094 line:-1
+to detect which rendering mode we're in.
+
+
+130
+00:06:34.127 --> 00:06:36.730 line:-2
+Let's change
+our Avatar's includesBackground parameter
+
+
+131
+00:06:36.763 --> 00:06:39.333 line:-2
+to check if we're in
+the vibrant rendering mode.
+
+
+132
+00:06:43.303 --> 00:06:45.873 line:-2
+StandBy Night mode
+also uses vibrant rendering,
+
+
+133
+00:06:45.906 --> 00:06:49.743 line:-2
+so our avatar is clearly visible
+in this context as well.
+
+
+134
+00:06:49.776 --> 00:06:51.845 line:-2
+To learn more about
+widget rendering modes,
+
+
+135
+00:06:51,879 --> 00:06:56,283
+watch "Complications and widgets:
+Reloaded" from WWDC22.
+
+
+136
+00:06:56,316 --> 00:06:58,352
+And for more about
+what's new with widgets,
+
+
+137
+00:06:58,385 --> 00:07:01,522
+check out "Bring widgets to life".
+
+
+138
+00:07:01.555 --> 00:07:04.958 line:-2
+I'm super excited about all the changes
+that are coming to widgets,
+
+
+139
+00:07:04.992 --> 00:07:08.395 line:-2
+and I can't wait to see what ideas
+you come up with to enhance your widgets
+
+
+140
+00:07:08.428 --> 00:07:09.696 line:-1
+with these new features.
+
+
+141
+00:07:09.730 --> 00:07:11.198 line:-1
+Thanks, and enjoy!
+
+
+142
+00:07:11.231 --> 00:07:14.468 line:-1
+♪ ♪
+

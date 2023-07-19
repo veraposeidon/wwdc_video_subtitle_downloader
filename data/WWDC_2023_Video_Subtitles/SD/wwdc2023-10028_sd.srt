@@ -1,0 +1,1519 @@
+2
+00:00:01.001 --> 00:00:08.008
+♪ ♪
+
+
+3
+00:00:10.010 --> 00:00:15.616
+Luca: Hi! My name is Luca and
+I’m an engineer on the SwiftUI team.
+
+
+4
+00:00:15.682 --> 00:00:20.254
+Today we are going to discuss
+how you can bring widgets to life
+
+
+5
+00:00:20.320 --> 00:00:24.124
+with some new, exciting capabilities.
+
+
+6
+00:00:24.191 --> 00:00:29.730
+Widgets are a beloved part
+of the iOS and macOS experience
+
+
+7
+00:00:29.796 --> 00:00:33.300
+and now, with interactivity
+and animations,
+
+
+8
+00:00:33.367 --> 00:00:36.470
+they are even more powerful.
+
+
+9
+00:00:39.606 --> 00:00:45.679
+Interactivity allows your user to directly
+manipulate the data in your widget,
+
+
+10
+00:00:45.746 --> 00:00:52.486
+creating powerful interaction to execute
+the most important actions in your app.
+
+
+11
+00:00:52.553 --> 00:00:57.691
+And animations bring widgets to life
+by helping users get a sense
+
+
+12
+00:00:57.758 --> 00:01:03.263
+of how the content has changed
+and what’s the result of their actions.
+
+
+13
+00:01:03.330 --> 00:01:09.136
+I’m super excited about all of these new
+capabilities, so let’s get started.
+
+
+14
+00:01:09.203 --> 00:01:11.872
+First, we are going to cover animations
+
+
+15
+00:01:11.939 --> 00:01:16.043
+and how easy it is
+to make your widget look great.
+
+
+16
+00:01:16.109 --> 00:01:23.083
+After that, I’m going to walk you through
+how to add interactivity to your widgets.
+
+
+17
+00:01:23.150 --> 00:01:25.419
+Let’s start with animations.
+
+
+18
+00:01:25.485 --> 00:01:28.155
+Throughout this talk,
+we are going to use an app
+
+
+19
+00:01:28.222 --> 00:01:31.458
+that my friend Nils
+has been working on
+
+
+20
+00:01:31.525 --> 00:01:36.930
+to keep track of the caffeine intake
+during the day.
+
+
+21
+00:01:36.997 --> 00:01:41.168
+It already has a widget that shows
+the total amount of caffeine
+
+
+22
+00:01:41.235 --> 00:01:43.737
+and the last drink I had today.
+
+
+23
+00:01:43.804 --> 00:01:47.875
+If I recompile my widget
+with the latest SDK,
+
+
+24
+00:01:47.941 --> 00:01:51.111
+every time the content
+of the widget changes,
+
+
+25
+00:01:51.178 --> 00:01:54.214
+the system is going
+to animate the transition
+
+
+26
+00:01:54.281 --> 00:01:58.519
+between the entries
+with a default animation.
+
+
+27
+00:01:58.585 --> 00:02:03.190
+We are going to add some tweaks here
+to make it look even better,
+
+
+28
+00:02:03.257 --> 00:02:06.527
+but before we jump into Xcode,
+let me briefly talk
+
+
+29
+00:02:06.593 --> 00:02:10.764
+about how animations work with widgets.
+
+
+30
+00:02:10.831 --> 00:02:12.666
+In a regular SwiftUI app,
+
+
+31
+00:02:12.733 --> 00:02:16.904
+you use state
+to drive changes to your view.
+
+
+32
+00:02:16.970 --> 00:02:19.873
+And animations are driven
+by state mutations
+
+
+33
+00:02:19.940 --> 00:02:23.577
+using modifiers like withAnimation.
+
+
+34
+00:02:23.644 --> 00:02:26.680
+But Widgets work slightly differently.
+
+
+35
+00:02:26.747 --> 00:02:29.283
+Widget don't have state.
+
+
+36
+00:02:29.349 --> 00:02:33.587
+Instead, they create a timeline
+made of entries,
+
+
+37
+00:02:33.654 --> 00:02:38.225
+which correspond to different views
+rendered at specific times.
+
+
+38
+00:02:38.292 --> 00:02:42.196
+SwiftUI determines what is the same
+and what is different
+
+
+39
+00:02:42.262 --> 00:02:47.501
+between the entries,
+and animates the parts that have changed.
+
+
+40
+00:02:47.568 --> 00:02:51.405
+By default, widgets
+get an implicit spring animation
+
+
+41
+00:02:51.471 --> 00:02:54.508
+and various implicit content transitions,
+
+
+42
+00:02:54.575 --> 00:02:57.678
+but you can use
+all the transition, animation,
+
+
+43
+00:02:57.744 --> 00:03:02.416
+and content transition APIs
+that SwiftUI provides out of the box
+
+
+44
+00:03:02.482 --> 00:03:05.819
+to customize how your widget animates.
+
+
+45
+00:03:05.886 --> 00:03:11.124
+I won’t go into more details about how all
+the animation primitives of SwiftUI work.
+
+
+46
+00:03:11.191 --> 00:03:17.497
+For that, there is a fantastic talk
+called “Explore SwiftUI Animation.”
+
+
+47
+00:03:17.564 --> 00:03:20.634
+Okay, time to open up Xcode
+
+
+48
+00:03:20.701 --> 00:03:23.203
+and show you how, with a few tweaks,
+
+
+49
+00:03:23.270 --> 00:03:28.809
+your widget can be as fancy as latte art
+on your morning cappuccino
+
+
+50
+00:03:28.876 --> 00:03:33.080
+and how the new Xcode Preview API
+can help you iterate quickly
+
+
+51
+00:03:33.146 --> 00:03:34.982
+on these animations.
+
+
+52
+00:03:37.050 --> 00:03:41.221
+Here we have all the views
+that comprised my widget.
+
+
+53
+00:03:41.288 --> 00:03:45.158
+The main view has a VStack with two views,
+
+
+54
+00:03:45.225 --> 00:03:49.263
+the first showing the total amount
+of caffeine
+
+
+55
+00:03:49.329 --> 00:03:53.634
+and the second,
+the last drink I had today, if present.
+
+
+56
+00:03:53.700 --> 00:03:57.638
+Note how I am using the
+containerBackground modifier here
+
+
+57
+00:03:57.704 --> 00:04:01.008
+to define the background for my widget.
+
+
+58
+00:04:01.074 --> 00:04:06.680
+This allows it to show up in all the new
+supported locations on the Mac and iPad.
+
+
+59
+00:04:06.747 --> 00:04:09.750
+Normally, to be able to see
+your widget animating,
+
+
+60
+00:04:09.816 --> 00:04:12.052
+you would need to have a bunch of entries
+
+
+61
+00:04:12.119 --> 00:04:14.855
+and wait for their moment
+to appear on screen,
+
+
+62
+00:04:14.922 --> 00:04:18.258
+but that can be tedious
+and would slow you down,
+
+
+63
+00:04:18.325 --> 00:04:20.460
+but luckily we have a great solution
+
+
+64
+00:04:20.527 --> 00:04:24.932
+with the new Preview API
+we are introducing this year.
+
+
+65
+00:04:24.998 --> 00:04:29.736
+I can define a new preview
+for a widget in systemSmall
+
+
+66
+00:04:29.803 --> 00:04:34.942
+and pass the type defining my widget.
+
+
+67
+00:04:35.008 --> 00:04:38.278
+and now I can specify
+how to render a timeline
+
+
+68
+00:04:38.345 --> 00:04:42.916
+with some entries I've defined earlier.
+
+
+69
+00:04:42.983 --> 00:04:44.818
+When I do that in the canvas,
+
+
+70
+00:04:44.885 --> 00:04:50.791
+I can now see a preview of my timeline
+and how every entry would look like.
+
+
+71
+00:04:50.858 --> 00:04:52.192
+But check this out!
+
+
+72
+00:04:52.259 --> 00:04:56.396
+When I click through the preview,
+I can see how my widget will animate
+
+
+73
+00:04:56.463 --> 00:04:59.867
+when transitioning between entries.
+
+
+74
+00:04:59.933 --> 00:05:01.768
+This is pretty cool!
+
+
+75
+00:05:01.835 --> 00:05:04.137
+And this is only scratching the surface
+
+
+76
+00:05:04.204 --> 00:05:07.908
+of what this new Preview API
+is capable of.
+
+
+77
+00:05:07.975 --> 00:05:10.477
+Make sure to check out the session
+
+
+78
+00:05:10.544 --> 00:05:13.680
+"Build programmatic UI
+with Xcode Previews"
+
+
+79
+00:05:13.747 --> 00:05:16.750
+to learn more about this new powerful API.
+
+
+80
+00:05:16.817 --> 00:05:20.487
+Okay, time to start
+tweaking these animations.
+
+
+81
+00:05:20.554 --> 00:05:26.527
+The first thing I want to do is start
+with the text for the caffeine amount.
+
+
+82
+00:05:26.593 --> 00:05:29.963
+Right now it is just cross-fading
+with the next value,
+
+
+83
+00:05:30.030 --> 00:05:34.168
+but I really want to add some drama
+to the value going up.
+
+
+84
+00:05:34.234 --> 00:05:39.273
+In this case, the view is not changing,
+but only the text content is,
+
+
+85
+00:05:39.339 --> 00:05:44.611
+and to animated that,
+we can use a content transition.
+
+
+86
+00:05:44.678 --> 00:05:51.685
+And I'm going to choose add a numeric text
+with the value of my caffeine.
+
+
+87
+00:05:51.752 --> 00:05:57.291
+This is a content transition that is made
+specifically for important numeric value
+
+
+88
+00:05:57.357 --> 00:06:02.629
+that we want to give prominence
+when they change.
+
+
+89
+00:06:02.696 --> 00:06:05.799
+I think its looking great!
+
+
+90
+00:06:05.866 --> 00:06:11.205
+Now, I want to focus on the view
+showing the last drink.
+
+
+91
+00:06:11.271 --> 00:06:16.543
+I want to add a transition to emphasize
+that a new drink is coming in.
+
+
+92
+00:06:16.610 --> 00:06:21.081
+The first thing I want to do
+is to use the ID modifier
+
+
+93
+00:06:21.148 --> 00:06:26.954
+to associate the identity of this view
+with specific log it is rendering.
+
+
+94
+00:06:27.020 --> 00:06:31.091
+This will inform SwiftUI
+that whenever this log changes,
+
+
+95
+00:06:31.158 --> 00:06:35.128
+this is a new view and we need
+to transition to the new one.
+
+
+96
+00:06:35.195 --> 00:06:41.568
+And now I can specify a transition.
+I think a push will be good.
+
+
+97
+00:06:41.635 --> 00:06:42.970
+From which edge?
+
+
+98
+00:06:43.036 --> 00:06:49.142
+I think from bottom is a good choice.
+
+
+99
+00:06:49.209 --> 00:06:53.647
+Okay, you already know what to do now.
+Back to the preview canvas.
+
+
+100
+00:06:57.551 --> 00:07:01.188
+And yeah, I like this transition
+from the bottom.
+
+
+101
+00:07:01.255 --> 00:07:03.123
+One last tweak.
+
+
+102
+00:07:03.190 --> 00:07:06.460
+I get a little jittery
+when I drink that much coffee,
+
+
+103
+00:07:06.527 --> 00:07:11.565
+and I want that reflected with
+the animation curve for this transition.
+
+
+104
+00:07:11.632 --> 00:07:15.068
+What's great is that,
+like in a regular SwiftUI app,
+
+
+105
+00:07:15.135 --> 00:07:20.774
+I can use the animation modifier
+
+
+106
+00:07:20.841 --> 00:07:27.648
+and choose a smooth spring
+with a shorter duration
+
+
+107
+00:07:27.714 --> 00:07:32.553
+and bind that animation to my log value.
+
+
+108
+00:07:32.619 --> 00:07:36.857
+And now, the animation
+would match my caffeination.
+
+
+109
+00:07:36.924 --> 00:07:39.359
+I feel pretty good about
+what we have now,
+
+
+110
+00:07:39.426 --> 00:07:42.329
+so let's switch our attention
+to interactivity.
+
+
+111
+00:07:42.396 --> 00:07:48.001
+With interactivity, you can
+execute actions right from the widget!
+
+
+112
+00:07:48.068 --> 00:07:51.839
+Before we jump into Xcode,
+I want to take a moment
+
+
+113
+00:07:51.905 --> 00:07:55.609
+to discuss the architecture
+of how widgets work.
+
+
+114
+00:07:55.676 --> 00:08:01.982
+This will allow you to create a better
+mental model for how interactivity works.
+
+
+115
+00:08:02.049 --> 00:08:05.686
+When you create a widget,
+you define a widget extension,
+
+
+116
+00:08:05.752 --> 00:08:12.159
+which is discovered by the system
+and run as an independent process.
+
+
+117
+00:08:12.226 --> 00:08:17.564
+Widgets define a timeline provider
+that returns a series of entries,
+
+
+118
+00:08:17.631 --> 00:08:20.434
+which are effectively the widget’s model.
+
+
+119
+00:08:20.501 --> 00:08:22.302
+If a widget is visible,
+
+
+120
+00:08:22.369 --> 00:08:25.772
+the system launches
+the widget extension process
+
+
+121
+00:08:25.839 --> 00:08:29.776
+and asks its timeline provider
+for entries.
+
+
+122
+00:08:29.843 --> 00:08:32.646
+These entries are fed back
+into the view builder
+
+
+123
+00:08:32.713 --> 00:08:38.085
+that is part of your widget configuration
+and used to generate a series of views
+
+
+124
+00:08:38.151 --> 00:08:40.220
+based on these entries.
+
+
+125
+00:08:40.287 --> 00:08:44.892
+After that, the system generates
+a representation of these views
+
+
+126
+00:08:44.958 --> 00:08:47.327
+and archives it on disk.
+
+
+127
+00:08:47.394 --> 00:08:53.166
+When its time to display a specific entry,
+the system decodes and renders
+
+
+128
+00:08:53.233 --> 00:08:57.871
+the archived representation of your widget
+in its process.
+
+
+129
+00:08:57.938 --> 00:09:03.277
+Let me pause for a second
+and reiterate this last point.
+
+
+130
+00:09:03.343 --> 00:09:07.281
+Your view code only runs during archiving.
+
+
+131
+00:09:07.347 --> 00:09:12.586
+A separate representation of that view
+is rendered by the system process.
+
+
+132
+00:09:12.653 --> 00:09:18.592
+But if your data is not static,
+you might want to update those entries.
+
+
+133
+00:09:18.659 --> 00:09:23.497
+You can do that by calling the
+reloadTimelines function in your app
+
+
+134
+00:09:23.564 --> 00:09:28.068
+whenever you are updating data
+that is displayed by your widget.
+
+
+135
+00:09:28.135 --> 00:09:31.371
+This will repeat the process
+I've just described,
+
+
+136
+00:09:31.438 --> 00:09:37.344
+regenerate new entries, and archive
+new copies of the views on disk.
+
+
+137
+00:09:37.411 --> 00:09:41.548
+There are three important takeaways
+with this architecture.
+
+
+138
+00:09:41.615 --> 00:09:46.987
+First, when your widget is visible,
+your code is not running.
+
+
+139
+00:09:47.054 --> 00:09:52.459
+You drive changes to the widget content
+by updating its timeline entries,
+
+
+140
+00:09:52.526 --> 00:09:56.496
+and this is also true
+of interactive widgets.
+
+
+141
+00:09:56.563 --> 00:10:02.302
+Typically, updates to widgets are done
+on a best effort basis,
+
+
+142
+00:10:02.369 --> 00:10:07.107
+but importantly, reloads
+initiated from an interaction
+
+
+143
+00:10:07.174 --> 00:10:10.210
+are always guaranteed to occur.
+
+
+144
+00:10:10.277 --> 00:10:15.716
+With this out of the way,
+let’s look at how to add interactivity.
+
+
+145
+00:10:15.782 --> 00:10:19.820
+What’s great is that you can use controls
+that you are already familiar with,
+
+
+146
+00:10:19.887 --> 00:10:25.292
+like Button and Toggle,
+to make part of your widget interactive.
+
+
+147
+00:10:25.359 --> 00:10:29.963
+But remember, since widgets
+are rendered in a different process,
+
+
+148
+00:10:30.030 --> 00:10:32.633
+SwiftUI won’t execute your closure,
+
+
+149
+00:10:32.699 --> 00:10:36.603
+nor mutate your bindings,
+in your process space.
+
+
+150
+00:10:36.670 --> 00:10:40.440
+So we need a way to represent actions
+that can be executed
+
+
+151
+00:10:40.507 --> 00:10:44.945
+by the widget extension
+and be invoked by the system.
+
+
+152
+00:10:45.012 --> 00:10:51.318
+Thankfully, there is already
+a solution to this problem: App Intents.
+
+
+153
+00:10:51.385 --> 00:10:57.958
+You might have used app intents to expose
+actions for your app to Shortcuts or Siri.
+
+
+154
+00:10:58.025 --> 00:11:01.295
+And now, the same intents can be used
+
+
+155
+00:11:01.361 --> 00:11:05.365
+to represent the actions in your widget.
+
+
+156
+00:11:05.432 --> 00:11:11.705
+At its very core, AppIntent is a protocol
+that allows you to define, in code,
+
+
+157
+00:11:11.772 --> 00:11:15.209
+actions that can be executed
+by the system.
+
+
+158
+00:11:15.275 --> 00:11:18.712
+For example, here,
+I’m defining an app intent
+
+
+159
+00:11:18.779 --> 00:11:22.382
+to toggle a todo item in a todo app.
+
+
+160
+00:11:22.449 --> 00:11:26.920
+An intent defines a number
+of parameters as inputs
+
+
+161
+00:11:26.987 --> 00:11:30.023
+and an async function called perform,
+
+
+162
+00:11:30.090 --> 00:11:34.361
+where you will have the business logic
+to run your intent.
+
+
+163
+00:11:34.428 --> 00:11:39.533
+App Intents are very powerful, and there
+is a lot more to know about them,
+
+
+164
+00:11:39.600 --> 00:11:43.504
+so be sure to checkout
+the “Dive into App Intents”
+
+
+165
+00:11:43.570 --> 00:11:47.040
+and "Explore enhancements
+to App Intents” sessions
+
+
+166
+00:11:47.107 --> 00:11:51.979
+from WWDC22 and 23.
+
+
+167
+00:11:52.045 --> 00:11:57.818
+And to support the ability
+to execute App Intent right from the UI,
+
+
+168
+00:11:57.885 --> 00:12:01.955
+when you import both SwiftUI
+and AppIntents,
+
+
+169
+00:12:02.022 --> 00:12:06.827
+There is a new family of initializers
+on Button and Toggle
+
+
+170
+00:12:06.894 --> 00:12:12.165
+that accept an AppIntent as an argument
+and will execute that intent
+
+
+171
+00:12:12.232 --> 00:12:15.102
+when these controls are interacted with.
+
+
+172
+00:12:15.169 --> 00:12:19.006
+Note that only Button and Toggle
+using AppIntent
+
+
+173
+00:12:19.072 --> 00:12:21.775
+are supported in interactive widgets.
+
+
+174
+00:12:21.842 --> 00:12:24.645
+Other controls won’t work.
+
+
+175
+00:12:24.711 --> 00:12:28.749
+And of course,
+those initializers work in apps as well,
+
+
+176
+00:12:28.815 --> 00:12:32.085
+which is cool because
+you can share the app intent logic
+
+
+177
+00:12:32.152 --> 00:12:34.955
+between your widget and your app.
+
+
+178
+00:12:35.022 --> 00:12:38.025
+Let’s go back to Xcode
+and our coffee tracker app
+
+
+179
+00:12:38.091 --> 00:12:41.094
+and add some interactivity.
+
+
+180
+00:12:41.161 --> 00:12:46.533
+Currently, the user can log a new drink
+only by opening the app,
+
+
+181
+00:12:46.600 --> 00:12:51.238
+but where interactive widget shines
+is as accelerator to surface
+
+
+182
+00:12:51.305 --> 00:12:54.541
+the most important actions in your app,
+
+
+183
+00:12:54.608 --> 00:13:00.047
+and for my app, this is definitely
+the logging of a new drink.
+
+
+184
+00:13:00.113 --> 00:13:03.550
+So lets add that to a file
+I've already created.
+
+
+185
+00:13:03.617 --> 00:13:07.054
+The first thing I want to do
+is to define a type
+
+
+186
+00:13:07.120 --> 00:13:11.491
+that conforms to AppIntent
+to log a new drink.
+
+
+187
+00:13:11.558 --> 00:13:16.496
+We'll give it a human-readable title
+that can be used by the system,
+
+
+188
+00:13:16.563 --> 00:13:20.834
+and then implement the perform
+requirements by logging an espresso
+
+
+189
+00:13:20.901 --> 00:13:26.507
+to our store and returning
+an empty intent result.
+
+
+190
+00:13:26.573 --> 00:13:29.076
+Something that
+I want to call your attention to
+
+
+191
+00:13:29.142 --> 00:13:32.112
+is that perform is an async function
+
+
+192
+00:13:32.179 --> 00:13:36.984
+and you should take full advantage of it
+if you are doing any asynchronous work,
+
+
+193
+00:13:37.050 --> 00:13:39.720
+such as writing to a database
+
+
+194
+00:13:39.786 --> 00:13:44.925
+exactly like I'm doing here when
+I'm awaiting the log writing operation.
+
+
+195
+00:13:44.992 --> 00:13:47.194
+As soon as your perform returns,
+
+
+196
+00:13:47.261 --> 00:13:52.032
+the system will immediately
+initiate a reload of your widget timeline,
+
+
+197
+00:13:52.099 --> 00:13:56.904
+giving you the opportunity
+to update the content of your widget.
+
+
+198
+00:13:56.970 --> 00:14:02.776
+So again, make sure to have persisted
+all the information necessary
+
+
+199
+00:14:02.843 --> 00:14:07.681
+to reload your updated widget
+before returning from perform.
+
+
+200
+00:14:07.748 --> 00:14:10.450
+I've hard coded the drink
+to be an espresso,
+
+
+201
+00:14:10.517 --> 00:14:15.088
+but, of course, we want to be able
+to pass the specific drink to log.
+
+
+202
+00:14:15.155 --> 00:14:20.561
+To do that we can add a stored property
+with the @Parameter property wrapper
+
+
+203
+00:14:20.627 --> 00:14:24.932
+and an initializer
+that populates the all parameters.
+
+
+204
+00:14:24.998 --> 00:14:28.001
+It is important
+that I use this property wrapper
+
+
+205
+00:14:28.068 --> 00:14:32.105
+because only the stored properties
+that are annotated with it
+
+
+206
+00:14:32.172 --> 00:14:34.942
+are going to be persisted
+and will be available
+
+
+207
+00:14:35.008 --> 00:14:39.346
+when the intent is performed
+in your widget extension.
+
+
+208
+00:14:39.413 --> 00:14:42.549
+Before we add the button
+to invoke this intent,
+
+
+209
+00:14:42.616 --> 00:14:48.655
+I want to highlight an important ecosystem
+benefit of using App Intents here.
+
+
+210
+00:14:48.722 --> 00:14:54.461
+This app intent I've just defined is going
+to be available in Shortcut and Siri,
+
+
+211
+00:14:54.528 --> 00:14:57.364
+so the investment in defining it here
+
+
+212
+00:14:57.431 --> 00:15:02.503
+will pay dividend to your user experience
+beyond widgets.
+
+
+213
+00:15:02.569 --> 00:15:06.440
+And now we are ready to add
+the button to the widget.
+
+
+214
+00:15:06.507 --> 00:15:10.244
+Let's create
+a new view holding our buttons.
+
+
+215
+00:15:10.310 --> 00:15:13.413
+In this view
+I'm using this button initializer
+
+
+216
+00:15:13.480 --> 00:15:18.886
+that take an app intent,
+so we can pass the one we just defined.
+
+
+217
+00:15:18.952 --> 00:15:24.191
+And let's add this view to the rest
+of the widget with some spacers.
+
+
+218
+00:15:24.258 --> 00:15:28.495
+Now we have everything in place,
+let's see how this is working out
+
+
+219
+00:15:28.562 --> 00:15:32.332
+on the widget by building and running.
+
+
+220
+00:15:32.399 --> 00:15:36.937
+A little tip here: you can
+actually have directly build the target
+
+
+221
+00:15:37.004 --> 00:15:41.542
+for the widget extension
+and Xcode will install the widget
+
+
+222
+00:15:41.608 --> 00:15:43.877
+right on the home screen for you.
+
+
+223
+00:15:43.944 --> 00:15:47.047
+My widget now has the button
+I've just defined.
+
+
+224
+00:15:47.114 --> 00:15:52.886
+If I tap on it,
+I can log this last cup of espresso.
+
+
+225
+00:15:52.953 --> 00:15:55.956
+But there is also one additional change
+I want to make
+
+
+226
+00:15:56.023 --> 00:16:00.694
+so that my widget provides
+the best user experience possible.
+
+
+227
+00:16:00.761 --> 00:16:03.564
+When your app intent finishes to perform,
+
+
+228
+00:16:03.630 --> 00:16:06.400
+it will cause a widget
+to reload its timeline.
+
+
+229
+00:16:06.466 --> 00:16:09.937
+This can introduce
+a small latency from the action,
+
+
+230
+00:16:10.003 --> 00:16:12.139
+to the resulting change in the UI.
+
+
+231
+00:16:12.206 --> 00:16:17.010
+But this latency can become more
+pronounced with iPhone widget on Mac
+
+
+232
+00:16:17.077 --> 00:16:21.682
+so we are providing
+a solution out of the box for it.
+
+
+233
+00:16:21.748 --> 00:16:25.385
+For example, in my widget,
+the value showing
+
+
+234
+00:16:25.452 --> 00:16:31.792
+the total amount of caffeine won't update
+until an updated entry arrived.
+
+
+235
+00:16:31.859 --> 00:16:36.530
+We can annotate this view
+with the invalidatableContent modifier.
+
+
+236
+00:16:36.597 --> 00:16:40.868
+I've added this widget
+from my iPhone to my Mac.
+
+
+237
+00:16:40.934 --> 00:16:44.137
+Let's tap on the button.
+
+
+238
+00:16:44.204 --> 00:16:48.442
+The view showing the caffeine amount
+shows a system effect
+
+
+239
+00:16:48.509 --> 00:16:54.381
+to indicate that its value is invalidated
+until an update comes in.
+
+
+240
+00:16:54.448 --> 00:16:59.686
+We just saw Button in action and how
+with the invalidatableContent modifier,
+
+
+241
+00:16:59.753 --> 00:17:03.991
+you can help users
+improve the perception of latency.
+
+
+242
+00:17:04.057 --> 00:17:06.693
+Use this modifier judiciously.
+
+
+243
+00:17:06.760 --> 00:17:11.465
+You don't need to annotate
+every single view that might change.
+
+
+244
+00:17:11.532 --> 00:17:16.136
+You should use this modifier
+with views that are meaningful
+
+
+245
+00:17:16.203 --> 00:17:19.773
+to set the right expectation
+with your users.
+
+
+246
+00:17:19.840 --> 00:17:22.209
+Toggle goes one step further
+
+
+247
+00:17:22.276 --> 00:17:27.214
+and will optimistically update its
+presentation when interacted with
+
+
+248
+00:17:27.281 --> 00:17:32.753
+without having to wait for a roundtrip
+to the widget extension and back.
+
+
+249
+00:17:32.819 --> 00:17:37.658
+This is done automatically,
+on your behalf, at archive time,
+
+
+250
+00:17:37.724 --> 00:17:42.462
+by pre-rendering the toggle style
+in both configurations.
+
+
+251
+00:17:42.529 --> 00:17:46.133
+Make sure,
+if you define your own toggle style,
+
+
+252
+00:17:46.200 --> 00:17:50.737
+to check the configuration isOn
+property from the style
+
+
+253
+00:17:50.804 --> 00:17:53.607
+and use that to switch the appearance.
+
+
+254
+00:17:53.674 --> 00:17:58.846
+This concludes our overview
+for interactivity and animations.
+
+
+255
+00:17:58.912 --> 00:18:01.248
+With animations and interactivity,
+
+
+256
+00:18:01.315 --> 00:18:05.886
+you have the opportunity
+to infuse new life into your widgets
+
+
+257
+00:18:05.953 --> 00:18:09.256
+and with widgets now
+in all these new locations,
+
+
+258
+00:18:09.323 --> 00:18:12.492
+you can bring these little,
+delightful interactions
+
+
+259
+00:18:12.559 --> 00:18:16.196
+to your users wherever they are.
+
+
+260
+00:18:16.263 --> 00:18:20.968
+So make sure to fine tune
+the animations for your widgets
+
+
+261
+00:18:21.034 --> 00:18:25.472
+with the help of the new Xcode
+Preview APIs
+
+
+262
+00:18:25.539 --> 00:18:29.409
+and look out
+for the most important actions in your app
+
+
+263
+00:18:29.476 --> 00:18:32.012
+and surface them in your widget,
+
+
+264
+00:18:32.079 --> 00:18:38.085
+giving your user powerful interactions
+whenever and wherever they need them.
+
+
+265
+00:18:38.151 --> 00:18:39.653
+Thanks you!
+
+
+266
+00:18:39.720 --> 00:18:41.722
+♪ ♪
+

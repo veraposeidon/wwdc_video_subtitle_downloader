@@ -1,0 +1,3879 @@
+2
+00:00:00.334 --> 00:00:06.340 line:-1 align:center
+♪ ♪
+
+
+3
+00:00:10,344 --> 00:00:13,080 line:-2
+Becca:
+Hi, I'm Becca from the Swift team.
+
+
+4
+00:00:13,113 --> 00:00:16,650 line:-2
+Today we'll be talking about Swift macros,
+an exciting new feature
+
+
+5
+00:00:16,683 --> 00:00:20,120 line:-2
+that lets you customize
+the Swift language for your needs.
+
+
+6
+00:00:20.153 --> 00:00:23.357 line:-2 align:center
+We'll start by talking
+about what macros are for.
+
+
+7
+00:00:24,157 --> 00:00:26,860 line:-2
+Then, we'll talk about some
+of the principles we kept in mind
+
+
+8
+00:00:26.894 --> 00:00:29.596 line:-1 align:center
+when we designed Swift macros.
+
+
+9
+00:00:29,630 --> 00:00:32,599 line:-2
+And then we'll
+cover how Swift macros work
+
+
+10
+00:00:32,633 --> 00:00:36,470 line:-2
+and the specific ways they can interact
+with the other code in your project.
+
+
+11
+00:00:37.571 --> 00:00:41.074 line:-2 align:center
+After that,
+we'll talk about how to implement macros
+
+
+12
+00:00:41,108 --> 00:00:45,112 line:-2
+and finish by discussing how
+to make sure your macros work correctly.
+
+
+13
+00:00:46.113 --> 00:00:50.250 line:-2 align:center
+So let's get started by talking
+about why Swift supports macros.
+
+
+14
+00:00:50,284 --> 00:00:54,121 line:-2
+Swift loves to let users
+write expressive code and APIs.
+
+
+15
+00:00:54,154 --> 00:00:55,756 line:-1
+That's why it provides features like
+
+
+16
+00:00:55.789 --> 00:00:58.859 line:-1 align:center
+derived conformances and result builders,
+
+
+17
+00:00:58,892 --> 00:01:00,260 line:-1
+which help users to avoid
+
+
+18
+00:01:00,294 --> 00:01:02,829 line:-1
+writing repetitive boilerplate.
+
+
+19
+00:01:02.863 --> 00:01:04.264 line:-1 align:center
+These features all work
+
+
+20
+00:01:04,298 --> 00:01:06,099 line:-1
+basically the same way.
+
+
+21
+00:01:06,133 --> 00:01:08,068 line:-1
+For example, when you conform to Codable
+
+
+22
+00:01:08,101 --> 00:01:09,469 line:-1
+without providing implementations
+
+
+23
+00:01:09.503 --> 00:01:11.138 line:-1 align:center
+for its members,
+
+
+24
+00:01:11.171 --> 00:01:14.708 line:-2 align:center
+Swift automatically expands
+the conformance into a set of members
+
+
+25
+00:01:14.741 --> 00:01:17.010 line:-1 align:center
+that it inserts into the program.
+
+
+26
+00:01:17.044 --> 00:01:20.948 line:-2 align:center
+I've shown the expansion
+for the conformance in the gray box.
+
+
+27
+00:01:20,981 --> 00:01:24,685 line:-2
+Creating this code for you lets you
+use Codable without having to know
+
+
+28
+00:01:24,718 --> 00:01:28,288 line:-2
+exactly how it works
+and makes it so you don't have to decide
+
+
+29
+00:01:28,322 --> 00:01:32,459 line:-2
+if adding Codable support
+is worth writing a screenful of code.
+
+
+30
+00:01:32,492 --> 00:01:34,962 line:-2
+Swift has many features
+that work in this way.
+
+
+31
+00:01:34.995 --> 00:01:36.730 line:-1 align:center
+You write some simple syntax,
+
+
+32
+00:01:36,763 --> 00:01:41,301 line:-2
+and the compiler expands it into a more
+complicated piece of code automatically.
+
+
+33
+00:01:41.335 --> 00:01:44.638 line:-2 align:center
+But what if the existing features
+can't do what you want?
+
+
+34
+00:01:44.671 --> 00:01:47.574 line:-2 align:center
+Well, you could add
+a feature to the Swift compiler,
+
+
+35
+00:01:47.608 --> 00:01:49.243 line:-1 align:center
+since it's open source.
+
+
+36
+00:01:49.276 --> 00:01:51.912 line:-2 align:center
+But that literally involves me,
+personally,
+
+
+37
+00:01:51,945 --> 00:01:54,548 line:-2
+getting on a video conference
+and discussing your feature
+
+
+38
+00:01:54,581 --> 00:01:59,820 line:-2
+with other Swift project leaders,
+so it's not exactly a process that scales.
+
+
+39
+00:01:59,853 --> 00:02:02,322 line:-1
+That's why we're introducing macros.
+
+
+40
+00:02:02.356 --> 00:02:04.858 line:-2 align:center
+They let you add
+your own language features to Swift,
+
+
+41
+00:02:04.892 --> 00:02:08.095 line:-2 align:center
+eliminating tedium and boilerplate,
+in a way you can distribute
+
+
+42
+00:02:08,128 --> 00:02:11,665 line:-2
+in a Swift package
+without modifying the compiler.
+
+
+43
+00:02:11,698 --> 00:02:14,401 line:-2
+Some of you haven't used macros
+in other languages.
+
+
+44
+00:02:14,434 --> 00:02:17,137 line:-2
+But if you have,
+you may have mixed feelings about them.
+
+
+45
+00:02:17.171 --> 00:02:19.840 line:-2 align:center
+That's partly because a lot
+of Swift developers are familiar
+
+
+46
+00:02:19,873 --> 00:02:23,677 line:-2
+with Objective-C or other languages
+that use the C preprocessor,
+
+
+47
+00:02:23,710 --> 00:02:27,114 line:-2
+and they know about the limitations
+and pitfalls of C macros.
+
+
+48
+00:02:27.147 --> 00:02:32.119 line:-2 align:center
+But Swift macros are very different
+in ways that avoid many of those issues.
+
+
+49
+00:02:32,152 --> 00:02:34,555 line:-1
+We designed them with four goals in mind.
+
+
+50
+00:02:34.588 --> 00:02:38.692 line:-2 align:center
+The first goal is that it should be
+pretty obvious when you're using a macro.
+
+
+51
+00:02:38.725 --> 00:02:40.627 line:-1 align:center
+There are two kinds of macros:
+
+
+52
+00:02:40,661 --> 00:02:44,198 line:-2
+Freestanding macros stand in place
+of something else in your code.
+
+
+53
+00:02:44.231 --> 00:02:47.000 line:-1 align:center
+They always start with a pound (#) sign.
+
+
+54
+00:02:47.034 --> 00:02:51.772 line:-2 align:center
+And attached macros are used as attributes
+on declarations in your code.
+
+
+55
+00:02:51,805 --> 00:02:54,041 line:-1
+They always start with an at (@) sign.
+
+
+56
+00:02:54,074 --> 00:02:58,712 line:-2
+Swift already uses the pound (#) and at (@) signs
+to indicate special compiler behavior.
+
+
+57
+00:02:58.745 --> 00:03:01.515 line:-1 align:center
+Macros just make that extensible.
+
+
+58
+00:03:01,548 --> 00:03:03,517 line:-1
+And if you don't see #’s or @’s,
+
+
+59
+00:03:03.550 --> 00:03:06.820 line:-2 align:center
+you can be confident
+that there aren't any macros involved.
+
+
+60
+00:03:06,854 --> 00:03:10,257 line:-2
+The second goal is that both
+the code passed into a macro
+
+
+61
+00:03:10.290 --> 00:03:14.962 line:-2 align:center
+and the code sent back out of it should
+be complete and checked for mistakes.
+
+
+62
+00:03:14,995 --> 00:03:17,464 line:-1
+You can't pass "1 +” to a macro
+
+
+63
+00:03:17.497 --> 00:03:20.534 line:-2 align:center
+because arguments have
+to be complete expressions.
+
+
+64
+00:03:20,567 --> 00:03:23,103 line:-2
+Nor can you pass an argument
+with the wrong type
+
+
+65
+00:03:23,136 --> 00:03:25,806 line:-2
+because macro arguments
+and results are type-checked,
+
+
+66
+00:03:25.839 --> 00:03:28.008 line:-1 align:center
+just like function arguments.
+
+
+67
+00:03:28,041 --> 00:03:31,111 line:-2
+And a macro's implementation
+can validate its inputs and emit
+
+
+68
+00:03:31,144 --> 00:03:33,447 line:-2
+compiler warnings or errors
+if something's wrong,
+
+
+69
+00:03:33,480 --> 00:03:37,150 line:-2
+so it's easier to be certain
+that you're using a macro correctly.
+
+
+70
+00:03:37,184 --> 00:03:40,821 line:-2
+The third goal is that macro expansions
+should be incorporated
+
+
+71
+00:03:40,854 --> 00:03:44,424 line:-2
+into the program
+in predictable, additive ways.
+
+
+72
+00:03:44,458 --> 00:03:47,528 line:-2
+A macro can only add
+to the visible code in your program.
+
+
+73
+00:03:47,561 --> 00:03:49,463 line:-1
+It can't remove it or change it.
+
+
+74
+00:03:49.496 --> 00:03:52.933 line:-2 align:center
+So even if you have no idea
+what "someUnknownMacro" does,
+
+
+75
+00:03:52,966 --> 00:03:55,169 line:-2
+you can still be sure
+that it doesn't delete the call
+
+
+76
+00:03:55,202 --> 00:03:58,138 line:-2
+to "finishDoingThingy"
+or move it into a new function.
+
+
+77
+00:03:58,172 --> 00:04:01,775 line:-2
+That makes it a lot easier
+to read code that uses macros.
+
+
+78
+00:04:01.808 --> 00:04:06.280 line:-2 align:center
+And the final goal is that macros
+should not be impenetrable magic.
+
+
+79
+00:04:06.313 --> 00:04:08.815 line:-1 align:center
+Macros just add more code to your program,
+
+
+80
+00:04:08.849 --> 00:04:11.685 line:-2 align:center
+and that's something
+you can see right in Xcode.
+
+
+81
+00:04:12.619 --> 00:04:16.590 line:-2 align:center
+You can right-click on a macro's use site
+and ask to see what it expands into.
+
+
+82
+00:04:16.623 --> 00:04:20.394 line:-2 align:center
+You can set breakpoints in the expansion
+or step into it with the debugger.
+
+
+83
+00:04:20,427 --> 00:04:23,230 line:-2
+When the code inside a macro
+expansion doesn't compile,
+
+
+84
+00:04:23,263 --> 00:04:25,632 line:-2
+you'll see both where the error
+is in the expansion,
+
+
+85
+00:04:25,666 --> 00:04:28,001 line:-2
+and where that expansion goes
+in your source code.
+
+
+86
+00:04:28.035 --> 00:04:30.904 line:-2 align:center
+And all of these tools work
+even if the macro is provided
+
+
+87
+00:04:30,938 --> 00:04:32,472 line:-1
+by a closed-source library.
+
+
+88
+00:04:32,506 --> 00:04:35,609 line:-2
+Macro authors can even write
+unit tests for their macros
+
+
+89
+00:04:35,642 --> 00:04:39,813 line:-2
+to make sure they work as expected;
+something we highly encourage they do.
+
+
+90
+00:04:40,581 --> 00:04:43,450 line:-2
+We think these goals make
+Swift macros easy for developers
+
+
+91
+00:04:43,483 --> 00:04:45,953 line:-1
+to understand and maintain.
+
+
+92
+00:04:45,986 --> 00:04:48,722 line:-2
+So now that we understand
+what Swift macros are trying to achieve,
+
+
+93
+00:04:48.755 --> 00:04:51.024 line:-1 align:center
+let's talk about how they do it.
+
+
+94
+00:04:51,058 --> 00:04:54,995 line:-2
+Before we get lost in the details,
+let's just get the basic concept down.
+
+
+95
+00:04:55.028 --> 00:04:57.331 line:-2 align:center
+When Swift sees you
+call a macro in your code,
+
+
+96
+00:04:57.364 --> 00:05:00.868 line:-2 align:center
+like the "stringify" macro
+from the Xcode macro package template,
+
+
+97
+00:05:00,901 --> 00:05:03,504 line:-1
+it extracts that use from the code
+
+
+98
+00:05:03.537 --> 00:05:06.006 line:-1 align:center
+and sends it to a special compiler plug-in
+
+
+99
+00:05:06,039 --> 00:05:08,775 line:-2
+that contains the implementation
+for that macro.
+
+
+100
+00:05:08,809 --> 00:05:12,412 line:-2
+The plug-in runs as a separate process
+in a secure sandbox,
+
+
+101
+00:05:12,446 --> 00:05:16,149 line:-2
+and it contains custom Swift code
+written by the macro's author.
+
+
+102
+00:05:16,183 --> 00:05:19,653 line:-2
+It processes the macro use
+and returns an "expansion,"
+
+
+103
+00:05:19.686 --> 00:05:23.524 line:-2 align:center
+a new fragment
+of code created by the macro.
+
+
+104
+00:05:23,557 --> 00:05:26,693 line:-2
+The Swift compiler then adds
+that expansion to your program
+
+
+105
+00:05:26.727 --> 00:05:29.930 line:-2 align:center
+and compiles your code
+and the expansion together.
+
+
+106
+00:05:29,963 --> 00:05:32,699 line:-2
+So when you run the program,
+it works just as though you wrote
+
+
+107
+00:05:32,733 --> 00:05:36,703 line:-2
+the expansion yourself
+instead of calling the macro.
+
+
+108
+00:05:36.737 --> 00:05:39.306 line:-2 align:center
+Now, there's an important point
+I glossed over here.
+
+
+109
+00:05:39.339 --> 00:05:43.177 line:-2 align:center
+How did Swift know
+that the "stringify" macro exists?
+
+
+110
+00:05:43.210 --> 00:05:47.047 line:-2 align:center
+And the answer is,
+it comes from a macro declaration.
+
+
+111
+00:05:47.080 --> 00:05:50.884 line:-2 align:center
+A macro declaration
+provides the API for a macro.
+
+
+112
+00:05:50.918 --> 00:05:53.787 line:-2 align:center
+You can write the declaration
+right in your own module,
+
+
+113
+00:05:53.820 --> 00:05:56.790 line:-2 align:center
+or you can import it
+from a library or framework.
+
+
+114
+00:05:56,823 --> 00:05:59,493 line:-2
+It specifies the macro's name
+and signature,
+
+
+115
+00:05:59,526 --> 00:06:02,462 line:-2
+the number of parameters it takes,
+their labels and types,
+
+
+116
+00:06:02,496 --> 00:06:05,098 line:-2
+and the type of the result
+if the macro has one,
+
+
+117
+00:06:05,132 --> 00:06:07,467 line:-1
+just like a function declaration.
+
+
+118
+00:06:07.501 --> 00:06:11.872 line:-2 align:center
+And it also has one or more attributes
+that specify the macro's roles.
+
+
+119
+00:06:11.905 --> 00:06:16.410 line:-2 align:center
+It's impossible to write a macro
+without thinking about what its roles are.
+
+
+120
+00:06:16,443 --> 00:06:20,414 line:-2
+So let's talk about what a role is
+and how you can use different roles
+
+
+121
+00:06:20.447 --> 00:06:23.016 line:-1 align:center
+to write different kinds of macros.
+
+
+122
+00:06:23.050 --> 00:06:25.719 line:-1 align:center
+A role is a set of rules for a macro.
+
+
+123
+00:06:25.752 --> 00:06:28.789 line:-2 align:center
+It governs where
+and how you apply the macro,
+
+
+124
+00:06:28.822 --> 00:06:31.525 line:-1 align:center
+what kind of code it expands into,
+
+
+125
+00:06:31.558 --> 00:06:34.962 line:-2 align:center
+and where that expansion
+is inserted into your code.
+
+
+126
+00:06:34.995 --> 00:06:37.464 line:-2 align:center
+Ultimately,
+it's macro roles that are responsible
+
+
+127
+00:06:37.497 --> 00:06:42.536 line:-2 align:center
+for achieving our goal of inserting
+expansions in predictable, additive ways.
+
+
+128
+00:06:43.403 --> 00:06:46.240 line:-2 align:center
+There are two roles
+that create freestanding macros:
+
+
+129
+00:06:46.273 --> 00:06:48.642 line:-1 align:center
+Expression and declaration.
+
+
+130
+00:06:48,675 --> 00:06:51,745 align:center
+And there are five roles
+that create attached macros:
+
+
+131
+00:06:51,778 --> 00:06:56,617 align:center
+Peer, accessor, member attribute,
+member, and conformance.
+
+
+132
+00:06:56.650 --> 00:06:59.820 line:-2 align:center
+Let's take a look at these roles
+and when you might use them.
+
+
+133
+00:06:59.853 --> 00:07:02.923 line:-2 align:center
+We'll start with
+the "freestanding expression" role.
+
+
+134
+00:07:02.956 --> 00:07:05.492 line:-2 align:center
+If the term "expression"
+doesn't ring a bell,
+
+
+135
+00:07:05,526 --> 00:07:10,464 line:-2
+an expression is what we call a unit of
+code that executes and produces a result.
+
+
+136
+00:07:10.497 --> 00:07:15.202 line:-2 align:center
+In this "let" statement, the arithmetic
+after the equal sign is an expression.
+
+
+137
+00:07:15,235 --> 00:07:17,671 line:-2
+But expressions have
+a recursive structure--
+
+
+138
+00:07:17,704 --> 00:07:20,274 line:-2
+they're often made up
+of smaller expressions.
+
+
+139
+00:07:20.307 --> 00:07:23.710 line:-2 align:center
+So "x + width"
+alone is also an expression.
+
+
+140
+00:07:23.744 --> 00:07:26.013 line:-1 align:center
+And so is just the word "width."
+
+
+141
+00:07:26.046 --> 00:07:32.019 line:-2 align:center
+A "freestanding expression" macro then is
+a macro that expands into an expression.
+
+
+142
+00:07:32,052 --> 00:07:33,987 line:-1
+How would you use one?
+
+
+143
+00:07:34,021 --> 00:07:36,790 line:-2
+Imagine you need
+to force-unwrap an optional.
+
+
+144
+00:07:36,823 --> 00:07:40,093 line:-2
+Swift provides a force-unwrap operator,
+but some teams feel
+
+
+145
+00:07:40.127 --> 00:07:42.763 line:-2 align:center
+that it's a little too easy
+to throw in a force-unwrap
+
+
+146
+00:07:42,796 --> 00:07:44,631 line:-1
+without thinking about its safety,
+
+
+147
+00:07:44.665 --> 00:07:48.101 line:-2 align:center
+so their style guides tell developers
+to write something more complex
+
+
+148
+00:07:48,135 --> 00:07:50,904 line:-2
+that indicates
+why the value should never be nil.
+
+
+149
+00:07:50.938 --> 00:07:53.841 line:-2 align:center
+But most of these alternatives,
+such as using a "guard let"
+
+
+150
+00:07:53.874 --> 00:07:56.610 line:-2 align:center
+and then calling "preconditionFailure"
+in the "else" branch,
+
+
+151
+00:07:56,643 --> 00:07:58,512 line:-1
+are a little too much ceremony.
+
+
+152
+00:07:58,545 --> 00:08:02,983 line:-2
+Let's design a macro that strikes
+a better balance between these extremes.
+
+
+153
+00:08:03,016 --> 00:08:05,519 line:-2
+We want this macro
+to compute and return a value,
+
+
+154
+00:08:05.552 --> 00:08:08.555 line:-2 align:center
+so we make it
+a "freestanding(expression)” macro.
+
+
+155
+00:08:08.589 --> 00:08:11.058 line:-2 align:center
+We give it the name "unwrap"
+and a generic type
+
+
+156
+00:08:11.091 --> 00:08:15.796 line:-2 align:center
+where the value passed in is optional,
+but the value returned is non-optional.
+
+
+157
+00:08:15,829 --> 00:08:18,665 line:-2
+And we also pass in a string
+that's part of the message printed
+
+
+158
+00:08:18,699 --> 00:08:20,300 line:-1
+if the unwrap fails.
+
+
+159
+00:08:20.334 --> 00:08:23.604 line:-2 align:center
+So we end up with a macro
+that we call just like a function,
+
+
+160
+00:08:23.637 --> 00:08:26.607 line:-2 align:center
+but it expands into an expression
+that contains a "guard let"
+
+
+161
+00:08:26.640 --> 00:08:27.975 line:-1 align:center
+wrapped in a closure.
+
+
+162
+00:08:28,008 --> 00:08:30,911 line:-2
+The error message
+even includes the variable name,
+
+
+163
+00:08:30,944 --> 00:08:34,515 line:-2
+something that would be impossible
+with a normal function.
+
+
+164
+00:08:34.548 --> 00:08:36.917 line:-2 align:center
+Now that we've seen
+the freestanding expression role,
+
+
+165
+00:08:36.950 --> 00:08:39.486 line:-2 align:center
+let's look
+at the freestanding declaration role.
+
+
+166
+00:08:39.520 --> 00:08:42.155 line:-1 align:center
+It expands into one or more declarations,
+
+
+167
+00:08:42,189 --> 00:08:44,625 line:-1
+like functions, variables, or types.
+
+
+168
+00:08:44.658 --> 00:08:46.593 line:-1 align:center
+What could you use it for?
+
+
+169
+00:08:46.627 --> 00:08:49.730 line:-2 align:center
+Imagine you're writing
+some kind of statistical analysis
+
+
+170
+00:08:49.763 --> 00:08:51.765 line:-1 align:center
+that needs a 2D array type.
+
+
+171
+00:08:51,798 --> 00:08:55,235 line:-2
+You want all of the rows in the array
+to have the same number of columns,
+
+
+172
+00:08:55,269 --> 00:08:57,771 line:-1
+so you don't want an array-of-arrays.
+
+
+173
+00:08:58,839 --> 00:09:02,843 line:-2
+Instead, you want to store the elements
+in a flat, one-dimensional array,
+
+
+174
+00:09:02,876 --> 00:09:05,078 line:-1
+and then compute a one-dimensional index
+
+
+175
+00:09:05,112 --> 00:09:09,049 line:-2
+from the two-dimensional indices
+passed in by the developer.
+
+
+176
+00:09:09.082 --> 00:09:12.352 line:-2 align:center
+To do that,
+you might write a type like this one.
+
+
+177
+00:09:12,386 --> 00:09:16,423 line:-2
+The "makeIndex" function takes
+the two integers needed for a 2D index,
+
+
+178
+00:09:16.456 --> 00:09:20.394 line:-2 align:center
+and then does a little arithmetic
+to turn them into a 1D index.
+
+
+179
+00:09:20,427 --> 00:09:23,030 line:-2
+But then you find that,
+in another part of the program,
+
+
+180
+00:09:23,063 --> 00:09:25,232 line:-1
+you need a three-dimensional array.
+
+
+181
+00:09:25,265 --> 00:09:28,135 line:-2
+It's almost exactly the same
+as the 2D array.
+
+
+182
+00:09:28,168 --> 00:09:29,803 line:-1
+There's just a few more indices,
+
+
+183
+00:09:29,837 --> 00:09:32,439 line:-2
+and the calculation
+is a little more complex.
+
+
+184
+00:09:32,472 --> 00:09:35,709 line:-2
+And then you need a 4D array
+and then a 5D array,
+
+
+185
+00:09:35.742 --> 00:09:39.112 line:-2 align:center
+and soon you're swimming
+in array types that are almost identical,
+
+
+186
+00:09:39.146 --> 00:09:42.649 line:-2 align:center
+but not quite close enough
+to use generics, or protocol extensions,
+
+
+187
+00:09:42,683 --> 00:09:44,952 line:-2
+or subclasses,
+or any of the other features
+
+
+188
+00:09:44,985 --> 00:09:47,054 line:-1
+Swift offers for this kind of thing.
+
+
+189
+00:09:47.087 --> 00:09:50.224 line:-2 align:center
+Fortunately,
+each of these structs is a declaration,
+
+
+190
+00:09:50,257 --> 00:09:53,760 line:-2
+so we can use
+a declaration macro to create them.
+
+
+191
+00:09:53,794 --> 00:09:56,496 line:-2
+So let's declare
+a freestanding declaration macro
+
+
+192
+00:09:56.530 --> 00:09:58.832 line:-1 align:center
+with the name "makeArrayND,"
+
+
+193
+00:09:58.866 --> 00:10:02.936 line:-2 align:center
+since it's going to create
+an N-dimensional array type.
+
+
+194
+00:10:02,970 --> 00:10:06,206 line:-2
+We'll pass the number
+of dimensions as an Int parameter,
+
+
+195
+00:10:06,240 --> 00:10:07,908 line:-1
+and we won't declare a result type
+
+
+196
+00:10:07.941 --> 00:10:11.245 line:-2 align:center
+because this macro
+will add a declaration to our program,
+
+
+197
+00:10:11,278 --> 00:10:14,014 line:-2
+not compute a result
+that's used by other code.
+
+
+198
+00:10:14.047 --> 00:10:16.950 line:-2 align:center
+Now we can call the macro
+four times with two,
+
+
+199
+00:10:16,984 --> 00:10:21,488 line:-2
+three, four, and five dimensions,
+and each of those calls will expand
+
+
+200
+00:10:21.522 --> 00:10:24.057 line:-2 align:center
+into an entire
+multi-dimensional array type
+
+
+201
+00:10:24.091 --> 00:10:28.695 line:-2 align:center
+with the right number of arguments
+and the right calculation for that size.
+
+
+202
+00:10:28,729 --> 00:10:31,665 line:-2
+So far, we've only looked
+at freestanding macros.
+
+
+203
+00:10:31.698 --> 00:10:34.701 line:-2 align:center
+Now let's move
+on to roles for attached macros.
+
+
+204
+00:10:34.735 --> 00:10:40.174 line:-2 align:center
+Attached macros are, as the name suggests,
+attached to a specific declaration.
+
+
+205
+00:10:40.207 --> 00:10:43.043 line:-2 align:center
+That means
+they have more information to work from.
+
+
+206
+00:10:43,076 --> 00:10:46,146 line:-2
+Freestanding macros are only given
+the arguments they're passed,
+
+
+207
+00:10:46,180 --> 00:10:50,551 line:-2
+but attached macros can also access
+the declaration they're attached to.
+
+
+208
+00:10:50,584 --> 00:10:53,820 line:-2
+They often inspect
+that declaration and pull out names,
+
+
+209
+00:10:53,854 --> 00:10:56,823 line:-2
+types,
+and other information from inside them.
+
+
+210
+00:10:56,857 --> 00:10:58,892 line:-1
+We'll start with the attached peer role.
+
+
+211
+00:10:58,926 --> 00:11:01,895 line:-2
+A peer macro can be attached
+to any declaration,
+
+
+212
+00:11:01.929 --> 00:11:04.364 line:-2 align:center
+not only variables,
+and functions, and types,
+
+
+213
+00:11:04,398 --> 00:11:07,434 line:-2
+but even things
+like import and operator declarations,
+
+
+214
+00:11:07,467 --> 00:11:10,337 line:-2
+and can insert
+new declarations alongside it.
+
+
+215
+00:11:10.370 --> 00:11:12.272 line:-1 align:center
+So if you use it on a method or property,
+
+
+216
+00:11:12.306 --> 00:11:14.374 line:-2 align:center
+you'll end up creating members
+of the type,
+
+
+217
+00:11:14.408 --> 00:11:17.144 line:-2 align:center
+but if you use it
+on a top-level function or type,
+
+
+218
+00:11:17.177 --> 00:11:20.080 line:-2 align:center
+you'll end up creating
+new top-level declarations.
+
+
+219
+00:11:20,113 --> 00:11:22,316 line:-1
+That makes them incredibly flexible.
+
+
+220
+00:11:22,349 --> 00:11:24,251 line:-1
+Here's one way you might use them.
+
+
+221
+00:11:24,284 --> 00:11:27,454 line:-2
+Suppose you're writing a library
+that uses Swift concurrency,
+
+
+222
+00:11:27,487 --> 00:11:31,525 line:-2
+but you know that some of your clients are
+still using older concurrency techniques,
+
+
+223
+00:11:31,558 --> 00:11:35,362 line:-2
+so you want to give them versions
+of your APIs that use completion handlers.
+
+
+224
+00:11:35.395 --> 00:11:37.464 line:-1 align:center
+It's not difficult to write these methods.
+
+
+225
+00:11:37,497 --> 00:11:41,068 line:-2
+You just remove the "async" keyword,
+add a completion handler parameter,
+
+
+226
+00:11:41,101 --> 00:11:43,504 line:-2
+move the result type
+into the parameter list,
+
+
+227
+00:11:43.537 --> 00:11:46.640 line:-2 align:center
+and call the async version
+in a detached task.
+
+
+228
+00:11:46.673 --> 00:11:48.141 line:-1 align:center
+But you're doing this a lot,
+
+
+229
+00:11:48.175 --> 00:11:50.544 line:-2 align:center
+and you don't want
+to have to write it by hand.
+
+
+230
+00:11:50.577 --> 00:11:53.380 line:-2 align:center
+That's a great job
+for an attached peer macro.
+
+
+231
+00:11:53,413 --> 00:11:56,216 line:-2
+We'll declare one called
+"AddCompletionHandler" and give it
+
+
+232
+00:11:56,250 --> 00:11:59,019 line:-2
+a parameter for the completion
+handler's argument label,
+
+
+233
+00:11:59.052 --> 00:12:03.123 line:-2 align:center
+and then attach that macro
+to the async version of the method.
+
+
+234
+00:12:03,156 --> 00:12:05,993 line:-2
+The macro will create
+a completion handler-based signature
+
+
+235
+00:12:06.026 --> 00:12:09.530 line:-2 align:center
+equivalent to the original,
+write the method body,
+
+
+236
+00:12:09.563 --> 00:12:11.632 line:-1 align:center
+and even attach a documentation comment
+
+
+237
+00:12:11,665 --> 00:12:13,867 line:-2
+with extra text
+for the completion handler.
+
+
+238
+00:12:13,901 --> 00:12:15,269 line:-1
+Pretty cool.
+
+
+239
+00:12:15,302 --> 00:12:18,138 line:-2
+Next,
+let's look at the attached accessor role.
+
+
+240
+00:12:18.172 --> 00:12:20.774 line:-2 align:center
+These can be attached
+to variables and subscripts,
+
+
+241
+00:12:20,807 --> 00:12:23,443 line:-2
+and they can install accessors
+into them, like "get,"
+
+
+242
+00:12:23.477 --> 00:12:26.213 line:-1 align:center
+"set," "willSet," or "didSet".
+
+
+243
+00:12:26,246 --> 00:12:28,315 line:-1
+So how might that be useful?
+
+
+244
+00:12:28,348 --> 00:12:32,052 line:-2
+Suppose you have a bunch of types
+that basically wrap around dictionaries
+
+
+245
+00:12:32.085 --> 00:12:34.755 line:-2 align:center
+and let you access their contents
+with properties.
+
+
+246
+00:12:34,788 --> 00:12:37,724 line:-2
+So for instance,
+this "Person" struct lets you access
+
+
+247
+00:12:37,758 --> 00:12:40,861 line:-2
+the "name," "height,"
+and "birth_date" fields,
+
+
+248
+00:12:40.894 --> 00:12:44.498 line:-2 align:center
+but if there's other information in
+the dictionary besides those three fields,
+
+
+249
+00:12:44,531 --> 00:12:47,801 line:0
+it'll just be preserved
+and ignored by your program.
+
+
+250
+00:12:47,835 --> 00:12:50,871 align:center
+These three properties need
+computed getters and setters,
+
+
+251
+00:12:50,904 --> 00:12:53,006 line:0
+but writing them by hand is tedious,
+
+
+252
+00:12:53,040 --> 00:12:56,476 align:center
+and we can't use property wrappers
+because property wrappers can't access
+
+
+253
+00:12:56,510 --> 00:12:59,379 align:center
+other stored properties
+on the type they're used with.
+
+
+254
+00:12:59,413 --> 00:13:03,050 line:0
+So let's write an attached accessor macro
+that can help with this.
+
+
+255
+00:13:03,083 --> 00:13:05,018 line:-1
+We'll call it "DictionaryStorage."
+
+
+256
+00:13:05,052 --> 00:13:08,055 line:-2
+We'll give it a "key" parameter
+because the dictionary spells "birth_date"
+
+
+257
+00:13:08,088 --> 00:13:11,225 line:-2
+with an underscore,
+but you can also just leave the key out,
+
+
+258
+00:13:11,258 --> 00:13:14,127 line:-2
+and it'll default to nil,
+which will make the macro
+
+
+259
+00:13:14.161 --> 00:13:16.430 line:-1 align:center
+use the property's name as the key.
+
+
+260
+00:13:16,463 --> 00:13:19,399 line:-2
+So now, instead of writing
+that big accessor block,
+
+
+261
+00:13:19.433 --> 00:13:22.870 line:-2 align:center
+you can just put “@DictionaryStorage"
+before each property,
+
+
+262
+00:13:22,903 --> 00:13:26,206 align:center
+and the macro will generate
+the accessors for you.
+
+
+263
+00:13:26,240 --> 00:13:29,376 align:center
+That's a nice improvement,
+but there's still some boilerplate here:
+
+
+264
+00:13:29,409 --> 00:13:32,179 line:-2
+The identical
+"DictionaryStorage" attributes.
+
+
+265
+00:13:32,212 --> 00:13:35,649 line:-2
+They're less boilerplate,
+but they're still boilerplate.
+
+
+266
+00:13:35.682 --> 00:13:38.652 line:-2 align:center
+Some built-in attributes
+let you deal with this kind of situation
+
+
+267
+00:13:38,685 --> 00:13:42,055 line:-2
+by applying them
+to the entire type or extension.
+
+
+268
+00:13:42.089 --> 00:13:46.527 line:-2 align:center
+The "attached member attribute" role
+can make your macros behave like that too.
+
+
+269
+00:13:46.560 --> 00:13:49.463 line:-2 align:center
+The macro gets attached
+to a type or extension,
+
+
+270
+00:13:49.496 --> 00:13:53.100 line:-2 align:center
+and it can add attributes to the members
+of whatever it's attached to.
+
+
+271
+00:13:53.133 --> 00:13:55.269 line:-1 align:center
+Let's see how it's done.
+
+
+272
+00:13:55,302 --> 00:13:58,405 line:-2
+We're going to do something
+a little different here.
+
+
+273
+00:13:58,438 --> 00:14:00,407 line:-1
+Rather than declaring a new macro,
+
+
+274
+00:14:00,440 --> 00:14:03,544 line:-2
+we'll add another role attribute
+to the "DictionaryStorage" macro,
+
+
+275
+00:14:03.577 --> 00:14:07.381 line:-2 align:center
+alongside the "attached accessor"
+role it already has.
+
+
+276
+00:14:07.414 --> 00:14:10.684 line:-2 align:center
+This is a really useful technique
+for creating macros.
+
+
+277
+00:14:10,717 --> 00:14:14,821 line:-2
+You're allowed to compose any combination
+of roles except the two freestanding roles
+
+
+278
+00:14:14,855 --> 00:14:19,293 line:-2
+because there are places where
+Swift wouldn't know which one to use.
+
+
+279
+00:14:19.326 --> 00:14:23.397 line:-2 align:center
+Swift will expand all of the roles
+that make sense wherever you applied them,
+
+
+280
+00:14:23.430 --> 00:14:27.000 line:-2 align:center
+but at least one
+of the roles has to work there.
+
+
+281
+00:14:27.034 --> 00:14:29.536 line:-2 align:center
+So if you attach
+"DictionaryStorage" to a type,
+
+
+282
+00:14:29,570 --> 00:14:32,306 line:-2
+Swift will expand
+the "member attribute" role.
+
+
+283
+00:14:32.339 --> 00:14:36.343 line:-2 align:center
+If you attach it to a property,
+Swift will expand the "accessor" role.
+
+
+284
+00:14:36,376 --> 00:14:39,613 line:-2
+But if you attach it to a function,
+you'll get a compilation error
+
+
+285
+00:14:39,646 --> 00:14:41,882 line:-2
+because "DictionaryStorage"
+doesn't have any roles
+
+
+286
+00:14:41.915 --> 00:14:43.784 line:-1 align:center
+that could attach to a function.
+
+
+287
+00:14:44,785 --> 00:14:47,287 line:-2
+With this second role added
+to "DictionaryStorage,"
+
+
+288
+00:14:47.321 --> 00:14:49.723 line:-2 align:center
+instead of attaching it separately
+to every property,
+
+
+289
+00:14:49,756 --> 00:14:51,758 line:-1
+you can just attach it to the whole type.
+
+
+290
+00:14:51,792 --> 00:14:54,394 line:-2
+The macro will have logic
+to skip certain members,
+
+
+291
+00:14:54,428 --> 00:14:56,930 line:-2
+like the initializer,
+the "dictionary" property,
+
+
+292
+00:14:56,964 --> 00:14:58,465 line:-1
+and properties like "birth_date"
+
+
+293
+00:14:58,498 --> 00:15:01,702 line:-2
+that already have
+a "DictionaryStorage" attribute.
+
+
+294
+00:15:01,735 --> 00:15:05,906 line:-2
+But it'll add a "DictionaryStorage"
+attribute to any other stored property,
+
+
+295
+00:15:05,939 --> 00:15:09,977 line:0
+and then those attributes will expand
+into the accessors we already saw.
+
+
+296
+00:15:10,010 --> 00:15:14,448 line:0
+That's a nice improvement, but there's
+still more boilerplate we could eliminate:
+
+
+297
+00:15:14.481 --> 00:15:16.750 line:-1 align:center
+The initializer and stored property.
+
+
+298
+00:15:16.783 --> 00:15:19.887 line:-2 align:center
+These are required
+by the "DictionaryRepresentable" protocol,
+
+
+299
+00:15:19.920 --> 00:15:22.523 line:-1 align:center
+and the property is used by the accessors,
+
+
+300
+00:15:22,556 --> 00:15:26,326 line:-2
+but they're exactly the same in any type
+that uses DictionaryStorage.
+
+
+301
+00:15:26,360 --> 00:15:29,129 line:-2
+Let's make the DictionaryStorage macro
+add them automatically,
+
+
+302
+00:15:29,162 --> 00:15:30,898 line:-1
+so we don't have to write them by hand.
+
+
+303
+00:15:30,931 --> 00:15:33,800 line:0
+We can do that using
+the "attached member" role.
+
+
+304
+00:15:33,834 --> 00:15:36,904 line:0
+Like member attribute macros,
+you can apply these macros
+
+
+305
+00:15:36,937 --> 00:15:39,506 line:0
+to types and extensions,
+but instead of adding attributes
+
+
+306
+00:15:39,540 --> 00:15:42,509 align:center
+to existing members,
+they add totally new members.
+
+
+307
+00:15:42,543 --> 00:15:46,413 align:center
+So you can add methods,
+properties, initializers, and so on.
+
+
+308
+00:15:46,446 --> 00:15:51,251 line:-2
+You can even add stored properties
+to classes and structs, or cases to enums.
+
+
+309
+00:15:51,285 --> 00:15:53,987 line:-2
+Once again,
+we'll add a new "attached member" role
+
+
+310
+00:15:54,021 --> 00:15:57,891 line:-2
+to the DictionaryStorage macro,
+composing it with the other two.
+
+
+311
+00:15:57,925 --> 00:16:02,229 line:-2
+This new role will add an initializer
+and a property called "dictionary."
+
+
+312
+00:16:03,397 --> 00:16:04,798 line:-1
+You might be wondering,
+
+
+313
+00:16:04.831 --> 00:16:07.568 line:-2 align:center
+when two different macros get applied
+to the same code,
+
+
+314
+00:16:07.601 --> 00:16:10.037 line:-1 align:center
+which one gets expanded first?
+
+
+315
+00:16:10.070 --> 00:16:13.140 line:-1 align:center
+Then answer is, it doesn't really matter.
+
+
+316
+00:16:13,173 --> 00:16:16,076 align:center
+Each one will see
+the original version of the declaration
+
+
+317
+00:16:16,109 --> 00:16:18,812 align:center
+without expansions provided by the others.
+
+
+318
+00:16:18,846 --> 00:16:20,981 line:0
+So you don't need to worry about ordering.
+
+
+319
+00:16:21,014 --> 00:16:25,485 line:0
+You'll see the same thing no matter
+when the compiler expands your macro.
+
+
+320
+00:16:25.519 --> 00:16:27.521 line:-1 align:center
+With the attached member role added,
+
+
+321
+00:16:27.554 --> 00:16:30.490 line:-2 align:center
+we don't even have
+to write those two members anymore.
+
+
+322
+00:16:30,524 --> 00:16:35,929 line:-2
+Simply using DictionaryStorage on the type
+will automatically add them for us.
+
+
+323
+00:16:35.963 --> 00:16:38.498 line:-2 align:center
+And then the other role will add
+the DictionaryStorage attributes
+
+
+324
+00:16:38.532 --> 00:16:43.203 line:-2 align:center
+on the properties, and those attributes
+will expand into accessors, and so on.
+
+
+325
+00:16:44,404 --> 00:16:47,774 line:-2
+But there's still one last bit
+of boilerplate to eliminate:
+
+
+326
+00:16:47.808 --> 00:16:51.011 line:-2 align:center
+The conformance
+to the DictionaryRepresentable protocol.
+
+
+327
+00:16:51,912 --> 00:16:55,048 align:center
+The "attached conformance" role
+is perfect for this.
+
+
+328
+00:16:55,082 --> 00:16:59,086 line:0
+It can add a conformance
+to a type or extension.
+
+
+329
+00:16:59,119 --> 00:17:01,522 line:-2
+We'll add
+one last "attached conformance" role
+
+
+330
+00:17:01.555 --> 00:17:05.025 line:-2 align:center
+to the "DictionaryStorage" macro,
+composing it with the other three.
+
+
+331
+00:17:05.058 --> 00:17:08.896 line:-2 align:center
+This new role will add a conformance
+to "DictionaryRepresentation."
+
+
+332
+00:17:08,929 --> 00:17:12,199 line:-2
+So now we don't have to write
+the conformance manually.
+
+
+333
+00:17:12.232 --> 00:17:15.369 line:-2 align:center
+The DictionaryStorage attribute
+we already added for the accessors
+
+
+334
+00:17:15.402 --> 00:17:19.506 line:-2 align:center
+and generated members will now
+automatically add the conformance too,
+
+
+335
+00:17:19,540 --> 00:17:22,409 line:-2
+along with all the other stuff
+it was already doing.
+
+
+336
+00:17:22,442 --> 00:17:24,912 line:-2
+It's been a long time
+since we saw our starting point,
+
+
+337
+00:17:24.945 --> 00:17:26.547 line:-1 align:center
+so just to remind you,
+
+
+338
+00:17:26,580 --> 00:17:30,450 line:-2
+we took a big, unruly type
+full of repetitive code
+
+
+339
+00:17:30,484 --> 00:17:32,719 line:-2
+and moved most
+of that code into several roles
+
+
+340
+00:17:32,753 --> 00:17:34,821 line:-1
+of a super-powerful macro
+
+
+341
+00:17:34.855 --> 00:17:38.425 line:-2 align:center
+so that what's left
+concisely specifies only what's special
+
+
+342
+00:17:38,458 --> 00:17:40,327 line:-1
+about this particular type.
+
+
+343
+00:17:40.360 --> 00:17:44.331 line:-2 align:center
+Imagine if you had 10 or 20 types
+that could use DictionaryStorage.
+
+
+344
+00:17:44,364 --> 00:17:47,701 line:-2
+How much easier would it be
+to work with all of them?
+
+
+345
+00:17:47.734 --> 00:17:51.205 line:-2 align:center
+We've spent a bunch of time now
+talking about declarations and roles,
+
+
+346
+00:17:51.238 --> 00:17:56.710 line:-2 align:center
+but so far, the code they expand into
+has just seemed to magically appear.
+
+
+347
+00:17:56,743 --> 00:18:00,647 line:-2
+Let's fill in that gap now and talk
+about how you implement your macro.
+
+
+348
+00:18:00.681 --> 00:18:03.250 line:-2 align:center
+When I've showed you
+macro declarations so far,
+
+
+349
+00:18:03.283 --> 00:18:05.752 line:-1 align:center
+I've left out something very important:
+
+
+350
+00:18:05.786 --> 00:18:07.421 line:-1 align:center
+the implementation.
+
+
+351
+00:18:07.454 --> 00:18:11.058 line:-2 align:center
+It's after an equal sign,
+and it's always another macro.
+
+
+352
+00:18:11,091 --> 00:18:13,360 line:-2
+Sometimes it's another macro
+you've written,
+
+
+353
+00:18:13,393 --> 00:18:15,262 line:-1
+just with the parameters rearranged
+
+
+354
+00:18:15,295 --> 00:18:18,298 line:-2
+or with extra parameters
+specified as literals.
+
+
+355
+00:18:19,132 --> 00:18:22,469 line:-2
+But usually,
+you'll use an external macro.
+
+
+356
+00:18:22,503 --> 00:18:26,573 line:-2
+An external macro is one
+that's implemented by a compiler plug-in.
+
+
+357
+00:18:26.607 --> 00:18:29.877 line:-2 align:center
+You might remember that I talked
+about compiler plug-ins earlier.
+
+
+358
+00:18:29.910 --> 00:18:32.713 line:-2 align:center
+I said that when the compiler
+sees a macro being used,
+
+
+359
+00:18:32.746 --> 00:18:37.551 line:-2 align:center
+it starts a plug-in in a separate process
+and asks it to expand the macro.
+
+
+360
+00:18:37.584 --> 00:18:41.188 line:-2 align:center
+"#externalMacro" is what
+defines that relationship.
+
+
+361
+00:18:41.221 --> 00:18:44.391 line:-2 align:center
+It specifies the plug-in
+the compiler should launch
+
+
+362
+00:18:44,424 --> 00:18:47,160 line:-1
+and the name of a type inside that plug-in.
+
+
+363
+00:18:47,194 --> 00:18:49,263 line:-1
+So when Swift expands this macro,
+
+
+364
+00:18:49,296 --> 00:18:51,798 line:-2
+it will launch a plug-in
+called "MyLibMacros"
+
+
+365
+00:18:51,832 --> 00:18:55,836 line:-2
+and ask a type
+called "StringifyMacro" to expand it.
+
+
+366
+00:18:55.869 --> 00:19:00.407 line:-2 align:center
+So the macro declaration goes in your
+normal library alongside your other APIs,
+
+
+367
+00:19:00.440 --> 00:19:04.678 line:-2 align:center
+but the macro implementation goes
+in a separate compiler plug-in module.
+
+
+368
+00:19:04,711 --> 00:19:08,081 line:-2
+And "#externalMacro" creates
+the link between the declaration
+
+
+369
+00:19:08,115 --> 00:19:10,250 line:-1
+and the type implementing it.
+
+
+370
+00:19:10.284 --> 00:19:12.986 line:-2 align:center
+What does
+a macro implementation look like?
+
+
+371
+00:19:13,020 --> 00:19:17,157 line:-2
+Well, let's take a look at how
+DictionaryStorage might be implemented.
+
+
+372
+00:19:17,191 --> 00:19:21,094 line:-2
+If you recall, our "DictionaryStorage"
+macro had an "attached member" role
+
+
+373
+00:19:21,128 --> 00:19:25,332 line:-2
+that added a stored property
+and an initializer to the type.
+
+
+374
+00:19:25.365 --> 00:19:27.935 line:-2 align:center
+Here's a simple implementation
+of that role.
+
+
+375
+00:19:27,968 --> 00:19:32,072 line:-2
+We'll walk through it one step
+at a time and learn how it works.
+
+
+376
+00:19:32,105 --> 00:19:37,077 line:-2
+Right at the top, we start
+by importing a library called SwiftSyntax.
+
+
+377
+00:19:37.110 --> 00:19:41.348 line:-2 align:center
+SwiftSyntax is a package maintained
+by the Swift project that helps you parse,
+
+
+378
+00:19:41,381 --> 00:19:45,219 line:-2
+inspect, manipulate,
+and generate Swift source code.
+
+
+379
+00:19:45.252 --> 00:19:49.089 line:-2 align:center
+Swift contributors keep SwiftSyntax
+up to date as the language evolves,
+
+
+380
+00:19:49,122 --> 00:19:52,759 line:-2
+so it supports every feature
+the Swift compiler does.
+
+
+381
+00:19:52.793 --> 00:19:56.330 line:-2 align:center
+SwiftSyntax represents source code
+as a special tree structure.
+
+
+382
+00:19:56.363 --> 00:19:59.099 line:-2 align:center
+For example,
+the "Person" struct in this code sample
+
+
+383
+00:19:59.132 --> 00:20:03.704 line:-2 align:center
+is represented as an instance
+of a type called "StructDeclSyntax."
+
+
+384
+00:20:03.737 --> 00:20:06.507 line:-1 align:center
+But that instance has properties,
+
+
+385
+00:20:06,540 --> 00:20:08,942 line:0
+and each of those properties
+represents some portion
+
+
+386
+00:20:08,976 --> 00:20:11,078 line:0
+of the struct declaration.
+
+
+387
+00:20:11,111 --> 00:20:14,314 align:center
+The list of attributes is
+in the "attributes" property.
+
+
+388
+00:20:14,348 --> 00:20:15,816 align:center
+The actual keyword "struct"
+
+
+389
+00:20:15,849 --> 00:20:17,618 line:0
+is in the "structKeyword" property.
+
+
+390
+00:20:17,651 --> 00:20:20,787 line:0
+The struct's name
+is in the "identifier" property.
+
+
+391
+00:20:20,821 --> 00:20:23,857 line:0
+And the body with the curly braces
+and the struct's members
+
+
+392
+00:20:23,891 --> 00:20:26,193 align:center
+is in the "memberBlock" property.
+
+
+393
+00:20:26,226 --> 00:20:28,195 align:center
+There are also properties like "modifiers"
+
+
+394
+00:20:28,228 --> 00:20:30,597 align:center
+that represent things
+that some struct declarations have.
+
+
+395
+00:20:30,631 --> 00:20:33,100 line:0
+But this one doesn't.
+These are nil.
+
+
+396
+00:20:33,901 --> 00:20:37,604 line:-2
+Some of the syntax nodes
+in these properties are called "tokens."
+
+
+397
+00:20:37,638 --> 00:20:40,774 line:-2
+These represent a specific piece
+of text in the source file,
+
+
+398
+00:20:40.807 --> 00:20:44.111 line:-2 align:center
+like a name, or a keyword,
+or a bit of punctuation,
+
+
+399
+00:20:44,144 --> 00:20:45,812 line:0
+and they just contain that text
+
+
+400
+00:20:45,846 --> 00:20:49,149 line:0
+and any surrounding trivia,
+like spaces and comments.
+
+
+401
+00:20:50,050 --> 00:20:52,553 align:center
+If you drill deep enough
+into the syntax tree,
+
+
+402
+00:20:52,586 --> 00:20:56,156 align:center
+you'll find a token node that covers
+every byte of the source file.
+
+
+403
+00:20:56,190 --> 00:20:59,359 align:center
+But some of those nodes,
+like the "AttributeListSyntax" node
+
+
+404
+00:20:59,393 --> 00:21:02,629 line:0
+in the "attributes" property
+and the "MemberDeclBlockSyntax" node
+
+
+405
+00:21:02,663 --> 00:21:06,266 align:center
+in the "memberBlock" property,
+are not tokens.
+
+
+406
+00:21:06,300 --> 00:21:09,603 line:0
+These have child nodes
+in their own properties.
+
+
+407
+00:21:09,636 --> 00:21:12,439 align:center
+For example, if we look inside
+the "memberBlock" property,
+
+
+408
+00:21:12,472 --> 00:21:15,008 align:center
+we'll find a token
+for the opening curly brace,
+
+
+409
+00:21:15,042 --> 00:21:18,378 line:0
+a "MemberDeclListSyntax" node
+for the list of members,
+
+
+410
+00:21:18,412 --> 00:21:20,581 align:center
+and a token for the closing curly brace.
+
+
+411
+00:21:20,614 --> 00:21:24,017 line:0
+And if you keep exploring the contents
+of that "MemberDeclListSyntax" node,
+
+
+412
+00:21:24,051 --> 00:21:28,188 line:0
+you'll eventually find a node for each
+of the properties, and so on.
+
+
+413
+00:21:28,222 --> 00:21:31,892 line:-2
+Working with SwiftSyntax
+is a huge topic all its own,
+
+
+414
+00:21:31.925 --> 00:21:34.094 line:-2 align:center
+so rather than make
+this video twice as long,
+
+
+415
+00:21:34,127 --> 00:21:36,630 line:0
+I'm going to refer you
+to two other resources.
+
+
+416
+00:21:36,663 --> 00:21:40,033 line:0
+One is the companion
+"Write Swift Macros" session,
+
+
+417
+00:21:40,067 --> 00:21:43,136 align:center
+which includes practical tips
+for figuring out how a particular piece
+
+
+418
+00:21:43,170 --> 00:21:46,607 line:0
+of source code is represented
+as a syntax tree.
+
+
+419
+00:21:46,640 --> 00:21:50,344 line:-2
+The other is the SwiftSyntax
+package's documentation.
+
+
+420
+00:21:50,377 --> 00:21:52,045 line:-1
+You can find it online,
+
+
+421
+00:21:52,079 --> 00:21:54,214 line:-2
+or if you use Xcode's
+Build Documentation command
+
+
+422
+00:21:54,248 --> 00:21:55,849 line:-1
+in your macro package,
+
+
+423
+00:21:55,883 --> 00:21:59,520 line:-2
+SwiftSyntax docs will appear
+in the Developer Documentation window.
+
+
+424
+00:21:59.553 --> 00:22:02.055 line:-2 align:center
+In addition
+to the main SwiftSyntax library,
+
+
+425
+00:22:02.089 --> 00:22:04.324 line:-1 align:center
+we also import two other modules.
+
+
+426
+00:22:04,358 --> 00:22:08,462 line:-2
+One is "SwiftSyntaxMacros",
+which provides protocols and types
+
+
+427
+00:22:08.495 --> 00:22:10.964 line:-1 align:center
+necessary for writing macros.
+
+
+428
+00:22:10.998 --> 00:22:13.700 line:-2 align:center
+The other is called
+"SwiftSyntaxBuilder".
+
+
+429
+00:22:13,734 --> 00:22:17,638 line:-2
+This library provides convenience APIs
+for constructing syntax trees
+
+
+430
+00:22:17.671 --> 00:22:19.706 line:-1 align:center
+to represent newly-generated code.
+
+
+431
+00:22:19,740 --> 00:22:23,410 line:-2
+You can write a macro without using it,
+but it's incredibly handy,
+
+
+432
+00:22:23,443 --> 00:22:25,879 line:-2
+and we highly recommend
+you take advantage of it.
+
+
+433
+00:22:25,913 --> 00:22:28,882 line:-2
+Now that we've imported these libraries,
+we'll start actually writing
+
+
+434
+00:22:28,916 --> 00:22:32,519 line:-2
+the "DictionaryStorageMacro" type
+that our plug-in is supposed to provide.
+
+
+435
+00:22:32,553 --> 00:22:36,056 line:-2
+Notice that it conforms
+to a protocol called "MemberMacro."
+
+
+436
+00:22:36.924 --> 00:22:39.526 line:-1 align:center
+Each role has a corresponding protocol,
+
+
+437
+00:22:39,560 --> 00:22:42,362 line:-2
+and the implementation has
+to conform to the protocol
+
+
+438
+00:22:42,396 --> 00:22:44,264 line:-1
+for each role the macro provides.
+
+
+439
+00:22:44,298 --> 00:22:47,301 line:0
+The "DictionaryStorage" macro
+has four of these roles,
+
+
+440
+00:22:47,334 --> 00:22:50,370 line:0
+so the "DictionaryStorageMacro" type
+will need to conform
+
+
+441
+00:22:50,404 --> 00:22:52,673 align:center
+to the four corresponding protocols.
+
+
+442
+00:22:52,706 --> 00:22:55,008 line:0
+But to keep things simple,
+we're just worrying
+
+
+443
+00:22:55,042 --> 00:22:57,644 align:center
+about the "MemberMacro" conformance
+for now.
+
+
+444
+00:22:57,678 --> 00:22:59,479 line:-1
+Moving on to the body of this type,
+
+
+445
+00:22:59,513 --> 00:23:04,251 line:-2
+we see a method called
+"expansion of, providingMembersOf, in."
+
+
+446
+00:23:04,284 --> 00:23:07,454 line:-2
+This method is required
+by the MemberMacro protocol,
+
+
+447
+00:23:07,487 --> 00:23:09,489 line:-1
+and it's what the Swift compiler calls
+
+
+448
+00:23:09,523 --> 00:23:12,392 line:-2
+to expand the member role
+when the macro is used.
+
+
+449
+00:23:12.426 --> 00:23:16.263 line:-2 align:center
+We're not using the arguments yet,
+but we'll talk about them later.
+
+
+450
+00:23:16.296 --> 00:23:19.266 line:-1 align:center
+For now, notice that it's a static method.
+
+
+451
+00:23:19.299 --> 00:23:22.803 line:-2 align:center
+All of the expansion methods are static,
+so Swift doesn't actually create
+
+
+452
+00:23:22,836 --> 00:23:25,439 line:-2
+an instance
+of the DictionaryStorageMacro type.
+
+
+453
+00:23:25,472 --> 00:23:28,141 line:-2
+It just uses it
+as a container for the methods.
+
+
+454
+00:23:28,175 --> 00:23:30,978 line:-2
+Each of the expansion methods
+returns SwiftSyntax nodes
+
+
+455
+00:23:31,011 --> 00:23:33,347 line:-1
+that are inserted into the source code.
+
+
+456
+00:23:33,380 --> 00:23:36,617 line:-2
+A member macro expands
+into a list of declarations to add
+
+
+457
+00:23:36.650 --> 00:23:39.119 line:-2 align:center
+as members to the type,
+so the expansion method
+
+
+458
+00:23:39.152 --> 00:23:43.257 line:-2 align:center
+for a member macro returns an array
+of "DeclSyntax" nodes.
+
+
+459
+00:23:43,290 --> 00:23:47,427 line:-2
+If we look inside the body,
+we see that array being created.
+
+
+460
+00:23:47,461 --> 00:23:51,765 line:-2
+It has the initializer and the stored
+property we want this macro to add.
+
+
+461
+00:23:51.798 --> 00:23:55.903 line:-2 align:center
+Now, the "var dictionary" bit here
+looks like it's an ordinary string,
+
+
+462
+00:23:55.936 --> 00:23:57.237 line:-1 align:center
+but it's actually not.
+
+
+463
+00:23:57,271 --> 00:24:00,807 line:-2
+This string literal is being written
+where a DeclSyntax is expected,
+
+
+464
+00:24:00,841 --> 00:24:03,911 line:-2
+so Swift actually treats it
+as a fragment of source code
+
+
+465
+00:24:03.944 --> 00:24:07.481 line:-2 align:center
+and asks the Swift parser
+to turn it into a DeclSyntax node.
+
+
+466
+00:24:07.514 --> 00:24:09.249 line:-1 align:center
+This is one of those conveniences
+
+
+467
+00:24:09.283 --> 00:24:11.919 line:-2 align:center
+that the SwiftSyntaxBuilder
+library provides.
+
+
+468
+00:24:11,952 --> 00:24:14,154 line:-1
+It's a good thing we imported it earlier.
+
+
+469
+00:24:14,188 --> 00:24:17,324 line:0
+So with that and with conformances
+to the protocols
+
+
+470
+00:24:17,357 --> 00:24:20,394 line:0
+for the other three roles,
+we'll have a working implementation
+
+
+471
+00:24:20,427 --> 00:24:22,930 line:0
+of our DictionaryStorage macro.
+
+
+472
+00:24:22,963 --> 00:24:26,233 line:-2
+But although this macro
+will now work when you use it correctly,
+
+
+473
+00:24:26,266 --> 00:24:28,235 line:-1
+what happens if you use it wrong?
+
+
+474
+00:24:28,268 --> 00:24:33,607 line:-2
+For instance, what if you try to apply it
+to an enum instead of to a struct?
+
+
+475
+00:24:33,640 --> 00:24:38,245 line:-2
+Well, the "attached member" role will try
+to add a stored "dictionary" property.
+
+
+476
+00:24:38.278 --> 00:24:42.983 line:-2 align:center
+But an enum can't have stored properties,
+so Swift will produce an error:
+
+
+477
+00:24:43.016 --> 00:24:45.819 line:-2 align:center
+"Enums must not contain
+stored properties."
+
+
+478
+00:24:45,853 --> 00:24:48,522 line:-2
+It's great that Swift will stop
+this code from compiling,
+
+
+479
+00:24:48.555 --> 00:24:51.191 line:-2 align:center
+but the error message
+is a little confusing, isn't it?
+
+
+480
+00:24:51.225 --> 00:24:53.961 line:-2 align:center
+It's not really clear
+why the DictionaryStorage macro tried
+
+
+481
+00:24:53,994 --> 00:24:57,331 line:-2
+to create a stored property
+or what you should have done differently.
+
+
+482
+00:24:57.364 --> 00:25:01.068 line:-2 align:center
+I said earlier that one
+of Swift's goals was to allow macros
+
+
+483
+00:25:01.101 --> 00:25:04.638 line:-2 align:center
+to detect mistakes
+in their inputs and emit custom errors.
+
+
+484
+00:25:04.671 --> 00:25:06.840 line:-1 align:center
+So let's modify our macro's implementation
+
+
+485
+00:25:06,874 --> 00:25:09,142 line:-2
+to produce a much clearer
+error message for this:
+
+
+486
+00:25:09,176 --> 00:25:13,180 line:-2
+“@DictionaryStorage
+can only be applied to a struct."
+
+
+487
+00:25:13,213 --> 00:25:16,850 line:-2
+That will give developers
+a better idea of what they did wrong.
+
+
+488
+00:25:16.884 --> 00:25:19.086 line:-2 align:center
+The key to doing this
+will be the parameters
+
+
+489
+00:25:19,119 --> 00:25:22,122 line:-2
+to the expansion method,
+which we've ignored so far.
+
+
+490
+00:25:22.155 --> 00:25:25.492 line:-2 align:center
+The exact arguments are slightly different
+for different roles,
+
+
+491
+00:25:42,809 --> 00:25:47,047 line:-2
+DeclGroupSyntax is a protocol
+that the nodes for structs, enums,
+
+
+492
+00:25:47,080 --> 00:25:51,418 line:-2
+classes, actors, protocols,
+and extensions all conform to.
+
+
+493
+00:25:51,451 --> 00:25:54,354 line:-2
+So this parameter gives us
+the declaration that the developer
+
+
+494
+00:25:54,388 --> 00:25:56,156 line:-1
+attached the attribute to.
+
+
+495
+00:25:56,190 --> 00:25:59,626 line:-2
+And the final parameter
+is called "context" and is of a type
+
+
+496
+00:25:59.660 --> 00:26:02.329 line:-2 align:center
+that conforms
+to "MacroExpansionContext".
+
+
+497
+00:26:02.362 --> 00:26:05.832 line:-2 align:center
+The context object is used
+when the macro implementation wants
+
+
+498
+00:26:05.866 --> 00:26:07.701 line:-1 align:center
+to communicate with the compiler.
+
+
+499
+00:26:07.734 --> 00:26:11.972 line:-2 align:center
+It can do a few different things,
+including emitting errors and warnings.
+
+
+500
+00:26:12,005 --> 00:26:15,275 line:-2
+We'll use all three
+of these parameters to emit our error.
+
+
+501
+00:26:15.309 --> 00:26:17.211 line:-1 align:center
+Let's see how it's done.
+
+
+502
+00:26:17.244 --> 00:26:19.947 line:-1 align:center
+First, we need to detect the problem.
+
+
+503
+00:26:19.980 --> 00:26:23.817 line:-2 align:center
+We'll do that by checking the type
+of the "declaration" parameter.
+
+
+504
+00:26:23,851 --> 00:26:26,687 line:-2
+Each kind of declaration
+has a different type,
+
+
+505
+00:26:26,720 --> 00:26:30,157 line:-2
+so if it's a struct,
+its type will be "StructDeclSyntax",
+
+
+506
+00:26:30.190 --> 00:26:34.528 line:-2 align:center
+if it's an enum,
+it'll be "EnumDeclSyntax", and so on.
+
+
+507
+00:26:34.561 --> 00:26:39.066 line:-2 align:center
+So we'll write a guard-else that calls
+the "declaration" parameter's "is" method
+
+
+508
+00:26:39,099 --> 00:26:41,802 line:-1
+and passes "StructDeclSyntax".
+
+
+509
+00:26:41.835 --> 00:26:45.572 line:-2 align:center
+If the declaration isn't a struct,
+we'll end up in the "else" block.
+
+
+510
+00:26:45,606 --> 00:26:49,443 line:-2
+For now, we'll return an empty array,
+so the macro doesn't add any code
+
+
+511
+00:26:49.476 --> 00:26:53.447 line:-2 align:center
+to the project, but what we really want
+to do is emit an error.
+
+
+512
+00:26:54.348 --> 00:26:57.985 line:-2 align:center
+Now, the easy way to do it is
+to just throw an ordinary Swift error,
+
+
+513
+00:27:11,164 --> 00:27:13,667 line:-1
+This is a bit of compiler jargon.
+
+
+514
+00:27:13,700 --> 00:27:18,739 line:-2
+Just as a doctor looking at an X-ray
+of your broken leg diagnoses a fracture,
+
+
+515
+00:27:18.772 --> 00:27:21.341 line:-2 align:center
+a compiler or macro
+looking at a syntax tree
+
+
+516
+00:27:21,375 --> 00:27:24,845 line:-2
+of your broken code
+diagnoses an error or warning.
+
+
+517
+00:27:24.878 --> 00:27:28.615 line:-2 align:center
+So we call the instance
+representing the error a “Diagnostic."
+
+
+518
+00:27:28.649 --> 00:27:32.486 line:-2 align:center
+A diagnostic contains
+at least two pieces of information.
+
+
+519
+00:27:32,519 --> 00:27:35,656 line:-2
+The first is the syntax node
+that the error occurred at,
+
+
+520
+00:27:35,689 --> 00:27:38,959 line:-2
+so the compiler knows
+which line to mark as incorrect.
+
+
+521
+00:27:38.992 --> 00:27:41.562 line:-2 align:center
+Here, we want to point
+to the DictionaryStorage attribute
+
+
+522
+00:27:41,595 --> 00:27:44,464 line:-2
+the user wrote,
+which, happily, is provided
+
+
+523
+00:27:44,498 --> 00:27:46,967 line:-2
+by the "attribute" parameter
+the method was passed.
+
+
+524
+00:27:47,000 --> 00:27:51,305 line:-2
+The second is the actual message
+you want the compiler to produce.
+
+
+525
+00:27:51.338 --> 00:27:55.843 line:-2 align:center
+You provide this by creating a custom type
+and then passing an instance of it.
+
+
+526
+00:27:55.876 --> 00:27:57.811 line:-1 align:center
+Let's take a quick look at it.
+
+
+527
+00:27:58.779 --> 00:28:04.618 line:-2 align:center
+The "MyLibDiagnostic" type defines all of
+the diagnostics this module can produce.
+
+
+528
+00:28:04.651 --> 00:28:08.589 line:-2 align:center
+We've chosen to use an enum
+and provide a case for each diagnostic,
+
+
+529
+00:28:08.622 --> 00:28:11.258 line:-2 align:center
+but you could use another kind
+of type if you wanted.
+
+
+530
+00:28:11.291 --> 00:28:14.228 line:-2 align:center
+This type works sort of like
+a throwable Swift error.
+
+
+531
+00:28:14,261 --> 00:28:16,897 line:-2
+It conforms
+to the "DiagnosticMessage" protocol,
+
+
+532
+00:28:16.930 --> 00:28:21.368 line:-2 align:center
+and it has a bunch of properties that
+provide information about the diagnostic.
+
+
+533
+00:28:21.401 --> 00:28:24.805 line:-2 align:center
+One of the most important
+is the "severity" property.
+
+
+534
+00:28:24,838 --> 00:28:28,976 line:-2
+It specifies whether the diagnostic
+is an error or a warning.
+
+
+535
+00:28:30.310 --> 00:28:34.915 line:-2 align:center
+Then there's the "message" property,
+which produces the actual error message,
+
+
+536
+00:28:34,948 --> 00:28:37,718 line:-1
+and the "diagnosticID" property.
+
+
+537
+00:28:37.751 --> 00:28:40.220 line:-2 align:center
+You should use
+the plug-in's module name for the domain
+
+
+538
+00:28:40,254 --> 00:28:42,589 line:-1
+and some kind of unique string for the ID.
+
+
+539
+00:28:42,623 --> 00:28:45,092 line:-2
+I've chosen
+to use string raw values for this enum,
+
+
+540
+00:28:45.125 --> 00:28:46.960 line:-1 align:center
+but that's just a convenience.
+
+
+541
+00:28:46,994 --> 00:28:51,064 line:-2
+So with the message in hand,
+you can create the diagnostic.
+
+
+542
+00:28:51.098 --> 00:28:54.768 line:-2 align:center
+Then you tell the context to diagnose it,
+and you're done.
+
+
+543
+00:28:56,069 --> 00:28:58,672 line:-2
+That's a pretty basic diagnostic,
+but if you want,
+
+
+544
+00:28:58.705 --> 00:29:00.541 line:-1 align:center
+you can get a lot fancier with them.
+
+
+545
+00:29:00.574 --> 00:29:03.410 line:-2 align:center
+For example,
+you can add Fix-Its to a diagnostic
+
+
+546
+00:29:17,558 --> 00:29:20,694 line:-2
+you still need
+to actually create the expansion.
+
+
+547
+00:29:20,727 --> 00:29:24,431 line:-2
+SwiftSyntax gives you several
+different tools to do that.
+
+
+548
+00:29:24.464 --> 00:29:27.568 line:-2 align:center
+Syntax nodes are immutable,
+but they have lots of APIs
+
+
+549
+00:29:27,601 --> 00:29:32,072 line:-2
+that either create new nodes or return
+modified versions of existing nodes.
+
+
+550
+00:29:32,105 --> 00:29:36,376 line:-2
+The SwiftSyntaxBuilder library
+adds SwiftUI-style syntax builders
+
+
+551
+00:29:36,410 --> 00:29:39,780 line:-2
+where some of the child nodes
+are specified by a trailing closure.
+
+
+552
+00:29:39.813 --> 00:29:43.951 line:-2 align:center
+For example, the multidimensional
+array macro can use a syntax builder
+
+
+553
+00:29:43.984 --> 00:29:48.722 line:-2 align:center
+to generate whatever number of parameters
+is appropriate for the type it's creating.
+
+
+554
+00:29:48.755 --> 00:29:51.692 line:-2 align:center
+And the string literal feature we used
+to make the DictionaryStorage property
+
+
+555
+00:29:51,725 --> 00:29:55,062 line:-2
+and initializer
+also supports interpolations.
+
+
+556
+00:29:56,129 --> 00:29:58,999 line:-2
+All of these features are useful
+in different situations,
+
+
+557
+00:29:59.032 --> 00:30:01.168 line:-2 align:center
+and you'll probably find yourself
+combining several
+
+
+558
+00:30:01.201 --> 00:30:04.037 line:-1 align:center
+in particularly complicated macros.
+
+
+559
+00:30:04.071 --> 00:30:06.039 line:-2 align:center
+But the string literal feature
+is especially good
+
+
+560
+00:30:06,073 --> 00:30:09,343 line:-2
+at producing syntax trees
+for large amounts of code,
+
+
+561
+00:30:09,376 --> 00:30:12,613 line:-2
+and there's a bit to learn
+about its interpolation features.
+
+
+562
+00:30:12,646 --> 00:30:16,283 line:-2
+So let's look at how you might use those
+to generate some code.
+
+
+563
+00:30:16,316 --> 00:30:19,086 line:-2
+Earlier, we talked
+about the "unwrap" macro.
+
+
+564
+00:30:19.119 --> 00:30:21.922 line:-2 align:center
+It takes an optional value
+and a message string
+
+
+565
+00:30:21.955 --> 00:30:25.325 line:-2 align:center
+and expands into a "guard let"
+wrapped in a closure.
+
+
+566
+00:30:25.359 --> 00:30:28.629 line:-2 align:center
+The general shape of this code
+is always going to be the same,
+
+
+567
+00:30:28,662 --> 00:30:32,399 line:-2
+but a lot of the contents are customized
+for the specific use site.
+
+
+568
+00:30:32,432 --> 00:30:35,202 line:-2
+Let's focus in on the "guard let"
+statement and see how
+
+
+569
+00:30:35.235 --> 00:30:38.772 line:-2 align:center
+we could write a function
+to generate just that statement.
+
+
+570
+00:30:38.805 --> 00:30:42.109 line:-2 align:center
+To start, we'll just take
+that exact code sample we just saw
+
+
+571
+00:30:42,142 --> 00:30:44,745 line:-2
+and put it in a helper method
+called "makeGuardStatement"
+
+
+572
+00:30:44,778 --> 00:30:47,381 line:-1
+that returns a Statement Syntax node.
+
+
+573
+00:30:47.414 --> 00:30:50.684 line:-2 align:center
+Then we'll slowly add interpolations
+to replace all the stuff
+
+
+574
+00:31:04,831 --> 00:31:08,535 line:-2
+An ordinary interpolation like this
+can add a syntax node to the code,
+
+
+575
+00:31:08,569 --> 00:31:10,671 line:-1
+but it can't add a plain String.
+
+
+576
+00:31:10.704 --> 00:31:15.509 line:-2 align:center
+That's a safety feature to keep you
+from inserting invalid code by accident.
+
+
+577
+00:31:15,542 --> 00:31:19,012 line:-2
+The guard-let condition is similar,
+except that it's just a variable name,
+
+
+578
+00:31:19.046 --> 00:31:21.882 line:-1 align:center
+so it's a token, not an expression.
+
+
+579
+00:31:21,915 --> 00:31:25,986 line:-2
+No matter, we add a TokenSyntax
+parameter and interpolate it in,
+
+
+580
+00:31:26.019 --> 00:31:28.222 line:-1 align:center
+just as we interpolated the expression.
+
+
+581
+00:31:28.255 --> 00:31:31.058 line:-2 align:center
+There's a trickier case when you add
+the expression being unwrapped
+
+
+582
+00:31:31.091 --> 00:31:32.993 line:-1 align:center
+to the error message.
+
+
+583
+00:31:33.026 --> 00:31:35.829 line:-2 align:center
+One of the features
+of our macro is that when it fails,
+
+
+584
+00:31:35.863 --> 00:31:38.565 line:-2 align:center
+it prints out the code
+you were trying to unwrap.
+
+
+585
+00:31:38.599 --> 00:31:40.667 line:-2 align:center
+That means we need
+to create a string literal
+
+
+586
+00:31:40.701 --> 00:31:43.871 line:-2 align:center
+that contains a stringified version
+of a syntax node.
+
+
+587
+00:31:44.872 --> 00:31:48.141 line:-2 align:center
+Let's start by pulling the prefix
+out of the Statement Syntax literal
+
+
+588
+00:31:48.175 --> 00:31:50.878 line:-2 align:center
+and into a variable
+that's just a plain string.
+
+
+589
+00:31:50,911 --> 00:31:52,513 line:-1
+We'll interpolate that string in,
+
+
+590
+00:31:52,546 --> 00:31:56,416 line:-2
+but we'll use a special interpolation
+that starts with "literal:".
+
+
+591
+00:31:56,450 --> 00:31:59,086 line:-2
+When you do this,
+SwiftSyntax will add the contents
+
+
+592
+00:31:59.119 --> 00:32:01.388 line:-1 align:center
+of the string as a string literal.
+
+
+593
+00:32:01,421 --> 00:32:04,157 line:-2
+This also works for making literals
+from other kinds of information
+
+
+594
+00:32:04,191 --> 00:32:08,595 line:-2
+computed by the macro,
+numbers, Booleans, arrays, dictionaries,
+
+
+595
+00:32:08.629 --> 00:32:10.197 line:-1 align:center
+and even optionals.
+
+
+596
+00:32:10.230 --> 00:32:12.466 line:-2 align:center
+Now that we're building up
+the string in a variable,
+
+
+597
+00:32:12.499 --> 00:32:15.302 line:-2 align:center
+we can change it to have
+the right code in the message.
+
+
+598
+00:32:15.335 --> 00:32:18.005 line:-2 align:center
+Just add a parameter
+for the original expression,
+
+
+599
+00:32:18.038 --> 00:32:21.975 line:-2 align:center
+and interpolate
+its "description" property into the string.
+
+
+600
+00:32:22.009 --> 00:32:24.711 line:-2 align:center
+You don't need
+to do anything special to escape it.
+
+
+601
+00:32:24.745 --> 00:32:27.581 line:-2 align:center
+The "literal:" interpolation
+will automatically detect
+
+
+602
+00:32:27,614 --> 00:32:30,584 line:-2
+if the string contains special characters
+and add escapes
+
+
+603
+00:32:30.617 --> 00:32:33.587 line:-2 align:center
+or switch to a raw literal
+to make sure the code is valid.
+
+
+604
+00:32:33,620 --> 00:32:38,559 line:-2
+So the "literal:" interpolation
+makes it super easy to do the right thing.
+
+
+605
+00:32:38,592 --> 00:32:41,895 line:-2
+The last thing to deal with
+are the file and line numbers.
+
+
+606
+00:32:41,929 --> 00:32:44,431 line:-2
+These are a little tricky
+because the compiler
+
+
+607
+00:33:01.381 --> 00:33:04.284 line:-2 align:center
+and then we'll use
+its "location of" method.
+
+
+608
+00:33:04,318 --> 00:33:07,688 line:-2
+This returns an object that can
+produce syntax nodes for the location
+
+
+609
+00:33:07.721 --> 00:33:09.857 line:-1 align:center
+of whatever node you provide.
+
+
+610
+00:33:09,890 --> 00:33:13,193 line:-2
+It will return nil if the node
+is one that your macro created,
+
+
+611
+00:33:13.227 --> 00:33:16.029 line:-2 align:center
+rather than one
+that the compiler passed in to you,
+
+
+612
+00:33:16,063 --> 00:33:20,467 line:-2
+but we know that "originalWrapped" is one
+of the arguments that the user wrote,
+
+
+613
+00:33:20,501 --> 00:33:24,938 line:-2
+so its location will never be nil,
+and we can safely force-unwrap the result.
+
+
+614
+00:33:24,972 --> 00:33:27,941 line:-2
+Now all you have to do
+is interpolate the syntax nodes
+
+
+615
+00:33:27,975 --> 00:33:31,578 line:-2
+for the file and line number,
+and you're done.
+
+
+616
+00:33:31,612 --> 00:33:34,515 line:-2
+We're now generating
+the right "guard" statement.
+
+
+617
+00:33:34.548 --> 00:33:37.985 line:-2 align:center
+So far, we've discussed how
+to make macros work at all.
+
+
+618
+00:33:38,018 --> 00:33:41,955 line:-2
+But let's move on and talk
+about how to make them work well.
+
+
+619
+00:33:41,989 --> 00:33:45,192 line:-2
+And we'll start
+by talking about name collisions.
+
+
+620
+00:33:45.225 --> 00:33:47.594 line:-2 align:center
+When we looked
+at the "unwrap" macro before,
+
+
+621
+00:33:47,628 --> 00:33:51,231 line:-2
+we looked at an example where
+we unwrapped a simple variable name.
+
+
+622
+00:33:52.199 --> 00:33:54.935 line:-2 align:center
+But if we try to unwrap
+a more complicated expression,
+
+
+623
+00:33:54.968 --> 00:33:57.337 line:-1 align:center
+the macro has to expand differently.
+
+
+624
+00:33:57.371 --> 00:34:00.307 line:-2 align:center
+It generates code
+which captures the expression's result
+
+
+625
+00:34:00,340 --> 00:34:04,311 line:-2
+into a variable called "wrappedValue,"
+and then unwraps that.
+
+
+626
+00:34:05,345 --> 00:34:08,782 line:-2
+But what happens if you try
+to use a variable called "wrappedValue"
+
+
+627
+00:34:08.815 --> 00:34:10.317 line:-1 align:center
+in the message?
+
+
+628
+00:34:11,285 --> 00:34:13,820 line:-2
+When the compiler goes looking
+for "wrappedValue",
+
+
+629
+00:34:13,854 --> 00:34:16,089 line:-1
+it'll end up finding the closer one,
+
+
+630
+00:34:16,123 --> 00:34:19,426 line:-2
+so it'll use that
+instead of the one you actually meant.
+
+
+631
+00:34:20,661 --> 00:34:24,064 line:-2
+You could try to fix this by picking
+a name that you think your users
+
+
+632
+00:34:24,097 --> 00:34:25,999 line:-1
+probably won't use by accident,
+
+
+633
+00:34:26,033 --> 00:34:29,203 line:-2
+but wouldn't it be better
+to make this impossible?
+
+
+634
+00:34:30,871 --> 00:34:35,509 line:-2
+That's what the "makeUniqueName" method
+on the Macro Expansion Context does.
+
+
+635
+00:34:35,542 --> 00:34:38,445 line:-2
+It returns a variable name
+that's guaranteed to not be used
+
+
+636
+00:34:38.478 --> 00:34:42.216 line:-2 align:center
+in user code
+or in any other macro expansion,
+
+
+637
+00:34:42,249 --> 00:34:46,620 line:-2
+so you can be sure that the message string
+won't accidentally refer to it.
+
+
+638
+00:34:46,653 --> 00:34:48,555 line:-1
+Some of you might be wondering,
+
+
+639
+00:34:48.589 --> 00:34:51.758 line:-2 align:center
+why doesn't Swift
+automatically stop that from happening?
+
+
+640
+00:35:08,075 --> 00:35:10,143 line:-1
+Think of the DictionaryStorage macro,
+
+
+641
+00:35:10.177 --> 00:35:13.280 line:-2 align:center
+which uses
+a "dictionary" property on the type.
+
+
+642
+00:35:13.313 --> 00:35:16.083 line:-2 align:center
+If "dictionary" inside a macro
+meant something different
+
+
+643
+00:35:16,116 --> 00:35:20,020 line:-2
+from "dictionary" outside,
+it'd be pretty hard to make that work.
+
+
+644
+00:35:21,788 --> 00:35:23,190 line:-1
+And sometimes, you even want
+
+
+645
+00:35:23.223 --> 00:35:24.525 line:-1 align:center
+to introduce a whole new name
+
+
+646
+00:35:24,558 --> 00:35:27,227 line:-1
+that non-macro code can access.
+
+
+647
+00:35:27.261 --> 00:35:29.329 line:-1 align:center
+Peer macros, member macros,
+
+
+648
+00:35:29,363 --> 00:35:31,965 line:-1
+and declaration macros basically exist
+
+
+649
+00:35:31.999 --> 00:35:33.967 line:-1 align:center
+entirely to do this.
+
+
+650
+00:35:34,001 --> 00:35:36,670 line:-2
+But when they do,
+they need to declare the names
+
+
+651
+00:35:36,703 --> 00:35:39,840 line:-2
+they're adding,
+so the compiler knows about them.
+
+
+652
+00:35:39,873 --> 00:35:42,509 line:-2
+And they do
+that inside their role attribute.
+
+
+653
+00:35:43.410 --> 00:35:45.179 line:-1 align:center
+You might not have noticed it before,
+
+
+654
+00:35:45,212 --> 00:35:48,682 line:-2
+but we've actually seen
+these declarations all along.
+
+
+655
+00:35:48,715 --> 00:35:51,084 line:-2
+The "member" role
+on the DictionaryStorage macro
+
+
+656
+00:35:51.118 --> 00:35:53.554 line:-2 align:center
+had a "names:" parameter
+that specified
+
+
+657
+00:35:53,587 --> 00:35:56,290 line:-1
+the names "dictionary" and "init".
+
+
+658
+00:35:56.323 --> 00:35:58.091 line:-2 align:center
+And in fact,
+most of the macros we've looked at
+
+
+659
+00:35:58,125 --> 00:36:01,762 line:-2
+in this session have at least one role
+with a "names" argument.
+
+
+660
+00:36:02,863 --> 00:36:05,599 line:-2
+There are five name specifiers
+you can use:
+
+
+661
+00:36:05,632 --> 00:36:08,836 line:-2
+"Overloaded" means
+that the macro adds declarations
+
+
+662
+00:36:08.869 --> 00:36:13.407 line:-2 align:center
+with the exact same base name
+as whatever the macro is attached to.
+
+
+663
+00:36:13,440 --> 00:36:17,044 line:-2
+"Prefixed" means that the macro adds
+declarations with the same base name,
+
+
+664
+00:36:17.077 --> 00:36:19.880 line:-1 align:center
+except with the specified prefix added.
+
+
+665
+00:36:19,913 --> 00:36:24,918 line:-2
+"Suffixed" is the same thing,
+except with a suffix instead of a prefix.
+
+
+666
+00:36:24.952 --> 00:36:27.588 line:-2 align:center
+"Named" means
+that the macro adds declarations
+
+
+667
+00:36:27.621 --> 00:36:30.190 line:-1 align:center
+with a specific, fixed base name.
+
+
+668
+00:36:30,224 --> 00:36:33,260 line:-2
+And "arbitrary" means
+that the macro adds declarations
+
+
+669
+00:36:33,293 --> 00:36:37,030 line:-2
+with some other name that can't be
+described using any of these rules.
+
+
+670
+00:36:37.064 --> 00:36:39.499 line:-1 align:center
+It's really common to use "arbitrary."
+
+
+671
+00:36:39.533 --> 00:36:42.135 line:-2 align:center
+For example,
+our multidimensional array macro
+
+
+672
+00:36:42,169 --> 00:36:43,871 line:-2
+declares a type
+with a name that's computed
+
+
+673
+00:36:43,904 --> 00:36:47,574 line:-2
+from one of its parameters,
+so it needs to specify "arbitrary."
+

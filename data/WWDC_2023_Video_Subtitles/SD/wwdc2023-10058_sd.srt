@@ -1,0 +1,1503 @@
+2
+00:00:00,334 --> 00:00:07,341 line:-1
+♪ ♪
+
+
+3
+00:00:10,010 --> 00:00:13,146 line:-2
+James: Hello.
+I'm James Magahern from UIKit,
+
+
+4
+00:00:13,180 --> 00:00:17,017 line:-2
+and I'll be your guide through what's new
+with text and text interactions.
+
+
+5
+00:00:17,050 --> 00:00:20,721 line:-2
+Text plays a crucial role
+in every application.
+
+
+6
+00:00:20,754 --> 00:00:23,790 line:-2
+It's the primary way
+to consume information and communicate.
+
+
+7
+00:00:24,758 --> 00:00:26,994 line:-1
+Now we're giving you even more tools
+
+
+8
+00:00:27,027 --> 00:00:29,830 line:-2
+to create a powerful
+text experience in your app,
+
+
+9
+00:00:29,863 --> 00:00:33,800 line:-2
+whether you're starting from scratch
+or from high-level abstractions.
+
+
+10
+00:00:33,834 --> 00:00:38,305 line:-2
+I'll be going over a bunch of great
+improvements to crafting text experiences
+
+
+11
+00:00:38,338 --> 00:00:40,707 line:-2
+and how to take advantage of them
+in your apps,
+
+
+12
+00:00:40,741 --> 00:00:43,777 line:-2
+including some changes
+to system selection UI,
+
+
+13
+00:00:43,810 --> 00:00:47,681 line:-2
+adding text item actions and menus
+to UITextViews,
+
+
+14
+00:00:47,714 --> 00:00:50,083 line:-1
+lists and bullets in TextKit 2,
+
+
+15
+00:00:50,117 --> 00:00:52,419 line:-1
+dictation UI on macOS,
+
+
+16
+00:00:52,452 --> 00:00:56,156 line:-2
+and some important updates
+for internationalization.
+
+
+17
+00:00:56,190 --> 00:00:59,626 line:-2
+We'll begin by talking
+about some changes to selection UI.
+
+
+18
+00:00:59,660 --> 00:01:03,430 line:-2
+New on all our platforms
+is a completely redesigned text cursor.
+
+
+19
+00:01:04,631 --> 00:01:07,568 line:0
+We now display an inline,
+interactive switcher
+
+
+20
+00:01:07,601 --> 00:01:10,037 line:0
+when changing input languages,
+
+
+21
+00:01:10,070 --> 00:01:13,941 line:0
+more ergonomic selection handles
+when doing range selection,
+
+
+22
+00:01:13,974 --> 00:01:16,443 line:0
+and we also have a completely new loupe
+
+
+23
+00:01:16,476 --> 00:01:19,913 line:0
+to make it easier to place the cursor
+in large bodies of text.
+
+
+24
+00:01:19,947 --> 00:01:24,151 line:-2
+If your app is using UITextViews
+or UITextFields,
+
+
+25
+00:01:24,184 --> 00:01:27,387 line:-2
+then you'll get
+all this new UI automatically.
+
+
+26
+00:01:27,421 --> 00:01:30,591 line:-2
+Additionally, we made sure
+that clients of UITextInteraction
+
+
+27
+00:01:30,624 --> 00:01:33,760 line:-1
+also get the new selection UI.
+
+
+28
+00:01:33,794 --> 00:01:37,564 line:-2
+However, if you have a highly customized
+UI for displaying text,
+
+
+29
+00:01:37,598 --> 00:01:41,368 line:-2
+it can be challenging to keep up with
+these changes in your own implementation,
+
+
+30
+00:01:41,401 --> 00:01:46,507 line:-2
+especially if you aren't able
+to adopt UITextInteraction.
+
+
+31
+00:01:46,540 --> 00:01:51,378 line:-2
+That's why in iOS 17, we've added
+UITextSelectionDisplayInteraction,
+
+
+32
+00:01:51,411 --> 00:01:53,680 line:-1
+which just provides the selection UI
+
+
+33
+00:01:53,714 --> 00:01:56,683 line:-2
+without the gestures included
+with UITextInteraction.
+
+
+34
+00:01:57,651 --> 00:02:01,822 line:-2
+UITextSelectionDisplayInteraction is a new
+type of UIInteraction
+
+
+35
+00:02:01,855 --> 00:02:04,825 line:-1
+that can be installed on any UIView.
+
+
+36
+00:02:04,858 --> 00:02:09,763 line:-2
+You must also provide an object
+that implements the UITextInput protocol,
+
+
+37
+00:02:09,796 --> 00:02:12,332 line:-2
+which defines various methods
+for the interaction
+
+
+38
+00:02:12,366 --> 00:02:16,770 line:-1
+to obtain selection state from your view.
+
+
+39
+00:02:16,803 --> 00:02:21,141 line:0
+UITextSelectionDisplayInteraction will
+then do all the heavy lifting for you,
+
+
+40
+00:02:21,175 --> 00:02:24,311 line:0
+providing the cursor view
+and cursor accessories,
+
+
+41
+00:02:24,344 --> 00:02:28,248 line:0
+as well as the range highlight
+and selection handles.
+
+
+42
+00:02:28,282 --> 00:02:30,317 line:-1
+All of these views are replaceable too,
+
+
+43
+00:02:30,350 --> 00:02:33,053 line:-2
+so you can customize the behavior
+if you need to.
+
+
+44
+00:02:33,086 --> 00:02:36,490 line:-2
+Here's a quick look at an example
+of how to do this in code.
+
+
+45
+00:02:36,523 --> 00:02:40,561 line:-2
+First, create a selection display
+interaction
+
+
+46
+00:02:40,594 --> 00:02:46,600 line:-2
+and provide it with your document object
+that implements the UITextInput protocol.
+
+
+47
+00:02:46,633 --> 00:02:50,337 line:-2
+This can be the same as your view,
+if applicable.
+
+
+48
+00:02:50,370 --> 00:02:52,639 line:-1
+Next, simply add the interaction
+
+
+49
+00:02:52,673 --> 00:02:56,777 line:-2
+to the view you want to display
+the selection UI inside of.
+
+
+50
+00:02:56,810 --> 00:03:01,682 line:-2
+This can be a container view
+or the view that renders your document.
+
+
+51
+00:03:01,715 --> 00:03:04,985 line:-2
+Whenever the selection state changes,
+just make sure
+
+
+52
+00:03:05,018 --> 00:03:07,888 line:-2
+to call setNeedsSelectionUpdate
+on the interaction,
+
+
+53
+00:03:07,921 --> 00:03:10,958 line:-2
+and the interaction will take care
+of updating all the views
+
+
+54
+00:03:10,991 --> 00:03:13,327 line:-1
+to reflect your new selection state.
+
+
+55
+00:03:13,360 --> 00:03:16,763 line:-2
+In addition
+to UITextSelectionDisplayInteraction,
+
+
+56
+00:03:16,797 --> 00:03:19,533 line:-2
+we've also added a new API
+for displaying a loupe.
+
+
+57
+00:03:19,566 --> 00:03:21,602 line:-1
+It can be used on any view,
+
+
+58
+00:03:21,635 --> 00:03:27,441 line:-2
+and UITextSelectionDisplayInteraction
+or UITextInput isn't required to use it.
+
+
+59
+00:03:27,474 --> 00:03:29,610 line:-2
+It's recommended to use
+a gesture recognizer,
+
+
+60
+00:03:29,643 --> 00:03:34,982 line:-2
+such as UIPanGestureRecognizer,
+to drive the loupe's updates.
+
+
+61
+00:03:35,015 --> 00:03:38,252 line:-2
+Here's how to manage
+a loupe session in code.
+
+
+62
+00:03:38,285 --> 00:03:40,487 line:-1
+When using a pan gesture recognizer,
+
+
+63
+00:03:40,521 --> 00:03:44,758 line:-2
+in the callback, grab the gesture's
+location and selection widget,
+
+
+64
+00:03:44,791 --> 00:03:47,895 line:-1
+in this case, the cursor view.
+
+
+65
+00:03:47,928 --> 00:03:50,030 line:-1
+Next, if the gesture is beginning,
+
+
+66
+00:03:50,063 --> 00:03:54,034 line:-2
+create a new UITextLoupeSession
+by calling begin(at:),
+
+
+67
+00:03:54,067 --> 00:04:00,841 line:-2
+providing the loupe's starting location,
+selection widget, and coordinate space.
+
+
+68
+00:04:00,874 --> 00:04:02,776 line:0
+Then when the gesture moves around,
+
+
+69
+00:04:02,809 --> 00:04:08,849 line:0
+call move(to:) on the existing
+loupe session to update its location.
+
+
+70
+00:04:08,882 --> 00:04:11,451 line:0
+Lastly, when the gesture recognizer ends,
+
+
+71
+00:04:11,485 --> 00:04:15,656 line:0
+make sure to call invalidate
+on the loupe session to dismiss it.
+
+
+72
+00:04:15,689 --> 00:04:18,625 line:-1
+Next I'd like to go over text item actions
+
+
+73
+00:04:18,659 --> 00:04:22,563 line:-2
+and how you can use them
+to display menus inside of text views.
+
+
+74
+00:04:22,596 --> 00:04:27,234 line:-2
+Text item interactions in UITextView
+are now much more customizable
+
+
+75
+00:04:27,267 --> 00:04:30,137 line:-1
+using new APIs on UITextViewDelegate.
+
+
+76
+00:04:31,505 --> 00:04:35,909 line:-2
+These new additions make it possible to
+modify the primary action for text items
+
+
+77
+00:04:35,943 --> 00:04:41,348 line:-2
+or present a menu like the candidate menu
+shown here in the Translate app.
+
+
+78
+00:04:41,381 --> 00:04:46,119 line:-2
+Previously, UITextView allows developers
+to disable item interactions
+
+
+79
+00:04:46,153 --> 00:04:50,390 line:-2
+through the shouldInteractWith APIs
+on UITextViewDelegate
+
+
+80
+00:04:50,424 --> 00:04:53,093 line:-1
+for links and attachments.
+
+
+81
+00:04:53,126 --> 00:04:57,297 line:-2
+In iOS 17, you now have the ability
+to customize item interactions
+
+
+82
+00:04:57,331 --> 00:05:00,734 line:-1
+for text items in text views.
+
+
+83
+00:05:00,767 --> 00:05:05,906 line:0
+UITextViewDelegate has gained new methods
+to customize both the primary action,
+
+
+84
+00:05:05,939 --> 00:05:09,710 line:0
+or provide a menu for specific text items.
+
+
+85
+00:05:09,743 --> 00:05:13,213 line:-2
+Here's a quick review
+of what text items actually are
+
+
+86
+00:05:13,247 --> 00:05:15,082 line:-1
+and how they integrate with your app.
+
+
+87
+00:05:16,149 --> 00:05:21,188 line:0
+Text items represent the content
+that support item interactions.
+
+
+88
+00:05:21,221 --> 00:05:27,327 line:0
+This includes text attachments,
+represented by NSTextAttachment,
+
+
+89
+00:05:27,361 --> 00:05:32,366 line:0
+and links,
+represented by NSLinkAttributeName.
+
+
+90
+00:05:32,399 --> 00:05:38,105 line:0
+UITextItem now also supports tagging
+custom ranges of text for interaction.
+
+
+91
+00:05:38,138 --> 00:05:40,140 line:0
+To tag a range for interaction,
+
+
+92
+00:05:40,174 --> 00:05:44,378 line:0
+use the UITextItemTagAttributeName
+on the attributed string
+
+
+93
+00:05:44,411 --> 00:05:47,881 line:0
+representing the range of text
+you wish to make interactive.
+
+
+94
+00:05:47,915 --> 00:05:50,918 line:0
+With these new APIs,
+it is now possible to change
+
+
+95
+00:05:50,951 --> 00:05:56,056 line:0
+the default tap or menu behavior
+when a text item is interacted with.
+
+
+96
+00:05:56,089 --> 00:05:59,092 line:0
+For instance, you might want
+to redirect known links
+
+
+97
+00:05:59,126 --> 00:06:02,429 line:0
+to existing views within the app
+
+
+98
+00:06:02,462 --> 00:06:07,568 line:0
+or add custom menus to parts of the text.
+
+
+99
+00:06:07,601 --> 00:06:11,839 line:-2
+To continue to suppress or disable
+the primary action or menu,
+
+
+100
+00:06:11,872 --> 00:06:14,842 line:-2
+simply return nil
+for the menuConfiguration
+
+
+101
+00:06:14,875 --> 00:06:17,344 line:-1
+or primaryAction delegate methods.
+
+
+102
+00:06:18,278 --> 00:06:21,515 line:-2
+Here's a small code example
+demonstrating how to show a menu
+
+
+103
+00:06:21,548 --> 00:06:27,120 line:-2
+in response to the user tapping on a link
+inside of your UITextView.
+
+
+104
+00:06:27,154 --> 00:06:31,124 line:-2
+Just implement the
+menuConfigurationFor:defaultMenu: method
+
+
+105
+00:06:31,158 --> 00:06:33,193 line:-1
+from UITextViewDelegate
+
+
+106
+00:06:33,227 --> 00:06:38,799 line:-2
+and return a menu configuration
+containing the menu you wish to display.
+
+
+107
+00:06:38,832 --> 00:06:42,035 line:-2
+You may also provide a preview
+as part of the menu configuration
+
+
+108
+00:06:42,069 --> 00:06:45,272 line:-2
+to show inline
+with the rest of the context menu.
+
+
+109
+00:06:46,240 --> 00:06:50,177 line:-2
+List and bullet support have also been
+added to TextKit 2.
+
+
+110
+00:06:50,210 --> 00:06:53,480 line:-2
+I'll go over how you can take advantage
+of this in your application.
+
+
+111
+00:06:53,514 --> 00:06:57,518 line:-2
+In addition to supporting multiple
+different kinds of bulleted items,
+
+
+112
+00:06:57,551 --> 00:07:02,723 line:-2
+roman numeral, alphabetical,
+and decimal ordering is also supported.
+
+
+113
+00:07:02,756 --> 00:07:04,791 line:-1
+Each one will automatically be localized
+
+
+114
+00:07:04,825 --> 00:07:07,227 line:-2
+based on the device
+or app's configured locale,
+
+
+115
+00:07:07,261 --> 00:07:11,999 line:-2
+so worldwide internationalization
+is built right in.
+
+
+116
+00:07:12,032 --> 00:07:15,169 line:-2
+Here's a quick example
+of how you can get started with text lists
+
+
+117
+00:07:15,202 --> 00:07:17,738 line:-1
+using attributed strings.
+
+
+118
+00:07:17,771 --> 00:07:20,941 line:-2
+Use the textLists property
+on NSParagraphStyle
+
+
+119
+00:07:20,974 --> 00:07:25,179 line:-2
+to define which paragraph
+has an ordered list applied to it.
+
+
+120
+00:07:25,212 --> 00:07:27,447 line:-2
+The system will automatically
+number the items
+
+
+121
+00:07:27,481 --> 00:07:30,784 line:-2
+based on line terminating characters
+like newlines,
+
+
+122
+00:07:30,817 --> 00:07:34,388 line:-2
+and UITextView will automatically
+propagate the paragraph style
+
+
+123
+00:07:34,421 --> 00:07:36,790 line:-1
+based on typing attributes.
+
+
+124
+00:07:36,823 --> 00:07:41,395 line:-2
+There are some big changes in the way
+dictation works on macOS Sonoma.
+
+
+125
+00:07:41,428 --> 00:07:43,497 line:-2
+We have some new APIs
+to help you make sure
+
+
+126
+00:07:43,530 --> 00:07:46,934 line:-2
+your custom text elements work well
+with the new design.
+
+
+127
+00:07:46,967 --> 00:07:52,172 line:-2
+This is how the new dictation indicator
+behaves on macOS 14.
+
+
+128
+00:07:52,206 --> 00:07:56,743 line:-2
+Like on iOS, dictation has a trailing
+glow effect while speaking,
+
+
+129
+00:07:56,777 --> 00:07:59,913 line:-2
+and a microphone indicator appears
+when at rest.
+
+
+130
+00:08:01,915 --> 00:08:05,485 line:-2
+Notice that after scrolling, the indicator
+next to the cursor will stick
+
+
+131
+00:08:05,519 --> 00:08:08,055 line:-2
+to the edge of the scroll view,
+and offer a button
+
+
+132
+00:08:08,088 --> 00:08:12,359 line:-2
+to return to the current position
+in the document.
+
+
+133
+00:08:12,392 --> 00:08:16,496 line:-2
+If you're using a standard text control
+in AppKit like NSTextView,
+
+
+134
+00:08:16,530 --> 00:08:19,666 line:-2
+you'll get this behavior
+right out of the box.
+
+
+135
+00:08:19,700 --> 00:08:22,302 line:-2
+If your app offers
+a customized implementation
+
+
+136
+00:08:22,336 --> 00:08:25,239 line:-2
+for showing the insertion point,
+there's a little bit of work
+
+
+137
+00:08:25,272 --> 00:08:27,407 line:-2
+you'll need to do
+to support this new behavior.
+
+
+138
+00:08:28,375 --> 00:08:32,012 line:-2
+Similar to
+UITextSelectionDisplayInteraction for iOS,
+
+
+139
+00:08:32,045 --> 00:08:34,314 line:-1
+there's now a new API for macOS
+
+
+140
+00:08:34,348 --> 00:08:38,752 line:-2
+that also allows you to remain consistent
+with the system's selection UI.
+
+
+141
+00:08:38,785 --> 00:08:43,824 line:-2
+Instead of drawing your own cursor,
+adopt NSTextInsertionIndicator,
+
+
+142
+00:08:43,857 --> 00:08:47,394 line:-2
+which is a customizable NSView subclass
+that you can place
+
+
+143
+00:08:47,427 --> 00:08:51,899 line:-2
+inside of your document's view
+to indicate the cursor position.
+
+
+144
+00:08:51,932 --> 00:08:53,867 line:-1
+Its appearance is customizable.
+
+
+145
+00:08:53,901 --> 00:08:56,136 line:-1
+You can change the color and size.
+
+
+146
+00:08:56,170 --> 00:09:00,407 line:-2
+By default, it will follow
+the current accent color.
+
+
+147
+00:09:00,440 --> 00:09:03,210 line:-2
+It makes supporting the dictation effects
+really easy.
+
+
+148
+00:09:03,243 --> 00:09:05,679 line:-2
+There's just a little bit
+of configuration required
+
+
+149
+00:09:05,712 --> 00:09:09,516 line:-2
+to allow the system to insert
+the appropriate views into your hierarchy.
+
+
+150
+00:09:09,550 --> 00:09:15,022 line:-2
+Here's how to get started
+using NSTextInsertionIndicator on macOS.
+
+
+151
+00:09:15,055 --> 00:09:19,860 line:-2
+Simply create an NSTextInsertionIndicator
+view and add it as a subview
+
+
+152
+00:09:19,893 --> 00:09:24,331 line:-2
+to whatever view is displaying
+the contents of your document.
+
+
+153
+00:09:24,364 --> 00:09:27,868 line:-2
+Once you've done that,
+set effectsViewInserter to a block
+
+
+154
+00:09:27,901 --> 00:09:32,372 line:-2
+that inserts views provided by your system
+into your document's view hierarchy.
+
+
+155
+00:09:32,406 --> 00:09:36,143 line:-2
+The system will automatically take care
+of positioning the effect views
+
+
+156
+00:09:36,176 --> 00:09:41,481 line:-2
+and making sure they get updated
+as the insertion indicator moves around.
+
+
+157
+00:09:41,515 --> 00:09:44,451 line:-2
+When your custom text view resigns
+responder status,
+
+
+158
+00:09:44,484 --> 00:09:48,288 line:-2
+make sure to hide the cursor
+by setting displayMode to hidden.
+
+
+159
+00:09:50,290 --> 00:09:54,461 line:-2
+As text is inserted, updates to the frame
+will automatically be animated
+
+
+160
+00:09:54,494 --> 00:09:59,499 line:-2
+with a glow effect if dictation is used
+as the input source.
+
+
+161
+00:09:59,533 --> 00:10:01,535 line:0
+If you need to disable the glow effect,
+
+
+162
+00:10:01,568 --> 00:10:07,641 line:0
+remove the showEffectsView option
+from automaticModeOptions.
+
+
+163
+00:10:07,674 --> 00:10:09,710 line:0
+When the user changes input modes,
+
+
+164
+00:10:09,743 --> 00:10:13,380 line:0
+an effect view is displayed
+beneath the cursor in horizontal text
+
+
+165
+00:10:13,413 --> 00:10:17,251 line:0
+to show the language selection UI.
+
+
+166
+00:10:17,284 --> 00:10:19,820 line:0
+If you need to override
+the placement of this UI,
+
+
+167
+00:10:19,853 --> 00:10:22,856 line:0
+you can specify
+preferredTextAccessoryPlacement
+
+
+168
+00:10:22,890 --> 00:10:26,360 line:0
+in your implementation
+of NSTextInputClient.
+
+
+169
+00:10:26,393 --> 00:10:28,795 line:-2
+The system checks
+the value of this property
+
+
+170
+00:10:28,829 --> 00:10:31,398 line:-2
+to determine
+where to draw the accessories.
+
+
+171
+00:10:31,431 --> 00:10:35,202 line:-2
+When the text cursor is scrolled offscreen
+during dictation,
+
+
+172
+00:10:35,235 --> 00:10:38,105 line:-2
+the system will also display
+a scroll-away indicator
+
+
+173
+00:10:38,138 --> 00:10:40,574 line:-2
+to indicate the relative position
+of the cursor
+
+
+174
+00:10:40,607 --> 00:10:44,711 line:-2
+and offer an affordance
+to get back to the dictation point.
+
+
+175
+00:10:46,713 --> 00:10:49,950 line:-2
+To make sure this behavior is supported
+in your custom text view,
+
+
+176
+00:10:49,983 --> 00:10:52,653 line:-1
+make sure to adopt NSTextInputClient
+
+
+177
+00:10:52,686 --> 00:10:58,358 line:-2
+and implement the selectionRect
+and documentVisibleRect properties.
+
+
+178
+00:10:58,392 --> 00:11:01,295 line:-2
+Notify the system
+about scrolling beginning and ending
+
+
+179
+00:11:01,328 --> 00:11:04,565 line:-2
+by calling
+textInputClientWillStartScrollingOrZooming
+
+
+180
+00:11:04,598 --> 00:11:08,335 line:-1
+and willEndScrollingOrZooming.
+
+
+181
+00:11:08,368 --> 00:11:11,939 line:-2
+Making sure your app works well
+in every language is crucial
+
+
+182
+00:11:11,972 --> 00:11:15,075 line:-2
+to providing
+an outstanding text experience.
+
+
+183
+00:11:15,108 --> 00:11:17,945 line:-2
+We've made some important changes
+to standard text controls,
+
+
+184
+00:11:17,978 --> 00:11:22,482 line:-2
+enhancing their readability and ergonomics
+across a broader range of languages.
+
+
+185
+00:11:22,516 --> 00:11:26,186 line:-2
+Supporting dynamic type in your apps
+goes a long way
+
+
+186
+00:11:26,220 --> 00:11:30,257 line:-2
+towards improving the layout of your UI
+in every language.
+
+
+187
+00:11:30,290 --> 00:11:33,627 line:-2
+Something important to consider
+when laying out text elements in your app
+
+
+188
+00:11:33,660 --> 00:11:37,631 line:-2
+is the fact that many languages can have
+variable line heights
+
+
+189
+00:11:37,664 --> 00:11:42,336 line:-2
+in addition to layout direction
+and font styles.
+
+
+190
+00:11:42,369 --> 00:11:45,372 line:-2
+A common issue encountered
+when dealing with variable line heights
+
+
+191
+00:11:45,405 --> 00:11:49,443 line:-2
+between languages is the problem
+of clipped text.
+
+
+192
+00:11:49,476 --> 00:11:54,081 line:-2
+Not only does this look bad, but it can
+also drastically impact readability
+
+
+193
+00:11:54,114 --> 00:11:59,119 line:-2
+and significantly hinder
+the overall user experience of your app.
+
+
+194
+00:11:59,152 --> 00:12:01,288 line:-1
+These issues may be difficult to notice,
+
+
+195
+00:12:01,321 --> 00:12:04,958 line:-2
+especially if you aren't able
+to test your app in every language.
+
+
+196
+00:12:04,992 --> 00:12:07,794 line:-2
+We've made some improvements
+to standard text elements,
+
+
+197
+00:12:07,828 --> 00:12:09,963 line:-1
+like UITextField and UILabel,
+
+
+198
+00:12:09,997 --> 00:12:13,534 line:-2
+to address this problem automatically
+in most cases.
+
+
+199
+00:12:13,567 --> 00:12:17,771 line:-2
+However, there are some best practices
+that you should still make sure to follow
+
+
+200
+00:12:17,804 --> 00:12:21,175 line:-2
+to ensure the system can prevent
+clipping of these elements.
+
+
+201
+00:12:21,208 --> 00:12:23,877 line:0
+To prevent these common clipping issues,
+
+
+202
+00:12:23,911 --> 00:12:27,114 line:0
+all our platforms will now automatically
+adjust the line height
+
+
+203
+00:12:27,147 --> 00:12:29,249 line:0
+in UILabel or UITextField
+
+
+204
+00:12:29,283 --> 00:12:33,187 line:0
+to accommodate languages
+with highly dynamic line heights.
+
+
+205
+00:12:33,220 --> 00:12:37,124 line:0
+This new behavior takes place
+only in specific cases.
+
+
+206
+00:12:37,157 --> 00:12:40,093 line:0
+First, keep in mind
+that line heights are now dependent
+
+
+207
+00:12:40,127 --> 00:12:43,764 line:0
+on the device's configured
+preferred languages.
+
+
+208
+00:12:43,797 --> 00:12:47,501 line:0
+Second, this adjustment affects
+the entire user interface,
+
+
+209
+00:12:47,534 --> 00:12:50,370 line:0
+increasing line heights
+for all text elements,
+
+
+210
+00:12:50,404 --> 00:12:54,208 line:0
+even those that display scripts
+with fixed line heights, like English,
+
+
+211
+00:12:54,241 --> 00:12:57,811 line:0
+which wouldn't normally require
+the extra space.
+
+
+212
+00:12:57,845 --> 00:13:00,447 line:-2
+This is intentional
+to ensure visual consistency
+
+
+213
+00:13:00,480 --> 00:13:02,249 line:-1
+across all text elements.
+
+
+214
+00:13:02,282 --> 00:13:05,652 line:-2
+Lastly, this automatic adjustment
+only applies
+
+
+215
+00:13:05,686 --> 00:13:08,522 line:-1
+to text elements that use text styles.
+
+
+216
+00:13:08,555 --> 00:13:12,659 line:-2
+Custom fonts will continue
+to use their fixed line heights.
+
+
+217
+00:13:12,693 --> 00:13:14,761 line:-1
+This behavior isn't entirely new,
+
+
+218
+00:13:14,795 --> 00:13:17,364 line:-2
+as it has been in effect
+for several releases.
+
+
+219
+00:13:17,397 --> 00:13:20,667 line:-1
+However, in iOS 17 it's much more dynamic,
+
+
+220
+00:13:20,701 --> 00:13:24,404 line:-2
+and the exact adjustment depends
+on both the text style and language used.
+
+
+221
+00:13:26,006 --> 00:13:29,042 line:-2
+To take advantage of this behavior,
+adopt Text Styles
+
+
+222
+00:13:29,076 --> 00:13:33,914 line:-2
+by creating a UIFont explicitly with
+the preferredFont(forTextStyle:) method
+
+
+223
+00:13:33,947 --> 00:13:37,751 line:-2
+and assign it to a text element,
+like UILabel.
+
+
+224
+00:13:37,784 --> 00:13:41,555 line:-2
+Next, avoid setting clipsToBounds
+on text elements.
+
+
+225
+00:13:41,588 --> 00:13:45,626 line:-2
+Ascenders and descenders for languages
+like Thai and Hindi will often protrude
+
+
+226
+00:13:45,659 --> 00:13:48,128 line:-1
+beyond the line height bounds.
+
+
+227
+00:13:48,161 --> 00:13:50,430 line:-2
+This is generally acceptable
+in most layouts,
+
+
+228
+00:13:50,464 --> 00:13:53,767 line:-2
+since there's usually extra space
+around neighboring elements,
+
+
+229
+00:13:53,800 --> 00:13:56,403 line:-2
+but it does mean
+that setting clipsToBounds will result
+
+
+230
+00:13:56,436 --> 00:13:59,606 line:-1
+in those text elements being clipped.
+
+
+231
+00:13:59,640 --> 00:14:03,911 line:-2
+UIKit has also been updated
+to prevent unnecessary use of this setting
+
+
+232
+00:14:03,944 --> 00:14:06,446 line:-2
+where it was previously enabled
+by default.
+
+
+233
+00:14:06,480 --> 00:14:11,051 line:-2
+Lastly, ensure that your UIs
+are responsive to changes in height
+
+
+234
+00:14:11,084 --> 00:14:13,353 line:-2
+and that all other controls
+remain aligned,
+
+
+235
+00:14:13,387 --> 00:14:16,256 line:-1
+as text elements can now grow vertically.
+
+
+236
+00:14:16,290 --> 00:14:19,993 line:-2
+We also made substantial enhancements
+to line-breaking behavior
+
+
+237
+00:14:20,027 --> 00:14:24,598 line:-2
+for languages such as Chinese,
+German, Japanese, and Korean.
+
+
+238
+00:14:24,631 --> 00:14:26,500 line:-1
+These improvements apply different rules
+
+
+239
+00:14:26,533 --> 00:14:29,670 line:-2
+based on what kind of text style
+you're using in your UI
+
+
+240
+00:14:29,703 --> 00:14:32,739 line:-1
+and which language is being displayed.
+
+
+241
+00:14:32,773 --> 00:14:36,243 line:-2
+For instance, previously,
+a word within Korean text
+
+
+242
+00:14:36,276 --> 00:14:39,780 line:-1
+might have been split between lines.
+
+
+243
+00:14:39,813 --> 00:14:43,851 line:-2
+Now UIKit prevents such splitting
+for title text styles,
+
+
+244
+00:14:43,884 --> 00:14:47,754 line:-2
+ensuring a more seamless
+reading experience.
+
+
+245
+00:14:47,788 --> 00:14:50,023 line:-2
+To benefit from this new behavior
+in your app,
+
+
+246
+00:14:50,057 --> 00:14:53,327 line:-1
+similarly adopt Text Styles.
+
+
+247
+00:14:53,360 --> 00:14:55,362 line:-1
+So that's everything you need to know
+
+
+248
+00:14:55,395 --> 00:14:59,466 line:-2
+to create a powerful text experience
+in your app on iOS 17.
+
+
+249
+00:15:00,667 --> 00:15:03,504 line:-2
+If you're using a custom text view
+in your app,
+
+
+250
+00:15:03,537 --> 00:15:05,939 line:-1
+make sure to use the system selection UI
+
+
+251
+00:15:05,973 --> 00:15:09,943 line:-2
+to take advantage
+of all the new features in the OS.
+
+
+252
+00:15:09,977 --> 00:15:12,312 line:-2
+Use text items
+to create better interactions
+
+
+253
+00:15:12,346 --> 00:15:15,649 line:-1
+with links in your text views.
+
+
+254
+00:15:15,682 --> 00:15:18,385 line:-2
+Leverage the powerful new features
+of TextKit 2
+
+
+255
+00:15:18,418 --> 00:15:21,388 line:-2
+to provide a more rich
+text editing experience.
+
+
+256
+00:15:21,421 --> 00:15:25,158 line:-2
+And adopt Text Styles
+in common text elements
+
+
+257
+00:15:25,192 --> 00:15:27,928 line:-2
+to ensure a great user experience
+for everyone,
+
+
+258
+00:15:27,961 --> 00:15:31,164 line:-2
+regardless of what language
+or preferred text size.
+
+
+259
+00:15:31,198 --> 00:15:32,799 line:-1
+That's all for now.
+
+
+260
+00:15:32,833 --> 00:15:34,168 line:-1
+Thanks for watching.
+
+
+261
+00:15:34,201 --> 00:15:37,804 line:-2
+Be sure to rate five stars
+and leave a comment down below.
+
+
+262
+00:15:37,838 --> 00:15:39,940 line:-1
+♪ ♪
+

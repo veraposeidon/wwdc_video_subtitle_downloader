@@ -1,0 +1,2132 @@
+2
+00:00:00,334 --> 00:00:06,340 line:-1
+♪ ♪
+
+
+3
+00:00:10,777 --> 00:00:14,681 line:-2
+Cody: Hi, and welcome to
+"The SwiftUI cookbook for focus."
+
+
+4
+00:00:14,715 --> 00:00:17,351 line:-1
+I'm Cody, and today I'll be discussing
+
+
+5
+00:00:17.384 --> 00:00:21.488 line:-2 align:center
+some of the things that you can do with
+focus APIs in SwiftUI
+
+
+6
+00:00:21.522 --> 00:00:24.258 line:-1 align:center
+to cook up a really great user experience.
+
+
+7
+00:00:25,092 --> 00:00:27,861 line:-2
+In this video,
+I'll serve up a three-course meal
+
+
+8
+00:00:27.895 --> 00:00:31.064 line:-1 align:center
+from a fixed menu of tasty API details
+
+
+9
+00:00:31.098 --> 00:00:34.568 line:-2 align:center
+paired with a series of
+fine code examples.
+
+
+10
+00:00:34,601 --> 00:00:39,239 line:-2
+As an appetizer, I'll spend some time
+reviewing the very basics of focus:
+
+
+11
+00:00:39.273 --> 00:00:42.876 line:-1 align:center
+what is it, and what job does it do?
+
+
+12
+00:00:42.910 --> 00:00:46.580 line:-2 align:center
+For the first course, whet your palate
+with a look at the ingredients
+
+
+13
+00:00:46.613 --> 00:00:50.517 line:-1 align:center
+that make the focus experience.
+
+
+14
+00:00:50.551 --> 00:00:54.321 line:-2 align:center
+With those ingredients laid out,
+I can really start cooking.
+
+
+15
+00:00:54.354 --> 00:00:58.759 line:-2 align:center
+For the main course, I'll dig in to some
+recipes for controlling focus appearance,
+
+
+16
+00:00:58,792 --> 00:01:00,460 line:-1
+observing focus movement,
+
+
+17
+00:01:00.494 --> 00:01:05.098 line:-2 align:center
+and responding to keyboard input
+with custom controls.
+
+
+18
+00:01:05.132 --> 00:01:07.868 line:-1 align:center
+So, what is focus?
+
+
+19
+00:01:08,569 --> 00:01:11,772 line:-2
+Focus is a tool for deciding
+how to respond when someone
+
+
+20
+00:01:11.805 --> 00:01:14.107 line:-1 align:center
+presses a key on a keyboard,
+
+
+21
+00:01:14.141 --> 00:01:17.144 line:-1 align:center
+swipes on an Apple TV Remote,
+
+
+22
+00:01:17,177 --> 00:01:20,848 line:-1
+or turns the Digital Crown on their watch.
+
+
+23
+00:01:20.881 --> 00:01:25.953 line:-2 align:center
+These input methods have
+one important detail in common.
+
+
+24
+00:01:25.986 --> 00:01:28.856 line:-2 align:center
+On their own,
+they don't provide enough information
+
+
+25
+00:01:28,889 --> 00:01:33,927 line:-2
+to identify which on-screen control
+their input is intended for.
+
+
+26
+00:01:33.961 --> 00:01:38.999 line:-2 align:center
+Compare this with things like mice,
+and trackpads, and touch screens.
+
+
+27
+00:01:39.032 --> 00:01:41.401 line:-1 align:center
+When you use a mouse or trackpad,
+
+
+28
+00:01:41,435 --> 00:01:45,772 line:-2
+the on-screen cursor associates
+your clicks with screen coordinates
+
+
+29
+00:01:45.806 --> 00:01:49.943 line:-2 align:center
+that the system uses to find
+the target of the interaction.
+
+
+30
+00:01:49,977 --> 00:01:53,347 line:-2
+Focus provides the extra information
+that the system needs
+
+
+31
+00:01:53,380 --> 00:01:56,717 line:-1
+to direct input without a pointer cursor.
+
+
+32
+00:01:56.750 --> 00:02:01.154 line:-2 align:center
+When a view has focus, the system will use
+it as a starting point for responding to
+
+
+33
+00:02:01.188 --> 00:02:06.059 line:-2 align:center
+input from keyboards, Apple TV remotes,
+and Apple Watch Digital Crowns.
+
+
+34
+00:02:07.227 --> 00:02:10.464 line:-1 align:center
+Focus isn't just an implementation detail.
+
+
+35
+00:02:10,497 --> 00:02:13,534 line:-2
+It's equally important to
+the people using your app,
+
+
+36
+00:02:13.567 --> 00:02:16.803 line:-2 align:center
+which is why the focused view
+is presented with special emphasis.
+
+
+37
+00:02:17.504 --> 00:02:20.841 line:-2 align:center
+macOS automatically adds
+a border around the focused view
+
+
+38
+00:02:20,874 --> 00:02:24,044 line:-2
+to show that it will receive
+keyboard input.
+
+
+39
+00:02:24.077 --> 00:02:27.047 line:-2 align:center
+watchOS draws a green border
+around controls
+
+
+40
+00:02:27.080 --> 00:02:32.152 line:-2 align:center
+to signal that the control's value can be
+changed by rotating the Digital Crown.
+
+
+41
+00:02:32,186 --> 00:02:35,255 line:-2
+And on tvOS, the focused view
+receives a hover effect
+
+
+42
+00:02:35,289 --> 00:02:38,525 line:-2
+that lifts it above
+the plane of other controls.
+
+
+43
+00:02:39,393 --> 00:02:44,198 line:-2
+Emphasizing the focus view
+helps people in a couple of ways.
+
+
+44
+00:02:44.231 --> 00:02:46.934 line:-2 align:center
+They can anticipate where
+their input will go
+
+
+45
+00:02:46,967 --> 00:02:50,871 line:-2
+when they type on a keyboard
+or swipe on the remote.
+
+
+46
+00:02:50,904 --> 00:02:55,042 line:-2
+And in a complex or detailed layout,
+it reminds people at a glance
+
+
+47
+00:02:55.075 --> 00:02:59.713 line:-2 align:center
+which part of the app
+they're interacting with.
+
+
+48
+00:02:59,746 --> 00:03:03,784 line:-2
+Focus behaves a lot like
+a special kind of cursor.
+
+
+49
+00:03:03,817 --> 00:03:07,654 line:-2
+Instead of tracking a point on screen
+like a mouse cursor does,
+
+
+50
+00:03:07,688 --> 00:03:13,193 line:-2
+it tracks which part of your UI
+is the target for focus input.
+
+
+51
+00:03:13,227 --> 00:03:18,866 line:-2
+For this reason, I like to think of focus
+as a cursor for the user's attention.
+
+
+52
+00:03:18.899 --> 00:03:23.070 line:-2 align:center
+Now that you know a little about what
+focus is and how it appears in your app,
+
+
+53
+00:03:23.103 --> 00:03:25.572 line:-1 align:center
+I can lay out the first course,
+
+
+54
+00:03:25,606 --> 00:03:30,377 line:-2
+a look at the basic ingredients that
+go into every app's focus experience:
+
+
+55
+00:03:30.410 --> 00:03:37.184 line:-2 align:center
+focusable views,  focus state,
+focused values, and focus sections.
+
+
+56
+00:03:37.217 --> 00:03:39.887 line:-2 align:center
+The main ingredient to consider
+when cooking with focus
+
+
+57
+00:03:39,920 --> 00:03:42,356 line:-1
+is the focused view itself.
+
+
+58
+00:03:42.389 --> 00:03:45.459 line:-2 align:center
+This is the view the system uses as
+its starting point
+
+
+59
+00:03:45.492 --> 00:03:48.095 line:-1 align:center
+when responding to focus input.
+
+
+60
+00:03:48,128 --> 00:03:51,932 line:-2
+Different controls are focusable
+under different circumstances,
+
+
+61
+00:03:51,965 --> 00:03:54,168 line:-1
+and for different reasons.
+
+
+62
+00:03:54,201 --> 00:03:58,438 line:-2
+Compare text fields and buttons
+on macOS and iPadOS.
+
+
+63
+00:03:58,472 --> 00:04:02,176 line:-2
+Text fields are always focusable,
+whether you tap on them
+
+
+64
+00:04:02.209 --> 00:04:06.079 line:-2 align:center
+or you press the Tab key to move focus
+from a previous control.
+
+
+65
+00:04:06.113 --> 00:04:09.016 line:-2 align:center
+This kind of control supports focus
+for editing,
+
+
+66
+00:04:09,049 --> 00:04:12,819 line:-2
+because its role is to capture
+continuous focus input.
+
+
+67
+00:04:13,820 --> 00:04:19,293 line:-2
+Buttons are different.
+Their job is to handle clicks and taps.
+
+
+68
+00:04:19.326 --> 00:04:24.264 line:-2 align:center
+macOS and iPadOS don't give focus
+to buttons when you tap them,
+
+
+69
+00:04:24.298 --> 00:04:27.434 line:-2 align:center
+and the only way to reach them with
+the Tab key is to turn on
+
+
+70
+00:04:27.467 --> 00:04:30.037 line:-1 align:center
+keyboard navigation system-wide.
+
+
+71
+00:04:30,070 --> 00:04:31,572 line:-1
+If you aren't familiar with this setting,
+
+
+72
+00:04:31.605 --> 00:04:36.310 line:-2 align:center
+you can find it in the Keyboard settings
+pane of macOS System Settings.
+
+
+73
+00:04:36.343 --> 00:04:40.180 line:-2 align:center
+It's the switch labeled
+"Keyboard navigation".
+
+
+74
+00:04:40,214 --> 00:04:44,017 line:-2
+After flipping that switch, I can press
+the Tab key to focus on buttons,
+
+
+75
+00:04:44.051 --> 00:04:46.987 line:-1 align:center
+and press the Space bar to activate them.
+
+
+76
+00:04:49.990 --> 00:04:53.760 line:-1 align:center
+Buttons support focus for activation.
+
+
+77
+00:04:53.794 --> 00:04:57.197 line:-2 align:center
+These controls don't require focus
+to do their job,
+
+
+78
+00:04:57,231 --> 00:05:00,267 line:-2
+but they'll take focus
+if the system allows it,
+
+
+79
+00:05:00,300 --> 00:05:04,905 line:-2
+in order to support focus-driven
+alternatives to clicking and tapping.
+
+
+80
+00:05:04,938 --> 00:05:07,941 line:-1
+In iOS 17 and macOS Sonoma,
+
+
+81
+00:05:07,975 --> 00:05:12,946 line:-2
+there are new APIs for custom controls to
+participate in the focus system.
+
+
+82
+00:05:12.980 --> 00:05:15.682 line:-2 align:center
+When you apply
+the "focusable" view modifier,
+
+
+83
+00:05:15,716 --> 00:05:18,652 line:-2
+you can now fine-tune
+the resulting behavior
+
+
+84
+00:05:18.685 --> 00:05:23.323 line:-2 align:center
+by specifying the kinds of
+focus interactions your control supports.
+
+
+85
+00:05:23.357 --> 00:05:27.094 line:-2 align:center
+For controls that use focus
+to update state over time,
+
+
+86
+00:05:27,127 --> 00:05:30,831 line:-1
+specify edit interactions.
+
+
+87
+00:05:30,864 --> 00:05:35,402 line:-2
+For controls that use focus as an
+alternative to direct pointer activation,
+
+
+88
+00:05:35,435 --> 00:05:38,772 line:-1
+specify activate interactions.
+
+
+89
+00:05:39.940 --> 00:05:42.409 line:-1 align:center
+If you don't provide any arguments at all,
+
+
+90
+00:05:42.442 --> 00:05:46.880 line:-2 align:center
+the system gives the control focus
+for all interactions.
+
+
+91
+00:05:46.914 --> 00:05:48.549 line:-1 align:center
+Prior to macOS Sonoma,
+
+
+92
+00:05:48,582 --> 00:05:53,086 line:-2
+the focusable modifier only supported
+activation semantics.
+
+
+93
+00:05:53,120 --> 00:05:56,924 line:-2
+If you're already using the focusable
+modifier in your macOS code,
+
+
+94
+00:05:56.957 --> 00:06:00.761 line:-2 align:center
+verify that the new behavior suits
+your use case.
+
+
+95
+00:06:00.794 --> 00:06:04.831 line:-2 align:center
+You may need to update your code
+by adding an "interactions" argument.
+
+
+96
+00:06:04,865 --> 00:06:09,603 line:-2
+The next ingredient relates to the state
+of the focus system from moment to moment.
+
+
+97
+00:06:09,636 --> 00:06:13,407 line:-2
+This ingredient is aptly named
+"FocusState".
+
+
+98
+00:06:13.440 --> 00:06:17.010 line:-2 align:center
+The system keeps track of
+which view has focus,
+
+
+99
+00:06:17,044 --> 00:06:19,880 line:-2
+and the app can use that information
+in its logic
+
+
+100
+00:06:19,913 --> 00:06:25,052 line:-2
+to determine how to handle input
+and how to style views.
+
+
+101
+00:06:25,085 --> 00:06:27,487 line:-1
+To observe the state of the system,
+
+
+102
+00:06:27,521 --> 00:06:31,291 line:-2
+you create bindings that associate values
+that you provide
+
+
+103
+00:06:31.325 --> 00:06:35.362 line:-1 align:center
+with focus being on a particular view.
+
+
+104
+00:06:35.395 --> 00:06:39.266 line:-2 align:center
+Views can read these bindings to
+get notified when focus changes,
+
+
+105
+00:06:39,299 --> 00:06:42,469 line:-1
+such as a view becoming focused,
+
+
+106
+00:06:42.503 --> 00:06:45.706 line:-1 align:center
+or when focus is dismissed.
+
+
+107
+00:06:45.739 --> 00:06:50.944 line:-2 align:center
+Focus state properties with Boolean values
+will tell you if a single view is focused,
+
+
+108
+00:06:50.978 --> 00:06:52.746 line:-1 align:center
+as shown here.
+
+
+109
+00:06:52,779 --> 00:06:57,351 line:-2
+For more complex cases,
+you can also use custom data types.
+
+
+110
+00:06:57,384 --> 00:07:00,087 line:-1
+Later, I'll discuss an example of this,
+
+
+111
+00:07:00,120 --> 00:07:03,357 line:-2
+and show how focus state can be changed
+programmatically.
+
+
+112
+00:07:04.358 --> 00:07:07.828 line:-1 align:center
+Next up, the Focused Values API.
+
+
+113
+00:07:07.861 --> 00:07:12.232 line:-2 align:center
+The Focused Values API solves the problem
+of how to build data dependencies
+
+
+114
+00:07:12,266 --> 00:07:15,836 line:-2
+that link remote parts of
+your user interface.
+
+
+115
+00:07:15.869 --> 00:07:18.939 line:-1 align:center
+Use this API to update your app's commands
+
+
+116
+00:07:18.972 --> 00:07:22.042 line:-2 align:center
+based on what's happening
+in the active scene.
+
+
+117
+00:07:22,075 --> 00:07:26,480 line:-2
+Focused values enable data flow
+between these different elements.
+
+
+118
+00:07:26.513 --> 00:07:30.417 line:-2 align:center
+I'll define a custom one and use it to
+build my main menu content.
+
+
+119
+00:07:30,450 --> 00:07:34,121 line:-2
+Creating and using focused values is
+similar to creating and using
+
+
+120
+00:07:34,154 --> 00:07:37,024 line:-1
+custom environment keys and objects.
+
+
+121
+00:07:37,057 --> 00:07:40,994 line:-2
+You define a new key using
+the "FocusedValueKey" protocol,
+
+
+122
+00:07:41,028 --> 00:07:44,431 line:-2
+and then extend "FocusedValues"
+with a computed property
+
+
+123
+00:07:44,464 --> 00:07:49,036 line:-2
+that uses the new key to
+get and set values.
+
+
+124
+00:07:49.069 --> 00:07:52.639 line:-2 align:center
+The data you use comes from
+your scene's views,
+
+
+125
+00:07:52,673 --> 00:07:57,277 line:-2
+and can be a value, a binding,
+or an observable object.
+
+
+126
+00:07:57,311 --> 00:08:02,683 line:-2
+In any case, you use a family of
+view modifiers to associate the data
+
+
+127
+00:08:02.716 --> 00:08:07.321 line:-2 align:center
+with focus being in that part of
+the view hierarchy.
+
+
+128
+00:08:07.354 --> 00:08:09.223 line:-1 align:center
+As with environment values,
+
+
+129
+00:08:09.256 --> 00:08:13.627 line:-2 align:center
+you access your focused values by
+declaring a dynamic property.
+
+
+130
+00:08:13,660 --> 00:08:17,097 line:-2
+In this example,
+my focused value is a binding,
+
+
+131
+00:08:17,130 --> 00:08:20,200 line:-2
+so I use the "@FocusedBinding"
+property wrapper
+
+
+132
+00:08:20.234 --> 00:08:22.536 line:-1 align:center
+and provide it with my custom key path.
+
+
+133
+00:08:22,569 --> 00:08:26,373 line:-2
+"@FocusedBinding" looks at
+the focused view and its ancestors
+
+
+134
+00:08:26,406 --> 00:08:30,777 line:-2
+to see if there's currently a binding
+associated with the key.
+
+
+135
+00:08:30,811 --> 00:08:33,313 line:-2
+The property wrapper automatically
+unwraps the binding
+
+
+136
+00:08:33,347 --> 00:08:36,717 line:-2
+so I can work with
+the bound value directly.
+
+
+137
+00:08:36.750 --> 00:08:42.623 line:-2 align:center
+The only other thing I need to do is
+use my new property in the view's body.
+
+
+138
+00:08:42.656 --> 00:08:46.460 line:-2 align:center
+Over time, as focus moves
+between different controls
+
+
+139
+00:08:46.493 --> 00:08:49.162 line:-1 align:center
+and different windows become active,
+
+
+140
+00:08:49,196 --> 00:08:55,169 line:-2
+the system will update the view to reflect
+the values it finds in the new context.
+
+
+141
+00:08:55,202 --> 00:08:59,506 line:-2
+The last ingredient is
+the Focus sections API.
+
+
+142
+00:08:59.540 --> 00:09:03.410 line:-2 align:center
+Focus sections give you a way to influence
+how focus moves when someone
+
+
+143
+00:09:03.443 --> 00:09:07.614 line:-2 align:center
+swipes on an Apple TV Remote
+or presses the Tab key on a keyboard.
+
+
+144
+00:09:07.648 --> 00:09:11.318 line:-2 align:center
+By default,
+focus starts on the top-most control
+
+
+145
+00:09:11.351 --> 00:09:14.788 line:-2 align:center
+that's closest to
+the leading edge of the screen.
+
+
+146
+00:09:14,821 --> 00:09:19,927 line:-2
+From there, pressing Tab moves focus from
+one control to the next,
+
+
+147
+00:09:19,960 --> 00:09:23,063 line:-2
+following the layout order
+of the current locale.
+
+
+148
+00:09:23.096 --> 00:09:25.599 line:-2 align:center
+When you reach the last control on
+the screen,
+
+
+149
+00:09:25,632 --> 00:09:29,736 line:-2
+pressing Tab again will restart
+the sequence.
+
+
+150
+00:09:29.770 --> 00:09:33.974 line:-2 align:center
+Focus movement with an Apple TV remote is
+directional.
+
+
+151
+00:09:34.007 --> 00:09:40.447 line:-2 align:center
+You can swipe up, down, left, and right
+to move focus between controls.
+
+
+152
+00:09:40.480 --> 00:09:45.752 line:-2 align:center
+Directional movement only works
+between adjacent targets.
+
+
+153
+00:09:45.786 --> 00:09:49.089 line:-2 align:center
+In this example, I can swipe right
+from the Creme Brûlée button
+
+
+154
+00:09:49.122 --> 00:09:51.725 line:-1 align:center
+to one of the other desserts.
+
+
+155
+00:09:51,758 --> 00:09:57,431 line:-2
+But if I want to add creme brûlée fixings
+to my grocery list, I can't swipe down.
+
+
+156
+00:09:57.464 --> 00:10:00.234 line:-2 align:center
+That button isn't directly beneath
+the creme brûlée button,
+
+
+157
+00:10:00,267 --> 00:10:03,437 line:-1
+so my gesture fails.
+
+
+158
+00:10:03.470 --> 00:10:05.405 line:-1 align:center
+To make these focus targets line up,
+
+
+159
+00:10:05,439 --> 00:10:09,910 line:-2
+I'll mark the bottom button's container
+as a focus section.
+
+
+160
+00:10:09.943 --> 00:10:13.313 line:-2 align:center
+Focus sections become targets for
+movement gestures,
+
+
+161
+00:10:13,347 --> 00:10:15,749 line:-1
+but they don't become focusable.
+
+
+162
+00:10:15.782 --> 00:10:20.587 line:-2 align:center
+Instead, they guide focus towards
+the nearest focusable content.
+
+
+163
+00:10:20,621 --> 00:10:25,959 line:-2
+To be effective, the focus sections have
+to take up more space than their contents.
+
+
+164
+00:10:25,993 --> 00:10:29,463 line:-2
+In this case, I'll add spacers
+before and after the button
+
+
+165
+00:10:29.496 --> 00:10:34.334 line:-2 align:center
+to make the stack grow
+to fit the width of the screen.
+
+
+166
+00:10:34,368 --> 00:10:37,437 line:-1
+With the larger focus target in place,
+
+
+167
+00:10:37,471 --> 00:10:39,239 line:-1
+I can now swipe down from anywhere
+
+
+168
+00:10:39.273 --> 00:10:42.109 line:-1 align:center
+to reach the bottom button.
+
+
+169
+00:10:42,142 --> 00:10:45,045 line:-1
+I can taste that creme brûlée already!
+
+
+170
+00:10:46,580 --> 00:10:48,715 line:-2
+I'll take you through
+some recipes that combine
+
+
+171
+00:10:48.749 --> 00:10:50.617 line:-1 align:center
+the staple ingredients I just described
+
+
+172
+00:10:50,651 --> 00:10:53,921 line:-2
+to polish the look and feel
+of custom controls
+
+
+173
+00:10:53.954 --> 00:10:56.523 line:-1 align:center
+and remove friction from common tasks.
+
+
+174
+00:10:57.057 --> 00:11:01.495 line:-2 align:center
+Recently, I've been using a cookbook app
+made by my fellow chef Curt.
+
+
+175
+00:11:01,528 --> 00:11:05,165 line:-2
+You may recognize it from
+his WWDC22 video.
+
+
+176
+00:11:05.199 --> 00:11:09.436 line:-2 align:center
+The recipes in this section are based on
+some new features I've been working on
+
+
+177
+00:11:09,469 --> 00:11:13,273 line:-2
+that will benefit from some attention to
+focus behavior.
+
+
+178
+00:11:13.307 --> 00:11:16.476 line:-2 align:center
+For instance,
+I've added an in-app grocery list
+
+
+179
+00:11:16,510 --> 00:11:20,848 line:-2
+to help me remember what to get
+on my next trip to the grocery store.
+
+
+180
+00:11:21,248 --> 00:11:24,918 line:-2
+This first recipe shows how
+a dash of programmatic focus movement
+
+
+181
+00:11:24,952 --> 00:11:28,555 line:-2
+can make editing my grocery list
+a delightful experience.
+
+
+182
+00:11:29.389 --> 00:11:34.261 line:-2 align:center
+When the grocery list sheet appears,
+it always has an empty item at its end.
+
+
+183
+00:11:34.294 --> 00:11:36.763 line:-2 align:center
+Tapping on the empty item brings up
+the keyboard
+
+
+184
+00:11:36,797 --> 00:11:39,166 line:-1
+so I can describe what I need to buy.
+
+
+185
+00:11:39.199 --> 00:11:43.237 line:-2 align:center
+Adding groceries is a frequent task,
+so I'd like to save myself a tap
+
+
+186
+00:11:43.270 --> 00:11:48.342 line:-2 align:center
+by putting focus on the empty item
+automatically whenever the list appears.
+
+
+187
+00:11:48.375 --> 00:11:51.211 line:-2 align:center
+Earlier, I showed how to use
+the Focus State API
+
+
+188
+00:11:51.245 --> 00:11:54.515 line:-2 align:center
+to observe and update
+which view has focus.
+
+
+189
+00:11:54,548 --> 00:11:57,484 line:-1
+I'll use the same API here.
+
+
+190
+00:11:57.518 --> 00:12:02.856 line:-2 align:center
+The previous example used a flag
+to signal whether a single view had focus.
+
+
+191
+00:12:02.890 --> 00:12:07.728 line:-2 align:center
+In the case of my grocery list, there are
+any number of text fields to observe.
+
+
+192
+00:12:07.761 --> 00:12:12.799 line:-2 align:center
+FocusState's value can be
+any Hashable type for cases like this.
+
+
+193
+00:12:12.833 --> 00:12:16.537 line:-2 align:center
+Each ingredient I add on this screen
+has a unique ID,
+
+
+194
+00:12:16,570 --> 00:12:20,174 line:-2
+and I can keep track of focus
+by storing the ID associated
+
+
+195
+00:12:20,207 --> 00:12:23,043 line:-1
+with the focused text field.
+
+
+196
+00:12:23.076 --> 00:12:24.878 line:-1 align:center
+I'll use the "focused(_:equals:)" modifier
+
+
+197
+00:12:24,912 --> 00:12:28,782 line:-2
+to make the link between each text field
+and its ingredient.
+
+
+198
+00:12:28.815 --> 00:12:32.085 line:-2 align:center
+I need to provide this modifier with
+two arguments:
+
+
+199
+00:12:32,119 --> 00:12:35,689 line:-1
+a binding to my "focusedItem" property
+
+
+200
+00:12:35,722 --> 00:12:39,393 line:-2
+and the ingredient ID that
+the binding should be updated
+
+
+201
+00:12:39.426 --> 00:12:42.696 line:-1 align:center
+with, when focus is in that text field.
+
+
+202
+00:12:42,729 --> 00:12:44,831 line:-1
+I can now run the app and verify that
+
+
+203
+00:12:44,865 --> 00:12:48,101 line:-2
+the "focusedItem" property is updated
+with different ID values
+
+
+204
+00:12:48.135 --> 00:12:51.605 line:-1 align:center
+when I tap around the grocery list.
+
+
+205
+00:12:53,607 --> 00:12:55,943 line:-1
+With my focus state binding in place,
+
+
+206
+00:12:55.976 --> 00:12:59.146 line:-2 align:center
+I have what I need to programmatically
+move focus to the text field
+
+
+207
+00:12:59.179 --> 00:13:02.049 line:-2 align:center
+when the grocery list first appears
+on screen.
+
+
+208
+00:13:02,082 --> 00:13:05,052 line:-2
+I do this by adding
+the "defaultFocus(_:_:)" view modifier
+
+
+209
+00:13:05,085 --> 00:13:10,557 line:-2
+to my list,
+which is now also available in iOS 17.
+
+
+210
+00:13:10,591 --> 00:13:14,228 line:-2
+When the system is evaluating focus
+for the first time on this screen,
+
+
+211
+00:13:14,261 --> 00:13:19,032 line:-2
+it will try to update my binding with
+the ID of the last grocery list item.
+
+
+212
+00:13:20,901 --> 00:13:25,906 line:-2
+With these changes, adding to my grocery
+list is now a two-step process.
+
+
+213
+00:13:25.939 --> 00:13:28.275 line:-2 align:center
+Tap the toolbar button to present
+the sheet,
+
+
+214
+00:13:28.308 --> 00:13:30.010 line:-1 align:center
+and then start typing.
+
+
+215
+00:13:30,043 --> 00:13:32,412 line:-1
+There is no step three.
+
+
+216
+00:13:32,446 --> 00:13:34,248 line:-1
+As my shopping list grows,
+
+
+217
+00:13:34.281 --> 00:13:39.386 line:-2 align:center
+I notice that tapping the Add button in
+the toolbar creates a new empty list item,
+
+
+218
+00:13:39.419 --> 00:13:42.222 line:-1 align:center
+but focus remains where it was.
+
+
+219
+00:13:42,256 --> 00:13:45,826 line:-2
+I have to tap the empty item
+to give it focus.
+
+
+220
+00:13:45.859 --> 00:13:49.696 line:-2 align:center
+This is another case where I want
+the app to move focus programmatically
+
+
+221
+00:13:49.730 --> 00:13:53.600 line:-2 align:center
+so that I can start typing as soon as
+the new item appears.
+
+
+222
+00:13:53,634 --> 00:13:58,038 line:-2
+The difference is that now I want to be
+in control of the timing of the change.
+
+
+223
+00:13:58.472 --> 00:14:01.942 line:-2 align:center
+Happily, I can use the same focus state
+binding that I created
+
+
+224
+00:14:01,975 --> 00:14:04,545 line:-1
+for setting default focus.
+
+
+225
+00:14:04.578 --> 00:14:08.682 line:-2 align:center
+In my GroceryListView,
+I have an "addEmptyItem" method
+
+
+226
+00:14:08.715 --> 00:14:12.286 line:-1 align:center
+that adds a new item in my model.
+
+
+227
+00:14:12,319 --> 00:14:14,555 line:-2
+And since I've already associated
+the new item's TextField
+
+
+228
+00:14:14,588 --> 00:14:17,424 line:-1
+with the "currentItemID" property,
+
+
+229
+00:14:17.457 --> 00:14:21.094 line:-2 align:center
+I just need to update the property with
+the new ID
+
+
+230
+00:14:21.128 --> 00:14:23.864 line:-1 align:center
+as part of my toolbar button action.
+
+
+231
+00:14:24.865 --> 00:14:26.433 line:-1 align:center
+Voilà!
+
+
+232
+00:14:26,466 --> 00:14:29,837 line:-2
+Now when I want to start
+or update my grocery list,
+
+
+233
+00:14:29,870 --> 00:14:33,774 line:-2
+I don't have to tap anything
+to put focus where it needs to be,
+
+
+234
+00:14:33.807 --> 00:14:36.310 line:-1 align:center
+I can just start typing.
+
+
+235
+00:14:37,644 --> 00:14:40,781 line:-2
+Next up, let's use some more of
+the ingredients
+
+
+236
+00:14:40,814 --> 00:14:45,018 line:-2
+to improve the focus interactions for
+a custom control that I've created.
+
+
+237
+00:14:45.419 --> 00:14:48.822 line:-2 align:center
+At this point,
+I've cataloged a lot of recipes.
+
+
+238
+00:14:48.856 --> 00:14:52.926 line:-2 align:center
+As I try each one out, I want to remember
+which ones come out well
+
+
+239
+00:14:52.960 --> 00:14:55.796 line:-1 align:center
+and which might need some re-thinking,
+
+
+240
+00:14:55,829 --> 00:14:58,365 line:-1
+or at least a little more salt.
+
+
+241
+00:14:58.398 --> 00:15:02.536 line:-2 align:center
+To help with this, I've built
+a custom picker control with emoji
+
+
+242
+00:15:02,569 --> 00:15:06,139 line:-2
+to capture the highs and lows of
+my culinary journey.
+
+
+243
+00:15:06,173 --> 00:15:09,776 line:-2
+I can rate each recipe
+by tapping on an emoji,
+
+
+244
+00:15:09,810 --> 00:15:13,146 line:-2
+but as someone who lives
+the keyboard navigation lifestyle,
+
+
+245
+00:15:13,180 --> 00:15:16,817 line:-2
+I'd really like to be able to focus on the
+control with the Tab key
+
+
+246
+00:15:16,850 --> 00:15:19,653 line:-2
+and use the arrow keys
+to change the selection.
+
+
+247
+00:15:19.686 --> 00:15:22.623 line:-1 align:center
+Let's make that happen.
+
+
+248
+00:15:22,656 --> 00:15:26,059 line:-2
+Here's the basic structure of
+my emoji picker:
+
+
+249
+00:15:26.093 --> 00:15:29.997 line:-2 align:center
+The first thing I need to do is make
+the control focusable.
+
+
+250
+00:15:30,030 --> 00:15:34,334 line:-2
+I start out by adding the "focusable"
+modifier with no arguments.
+
+
+251
+00:15:34.368 --> 00:15:37.571 line:-2 align:center
+This makes my control focusable
+when I press the Tab key,
+
+
+252
+00:15:37,604 --> 00:15:39,306 line:-1
+but I notice some additional behavior
+
+
+253
+00:15:39.339 --> 00:15:43.477 line:-2 align:center
+that I don't see with other buttons
+and similar controls.
+
+
+254
+00:15:43.510 --> 00:15:47.414 line:-2 align:center
+My control, for example,
+gets focus on click,
+
+
+255
+00:15:47,447 --> 00:15:51,018 line:-2
+whereas buttons
+and segmented controls don't.
+
+
+256
+00:15:51.051 --> 00:15:55.022 line:-2 align:center
+Those controls require "Keyboard
+navigation" in order to be focused.
+
+
+257
+00:15:55,055 --> 00:15:57,858 line:-1
+Mine should, too.
+
+
+258
+00:15:57,891 --> 00:16:00,994 line:-2
+To get that behavior,
+I'll specify my control
+
+
+259
+00:16:01.028 --> 00:16:03.931 line:-1 align:center
+as being focusable for activation.
+
+
+260
+00:16:03.964 --> 00:16:08.368 line:-2 align:center
+Controls that are focusable for activation
+don't get focus on click,
+
+
+261
+00:16:08.402 --> 00:16:10.571 line:-2 align:center
+and they need "Keyboard navigation"
+turned on
+
+
+262
+00:16:10.604 --> 00:16:13.373 line:-1 align:center
+to receive focus with the keyboard.
+
+
+263
+00:16:13.407 --> 00:16:15.108 line:-1 align:center
+The next thing I notice is that
+
+
+264
+00:16:15,142 --> 00:16:19,413 line:-2
+the focus ring that macOS draws around
+my control is rectangular.
+
+
+265
+00:16:19,446 --> 00:16:21,181 line:-1
+For a more polished look,
+
+
+266
+00:16:21.215 --> 00:16:25.853 line:-2 align:center
+I want the focus ring to follow the path
+of the capsule-shaped background.
+
+
+267
+00:16:25.886 --> 00:16:29.456 line:-2 align:center
+Focus rings always follow
+the content shape of a view,
+
+
+268
+00:16:29,489 --> 00:16:32,659 line:-2
+which is a rectangle by default
+in my case.
+
+
+269
+00:16:32,693 --> 00:16:34,795 line:-1
+I'll use the "contentShape" modifier
+
+
+270
+00:16:34.828 --> 00:16:39.833 line:-2 align:center
+and pass in the same Capsule shape that
+I'm using to visually clip the view.
+
+
+271
+00:16:39,867 --> 00:16:45,739 line:-2
+Now that my control is focusable, the next
+step is to have it handle key presses.
+
+
+272
+00:16:45,772 --> 00:16:48,242 line:-2
+I want to be able to use
+the left and right arrow key
+
+
+273
+00:16:48.275 --> 00:16:50.744 line:-1 align:center
+to change the chosen rating.
+
+
+274
+00:16:50,777 --> 00:16:55,282 line:-2
+Using the "onMoveCommand" modifier,
+I can provide an action to perform
+
+
+275
+00:16:55.315 --> 00:16:59.152 line:-2 align:center
+in response to
+a platform-appropriate move command,
+
+
+276
+00:16:59,186 --> 00:17:02,856 line:-2
+like when arrow keys are pressed
+on a Mac keyboard,
+
+
+277
+00:17:02,890 --> 00:17:06,560 line:-2
+or the directional edges are tapped
+on an Apple TV remote.
+
+
+278
+00:17:06,593 --> 00:17:10,097 align:center
+The system calls the action with
+the direction of movement,
+
+
+279
+00:17:10,130 --> 00:17:15,802 line:0
+so I'll move the rating selection
+left or right based on that.
+
+
+280
+00:17:15.836 --> 00:17:18.772 line:-2 align:center
+Control content should flip horizontally
+for folks using
+
+
+281
+00:17:18.805 --> 00:17:22.776 line:-2 align:center
+a right-to-left language
+like Arabic and Hebrew.
+
+
+282
+00:17:22.809 --> 00:17:26.513 line:-2 align:center
+Make sure your move command action uses
+the Environment's "layoutDirection"
+
+
+283
+00:17:26,547 --> 00:17:29,683 line:-1
+to account for this.
+
+
+284
+00:17:30,417 --> 00:17:33,320 line:-2
+One of the neat things about implementing
+focus behavior is that
+
+
+285
+00:17:33,353 --> 00:17:37,991 line:-2
+I can take the same control and get
+a great result in my Apple Watch app.
+
+
+286
+00:17:38,659 --> 00:17:41,161 line:-1
+To handle focus input on watchOS,
+
+
+287
+00:17:41.195 --> 00:17:47.167 line:-2 align:center
+I use the "digitalCrownRotation" modifier
+instead of the "onMoveCommand" modifier.
+
+
+288
+00:17:47.201 --> 00:17:50.137 line:-2 align:center
+And I'll use the isFocused
+environment value
+
+
+289
+00:17:50.170 --> 00:17:54.675 line:-2 align:center
+to draw the familiar green border
+around the control when it has focus.
+
+
+290
+00:17:56,376 --> 00:18:00,113 line:-2
+With just these few modifiers,
+I was able to take a simple control
+
+
+291
+00:18:00,147 --> 00:18:04,117 line:-2
+and add support for keyboards
+and the Digital Crown.
+
+
+292
+00:18:04,151 --> 00:18:07,888 line:-2
+The last recipe is for
+a focusable grid view
+
+
+293
+00:18:07.921 --> 00:18:10.657 line:-2 align:center
+that I've been building to showcase the
+pictures I've been taking
+
+
+294
+00:18:10,691 --> 00:18:12,526 line:-1
+of my finished results.
+
+
+295
+00:18:12,559 --> 00:18:14,728 line:-1
+I'm building this as a lazy grid,
+
+
+296
+00:18:14.761 --> 00:18:18.465 line:-2 align:center
+and I've already implemented
+some selection behavior.
+
+
+297
+00:18:18,498 --> 00:18:20,567 line:-1
+So clicking on an image selects it
+
+
+298
+00:18:20,601 --> 00:18:24,037 line:-2
+and double-clicking goes to
+the recipe's detail view.
+
+
+299
+00:18:24,071 --> 00:18:28,442 line:-2
+Now I need to consider how
+it should handle focus interactions.
+
+
+300
+00:18:28,475 --> 00:18:33,313 line:-2
+Specifically, I want the grid to be
+focusable when I press the Tab key.
+
+
+301
+00:18:33.347 --> 00:18:37.551 line:-2 align:center
+When focused, I want the arrow keys
+to update the selection,
+
+
+302
+00:18:37,584 --> 00:18:41,188 line:-2
+and I want the Return key to take me
+to the selected recipe's details.
+
+
+303
+00:18:41,221 --> 00:18:43,790 line:-2
+I'll use several of the ingredients
+I talked about before,
+
+
+304
+00:18:43,824 --> 00:18:46,426 line:-2
+plus a few extra ones
+to help me handle key presses
+
+
+305
+00:18:46,460 --> 00:18:49,463 line:-2
+and customize how the grid appears
+when it has focus.
+
+
+306
+00:18:50,397 --> 00:18:55,202 line:-2
+As in previous examples, the first step is
+to make the grid focusable.
+
+
+307
+00:18:55.235 --> 00:18:58.906 line:-2 align:center
+In this case,
+I don't need to specify any interactions.
+
+
+308
+00:18:58,939 --> 00:19:01,808 line:-2
+By default, the grid will take focus when
+I click on it
+
+
+309
+00:19:01,842 --> 00:19:04,178 line:-1
+and when I use the keyboard to tab to it,
+
+
+310
+00:19:04,211 --> 00:19:07,247 line:-2
+whether or not
+"Keyboard navigation" is enabled.
+
+
+311
+00:19:07,281 --> 00:19:09,583 line:-1
+This is exactly what I want.
+
+
+312
+00:19:09.616 --> 00:19:11.552 line:-1 align:center
+Now that I've made the grid focusable,
+
+
+313
+00:19:11.585 --> 00:19:16.156 line:-2 align:center
+the system automatically
+draws a focus ring around it.
+
+
+314
+00:19:16,190 --> 00:19:20,994 line:-2
+For containers of selectable content,
+the effect is redundant.
+
+
+315
+00:19:21.028 --> 00:19:25.165 line:-2 align:center
+The colored border I add around
+the selected recipe already communicates
+
+
+316
+00:19:25.199 --> 00:19:27.234 line:-1 align:center
+whether the grid has focus.
+
+
+317
+00:19:27,267 --> 00:19:29,603 line:-2
+I can use
+the "focusEffectDisabled" modifier
+
+
+318
+00:19:29.636 --> 00:19:32.973 line:-1 align:center
+to turn off the automatic focus ring.
+
+
+319
+00:19:33,006 --> 00:19:39,313 line:-2
+Use "SelectionShapeStyle" for borders and
+other indicators that a view is selected.
+
+
+320
+00:19:39,346 --> 00:19:42,883 line:-2
+It automatically adapts to
+my chosen accent color,
+
+
+321
+00:19:42.916 --> 00:19:46.486 line:-2 align:center
+and it turns gray when
+none of its ancestor views have focus,
+
+
+322
+00:19:46.520 --> 00:19:52.159 line:-2 align:center
+like when focus moves from
+the grid to the sidebar.
+
+
+323
+00:19:52,192 --> 00:19:55,262 line:-2
+The next thing I want to do is hook up
+a main menu command
+
+
+324
+00:19:55.295 --> 00:19:59.700 line:-2 align:center
+for marking the selected recipe as
+a favorite.
+
+
+325
+00:19:59.733 --> 00:20:02.669 line:-1 align:center
+I'll use the Focused Values API for this
+
+
+326
+00:20:02,703 --> 00:20:08,442 line:-2
+and I'll pass in a binding to my selection
+for my menu commands to update as needed.
+
+
+327
+00:20:08.475 --> 00:20:12.779 line:-2 align:center
+To support arrow key selection,
+I'll use the onMoveCommand modifier.
+
+
+328
+00:20:12,813 --> 00:20:15,682 line:0
+And when the system calls,
+I'll use the movement direction
+
+
+329
+00:20:15,716 --> 00:20:19,186 align:center
+to update my grid's selected recipe.
+
+
+330
+00:20:19,219 --> 00:20:21,989 align:center
+Lastly, I want a way to act on
+the selection
+
+
+331
+00:20:22,022 --> 00:20:24,892 align:center
+and navigate to it when
+the Return key is pressed.
+
+
+332
+00:20:24.925 --> 00:20:27.694 line:-2 align:center
+I can do this with
+the "onKeyPress" modifier,
+
+
+333
+00:20:27,728 --> 00:20:31,965 line:-1
+which is new in macOS Sonoma and iOS 17.
+
+
+334
+00:20:31,999 --> 00:20:36,937 line:-2
+This modifier takes a set of keys or
+characters and an action to perform
+
+
+335
+00:20:36.970 --> 00:20:41.041 line:-2 align:center
+when any of those keys are pressed on
+a connected hardware keyboard.
+
+
+336
+00:20:41,074 --> 00:20:44,111 line:-2
+Return "ignored" if the action
+didn't handle the press
+
+
+337
+00:20:44.144 --> 00:20:47.581 line:-2 align:center
+and dispatch should continue up
+the view hierarchy.
+
+
+338
+00:20:47,614 --> 00:20:52,753 line:0
+And for a bonus feature, I'll also use
+"onKeyPress" to implement Type Selection,
+
+
+339
+00:20:52,786 --> 00:20:56,223 line:0
+so I can quickly scroll to
+and select a recipe
+
+
+340
+00:20:56,256 --> 00:20:58,692 align:center
+by typing the first letter of its name.
+
+
+341
+00:21:00,961 --> 00:21:05,566 line:-2
+Now that I've built a great keyboard
+experience for my grid on macOS,
+
+
+342
+00:21:05.599 --> 00:21:08.502 line:-1 align:center
+let's turn to the grid on tvOS.
+
+
+343
+00:21:08.535 --> 00:21:12.539 line:-2 align:center
+On tvOS, each cell in the grid
+is focusable,
+
+
+344
+00:21:12.573 --> 00:21:16.844 line:-2 align:center
+so that as focus is moved in
+different directions with the remote,
+
+
+345
+00:21:16,877 --> 00:21:22,115 line:-2
+the cell in that direction becomes focus
+and visually lifts above the others.
+
+
+346
+00:21:22.149 --> 00:21:27.554 line:-2 align:center
+The system uses the "lift" hover effect by
+default with Buttons and NavigationLinks.
+
+
+347
+00:21:27.588 --> 00:21:30.090 line:-2 align:center
+And this effect is appropriate for
+views with text
+
+
+348
+00:21:30,123 --> 00:21:33,627 line:-1
+or those combining text and images.
+
+
+349
+00:21:33.660 --> 00:21:38.699 line:-2 align:center
+However, these recipe photos would benefit
+from a different effect.
+
+
+350
+00:21:38.732 --> 00:21:45.138 line:-2 align:center
+New in tvOS 17, I can apply the highlight
+hover effect to my focusable views.
+
+
+351
+00:21:45,172 --> 00:21:47,241 line:-1
+This effect adds a perspective shift
+
+
+352
+00:21:47.274 --> 00:21:51.144 line:-2 align:center
+and specular shine to the focused item
+as I swipe the remote,
+
+
+353
+00:21:51,178 --> 00:21:56,383 line:-2
+and it looks great with artwork and
+photos, like my recipe thumbnails.
+
+
+354
+00:21:56.416 --> 00:22:01.388 line:-2 align:center
+And as a cherry on top for my tvOS app,
+I'll add focus sections.
+
+
+355
+00:22:01.421 --> 00:22:03.991 line:-1 align:center
+The grid is next to a list of buttons,
+
+
+356
+00:22:04.024 --> 00:22:08.228 line:-2 align:center
+and I'll often need to navigate between
+these two groupings.
+
+
+357
+00:22:08.262 --> 00:22:11.665 line:-2 align:center
+When using the app,
+I notice a familiar problem.
+
+
+358
+00:22:11.698 --> 00:22:15.035 line:-2 align:center
+When focus is on one of
+the lower rows in the grid,
+
+
+359
+00:22:15,068 --> 00:22:18,572 line:-2
+I can't swipe left to move
+the category buttons,
+
+
+360
+00:22:18.605 --> 00:22:22.743 line:-2 align:center
+because the focus targets
+aren't adjacent to one another.
+
+
+361
+00:22:22.776 --> 00:22:25.846 line:-2 align:center
+I'll place the category list in
+a focus section that spans
+
+
+362
+00:22:25.879 --> 00:22:28.515 line:-1 align:center
+the full height of the layout.
+
+
+363
+00:22:28.549 --> 00:22:31.919 line:-1 align:center
+Now as I swipe left from the Creme Brûlée,
+
+
+364
+00:22:31.952 --> 00:22:37.191 line:-2 align:center
+focus moves to the categories,
+just as I would expect.
+
+
+365
+00:22:37,224 --> 00:22:40,427 line:-1
+And the grid is complete.
+
+
+366
+00:22:42.229 --> 00:22:44.731 line:-1 align:center
+Bellisimo!
+
+
+367
+00:22:44.765 --> 00:22:47.067 line:-1 align:center
+I covered a lot of ground in this video.
+
+
+368
+00:22:47.100 --> 00:22:48.902 line:-2 align:center
+It's time to gather up
+your focus ingredients
+
+
+369
+00:22:48.936 --> 00:22:50.704 line:-1 align:center
+and see what you can make.
+
+
+370
+00:22:50.737 --> 00:22:55.976 line:-2 align:center
+Test your macOS and iPadOS apps
+with keyboard navigation enabled.
+
+
+371
+00:22:56,009 --> 00:23:00,447 line:-2
+Place default focus where it will be
+most useful.
+
+
+372
+00:23:00.480 --> 00:23:02.716 line:-1 align:center
+Organize your controls in focus sections
+
+
+373
+00:23:02,749 --> 00:23:07,321 line:-2
+to help guide movement through
+irregular layouts.
+
+
+374
+00:23:07,354 --> 00:23:09,957 line:-1
+Thank you, and bon appétit!
+

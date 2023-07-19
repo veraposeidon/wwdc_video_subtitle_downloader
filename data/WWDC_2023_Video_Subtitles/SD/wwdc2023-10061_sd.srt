@@ -1,0 +1,1492 @@
+2
+00:00:00.334 --> 00:00:07.341 line:-1
+♪ ♪
+
+
+3
+00:00:11.011 --> 00:00:14.948 line:-2
+Kay: Hey, this is Kay
+from Privacy Engineering.
+
+
+4
+00:00:14.982 --> 00:00:21.221 line:-2
+I'm here to introduce a new and exciting
+Privacy and Security feature in Xcode
+
+
+5
+00:00:21.255 --> 00:00:26.393 line:-2
+that will help you automatically verify
+the integrity of your dependencies.
+
+
+6
+00:00:26.426 --> 00:00:29.863 line:-2
+At Apple,
+we believe that privacy should be
+
+
+7
+00:00:29.897 --> 00:00:33.367 line:-2
+at the core of everyone's
+development process,
+
+
+8
+00:00:33.400 --> 00:00:37.371 line:-2
+as much as it is
+at the core of our products.
+
+
+9
+00:00:37.404 --> 00:00:41.141 line:-2
+Dependency signature verification
+within Xcode
+
+
+10
+00:00:41.175 --> 00:00:44.144 line:-2
+will help app developers
+protect their apps
+
+
+11
+00:00:44.178 --> 00:00:48.382 line:-2
+and dependency authors
+protect the SDKs they distribute.
+
+
+12
+00:00:50.417 --> 00:00:54.154 line:-1
+Apps are developed using a range of SDKs.
+
+
+13
+00:00:54.188 --> 00:00:57.858 line:-1
+For example, the iOS SDK.
+
+
+14
+00:00:57.891 --> 00:01:01.361 line:-2
+Some are made by Apple,
+some by app developers
+
+
+15
+00:01:01.395 --> 00:01:04.464 line:-1
+to use across all of their apps,
+
+
+16
+00:01:04.498 --> 00:01:08.869 line:-2
+and some that app developers obtain
+from other sources.
+
+
+17
+00:01:08.902 --> 00:01:13.340 line:-2
+These form the app's supply chain
+and can include frameworks,
+
+
+18
+00:01:13.373 --> 00:01:18.612 line:-2
+Swift source files,
+and other types of dependencies.
+
+
+19
+00:01:18.645 --> 00:01:24.451 line:-2
+Using third party SDKs can make
+app development significantly easier
+
+
+20
+00:01:24.484 --> 00:01:27.888 line:-1
+and can provide extended functionality.
+
+
+21
+00:01:27.921 --> 00:01:32.059 line:-1
+However, this does introduce risks.
+
+
+22
+00:01:32,993 --> 00:01:38,498
+Supply chain security is the process
+of mitigating these risks.
+
+
+23
+00:01:38,532 --> 00:01:41,702
+You have the responsibility
+of protecting your users
+
+
+24
+00:01:41,735 --> 00:01:45,305
+by being selective
+of what dependencies you include
+
+
+25
+00:01:45,339 --> 00:01:48,242
+and to ensure that you don't
+accidentally use a version
+
+
+26
+00:01:48,275 --> 00:01:51,812
+that has been maliciously modified.
+
+
+27
+00:01:51,845 --> 00:01:55,649
+This responsibility also extends
+to SDK authors
+
+
+28
+00:01:55,682 --> 00:02:00,053
+who include other SDKs
+as part of their development.
+
+
+29
+00:02:00,087 --> 00:02:04,291
+The processes and tools available
+to mitigate these risks
+
+
+30
+00:02:04,324 --> 00:02:07,661
+can be burdensome or complex
+to do manually.
+
+
+31
+00:02:09,363 --> 00:02:13,467
+Dependency signature verification
+is a new Xcode feature
+
+
+32
+00:02:13,500 --> 00:02:17,004
+that can make this task easy
+and automatic.
+
+
+33
+00:02:17.938 --> 00:02:21.675 line:-2
+Now that you know
+what supply chain security is,
+
+
+34
+00:02:21.708 --> 00:02:24.678 line:-2
+I will talk about the role
+that digital signatures play
+
+
+35
+00:02:24.711 --> 00:02:29.850 line:-2
+in protecting developers
+and in helping reduce this burden.
+
+
+36
+00:02:29.883 --> 00:02:32.319 line:-1
+To begin, I will give you an overview
+
+
+37
+00:02:32.352 --> 00:02:35.822 line:-2
+on how Apple's code signing
+technology works
+
+
+38
+00:02:35.856 --> 00:02:39.359 line:-2
+and what Xcode now does
+to verify the signatures
+
+
+39
+00:02:39.393 --> 00:02:41.895 line:-1
+of your dependencies.
+
+
+40
+00:02:41.929 --> 00:02:46.400 line:-2
+And then I will talk about
+how app developers can use this feature
+
+
+41
+00:02:46.433 --> 00:02:50.904 line:-2
+to ensure that their dependencies
+haven't been compromised.
+
+
+42
+00:02:50.938 --> 00:02:55.108 line:-2
+And finally,
+I will discuss what SDK authors can do
+
+
+43
+00:02:55.142 --> 00:02:59.146 line:-1
+to improve the security of the ecosystem.
+
+
+44
+00:02:59.179 --> 00:03:02.983 line:-2
+I'll get started with how Apple's
+code signing technology works.
+
+
+45
+00:03:04.785 --> 00:03:08.989 line:-2
+When you are developing an SDK
+for app developers to use,
+
+
+46
+00:03:09.022 --> 00:03:12.326 line:-2
+you want to ensure that no one can modify
+or tamper with it
+
+
+47
+00:03:12.359 --> 00:03:16.430 line:-2
+during its distribution
+to your SDK clients.
+
+
+48
+00:03:16.463 --> 00:03:19.967 line:-2
+Code signing is a mechanism
+to cryptographically link
+
+
+49
+00:03:20.000 --> 00:03:23.737 line:-2
+the final complied binary
+and the associated metadata
+
+
+50
+00:03:23.770 --> 00:03:25.873 line:-1
+such as the Info.plist
+
+
+51
+00:03:25.906 --> 00:03:28.675 line:-1
+or the privacy manifest for your framework
+
+
+52
+00:03:28.709 --> 00:03:30.944 line:-1
+or, for certain types of distribution,
+
+
+53
+00:03:30.978 --> 00:03:34.815 line:-2
+the source code itself,
+with your developer identity.
+
+
+54
+00:03:36.116 --> 00:03:39.620 line:-1
+At a high level, code signing works
+
+
+55
+00:03:39.653 --> 00:03:43.056 line:-1
+by first generating a Code Directory hash,
+
+
+56
+00:03:43.090 --> 00:03:47.094 line:-2
+also known as the CDHash,
+of your compiled binary.
+
+
+57
+00:03:48.762 --> 00:03:53.700 line:-2
+To then sign this hash,
+you use your developer identity.
+
+
+58
+00:03:53.734 --> 00:03:58.739 line:-2
+This identity is represented
+by your developer certificate.
+
+
+59
+00:03:58.772 --> 00:04:03.010 line:-2
+It is made up of a private key
+that is used for code signing
+
+
+60
+00:04:03.043 --> 00:04:07.848 line:-2
+and a public key that is distributed
+as part of the signature.
+
+
+61
+00:04:07.881 --> 00:04:12.252 line:-2
+This signature can be
+tied back to your identity.
+
+
+62
+00:04:12.286 --> 00:04:15.689 line:-2
+This identity is then used
+to sign the hash
+
+
+63
+00:04:15.722 --> 00:04:18.192 line:-2
+and can be combined
+with a secure timestamp
+
+
+64
+00:04:18.225 --> 00:04:21.428 line:-2
+that is used to validate
+that the signature was generated
+
+
+65
+00:04:21.461 --> 00:04:24.198 line:-1
+at a specific point in time.
+
+
+66
+00:04:24.231 --> 00:04:28.368 line:-2
+This ensures that if anyone tampers
+with your SDK,
+
+
+67
+00:04:28.402 --> 00:04:31.038 line:-1
+the signature will no longer be valid.
+
+
+68
+00:04:31.071 --> 00:04:36.176 line:-2
+It also allows app developers to verify
+that it was you who signed it,
+
+
+69
+00:04:36.210 --> 00:04:40.247 line:-2
+using the certificate that is
+embedded into the signature.
+
+
+70
+00:04:41,415 --> 00:04:45,052
+A common type of dependency
+that you may use in your app
+
+
+71
+00:04:45,085 --> 00:04:47,054
+is the xcframework.
+
+
+72
+00:04:47,087 --> 00:04:50,324
+With xcframeworks, the signature resides
+
+
+73
+00:04:50,357 --> 00:04:53,427
+within the _CodeSignature directory.
+
+
+74
+00:04:53,460 --> 00:04:57,264
+The code signature protects
+the integrity of all the files
+
+
+75
+00:04:57,297 --> 00:05:02,336
+inside your final xcframework,
+including the privacy manifest files
+
+
+76
+00:05:02,369 --> 00:05:06,206
+that are mentioned in the WWDC23 video
+
+
+77
+00:05:06,240 --> 00:05:09,076
+"Get started with privacy manifests."
+
+
+78
+00:05:10,677 --> 00:05:15,215
+It's possible for you to manually verify
+these code signatures
+
+
+79
+00:05:15,249 --> 00:05:20,554
+for every version of every xcframework
+you include within your app,
+
+
+80
+00:05:20,587 --> 00:05:23,056
+but this is a time-consuming process
+
+
+81
+00:05:23,090 --> 00:05:27,561
+and places a burden on you
+in order to get the security benefits.
+
+
+82
+00:05:27.594 --> 00:05:32.032 line:-2
+Signature verification is
+a new feature in Xcode
+
+
+83
+00:05:32.065 --> 00:05:34.935 line:-2
+that automatically handles
+the verification
+
+
+84
+00:05:34.968 --> 00:05:39.406 line:-2
+of your app's dependencies
+and protects your supply chain integrity
+
+
+85
+00:05:39.439 --> 00:05:43.177 line:-1
+by alerting you if an issue is detected.
+
+
+86
+00:05:43.210 --> 00:05:48.182 line:-2
+Xcode 15 now has tools to help you
+automatically track the identities
+
+
+87
+00:05:48.215 --> 00:05:52.486 line:-2
+used to sign any xcframeworks
+that you include in your project.
+
+
+88
+00:05:53.954 --> 00:05:57.457 line:-2
+Xcode now shows a new section
+in the Inspector
+
+
+89
+00:05:57.491 --> 00:05:59.893 line:-1
+that displays the signature status
+
+
+90
+00:05:59.927 --> 00:06:04.031 line:-2
+for the xcframeworks
+you include within your app.
+
+
+91
+00:06:04.064 --> 00:06:07.568 line:-2
+This section includes information
+about the signature,
+
+
+92
+00:06:07.601 --> 00:06:10.637 line:-1
+such as the author's identity.
+
+
+93
+00:06:10.671 --> 00:06:13.240 line:-2
+It will show
+whether the xcframework is signed
+
+
+94
+00:06:13.273 --> 00:06:18.812 line:-2
+by an Apple Developer Program identity,
+signed by a self-signed certificate,
+
+
+95
+00:06:18.846 --> 00:06:21.648 line:-1
+or currently unsigned at all.
+
+
+96
+00:06:21.682 --> 00:06:24.985 line:-2
+In addition,
+Xcode will record the identity
+
+
+97
+00:06:25.018 --> 00:06:27.554 line:-1
+the first time you use the xcframework
+
+
+98
+00:06:27.588 --> 00:06:31.425 line:-2
+and verify that it does not change
+during later builds.
+
+
+99
+00:06:31.458 --> 00:06:35.028 line:-1
+For different developer identities,
+
+
+100
+00:06:35.062 --> 00:06:38.298 line:-2
+Xcode provides
+differing levels of features
+
+
+101
+00:06:38.332 --> 00:06:41.268 line:-2
+based on the trust in the identity
+that was used
+
+
+102
+00:06:41.301 --> 00:06:44.571 line:-1
+for a particular xcframework.
+
+
+103
+00:06:44.605 --> 00:06:47.841 line:-1
+For Apple Developer Program identities,
+
+
+104
+00:06:47.875 --> 00:06:52.246 line:-2
+Apple is able to check the validity
+of the certificate used,
+
+
+105
+00:06:52.279 --> 00:06:54.548 line:-1
+including if it's been revoked,
+
+
+106
+00:06:54.581 --> 00:06:59.653 line:-2
+and ensure that multiple developers
+can't register with the same name.
+
+
+107
+00:06:59.686 --> 00:07:03.056 line:-1
+If the certificate used is self-signed,
+
+
+108
+00:07:03.090 --> 00:07:06.560 line:-2
+app developers should confirm
+its validity and authenticity
+
+
+109
+00:07:06.593 --> 00:07:09.263 line:-1
+directly with the dependency author.
+
+
+110
+00:07:11.098 --> 00:07:15.736 line:-2
+When the xcframework author's
+signing certificate expires,
+
+
+111
+00:07:15.769 --> 00:07:18.772 line:-1
+Xcode is able to automatically validate
+
+
+112
+00:07:18.805 --> 00:07:22.576 line:-2
+that a new certificate
+for Apple Developer Program identities
+
+
+113
+00:07:22.609 --> 00:07:24.912 line:-1
+is from the same developer.
+
+
+114
+00:07:24.945 --> 00:07:29.049 line:-2
+For self-signed certificates,
+you will need to manually verify
+
+
+115
+00:07:29.082 --> 00:07:32.686 line:-2
+that this change was legitimate,
+as there is no attestation
+
+
+116
+00:07:32.719 --> 00:07:36.924 line:-2
+of the certificate by a trusted party,
+like Apple.
+
+
+117
+00:07:36.957 --> 00:07:42.262 line:-2
+When the dependency is signed
+by an Apple Developer Program identity,
+
+
+118
+00:07:42.296 --> 00:07:44.965 line:-1
+Xcode will verify it on build
+
+
+119
+00:07:44.998 --> 00:07:48.302 line:-2
+and show you an alert
+if the signature is not valid,
+
+
+120
+00:07:48.335 --> 00:07:51.839 line:-2
+the identity has changed,
+or the xcframework was signed
+
+
+121
+00:07:51.872 --> 00:07:55.375 line:-1
+after the certificate had expired.
+
+
+122
+00:07:55.409 --> 00:07:57.344 line:-1
+Xcode will also alert you
+
+
+123
+00:07:57.377 --> 00:08:02.850 line:-2
+if the Apple Developer Program certificate
+has been revoked by Apple.
+
+
+124
+00:08:02.883 --> 00:08:08.455 line:-2
+This can happen if Apple determines
+that the developer account is malicious.
+
+
+125
+00:08:08.488 --> 00:08:11.291 line:-1
+These alerts will be rare
+
+
+126
+00:08:11.325 --> 00:08:14.294 line:-2
+and will automatically ensure
+you don't build your app
+
+
+127
+00:08:14.328 --> 00:08:17.297 line:-1
+until you've resolved the issue.
+
+
+128
+00:08:17.331 --> 00:08:20.968 line:-1
+If this does happen, Xcode will offer
+
+
+129
+00:08:21.001 --> 00:08:25.339 line:-2
+to let you remove the xcframework
+from the project.
+
+
+130
+00:08:25.372 --> 00:08:28.008 line:-1
+For self-signed identities,
+
+
+131
+00:08:28.041 --> 00:08:32.913 line:-2
+Xcode will still compare
+the certificate's SHA-256 fingerprint
+
+
+132
+00:08:32.946 --> 00:08:37.017 line:-2
+with the one that was previously added
+to the project.
+
+
+133
+00:08:37.050 --> 00:08:40.654 line:-2
+It will show you an alert
+if the identity has changed
+
+
+134
+00:08:40.687 --> 00:08:45.092 line:-2
+or if the contents of the dependency
+have been modified.
+
+
+135
+00:08:45.125 --> 00:08:47.961 line:-2
+You may need to contact
+the xcframework author
+
+
+136
+00:08:47.995 --> 00:08:51.598 line:-2
+to ensure the fingerprint matches
+what they have used,
+
+
+137
+00:08:51.632 --> 00:08:55.969 line:-2
+or an xcframework author
+can publish this information.
+
+
+138
+00:08:56.003 --> 00:09:00.307 line:-2
+And that's how digital signatures work
+on xcframeworks.
+
+
+139
+00:09:00.340 --> 00:09:02.576 line:-1
+Next, let me show you
+
+
+140
+00:09:02.609 --> 00:09:06.713 line:-2
+how an app developer can
+use this feature in Xcode.
+
+
+141
+00:09:06.747 --> 00:09:11.585 line:-2
+To demonstrate, I'm going to use
+the Backyard Birds sample app.
+
+
+142
+00:09:11.618 --> 00:09:16.123 line:-2
+It provides a digital birding experience
+where you own multiple backyards,
+
+
+143
+00:09:16.156 --> 00:09:19.092 line:-1
+are able to put bird food and water out,
+
+
+144
+00:09:19.126 --> 00:09:22.062 line:-1
+and see when bird visitors show up.
+
+
+145
+00:09:22.095 --> 00:09:26.667 line:-2
+I plan on using an xcframework
+called BirdFeeder
+
+
+146
+00:09:26.700 --> 00:09:30.504 line:-2
+to automate the food and water
+refilling process.
+
+
+147
+00:09:30.537 --> 00:09:36.710 line:-2
+The author of the BirdFeeder xcframework
+has signed the most recent release.
+
+
+148
+00:09:36.743 --> 00:09:41.181 line:-2
+Here, I've added the BirdFeeder
+into my project.
+
+
+149
+00:09:41.215 --> 00:09:46.854 line:-2
+For xcframeworks, Xcode 15 will have
+a "Signature" view in the Inspector.
+
+
+150
+00:09:46.887 --> 00:09:50.290 line:-2
+This displays
+the certificate signing information,
+
+
+151
+00:09:50.324 --> 00:09:53.026 line:-1
+showing the team details.
+
+
+152
+00:09:53.060 --> 00:09:57.364 line:-2
+The xcframework developer's identity
+will be stored in the project
+
+
+153
+00:09:57.397 --> 00:10:00.000 line:-1
+the first time it is seen.
+
+
+154
+00:10:00,033 --> 00:10:04,671
+During the build,
+Xcode will validate that the identity used
+
+
+155
+00:10:04,705 --> 00:10:10,777
+to sign the BirdFeeder xcframework matches
+the expected identity in the project.
+
+
+156
+00:10:10,811 --> 00:10:13,647
+It built successfully.
+
+
+157
+00:10:13.680 --> 00:10:16.583 line:-1
+To simulate a supply chain attack,
+
+
+158
+00:10:16.617 --> 00:10:18.318 line:-1
+I'll pretend that someone gave me
+
+
+159
+00:10:18.352 --> 00:10:21.622 line:-2
+an updated version
+of the BirdFeeder xcframework
+
+
+160
+00:10:21.655 --> 00:10:24.591 line:-2
+that they said added
+many new exciting features
+
+
+161
+00:10:24.625 --> 00:10:27.528 line:-1
+and gave better performance.
+
+
+162
+00:10:27.561 --> 00:10:30.964 line:-2
+This could also happen to you
+when you download an xcframework
+
+
+163
+00:10:30.998 --> 00:10:34.334 line:-2
+from a website
+that you do not fully trust.
+
+
+164
+00:10:34.368 --> 00:10:38.872 line:-2
+Here, I replaced my previous version
+with this updated one.
+
+
+165
+00:10:39,973 --> 00:10:44,044
+When I build my app,
+Xcode verifies the signatures
+
+
+166
+00:10:44,077 --> 00:10:47,514
+of all the xcframeworks within the app.
+
+
+167
+00:10:47,548 --> 00:10:52,286
+The build failed, pointing out
+that BirdFeeder developer's identity
+
+
+168
+00:10:52,319 --> 00:10:57,090
+does not match what was
+previously recorded in the project.
+
+
+169
+00:10:57.124 --> 00:10:59.359 line:-1
+Selecting the error offers an alert
+
+
+170
+00:10:59.393 --> 00:11:03.063 line:-2
+explaining that the developer's identity
+has changed,
+
+
+171
+00:11:03.096 --> 00:11:08.535 line:-2
+showing how the expected identity compares
+to what is present in the new version.
+
+
+172
+00:11:08.569 --> 00:11:12.472 line:-2
+In this case,
+it shows that the expected certificate was
+
+
+173
+00:11:12.506 --> 00:11:15.576 line:-1
+an Apple Developer Program Certificate,
+
+
+174
+00:11:15.609 --> 00:11:20.280 line:-2
+but the one in the project
+uses a self-signed certificate.
+
+
+175
+00:11:20.314 --> 00:11:24.251 line:-2
+This could mean
+that the xcframework has been compromised
+
+
+176
+00:11:24.284 --> 00:11:26.954 line:-1
+or the change was legitimate.
+
+
+177
+00:11:26.987 --> 00:11:30.290 line:-2
+For example,
+they might have transferred ownership
+
+
+178
+00:11:30.324 --> 00:11:33.727 line:-1
+of the xcframework to another developer.
+
+
+179
+00:11:33.760 --> 00:11:37.097 line:-2
+It's always safe to cancel
+if you're unsure.
+
+
+180
+00:11:37.130 --> 00:11:42.102 line:-2
+This gives you time to investigate
+if the change was genuine.
+
+
+181
+00:11:42.135 --> 00:11:47.407 line:-2
+Xcode protects you and your apps
+by ensuring that if this change happens,
+
+
+182
+00:11:47.441 --> 00:11:50.310 line:-1
+you will be notified automatically.
+
+
+183
+00:11:51.411 --> 00:11:54.882 line:-1
+In this case, the change wasn't expected,
+
+
+184
+00:11:54.915 --> 00:11:58.619 line:-2
+so I will move this new version to trash
+in Xcode.
+
+
+185
+00:11:58.652 --> 00:12:02.422 line:-2
+However, if you know
+the change is legitimate–
+
+
+186
+00:12:02.456 --> 00:12:05.859 line:-2
+for example,
+the developer has communicated this to you
+
+
+187
+00:12:05.893 --> 00:12:10.497 line:-2
+via a verified public channel–
+then you could accept the change.
+
+
+188
+00:12:11.198 --> 00:12:17.104 line:-2
+Finally, I will talk about
+what this feature means to SDK authors.
+
+
+189
+00:12:17.137 --> 00:12:22.509 line:-2
+It is important for SDK authors
+to cryptographically sign SDKs
+
+
+190
+00:12:22.543 --> 00:12:26.380 line:-2
+because it allows an app developer
+to confirm the identity
+
+
+191
+00:12:26.413 --> 00:12:30.350 line:-2
+and guarantees that the code has not been
+altered or tampered with
+
+
+192
+00:12:30.384 --> 00:12:32.719 line:-1
+after it was signed.
+
+
+193
+00:12:32.753 --> 00:12:35.822 line:-2
+Both of these properties are
+extremely important
+
+
+194
+00:12:35.856 --> 00:12:40.627 line:-2
+for building trust
+and safely distributing SDKs.
+
+
+195
+00:12:40.661 --> 00:12:44.264 line:-2
+As discussed earlier,
+there are two types of identity
+
+
+196
+00:12:44.298 --> 00:12:48.569 line:-2
+that you can use:
+Apple Developer Program and self-signed.
+
+
+197
+00:12:50.037 --> 00:12:54.808 line:-2
+Members of the Apple Developer Program
+should use the certificates included
+
+
+198
+00:12:54.842 --> 00:12:59.613 line:-2
+as part of this program
+to ensure the trust of your SDK clients.
+
+
+199
+00:13:00.914 --> 00:13:04.084 line:-2
+You should use
+the Apple Distribution certificate
+
+
+200
+00:13:04.117 --> 00:13:06.153 line:-1
+if you publish your SDK
+
+
+201
+00:13:06.186 --> 00:13:11.892 line:-2
+or the Apple Development certificate
+if you are distributing test versions.
+
+
+202
+00:13:11.925 --> 00:13:16.196 line:-2
+Enterprise Program members
+should use their iOS Distribution
+
+
+203
+00:13:16.230 --> 00:13:19.266 line:-1
+or App Development certificates.
+
+
+204
+00:13:19.299 --> 00:13:24.571 line:-2
+When Apple issues a certificate to you,
+Apple is attesting to the fact
+
+
+205
+00:13:24.605 --> 00:13:29.076 line:-2
+that you are a legitimate member
+of the Apple Developer Program
+
+
+206
+00:13:29.109 --> 00:13:31.812 line:-2
+and have met
+all the necessary requirements
+
+
+207
+00:13:31.845 --> 00:13:34.481 line:-1
+to obtain the certificate.
+
+
+208
+00:13:34.515 --> 00:13:39.486 line:-2
+This includes verifying your identity
+and adherence to Apple's policies
+
+
+209
+00:13:39.520 --> 00:13:43.690 line:-2
+and guidelines
+around privacy and security.
+
+
+210
+00:13:43.724 --> 00:13:48.428 line:-2
+If you manually revoke
+the certificate used to sign an SDK,
+
+
+211
+00:13:48.462 --> 00:13:50.531 line:-2
+you will need to release
+an updated version
+
+
+212
+00:13:50.564 --> 00:13:53.467 line:-1
+signed using a valid certificate,
+
+
+213
+00:13:53.500 --> 00:13:57.137 line:-2
+as Xcode will no longer be able
+to verify the signature
+
+
+214
+00:13:57.171 --> 00:14:01.141 line:-2
+when a developer attempts
+to build their app.
+
+
+215
+00:14:01.175 --> 00:14:03.043 line:-1
+An SDK that has been signed
+
+
+216
+00:14:03.076 --> 00:14:05.712 line:-2
+with an Apple Developer Program
+certificate
+
+
+217
+00:14:05.746 --> 00:14:08.182 line:-1
+has a baseline level of trust
+
+
+218
+00:14:08.215 --> 00:14:12.152 line:-2
+and ensures that the SDK
+has not been tampered with.
+
+
+219
+00:14:12.186 --> 00:14:15.923 line:-2
+On top of that,
+because Apple is the trusted authority,
+
+
+220
+00:14:15.956 --> 00:14:19.026 line:-2
+certificate validation is
+automatically handled
+
+
+221
+00:14:19.059 --> 00:14:21.828 line:-1
+when a new certificate is generated.
+
+
+222
+00:14:21.862 --> 00:14:26.834 line:-2
+At the start of this video,
+I discussed how code signing works
+
+
+223
+00:14:26.867 --> 00:14:30.003 line:-2
+and how it includes a signature
+within your SDK
+
+
+224
+00:14:30.037 --> 00:14:32.573 line:-1
+using your developer identity.
+
+
+225
+00:14:32.606 --> 00:14:36.777 line:-2
+Let's now go through how you can do this
+using the codesign tool.
+
+
+226
+00:14:38.378 --> 00:14:41.648 line:-2
+You can sign your xcframeworks
+using the command here
+
+
+227
+00:14:41.682 --> 00:14:45.085 line:-1
+and your Apple Developer Program identity.
+
+
+228
+00:14:45.118 --> 00:14:47.554 line:-1
+The timestamp flag is included
+
+
+229
+00:14:47.588 --> 00:14:50.824 line:-2
+to ensure that the signature contains
+a secure timestamp
+
+
+230
+00:14:50.858 --> 00:14:54.161 line:-1
+that is attested to by Apple.
+
+
+231
+00:14:54.194 --> 00:14:58.665 line:-2
+However, if you aren't a member
+of the Apple Developer Program,
+
+
+232
+00:14:58.699 --> 00:15:01.468 line:-1
+you can generate a self-signed certificate
+
+
+233
+00:15:01.502 --> 00:15:04.838 line:-1
+and use it with the codesign command.
+
+
+234
+00:15:04.872 --> 00:15:08.075 line:-2
+You are responsible for sharing
+with your SDK clients
+
+
+235
+00:15:08.108 --> 00:15:10.210 line:-1
+the fingerprint of this certificate
+
+
+236
+00:15:10.244 --> 00:15:13.881 line:-2
+so that you can verify
+the xcframework was signed by you.
+
+
+237
+00:15:13.914 --> 00:15:17.217 line:-1
+Developers including your SDK in their app
+
+
+238
+00:15:17.251 --> 00:15:21.121 line:-2
+will be able to confirm
+that the xcframework was signed by you
+
+
+239
+00:15:21.154 --> 00:15:24.758 line:-2
+by using the new feature
+included in Xcode.
+
+
+240
+00:15:24.791 --> 00:15:28.328 line:-2
+If you always sign
+the SDKs you distribute,
+
+
+241
+00:15:28.362 --> 00:15:31.999 line:-2
+this new feature in Xcode
+will help your SDK clients
+
+
+242
+00:15:32.032 --> 00:15:36.336 line:-1
+get more confidence in their supply chain.
+
+
+243
+00:15:36.370 --> 00:15:38.305 line:-1
+Doing this is simple.
+
+
+244
+00:15:38.338 --> 00:15:41.942 line:-2
+You can start straight away
+with versions of your frameworks
+
+
+245
+00:15:41.975 --> 00:15:46.246 line:-2
+that you've already published
+with no new build required.
+
+
+246
+00:15:46.280 --> 00:15:49.383 line:-2
+This even works
+using a self-signed certificate
+
+
+247
+00:15:49.416 --> 00:15:54.121 line:-2
+if you are not currently a member
+of the Apple Developer Program.
+
+
+248
+00:15:54.154 --> 00:15:58.091 line:-2
+You can then do this for all new versions
+of your xcframeworks
+
+
+249
+00:15:58.125 --> 00:16:01.528 line:-2
+by including the codesign command
+in a build script,
+
+
+250
+00:16:01.562 --> 00:16:03.830 line:-1
+so that you no longer need to worry.
+
+
+251
+00:16:03.864 --> 00:16:08.435 line:-2
+For app developers,
+Xcode 15 will automatically help you
+
+
+252
+00:16:08.468 --> 00:16:13.841 line:-2
+ensure the integrity and security
+of your apps' underlying SDKs.
+
+
+253
+00:16:13.874 --> 00:16:17.411 line:-2
+Making sure
+that all SDK signatures are verified
+
+
+254
+00:16:17.444 --> 00:16:21.381 line:-2
+is an important aspect
+of responsible app development
+
+
+255
+00:16:21.415 --> 00:16:24.117 line:-1
+and protecting your users.
+
+
+256
+00:16:24.151 --> 00:16:27.588 line:-2
+You can help by encouraging
+the developers in your supply chain
+
+
+257
+00:16:27.621 --> 00:16:31.825 line:-1
+to start signing the SDKs they publish.
+
+
+258
+00:16:31.859 --> 00:16:35.662 line:-1
+For SDK authors, start signing your SDKs
+
+
+259
+00:16:35.696 --> 00:16:39.233 line:-1
+to ensure their security and authenticity.
+
+
+260
+00:16:39.266 --> 00:16:44.404 line:-2
+By signing your code,
+you establish trust with your SDK clients,
+
+
+261
+00:16:44.438 --> 00:16:48.609 line:-2
+showing them that you take
+their security and privacy seriously.
+
+
+262
+00:16:50.077 --> 00:16:52.312 line:-1
+Happy app development!
+
+
+263
+00:16:52.346 --> 00:16:55.148 line:-1
+This is Kay, signing off.
+
+
+264
+00:16:55.182 --> 00:16:59.653 line:-1
+♪ ♪
+

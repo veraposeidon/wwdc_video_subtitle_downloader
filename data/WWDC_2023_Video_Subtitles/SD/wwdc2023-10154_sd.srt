@@ -1,0 +1,1452 @@
+2
+00:00:10.477 --> 00:00:12.613 line:-2 align:center
+Julia: Hello!
+My name is Julia.
+
+
+3
+00:00:12.679 --> 00:00:14.615 line:-1 align:center
+I'm a SwiftUI Engineer.
+
+
+4
+00:00:14,681 --> 00:00:17,217 line:-1
+Recently, we've introduced SwiftData,
+
+
+5
+00:00:17,284 --> 00:00:20,888 line:-2
+a new way to persist your model layer
+in Swift.
+
+
+6
+00:00:20.954 --> 00:00:23.590 line:-2 align:center
+In today's session,
+let's see how to seamlessly
+
+
+7
+00:00:23.657 --> 00:00:27.427 line:-1 align:center
+integrate SwiftData in a SwiftUI app. We
+
+
+8
+00:00:27.494 --> 00:00:31.431 line:-2 align:center
+will discuss the new SwiftUI features
+that allow for smooth integration
+
+
+9
+00:00:31,498 --> 00:00:33,233 line:-1
+with SwiftData models.
+
+
+10
+00:00:33.300 --> 00:00:35.836 line:-2 align:center
+To cover your basics,
+watch the "Meet SwiftData"
+
+
+11
+00:00:35.903 --> 00:00:38.839 line:-1 align:center
+session first if you haven’t already.
+
+
+12
+00:00:38.906 --> 00:00:42.342 line:-2 align:center
+To see how SwiftData
+and SwiftUI play together,
+
+
+13
+00:00:42.409 --> 00:00:44.211 line:-1 align:center
+let’s build a flashcards app.
+
+
+14
+00:00:44,278 --> 00:00:46,813 line:-2
+For some time,
+I’ve wanted to make a tool that can
+
+
+15
+00:00:46,880 --> 00:00:50,851 line:-2
+help me remember dates
+and authors of great inventions,
+
+
+16
+00:00:50.918 --> 00:00:53.420 line:-1 align:center
+and SwiftData is perfect for this task.
+
+
+17
+00:00:53,487 --> 00:00:56,056 line:-2
+It will help to persist
+the flashcard decks,
+
+
+18
+00:00:56,123 --> 00:01:00,460 line:-2
+so I can open and click through them
+whenever I got a minute.
+
+
+19
+00:01:00,527 --> 00:01:04,998 line:-2
+I want this app to work everywhere:
+on Mac, iPhone, Watch,
+
+
+20
+00:01:05,065 --> 00:01:08,468 line:-1
+and TV, and SwiftData has my back.
+
+
+21
+00:01:08.535 --> 00:01:12.573 line:-1 align:center
+It is available across all the platforms.
+
+
+22
+00:01:12.639 --> 00:01:14.074 line:-1 align:center
+This is a code-along.
+
+
+23
+00:01:14.141 --> 00:01:17.477 line:-2 align:center
+During this session,
+I will be building an app with you.
+
+
+24
+00:01:17.544 --> 00:01:21.281 line:-2 align:center
+Hit pause now,
+and download the companion Xcode projects:
+
+
+25
+00:01:21.348 --> 00:01:26.086 line:-2 align:center
+an archive with the prepared
+starting point, and the finished one.
+
+
+26
+00:01:26.153 --> 00:01:31.658 line:-2 align:center
+Open the starter project,
+and go to the ContentView file.
+
+
+27
+00:01:31,725 --> 00:01:35,262 line:-2
+Throughout this session,
+we will leverage a new Xcode feature,
+
+
+28
+00:01:35.329 --> 00:01:38.765 line:-2 align:center
+embedded interactive live Previews
+for Mac.
+
+
+29
+00:01:38.832 --> 00:01:43.370 line:-2 align:center
+In the Previews section,
+there's a grid with some flash cards.
+
+
+30
+00:01:43.437 --> 00:01:47.274 line:-2 align:center
+A click on any card
+transitions into a view
+
+
+31
+00:01:47.341 --> 00:01:50.344 line:-1 align:center
+where we can scroll the cards one by one.
+
+
+32
+00:01:50,410 --> 00:01:53,146 line:-1
+Do you remember who invented the compiler?
+
+
+33
+00:01:53.213 --> 00:01:57.150 line:-2 align:center
+Click the card.
+It flips and gives an answer!
+
+
+34
+00:01:57.217 --> 00:02:01.288 line:-2 align:center
+The app is populated with
+sample cards stored in memory,
+
+
+35
+00:02:01.355 --> 00:02:06.860 line:-2 align:center
+and if we run the app and add new ones,
+they will disappear when we close the app.
+
+
+36
+00:02:06.927 --> 00:02:09.329 line:-1 align:center
+This is where SwiftData comes in.
+
+
+37
+00:02:09.396 --> 00:02:13.867 line:-2 align:center
+We will use it
+to persist the flashcards we create.
+
+
+38
+00:02:13,934 --> 00:02:16,403 line:-2
+Today, we will talk about
+everything you need to know
+
+
+39
+00:02:16.470 --> 00:02:20.607 line:-2 align:center
+to start using SwiftData,
+checking off one item after another
+
+
+40
+00:02:20,674 --> 00:02:24,545 line:-2
+in this to-do list
+that I put together for us.
+
+
+41
+00:02:24,611 --> 00:02:27,447 line:-1
+You have just met the app we will build.
+
+
+42
+00:02:27.514 --> 00:02:32.252 line:-2 align:center
+Next, we’ll take a look at
+the starter project and its model class.
+
+
+43
+00:02:32.319 --> 00:02:36.823 line:-2 align:center
+Then, step by step,
+we will convert and amend it
+
+
+44
+00:02:36,890 --> 00:02:40,260 line:-1
+to use SwiftData as its storage.
+
+
+45
+00:02:40.327 --> 00:02:45.532 line:-2 align:center
+We’ll learn how to expand the model class
+to become SwiftData model,
+
+
+46
+00:02:45.599 --> 00:02:50.838 line:-2 align:center
+how to query the data and update the view
+on every change in the model layer,
+
+
+47
+00:02:50.904 --> 00:02:56.310 line:-2 align:center
+create and save models,
+and conveniently bind UI elements to them.
+
+
+48
+00:02:56.376 --> 00:03:00.480 line:-2 align:center
+And at the end, as a bonus,
+we’ll see how easy it is
+
+
+49
+00:03:00.547 --> 00:03:05.552 line:-2 align:center
+to create a document-based app
+when SwiftData takes care of the storage.
+
+
+50
+00:03:05,619 --> 00:03:07,254 line:-1
+In the starter project,
+
+
+51
+00:03:07.321 --> 00:03:13.493 line:-2 align:center
+I defined a Card model
+that represents a single flash card,
+
+
+52
+00:03:13,560 --> 00:03:19,233 line:-2
+some views,
+and supporting files to save us time.
+
+
+53
+00:03:19.299 --> 00:03:25.372 line:-2 align:center
+Every card stores the text for the front
+and back sides and the creation date.
+
+
+54
+00:03:25.439 --> 00:03:28.008 line:-1 align:center
+It is a pretty typical model.
+
+
+55
+00:03:28,075 --> 00:03:33,447 line:-2
+Let’s update it so
+that SwiftData can store it for us.
+
+
+56
+00:03:33,514 --> 00:03:36,383 line:-1
+First, import SwiftData into this file.
+
+
+57
+00:03:36,450 --> 00:03:40,787 line:-2
+And next, the main change
+that we need to make
+
+
+58
+00:03:40.854 --> 00:03:46.593 line:-2 align:center
+is adding the @Model macro
+to the definition.
+
+
+59
+00:03:46.660 --> 00:03:50.430 line:-2 align:center
+And now, the class is fully persistable
+with SwiftData.
+
+
+60
+00:03:50,497 --> 00:03:52,966 line:-2
+No more typing.
+That’s it!
+
+
+61
+00:03:53.033 --> 00:03:57.104 line:-2 align:center
+And even more: with @Model,
+the Card gets conformance
+
+
+62
+00:03:57.171 --> 00:04:02.609 line:-2 align:center
+to the Observable protocol, and we will
+use it instead of ObservableObject.
+
+
+63
+00:04:02.676 --> 00:04:06.013 line:-2 align:center
+Remove the conformance
+to the Observable object
+
+
+64
+00:04:06.079 --> 00:04:11.351 line:-1 align:center
+as well as @Published property wrappers.
+
+
+65
+00:04:11,418 --> 00:04:13,954 line:-2
+We previously used
+the ObservedObject conformance
+
+
+66
+00:04:14.021 --> 00:04:16.590 line:-1 align:center
+to edit the card directly from the UI
+
+
+67
+00:04:16.657 --> 00:04:21.461 line:-1 align:center
+in the CardEditorView file.
+
+
+68
+00:04:21.528 --> 00:04:23.997 line:-1 align:center
+To adopt Observable here,
+
+
+69
+00:04:24.064 --> 00:04:28.135 line:-2 align:center
+we replace the "ObservedObject" property
+wrapper with "Bindable."
+
+
+70
+00:04:28,202 --> 00:04:35,209 line:-2
+It allows the text fields to bind directly
+to the card's front...
+
+
+71
+00:04:35,275 --> 00:04:37,444 line:-1
+and back text.
+
+
+72
+00:04:37.511 --> 00:04:39.046 line:-1 align:center
+Done!
+
+
+73
+00:04:39.112 --> 00:04:42.449 line:-2 align:center
+New Observable macro
+and Bindable property wrapper
+
+
+74
+00:04:42,516 --> 00:04:45,819 line:-2
+allow to effortlessly set up the data flow
+in an application
+
+
+75
+00:04:45.886 --> 00:04:49.156 line:-1 align:center
+with even less code than before.
+
+
+76
+00:04:49.223 --> 00:04:53.527 line:-2 align:center
+When a View uses a property
+of an Observable type in its body,
+
+
+77
+00:04:53,594 --> 00:04:58,932 line:-2
+it will be updated automatically
+when the given property changes.
+
+
+78
+00:04:58.999 --> 00:05:01.335 line:-1 align:center
+And it has never been that easy
+
+
+79
+00:05:01,401 --> 00:05:05,873 line:-2
+to bind a model's mutable state
+to UI elements!
+
+
+80
+00:05:05,939 --> 00:05:10,544 line:-2
+I encourage you to watch
+the WWDC23 session,
+
+
+81
+00:05:10.611 --> 00:05:13.480 line:-1 align:center
+"Discover Observation with SwiftUI."
+
+
+82
+00:05:13.547 --> 00:05:17.985 line:-2 align:center
+You'll be surprised how Observable
+simplifies the data flow code
+
+
+83
+00:05:18.051 --> 00:05:20.687 line:-1 align:center
+with or without SwiftData.
+
+
+84
+00:05:20.754 --> 00:05:25.058 line:-2 align:center
+And that’s all you need to know
+about the models.
+
+
+85
+00:05:25,125 --> 00:05:28,362 line:-2
+Nothing more.
+How cool is that?
+
+
+86
+00:05:28.428 --> 00:05:32.966 line:-2 align:center
+Next, to query models from SwiftData
+and display them in the UI,
+
+
+87
+00:05:33,033 --> 00:05:37,471 line:-1
+let’s switch to ContentView.
+
+
+88
+00:05:37,538 --> 00:05:39,706 line:-1
+Instead of the SampleDeck.contents,
+
+
+89
+00:05:39,773 --> 00:05:44,778 line:-2
+we will display
+the cards that SwiftData has.
+
+
+90
+00:05:48.715 --> 00:05:51.852 line:-2 align:center
+And there’s a single change
+that I need to make
+
+
+91
+00:05:51,919 --> 00:05:55,389 line:-2
+to bind the cards array
+to SwiftData storage:
+
+
+92
+00:05:55.455 --> 00:06:00.627 line:-2 align:center
+replace @State property wrapper
+with @Query.
+
+
+93
+00:06:00.694 --> 00:06:02.829 line:-1 align:center
+That’s it!
+
+
+94
+00:06:02.896 --> 00:06:06.834 line:-2 align:center
+As we can see in the preview,
+there are no more cards to display,
+
+
+95
+00:06:06,900 --> 00:06:09,837 line:-1
+probably because we haven’t saved any.
+
+
+96
+00:06:09.903 --> 00:06:13.140 line:-2 align:center
+Use @Query whenever you want
+to display models,
+
+
+97
+00:06:13.207 --> 00:06:17.477 line:-1 align:center
+managed by SwiftData, in the UI.
+
+
+98
+00:06:17.544 --> 00:06:22.583 line:-2 align:center
+@Query is a new property wrapper
+that queries the models from SwiftData.
+
+
+99
+00:06:22.649 --> 00:06:27.221 line:-2 align:center
+It also triggers the view updated
+on every change of the models,
+
+
+100
+00:06:27,287 --> 00:06:30,390 line:-1
+similarly to how @State would do that.
+
+
+101
+00:06:30,457 --> 00:06:35,696 line:-2
+Every view can have
+as many queried properties as it needs.
+
+
+102
+00:06:35,762 --> 00:06:39,266 line:-2
+Query offers lightweight syntax
+to configure sorting,
+
+
+103
+00:06:39,333 --> 00:06:44,238 line:-2
+ordering, filtering,
+and even animating changes.
+
+
+104
+00:06:44.304 --> 00:06:50.043 line:-2 align:center
+Under the hood, it uses a model context
+of the view as the data source.
+
+
+105
+00:06:50,110 --> 00:06:53,547 line:-2
+How do we provide @Query
+with a model context?
+
+
+106
+00:06:53,614 --> 00:06:57,518 line:-1
+We'll get one from a model container.
+
+
+107
+00:06:57,584 --> 00:07:00,521 line:-2
+SwiftUI vends a new view
+and scene modifier
+
+
+108
+00:07:00,587 --> 00:07:04,625 line:-2
+for a convenient setup
+of the view’s ModelContainer.
+
+
+109
+00:07:04.691 --> 00:07:10.597 line:-2 align:center
+To use SwiftData, any application
+has to set up at least one ModelContainer.
+
+
+110
+00:07:10.664 --> 00:07:12.866 line:-1 align:center
+It creates the whole storage stack,
+
+
+111
+00:07:12.933 --> 00:07:17.304 line:-2 align:center
+including the context
+that @Query will use.
+
+
+112
+00:07:17.371 --> 00:07:22.209 line:-2 align:center
+A View has a single model container, but
+an application can create and use
+
+
+113
+00:07:22,276 --> 00:07:27,381 line:-2
+as many containers as it needs
+for different view hierarchies.
+
+
+114
+00:07:27.447 --> 00:07:31.118 line:-2 align:center
+If the application does not set up
+its modelContainer,
+
+
+115
+00:07:31,185 --> 00:07:37,891 line:-2
+its windows and the views it creates can
+not save or query models via SwiftData.
+
+
+116
+00:07:37.958 --> 00:07:41.295 line:-2 align:center
+Many applications
+need a single model container.
+
+
+117
+00:07:41,361 --> 00:07:45,566 line:-2
+In this case, you can set it up
+for the whole window group scene.
+
+
+118
+00:07:45.632 --> 00:07:49.036 line:-2 align:center
+The window and its views
+will inherit the container,
+
+
+119
+00:07:49.102 --> 00:07:53.340 line:-2 align:center
+as well as any other windows created
+from the same group.
+
+
+120
+00:07:53.407 --> 00:07:59.179 line:-2 align:center
+All of these views will write
+and read from a single container.
+
+
+121
+00:07:59.246 --> 00:08:02.015 line:-1 align:center
+Some apps need a few storage stacks,
+
+
+122
+00:08:02.082 --> 00:08:06.520 line:-2 align:center
+and they can set up several
+model containers for different windows.
+
+
+123
+00:08:06,587 --> 00:08:11,191 line:-2
+SwiftUI also allows for a granular setup
+on a view level.
+
+
+124
+00:08:11.258 --> 00:08:15.028 line:-2 align:center
+Different views in the same window
+can have separate containers,
+
+
+125
+00:08:15,095 --> 00:08:19,032 line:-2
+and saving in one container
+won’t affect another.
+
+
+126
+00:08:19.099 --> 00:08:24.371 line:-2 align:center
+Now, let's set up the modelContainer to
+provide the Query with a source of data.
+
+
+127
+00:08:24,438 --> 00:08:30,444 line:-1
+I open the app definition...
+
+
+128
+00:08:33.714 --> 00:08:37.918 line:-2 align:center
+And set a model container
+for app's windows.
+
+
+129
+00:08:37.985 --> 00:08:42.656 line:-2 align:center
+Note that the subviews can create,
+read, update,
+
+
+130
+00:08:42.723 --> 00:08:47.194 line:-2 align:center
+and delete only the model types
+listed in the view modifier.
+
+
+131
+00:08:47.261 --> 00:08:50.097 line:-1 align:center
+And we are done with the setup!
+
+
+132
+00:08:50,163 --> 00:08:56,470 line:-2
+Although, I want to take one extra step:
+provide my previews with sample data.
+
+
+133
+00:08:56.537 --> 00:09:01.508 line:-2 align:center
+In the app, I have defined
+an in-memory container with sample cards.
+
+
+134
+00:09:01,575 --> 00:09:08,081 line:-2
+Let's open the "PreviewSampleData" file
+and include it in the target.
+
+
+135
+00:09:08,148 --> 00:09:12,786 line:-2
+This file contains the definition
+of a container with the sample data.
+
+
+136
+00:09:12.853 --> 00:09:18.825 line:-2 align:center
+I will use it in the ContentView
+to fill my preview with sample cards.
+
+
+137
+00:09:18,892 --> 00:09:24,898 line:-1
+[no audio]
+
+
+138
+00:09:28.735 --> 00:09:33.874 line:-2 align:center
+Now that @Query has a source of data,
+the preview displays the cards!
+
+
+139
+00:09:33.941 --> 00:09:38.412 line:-2 align:center
+And this is all the setup that’s required
+to have SwiftData stack ready
+
+
+140
+00:09:38,478 --> 00:09:41,148 line:-1
+and generate a preview.
+
+
+141
+00:09:41.215 --> 00:09:44.484 line:-2 align:center
+Next, I want to make sure
+that SwiftData tracks and saves
+
+
+142
+00:09:44.551 --> 00:09:50.157 line:-2 align:center
+the new cards that I create, as well as
+the changes made to the existing ones.
+
+
+143
+00:09:50.224 --> 00:09:54.962 line:-2 align:center
+To do that,
+I will use the model context of the view.
+
+
+144
+00:09:55.028 --> 00:10:01.535 line:-2 align:center
+To access the model context,
+SwiftUI offers a new environment variable.
+
+
+145
+00:10:01.602 --> 00:10:05.973 line:-2 align:center
+Similarly to model container,
+each view has a single context,
+
+
+146
+00:10:06,039 --> 00:10:11,178 line:-2
+but an application, in general,
+can have as many as it needs.
+
+
+147
+00:10:11.245 --> 00:10:14.815 line:-2 align:center
+In our app,
+the context is already configured.
+
+
+148
+00:10:14,882 --> 00:10:18,218 line:-2
+This environment variable
+was populated automatically
+
+
+149
+00:10:18.285 --> 00:10:21.555 line:-1 align:center
+when we set the model container earlier.
+
+
+150
+00:10:21.622 --> 00:10:24.291 line:-1 align:center
+Let’s switch back to Xcode.
+
+
+151
+00:10:24.358 --> 00:10:26.960 line:-1 align:center
+We will need to access the modelContext
+
+
+152
+00:10:27.027 --> 00:10:32.966 line:-1 align:center
+to save and update the cards.
+
+
+153
+00:10:33,033 --> 00:10:39,039 line:-1
+[no audio]
+
+
+154
+00:10:41.041 --> 00:10:47.047 line:-1 align:center
+[no audio]
+
+
+155
+00:10:52.052 --> 00:10:55.422 line:-2 align:center
+We insert the newly created card
+in the model context
+
+
+156
+00:10:55.489 --> 00:11:00.360 line:-2 align:center
+to make SwiftData aware
+of the model we want to store.
+
+
+157
+00:11:03,764 --> 00:11:05,966 line:-2
+You might think that
+after inserting the model,
+
+
+158
+00:11:06,033 --> 00:11:09,803 line:-2
+you need to save the context,
+calling "modelContext.save(),"
+
+
+159
+00:11:09.870 --> 00:11:13.040 line:-1 align:center
+but you don't need to do that.
+
+
+160
+00:11:13.106 --> 00:11:19.279 line:-2 align:center
+A nice detail about SwiftData is
+that it autosaves the model context.
+
+
+161
+00:11:19.346 --> 00:11:24.451 line:-2 align:center
+The autosaves are triggered
+by UI-related events and user input.
+
+
+162
+00:11:24.518 --> 00:11:29.590 line:-2 align:center
+We don’t need to worry about saving
+because SwiftData does it for us.
+
+
+163
+00:11:29.656 --> 00:11:32.626 line:-2 align:center
+There are only a few cases
+when you want to make sure
+
+
+164
+00:11:32.693 --> 00:11:36.196 line:-2 align:center
+that all the changes
+are persisted immediately,
+
+
+165
+00:11:36.263 --> 00:11:40.868 line:-2 align:center
+for example, before sharing the SwiftData
+storage or sending it over.
+
+
+166
+00:11:40.934 --> 00:11:44.271 line:-1 align:center
+In these cases, call "save()" explicitly.
+
+
+167
+00:11:44.338 --> 00:11:47.741 line:-2 align:center
+Now that our app can save
+and query the cards,
+
+
+168
+00:11:47,808 --> 00:11:50,344 line:-1
+let’s create one!
+
+
+169
+00:11:50,410 --> 00:11:53,547 line:-1
+I run the app...
+
+
+170
+00:11:53.614 --> 00:11:58.318 line:-1 align:center
+and press plus button to create a card.
+
+
+171
+00:11:58.385 --> 00:12:04.324 line:-2 align:center
+Let's add that Compiler card
+that we saw before.
+
+
+172
+00:12:04.391 --> 00:12:10.597 line:-1 align:center
+[no audio]
+
+
+173
+00:12:10,664 --> 00:12:16,670 line:-2
+Now, let’s quit the app, launch it again,
+and see if our new card is there.
+
+
+174
+00:12:19,540 --> 00:12:21,542 line:-1
+And here it is!
+
+
+175
+00:12:21,608 --> 00:12:26,213 line:-2
+Now you know how to access the model
+context of the view and add cards.
+
+
+176
+00:12:26,280 --> 00:12:28,148 line:-1
+Done!
+
+
+177
+00:12:28.215 --> 00:12:31.685 line:-1 align:center
+Let’s open a new window.
+
+
+178
+00:12:31,752 --> 00:12:35,489 line:-2
+It displays the same deck
+as the first one, which makes sense,
+
+
+179
+00:12:35,556 --> 00:12:41,562 line:-2
+since both windows use the same model
+container and access the same data.
+
+
+180
+00:12:41.628 --> 00:12:42.963 line:-1 align:center
+It would be nice, though,
+
+
+181
+00:12:43.030 --> 00:12:47.935 line:-2 align:center
+if the app could open different
+flash card decks in different windows.
+
+
+182
+00:12:48.001 --> 00:12:53.006 line:-2 align:center
+Essentially, it means that I want to treat
+every deck as a separate document.
+
+
+183
+00:12:53.073 --> 00:12:56.276 line:-2 align:center
+Then, I can share
+these documents with friends.
+
+
+184
+00:12:56.343 --> 00:13:03.050 line:-2 align:center
+Document-based apps is a concept
+used on macOS, iOS, and iPadOS.
+
+
+185
+00:13:03,116 --> 00:13:07,921 line:-2
+It describes the certain types of
+applications that allow users to create,
+
+
+186
+00:13:07.988 --> 00:13:12.726 line:-2 align:center
+open, view, or edit
+different types of documents.
+
+
+187
+00:13:12.793 --> 00:13:18.665 line:-2 align:center
+Every document is a file,
+and users can store, copy, and share them.
+
+
+188
+00:13:18.732 --> 00:13:22.769 line:-2 align:center
+And I am excited
+to let you know that SwiftUI
+
+
+189
+00:13:22.836 --> 00:13:26.106 line:-1 align:center
+supports SwiftData-backed document apps.
+
+
+190
+00:13:26,173 --> 00:13:28,242 line:-1
+Let’s try this approach.
+
+
+191
+00:13:28.308 --> 00:13:32.613 line:-1 align:center
+I open the FlashCardApp file.
+
+
+192
+00:13:32.679 --> 00:13:36.817 line:-2 align:center
+Document-based apps exist
+on iOS and macOS,
+
+
+193
+00:13:36.884 --> 00:13:42.956 line:-2 align:center
+and on these platforms, we'll switch
+to using the DocumentGroup initializer.
+
+
+194
+00:13:45,859 --> 00:13:51,865 line:-1
+[no audio]
+
+
+195
+00:13:54.835 --> 00:14:00.841 line:-1 align:center
+[no audio]
+
+
+196
+00:14:07.581 --> 00:14:10.951 line:-2 align:center
+I will be passing in
+the model type Card.self,
+
+
+197
+00:14:11.018 --> 00:14:13.921 line:-1 align:center
+content type, and a view builder.
+
+
+198
+00:14:13.987 --> 00:14:17.457 line:-2 align:center
+Let's take a short detour and talk
+about the second parameter,
+
+
+199
+00:14:17,524 --> 00:14:20,194 line:-1
+content type, in more detail!
+
+
+200
+00:14:20,260 --> 00:14:25,299 line:-2
+SwiftData Document-based apps
+need to declare custom content types.
+
+
+201
+00:14:25.365 --> 00:14:28.902 line:-2 align:center
+Each SwiftData document
+is built from a unique set of models
+
+
+202
+00:14:28,969 --> 00:14:32,472 line:-2
+and so has a unique representation
+on disk.
+
+
+203
+00:14:32,539 --> 00:14:36,276 line:-2
+In the context of documents,
+you can think of a content type
+
+
+204
+00:14:36.343 --> 00:14:40.080 line:-1 align:center
+as of a binary file format, like JPEG.
+
+
+205
+00:14:40,147 --> 00:14:43,183 line:-1
+Another type of documents, a package,
+
+
+206
+00:14:43,250 --> 00:14:48,689 line:-2
+is a directory with a fixed structure
+on disk, like an Xcode project.
+
+
+207
+00:14:48,755 --> 00:14:53,227 line:-2
+For example, all the JPEG images
+have the same binary structure.
+
+
+208
+00:14:53.293 --> 00:14:57.397 line:-2 align:center
+Otherwise, photo editors
+wouldn’t know how to read them.
+
+
+209
+00:14:57.464 --> 00:15:03.504 line:-2 align:center
+Similarly, all the Xcode projects
+contain certain directories and files.
+
+
+210
+00:15:03.570 --> 00:15:07.241 line:-2 align:center
+When the user opens the deck,
+we need the operating system
+
+
+211
+00:15:07.307 --> 00:15:12.579 line:-2 align:center
+to associate the deck format
+and file extension with our app.
+
+
+212
+00:15:12,646 --> 00:15:16,316 line:-2
+That’s why we need
+to declare the content type.
+
+
+213
+00:15:16,383 --> 00:15:18,986 line:-1
+SwiftData documents are packages:
+
+
+214
+00:15:19,052 --> 00:15:21,755 line:-2
+if you mark some properties
+of a SwiftData model
+
+
+215
+00:15:21,822 --> 00:15:24,224 line:-1
+with the “externalStorage” attribute,
+
+
+216
+00:15:24.291 --> 00:15:29.296 line:-2 align:center
+all the externally stored items
+will be a part of the document package.
+
+
+217
+00:15:29,363 --> 00:15:33,800 line:-1
+In the UTType+FlashCards file,
+
+
+218
+00:15:33.867 --> 00:15:36.303 line:-2 align:center
+I have a definition
+of the new content type,
+
+
+219
+00:15:36.370 --> 00:15:39.473 line:-1 align:center
+so we can conveniently use it in code.
+
+
+220
+00:15:39,540 --> 00:15:45,546 line:-2
+We'll put the same definition
+in the Info.plist.
+
+
+221
+00:15:52,553 --> 00:15:57,191 line:-2
+We are about to declare a new content type
+in the operating system.
+
+
+222
+00:15:57.257 --> 00:16:00.227 line:-2 align:center
+We need to specify the file extension
+to help to distinguish
+
+
+223
+00:16:00.294 --> 00:16:05.866 line:-2 align:center
+the card decks created by our app
+from any other documents.
+
+
+224
+00:16:05.933 --> 00:16:11.939 line:-2 align:center
+For this sample app,
+we’ll use “sampledeck” as an extension.
+
+
+225
+00:16:13,540 --> 00:16:19,546 line:-2
+I will also add a short description,
+like Flash Cards Deck.
+
+
+226
+00:16:24,384 --> 00:16:30,390 line:-2
+The identifier should be exactly the same
+as the one in the code.
+
+
+227
+00:16:33.060 --> 00:16:35.629 line:-1 align:center
+Because SwiftData documents are packages,
+
+
+228
+00:16:35,696 --> 00:16:40,033 line:-1
+we have to make sure our type conforms to
+
+
+229
+00:16:40,100 --> 00:16:46,473 line:-1
+com.apple.package.
+
+
+230
+00:16:46,540 --> 00:16:51,745 line:-2
+And now, let’s use
+the content type that we declared.
+
+
+231
+00:16:51,812 --> 00:16:53,814 line:-1
+I am returning to the app definition
+
+
+232
+00:16:53.881 --> 00:16:59.353 line:-2 align:center
+and passing the content type
+to the DocumentGroup.
+
+
+233
+00:16:59,419 --> 00:17:04,391 line:-1
+The view builder looks identical.
+
+
+234
+00:17:06.760 --> 00:17:10.230 line:-2 align:center
+Notably, we don’t set up
+the model container.
+
+
+235
+00:17:10,297 --> 00:17:16,370 line:-2
+The document infrastructure
+will set up one for each document.
+
+
+236
+00:17:16,436 --> 00:17:23,210 line:-2
+Let's run the application
+and see how it looks now!
+
+
+237
+00:17:23.277 --> 00:17:26.980 line:-2 align:center
+The app launches
+with the open panel.
+
+
+238
+00:17:27.047 --> 00:17:31.051 line:-2 align:center
+Standard behavior for Document-based
+applications.
+
+
+239
+00:17:31,118 --> 00:17:34,054 line:-1
+I'll create a new document
+
+
+240
+00:17:34.121 --> 00:17:38.659 line:-1 align:center
+and add a card there.
+
+
+241
+00:17:38.725 --> 00:17:44.631 line:-2 align:center
+The document now has a toolbar subtitle
+indicating that it has unsaved changes.
+
+
+242
+00:17:44,698 --> 00:17:50,270 line:-2
+I press Command+S,
+and the save dialog appears.
+
+
+243
+00:17:50.337 --> 00:17:53.874 line:-2 align:center
+Note that the deck will be saved
+with the same file extension
+
+
+244
+00:17:53.941 --> 00:17:57.044 line:-1 align:center
+that we put in the Info.plist earlier.
+
+
+245
+00:17:57.110 --> 00:18:01.548 line:-1 align:center
+I'll save the new deck,
+
+
+246
+00:18:01,615 --> 00:18:06,320 line:-2
+and here it is, my first flashcards deck,
+on the Desktop.
+
+
+247
+00:18:06.386 --> 00:18:11.058 line:-2 align:center
+I can also press Command+N
+to create a new deck,
+
+
+248
+00:18:11.124 --> 00:18:14.795 line:-1 align:center
+or Command+O to open one.
+
+
+249
+00:18:14.862 --> 00:18:18.065 line:-2 align:center
+These shortcuts,
+as well as many other features,
+
+
+250
+00:18:18.131 --> 00:18:22.236 line:-2 align:center
+Document-based applications
+get automatically.
+
+
+251
+00:18:22,302 --> 00:18:28,175 line:-2
+Just to recap, today, we’ve learned how
+to use SwiftData storage in SwiftUI apps.
+
+
+252
+00:18:28.242 --> 00:18:32.246 line:-2 align:center
+We talked about the new @Model macro,
+@Query property wrapper,
+
+
+253
+00:18:32,312 --> 00:18:35,449 line:-2
+and the new Environment variable
+for model context,
+
+
+254
+00:18:35.516 --> 00:18:39.186 line:-1 align:center
+and saw how easy it is to use SwiftData
+
+
+255
+00:18:39.253 --> 00:18:42.222 line:-1 align:center
+as a storage for your documents.
+
+
+256
+00:18:42,289 --> 00:18:46,426 line:-2
+Thanks for joining me today,
+and have fun building apps!
+
+
+257
+00:18:46.493 --> 00:18:48.495 line:-1 align:center
+♪ ♪
+

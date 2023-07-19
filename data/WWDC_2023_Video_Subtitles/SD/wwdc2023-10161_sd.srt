@@ -1,0 +1,1085 @@
+2
+00:00:01,001 --> 00:00:07,007 line:-1
+♪ ♪
+
+
+3
+00:00:11,411 --> 00:00:16,049 line:-2
+Nick: Hi, I'm Nick,
+an engineer on the SwiftUI team.
+
+
+4
+00:00:16,116 --> 00:00:20,454 line:-2
+Inspector is
+an exciting new element in SwiftUI.
+
+
+5
+00:00:20,521 --> 00:00:25,926 line:-2
+I'll go over what an inspector is
+and how to use the API.
+
+
+6
+00:00:25,993 --> 00:00:31,865 line:-2
+After that, I'll review modifiers
+for presentation customizations.
+
+
+7
+00:00:31,932 --> 00:00:37,304 line:-2
+Inspector is the name for views that show
+further detail of selected content.
+
+
+8
+00:00:37,371 --> 00:00:41,041 line:-2
+You have probably interacted
+with one before.
+
+
+9
+00:00:41,108 --> 00:00:44,044 line:-2
+Keynote uses an inspector
+to show formatting details
+
+
+10
+00:00:44,111 --> 00:00:48,715 line:-2
+for a selection, in this case,
+the shape formatter.
+
+
+11
+00:00:48,782 --> 00:00:53,320 line:-2
+Here the inspector presents
+as a trailing sidebar.
+
+
+12
+00:00:53,387 --> 00:00:55,789 line:-1
+Another common use case for inspectors
+
+
+13
+00:00:55,856 --> 00:01:00,894 line:-2
+is showing content
+that supplements an app's main content.
+
+
+14
+00:01:00,961 --> 00:01:04,298 line:-1
+Shortcuts uses inspector for this purpose.
+
+
+15
+00:01:04,364 --> 00:01:08,135 line:-2
+The main interface is the shortcut
+that the user is editing,
+
+
+16
+00:01:08,202 --> 00:01:14,308 line:-2
+and the inspector supplements that with
+the library of available apps and actions.
+
+
+17
+00:01:14,374 --> 00:01:18,712 line:-2
+I will be using this sample app
+to explore the inspector API.
+
+
+18
+00:01:18,779 --> 00:01:22,449 line:-2
+I've been getting to know the animals
+in and around Apple Park.
+
+
+19
+00:01:22,516 --> 00:01:26,620 line:-2
+This app saves the animals I've met,
+tracks their name,
+
+
+20
+00:01:26,687 --> 00:01:29,590 line:-2
+tracks their favorite fruits,
+and there's this column
+
+
+21
+00:01:29,656 --> 00:01:33,594 line:-2
+that I'll get to later
+labeled "Suspicion Level."
+
+
+22
+00:01:33,660 --> 00:01:37,564 line:-1
+And now, meet, SwiftUI's inspector!
+
+
+23
+00:01:37,631 --> 00:01:42,135 line:-2
+The inspector shows a read-write view
+of details about the selected animal.
+
+
+24
+00:01:42,202 --> 00:01:45,639 line:-2
+Here I'm adjusting
+Fabrizio Fish's suspicion level
+
+
+25
+00:01:45,706 --> 00:01:48,008 line:-1
+up to "Extremely suspicious."
+
+
+26
+00:01:48,075 --> 00:01:51,512 line:-1
+Actually I'll keep him at fishy.
+
+
+27
+00:01:51,578 --> 00:01:56,483 line:-2
+Inspector is available to
+SwiftUI Developers on macOS
+
+
+28
+00:01:56,550 --> 00:02:01,788 line:-1
+and iPadOS and iOS too!
+
+
+29
+00:02:01,855 --> 00:02:06,026 line:-2
+The inspector API includes
+programmatic control over column width,
+
+
+30
+00:02:06,093 --> 00:02:10,631 line:-2
+allowing you to tune the width
+of the trailing column.
+
+
+31
+00:02:10,697 --> 00:02:14,268 line:-2
+The API includes programmatic control
+over presented state,
+
+
+32
+00:02:14,334 --> 00:02:18,939 line:-2
+allowing hiding and showing
+of the inspector as needed.
+
+
+33
+00:02:19,006 --> 00:02:23,177 line:-2
+Inspector is a higher level abstraction
+than just a trailing sidebar.
+
+
+34
+00:02:23,243 --> 00:02:27,281 line:-2
+In compact size classes,
+it adapts to a resizable sheet
+
+
+35
+00:02:27,347 --> 00:02:33,887 line:-2
+and inspector will automatically overlay
+in split screen on larger iPads.
+
+
+36
+00:02:33,954 --> 00:02:39,993 line:-2
+SwiftUI already has an existing set
+of structural APIs.
+
+
+37
+00:02:40,060 --> 00:02:43,030 line:-1
+Inspector fits in alongside these APIs
+
+
+38
+00:02:43,096 --> 00:02:49,369 line:-2
+with characteristics of both
+navigation components and presentations.
+
+
+39
+00:02:49,436 --> 00:02:53,640 line:-2
+Similar to NavigationSplitView
+and NavigationStack,
+
+
+40
+00:02:53,707 --> 00:02:58,812 line:-2
+inspector is used to build
+the scaffolding of your scene.
+
+
+41
+00:02:58,879 --> 00:03:03,584 line:-2
+Similar to Sheet, popover, alert,
+and confirmation dialogs,
+
+
+42
+00:03:03,650 --> 00:03:09,590 line:-2
+inspector is a presentation,
+dismissing and presenting as needed.
+
+
+43
+00:03:09,656 --> 00:03:13,660 line:-2
+It's time to learn
+how to adopt the new inspector API.
+
+
+44
+00:03:13,727 --> 00:03:17,664 line:-2
+Earlier, I showed off the sample app
+I made for this session.
+
+
+45
+00:03:17,731 --> 00:03:22,069 line:-2
+You may have noticed I was tracking
+each animal's suspicion level.
+
+
+46
+00:03:22,135 --> 00:03:26,206 line:-2
+That's because I am trying to solve
+a high-stakes mystery.
+
+
+47
+00:03:26,273 --> 00:03:30,010 line:-2
+Someone is eating
+all the fruit at Apple Park!
+
+
+48
+00:03:30,077 --> 00:03:34,982 line:-2
+I added inspector to my app so that I,
+Inspector Nick,
+
+
+49
+00:03:35,048 --> 00:03:37,851 line:-1
+can gather the details of each animal.
+
+
+50
+00:03:37,918 --> 00:03:42,155 line:-2
+I'll show you how easy it was
+to adopt the inspector API,
+
+
+51
+00:03:42,222 --> 00:03:46,426 line:-2
+and maybe I can solve
+this fruity mystery along the way.
+
+
+52
+00:03:46,493 --> 00:03:50,397 line:-2
+Quickly, to Xcode!
+The game is a-fruit!
+
+
+53
+00:03:50,464 --> 00:03:56,036 line:-2
+The first step to adding inspector
+is using the new modifier, inspector.
+
+
+54
+00:03:56,103 --> 00:04:00,541 line:-2
+Like some other presentations,
+this takes a Bool presented binding,
+
+
+55
+00:04:00,607 --> 00:04:05,712 line:-2
+and then the inspector's content
+in the trailing view builder.
+
+
+56
+00:04:05,779 --> 00:04:10,017 line:-2
+For the inspector content,
+I have a ready made AnimalInspectorForm.
+
+
+57
+00:04:10,083 --> 00:04:15,222 line:-2
+I have some custom methods for passing
+in the animal currently being inspected.
+
+
+58
+00:04:15,289 --> 00:04:19,927 line:-2
+And there's my inspector, presenting
+as a trailing column here on macOS.
+
+
+59
+00:04:19,993 --> 00:04:24,631 line:-2
+I have planted the seeds of
+a wonderful inspector experience.
+
+
+60
+00:04:24,698 --> 00:04:28,402 line:-2
+This AnimalForm
+is using the grouped style.
+
+
+61
+00:04:28,468 --> 00:04:33,841 line:-2
+In case you haven't encountered form
+styles before, they're applied like this<i>.</i>
+
+
+62
+00:04:33,907 --> 00:04:37,845 line:-2
+But because inspector contexts
+use the grouped style by default,
+
+
+63
+00:04:37,911 --> 00:04:41,582 line:-1
+I don't need to style it myself.
+
+
+64
+00:04:41,648 --> 00:04:48,388 line:-2
+I can even interact with the inspector
+in the preview's canvas.
+
+
+65
+00:04:48,455 --> 00:04:50,557 line:-1
+Ah, this reminds me,
+
+
+66
+00:04:50,624 --> 00:04:55,195 line:-2
+while inspectors can collapse by default,
+they aren't resizable by default.
+
+
+67
+00:04:55,262 --> 00:04:59,166 line:-2
+I can change that
+using the inspector column width modifier.
+
+
+68
+00:04:59,233 --> 00:05:01,268 line:-1
+I'll use some sensible defaults.
+
+
+69
+00:05:01,335 --> 00:05:07,608 line:-2
+200 for min, 300 for ideal,
+and 400 for max.
+
+
+70
+00:05:07,674 --> 00:05:11,979 line:-2
+This ideal parameter will be
+the size of the column at at first launch,
+
+
+71
+00:05:12,045 --> 00:05:14,681 line:-1
+but if the user resizes the inspector,
+
+
+72
+00:05:14,748 --> 00:05:18,919 line:-2
+the system will persist
+that size across launches.
+
+
+73
+00:05:18,986 --> 00:05:25,993 line:-2
+Lastly, I'll add a toolbar
+item to toggle the presented state.
+
+
+74
+00:05:26,059 --> 00:05:29,429 line:-2
+I'll use a button
+that toggles the presented property,
+
+
+75
+00:05:29,496 --> 00:05:35,068 line:-2
+and for its label, a Label,
+using the info.circle system image.
+
+
+76
+00:05:35,135 --> 00:05:37,671 line:-2
+The toolbar item will appear
+in the section of the toolbar
+
+
+77
+00:05:37,738 --> 00:05:42,376 line:-2
+above the inspector because it's declared
+within the inspector's view builder.
+
+
+78
+00:05:42,442 --> 00:05:46,647 line:-2
+When I scroll, the toolbar
+behaves exactly like I'd expect,
+
+
+79
+00:05:46,713 --> 00:05:51,018 line:-2
+showing a shadow pocket when enough
+of the content is underneath the toolbar.
+
+
+80
+00:05:55,055 --> 00:05:58,659 line:-2
+I used the inspector modifier
+on the AnimalTable intentionally,
+
+
+81
+00:05:58,725 --> 00:06:01,662 line:-2
+rather than some other spot
+in the view hierarchy.
+
+
+82
+00:06:01,728 --> 00:06:04,998 line:-2
+Like many SwiftUI APIs,
+the inspector modifier
+
+
+83
+00:06:05,065 --> 00:06:10,771 line:-2
+has different behaviors depending
+on the context of where it is applied.
+
+
+84
+00:06:10,838 --> 00:06:13,473 line:-2
+Specifically,
+the placement decides whether
+
+
+85
+00:06:13,540 --> 00:06:16,510 line:-2
+the full height style is used,
+where there is no separation
+
+
+86
+00:06:16,577 --> 00:06:19,780 line:-1
+between toolbar and content,
+
+
+87
+00:06:19,847 --> 00:06:21,949 line:-1
+or the under toolbar style is used,
+
+
+88
+00:06:22,015 --> 00:06:25,385 line:-2
+where the inspector
+is nested under the toolbar.
+
+
+89
+00:06:25,452 --> 00:06:28,121 line:-2
+Notice the title separator
+spans the full width
+
+
+90
+00:06:28,188 --> 00:06:32,326 line:-2
+of the window
+in the under toolbar appearance.
+
+
+91
+00:06:32,392 --> 00:06:38,565 line:-2
+Similarly, toolbar content will be placed
+in the main content's toolbar...
+
+
+92
+00:06:38,632 --> 00:06:41,268 line:-1
+or in the inspector's toolbar,
+
+
+93
+00:06:41,335 --> 00:06:44,538 line:-2
+depending on where
+the toolbar modifier is used.
+
+
+94
+00:06:44,605 --> 00:06:48,542 line:-2
+There are two points to consider
+when using the inspector API.
+
+
+95
+00:06:48,609 --> 00:06:51,645 line:-2
+First, is the inspector
+going to be placed inside
+
+
+96
+00:06:51,712 --> 00:06:56,917 line:-2
+or outside of a navigation structure like
+a NavigationStack or NavigationSplitView?
+
+
+97
+00:06:56,984 --> 00:07:00,587 line:-2
+Second, should the toolbar content
+be inside or outside
+
+
+98
+00:07:00,654 --> 00:07:03,557 line:-1
+of the inspector's view builder?
+
+
+99
+00:07:03,624 --> 00:07:06,360 line:-2
+I'll walk through two
+of these constructions.
+
+
+100
+00:07:06,426 --> 00:07:10,397 line:-2
+First up, placing inspector
+inside a navigation structure,
+
+
+101
+00:07:10,464 --> 00:07:14,668 line:-2
+with toolbar content
+outside the inspector.
+
+
+102
+00:07:14,735 --> 00:07:17,971 line:-2
+When an inspector is contained
+within a NavigationStack,
+
+
+103
+00:07:18,038 --> 00:07:22,643 line:-2
+the inspector is underneath
+the navigation stack's toolbar.
+
+
+104
+00:07:22,709 --> 00:07:26,346 line:-2
+Here, the toolbar content is declared
+outside of the inspector
+
+
+105
+00:07:26,413 --> 00:07:31,285 line:-2
+on the main content and is rendered
+in the navigation stack's toolbar.
+
+
+106
+00:07:31,351 --> 00:07:35,322 line:-2
+In compact horizontal size classes,
+the inspector presents as a sheet
+
+
+107
+00:07:35,389 --> 00:07:41,295 line:-2
+and the toolbar item stays
+in the main<i> </i>content's toolbar.
+
+
+108
+00:07:41,361 --> 00:07:44,364 line:-1
+Back to my table of possibilities.
+
+
+109
+00:07:44,431 --> 00:07:46,033 line:-1
+For the second construction,
+
+
+110
+00:07:46,099 --> 00:07:49,770 line:-2
+I'll look at placing the inspector
+outside of a navigation structure,
+
+
+111
+00:07:49,837 --> 00:07:54,875 line:-2
+with toolbar content
+inside the inspector view builder.
+
+
+112
+00:07:54,942 --> 00:07:59,379 line:-2
+When the inspector modifier is placed
+outside of a navigation structure,
+
+
+113
+00:07:59,446 --> 00:08:04,051 line:-2
+the inspector is given the full height
+of the trailing column to lay out.
+
+
+114
+00:08:04,117 --> 00:08:06,920 line:-1
+If the inspector has toolbar content,
+
+
+115
+00:08:06,987 --> 00:08:09,823 line:-2
+that content will be placed
+in a toolbar section
+
+
+116
+00:08:09,890 --> 00:08:12,092 line:-1
+specifically for the inspector.
+
+
+117
+00:08:12,159 --> 00:08:15,529 line:-2
+These two toolbar items are positioned
+with the principal placement
+
+
+118
+00:08:15,596 --> 00:08:20,868 line:-2
+and end up centered in the navigation
+toolbar above the inspector.
+
+
+119
+00:08:20,934 --> 00:08:23,570 line:-2
+This time, however,
+because the toolbar content
+
+
+120
+00:08:23,637 --> 00:08:26,306 line:-1
+is inside the inspector's view builder,
+
+
+121
+00:08:26,373 --> 00:08:32,012 line:-2
+when the inspector presents as a sheet,
+the toolbar content is in the sheet.
+
+
+122
+00:08:36,183 --> 00:08:38,385 line:-1
+These principles extend to macOS,
+
+
+123
+00:08:38,452 --> 00:08:42,723 line:-2
+except inspector does not present
+as a sheet on macOS,
+
+
+124
+00:08:42,789 --> 00:08:44,925 line:-1
+and so the table becomes simpler.
+
+
+125
+00:08:44,992 --> 00:08:50,664 line:-2
+The only axis to worry about is inside
+or outside a navigation structure.
+
+
+126
+00:08:50,731 --> 00:08:54,301 line:-1
+A final, but important note:
+
+
+127
+00:08:54,368 --> 00:08:58,972 line:-2
+If you are using an inspector
+within a NavigationSplitView,
+
+
+128
+00:08:59,039 --> 00:09:04,111 line:-2
+the inspector should be placed
+in the detail column's view builder,
+
+
+129
+00:09:04,178 --> 00:09:05,913 line:-1
+or, just like before,
+
+
+130
+00:09:05,979 --> 00:09:10,884 line:-2
+it can also be placed entirely
+outside the navigation structure.
+
+
+131
+00:09:10,951 --> 00:09:17,491 line:-2
+Wow, all of this mystery solving
+is making me hungry!
+
+
+132
+00:09:17,558 --> 00:09:20,427 line:-1
+[apple crunches]
+
+
+133
+00:09:20,494 --> 00:09:23,830 line:-1
+Oh!
+
+
+134
+00:09:23,897 --> 00:09:28,502 line:-1
+I'm getting a Nibble Bulletin in the app!
+
+
+135
+00:09:28,569 --> 00:09:31,505 line:-2
+The app shows Nibble Bulletins
+as resizable sheets
+
+
+136
+00:09:31,572 --> 00:09:37,845 line:-2
+with some information about
+where and when the fruit was nibbled.
+
+
+137
+00:09:37,911 --> 00:09:42,216 line:-2
+This is a great time for me to talk about
+presentation customizations
+
+
+138
+00:09:42,282 --> 00:09:46,987 line:-1
+SwiftUI released with iOS 16.4.
+
+
+139
+00:09:47,054 --> 00:09:52,526 line:-2
+The fruit nibble bulletin is a sheet,
+not an inspector.
+
+
+140
+00:09:52,593 --> 00:09:56,063 line:-2
+Presentation modifiers allow
+deep customization of sheets
+
+
+141
+00:09:56,129 --> 00:09:59,099 line:-1
+and other presentations like popovers.
+
+
+142
+00:09:59,166 --> 00:10:02,536 line:-1
+I'll try a few of them out.
+
+
+143
+00:10:02,603 --> 00:10:06,206 line:-2
+The presentation background modifier
+is aptly named.
+
+
+144
+00:10:06,273 --> 00:10:10,878 line:-2
+It will set the background
+of a presentation.
+
+
+145
+00:10:10,944 --> 00:10:13,380 line:-1
+Unlike the existing background modifier,
+
+
+146
+00:10:13,447 --> 00:10:17,451 line:-2
+the presentation specific modifier
+will fill the entire presentation
+
+
+147
+00:10:17,518 --> 00:10:21,255 line:-2
+and allow underlying content
+to show through.
+
+
+148
+00:10:21,321 --> 00:10:23,924 line:-1
+So, if I use a thinMaterial,
+
+
+149
+00:10:23,991 --> 00:10:29,196 line:-2
+I'll see a hint of the List
+behind the sheet.
+
+
+150
+00:10:29,263 --> 00:10:32,199 line:-2
+I'd like to allow interaction
+with content behind the sheet,
+
+
+151
+00:10:32,266 --> 00:10:34,067 line:-1
+in case I want to scroll the list,
+
+
+152
+00:10:34,134 --> 00:10:38,372 line:-2
+and look at suspects
+while reading the Nibble Bulletin.
+
+
+153
+00:10:38,438 --> 00:10:43,777 line:-2
+This is as simple as
+presentationBackgroundInteraction enabled.
+
+
+154
+00:10:43,844 --> 00:10:45,379 line:-1
+The dimming view is removed
+
+
+155
+00:10:45,445 --> 00:10:49,583 line:-2
+and I can now interact
+with the background content.
+
+
+156
+00:10:49,650 --> 00:10:52,085 line:-2
+The PresentationBackgroundInteraction
+type
+
+
+157
+00:10:52,152 --> 00:10:57,291 line:-2
+can also have an upThrough parameter
+accepting a presentation detent.
+
+
+158
+00:10:57,357 --> 00:11:02,196 line:-2
+As long as the provided argument matches
+one of the given presentation's detents,
+
+
+159
+00:11:02,262 --> 00:11:05,199 line:-2
+SwiftUI will only provide
+the dimming view at detents
+
+
+160
+00:11:05,265 --> 00:11:08,969 line:-1
+greater than the upThrough argument.
+
+
+161
+00:11:09,036 --> 00:11:12,973 line:-2
+I want dimming at any detent
+above a height of 200,
+
+
+162
+00:11:13,040 --> 00:11:18,178 line:-2
+so I will first add a height detent of 200
+using the presentationDetents modifier.
+
+
+163
+00:11:18,245 --> 00:11:21,982 line:-2
+I'll adjust the sheet
+from its current detent of medium...
+
+
+164
+00:11:22,049 --> 00:11:25,319 line:-1
+down to my custom height of 200.
+
+
+165
+00:11:25,385 --> 00:11:29,122 line:-2
+When I only enable background interaction
+up through 200,
+
+
+166
+00:11:29,189 --> 00:11:35,829 line:-2
+the dimming view will return
+for the medium and large detents.
+
+
+167
+00:11:35,896 --> 00:11:38,532 line:-2
+There are more customizations
+available to you
+
+
+168
+00:11:38,599 --> 00:11:41,802 line:-2
+to get the perfect look and feel
+for presentations.
+
+
+169
+00:11:41,869 --> 00:11:43,670 line:-1
+Many of these modifiers have effects
+
+
+170
+00:11:43,737 --> 00:11:48,275 line:-2
+on other presentations too,
+not just sheets.
+
+
+171
+00:11:48,342 --> 00:11:51,578 line:-2
+And one more thing
+about presentation modifiers.
+
+
+172
+00:11:51,645 --> 00:11:54,681 line:-2
+Those same modifiers compose
+with Inspector
+
+
+173
+00:11:54,748 --> 00:11:57,117 line:-1
+when Inspector is presenting as a sheet.
+
+
+174
+00:11:57,184 --> 00:11:59,186 line:-1
+For my inspector from earlier,
+
+
+175
+00:11:59,253 --> 00:12:03,123 line:-2
+to disable background content interaction
+at the medium detent,
+
+
+176
+00:12:03,190 --> 00:12:07,594 line:-2
+I can use the same exact code
+from before...
+
+
+177
+00:12:07,661 --> 00:12:10,831 line:-1
+declaring a height detent,
+
+
+178
+00:12:10,898 --> 00:12:15,903 line:-2
+and only enabling background interaction
+up through the same detent.
+
+
+179
+00:12:15,969 --> 00:12:20,974 line:-2
+Now the inspector dims
+at the medium detent and higher.
+
+
+180
+00:12:21,041 --> 00:12:23,744 line:-1
+And that's inspectors in SwiftUI.
+
+
+181
+00:12:23,810 --> 00:12:29,583 line:-2
+In this video, I introduced the inspector
+API and the nuances of using it.
+
+
+182
+00:12:29,650 --> 00:12:33,987 line:-2
+I picked some of my favorite sheet
+presentation modifiers to demonstrate,
+
+
+183
+00:12:34,054 --> 00:12:37,357 line:-2
+and showed how
+they can compose with inspectors.
+
+
+184
+00:12:37,424 --> 00:12:39,493 line:-1
+So what are you waiting for?
+
+
+185
+00:12:39,560 --> 00:12:42,196 line:-1
+Go out and get inspecting.
+
+
+186
+00:12:42,262 --> 00:12:45,098 line:-1
+Place the inspector somewhere in your app.
+
+
+187
+00:12:45,165 --> 00:12:48,936 line:-2
+Keep it going
+by customizing your presentations.
+
+
+188
+00:12:49,002 --> 00:12:51,505 line:-1
+And as for the nibbler,
+
+
+189
+00:12:51,572 --> 00:12:55,909 line:-2
+I guess our efforts to solve this mystery
+were fruitless.
+
+
+190
+00:12:55,976 --> 00:12:57,978 line:-1
+♪ ♪
+

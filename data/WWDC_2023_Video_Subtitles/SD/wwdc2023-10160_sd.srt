@@ -1,0 +1,2406 @@
+2
+00:00:00,334 --> 00:00:06,340 line:-1
+♪ ♪
+
+
+3
+00:00:10,010 --> 00:00:14,348 line:-2
+person: Hello, and welcome
+to "Demystify SwiftUI Performance."
+
+
+4
+00:00:14,381 --> 00:00:18,018 line:-2
+SwiftUI makes it easy
+to build complex, powerful apps,
+
+
+5
+00:00:18,051 --> 00:00:22,956 line:0
+offering a large set of features and
+complex controls like lists and tables.
+
+
+6
+00:00:22,990 --> 00:00:25,926 line:0
+When you're just starting out
+and your app isn't very complex,
+
+
+7
+00:00:25,959 --> 00:00:28,495 line:0
+performance issues aren't as obvious.
+
+
+8
+00:00:28,529 --> 00:00:30,831 line:0
+but as your app's complexity grows,
+
+
+9
+00:00:30,864 --> 00:00:32,633 line:0
+performance becomes more important.
+
+
+10
+00:00:32,666 --> 00:00:34,601 line:0
+Small issues can get amplified,
+
+
+11
+00:00:34,635 --> 00:00:36,703 line:0
+and code that works well for a prototype
+
+
+12
+00:00:36,737 --> 00:00:39,039 line:0
+might not work as well in production.
+
+
+13
+00:00:39,072 --> 00:00:41,742 line:-2
+This session is all
+about building a mental model
+
+
+14
+00:00:41,775 --> 00:00:44,645 line:-2
+for performance in SwiftUI
+because if you understand how
+
+
+15
+00:00:44,678 --> 00:00:47,681 line:-2
+to write fast code from the beginning
+of the development process,
+
+
+16
+00:00:47,714 --> 00:00:51,285 line:-2
+you'll run into fewer issues
+as your app becomes more complex.
+
+
+17
+00:00:52,119 --> 00:00:56,156 line:-2
+Let's examine the feedback loop involved
+in addressing a performance problem.
+
+
+18
+00:00:56,190 --> 00:00:58,792 line:-1
+Performance problems start with a symptom.
+
+
+19
+00:00:58,825 --> 00:01:02,329 line:-2
+Perhaps there's a slow navigation push,
+a broken animation,
+
+
+20
+00:01:02,362 --> 00:01:05,832 line:-2
+or you're seeing
+the spinning wait cursor on macOS.
+
+
+21
+00:01:05,866 --> 00:01:07,701 line:-1
+When you identify a performance problem,
+
+
+22
+00:01:07,734 --> 00:01:11,305 line:-2
+the first step
+towards addressing it is to measure.
+
+
+23
+00:01:11,338 --> 00:01:14,174 line:-2
+Once you have measured
+and verified that the symptom exists,
+
+
+24
+00:01:14,208 --> 00:01:16,910 line:-1
+work on identifying its cause.
+
+
+25
+00:01:16,944 --> 00:01:19,880 line:-2
+This can often be one
+of the trickier phases of this loop
+
+
+26
+00:01:19,913 --> 00:01:24,017 line:-2
+because it requires an intuition
+about how things are supposed to work.
+
+
+27
+00:01:24,051 --> 00:01:27,554 line:-2
+Bugs arise when your app
+has an incorrect assumption.
+
+
+28
+00:01:27,588 --> 00:01:30,457 line:-2
+This session is about helping
+you identify the mismatch
+
+
+29
+00:01:30,490 --> 00:01:32,292 line:-2
+between your app's assumptions
+and reality.
+
+
+30
+00:01:33,427 --> 00:01:37,431 line:1
+After identifying the root cause,
+fix the issue through optimization.
+
+
+31
+00:01:37,464 --> 00:01:41,001 line:1
+But performance problems don't end
+after you've found a root cause
+
+
+32
+00:01:41,034 --> 00:01:42,269 line:1
+and optimized your code.
+
+
+33
+00:01:42,302 --> 00:01:46,173 line:1
+You need to re-measure and re-verify
+any fix you make to ensure
+
+
+34
+00:01:46,206 --> 00:01:48,075 line:1
+that it addresses the issue.
+
+
+35
+00:01:48,108 --> 00:01:50,344 line:1
+This is a good practice for all bugs,
+
+
+36
+00:01:50,377 --> 00:01:53,447 line:1
+but it's especially important
+for performance.
+
+
+37
+00:01:53,480 --> 00:01:57,751 line:1
+After you've verified that the problem
+is resolved, you break the loop.
+
+
+38
+00:01:57,784 --> 00:02:00,420 line:1
+This diagram puts this session in context.
+
+
+39
+00:02:00,454 --> 00:02:04,658 line:1
+Ideally, you never end up in this cycle,
+and you can avoid many performance issues
+
+
+40
+00:02:04,691 --> 00:02:06,860 line:1
+by writing fast code when prototyping.
+
+
+41
+00:02:06,894 --> 00:02:10,497 line:-2
+However, it's inevitable that,
+as your app gets more complex,
+
+
+42
+00:02:10,531 --> 00:02:12,533 line:-1
+you end up with performance bugs.
+
+
+43
+00:02:12,566 --> 00:02:14,268 line:-1
+It happens to the best of us.
+
+
+44
+00:02:14,301 --> 00:02:16,203 line:-2
+And when you do encounter
+performance issues,
+
+
+45
+00:02:16,236 --> 00:02:20,641 line:-2
+it's good to have as many tools
+at your disposal to triage and fix them.
+
+
+46
+00:02:20,674 --> 00:02:23,844 line:-2
+This session aims to make it easier
+to get through the loop.
+
+
+47
+00:02:24,845 --> 00:02:28,048 line:-2
+This is an advanced session,
+and there are some prerequisites.
+
+
+48
+00:02:28,849 --> 00:02:31,785 line:-2
+You should have a cursory understanding
+of SwiftUI identity,
+
+
+49
+00:02:31,818 --> 00:02:35,889 line:-2
+including the difference
+between implicit and explicit identity.
+
+
+50
+00:02:35,923 --> 00:02:37,991 line:-2
+It's also important
+to know the distinction
+
+
+51
+00:02:38,025 --> 00:02:40,561 line:-1
+between view lifetime and view identity.
+
+
+52
+00:02:41,295 --> 00:02:43,931 line:-4
+If you don't have these prerequisites,
+don't fret.
+
+
+53
+00:02:43,964 --> 00:02:49,169 line:-4
+The "Demystify SwiftUI" session
+from WWDC21 has you covered.
+
+
+54
+00:02:49,203 --> 00:02:53,006 line:-4
+Today's session picks up
+where that session left off.
+
+
+55
+00:02:53,040 --> 00:02:55,175 line:-3
+Let's go over the agenda.
+
+
+56
+00:02:55,209 --> 00:02:57,678 line:-2
+We'll begin with an in-depth discussion
+of dependencies
+
+
+57
+00:02:57,711 --> 00:03:00,514 line:-2
+and explore the SwiftUI
+update process in detail.
+
+
+58
+00:03:00,547 --> 00:03:04,084 line:-2
+Next, we'll move on to a discussion
+of updates and how to improve the speed
+
+
+59
+00:03:04,117 --> 00:03:06,386 line:-1
+with which SwiftUI updates your interface.
+
+
+60
+00:03:06,420 --> 00:03:11,291 line:-2
+And last, but definitely not least,
+we'll discuss identity in list and table.
+
+
+61
+00:03:11,325 --> 00:03:13,627 line:-2
+Along the way,
+we'll take a peek under the hood
+
+
+62
+00:03:13,660 --> 00:03:17,431 line:-2
+of SwiftUI and check out several tips
+and tricks to use when developing.
+
+
+63
+00:03:17,464 --> 00:03:20,000 line:-2
+This session is primarily concerned
+with slow updates
+
+
+64
+00:03:20,033 --> 00:03:23,270 line:-2
+to the view hierarchy,
+but is by no means an exhaustive look
+
+
+65
+00:03:23,303 --> 00:03:26,940 line:-2
+at all the performance problems that you
+might encounter when developing an app.
+
+
+66
+00:03:26,974 --> 00:03:28,809 line:-1
+Let's get started with Dependencies.
+
+
+67
+00:03:29,576 --> 00:03:32,479 line:-2
+It's been a few years since
+the last "Demystify SwiftUI" session,
+
+
+68
+00:03:32,513 --> 00:03:34,982 line:-2
+and I've missed working
+on dog-themed apps.
+
+
+69
+00:03:35,015 --> 00:03:38,685 line:-2
+So continuing the theme from that session,
+I've been working on a new app
+
+
+70
+00:03:38,719 --> 00:03:41,188 line:-2
+that lets me keep track
+of my favorite furry friends
+
+
+71
+00:03:41,221 --> 00:03:43,257 line:-1
+and set up some time to play with them.
+
+
+72
+00:03:43,290 --> 00:03:46,927 line:-2
+Here's one of the views,
+a table showing all of the dogs.
+
+
+73
+00:03:46,960 --> 00:03:50,063 line:-2
+The app also has a detail view,
+shown here on iPhone,
+
+
+74
+00:03:50,097 --> 00:03:53,934 line:-2
+that shows a bigger picture of each dog,
+the dog's preferences,
+
+
+75
+00:03:53,967 --> 00:03:57,104 line:-2
+and offers a button
+to set up some time to play.
+
+
+76
+00:03:57,137 --> 00:03:59,306 line:-1
+Here's the code for that same view.
+
+
+77
+00:03:59,339 --> 00:04:03,143 line:-2
+The view takes in a dog as a parameter
+and also has an environment property
+
+
+78
+00:04:03,177 --> 00:04:05,379 line:-1
+for knowing whether it's play time.
+
+
+79
+00:04:05,412 --> 00:04:07,915 line:-2
+As mentioned
+in the previous Demystify session,
+
+
+80
+00:04:07,948 --> 00:04:11,952 line:-2
+this means the dog and the play time
+variables are dependencies of the view,
+
+
+81
+00:04:11,985 --> 00:04:14,955 line:-2
+and another way
+to show this view is as a graph.
+
+
+82
+00:04:14,988 --> 00:04:18,692 line:-2
+Here is a basic graph representing
+approximately the same view.
+
+
+83
+00:04:18,725 --> 00:04:21,261 line:-1
+Each arrow represents a view's body.
+
+
+84
+00:04:21,295 --> 00:04:23,297 line:-1
+The dog view produces a stack.
+
+
+85
+00:04:23,330 --> 00:04:26,266 line:-2
+And the stack has multiple children,
+like some text,
+
+
+86
+00:04:26,300 --> 00:04:30,037 line:0
+the scalable dog image,
+the detail view, and the button.
+
+
+87
+00:04:30,070 --> 00:04:32,973 line:0
+Continuing on,
+each of those views has children,
+
+
+88
+00:04:33,006 --> 00:04:35,642 line:0
+and the graph continues
+until it reaches a leaf view,
+
+
+89
+00:04:35,676 --> 00:04:38,612 line:0
+like an image, text, or color.
+
+
+90
+00:04:38,645 --> 00:04:41,281 line:0
+All views ultimately resolve
+to a leaf view.
+
+
+91
+00:04:41,315 --> 00:04:45,819 line:0
+There are many leaf views in SwiftUI,
+so I won't be covering all of them here.
+
+
+92
+00:04:45,853 --> 00:04:49,122 line:0
+Check out the documentation
+for more information.
+
+
+93
+00:04:49,156 --> 00:04:51,158 line:-1
+Let's go back to the app.
+
+
+94
+00:04:51,191 --> 00:04:55,195 line:-2
+Whenever I'm using the app, I can log
+whenever I play with one of my friends.
+
+
+95
+00:04:55,229 --> 00:04:57,164 line:-2
+I just finished playing fetch
+with Rocky here,
+
+
+96
+00:04:57,197 --> 00:04:58,899 line:-1
+so I've noted that in the app,
+
+
+97
+00:04:58,932 --> 00:05:01,502 line:-1
+which updates the button and the image.
+
+
+98
+00:05:01,535 --> 00:05:02,970 line:-1
+Rocky's looking pretty happy,
+
+
+99
+00:05:03,003 --> 00:05:05,806 line:-1
+but he's definitely too tired to play now.
+
+
+100
+00:05:05,839 --> 00:05:07,608 line:-1
+When this data changes in the model,
+
+
+101
+00:05:07,641 --> 00:05:09,710 line:-1
+SwiftUI updates this view.
+
+
+102
+00:05:09,743 --> 00:05:13,013 line:-2
+Let's explore the update process in depth
+by returning to the graph
+
+
+103
+00:05:13,046 --> 00:05:15,449 line:-2
+and looking at what happens
+when this change occurs.
+
+
+104
+00:05:16,149 --> 00:05:17,317 line:0
+Here's our graph again.
+
+
+105
+00:05:17,351 --> 00:05:19,887 line:0
+This is where the previous
+Demystify session left off,
+
+
+106
+00:05:19,920 --> 00:05:21,855 line:0
+explaining that views form a graph
+
+
+107
+00:05:21,889 --> 00:05:24,925 line:0
+and SwiftUI looks at dependencies
+when evaluating your code.
+
+
+108
+00:05:24,958 --> 00:05:26,159 line:-1
+Let's zoom in
+
+
+109
+00:05:26,193 --> 00:05:29,463 line:-2
+and provide a more in-depth look
+at where those dependencies come from
+
+
+110
+00:05:29,496 --> 00:05:32,032 line:-1
+and how you can control them.
+
+
+111
+00:05:32,065 --> 00:05:35,569 line:-2
+Each child view is dependent
+on the view value that gets produced
+
+
+112
+00:05:35,602 --> 00:05:36,970 line:-1
+by its ancestor.
+
+
+113
+00:05:37,004 --> 00:05:39,540 line:-2
+But there are other forms
+of dependencies too.
+
+
+114
+00:05:39,573 --> 00:05:42,876 line:-2
+Dynamic properties are a common source
+of dependencies as well.
+
+
+115
+00:05:42,910 --> 00:05:45,646 line:-2
+For example,
+the DogView reads whether it's play time
+
+
+116
+00:05:45,679 --> 00:05:48,949 line:-2
+from environment by using
+the @Environment property wrapper.
+
+
+117
+00:05:48,982 --> 00:05:51,485 line:-2
+Therefore,
+it is dependent both on the value
+
+
+118
+00:05:51,518 --> 00:05:55,055 line:-2
+produced by its parent
+and the value from the environment.
+
+
+119
+00:05:55,088 --> 00:05:59,560 line:-2
+If we visualize time on the X axis,
+the first step in the update process
+
+
+120
+00:05:59,593 --> 00:06:02,529 line:-1
+is to produce a new value for the view.
+
+
+121
+00:06:02,563 --> 00:06:05,599 line:-2
+This value encompasses
+all the stored properties of the view,
+
+
+122
+00:06:05,632 --> 00:06:09,536 line:-2
+like the dog value and the initial value
+of the dynamic property.
+
+
+123
+00:06:09,570 --> 00:06:13,207 line:-2
+Next, SwiftUI updates all
+of the dynamic properties of the view,
+
+
+124
+00:06:13,240 --> 00:06:16,710 line:-2
+replacing their values
+with the current ones from the graph.
+
+
+125
+00:06:16,743 --> 00:06:21,148 line:-2
+Finally, with the updated value,
+body runs to produce the view's children.
+
+
+126
+00:06:21,181 --> 00:06:23,483 line:-1
+Let's bring in the graph again.
+
+
+127
+00:06:23,517 --> 00:06:26,186 line:-2
+This process recurses
+to update the interface,
+
+
+128
+00:06:26,220 --> 00:06:30,824 line:-2
+only updating those views that have
+new values or other changed dependencies.
+
+
+129
+00:06:30,858 --> 00:06:34,361 line:-2
+When we mark Rocky as tired,
+we get a new dog--
+
+
+130
+00:06:34,394 --> 00:06:38,165 line:-2
+sorry, a new dog struct value,
+but it's still the same Rocky.
+
+
+131
+00:06:38,198 --> 00:06:40,067 line:-1
+Because our data is a value type,
+
+
+132
+00:06:40,100 --> 00:06:43,136 line:-2
+a new copy of it
+is created when it's mutated.
+
+
+133
+00:06:43,170 --> 00:06:47,107 line:-2
+And that results in DogView
+producing new content for the stack,
+
+
+134
+00:06:47,140 --> 00:06:49,743 line:-1
+Which updates the stack's children.
+
+
+135
+00:06:49,776 --> 00:06:52,246 line:-2
+I'm only focusing
+on the ScalableDogImage here,
+
+
+136
+00:06:52,279 --> 00:06:55,949 line:-2
+but other views may update
+if they depend on the dog value.
+
+
+137
+00:06:55,983 --> 00:06:59,419 line:-2
+ScalableDogImage
+ends up producing a new image.
+
+
+138
+00:06:59,453 --> 00:07:04,291 line:-2
+Images are leaf views, so the rest
+of the work is done by SwiftUI from here.
+
+
+139
+00:07:04,324 --> 00:07:08,862 line:-2
+The process then finishes,
+and a new rendering is produced.
+
+
+140
+00:07:08,896 --> 00:07:11,164 line:-2
+That's how
+to look at the dependency graph.
+
+
+141
+00:07:11,198 --> 00:07:13,767 line:-2
+Let's go over some tips
+to improve this process.
+
+
+142
+00:07:13,800 --> 00:07:17,871 line:-2
+It's important to reduce the updates
+to only those that are necessary.
+
+
+143
+00:07:17,905 --> 00:07:22,509 line:-2
+To understand when a view is updated,
+SwiftUI has the printChanges method.
+
+
+144
+00:07:22,543 --> 00:07:25,512 line:-2
+This lets you print out
+why the SwiftUI graph evaluator
+
+
+145
+00:07:25,546 --> 00:07:27,581 line:-1
+called into a view's body.
+
+
+146
+00:07:27,614 --> 00:07:30,317 line:-2
+Let's walk through
+an example of how to use it.
+
+
+147
+00:07:30,350 --> 00:07:34,555 line:-2
+Here we have our scalable dog image,
+which contains a piece of state.
+
+
+148
+00:07:34,588 --> 00:07:38,325 line:-2
+When we tap on the image,
+the state changes like so.
+
+
+149
+00:07:41,495 --> 00:07:44,431 line:-2
+Focusing on just the image view,
+if we set a breakpoint
+
+
+150
+00:07:44,464 --> 00:07:46,066 line:-1
+in our view's body,
+
+
+151
+00:07:46,099 --> 00:07:50,204 line:-2
+from the LLDB console,
+we can call Self._printChanges
+
+
+152
+00:07:50,237 --> 00:07:53,640 line:-1
+by using the "expression" LLDB command.
+
+
+153
+00:07:53,674 --> 00:07:56,176 line:-1
+printChanges is a debugging-only facility
+
+
+154
+00:07:56,210 --> 00:08:00,581 line:0
+that gives a best-effort explanation
+of why SwiftUI requested a view's body.
+
+
+155
+00:08:00,614 --> 00:08:03,350 line:0
+In this case,
+it's because scaleToFill changed.
+
+
+156
+00:08:03,383 --> 00:08:06,053 line:0
+You can use printChanges
+to understand whether a view
+
+
+157
+00:08:06,086 --> 00:08:08,355 line:0
+might have extra dependencies.
+
+
+158
+00:08:08,388 --> 00:08:10,924 line:-2
+For example, I'm currently
+running my app and debugging
+
+
+159
+00:08:10,958 --> 00:08:13,927 line:-2
+and want to see
+if this view has an extra dependency.
+
+
+160
+00:08:13,961 --> 00:08:17,664 line:-2
+I can add a call to printChanges
+to this view's body to print every time
+
+
+161
+00:08:17,698 --> 00:08:19,466 line:-1
+the view's body is accessed.
+
+
+162
+00:08:19,499 --> 00:08:23,270 line:-2
+However, note that printChanges
+is prefixed with an underscore.
+
+
+163
+00:08:23,303 --> 00:08:26,840 line:-2
+In this case, that means,
+it is never guaranteed to always exist
+
+
+164
+00:08:26,874 --> 00:08:29,409 line:-2
+and may even be removed
+in a future release,
+
+
+165
+00:08:29,443 --> 00:08:33,146 line:-2
+so never submit a call
+to this method to the app store.
+
+
+166
+00:08:33,180 --> 00:08:35,382 line:-1
+I'll need to remove this call later.
+
+
+167
+00:08:35,415 --> 00:08:38,952 line:-2
+It's only meant for debugging
+and has a runtime performance impact.
+
+
+168
+00:08:38,986 --> 00:08:42,422 line:-2
+If I re-run my app
+and change Rocky's favorite treat,
+
+
+169
+00:08:42,456 --> 00:08:45,392 line:-2
+say, from a biscuit to something else,
+like a cucumber,
+
+
+170
+00:08:45,425 --> 00:08:47,561 line:-2
+I notice a log
+in the console from our image.
+
+
+171
+00:08:48,095 --> 00:08:49,897 line:0
+It says that "self" changed.
+
+
+172
+00:08:49,930 --> 00:08:54,101 line:0
+This means that the view value changed,
+so the scalable image view must have
+
+
+173
+00:08:54,134 --> 00:08:55,736 line:0
+some dependency on the treat,
+
+
+174
+00:08:55,769 --> 00:08:58,105 line:-1
+but it doesn't actually need to.
+
+
+175
+00:08:58,138 --> 00:09:01,008 line:-2
+Focusing on the code,
+the view's value only has
+
+
+176
+00:09:01,041 --> 00:09:03,443 line:-2
+the scaleToFill member
+and the dog property.
+
+
+177
+00:09:03,477 --> 00:09:06,313 line:-2
+Since scaleToFill
+is a SwiftUI dynamic property,
+
+
+178
+00:09:06,346 --> 00:09:08,949 line:-2
+it would have shown up
+in the change log if it had changed,
+
+
+179
+00:09:08,982 --> 00:09:12,419 line:-2
+so "@Self" here means
+that the dog value changed.
+
+
+180
+00:09:12,452 --> 00:09:15,622 line:-2
+But looking at this view,
+we only care about the image.
+
+
+181
+00:09:15,656 --> 00:09:19,793 line:-2
+So we can eliminate this dependency
+by instead using just the image.
+
+
+182
+00:09:19,826 --> 00:09:22,196 line:-2
+And now,
+when I change a property of the dog
+
+
+183
+00:09:22,229 --> 00:09:25,532 line:-2
+that isn't related to the image,
+I don't see a log.
+
+
+184
+00:09:27,100 --> 00:09:29,837 line:-2
+The view's dependencies
+are tightly scoped.
+
+
+185
+00:09:29,870 --> 00:09:34,041 line:-2
+If you follow this technique, don't forget
+to remove the call to printChanges.
+
+
+186
+00:09:34,074 --> 00:09:36,777 line:-1
+Let's update the parent view to match.
+
+
+187
+00:09:36,810 --> 00:09:38,946 line:-1
+Here's the code for the parent dog view.
+
+
+188
+00:09:38,979 --> 00:09:40,447 line:-1
+I need to update the initializer
+
+
+189
+00:09:40,480 --> 00:09:42,816 line:-1
+for ScalableDogImage to take in an image,
+
+
+190
+00:09:42,850 --> 00:09:44,017 line:-1
+like so.
+
+
+191
+00:09:44,051 --> 00:09:46,386 line:-1
+By extracting the ScalableDogImage out,
+
+
+192
+00:09:46,420 --> 00:09:47,721 line:-1
+I've reduced the dependencies
+
+
+193
+00:09:47,754 --> 00:09:49,423 line:-1
+to only those that matter.
+
+
+194
+00:09:49,456 --> 00:09:51,558 line:-1
+I can do the same with the header too
+
+
+195
+00:09:51,592 --> 00:09:53,861 line:-1
+and extract it to its own view.
+
+
+196
+00:09:53,894 --> 00:09:55,662 line:-1
+This has a number of benefits.
+
+
+197
+00:09:55,696 --> 00:09:57,364 line:-1
+This code is now easier to read,
+
+
+198
+00:09:57,397 --> 00:09:58,999 line:-1
+and the dependencies of the DogHeader
+
+
+199
+00:09:59,032 --> 00:10:01,068 line:-1
+are apparent at its use site.
+
+
+200
+00:10:01,101 --> 00:10:03,470 line:-2
+This technique works great
+for smaller views,
+
+
+201
+00:10:03,504 --> 00:10:05,939 line:-2
+but just be careful
+with very large structs.
+
+
+202
+00:10:05,973 --> 00:10:08,575 line:-2
+Not every dependency deserves
+to be scoped like this.
+
+
+203
+00:10:08,609 --> 00:10:10,711 line:-1
+You'll need to use your best judgement.
+
+
+204
+00:10:11,745 --> 00:10:15,215 line:-2
+Fewer updates means better performance
+when data changes in your app.
+
+
+205
+00:10:15,249 --> 00:10:19,486 line:-2
+As we just explored, one way
+to do this is by reducing dependencies.
+
+
+206
+00:10:19,520 --> 00:10:24,224 line:-2
+Try reducing view values
+to only the data they actually depend on.
+
+
+207
+00:10:24,258 --> 00:10:28,095 line:-2
+Another tip is to extract views
+to reduce dependencies.
+
+
+208
+00:10:28,128 --> 00:10:32,132 line:-2
+And finally, the new Observable protocol
+can also help with dependency scoping
+
+
+209
+00:10:32,165 --> 00:10:36,436 line:-2
+by automatically limiting the dependencies
+to only that which is read.
+
+
+210
+00:10:36,470 --> 00:10:40,641 line:-4
+Check out the "Discover Observation
+in SwiftUI" session for more information.
+
+
+211
+00:10:41,608 --> 00:10:44,344 line:-4
+That was just a quick tour
+of how to look at dependencies.
+
+
+212
+00:10:44,378 --> 00:10:46,947 line:-4
+Let's move on
+to talk about faster updates.
+
+
+213
+00:10:46,980 --> 00:10:51,318 line:-2
+In this section, we'll discuss how
+to reduce the cost of each SwiftUI update.
+
+
+214
+00:10:51,351 --> 00:10:54,988 line:-2
+Slow SwiftUI updates can have a number
+of negative effects on your app,
+
+
+215
+00:10:55,022 --> 00:10:58,725 line:-2
+including reduced responsiveness,
+such as hangs and hitches.
+
+
+216
+00:10:58,759 --> 00:11:01,962 line:-2
+A hang is a delay
+in responding to user interaction,
+
+
+217
+00:11:01,995 --> 00:11:04,898 line:-2
+like a view taking a long time
+to initially appear.
+
+
+218
+00:11:04,932 --> 00:11:10,037 line:-2
+The "Analyze Hangs in Instruments" session
+from WWDC2023 goes into detail
+
+
+219
+00:11:10,070 --> 00:11:12,706 line:-4
+about how to use Instruments
+to analyze hangs,
+
+
+220
+00:11:12,739 --> 00:11:17,744 line:-4
+including how to identify whether the hang
+may be caused by SwiftUI-related work.
+
+
+221
+00:11:17,778 --> 00:11:20,881 line:-2
+A hitch is a user-perceivable
+animation issue,
+
+
+222
+00:11:20,914 --> 00:11:24,852 line:-2
+such as a pause during scrolling
+or skipped frames of an animation.
+
+
+223
+00:11:24,885 --> 00:11:29,723 line:-4
+The root causes of hangs and hitches,
+especially in SwiftUI, are often related.
+
+
+224
+00:11:29,756 --> 00:11:33,627 line:-4
+For more information on hitches, including
+how the system render loop works,
+
+
+225
+00:11:33,660 --> 00:11:36,597 line:-4
+check out the "Explore UI animation
+hitches and the render loop"
+
+
+226
+00:11:36,630 --> 00:11:38,665 line:-3
+tech talk video.
+
+
+227
+00:11:38,699 --> 00:11:42,503 line:-2
+Both hangs and hitches in SwiftUI
+often originate from a slow update.
+
+
+228
+00:11:42,536 --> 00:11:45,272 line:-2
+These slow updates have
+a number of common causes.
+
+
+229
+00:11:45,305 --> 00:11:48,275 line:-2
+The first is expensive
+Dynamic Property instantiation,
+
+
+230
+00:11:48,308 --> 00:11:52,446 line:-2
+such as allocating and initializing
+a state object or initializing state.
+
+
+231
+00:11:52,479 --> 00:11:54,848 line:-1
+Another source is work done in body.
+
+
+232
+00:11:54,882 --> 00:11:58,151 line:-2
+Make sure to check for expensive
+string interpolation or operations
+
+
+233
+00:11:58,185 --> 00:12:00,954 line:-2
+like data filtering
+and other work inside of body.
+
+
+234
+00:12:00,988 --> 00:12:04,591 line:-2
+It's important that body itself
+is as cheap as possible.
+
+
+235
+00:12:04,625 --> 00:12:06,293 line:-1
+These are all inter-related.
+
+
+236
+00:12:06,326 --> 00:12:08,695 line:-2
+For example,
+a dynamic property could be computed
+
+
+237
+00:12:08,729 --> 00:12:12,366 line:-2
+from a view's body,
+making the view expensive to evaluate.
+
+
+238
+00:12:12,399 --> 00:12:16,069 line:-2
+Slow identification also
+frequently happens in a view's body.
+
+
+239
+00:12:16,103 --> 00:12:19,072 line:-2
+Let's start by looking
+at an example from the fetch app.
+
+
+240
+00:12:20,674 --> 00:12:23,310 line:-2
+In this example, I've been working
+on the root view of the app,
+
+
+241
+00:12:23,343 --> 00:12:26,346 line:-2
+which has an object
+that I use to create the dog list.
+
+
+242
+00:12:26,380 --> 00:12:28,348 line:-2
+Following the code highlight
+on this slide,
+
+
+243
+00:12:28,382 --> 00:12:30,651 line:-1
+accessing model.dogs in the body
+
+
+244
+00:12:30,684 --> 00:12:32,653 line:-1
+lazily instantiates the object,
+
+
+245
+00:12:32,686 --> 00:12:34,588 line:-1
+which brings us to the initializer,
+
+
+246
+00:12:34,621 --> 00:12:36,723 line:-1
+which fetches the list of dogs.
+
+
+247
+00:12:36,757 --> 00:12:38,358 line:-1
+As the code comment says,
+
+
+248
+00:12:38,392 --> 00:12:40,627 line:-1
+this could take a long time.
+
+
+249
+00:12:40,661 --> 00:12:42,629 line:-1
+This is synchronous work.
+
+
+250
+00:12:43,564 --> 00:12:46,834 line:-2
+One way to fix this
+is by using the task modifier.
+
+
+251
+00:12:46,867 --> 00:12:49,203 line:-1
+We'll first make the fetching async.
+
+
+252
+00:12:49,236 --> 00:12:52,506 line:-2
+I'm only showing the addition
+of the async keyword here.
+
+
+253
+00:12:52,539 --> 00:12:54,741 line:-1
+Next, in the task modifier,
+
+
+254
+00:12:54,775 --> 00:12:58,078 line:-2
+we'll asynchronously fetch the dog list
+by awaiting it.
+
+
+255
+00:12:58,111 --> 00:13:00,080 line:-1
+That way, the app is responsive
+
+
+256
+00:13:00,113 --> 00:13:02,716 line:-2
+when the expensive data
+loading operation occurs.
+
+
+257
+00:13:02,749 --> 00:13:05,219 line:-2
+There are other sources of work
+that you might not realize
+
+
+258
+00:13:05,252 --> 00:13:06,653 line:-1
+are affecting your app.
+
+
+259
+00:13:06,687 --> 00:13:09,890 line:-2
+For example, string interpolation
+can often be expensive,
+
+
+260
+00:13:09,923 --> 00:13:13,594 line:-2
+so make sure to cache any strings
+you might need to frequently use.
+
+
+261
+00:13:13,627 --> 00:13:17,364 line:-2
+Similarly, looking up values
+from bundles can be expensive.
+
+
+262
+00:13:17,397 --> 00:13:20,834 line:-2
+And of course, any heap allocation,
+such as for a class-bound type,
+
+
+263
+00:13:20,868 --> 00:13:22,069 line:-1
+can add up.
+
+
+264
+00:13:22,102 --> 00:13:24,938 line:-1
+Let's move on to lists and tables.
+
+
+265
+00:13:24,972 --> 00:13:28,242 line:-2
+List and Table support rich features
+beyond a simple layout,
+
+
+266
+00:13:28,275 --> 00:13:32,713 line:-2
+adding selection, swipe actions,
+reordering support, and more.
+
+
+267
+00:13:32,746 --> 00:13:36,583 line:-2
+These are complex, advanced controls,
+and understanding identity
+
+
+268
+00:13:36,617 --> 00:13:39,686 line:-2
+is critical to ensuring
+they perform well in your app.
+
+
+269
+00:13:39,720 --> 00:13:42,990 line:-2
+In this section,
+I'll discuss identity in list and table
+
+
+270
+00:13:43,023 --> 00:13:47,694 line:-2
+and demystify how to maximize update
+performance for these built-in components.
+
+
+271
+00:13:47,728 --> 00:13:51,331 line:-2
+Before we dive into this subject,
+I'd like to touch on some improvements.
+
+
+272
+00:13:51,365 --> 00:13:56,136 line:-2
+In macOS Sonoma and iOS 17,
+SwiftUI has a number of optimizations
+
+
+273
+00:13:56,170 --> 00:13:59,573 line:-2
+under the hood for cases
+like filtering and scrolling.
+
+
+274
+00:13:59,606 --> 00:14:02,643 line:-2
+These improvements can be had
+with minimal effort on your part,
+
+
+275
+00:14:02,676 --> 00:14:06,013 line:-2
+and in many cases, can result
+in drastically more responsive load
+
+
+276
+00:14:06,046 --> 00:14:08,348 line:-2
+and update times
+for bigger lists and tables.
+
+
+277
+00:14:08,382 --> 00:14:11,618 line:-2
+However, there are certain ways
+to construct lists and tables
+
+
+278
+00:14:11,652 --> 00:14:14,021 line:-1
+that result in better performance.
+
+
+279
+00:14:14,054 --> 00:14:18,125 line:-2
+List and Table use identifiers
+to know what changes occurred to the data.
+
+
+280
+00:14:18,158 --> 00:14:22,930 line:-2
+For consistency, all the IDs
+of List and Table are gathered eagerly.
+
+
+281
+00:14:22,963 --> 00:14:26,400 line:-2
+Therefore, being able to quickly
+generate identifiers for your list
+
+
+282
+00:14:26,433 --> 00:14:30,904 line:-2
+and table contents directly translates
+to faster load and update times.
+
+
+283
+00:14:30,938 --> 00:14:33,907 line:-2
+Identity helps
+SwiftUI manage view lifetime,
+
+
+284
+00:14:33,941 --> 00:14:37,177 line:-2
+which is crucial for incremental
+updates to your hierarchy.
+
+
+285
+00:14:37,211 --> 00:14:40,447 line:-2
+A change to the identity
+means the view changed.
+
+
+286
+00:14:40,480 --> 00:14:43,584 line:-4
+This is important
+for animations and performance.
+
+
+287
+00:14:43,617 --> 00:14:45,352 line:-3
+For more information on animations,
+
+
+288
+00:14:45,385 --> 00:14:48,755 line:-4
+check out the "Fundamentals
+of SwiftUI Animations" session.
+
+
+289
+00:14:48,789 --> 00:14:52,993 line:-4
+Identification performance is important
+because identifiers are gathered often,
+
+
+290
+00:14:53,026 --> 00:14:54,828 line:-3
+especially for lists and tables.
+
+
+291
+00:14:54,862 --> 00:14:57,631 line:-4
+Let's walk through
+the list identification model.
+
+
+292
+00:14:58,398 --> 00:15:00,834 line:-2
+I've been hard at work
+on the list of dogs in the app.
+
+
+293
+00:15:00,868 --> 00:15:03,270 line:-1
+I've started with just a single row.
+
+
+294
+00:15:03,303 --> 00:15:07,007 line:-2
+Here's the code for the list,
+with a single DogCell inside.
+
+
+295
+00:15:07,040 --> 00:15:11,345 line:-2
+The next step is to use ForEach
+to iterate over all the dogs.
+
+
+296
+00:15:11,378 --> 00:15:14,748 line:-2
+This example is simple,
+but it's directly related to identity,
+
+
+297
+00:15:14,781 --> 00:15:18,819 line:-2
+and adding a ForEach in a List is
+an important time to evaluate performance.
+
+
+298
+00:15:18,852 --> 00:15:23,090 line:-2
+To understand why, let's look
+at the generic signature of ForEach next.
+
+
+299
+00:15:23,123 --> 00:15:26,527 line:-2
+This is the signature
+for ForEach from SwiftUI.
+
+
+300
+00:15:26,560 --> 00:15:30,797 line:-2
+ForEach maps a collection of data
+onto a resulting sequence of views,
+
+
+301
+00:15:30,831 --> 00:15:34,334 line:-2
+producing explicit identity
+for each of its views.
+
+
+302
+00:15:34,368 --> 00:15:37,871 line:-2
+When you use List, it needs
+to figure out how many rows to display,
+
+
+303
+00:15:37,905 --> 00:15:40,908 line:0
+as well as what the identifier
+for each row is.
+
+
+304
+00:15:40,941 --> 00:15:43,777 line:0
+Therefore, it visits
+the data collection up front,
+
+
+305
+00:15:43,810 --> 00:15:46,346 line:0
+determining each element's ID.
+
+
+306
+00:15:46,380 --> 00:15:49,183 line:0
+The content closure is called
+to produce each view.
+
+
+307
+00:15:49,850 --> 00:15:51,885 line:-1
+Rows are created on-demand.
+
+
+308
+00:15:51,919 --> 00:15:54,054 line:-1
+List uses a composite of the identity
+
+
+309
+00:15:54,087 --> 00:15:56,056 line:-1
+and the content to produce a list row.
+
+
+310
+00:15:56,790 --> 00:15:58,158 line:1
+The rows created on-demand
+
+
+311
+00:15:58,192 --> 00:16:00,093 line:1
+correlate to the visible region,
+
+
+312
+00:16:00,127 --> 00:16:01,995 line:1
+plus some system-determined buffer
+
+
+313
+00:16:02,029 --> 00:16:04,131 line:1
+for prefetching or accessibility.
+
+
+314
+00:16:04,164 --> 00:16:05,599 line:1
+As the view is scrolled,
+
+
+315
+00:16:05,632 --> 00:16:07,901 line:1
+more views become extant.
+
+
+316
+00:16:07,935 --> 00:16:09,169 line:1
+Here's the code snippet
+
+
+317
+00:16:09,203 --> 00:16:11,038 line:1
+producing this ForEach.
+
+
+318
+00:16:11,071 --> 00:16:13,907 line:1
+Note here that the content
+is just DogCell,
+
+
+319
+00:16:13,941 --> 00:16:18,245 line:1
+which is itself single view,
+because it uses an HStack inside.
+
+
+320
+00:16:18,278 --> 00:16:22,783 line:1
+ForEach is critical in determining
+the ultimate row ID used by the List.
+
+
+321
+00:16:22,816 --> 00:16:25,853 line:1
+And List needs
+to know all of its IDs up front.
+
+
+322
+00:16:25,886 --> 00:16:29,623 line:1
+But it can only do this efficiently
+without visiting all the content
+
+
+323
+00:16:29,656 --> 00:16:33,160 line:1
+if the content resolves
+to a constant number of rows.
+
+
+324
+00:16:33,193 --> 00:16:36,530 line:1
+As an example,
+let's say we want to refactor our list
+
+
+325
+00:16:36,563 --> 00:16:39,466 line:1
+to only show those dogs
+that like to fetch a ball.
+
+
+326
+00:16:39,499 --> 00:16:43,904 line:1
+It might be tempting to add a filter
+using a conditional view, like this.
+
+
+327
+00:16:43,937 --> 00:16:48,609 line:1
+Here, the number of views is variable.
+It's either one or zero.
+
+
+328
+00:16:48,642 --> 00:16:51,178 line:1
+This is bad
+because it results in list needing
+
+
+329
+00:16:51,211 --> 00:16:54,047 line:1
+to build all the views
+to retrieve the row identifiers
+
+
+330
+00:16:54,081 --> 00:16:57,818 line:1
+because it doesn't know how
+many views each element resolves to.
+
+
+331
+00:16:57,851 --> 00:17:00,621 line:1
+The same is true if you use AnyView.
+
+
+332
+00:17:00,654 --> 00:17:03,790 line:1
+Here, the number of views
+is now completely unknown.
+
+
+333
+00:17:03,824 --> 00:17:08,529 line:1
+So we have the same problem as before:
+All rows must be created.
+
+
+334
+00:17:08,562 --> 00:17:11,732 line:1
+What if we move the filter
+into the data collection itself?
+
+
+335
+00:17:11,765 --> 00:17:14,501 line:1
+Now we're back to a constant number
+of views per element,
+
+
+336
+00:17:14,535 --> 00:17:17,971 line:1
+and only those that are needed
+have their row contents constructed,
+
+
+337
+00:17:18,005 --> 00:17:22,376 line:1
+but be careful: The inline filter here
+is linear over the collection.
+
+
+338
+00:17:22,409 --> 00:17:24,244 line:1
+This might work in a prototype,
+
+
+339
+00:17:24,278 --> 00:17:25,846 line:1
+but when the collection scales,
+
+
+340
+00:17:25,879 --> 00:17:28,415 line:1
+this operation
+can quickly become expensive,
+
+
+341
+00:17:28,448 --> 00:17:30,083 line:1
+leading to a slow update.
+
+
+342
+00:17:30,117 --> 00:17:32,819 line:1
+It's better to move it out to the model.
+
+
+343
+00:17:32,853 --> 00:17:36,990 line:1
+Now we have the best of both worlds:
+The filter is cached,
+
+
+344
+00:17:37,024 --> 00:17:39,593 line:1
+so it won't run every
+time this list is constructed,
+
+
+345
+00:17:39,626 --> 00:17:41,795 line:1
+and the number of views
+per element is constant.
+
+
+346
+00:17:42,596 --> 00:17:46,200 line:-2
+Here are a few tips for how to ensure
+your view counts are constant.
+
+
+347
+00:17:46,233 --> 00:17:49,670 line:-2
+Note that this approach to view counts
+is only relevant in the context
+
+
+348
+00:17:49,703 --> 00:17:53,140 line:-2
+of ForEach within List and Table
+because those components
+
+
+349
+00:17:53,173 --> 00:17:55,275 line:-1
+gather their identifiers up front.
+
+
+350
+00:17:55,309 --> 00:17:56,443 line:-1
+As I just mentioned,
+
+
+351
+00:17:56,476 --> 00:17:59,413 line:-2
+avoid using AnyView
+and lopsided conditions.
+
+
+352
+00:17:59,446 --> 00:18:02,149 line:-2
+You can also use an explicit stack
+where appropriate,
+
+
+353
+00:18:02,182 --> 00:18:05,319 line:-2
+but note that certain modifiers
+like listRowBackground need
+
+
+354
+00:18:05,352 --> 00:18:08,355 line:-1
+to go after the stack and not within it.
+
+
+355
+00:18:08,388 --> 00:18:12,226 line:-2
+Finally, try to flatten nested
+ForEach constructions if you can.
+
+
+356
+00:18:12,259 --> 00:18:17,231 line:-2
+However, there is one place where nested
+ForEach can be valuable, sectioned lists.
+
+
+357
+00:18:17,264 --> 00:18:19,233 line:-1
+Let's take a look at an example.
+
+
+358
+00:18:20,167 --> 00:18:22,903 line:-2
+In this example,
+I have a list of dogs that's sectioned
+
+
+359
+00:18:22,936 --> 00:18:25,105 line:-1
+by the favorite toy of each dog.
+
+
+360
+00:18:25,138 --> 00:18:28,575 line:-2
+I'm using ForEach to create
+a dynamic number of sections.
+
+
+361
+00:18:28,609 --> 00:18:33,714 line:-2
+and each section has a dynamic number
+of rows within it by nesting a ForEach.
+
+
+362
+00:18:33,747 --> 00:18:36,517 line:-2
+List will need
+to retrieve all of the identifiers,
+
+
+363
+00:18:36,550 --> 00:18:40,554 line:-2
+but because we're using sections here,
+SwiftUI understands this construction
+
+
+364
+00:18:40,587 --> 00:18:43,056 line:-2
+and ensures the list
+is still fast to render.
+
+
+365
+00:18:43,090 --> 00:18:48,161 line:-2
+Dynamic sections are a good example of
+when using nested ForEach is recommended.
+
+
+366
+00:18:48,195 --> 00:18:51,632 line:-2
+The basic equation to think about
+is that the row count resulting
+
+
+367
+00:18:51,665 --> 00:18:55,102 line:-2
+from a ForEach in a List
+is equal to the number of elements
+
+
+368
+00:18:55,135 --> 00:18:58,772 line:-2
+multiplied by the number
+of views produced for each element.
+
+
+369
+00:18:58,805 --> 00:19:02,242 line:-2
+You need to ensure the number
+of views per element is a constant,
+
+
+370
+00:19:02,276 --> 00:19:05,879 line:-2
+or SwiftUI has to build the views
+in addition to the identifiers
+
+
+371
+00:19:05,913 --> 00:19:08,248 line:-1
+in order to identify the rows.
+
+
+372
+00:19:08,282 --> 00:19:09,983 line:-1
+So far we've talked about List,
+
+
+373
+00:19:10,017 --> 00:19:12,719 line:-2
+but these rules
+generally apply to Table too.
+
+
+374
+00:19:12,753 --> 00:19:15,289 line:-1
+Table uses TableRow instead of views,
+
+
+375
+00:19:15,322 --> 00:19:18,425 line:-2
+and TableRow always resolves
+to a single row.
+
+
+376
+00:19:18,458 --> 00:19:20,661 line:-1
+Let's look at a Table example.
+
+
+377
+00:19:20,694 --> 00:19:24,631 line:-2
+Here I have the dog table,
+which has a ForEach inside.
+
+
+378
+00:19:24,665 --> 00:19:28,669 line:-2
+Because TableRow is always a single row,
+the number of total rows here
+
+
+379
+00:19:28,702 --> 00:19:32,005 line:-2
+is just the number of elements
+in the dogs collection.
+
+
+380
+00:19:32,039 --> 00:19:36,577 line:-2
+This construction is so common that,
+new in iOS 17 and macOS Sonoma,
+
+
+381
+00:19:36,610 --> 00:19:41,348 line:-2
+SwiftUI provides a streamlined initializer
+that lets you simply write ForEach
+
+
+382
+00:19:41,381 --> 00:19:45,118 line:-2
+of your data collection
+and creates the table rows on your behalf.
+
+
+383
+00:19:45,152 --> 00:19:48,789 line:-2
+While this initializer is new,
+it back deploys to all previous
+
+
+384
+00:19:48,822 --> 00:19:52,125 line:-2
+operating system versions
+where Table is available.
+
+
+385
+00:19:52,159 --> 00:19:54,361 line:-1
+Not only is this construction simpler,
+
+
+386
+00:19:54,394 --> 00:19:58,432 line:-2
+it also enforces a constant number
+of rows for the ForEach content,
+
+
+387
+00:19:58,465 --> 00:20:00,834 line:-2
+which helps
+with identification performance.
+
+
+388
+00:20:00,868 --> 00:20:04,805 line:-2
+However, there is a semantic change
+I'd like to call out that's new.
+
+
+389
+00:20:04,838 --> 00:20:06,573 line:-1
+If you have code like this,
+
+
+390
+00:20:06,607 --> 00:20:09,610 line:-2
+it could behave differently
+in the newest OS versions.
+
+
+391
+00:20:09,643 --> 00:20:12,679 line:-2
+In this example,
+we have a ForEach over dog,
+
+
+392
+00:20:12,713 --> 00:20:15,115 line:-1
+which also creates a row of dog.
+
+
+393
+00:20:15,148 --> 00:20:18,018 line:-1
+However, the dogs here don't match.
+
+
+394
+00:20:18,051 --> 00:20:20,754 line:-1
+The values are the dog's best friend.
+
+
+395
+00:20:20,787 --> 00:20:22,322 line:-1
+In iOS 16,
+
+
+396
+00:20:22,356 --> 00:20:25,192 line:-1
+each row became identified by its value.
+
+
+397
+00:20:25,225 --> 00:20:28,095 line:-1
+In iOS 17, this behavior has changed
+
+
+398
+00:20:28,128 --> 00:20:29,630 line:-1
+to improve performance.
+
+
+399
+00:20:29,663 --> 00:20:31,565 line:-1
+The reason is, now we don't need
+
+
+400
+00:20:31,598 --> 00:20:33,166 line:-1
+to identify each table row
+
+
+401
+00:20:33,200 --> 00:20:34,835 line:-1
+by looking into the ForEach.
+
+
+402
+00:20:34,868 --> 00:20:37,237 line:-1
+So this example now has the IDs
+
+
+403
+00:20:37,271 --> 00:20:38,539 line:-1
+of each of the dogs,
+
+
+404
+00:20:38,572 --> 00:20:40,374 line:-1
+instead of the TableRow's value.
+
+
+405
+00:20:40,407 --> 00:20:41,875 line:-1
+If you need to back deploy,
+
+
+406
+00:20:41,909 --> 00:20:43,443 line:-1
+you can get the old behavior
+
+
+407
+00:20:43,477 --> 00:20:45,279 line:-1
+by either mapping over your collection
+
+
+408
+00:20:45,312 --> 00:20:46,847 line:-1
+or by explicitly specifying
+
+
+409
+00:20:46,880 --> 00:20:48,549 line:-1
+an ID key path.
+
+
+410
+00:20:49,616 --> 00:20:52,686 line:-2
+The basic equation to think about
+is that the row count resulting
+
+
+411
+00:20:52,719 --> 00:20:56,089 line:-2
+from a ForEach in a List
+is equal to the number of elements
+
+
+412
+00:20:56,123 --> 00:20:59,159 line:-2
+multiplied by the number
+of views produced for each element.
+
+
+413
+00:20:59,193 --> 00:21:04,464 line:-2
+In Table, this is similar, but it's
+the number of TableRows per element.
+
+
+414
+00:21:04,498 --> 00:21:08,068 line:-2
+We've covered a few tips and tricks
+for faster lists and tables here,
+
+
+415
+00:21:08,101 --> 00:21:11,305 line:-2
+namely that you should ensure
+identifiers are cheap to create
+
+
+416
+00:21:11,338 --> 00:21:15,108 line:-2
+and that the number of views
+in ForEach content is constant.
+
+
+417
+00:21:15,142 --> 00:21:16,944 line:-1
+We've covered a lot today.
+
+
+418
+00:21:16,977 --> 00:21:21,248 line:-2
+We started with exploring the graph to
+understand dependencies and optimize them.
+
+
+419
+00:21:21,281 --> 00:21:24,985 line:-2
+Then, we looked at slow updates
+and how to improve responsiveness.
+
+
+420
+00:21:25,018 --> 00:21:29,857 line:-2
+And finally, we discussed the importance
+of identity with Lists and Tables.
+
+
+421
+00:21:29,890 --> 00:21:33,026 line:-2
+With the right mental models,
+you can easily have great performance
+
+
+422
+00:21:33,060 --> 00:21:34,928 line:-2
+from the beginning
+of the development process,
+
+
+423
+00:21:34,962 --> 00:21:38,198 line:-2
+which lets you focus more
+on the details of your app.
+
+
+424
+00:21:38,232 --> 00:21:40,067 line:-1
+Thanks for watching.
+
+
+425
+00:21:40,100 --> 00:21:44,705 line:-1
+♪ ♪
+
