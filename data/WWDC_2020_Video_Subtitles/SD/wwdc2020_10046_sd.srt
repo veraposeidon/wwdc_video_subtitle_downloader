@@ -1,0 +1,2215 @@
+1
+00:00:03,836 --> 00:00:06,440 line:-1
+Hello and welcome to WWDC.
+
+
+2
+00:00:08,642 --> 00:00:11,678 line:0
+Hello everyone. My name is Michael Kent,
+and I'm a ClockKit engineer.
+
+
+3
+00:00:11,745 --> 00:00:14,815 line:0
+In this session, we'll be talking about
+complications on Apple Watch
+
+
+4
+00:00:14,882 --> 00:00:16,617 line:0
+and how you can add them to your app.
+
+
+5
+00:00:16,683 --> 00:00:20,554 line:-2
+Complications are a great way to
+get your content in front of your users.
+
+
+6
+00:00:20,621 --> 00:00:23,090 line:-2
+They're easily glanceable
+right on the clock face.
+
+
+7
+00:00:23,490 --> 00:00:25,993 line:-2
+With watchOS 7,
+we've made it even easier than ever
+
+
+8
+00:00:26,059 --> 00:00:28,328 line:-1
+to create a great complication experience,
+
+
+9
+00:00:28,395 --> 00:00:30,898 line:-2
+and that's why
+complications are as important
+
+
+10
+00:00:30,964 --> 00:00:32,598 line:-1
+as the app experience on the watch.
+
+
+11
+00:00:32,665 --> 00:00:36,036 line:-2
+They're the easiest way
+to get your content in front of the user.
+
+
+12
+00:00:36,103 --> 00:00:37,404 line:-1
+How can you add them to your app?
+
+
+13
+00:00:37,938 --> 00:00:39,306 line:-1
+We'll be talking about timelines,
+
+
+14
+00:00:39,373 --> 00:00:41,842 line:-2
+which are
+the backing structure of complications,
+
+
+15
+00:00:41,909 --> 00:00:44,111 line:-2
+all the bits and pieces
+you need to get going,
+
+
+16
+00:00:44,178 --> 00:00:46,780 line:-2
+how you can get your data
+into complications,
+
+
+17
+00:00:46,847 --> 00:00:49,149 line:-2
+how you can utilize
+a new watchOS 7 feature
+
+
+18
+00:00:49,216 --> 00:00:51,585 line:-2
+to provide more than one complication
+from your app,
+
+
+19
+00:00:51,652 --> 00:00:52,953 line:-1
+and we'll run through an example.
+
+
+20
+00:00:53,020 --> 00:00:55,189 line:-1
+We'll start out talking about timelines.
+
+
+21
+00:00:56,056 --> 00:00:58,892 line:-2
+Timelines play a central role
+in complications.
+
+
+22
+00:00:58,959 --> 00:01:02,029 line:-2
+They're a representation
+of your complication's data over time.
+
+
+23
+00:01:02,896 --> 00:01:05,632 line:-2
+Since a timeline provides
+all of your complication's data,
+
+
+24
+00:01:05,699 --> 00:01:08,335 line:-2
+ClockKit can ask your app once
+for all the information needed
+
+
+25
+00:01:08,402 --> 00:01:11,672 line:-2
+to drive your complication
+automatically through a date you specify.
+
+
+26
+00:01:12,706 --> 00:01:16,310 line:-2
+Of course, if you get new data in your app
+and need to give us more entries,
+
+
+27
+00:01:16,376 --> 00:01:18,445 line:-2
+you can ask ClockKit
+to extend your timeline
+
+
+28
+00:01:18,512 --> 00:01:19,947 line:-1
+or completely invalidate it.
+
+
+29
+00:01:20,814 --> 00:01:23,116 line:-2
+I've been working with some teammates
+to develop an app
+
+
+30
+00:01:23,183 --> 00:01:25,252 line:-1
+to track whale sightings around Hawaii.
+
+
+31
+00:01:25,319 --> 00:01:27,287 line:-2
+In the app,
+you can see recent whale sightings
+
+
+32
+00:01:27,354 --> 00:01:29,223 line:-1
+at several viewing stations around Maui.
+
+
+33
+00:01:29,756 --> 00:01:33,093 line:-2
+Let's look at an example of a timeline
+that might come from this app.
+
+
+34
+00:01:33,760 --> 00:01:35,896 line:-2
+Here I've got a schedule
+of whale-watching tours,
+
+
+35
+00:01:35,963 --> 00:01:38,198 line:-2
+three throughout the day
+at different locations.
+
+
+36
+00:01:39,166 --> 00:01:42,569 line:-2
+Now here's how it might look
+as a timeline presented to ClockKit.
+
+
+37
+00:01:42,636 --> 00:01:45,005 line:-1
+There are a few differences you'll notice.
+
+
+38
+00:01:45,072 --> 00:01:49,810 line:-2
+First, each tour is associated
+with only one time rather than a range.
+
+
+39
+00:01:49,877 --> 00:01:52,346 line:-2
+This is because
+your complication will show an entry
+
+
+40
+00:01:52,412 --> 00:01:54,681 line:-1
+until the date of the next one.
+
+
+41
+00:01:54,748 --> 00:01:58,185 line:-2
+Second, you'll see that the times
+associated with each tour
+
+
+42
+00:01:58,252 --> 00:02:00,621 line:-1
+are earlier than their actual start time.
+
+
+43
+00:02:00,687 --> 00:02:02,756 line:-2
+This is so that a user has
+a bit of a heads-up
+
+
+44
+00:02:02,823 --> 00:02:05,926 line:-2
+in order to catch the boat for the tour
+on time if they're interested.
+
+
+45
+00:02:06,493 --> 00:02:08,829 line:-2
+Not all types of data
+would behave like this.
+
+
+46
+00:02:08,895 --> 00:02:10,697 line:-1
+A temperature forecast, for example,
+
+
+47
+00:02:10,764 --> 00:02:13,433 line:-2
+would want to have entries
+right at each forecasted time.
+
+
+48
+00:02:13,867 --> 00:02:17,504 line:-2
+Up top is the data I'd like to show
+in this complication at the current time.
+
+
+49
+00:02:17,571 --> 00:02:21,742 line:-2
+And as that progresses throughout the day,
+you can see the information updates
+
+
+50
+00:02:21,808 --> 00:02:25,045 line:-2
+as the time changes
+until there are no more tours for today.
+
+
+51
+00:02:26,446 --> 00:02:28,248 line:-2
+Now, let's get into
+how you actually specify
+
+
+52
+00:02:28,315 --> 00:02:30,417 line:-2
+what you want your complications
+to display.
+
+
+53
+00:02:31,518 --> 00:02:35,289 line:-2
+Families of complications are how we break
+them up into different visual groups.
+
+
+54
+00:02:35,856 --> 00:02:38,926 line:-2
+The graphic families
+were introduced in watchOS 5,
+
+
+55
+00:02:38,992 --> 00:02:41,495 line:-2
+with the exception
+of the Graphic Extra Large,
+
+
+56
+00:02:41,562 --> 00:02:43,597 line:-1
+which is new in watchOS 7.
+
+
+57
+00:02:44,264 --> 00:02:48,035 line:-2
+These families allow for more
+visually oriented presentations of data.
+
+
+58
+00:02:48,101 --> 00:02:51,305 line:-2
+Different watch faces
+use different complication families.
+
+
+59
+00:02:51,371 --> 00:02:52,406 line:-1
+Here are some examples.
+
+
+60
+00:02:53,507 --> 00:02:57,578 line:-2
+The Infograph face uses Graphic Corner
+and Graphic Bezel
+
+
+61
+00:02:57,644 --> 00:02:59,680 line:-1
+as well as Graphic Circular,
+
+
+62
+00:02:59,746 --> 00:03:02,749 line:-2
+which is also
+on the Infograph Modular face,
+
+
+63
+00:03:02,816 --> 00:03:04,551 line:-1
+along with Graphic Rectangular.
+
+
+64
+00:03:05,719 --> 00:03:09,623 line:-2
+This is Graphic Extra Large, which is
+now supported on the Extra Large face.
+
+
+65
+00:03:10,457 --> 00:03:14,761 line:-2
+Modular Small and Modular Large
+on the Modular face,
+
+
+66
+00:03:14,828 --> 00:03:17,898 line:-1
+Utilitarian Small Flat on the Motion face,
+
+
+67
+00:03:17,965 --> 00:03:21,835 line:-2
+Utilitarian Small and Large
+on the Utility face,
+
+
+68
+00:03:22,569 --> 00:03:25,639 line:-2
+and lastly, Extra Large,
+which is used on the Extra Large face
+
+
+69
+00:03:25,706 --> 00:03:29,142 line:-2
+if your complication doesn't support
+the Graphic Extra Large family.
+
+
+70
+00:03:29,209 --> 00:03:33,280 line:-2
+This family is always used on
+the Extra Large face for Series 3 watches.
+
+
+71
+00:03:33,714 --> 00:03:37,150 line:-2
+Ideally, you will want to support
+as many complication families as you can
+
+
+72
+00:03:37,217 --> 00:03:38,719 line:-1
+for your complications.
+
+
+73
+00:03:38,785 --> 00:03:41,688 line:-2
+This way, all of your users
+will be able to use your complications
+
+
+74
+00:03:41,755 --> 00:03:42,990 line:-1
+on whichever face they prefer.
+
+
+75
+00:03:43,824 --> 00:03:47,794 line:-2
+Complication templates represent
+different visual layouts within families.
+
+
+76
+00:03:48,295 --> 00:03:50,831 line:-2
+Here's an example
+of just some of the complication templates
+
+
+77
+00:03:50,898 --> 00:03:52,566 line:-1
+available in a few different families.
+
+
+78
+00:03:53,333 --> 00:03:56,036 line:-2
+Despite being associated
+with a specific family,
+
+
+79
+00:03:56,103 --> 00:03:58,872 line:-2
+each template inherits
+from a common base class,
+
+
+80
+00:03:58,939 --> 00:04:00,507 line:-1
+CLKComplicationTemplate.
+
+
+81
+00:04:01,909 --> 00:04:03,810 line:-1
+There are a lot of options to choose from
+
+
+82
+00:04:03,877 --> 00:04:06,380 line:-2
+to best represent the data
+that you want to show.
+
+
+83
+00:04:06,446 --> 00:04:07,981 line:-2
+You can find out more about
+what's available
+
+
+84
+00:04:08,048 --> 00:04:10,050 line:-2
+in the documentation
+on the Developer website.
+
+
+85
+00:04:10,484 --> 00:04:14,454 line:-2
+Now let's look at a brief example of what
+the code looks like to supply a timeline.
+
+
+86
+00:04:14,521 --> 00:04:18,892 line:-2
+The first type I want to talk about
+is CLKComplicationTimelineEntry.
+
+
+87
+00:04:18,959 --> 00:04:22,829 line:-2
+You populate your complication's timeline
+by giving us a list of these.
+
+
+88
+00:04:22,896 --> 00:04:25,165 line:-2
+Each represents
+what your complication should look like
+
+
+89
+00:04:25,232 --> 00:04:26,733 line:-1
+at a certain point in time.
+
+
+90
+00:04:27,434 --> 00:04:29,136 line:-1
+It only has two properties:
+
+
+91
+00:04:29,203 --> 00:04:32,372 line:-2
+date, which is the date
+that this entry should be visible at,
+
+
+92
+00:04:32,439 --> 00:04:33,774 line:-1
+and complicationTemplate,
+
+
+93
+00:04:33,841 --> 00:04:37,344 line:-2
+which is the template containing the data
+you want to display for this entry.
+
+
+94
+00:04:37,811 --> 00:04:40,280 line:-2
+Going back to our timeline example
+from before,
+
+
+95
+00:04:40,347 --> 00:04:44,585 line:-2
+at 6:00 a.m., we'll have a timeline entry
+populated with the date, 6:00 a.m.,
+
+
+96
+00:04:44,651 --> 00:04:48,755 line:-2
+and a complicationTemplate representing
+the Ma'alaea Harbor Tour.
+
+
+97
+00:04:48,822 --> 00:04:51,325 line:-2
+At 9:00 a.m.,
+the date and template change,
+
+
+98
+00:04:51,391 --> 00:04:53,493 line:-1
+as well as throughout the rest of the day.
+
+
+99
+00:04:54,061 --> 00:04:57,231 line:-2
+Your main interaction with ClockKit
+is through an object you create
+
+
+100
+00:04:57,297 --> 00:05:00,133 line:-2
+that conforms to
+CLKComplicationDataSource.
+
+
+101
+00:05:00,200 --> 00:05:02,803 line:-2
+There's only one required method
+in this protocol:
+
+
+102
+00:05:02,870 --> 00:05:05,839 line:-2
+getCurrentTimelineEntry
+for complication withHandler.
+
+
+103
+00:05:06,907 --> 00:05:09,309 line:-2
+You can implement this
+by simply calling the handler
+
+
+104
+00:05:09,376 --> 00:05:11,879 line:-2
+with the current timeline entry
+for the given complication.
+
+
+105
+00:05:12,412 --> 00:05:14,915 line:-2
+We'll talk more about
+what this complication is later.
+
+
+106
+00:05:15,916 --> 00:05:18,352 line:-2
+For some complications,
+a current entry is enough,
+
+
+107
+00:05:18,418 --> 00:05:21,822 line:-2
+like the current score in a baseball game
+or the current Apple stock price.
+
+
+108
+00:05:22,322 --> 00:05:25,792 line:-2
+But if your complication can provide
+a timeline with entries in the future,
+
+
+109
+00:05:25,859 --> 00:05:28,095 line:-2
+you'll need to implement
+these two methods as well:
+
+
+110
+00:05:29,029 --> 00:05:31,565 line:-2
+getTimelineEndDate
+for complication withHandler,
+
+
+111
+00:05:31,632 --> 00:05:34,735 line:-2
+which specifies how far in the future
+you can provide entries,
+
+
+112
+00:05:35,202 --> 00:05:39,473 line:-2
+and getTimelineEntries for complication
+after date limit withHandler.
+
+
+113
+00:05:39,540 --> 00:05:41,975 line:-2
+That's a bit of a mouthful,
+but all you need to do
+
+
+114
+00:05:42,042 --> 00:05:45,379 line:-2
+is provide as many entries
+as is appropriate for the data you have
+
+
+115
+00:05:45,445 --> 00:05:48,015 line:-1
+up to the limit after the given date.
+
+
+116
+00:05:48,415 --> 00:05:51,985 line:-2
+The date represents the last
+timeline entry that we already have,
+
+
+117
+00:05:52,052 --> 00:05:56,256 line:-2
+and the limit is so that we only get
+as many entries as we need at one time.
+
+
+118
+00:05:56,323 --> 00:05:59,626 line:-2
+If you provide more, we'll drop
+all of the entries over the limit.
+
+
+119
+00:06:00,260 --> 00:06:03,297 line:-2
+What if your app gets new data,
+and you need to reload your timeline?
+
+
+120
+00:06:03,363 --> 00:06:04,631 line:-1
+We've got two options.
+
+
+121
+00:06:05,499 --> 00:06:07,534 line:-1
+First, if your data changes completely,
+
+
+122
+00:06:07,601 --> 00:06:09,937 line:-2
+and all of the entries you provided
+are invalid,
+
+
+123
+00:06:10,003 --> 00:06:12,172 line:-2
+you can call
+reloadTimeline for complication
+
+
+124
+00:06:12,239 --> 00:06:15,008 line:-2
+on the shared instance
+of CLKComplicationServer.
+
+
+125
+00:06:16,109 --> 00:06:18,879 line:-2
+For example, if an unexpected storm
+came through Maui,
+
+
+126
+00:06:18,946 --> 00:06:21,181 line:-2
+all our whale-watching tours
+would be canceled,
+
+
+127
+00:06:21,248 --> 00:06:24,418 line:-2
+and we'd want to invalidate
+our whole timeline to reflect that.
+
+
+128
+00:06:25,986 --> 00:06:28,956 line:-2
+But if your previously provided entries
+are still valid,
+
+
+129
+00:06:29,022 --> 00:06:31,391 line:-2
+and you just want to let us know
+you can provide more,
+
+
+130
+00:06:31,458 --> 00:06:33,460 line:-1
+call extendTimeline for complication.
+
+
+131
+00:06:35,329 --> 00:06:36,997 line:-1
+ClockKit only keeps track of timelines
+
+
+132
+00:06:37,064 --> 00:06:40,067 line:-2
+for complications that are currently
+on the user's watch face.
+
+
+133
+00:06:40,133 --> 00:06:43,337 line:-2
+We let you know about these
+via the activeComplications property.
+
+
+134
+00:06:44,404 --> 00:06:47,941 line:-2
+You don't ever create
+CLKComplication objects directly.
+
+
+135
+00:06:48,008 --> 00:06:49,643 line:-1
+You always get them from here
+
+
+136
+00:06:49,710 --> 00:06:52,446 line:-2
+or passed into a data source method
+you implement.
+
+
+137
+00:06:53,146 --> 00:06:56,517 line:-2
+Now let's talk about what really goes into
+creating these complication templates.
+
+
+138
+00:06:57,518 --> 00:06:59,753 line:-1
+Complications have several limitations:
+
+
+139
+00:06:59,820 --> 00:07:02,689 line:-2
+Watch screens are small,
+complications are smaller.
+
+
+140
+00:07:02,756 --> 00:07:04,391 line:-1
+You may want to display the same string
+
+
+141
+00:07:04,458 --> 00:07:07,227 line:-2
+in different templates
+or families of complications,
+
+
+142
+00:07:07,294 --> 00:07:09,229 line:-2
+all with very different
+layout constraints.
+
+
+143
+00:07:09,930 --> 00:07:14,301 line:-2
+To give the best possible experience,
+we have a concept called data providers.
+
+
+144
+00:07:14,368 --> 00:07:18,038 line:-2
+These allow you to consistently
+express the same information
+
+
+145
+00:07:18,105 --> 00:07:22,709 line:-2
+in many different locations and contexts,
+formatted for you by ClockKit.
+
+
+146
+00:07:23,143 --> 00:07:25,212 line:-2
+Since we take care
+of the specific layout details
+
+
+147
+00:07:25,279 --> 00:07:27,114 line:-1
+of complications on your behalf,
+
+
+148
+00:07:27,181 --> 00:07:29,683 line:-2
+we need enough information
+to do so flexibly.
+
+
+149
+00:07:29,750 --> 00:07:32,953 line:-2
+Let me show you what I mean.
+We'll start with some text.
+
+
+150
+00:07:33,020 --> 00:07:34,321 line:-1
+Watches are all about time,
+
+
+151
+00:07:34,388 --> 00:07:36,890 line:-2
+so showing a date is something
+you may want to do often.
+
+
+152
+00:07:36,957 --> 00:07:38,926 line:-2
+Here's a nice way
+to write out a long date.
+
+
+153
+00:07:39,693 --> 00:07:43,830 line:-2
+But in most complication contexts,
+you'd end up with something like this.
+
+
+154
+00:07:43,897 --> 00:07:47,501 line:-2
+That's not very clear what it's saying.
+So how can we do better?
+
+
+155
+00:07:47,568 --> 00:07:51,004 line:-2
+You would use a data provider
+called CLKDateTextProvider.
+
+
+156
+00:07:51,071 --> 00:07:55,275 line:-2
+You declare what you would like,
+in this case, "Wednesday, September 23,"
+
+
+157
+00:07:55,342 --> 00:07:57,277 line:-1
+and we'll do the best we can to show it.
+
+
+158
+00:07:58,078 --> 00:08:01,415 line:-2
+But if space is constrained, we'll start
+falling back to shorter versions...
+
+
+159
+00:08:02,683 --> 00:08:06,286 line:-2
+eventually dropping
+less-useful information like the weekday,
+
+
+160
+00:08:06,353 --> 00:08:09,056 line:-2
+and if needed,
+all the way down to the day of the month.
+
+
+161
+00:08:10,357 --> 00:08:12,192 line:0
+Here's what that would look like in code.
+
+
+162
+00:08:12,259 --> 00:08:15,362 line:0
+You create a CLKDateTextProvider
+by giving it a date
+
+
+163
+00:08:15,429 --> 00:08:18,131 line:0
+and the calendar units you'd prefer
+in the longest case.
+
+
+164
+00:08:18,198 --> 00:08:20,968 line:-2
+What about if you wanted
+to answer questions like,
+
+
+165
+00:08:21,034 --> 00:08:23,303 line:-2
+"How far is my date
+from the current time?"
+
+
+166
+00:08:23,370 --> 00:08:25,873 line:-2
+Or "How far is my date
+from some other date?"
+
+
+167
+00:08:26,440 --> 00:08:29,543 line:-2
+You could use
+a CLKRelativeDateTextProvider.
+
+
+168
+00:08:29,610 --> 00:08:31,211 line:-1
+In the case of the first question,
+
+
+169
+00:08:31,278 --> 00:08:33,881 line:-2
+a relative date text provider
+will auto-update its text
+
+
+170
+00:08:33,947 --> 00:08:35,749 line:-1
+for whatever the current time is.
+
+
+171
+00:08:35,816 --> 00:08:39,419 line:-2
+This can be accurate down to the second
+with no extra work on your part.
+
+
+172
+00:08:40,320 --> 00:08:43,256 line:-2
+You can use it for different formats,
+displaying strings like this,
+
+
+173
+00:08:43,323 --> 00:08:45,158 line:-1
+the time from now until sunset,
+
+
+174
+00:08:45,225 --> 00:08:49,162 line:-2
+or this: how much longer is left for
+the dough you're making to finish rising.
+
+
+175
+00:08:50,497 --> 00:08:53,300 line:0
+In the latter case, you'd create it
+by providing an end date,
+
+
+176
+00:08:53,367 --> 00:08:56,937 line:0
+specifying the "timer" style
+and giving the units you'd like displayed.
+
+
+177
+00:08:57,838 --> 00:09:01,408 line:-2
+Here are some other text providers,
+like the time text provider,
+
+
+178
+00:09:01,475 --> 00:09:03,911 line:-2
+which acts very similarly
+to the date text provider
+
+
+179
+00:09:03,977 --> 00:09:06,446 line:-1
+but shows a time rather than a day,
+
+
+180
+00:09:06,513 --> 00:09:08,048 line:-1
+time interval text provider,
+
+
+181
+00:09:08,115 --> 00:09:11,418 line:-2
+which can be used to show
+a range of time, like 7:30 to 9:00 a.m.,
+
+
+182
+00:09:12,219 --> 00:09:16,290 line:-2
+and lastly, simple text provider,
+which displays any string you'd like.
+
+
+183
+00:09:16,356 --> 00:09:19,259 line:-2
+You can also give it a shorter version
+of that string to fall back on
+
+
+184
+00:09:19,326 --> 00:09:21,161 line:-1
+in contexts where space is constrained.
+
+
+185
+00:09:21,795 --> 00:09:24,231 line:-2
+Image providers
+are a lot like text providers
+
+
+186
+00:09:24,298 --> 00:09:28,135 line:-2
+in that the data they contain can be used
+across several different contexts.
+
+
+187
+00:09:29,203 --> 00:09:31,238 line:-1
+The big difference is that these contexts
+
+
+188
+00:09:31,305 --> 00:09:34,241 line:-2
+are more focused
+on the color of the watch face.
+
+
+189
+00:09:34,308 --> 00:09:37,511 line:-2
+Many watch faces allow users
+to customize this attribute,
+
+
+190
+00:09:37,578 --> 00:09:39,847 line:-2
+and complications
+need to match consistently.
+
+
+191
+00:09:41,281 --> 00:09:45,619 line:-2
+Some watch faces apply a single color
+to the whole image of the complication,
+
+
+192
+00:09:46,286 --> 00:09:50,824 line:-2
+and others allow a more multicolor image,
+composed of a background and foreground.
+
+
+193
+00:09:51,425 --> 00:09:55,395 line:-2
+You can see some here on the bottom:
+timer, sunrise and stopwatch.
+
+
+194
+00:09:56,463 --> 00:09:59,967 line:-2
+CLKImageProvider is the object
+that makes this possible.
+
+
+195
+00:10:00,033 --> 00:10:03,570 line:-2
+The graphic complication families
+allow displaying full-color images,
+
+
+196
+00:10:03,637 --> 00:10:06,940 line:-2
+so their templates ask for
+CLKFullColorImageProviders.
+
+
+197
+00:10:07,808 --> 00:10:12,179 line:-2
+However, these graphic complications
+are tinted in some contexts.
+
+
+198
+00:10:12,246 --> 00:10:14,448 line:-1
+If you only provide a full-color image,
+
+
+199
+00:10:14,515 --> 00:10:17,551 line:-2
+we'll desaturate it for you
+to apply this tint color.
+
+
+200
+00:10:18,218 --> 00:10:20,854 line:-2
+If instead
+you want to override this behavior,
+
+
+201
+00:10:20,921 --> 00:10:22,823 line:-1
+CLKFullColorImageProvider
+
+
+202
+00:10:22,890 --> 00:10:25,993 line:-2
+allows you to set
+a CLKImageProvider to fall back on.
+
+
+203
+00:10:26,860 --> 00:10:29,129 line:-2
+You can see here
+that by providing the same image
+
+
+204
+00:10:29,196 --> 00:10:32,466 line:-2
+with a CLKImageProvider,
+the complication appears brighter,
+
+
+205
+00:10:32,533 --> 00:10:35,769 line:-2
+with the same white color as
+the other complications on the top left.
+
+
+206
+00:10:36,503 --> 00:10:39,039 line:0
+For more about adapting
+to complication tinting,
+
+
+207
+00:10:39,106 --> 00:10:41,675 line:0
+check out this great talk from 2019.
+
+
+208
+00:10:42,509 --> 00:10:45,412 line:-2
+Gauge providers are a way
+to encapsulate the data necessary
+
+
+209
+00:10:45,479 --> 00:10:47,581 line:-1
+to show a graphical gauge or progress.
+
+
+210
+00:10:47,981 --> 00:10:49,983 line:-2
+These adapt
+to different complication layouts,
+
+
+211
+00:10:50,050 --> 00:10:52,986 line:-2
+like those seen here,
+in both the corners and the center.
+
+
+212
+00:10:54,154 --> 00:10:56,890 line:-2
+You can customize the color
+or gradient of the gauge,
+
+
+213
+00:10:56,957 --> 00:11:00,127 line:-2
+as well as the fill fraction,
+all with minimal work on your part.
+
+
+214
+00:11:01,929 --> 00:11:04,998 line:-2
+If you want a gauge that updates
+its fill fraction in real time,
+
+
+215
+00:11:05,065 --> 00:11:07,801 line:-2
+you can use
+a CLKTimeIntervalGaugeProvider,
+
+
+216
+00:11:07,868 --> 00:11:10,404 line:-2
+which lets you specify
+a start and end date,
+
+
+217
+00:11:10,470 --> 00:11:13,740 line:-2
+and it'll be updated automatically
+to show the progress at the current time.
+
+
+218
+00:11:15,609 --> 00:11:19,479 line:-2
+New in watchOS 7,
+you can use SwiftUI in complications.
+
+
+219
+00:11:19,546 --> 00:11:23,483 line:-2
+All of the complication templates
+that use CLKFullColorImageProviders
+
+
+220
+00:11:23,550 --> 00:11:25,452 line:-1
+have SwiftUI view alternatives.
+
+
+221
+00:11:27,187 --> 00:11:30,257 line:-2
+You can easily reuse components
+from other parts of your app,
+
+
+222
+00:11:30,324 --> 00:11:32,693 line:-2
+and it's even easier than ever
+to stand out
+
+
+223
+00:11:32,759 --> 00:11:35,562 line:-2
+and create unique complications
+to engage your users.
+
+
+224
+00:11:36,797 --> 00:11:39,600 line:0
+If you want to learn more
+about using SwiftUI in complications,
+
+
+225
+00:11:39,666 --> 00:11:42,169 line:0
+we've got a wonderful session
+that covers this in depth.
+
+
+226
+00:11:43,470 --> 00:11:47,040 line:-2
+What if your app is full of useful,
+relevant information to your users,
+
+
+227
+00:11:47,107 --> 00:11:49,843 line:-2
+and you want to provide them
+quick, easy access to all of it?
+
+
+228
+00:11:50,544 --> 00:11:52,446 line:-1
+Also new in watchOS 7,
+
+
+229
+00:11:52,513 --> 00:11:56,116 line:-2
+you can now provide multiple complications
+from a single app.
+
+
+230
+00:11:56,183 --> 00:11:59,019 line:-2
+This is a great way to get your data
+in front of your users
+
+
+231
+00:11:59,086 --> 00:12:01,588 line:-1
+at a quick glance down to their wrist.
+
+
+232
+00:12:01,655 --> 00:12:05,125 line:-2
+You can even fill a watch face
+with your own complications and share it.
+
+
+233
+00:12:07,027 --> 00:12:08,595 line:-1
+Multiple complication support
+
+
+234
+00:12:08,662 --> 00:12:12,866 line:-2
+is declared in your implementation
+of CLKComplicationDataSource.
+
+
+235
+00:12:12,933 --> 00:12:14,701 line:-1
+There are two relevant methods:
+
+
+236
+00:12:14,768 --> 00:12:17,237 line:-1
+getComplicationDescriptors withHandler,
+
+
+237
+00:12:17,304 --> 00:12:20,707 line:-2
+which specifies the current list
+of complications that your app supports...
+
+
+238
+00:12:22,209 --> 00:12:24,411 line:-2
+and handleShared
+ComplicationDescriptors,
+
+
+239
+00:12:24,478 --> 00:12:27,681 line:-2
+which will be called when a watch face
+containing some of your complications
+
+
+240
+00:12:27,748 --> 00:12:30,450 line:-2
+was shared with this watch
+in order to give you a heads-up
+
+
+241
+00:12:30,517 --> 00:12:33,420 line:-2
+that ClockKit will start asking
+for timeline entries for them.
+
+
+242
+00:12:34,288 --> 00:12:38,458 line:-2
+A CLKComplicationDescriptor
+is how you define a complication.
+
+
+243
+00:12:38,525 --> 00:12:41,728 line:-2
+It consists of an identifier
+unique within your app...
+
+
+244
+00:12:42,763 --> 00:12:46,099 line:-2
+a displayName, which will be shown
+during watch face editing,
+
+
+245
+00:12:46,800 --> 00:12:50,170 line:-2
+a list of complication families
+that this complication supports,
+
+
+246
+00:12:51,004 --> 00:12:53,841 line:-2
+and two optional
+and mutually exclusive properties
+
+
+247
+00:12:53,907 --> 00:12:57,211 line:-2
+that allow you to include custom data
+for your use later:
+
+
+248
+00:12:57,277 --> 00:13:00,180 line:-1
+a userInfo dictionary or a userActivity.
+
+
+249
+00:13:01,281 --> 00:13:04,484 line:-2
+Our Whale Watch app has support for
+a few different kinds of complications:
+
+
+250
+00:13:05,452 --> 00:13:08,088 line:-2
+some for the number of whale sightings
+at each location,
+
+
+251
+00:13:08,155 --> 00:13:10,891 line:-2
+a complication
+to quickly log a new sighting,
+
+
+252
+00:13:10,958 --> 00:13:13,627 line:-2
+and a complication to show
+the overall season data.
+
+
+253
+00:13:13,694 --> 00:13:15,229 line:-1
+Let's look at how this works.
+
+
+254
+00:13:16,230 --> 00:13:19,499 line:-2
+In the getComplicationDescriptors
+withHandler method,
+
+
+255
+00:13:19,566 --> 00:13:22,202 line:-2
+you'll create an array
+of ComplicationDescriptors
+
+
+256
+00:13:22,269 --> 00:13:23,804 line:-1
+and use it to call the handler.
+
+
+257
+00:13:24,538 --> 00:13:27,908 line:-2
+Here, we iterate through each station
+in our data model,
+
+
+258
+00:13:27,975 --> 00:13:30,310 line:-2
+creating a ComplicationDescriptor
+for each.
+
+
+259
+00:13:32,246 --> 00:13:35,215 line:-2
+These will be used to show
+sighting information at each location.
+
+
+260
+00:13:36,316 --> 00:13:38,886 line:-2
+Next, we add a descriptor
+for a complication
+
+
+261
+00:13:38,952 --> 00:13:40,787 line:-1
+to log a new whale sighting
+
+
+262
+00:13:40,854 --> 00:13:43,090 line:-1
+and one to view overall season data.
+
+
+263
+00:13:43,156 --> 00:13:44,992 line:-1
+You'll notice that this last complication
+
+
+264
+00:13:45,058 --> 00:13:47,494 line:-2
+only supports
+the graphicRectangular family,
+
+
+265
+00:13:47,561 --> 00:13:49,763 line:-1
+while the others supported all families.
+
+
+266
+00:13:50,430 --> 00:13:53,734 line:-2
+Since the season data complication
+will display a lot of information,
+
+
+267
+00:13:53,800 --> 00:13:56,270 line:-2
+the large canvas
+of the graphicRectangular family
+
+
+268
+00:13:56,336 --> 00:13:59,006 line:-2
+is the only one that made sense
+for this complication.
+
+
+269
+00:13:59,606 --> 00:14:01,808 line:0
+If you ever need to invalidate this list,
+
+
+270
+00:14:01,875 --> 00:14:04,278 line:0
+you can call
+reloadComplicationDescriptors
+
+
+271
+00:14:04,344 --> 00:14:07,648 line:0
+on CLKComplicationServer,
+and we'll call this method again.
+
+
+272
+00:14:07,714 --> 00:14:09,349 line:-1
+In our Whale Watch example,
+
+
+273
+00:14:09,416 --> 00:14:13,187 line:-2
+maybe we only show complications
+for the user's favorite viewing stations.
+
+
+274
+00:14:13,253 --> 00:14:16,323 line:-2
+If they update those, we'll want to
+update the complications as well.
+
+
+275
+00:14:17,324 --> 00:14:20,093 line:-2
+If you ever update this list
+to remove support for a complication
+
+
+276
+00:14:20,160 --> 00:14:22,362 line:-2
+that a user
+currently has on their watch face,
+
+
+277
+00:14:22,429 --> 00:14:26,099 line:-2
+we'll continue to ask you for
+timeline entries for that complication.
+
+
+278
+00:14:26,166 --> 00:14:27,334 line:-1
+Do your best to ensure
+
+
+279
+00:14:27,401 --> 00:14:30,437 line:-2
+that you can continue to provide
+useful information in this case.
+
+
+280
+00:14:32,105 --> 00:14:33,607 line:-1
+Note that this method is different
+
+
+281
+00:14:33,674 --> 00:14:37,711 line:-2
+from CLKComplicationServer's
+reloadTimelineForComplication method.
+
+
+282
+00:14:37,778 --> 00:14:40,814 line:-2
+This reloads the list of complications
+your app offers,
+
+
+283
+00:14:40,881 --> 00:14:43,817 line:-2
+where the other reloads
+a specific complication's timeline.
+
+
+284
+00:14:45,452 --> 00:14:47,855 line:-2
+Just like always,
+when a user taps your complication,
+
+
+285
+00:14:47,921 --> 00:14:49,523 line:-1
+we'll launch your app.
+
+
+286
+00:14:49,590 --> 00:14:53,126 line:-2
+If the tapped complication's descriptor
+was created with a userActivity,
+
+
+287
+00:14:53,193 --> 00:14:54,928 line:-1
+then it will be used when launching it.
+
+
+288
+00:14:55,829 --> 00:14:59,600 line:0
+In either case, we pass some entries
+in the userInfo dictionary:
+
+
+289
+00:14:59,666 --> 00:15:03,237 line:0
+the date of the complication's
+currently visible timeline entry
+
+
+290
+00:15:03,303 --> 00:15:05,472 line:0
+as well as the complication's identifier.
+
+
+291
+00:15:06,640 --> 00:15:09,877 line:0
+And of course, this dictionary contains
+developer-specified entries
+
+
+292
+00:15:09,943 --> 00:15:12,246 line:0
+defined in the complicationDescriptor
+as well.
+
+
+293
+00:15:13,747 --> 00:15:16,517 line:-2
+We've talked about how to describe
+your supported complications,
+
+
+294
+00:15:16,583 --> 00:15:17,985 line:-1
+but how do you know what complication
+
+
+295
+00:15:18,051 --> 00:15:19,753 line:-2
+ClockKit is asking for
+timeline entries for?
+
+
+296
+00:15:21,455 --> 00:15:23,490 line:-2
+Here are a couple methods
+that we saw earlier:
+
+
+297
+00:15:23,557 --> 00:15:26,293 line:-2
+getCurrentTimelineEntry
+and getTimelineEndDate.
+
+
+298
+00:15:26,360 --> 00:15:30,030 line:-2
+Each takes a complication parameter
+of type CLKComplication.
+
+
+299
+00:15:31,598 --> 00:15:34,034 line:-2
+This looks a lot
+like a complicationDescriptor.
+
+
+300
+00:15:34,101 --> 00:15:38,272 line:-2
+However, where a complicationDescriptor
+defines what a complication supports,
+
+
+301
+00:15:38,338 --> 00:15:41,475 line:-2
+this object represents a specific,
+concrete instance
+
+
+302
+00:15:41,542 --> 00:15:44,511 line:-1
+of a complication on a user's watch face.
+
+
+303
+00:15:44,578 --> 00:15:47,014 line:-2
+So instead of a list
+of supported families,
+
+
+304
+00:15:47,080 --> 00:15:51,385 line:-2
+it has a property containing the family
+of the real complication instance.
+
+
+305
+00:15:51,451 --> 00:15:54,087 line:0
+And of course, the information
+you provided in the descriptor
+
+
+306
+00:15:54,154 --> 00:15:56,857 line:0
+with a userInfo dictionary
+or a userActivity
+
+
+307
+00:15:56,924 --> 00:15:58,358 line:0
+is contained here as well.
+
+
+308
+00:15:59,092 --> 00:16:02,496 line:-2
+We have something called
+the default complication identifier.
+
+
+309
+00:16:02,563 --> 00:16:05,899 line:-2
+Is this something you should be using
+to identify one of your complications?
+
+
+310
+00:16:05,966 --> 00:16:08,535 line:-2
+Sure, you could,
+but that's not its main purpose.
+
+
+311
+00:16:09,136 --> 00:16:11,538 line:-2
+If you had a complication
+before watchOS 7,
+
+
+312
+00:16:11,605 --> 00:16:14,007 line:-1
+and a user has it on their watch face,
+
+
+313
+00:16:14,074 --> 00:16:17,077 line:-2
+or if a user shares a watch face
+with your complication
+
+
+314
+00:16:17,144 --> 00:16:19,980 line:-1
+but chooses to remove the associated data,
+
+
+315
+00:16:20,047 --> 00:16:23,050 line:-2
+then you'll get asked about
+a complication with the identifier
+
+
+316
+00:16:23,116 --> 00:16:25,652 line:-1
+CLKDefaultComplicationIdentifier
+
+
+317
+00:16:25,719 --> 00:16:29,790 line:-2
+even if you don't explicitly support it
+in your list of complication descriptors.
+
+
+318
+00:16:29,857 --> 00:16:33,460 line:-2
+This is very important.
+You should support this complication.
+
+
+319
+00:16:33,527 --> 00:16:36,964 line:-2
+If not, your users will be wondering
+why they're seeing a broken complication
+
+
+320
+00:16:37,030 --> 00:16:39,366 line:-2
+on their watch face
+that says it's from your app.
+
+
+321
+00:16:40,200 --> 00:16:41,502 line:-1
+So how can you do that?
+
+
+322
+00:16:42,503 --> 00:16:47,007 line:-2
+You could display the same information
+as your complication did before watchOS 7,
+
+
+323
+00:16:47,074 --> 00:16:48,375 line:-1
+or maybe you could choose to show
+
+
+324
+00:16:48,442 --> 00:16:51,879 line:-2
+the most popular or relevant information
+from your app,
+
+
+325
+00:16:51,945 --> 00:16:53,747 line:-1
+or you could just show your app icon,
+
+
+326
+00:16:53,814 --> 00:16:57,017 line:-2
+so at the very least,
+the user knows what the complication is
+
+
+327
+00:16:57,084 --> 00:16:59,686 line:-2
+and has an idea of what would happen
+if they tapped on it.
+
+
+328
+00:16:59,753 --> 00:17:03,857 line:-2
+Now let's look at more of the specifics
+of our whale-watching app.
+
+
+329
+00:17:03,924 --> 00:17:05,692 line:-1
+We saw this method before.
+
+
+330
+00:17:05,759 --> 00:17:08,362 line:-2
+It creates the current entry
+for the given complication.
+
+
+331
+00:17:09,563 --> 00:17:12,132 line:-2
+Here's another method
+that we haven't looked at yet:
+
+
+332
+00:17:12,199 --> 00:17:15,035 line:-2
+getLocalizableSampleTemplate
+for complication withHandler
+
+
+333
+00:17:15,102 --> 00:17:18,638 line:-2
+is also a part of
+the CLKComplicationDataSource protocol.
+
+
+334
+00:17:19,772 --> 00:17:21,175 line:-1
+The template it's asking for
+
+
+335
+00:17:21,241 --> 00:17:24,411 line:-2
+will be used while selecting complications
+in face editing
+
+
+336
+00:17:24,478 --> 00:17:27,281 line:-2
+as well as in the Apple Watch app
+on the paired iPhone.
+
+
+337
+00:17:27,681 --> 00:17:29,716 line:-1
+This template should contain sample data,
+
+
+338
+00:17:29,783 --> 00:17:33,053 line:-2
+as we only ask for it once
+per complication and cache the result.
+
+
+339
+00:17:34,121 --> 00:17:37,357 line:-2
+We've seen this createTimelineEntry
+method used a few times now.
+
+
+340
+00:17:37,424 --> 00:17:40,327 line:-1
+It's pretty simple. It creates a template
+
+
+341
+00:17:40,394 --> 00:17:43,697 line:-2
+and then a timeline entry with
+that template and the date passed into it.
+
+
+342
+00:17:45,065 --> 00:17:47,801 line:-2
+Let's take a closer look
+at the createTemplate method.
+
+
+343
+00:17:47,868 --> 00:17:51,572 line:-2
+We first grab some data that we'll need
+to reuse while creating templates.
+
+
+344
+00:17:51,638 --> 00:17:54,341 line:-2
+We pull the station information
+from the complication.
+
+
+345
+00:17:54,408 --> 00:17:56,476 line:-2
+Remember,
+we created the descriptors with it.
+
+
+346
+00:17:57,277 --> 00:18:01,215 line:-2
+And we create a FullColorImageProvider
+to use in a few different cases.
+
+
+347
+00:18:01,281 --> 00:18:04,184 line:-2
+And we create a SimpleTextProvider
+for logging a sighting.
+
+
+348
+00:18:05,586 --> 00:18:09,623 line:0
+Lastly, we create a closure that returns
+a default template for a given family
+
+
+349
+00:18:09,690 --> 00:18:13,093 line:0
+that we can fall back on
+if something unexpected happens,
+
+
+350
+00:18:13,160 --> 00:18:16,296 line:0
+like being asked for a template
+for the default complication identifier.
+
+
+351
+00:18:18,198 --> 00:18:20,067 line:-1
+To determine which template to create,
+
+
+352
+00:18:20,133 --> 00:18:22,736 line:-2
+we switch on both the family
+and the identifier.
+
+
+353
+00:18:23,637 --> 00:18:26,707 line:-2
+For the SeasonData complication
+in Graphic Rectangular,
+
+
+354
+00:18:26,773 --> 00:18:29,543 line:-2
+we create
+a GraphicRectangularFullView template,
+
+
+355
+00:18:29,610 --> 00:18:33,180 line:-2
+which has a SwiftUI view displaying
+a nice visual chart of the data.
+
+
+356
+00:18:34,748 --> 00:18:37,451 line:-2
+For the "log a sighting" complication
+in graphicCircular,
+
+
+357
+00:18:37,518 --> 00:18:40,153 line:-2
+we create
+a GraphicCircularStackImage template
+
+
+358
+00:18:40,220 --> 00:18:43,190 line:-2
+with our ImageProvider
+and TextProvider that we created earlier.
+
+
+359
+00:18:43,824 --> 00:18:46,560 line:-2
+For any other kind
+of graphicCircular complication,
+
+
+360
+00:18:46,627 --> 00:18:48,395 line:-1
+we want to show another SwiftUI view
+
+
+361
+00:18:48,462 --> 00:18:51,365 line:-2
+that displays information
+about the sightings at that location.
+
+
+362
+00:18:51,832 --> 00:18:55,068 line:-2
+GraphicCorner and GraphicExtraLarge
+are also very similar,
+
+
+363
+00:18:55,135 --> 00:18:57,104 line:-1
+each returning a complication template
+
+
+364
+00:18:57,171 --> 00:19:00,807 line:-2
+containing corresponding text
+and imageProviders from the station data.
+
+
+365
+00:19:01,775 --> 00:19:03,243 line:-1
+There are a lot of other cases here
+
+
+366
+00:19:03,310 --> 00:19:06,013 line:-2
+to correctly provide a template
+for each complication supported,
+
+
+367
+00:19:06,079 --> 00:19:08,782 line:-2
+but since they're all similar,
+I won't go into all the details here.
+
+
+368
+00:19:09,483 --> 00:19:12,085 line:0
+But of course, if we are getting asked
+about a complication
+
+
+369
+00:19:12,152 --> 00:19:16,290 line:0
+we don't think we can do anything about,
+like the default complication identifier,
+
+
+370
+00:19:16,356 --> 00:19:18,091 line:0
+we'll just return a default template.
+
+
+371
+00:19:18,158 --> 00:19:20,627 line:-2
+Here's how some of those complications
+look in action.
+
+
+372
+00:19:21,161 --> 00:19:23,964 line:-2
+We have two different kinds
+of Graphic Rectangular complications,
+
+
+373
+00:19:24,031 --> 00:19:25,766 line:-1
+two kinds of Graphic Circular,
+
+
+374
+00:19:25,832 --> 00:19:28,402 line:-2
+we used SwiftUI
+to draw these beautiful charts,
+
+
+375
+00:19:28,468 --> 00:19:32,206 line:-2
+and the complications look great
+in both full-color and tinted contexts.
+
+
+376
+00:19:33,040 --> 00:19:35,209 line:-2
+In watchOS 7,
+there are so many opportunities
+
+
+377
+00:19:35,275 --> 00:19:38,345 line:-2
+to get your data in front of your users
+right on their watch face.
+
+
+378
+00:19:39,046 --> 00:19:40,881 line:-1
+So make some complications,
+
+
+379
+00:19:40,948 --> 00:19:44,151 line:-2
+provide your data in a timeline
+to keep your complication up to date,
+
+
+380
+00:19:44,218 --> 00:19:47,754 line:-2
+create great, customized
+complication content with SwiftUI,
+
+
+381
+00:19:47,821 --> 00:19:50,257 line:-2
+and make sure you support
+the default complication identifier
+
+
+382
+00:19:50,324 --> 00:19:52,292 line:-1
+for when you get asked about them.
+
+
+383
+00:19:52,359 --> 00:19:55,829 line:0
+If you're looking for more information
+on building great complications,
+
+
+384
+00:19:55,896 --> 00:19:57,764 line:0
+here are some other sessions
+you can check out.
+
+
+385
+00:19:57,831 --> 00:19:59,299 line:-1
+Thanks for joining me.
+

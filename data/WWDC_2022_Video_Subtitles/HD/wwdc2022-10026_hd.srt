@@ -1,0 +1,1792 @@
+2
+00:00:00,100 --> 00:00:03,003
+♪ Mellow instrumental
+hip-hop music ♪
+
+
+3
+00:00:03,003 --> 00:00:09,810 size:2% position:90% align:right
+♪
+
+
+4
+00:00:09,810 --> 00:00:11,979
+Hi! My name is Adam Bradford.
+
+
+5
+00:00:11,979 --> 00:00:13,981
+I'm an engineer
+on the VisionKit team,
+
+
+6
+00:00:13,981 --> 00:00:16,316
+and if you're looking to add
+Live Text to your app,
+
+
+7
+00:00:16,316 --> 00:00:18,652
+you're in the right place.
+
+
+8
+00:00:18,652 --> 00:00:21,588
+But first, what is Live Text?
+
+
+9
+00:00:21,588 --> 00:00:24,958
+Live Text analyzes an image and
+provides features for the users
+
+
+10
+00:00:24,958 --> 00:00:29,663
+to interact with its content,
+such selecting and copying text,
+
+
+11
+00:00:29,663 --> 00:00:33,133
+perform actions
+like lookup and translate,
+
+
+12
+00:00:33,133 --> 00:00:34,801
+providing data-detection
+workflows,
+
+
+13
+00:00:34,801 --> 00:00:37,070
+such as mapping an address,
+dialing a number,
+
+
+14
+00:00:37,070 --> 00:00:39,940
+or jumping to a URL.
+
+
+15
+00:00:39,940 --> 00:00:43,176
+Live Text even allows
+for QR code interaction.
+
+
+16
+00:00:43,176 --> 00:00:45,913
+Imagine how you could
+put this to use in your app?
+
+
+17
+00:00:45,913 --> 00:00:49,549
+You want to know more?
+Well, you're in the right place.
+
+
+18
+00:00:49,549 --> 00:00:52,519
+For this session, I'm going
+to start with a general overview
+
+
+19
+00:00:52,519 --> 00:00:54,721
+of the Live Text API.
+
+
+20
+00:00:54,721 --> 00:00:57,724
+Then I will explore
+how to implement this API
+
+
+21
+00:00:57,724 --> 00:01:00,460
+in an existing application.
+
+
+22
+00:01:00,460 --> 00:01:02,930
+Next, I will dive into
+some tips and tricks
+
+
+23
+00:01:02,930 --> 00:01:06,733
+which may help you when adding
+Live Text to your app.
+
+
+24
+00:01:06,733 --> 00:01:10,704
+Now for an overview
+of the Live Text API.
+
+
+25
+00:01:10,704 --> 00:01:14,908
+At a high level, the Live Text
+API is available in Swift.
+
+
+26
+00:01:14,908 --> 00:01:17,010
+It works beautifully
+on static images
+
+
+27
+00:01:17,010 --> 00:01:20,414
+and can be adapted to be used
+for paused video frames.
+
+
+28
+00:01:20,414 --> 00:01:23,250
+If you need to analyze video
+in a live camera stream
+
+
+29
+00:01:23,250 --> 00:01:25,819
+to search for items
+like text or QR codes,
+
+
+30
+00:01:25,819 --> 00:01:28,855
+VisionKit also has
+a data scanner available.
+
+
+31
+00:01:28,855 --> 00:01:33,593
+Check out this session from
+my colleague Ron for more info.
+
+
+32
+00:01:33,593 --> 00:01:37,230
+The Live Text API is available
+starting on iOS 16
+
+
+33
+00:01:37,230 --> 00:01:39,566
+for devices with
+an Apple Neural Engine,
+
+
+34
+00:01:39,566 --> 00:01:44,104
+and for all devices
+that support macOS 13.
+
+
+35
+00:01:44,104 --> 00:01:46,239
+It consists of
+four main classes.
+
+
+36
+00:01:46,239 --> 00:01:49,176
+To use it,
+first, you'll need an image.
+
+
+37
+00:01:49,176 --> 00:01:51,945
+This image is then fed
+into an ImageAnalyzer,
+
+
+38
+00:01:51,945 --> 00:01:54,514
+which performs
+the async analysis.
+
+
+39
+00:01:54,514 --> 00:01:56,216
+Once the analysis is complete,
+
+
+40
+00:01:56,216 --> 00:01:58,018
+the resulting
+ImageAnalysis object
+
+
+41
+00:01:58,018 --> 00:02:00,721
+is provided to either
+an ImageAnalysisInteraction
+
+
+42
+00:02:00,721 --> 00:02:05,525
+or ImageAnalysisOverlayView,
+depending on your platform.
+
+
+43
+00:02:05,525 --> 00:02:08,428
+Seems pretty straightforward
+so far, right?
+
+
+44
+00:02:08,428 --> 00:02:10,564
+Now, I'm going to demonstrate
+how one would add it
+
+
+45
+00:02:10,564 --> 00:02:13,600
+to an existing application.
+
+
+46
+00:02:13,600 --> 00:02:16,003
+And here's our application.
+
+
+47
+00:02:16,003 --> 00:02:17,437
+This is a simple image viewer,
+
+
+48
+00:02:17,437 --> 00:02:21,174
+which has an image view
+inside of a scroll view.
+
+
+49
+00:02:21,174 --> 00:02:24,745
+Notice, I can
+both zoom and pan.
+
+
+50
+00:02:24,745 --> 00:02:27,647
+But try as I might,
+I cannot select any of this text
+
+
+51
+00:02:27,647 --> 00:02:30,384
+or activate any
+of these data detectors.
+
+
+52
+00:02:30,384 --> 00:02:33,120
+This simply will not do.
+
+
+53
+00:02:33,120 --> 00:02:35,455
+Here's the project in Xcode.
+
+
+54
+00:02:35,455 --> 00:02:37,624
+To add Live Text
+to this application,
+
+
+55
+00:02:37,624 --> 00:02:40,861
+I'll be modifying
+a view controller subclass.
+
+
+56
+00:02:40,861 --> 00:02:43,964
+First, I'm going to need
+an ImageAnalyzer,
+
+
+57
+00:02:43,964 --> 00:02:48,235
+and an
+ImageAnalysisInteraction.
+
+
+58
+00:02:48,235 --> 00:02:50,470
+Here, I'm simply
+overriding viewDidLoad
+
+
+59
+00:02:50,470 --> 00:02:54,975
+and adding the interaction
+to the imageview.
+
+
+60
+00:02:54,975 --> 00:02:58,979
+Next, I need to know
+when to perform the analysis.
+
+
+61
+00:03:01,848 --> 00:03:03,517
+Notice that when
+a new image is set,
+
+
+62
+00:03:03,517 --> 00:03:05,852
+I first reset the
+preferredInteractionTypes
+
+
+63
+00:03:05,852 --> 00:03:10,290
+and analysis which were meant
+for the old image.
+
+
+64
+00:03:10,290 --> 00:03:13,827
+Now everything is ready
+for a new analysis.
+
+
+65
+00:03:13,827 --> 00:03:17,164
+Next, I'm going to create
+the function we will use
+
+
+66
+00:03:17,164 --> 00:03:19,833
+and then check
+that our image exists.
+
+
+67
+00:03:23,003 --> 00:03:28,542
+If so, then create a task.
+
+
+68
+00:03:28,542 --> 00:03:31,845
+Next, create a configuration
+in order to tell the analyzer
+
+
+69
+00:03:31,845 --> 00:03:34,181
+what it should be looking for.
+
+
+70
+00:03:34,181 --> 00:03:39,653
+In this case, I'll go with text
+and machine-readable codes.
+
+
+71
+00:03:39,653 --> 00:03:41,555
+Generating the analysis
+can throw,
+
+
+72
+00:03:41,555 --> 00:03:43,690
+so handle that as appropriate.
+
+
+73
+00:03:43,690 --> 00:03:46,226
+And now finally,
+I'm ready to call the method
+
+
+74
+00:03:46,226 --> 00:03:48,195
+analyzeImageWithConfiguration,
+
+
+75
+00:03:48,195 --> 00:03:51,698
+which will start
+the analysis process.
+
+
+76
+00:03:51,698 --> 00:03:53,700
+Once the analysis is complete,
+
+
+77
+00:03:53,700 --> 00:03:56,169
+an indeterminate
+amount of time has passed,
+
+
+78
+00:03:56,169 --> 00:03:59,005
+and the state of the application
+may have changed,
+
+
+79
+00:03:59,005 --> 00:04:01,975
+so I will check that both
+the analysis was successful
+
+
+80
+00:04:01,975 --> 00:04:05,145
+and that the displayed image
+has not changed.
+
+
+81
+00:04:05,145 --> 00:04:07,080
+If all of these checks pass,
+
+
+82
+00:04:07,080 --> 00:04:09,683
+I can simply set
+the analysis on the interaction
+
+
+83
+00:04:09,683 --> 00:04:12,219
+and set the
+preferredInteractionTypes.
+
+
+84
+00:04:12,219 --> 00:04:13,787
+I'm using .automatic here,
+
+
+85
+00:04:13,787 --> 00:04:17,824
+which will give me
+the default system behavior.
+
+
+86
+00:04:17,824 --> 00:04:20,894
+I think this is ready
+for a test.
+
+
+87
+00:04:20,894 --> 00:04:22,896
+Oh, look at that!
+
+
+88
+00:04:22,896 --> 00:04:26,099
+I see the Live Text button
+has appeared, and yep,
+
+
+89
+00:04:26,099 --> 00:04:28,368
+I can now select text.
+
+
+90
+00:04:28,368 --> 00:04:30,303
+Notice how these
+interface elements
+
+
+91
+00:04:30,303 --> 00:04:32,405
+are positioned for me
+automatically,
+
+
+92
+00:04:32,405 --> 00:04:35,108
+and keep their position inside
+of both the image bounds
+
+
+93
+00:04:35,108 --> 00:04:39,779
+and the visible area,
+with no work on my part.
+
+
+94
+00:04:39,779 --> 00:04:42,282
+OK, notice that tapping
+the Live Text button
+
+
+95
+00:04:42,282 --> 00:04:44,451
+will both highlight
+any selectable items,
+
+
+96
+00:04:44,451 --> 00:04:48,021
+underline data detectors,
+and show Quick Actions.
+
+
+97
+00:04:48,021 --> 00:04:51,024
+I can easily tap this
+Quick Action to make a call,
+
+
+98
+00:04:51,024 --> 00:04:54,394
+and even see more options
+by long-pressing.
+
+
+99
+00:04:54,394 --> 00:04:58,665
+You have to admit,
+this is pretty cool.
+
+
+100
+00:04:58,665 --> 00:05:01,101
+With just these
+few lines of code,
+
+
+101
+00:05:01,101 --> 00:05:04,404
+I've taken an ordinary image
+and brought it to life.
+
+
+102
+00:05:04,404 --> 00:05:06,740
+This simple application
+now has the ability
+
+
+103
+00:05:06,740 --> 00:05:10,210
+to select text on images,
+activate data detectors,
+
+
+104
+00:05:10,210 --> 00:05:14,114
+QR codes, lookup,
+translate text, and more.
+
+
+105
+00:05:14,114 --> 00:05:16,716
+Not too shabby from just
+this few lines of code,
+
+
+106
+00:05:16,716 --> 00:05:18,652
+if you ask me.
+
+
+107
+00:05:18,652 --> 00:05:21,354
+And now that you've have seen
+how to implement Live Text,
+
+
+108
+00:05:21,354 --> 00:05:23,890
+I'm going to go over
+a few tips and tricks
+
+
+109
+00:05:23,890 --> 00:05:26,560
+that may help you
+with your adoption.
+
+
+110
+00:05:26,560 --> 00:05:29,095
+I'll start by exploring
+interaction types.
+
+
+111
+00:05:29,095 --> 00:05:30,931
+Most developers
+will want .automatic,
+
+
+112
+00:05:30,931 --> 00:05:33,466
+which provides text selection,
+but will also highlight
+
+
+113
+00:05:33,466 --> 00:05:36,736
+data detectors if the Live Text
+button is active.
+
+
+114
+00:05:36,736 --> 00:05:40,407
+This will draw a line underneath
+any applicable detected items
+
+
+115
+00:05:40,407 --> 00:05:43,510
+and allows one-tap access
+to activate them.
+
+
+116
+00:05:43,510 --> 00:05:45,745
+This is the exact same
+behavior you would see
+
+
+117
+00:05:45,745 --> 00:05:48,148
+from built-in applications.
+
+
+118
+00:05:48,148 --> 00:05:50,884
+If it makes sense for your app
+to only have text selection
+
+
+119
+00:05:50,884 --> 00:05:54,387
+without data detectors, you may
+set the type to .textSelection
+
+
+120
+00:05:54,387 --> 00:05:59,159
+and it will not change with the
+state of the Live Text button.
+
+
+121
+00:05:59,159 --> 00:06:00,827
+If, however,
+it makes sense for your app
+
+
+122
+00:06:00,827 --> 00:06:04,030
+to only have data detectors
+without text selection,
+
+
+123
+00:06:04,030 --> 00:06:06,132
+set the type to
+.dataDetectors.
+
+
+124
+00:06:06,132 --> 00:06:09,269
+Note that in this mode,
+since selection is disabled,
+
+
+125
+00:06:09,269 --> 00:06:11,204
+you will not see
+a Live Text button,
+
+
+126
+00:06:11,204 --> 00:06:13,673
+but data detectors will be
+underlined and ready
+
+
+127
+00:06:13,673 --> 00:06:17,210
+for one-tap access.
+
+
+128
+00:06:17,210 --> 00:06:18,812
+Setting the
+preferredInteractionTypes
+
+
+129
+00:06:18,812 --> 00:06:21,715
+to an empty set
+will disable the interaction.
+
+
+130
+00:06:21,715 --> 00:06:26,052
+And also, a last note, with text
+selection or automatic mode,
+
+
+131
+00:06:26,052 --> 00:06:28,622
+you'll find you can
+still activate data detectors
+
+
+132
+00:06:28,622 --> 00:06:31,258
+by long-pressing.
+
+
+133
+00:06:31,258 --> 00:06:32,726
+This is controlled by the
+
+
+134
+00:06:32,726 --> 00:06:35,829
+allowLongPressForDataDetectorsIn
+TextMode property,
+
+
+135
+00:06:35,829 --> 00:06:39,766
+which will be active when set
+to true, which the default.
+
+
+136
+00:06:39,766 --> 00:06:43,270
+Simply set to false
+to disable this if necessary.
+
+
+137
+00:06:43,270 --> 00:06:44,437
+I would like
+to now take a moment
+
+
+138
+00:06:44,437 --> 00:06:46,573
+and talk about these buttons
+at the bottom,
+
+
+139
+00:06:46,573 --> 00:06:49,309
+collectively known as
+the supplementary interface.
+
+
+140
+00:06:49,309 --> 00:06:51,278
+This consists of
+the Live Text button,
+
+
+141
+00:06:51,278 --> 00:06:53,446
+which normally lives in
+the bottom right-hand corner,
+
+
+142
+00:06:53,446 --> 00:06:56,516
+as well as Quick Actions
+which appear on the bottom left.
+
+
+143
+00:06:56,516 --> 00:06:59,986
+Quick Actions represent any
+data detectors from the analysis
+
+
+144
+00:06:59,986 --> 00:07:02,922
+and are visible when
+the Live Text button is active.
+
+
+145
+00:07:02,922 --> 00:07:05,091
+The size, position,
+and visibility
+
+
+146
+00:07:05,091 --> 00:07:07,093
+are controlled
+by the interaction.
+
+
+147
+00:07:07,093 --> 00:07:10,297
+And while the default position
+and look matches the system,
+
+
+148
+00:07:10,297 --> 00:07:12,365
+your app may have
+custom interface elements
+
+
+149
+00:07:12,365 --> 00:07:15,101
+which may interfere
+or utilize different fonts
+
+
+150
+00:07:15,101 --> 00:07:16,469
+and symbol weights.
+
+
+151
+00:07:16,469 --> 00:07:20,307
+Let's look at how you can
+customize this interface.
+
+
+152
+00:07:20,307 --> 00:07:23,877
+First off, the isSupplementary
+InterfaceHidden property.
+
+
+153
+00:07:23,877 --> 00:07:26,913
+If I wanted to allow my app
+to still select text
+
+
+154
+00:07:26,913 --> 00:07:29,983
+but I did not want to show
+the Live Text button,
+
+
+155
+00:07:29,983 --> 00:07:31,751
+if I set
+the SupplementaryInterfaceHidden
+
+
+156
+00:07:31,751 --> 00:07:34,321
+to true, you will not see
+any Live Text button
+
+
+157
+00:07:34,321 --> 00:07:37,090
+or Quick Actions.
+
+
+158
+00:07:37,090 --> 00:07:40,126
+We also have a content insets
+property available.
+
+
+159
+00:07:40,126 --> 00:07:42,495
+If you have interface elements
+that would overlap
+
+
+160
+00:07:42,495 --> 00:07:43,997
+the supplementary interface,
+
+
+161
+00:07:43,997 --> 00:07:46,032
+you may adjust
+the content insets
+
+
+162
+00:07:46,032 --> 00:07:48,768
+so the Live Text button
+and Quick Actions adapt nicely
+
+
+163
+00:07:48,768 --> 00:07:52,839
+to your existing app content
+when visible.
+
+
+164
+00:07:52,839 --> 00:07:54,441
+If your app is using
+a custom font
+
+
+165
+00:07:54,441 --> 00:07:56,276
+you'd like
+the interface to adopt,
+
+
+166
+00:07:56,276 --> 00:07:58,244
+setting the
+supplementaryInterfaceFont
+
+
+167
+00:07:58,244 --> 00:08:00,547
+will cause the Live Text
+button and Quick Actions
+
+
+168
+00:08:00,547 --> 00:08:02,515
+to use the specified font
+for text
+
+
+169
+00:08:02,515 --> 00:08:04,651
+and font weight for symbols.
+
+
+170
+00:08:04,651 --> 00:08:06,986
+Please note that
+for button-sizing consistency,
+
+
+171
+00:08:06,986 --> 00:08:10,090
+Live Text will ignore
+the point size.
+
+
+172
+00:08:10,090 --> 00:08:12,025
+Switching gears for a moment,
+
+
+173
+00:08:12,025 --> 00:08:14,427
+if you are not using
+UIImageview,
+
+
+174
+00:08:14,427 --> 00:08:18,531
+you may discover that highlights
+do not match up with your image.
+
+
+175
+00:08:18,531 --> 00:08:20,600
+This is because
+with UIImageView,
+
+
+176
+00:08:20,600 --> 00:08:22,969
+VisionKit can use
+its ContentMode property
+
+
+177
+00:08:22,969 --> 00:08:26,673
+to calculate the contentsRect
+automatically for you.
+
+
+178
+00:08:26,673 --> 00:08:29,776
+Here, the interaction's view
+has a bounds that is bigger
+
+
+179
+00:08:29,776 --> 00:08:32,145
+than its image content
+but is using
+
+
+180
+00:08:32,145 --> 00:08:36,049
+the default's content rect,
+which is a unit rectangle.
+
+
+181
+00:08:36,049 --> 00:08:39,152
+This is easily solved by
+implementing the delegate method
+
+
+182
+00:08:39,152 --> 00:08:41,054
+contentsRectForInteraction
+
+
+183
+00:08:41,054 --> 00:08:43,590
+and return a rectangle
+in unit coordinate space
+
+
+184
+00:08:43,590 --> 00:08:46,159
+describing how
+the image content relates
+
+
+185
+00:08:46,159 --> 00:08:49,829
+to the interaction's bounds
+in order to correct this.
+
+
+186
+00:08:49,829 --> 00:08:52,132
+For example, returning
+a rectangle with these values
+
+
+187
+00:08:52,132 --> 00:08:53,600
+would correct the issue,
+
+
+188
+00:08:53,600 --> 00:08:55,902
+but please return the correct
+normalized rectangle
+
+
+189
+00:08:55,902 --> 00:08:59,939
+based on your app's
+current content and layout.
+
+
+190
+00:08:59,939 --> 00:09:01,841
+contentsRectForInteraction
+will be called
+
+
+191
+00:09:01,841 --> 00:09:04,811
+whenever the interaction's
+bounds change, however,
+
+
+192
+00:09:04,811 --> 00:09:06,546
+if your contentsRect
+has changed
+
+
+193
+00:09:06,546 --> 00:09:08,882
+but your interaction's bounds
+have not,
+
+
+194
+00:09:08,882 --> 00:09:11,284
+you can ask the interaction
+to update by calling
+
+
+195
+00:09:11,284 --> 00:09:15,121
+setContentsRectNeedsUpdate().
+
+
+196
+00:09:15,121 --> 00:09:18,825
+Another question you may have
+when adopting Live Text may be,
+
+
+197
+00:09:18,825 --> 00:09:21,561
+Where is the best place
+to put this interaction?
+
+
+198
+00:09:21,561 --> 00:09:24,964
+Ideally, Live Text interactions
+are placed directly on the view
+
+
+199
+00:09:24,964 --> 00:09:27,167
+that hosts your image content.
+
+
+200
+00:09:27,167 --> 00:09:30,003
+As mentioned before,
+UIImageView will handle
+
+
+201
+00:09:30,003 --> 00:09:32,605
+the contentsRect
+calculations for you,
+
+
+202
+00:09:32,605 --> 00:09:36,075
+and while not necessary,
+is preferred.
+
+
+203
+00:09:36,075 --> 00:09:38,178
+If you are using UIImageview,
+
+
+204
+00:09:38,178 --> 00:09:40,346
+just set the interaction
+on the imageView
+
+
+205
+00:09:40,346 --> 00:09:43,450
+and VisionKit
+will handle the rest.
+
+
+206
+00:09:43,450 --> 00:09:45,973
+However, if your ImageView
+is located
+
+
+207
+00:09:45,973 --> 00:09:47,487
+inside of a ScrollView,
+
+
+208
+00:09:47,487 --> 00:09:50,590
+you may be tempted to place the
+interaction on the ScrollView,
+
+
+209
+00:09:50,590 --> 00:09:54,294
+however, this is not recommended
+and could be difficult to manage
+
+
+210
+00:09:54,294 --> 00:09:58,765
+as it will have a continually
+changing contentsRect.
+
+
+211
+00:09:58,765 --> 00:10:00,600
+The solution here is the same,
+
+
+212
+00:10:00,600 --> 00:10:02,268
+place the interaction
+on the view
+
+
+213
+00:10:02,268 --> 00:10:04,103
+that hosts your image content,
+
+
+214
+00:10:04,103 --> 00:10:05,839
+even if it is inside
+a ScrollView
+
+
+215
+00:10:05,839 --> 00:10:08,942
+with magnification applied.
+
+
+216
+00:10:08,942 --> 00:10:11,144
+I'm going talk about gestures
+for a moment,
+
+
+217
+00:10:11,144 --> 00:10:14,547
+Live Text has a very, very
+rich set of gesture recognizers,
+
+
+218
+00:10:14,547 --> 00:10:16,015
+to say to least.
+
+
+219
+00:10:16,015 --> 00:10:18,084
+Depending on how your app
+is structured,
+
+
+220
+00:10:18,084 --> 00:10:20,653
+it's possible you may find
+the interaction
+
+
+221
+00:10:20,653 --> 00:10:22,522
+responding to gestures
+and events
+
+
+222
+00:10:22,522 --> 00:10:25,558
+your app should really handle
+or vice versa.
+
+
+223
+00:10:25,558 --> 00:10:26,593
+Don't panic.
+
+
+224
+00:10:26,593 --> 00:10:29,262
+Here are a few techniques
+you can use to help correct
+
+
+225
+00:10:29,262 --> 00:10:31,498
+if you see these issues occur.
+
+
+226
+00:10:31,498 --> 00:10:33,366
+One common way to correct this
+
+
+227
+00:10:33,366 --> 00:10:35,168
+is to implement
+the delegate method
+
+
+228
+00:10:35,168 --> 00:10:39,005
+interactionShouldBeginAtPointFor
+InteractionType.
+
+
+229
+00:10:39,005 --> 00:10:42,842
+If you return false, the
+action will not be performed.
+
+
+230
+00:10:42,842 --> 00:10:44,978
+A good place to start is
+to check if the interaction
+
+
+231
+00:10:44,978 --> 00:10:47,547
+has an interactive item
+at the given point
+
+
+232
+00:10:47,547 --> 00:10:50,283
+or if it has an active
+text selection.
+
+
+233
+00:10:50,283 --> 00:10:52,285
+The text selection check
+is used here
+
+
+234
+00:10:52,285 --> 00:10:55,488
+so you will be able to have
+the ability tap off of the text
+
+
+235
+00:10:55,488 --> 00:10:58,258
+in order to deselect it.
+
+
+236
+00:10:58,258 --> 00:11:01,194
+On the other hand,
+if you find your interaction
+
+
+237
+00:11:01,194 --> 00:11:03,296
+doesn't seem
+to respond to gestures,
+
+
+238
+00:11:03,296 --> 00:11:05,665
+it may be because
+there's a gesture recognizer
+
+
+239
+00:11:05,665 --> 00:11:08,835
+in your app
+that's handling them instead.
+
+
+240
+00:11:08,835 --> 00:11:11,738
+In this case, you can craft
+a similar solution
+
+
+241
+00:11:11,738 --> 00:11:15,675
+using your gestureRecognizer's
+gestureRecognizerShouldBegin
+
+
+242
+00:11:15,675 --> 00:11:17,043
+delegate method.
+
+
+243
+00:11:17,043 --> 00:11:21,014
+Here, I perform a similar check
+and return false
+
+
+244
+00:11:21,014 --> 00:11:23,249
+if there is an interactive item
+at the location
+
+
+245
+00:11:23,249 --> 00:11:25,385
+or there's an active
+text selection.
+
+
+246
+00:11:25,385 --> 00:11:26,519
+On a side note.
+
+
+247
+00:11:26,519 --> 00:11:28,588
+In this example,
+I'm first converting
+
+
+248
+00:11:28,588 --> 00:11:32,025
+the gestureRecognizer's location
+to the window's coordinate space
+
+
+249
+00:11:32,025 --> 00:11:33,326
+by passing in nil,
+
+
+250
+00:11:33,326 --> 00:11:36,663
+and then converting it
+to the interaction's view.
+
+
+251
+00:11:36,663 --> 00:11:39,098
+This may be necessary
+if your interaction
+
+
+252
+00:11:39,098 --> 00:11:42,869
+is inside of a ScrollView
+with magnification applied.
+
+
+253
+00:11:42,869 --> 00:11:44,637
+If you find your points
+aren't matching up,
+
+
+254
+00:11:44,637 --> 00:11:46,906
+give this technique a try.
+
+
+255
+00:11:46,906 --> 00:11:49,342
+Another similar option
+I have found to be useful
+
+
+256
+00:11:49,342 --> 00:11:52,445
+is to override UIView's
+hitTest:WithEvent.
+
+
+257
+00:11:52,445 --> 00:11:54,814
+Here, once again,
+similar story,
+
+
+258
+00:11:54,814 --> 00:11:57,150
+I perform the same
+types of checks as before,
+
+
+259
+00:11:57,150 --> 00:12:00,720
+and in this case,
+return the appropriate view.
+
+
+260
+00:12:00,720 --> 00:12:05,158
+As always, we want your app
+to be as responsive as possible,
+
+
+261
+00:12:05,158 --> 00:12:06,893
+and while the Neural Engine
+makes analysis
+
+
+262
+00:12:06,893 --> 00:12:10,129
+extremely efficient,
+there a few ImageAnalyzer tips
+
+
+263
+00:12:10,129 --> 00:12:12,365
+I'd like to share
+for best performance.
+
+
+264
+00:12:12,365 --> 00:12:14,767
+Ideally, you want
+only one ImageAnalyzer
+
+
+265
+00:12:14,767 --> 00:12:16,436
+shared in your app.
+
+
+266
+00:12:16,436 --> 00:12:19,138
+Also, we support
+several types of images.
+
+
+267
+00:12:19,138 --> 00:12:21,674
+You should always
+minimize image conversions
+
+
+268
+00:12:21,674 --> 00:12:24,010
+by passing in the native type
+that you have;
+
+
+269
+00:12:24,010 --> 00:12:27,113
+however, if you do happen
+to have a CVPixelBuffer,
+
+
+270
+00:12:27,113 --> 00:12:29,349
+that would be
+the most efficient.
+
+
+271
+00:12:29,349 --> 00:12:32,885
+Also, in order to best utilize
+system resources,
+
+
+272
+00:12:32,885 --> 00:12:36,389
+you should begin your analysis
+only when, or just before,
+
+
+273
+00:12:36,389 --> 00:12:38,958
+an image appears onscreen.
+
+
+274
+00:12:38,958 --> 00:12:41,427
+If your app's content scrolls --
+
+
+275
+00:12:41,427 --> 00:12:43,529
+for example,
+it has a timeline --
+
+
+276
+00:12:43,529 --> 00:12:47,567
+begin analysis only once
+the scrolling has stopped.
+
+
+277
+00:12:47,567 --> 00:12:51,004
+Now this API isn't the only
+place you'll see Live Text,
+
+
+278
+00:12:51,004 --> 00:12:52,739
+support is provided
+automatically
+
+
+279
+00:12:52,739 --> 00:12:56,542
+in a few frameworks across the
+system your app may already use.
+
+
+280
+00:12:56,542 --> 00:13:00,546
+For example,
+UITextField or UITextView
+
+
+281
+00:13:00,546 --> 00:13:04,250
+have Live Text support using
+Camera for keyboard input.
+
+
+282
+00:13:04,250 --> 00:13:08,287
+And Live Text is also supported
+in WebKit and Quick Look.
+
+
+283
+00:13:08,287 --> 00:13:12,158
+For more information,
+please check out these sessions.
+
+
+284
+00:13:12,158 --> 00:13:14,160
+New this year for iOS 16,
+
+
+285
+00:13:14,160 --> 00:13:16,963
+we've added
+Live Text support in AVKit.
+
+
+286
+00:13:16,963 --> 00:13:20,400
+AVPlayerView and ViewController
+support Live Text
+
+
+287
+00:13:20,400 --> 00:13:22,902
+in paused frames automatically
+
+
+288
+00:13:22,902 --> 00:13:25,738
+via the allowsVideoFrameAnalysis
+property,
+
+
+289
+00:13:25,738 --> 00:13:27,707
+which is enabled by default.
+
+
+290
+00:13:27,707 --> 00:13:29,542
+Please note,
+this is only available
+
+
+291
+00:13:29,542 --> 00:13:32,979
+with non-FairPlay
+protected content.
+
+
+292
+00:13:32,979 --> 00:13:35,281
+If you're using AVPlayerLayer,
+
+
+293
+00:13:35,281 --> 00:13:37,684
+then you are responsible
+for managing the analysis
+
+
+294
+00:13:37,684 --> 00:13:40,987
+and the interaction but it is
+very important to use the
+
+
+295
+00:13:40,987 --> 00:13:43,222
+currentlyDisplayedPixelBuffer
+property
+
+
+296
+00:13:43,222 --> 00:13:45,091
+to get the current frame.
+
+
+297
+00:13:45,091 --> 00:13:46,659
+This is the only way
+to guarantee
+
+
+298
+00:13:46,659 --> 00:13:49,829
+the proper frame
+is being analyzed.
+
+
+299
+00:13:49,829 --> 00:13:51,597
+This will only return
+a valid value
+
+
+300
+00:13:51,597 --> 00:13:55,968
+if the video play rate is zero,
+and this is a shallow copy
+
+
+301
+00:13:55,968 --> 00:13:58,671
+and absolutely
+not safe to write to.
+
+
+302
+00:13:58,671 --> 00:14:00,740
+And once again,
+only available
+
+
+303
+00:14:00,740 --> 00:14:04,210
+for non-FairPlay
+protected content.
+
+
+304
+00:14:04,210 --> 00:14:06,746
+We are thrilled to help bring
+Live Text functionality
+
+
+305
+00:14:06,746 --> 00:14:07,847
+to your app.
+
+
+306
+00:14:07,847 --> 00:14:10,850
+On behalf of everybody
+on the Live Text team,
+
+
+307
+00:14:10,850 --> 00:14:12,952
+thank you for joining us
+for this session.
+
+
+308
+00:14:12,952 --> 00:14:16,222
+I am stoked to see how you use
+it for images in your app.
+
+
+309
+00:14:16,222 --> 00:14:18,691
+And as always, have fun!
+
+
+310
+00:14:18,691 --> 00:14:23,096 line:0 align:right size:2%
+♪
+

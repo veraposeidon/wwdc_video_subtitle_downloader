@@ -1,0 +1,2503 @@
+2
+00:00:00.334 --> 00:00:03.837 line:-1 align:center
+♪ ♪
+
+
+3
+00:00:10.043 --> 00:00:11.411 line:-1 align:center
+Hello and welcome.
+
+
+4
+00:00:11.445 --> 00:00:14.948 line:-2 align:center
+My name is Kelvin Chiu from
+the GPU Software team here at Apple.
+
+
+5
+00:00:14.982 --> 00:00:17.985 line:-2 align:center
+Today, I'll talk about how to
+boost your Metal application performance
+
+
+6
+00:00:18.018 --> 00:00:20.087 line:-1 align:center
+with MetalFX Upscaling.
+
+
+7
+00:00:20.721 --> 00:00:23.090 line:-1 align:center
+MetalFX is a new API that provides
+
+
+8
+00:00:23.123 --> 00:00:26.627 line:-2 align:center
+platform optimized graphics effects
+for Metal applications.
+
+
+9
+00:00:27,361 --> 00:00:29,730 line:-1
+It enables high performance upscaling,
+
+
+10
+00:00:29,763 --> 00:00:31,865 line:-2
+which will boost
+your application performance
+
+
+11
+00:00:31.899 --> 00:00:34.868 line:-1 align:center
+while retaining its rendering quality.
+
+
+12
+00:00:34.902 --> 00:00:38.172 line:-2 align:center
+Rendering a frame
+at high resolution costs GPU time.
+
+
+13
+00:00:38.205 --> 00:00:41.041 line:-2 align:center
+To reduce that time,
+rendering at a lower resolution will
+
+
+14
+00:00:41,074 --> 00:00:42,910 line:-1
+usually do the trick.
+
+
+15
+00:00:42.943 --> 00:00:45.879 line:-2 align:center
+However, the tradeoff is
+a lower rendering quality.
+
+
+16
+00:00:45,913 --> 00:00:47,748 line:-1
+With MetalFX Upscaling,
+
+
+17
+00:00:47.781 --> 00:00:49.716 line:-1 align:center
+your application can now render frames
+
+
+18
+00:00:49.750 --> 00:00:52.686 line:-2 align:center
+at a lower resolution,
+reducing rendering time,
+
+
+19
+00:00:52.719 --> 00:00:55.923 line:-1 align:center
+without compromising rendering quality.
+
+
+20
+00:00:55.956 --> 00:00:58.292 line:-1 align:center
+MetalFX Upscaling is optimized
+
+
+21
+00:00:58.325 --> 00:01:00.928 line:-1 align:center
+to run best on Apple devices.
+
+
+22
+00:01:00,961 --> 00:01:04,364 line:-2
+and it is also easy
+to adopt in your game.
+
+
+23
+00:01:04,398 --> 00:01:07,000 line:-2
+MetalFX provides
+two upscaling effects,
+
+
+24
+00:01:07.034 --> 00:01:09.236 line:-1 align:center
+which I will describe in detail.
+
+
+25
+00:01:09,269 --> 00:01:11,338 line:-1
+Spatial upscaling is simple to use
+
+
+26
+00:01:11,371 --> 00:01:13,674 line:-1
+and gives a great performance boost.
+
+
+27
+00:01:14.541 --> 00:01:17.611 line:-2 align:center
+Temporal anti-aliasing
+and upscaling integrates information
+
+
+28
+00:01:17.644 --> 00:01:20.914 line:-2 align:center
+from multiple frames
+to produce a higher quality output.
+
+
+29
+00:01:22.216 --> 00:01:24.418 line:-1 align:center
+I will then talk about best practices
+
+
+30
+00:01:24.451 --> 00:01:27.020 line:-1 align:center
+for using these effects.
+
+
+31
+00:01:27,054 --> 00:01:29,022 line:-1
+Finally, I will end the session
+
+
+32
+00:01:29.056 --> 00:01:31.625 line:-1 align:center
+with demos showing them in action.
+
+
+33
+00:01:32.893 --> 00:01:35.329 line:-1 align:center
+Let's start with Spatial upscaling.
+
+
+34
+00:01:36.096 --> 00:01:37.865 line:-1 align:center
+MetalFX Spatial upscaling
+
+
+35
+00:01:37,898 --> 00:01:40,167 line:-1
+analyzes the input’s spatial information
+
+
+36
+00:01:40.200 --> 00:01:43.003 line:-1 align:center
+to produce new, upscaled samples.
+
+
+37
+00:01:43,036 --> 00:01:45,506 line:-1
+Integrating Spatial upscaling is simple.
+
+
+38
+00:01:45.539 --> 00:01:48.475 line:-2 align:center
+It only requires anti-aliased
+input color to produce
+
+
+39
+00:01:48,509 --> 00:01:51,445 line:-1
+a spatially upscaled color output.
+
+
+40
+00:01:51.478 --> 00:01:54.248 line:-1 align:center
+In a typical game rendering pipeline,
+
+
+41
+00:01:54,281 --> 00:01:57,484 line:-2
+there are various rendering passes
+including anti-aliased render
+
+
+42
+00:01:57,518 --> 00:02:00,721 line:-1
+and various post processing effects.
+
+
+43
+00:02:00.754 --> 00:02:02.623 line:-1 align:center
+Add MetalFX spatial upscaling
+
+
+44
+00:02:02.656 --> 00:02:04.725 line:-2 align:center
+right after
+the game's tone-mapping process
+
+
+45
+00:02:04.758 --> 00:02:05.792 line:-1 align:center
+is completed.
+
+
+46
+00:02:05.826 --> 00:02:08.595 line:-2 align:center
+It will perform best if the input
+has been tone mapped and is
+
+
+47
+00:02:08,629 --> 00:02:10,497 line:-1
+in a perceptual color space.
+
+
+48
+00:02:10,531 --> 00:02:13,634 line:-2
+Let’s checkout MetalFX
+spatial upscaling in action.
+
+
+49
+00:02:15.135 --> 00:02:18.505 line:-2 align:center
+This chess scene is produced
+with a high quality reference renderer
+
+
+50
+00:02:18.539 --> 00:02:20.140 line:-1 align:center
+in 4K resolution.
+
+
+51
+00:02:20.174 --> 00:02:23.076 line:-2 align:center
+It is path traced,
+with complex graphics effects,
+
+
+52
+00:02:23.110 --> 00:02:26.413 line:-1 align:center
+like ray-traced reflections and shadows.
+
+
+53
+00:02:26,446 --> 00:02:28,882 line:-1
+Here is a side by side comparison,
+
+
+54
+00:02:28.916 --> 00:02:31.451 line:-1 align:center
+with 540p input on the left...
+
+
+55
+00:02:32,553 --> 00:02:36,023 line:-2
+…and 1080p output with MetalFX
+spatial upscaling on the right.
+
+
+56
+00:02:38.926 --> 00:02:41.595 line:-1 align:center
+If I zoom in on the queen, on the left,
+
+
+57
+00:02:41.628 --> 00:02:44.965 line:-2 align:center
+the image lacks details
+and is low resolution.
+
+
+58
+00:02:44,998 --> 00:02:47,568 line:-2
+On the right,
+the spatially upscaled output
+
+
+59
+00:02:47,601 --> 00:02:50,938 line:-2
+has sharper reflections
+and more refined edges.
+
+
+60
+00:02:52,439 --> 00:02:55,943 line:-2
+Next, I'll walk you through how
+to implement MetalFX spatial upscaling.
+
+
+61
+00:02:57,044 --> 00:03:00,080 line:-2
+In Metal, you would
+normally create a command encoder
+
+
+62
+00:03:00,113 --> 00:03:02,382 align:center
+to encode commands into a command buffer
+
+
+63
+00:03:02,416 --> 00:03:04,885 line:0
+and produce input for the effect.
+
+
+64
+00:03:04,918 --> 00:03:08,388 align:center
+Similarly,
+you can create a MetalFX effect object
+
+
+65
+00:03:08,422 --> 00:03:11,758 align:center
+to encode commands into a command buffer
+and perform the effect.
+
+
+66
+00:03:12.226 --> 00:03:15.362 line:-2 align:center
+Finally, create a third command encoder
+to encode commands
+
+
+67
+00:03:15.395 --> 00:03:17.965 line:-1 align:center
+that make use of the MetalFX output.
+
+
+68
+00:03:17.998 --> 00:03:20.634 line:-2 align:center
+You should only create
+a new spatial scaler object
+
+
+69
+00:03:20,667 --> 00:03:22,302 line:-1
+when your application first starts
+
+
+70
+00:03:22.336 --> 00:03:24.505 line:-1 align:center
+or when a display switches resolutions
+
+
+71
+00:03:24.538 --> 00:03:26.507 line:-1 align:center
+because they are expensive to create.
+
+
+72
+00:03:27,541 --> 00:03:29,676 line:-1
+First, create and configure
+
+
+73
+00:03:29,710 --> 00:03:32,846 line:-1
+a MTLFXSpatialScalerDescriptor.
+
+
+74
+00:03:32.880 --> 00:03:34.948 line:-1 align:center
+Then, create a scaler object
+
+
+75
+00:03:34.982 --> 00:03:37.818 line:-1 align:center
+by calling the makeSpatialScaler() method.
+
+
+76
+00:03:37.851 --> 00:03:39.720 line:-1 align:center
+In the initialization code,
+
+
+77
+00:03:39,753 --> 00:03:41,822 line:-1
+start with the descriptor.
+
+
+78
+00:03:41,855 --> 00:03:43,290 line:-1
+Fill both the width and height
+
+
+79
+00:03:43.323 --> 00:03:45.559 line:-1 align:center
+of the input and output texture.
+
+
+80
+00:03:45.592 --> 00:03:48.662 line:-2 align:center
+Then, set the texture format
+for the textures that will be set later
+
+
+81
+00:03:48,695 --> 00:03:50,597 line:-1
+on the scaler object.
+
+
+82
+00:03:50,631 --> 00:03:53,200 line:-1
+Set the color processing mode.
+
+
+83
+00:03:53.233 --> 00:03:55.435 line:-1 align:center
+This tells the API which color space
+
+
+84
+00:03:55.469 --> 00:03:57.804 line:-1 align:center
+the input and output is in.
+
+
+85
+00:03:57,838 --> 00:04:00,474 line:-2
+You can set the value
+to be in either perceptual,
+
+
+86
+00:04:00,507 --> 00:04:03,310 line:-1
+linear, or HDR color space.
+
+
+87
+00:04:03.343 --> 00:04:06.647 line:-2 align:center
+Once the descriptor is filled,
+create the scaler object.
+
+
+88
+00:04:08,549 --> 00:04:11,985 line:-2
+Once the scaler object is created,
+you can modify the properties
+
+
+89
+00:04:12,019 --> 00:04:14,354 line:-1
+of the object as frequently as you want
+
+
+90
+00:04:14,388 --> 00:04:17,491 line:-2
+and call the encode() method
+to start the upscaling process.
+
+
+91
+00:04:18.458 --> 00:04:21.628 line:-2 align:center
+In your per frame draw code,
+make sure the correct input
+
+
+92
+00:04:21,662 --> 00:04:24,331 line:-2
+and output textures are being set
+on the scaler object
+
+
+93
+00:04:24.364 --> 00:04:27.501 line:-2 align:center
+before encoding the scaling effect
+into the command buffer.
+
+
+94
+00:04:28.335 --> 00:04:31.839 line:-2 align:center
+Spatial upscaling offers
+a simple way to boost performance.
+
+
+95
+00:04:32.906 --> 00:04:35.209 line:-2 align:center
+And when you want
+even higher quality rendering,
+
+
+96
+00:04:35.242 --> 00:04:37.377 line:-2 align:center
+that's where
+MetalFX temporal anti-aliasing
+
+
+97
+00:04:37,411 --> 00:04:39,479 line:-1
+and upscaling comes in.
+
+
+98
+00:04:39,513 --> 00:04:42,583 line:-2
+Temporal AA and upscaling
+is a technique that uses data
+
+
+99
+00:04:42.616 --> 00:04:45.819 line:-2 align:center
+from previous frames to produce
+high-quality upscaled output.
+
+
+100
+00:04:46.286 --> 00:04:49.089 line:-2 align:center
+This means, the output of upscaling
+from the previous frame
+
+
+101
+00:04:49.122 --> 00:04:52.559 line:-2 align:center
+will be used as one of the inputs
+for the current frame upscaling.
+
+
+102
+00:04:53.961 --> 00:04:57.364 line:-2 align:center
+To better understand why Temporal AA
+and upscaling requires data
+
+
+103
+00:04:57.397 --> 00:04:58.565 line:-1 align:center
+from the previous frames,
+
+
+104
+00:04:58,599 --> 00:05:01,368 line:-2
+I'll first review the concept
+of supersampling.
+
+
+105
+00:05:02,536 --> 00:05:03,937 align:center
+In supersampling,
+
+
+106
+00:05:03,971 --> 00:05:06,707 align:center
+multiple samples are calculated per pixel,
+
+
+107
+00:05:06,740 --> 00:05:09,877 line:0
+which is then integrated
+into a single pixel value.
+
+
+108
+00:05:09,910 --> 00:05:12,279 align:center
+The more samples
+that we integrate per pixel,
+
+
+109
+00:05:12,312 --> 00:05:14,548 align:center
+the better the result will be.
+
+
+110
+00:05:14.581 --> 00:05:16.783 line:-1 align:center
+However, it comes at a great cost
+
+
+111
+00:05:16.817 --> 00:05:18.652 line:-1 align:center
+to calculate multiple samples per pixel
+
+
+112
+00:05:18,685 --> 00:05:21,121 line:-1
+within a single frame.
+
+
+113
+00:05:21,154 --> 00:05:23,524 line:-1
+Instead of sampling multiple locations
+
+
+114
+00:05:23.557 --> 00:05:25.292 line:-1 align:center
+per pixel in a single frame,
+
+
+115
+00:05:25.325 --> 00:05:27.995 line:-1 align:center
+you can perform temporal sampling.
+
+
+116
+00:05:28.028 --> 00:05:30.430 line:-2 align:center
+Temporal sampling
+is the concept of rendering
+
+
+117
+00:05:30,464 --> 00:05:31,865 line:-1
+a different sample location
+
+
+118
+00:05:31.899 --> 00:05:34.368 line:-1 align:center
+for all the pixels in a given frame.
+
+
+119
+00:05:34,401 --> 00:05:37,004 line:-2
+This enables you to achieve
+supersampling quality
+
+
+120
+00:05:37.037 --> 00:05:40.507 line:-2 align:center
+over multiple frames
+at a significantly lower cost.
+
+
+121
+00:05:41,308 --> 00:05:44,378 align:center
+By accumulating samples
+from multiple frames and accounting
+
+
+122
+00:05:44,411 --> 00:05:46,113 align:center
+for sample positions,
+
+
+123
+00:05:46,146 --> 00:05:47,948 line:0
+temporal AA & upscaling can
+
+
+124
+00:05:47,981 --> 00:05:49,683 line:0
+integrate samples appropriately
+
+
+125
+00:05:49,716 --> 00:05:51,919 align:center
+in target resolution pixels,
+
+
+126
+00:05:52,052 --> 00:05:55,556 align:center
+resulting in a high quality
+anti-aliased upscaled output.
+
+
+127
+00:05:56,323 --> 00:05:59,760 align:center
+However, since content
+often changes between frames,
+
+
+128
+00:05:59,793 --> 00:06:02,963 align:center
+it will require more input data
+to detect these changes.
+
+
+129
+00:06:03,931 --> 00:06:06,133 line:-1
+Besides the previous frame output,
+
+
+130
+00:06:06,166 --> 00:06:08,569 line:-1
+Temporal AA and upscaling also requires
+
+
+131
+00:06:08.602 --> 00:06:10.871 line:-1 align:center
+a color input that is jittered,
+
+
+132
+00:06:10.904 --> 00:06:14.341 line:-2 align:center
+as well as motion
+and depth data from the scene.
+
+
+133
+00:06:14.942 --> 00:06:18.245 line:-2 align:center
+I'll go through each of them
+to explain why they are required.
+
+
+134
+00:06:19,613 --> 00:06:21,982 line:-1
+Let's start with the jittered color input.
+
+
+135
+00:06:23,383 --> 00:06:26,820 align:center
+Here is a red triangle rendered
+without jitter.
+
+
+136
+00:06:26,854 --> 00:06:30,123 line:0
+The bright white outline represents
+the triangle being rendered.
+
+
+137
+00:06:30,757 --> 00:06:33,760 line:0
+Each one of the small squares
+represent a pixel.
+
+
+138
+00:06:33,794 --> 00:06:37,130 align:center
+And the gray dot in the middle
+is where the pixel is sampled.
+
+
+139
+00:06:38,999 --> 00:06:40,868 line:0
+This is the output of the same triangle
+
+
+140
+00:06:40,901 --> 00:06:43,270 line:0
+when rendered with a small jitter.
+
+
+141
+00:06:43,303 --> 00:06:46,573 align:center
+The gray dots show
+the sampling location for a given pixel.
+
+
+142
+00:06:47.174 --> 00:06:50.377 line:-2 align:center
+The jitter offset should be unique
+for a set number of frames
+
+
+143
+00:06:50,410 --> 00:06:53,380 line:-2
+in order to fully gather
+the desired number of samples.
+
+
+144
+00:06:54.147 --> 00:06:57.451 line:-2 align:center
+I will cover the topic
+of jitter sequence in detail later.
+
+
+145
+00:06:58,685 --> 00:07:01,889 line:-2
+Next is the motion information
+from the scene.
+
+
+146
+00:07:01,922 --> 00:07:03,824 align:center
+Motion data from the scene indicates
+
+
+147
+00:07:03,857 --> 00:07:05,559 align:center
+how much and which direction
+
+
+148
+00:07:05,592 --> 00:07:09,096 align:center
+the objects had moved
+from the previous frame.
+
+
+149
+00:07:09,129 --> 00:07:12,566 align:center
+Temporal AA and upscaling uses
+the motion information to back track
+
+
+150
+00:07:12,599 --> 00:07:15,102 line:-2
+and find corresponding locations
+in the previous frame
+
+
+151
+00:07:15,135 --> 00:07:17,437 line:-1
+in order to correctly gather samples.
+
+
+152
+00:07:18.739 --> 00:07:21.842 line:-2 align:center
+Another input is the depth information
+from the scene.
+
+
+153
+00:07:22,476 --> 00:07:23,744 align:center
+Depth data from the scene
+
+
+154
+00:07:23,777 --> 00:07:26,914 align:center
+indicates what's in the foreground
+and what's in the background.
+
+
+155
+00:07:26,947 --> 00:07:30,217 align:center
+This is important when prioritizing
+foreground edge anti-aliasing
+
+
+156
+00:07:30,651 --> 00:07:33,887 align:center
+and provides clues on what
+other objects might be newly exposed
+
+
+157
+00:07:33,921 --> 00:07:37,257 align:center
+when gathering samples
+from previous frames.
+
+
+158
+00:07:37,291 --> 00:07:40,627 line:0
+The last piece of input data is
+the previous frame’s output.
+
+
+159
+00:07:42,729 --> 00:07:45,365 align:center
+The previous frame’s output contains all
+
+
+160
+00:07:45,399 --> 00:07:48,836 align:center
+of the samples that have been
+integrated previously,
+
+
+161
+00:07:48,869 --> 00:07:52,139 line:0
+and it will be blended with
+the current frame’s jittered color input
+
+
+162
+00:07:52,172 --> 00:07:55,409 line:0
+in order to increase the number
+of samples per pixel.
+
+
+163
+00:07:56,176 --> 00:07:59,513 line:0
+By combining information
+from both the current and previous frame,
+
+
+164
+00:07:59,546 --> 00:08:02,649 align:center
+the resulting image now has more details.
+
+
+165
+00:08:02,683 --> 00:08:05,552 line:0
+MetalFX keeps track
+of the upscaled output,
+
+
+166
+00:08:05,586 --> 00:08:07,521 line:-1
+so you only need to pass the color,
+
+
+167
+00:08:07,554 --> 00:08:10,490 line:-2
+motion, and depth
+from the current rendered frame.
+
+
+168
+00:08:11,191 --> 00:08:13,861 line:-2
+Going back to a typical
+game’s rendering pipeline,
+
+
+169
+00:08:13.894 --> 00:08:16.697 line:-2 align:center
+MetalFX temporal AA
+and upscaling should run
+
+
+170
+00:08:16,730 --> 00:08:18,832 line:-1
+before any post processing effects,
+
+
+171
+00:08:18.866 --> 00:08:20.834 line:-1 align:center
+since these effects will interfere
+
+
+172
+00:08:20,868 --> 00:08:23,103 line:-1
+with the result of the upscaling.
+
+
+173
+00:08:24.371 --> 00:08:26.306 line:-1 align:center
+Here's the chess rendering again,
+
+
+174
+00:08:26,340 --> 00:08:29,810 line:-2
+this time using
+MetalFX Temporal AA and upscaling.
+
+
+175
+00:08:29,843 --> 00:08:33,347 line:-2
+This is a side by side comparison
+of 1080p input on the left
+
+
+176
+00:08:34.248 --> 00:08:36.583 line:-1 align:center
+and 4K upscaled output on the right.
+
+
+177
+00:08:41,488 --> 00:08:44,258 line:-1
+Zooming in closer to the queen,
+
+
+178
+00:08:44.291 --> 00:08:47.361 line:-1 align:center
+the input is low resolution and aliased,
+
+
+179
+00:08:47,394 --> 00:08:50,430 line:-2
+while the temporally upscaled output
+on the right is high resolution
+
+
+180
+00:08:50.464 --> 00:08:53.934 line:-2 align:center
+with a smooth outline and has
+more fine details in the reflections.
+
+
+181
+00:08:55.068 --> 00:08:58.372 line:-2 align:center
+Just as with spatial scaler,
+creating a new temporal scaler
+
+
+182
+00:08:58.405 --> 00:09:00.440 line:-1 align:center
+is expensive and should only be done
+
+
+183
+00:09:00,474 --> 00:09:02,209 line:-1
+when your application first starts
+
+
+184
+00:09:02,242 --> 00:09:05,312 line:-1
+or when a display switches resolutions.
+
+
+185
+00:09:05,345 --> 00:09:07,247 line:-1
+First, you'll need to allocate and fill in
+
+
+186
+00:09:07,281 --> 00:09:10,117 line:-1
+a MTLFXTemporalScalerDescriptor.
+
+
+187
+00:09:10,851 --> 00:09:14,354 line:-2
+Then call makeTemporalScaler() method
+to create the scaler object.
+
+
+188
+00:09:15,656 --> 00:09:19,092 line:-2
+In your initialization code,
+start with the descriptor.
+
+
+189
+00:09:19,726 --> 00:09:23,230 line:-2
+Fill in both the width and height
+of the input and output textures.
+
+
+190
+00:09:23,897 --> 00:09:25,632 line:-1
+Then set the jittered color,
+
+
+191
+00:09:25,666 --> 00:09:27,501 line:-1
+depth, and motion texture formats
+
+
+192
+00:09:27.534 --> 00:09:30.971 line:-2 align:center
+for the textures that will be bound later
+on the scaler object as inputs.
+
+
+193
+00:09:32.339 --> 00:09:35.042 line:-2 align:center
+Finally, set the format
+for the output texture
+
+
+194
+00:09:35,075 --> 00:09:38,378 line:-2
+where MetalFX will store
+the upscaled output.
+
+
+195
+00:09:38,412 --> 00:09:41,515 line:-2
+Once the descriptor is filled,
+create the scaler object.
+
+
+196
+00:09:42.482 --> 00:09:45.686 line:-2 align:center
+On the scaler object,
+set the motion scale properties.
+
+
+197
+00:09:45.719 --> 00:09:49.223 line:-2 align:center
+This helps you scale the app's motion data
+to what the API expects.
+
+
+198
+00:09:50,057 --> 00:09:51,992 line:-1
+MetalFX expects motion data
+
+
+199
+00:09:52,025 --> 00:09:54,661 line:-1
+in the render resolution pixel space
+
+
+200
+00:09:54,695 --> 00:09:57,497 line:-2
+with direction that goes
+from the current frame’s position
+
+
+201
+00:09:57,531 --> 00:09:59,733 line:0
+to the previous frame’s position.
+
+
+202
+00:09:59,766 --> 00:10:01,034 align:center
+As an example,
+
+
+203
+00:10:01,068 --> 00:10:03,637 line:0
+I'll use a render resolution of 1080p.
+
+
+204
+00:10:03,670 --> 00:10:06,707 align:center
+Suppose you have an object
+that moves from clip space coordinate
+
+
+205
+00:10:06,740 --> 00:10:09,243 align:center
+(-0.75, -0.75).
+
+
+206
+00:10:09,276 --> 00:10:12,346 line:0
+to clip space coordinate (0.25, 0.25).
+
+
+207
+00:10:12,913 --> 00:10:15,582 line:0
+The motion data is stored as (1, 1).
+
+
+208
+00:10:17.150 --> 00:10:19.119 line:-1 align:center
+Set the motion vector scale property
+
+
+209
+00:10:19,152 --> 00:10:21,021 line:-1
+to (-960, 540)
+
+
+210
+00:10:21,054 --> 00:10:24,358 line:-2
+so that MetalFX can interpret
+your game's motion data correctly.
+
+
+211
+00:10:26.660 --> 00:10:29.530 line:-2 align:center
+You can modify the properties
+of the scaler object as frequently
+
+
+212
+00:10:29.563 --> 00:10:30.464 line:-1 align:center
+as you want.
+
+
+213
+00:10:30,497 --> 00:10:33,934 line:-2
+And call the encode() method
+to start the upscaling process.
+
+
+214
+00:10:35.402 --> 00:10:37.304 line:-1 align:center
+For your per frame draw code,
+
+
+215
+00:10:37,337 --> 00:10:39,606 line:-1
+first set the resetHistory property.
+
+
+216
+00:10:39.640 --> 00:10:42.476 line:-2 align:center
+Set this to true when your application
+loads the first frame
+
+
+217
+00:10:42,509 --> 00:10:44,745 line:-1
+or when there is a scene cut.
+
+
+218
+00:10:44,778 --> 00:10:48,148 line:-2
+Then set the textures
+that are inputs for the effect,
+
+
+219
+00:10:48,182 --> 00:10:50,984 line:-1
+followed by the output texture.
+
+
+220
+00:10:51.018 --> 00:10:53.253 line:-1 align:center
+Next, set the reversedDepth property
+
+
+221
+00:10:53.287 --> 00:10:56.323 line:-2 align:center
+to indicate whether the depth values are
+in reversed-Z mapping.
+
+
+222
+00:10:57.558 --> 00:10:58.825 line:-1 align:center
+The last property to set
+
+
+223
+00:10:58,859 --> 00:11:02,062 line:-2
+before encoding the scaling effect
+is the current jitter offset.
+
+
+224
+00:11:03.263 --> 00:11:05.465 line:-2 align:center
+Getting jitter offset correctly
+is essential
+
+
+225
+00:11:05,499 --> 00:11:06,967 line:-1
+to the quality of the output.
+
+
+226
+00:11:07,000 --> 00:11:10,103 line:0
+Let us take a quick look
+on how to set jitter offset.
+
+
+227
+00:11:11,371 --> 00:11:14,775 align:center
+As an example, on the left
+is a triangle rendered with jitter.
+
+
+228
+00:11:16,376 --> 00:11:19,379 align:center
+On the right
+is a zoomed in view of a pixel.
+
+
+229
+00:11:19,413 --> 00:11:22,716 line:0
+The sample is located at (0.625, 0.78).
+
+
+230
+00:11:23,150 --> 00:11:26,153 align:center
+The pixel center is represented
+by the orange dot.
+
+
+231
+00:11:26,186 --> 00:11:28,889 line:0
+It is located at (0.5, 0.5).
+
+
+232
+00:11:30,357 --> 00:11:31,425 line:0
+In this example,
+
+
+233
+00:11:31,458 --> 00:11:34,895 align:center
+the jitter offset is (-0.125, -0.28).
+
+
+234
+00:11:35,796 --> 00:11:37,431 line:0
+Note that jitter offsets are always
+
+
+235
+00:11:37,464 --> 00:11:40,634 align:center
+in the range of -0.5 to 0.5.
+
+
+236
+00:11:40,667 --> 00:11:43,670 line:-2
+To verify that you are providing
+the correct jitter offset,
+
+
+237
+00:11:43.704 --> 00:11:46.340 line:-2 align:center
+render a scene
+without camera and object motion
+
+
+238
+00:11:46.373 --> 00:11:49.343 line:-2 align:center
+using a sequence
+of different jitter offsets.
+
+
+239
+00:11:49,376 --> 00:11:51,445 align:center
+On the left is an example
+
+
+240
+00:11:51,478 --> 00:11:53,881 line:0
+when incorrect jitter offset is specified.
+
+
+241
+00:11:53,914 --> 00:11:57,050 align:center
+Static objects could shift,
+and fine lines are fuzzy.
+
+
+242
+00:11:57,718 --> 00:11:59,453 align:center
+On the right is the output
+
+
+243
+00:11:59,486 --> 00:12:01,688 align:center
+when correct jitter offset is specified.
+
+
+244
+00:12:01,722 --> 00:12:03,056 align:center
+Objects stay in place,
+
+
+245
+00:12:03,090 --> 00:12:05,626 line:0
+and fine lines are resolved progressively.
+
+
+246
+00:12:05.659 --> 00:12:08.328 line:-2 align:center
+The MetalFX
+“temporal AA and upscaling” effect
+
+
+247
+00:12:08.362 --> 00:12:09.930 line:-1 align:center
+boosts your application performance
+
+
+248
+00:12:09.963 --> 00:12:13.033 line:-2 align:center
+and gives an upscaling quality
+that’s comparable to the quality
+
+
+249
+00:12:13.066 --> 00:12:16.069 line:-1 align:center
+of the native target resolution rendering.
+
+
+250
+00:12:16.103 --> 00:12:18.672 line:-2 align:center
+In order to get optimal quality
+and performance
+
+
+251
+00:12:18,705 --> 00:12:20,607 line:-1
+when using both upscaling effects,
+
+
+252
+00:12:20.641 --> 00:12:24.011 line:-2 align:center
+l’ll now cover
+implementation best practices.
+
+
+253
+00:12:25,245 --> 00:12:28,081 line:-1
+Starting with spatial upscaling.
+
+
+254
+00:12:28.115 --> 00:12:30.584 line:-1 align:center
+For the best spatial upscaling quality,
+
+
+255
+00:12:30.617 --> 00:12:33.754 line:-2 align:center
+the color input should be
+anti-aliased and noise free.
+
+
+256
+00:12:33.787 --> 00:12:35.289 line:-1 align:center
+This is because noise effects
+
+
+257
+00:12:35,322 --> 00:12:38,325 line:-2
+and aliased images
+prevent good edge determination,
+
+
+258
+00:12:38.358 --> 00:12:41.094 line:-2 align:center
+which will worsen
+the spatial upscaling quality.
+
+
+259
+00:12:41.929 --> 00:12:43.597 line:-1 align:center
+For the best performance,
+
+
+260
+00:12:43,630 --> 00:12:46,066 line:-1
+use the perceptual color processing mode.
+
+
+261
+00:12:46,099 --> 00:12:48,702 line:-2
+This means,
+your input color should be tone mapped,
+
+
+262
+00:12:48.735 --> 00:12:52.172 line:-2 align:center
+with values from 0-1,
+in the sRGB color space.
+
+
+263
+00:12:53.073 --> 00:12:56.043 line:-2 align:center
+And finally,
+set the appropriate negative mip bias
+
+
+264
+00:12:56,076 --> 00:12:58,712 line:-1
+for higher texture detail.
+
+
+265
+00:12:58,745 --> 00:13:00,848 line:-1
+The recommended mip bias calculation
+
+
+266
+00:13:00.881 --> 00:13:03.450 line:-1 align:center
+for spatial upscaling is to apply log2
+
+
+267
+00:13:03.483 --> 00:13:05.018 line:-1 align:center
+of the render resolution width,
+
+
+268
+00:13:05.052 --> 00:13:07.187 line:-1 align:center
+divided by the target resolution width.
+
+
+269
+00:13:08,388 --> 00:13:11,525 line:0
+For example,
+scaling each render resolution dimension
+
+
+270
+00:13:11,558 --> 00:13:15,062 align:center
+by 2x will result in -1 mip bias,
+
+
+271
+00:13:15,095 --> 00:13:17,865 align:center
+while scaling each dimension by 1.5x
+
+
+272
+00:13:17,898 --> 00:13:20,801 align:center
+will result in -0.58 mip bias.
+
+
+273
+00:13:21,602 --> 00:13:24,838 line:-2
+Note that lower mip levels
+might result in flickering for textures
+
+
+274
+00:13:24,872 --> 00:13:26,573 line:-1
+with high frequency patterns.
+
+
+275
+00:13:26.607 --> 00:13:28.876 line:-2 align:center
+You should adjust the mip bias
+for certain textures
+
+
+276
+00:13:28,909 --> 00:13:31,378 line:-1
+if you spot such artifacts.
+
+
+277
+00:13:31,411 --> 00:13:33,514 line:-1
+I will talk next about TemporalAA
+
+
+278
+00:13:33.547 --> 00:13:35.449 line:-1 align:center
+and upscaling best practices.
+
+
+279
+00:13:36,183 --> 00:13:39,486 line:-2
+To get the best quality
+from Temporal AA and upscaling,
+
+
+280
+00:13:39,520 --> 00:13:42,990 line:-2
+it's important to choose
+a good jitter sequence.
+
+
+281
+00:13:43.023 --> 00:13:44.324 line:-1 align:center
+Look for a jitter sequence
+
+
+282
+00:13:44.358 --> 00:13:46.560 line:-2 align:center
+that will provide
+a good distribution of samples
+
+
+283
+00:13:46.593 --> 00:13:47.628 line:-1 align:center
+across all the pixels
+
+
+284
+00:13:47,661 --> 00:13:50,230 line:-1
+in an upscaled target resolution.
+
+
+285
+00:13:50,264 --> 00:13:53,333 line:-2
+Usually, eight jittered samples
+per output pixel
+
+
+286
+00:13:53.367 --> 00:13:56.703 line:-2 align:center
+produces a high-quality
+anti-aliased upscaled output.
+
+
+287
+00:13:57.671 --> 00:14:00.908 line:-2 align:center
+In the case of 2x upscaling,
+the recommendation is to use
+
+
+288
+00:14:00.941 --> 00:14:03.710 line:-1 align:center
+a Halton (2,3) sequence with 32 jitters
+
+
+289
+00:14:03.744 --> 00:14:06.513 line:-1 align:center
+to produce your jittered color input.
+
+
+290
+00:14:06,547 --> 00:14:09,483 align:center
+Here’s a plot
+of the first 32 sample locations
+
+
+291
+00:14:09,516 --> 00:14:11,318 align:center
+from Halton (2,3) sequence,
+
+
+292
+00:14:11,351 --> 00:14:14,521 line:0
+producing approximately
+eight samples per output pixel.
+
+
+293
+00:14:15,322 --> 00:14:18,525 line:-2
+It's also important to set
+the appropriate negative mip bias
+
+
+294
+00:14:18,559 --> 00:14:20,661 line:-1
+for higher texture detail.
+
+
+295
+00:14:20.694 --> 00:14:22.529 line:-1 align:center
+The recommended mip bias calculation
+
+
+296
+00:14:22,563 --> 00:14:24,498 line:-1
+for temporal AA and upscaling
+
+
+297
+00:14:24.531 --> 00:14:27.367 line:-2 align:center
+is to apply log2
+of render resolution width,
+
+
+298
+00:14:27,401 --> 00:14:30,771 line:-2
+divided by target resolution width,
+subtracted by 1.
+
+
+299
+00:14:31,538 --> 00:14:34,808 align:center
+For example,
+scaling each render resolution dimension
+
+
+300
+00:14:34,842 --> 00:14:38,011 line:0
+by 2x will result in a -2 mip bias,
+
+
+301
+00:14:38,045 --> 00:14:40,480 align:center
+while scaling each dimension
+
+
+302
+00:14:40,514 --> 00:14:43,483 align:center
+by 1.5x will result in a -1.58 mip bias.
+
+
+303
+00:14:44.318 --> 00:14:47.487 line:-2 align:center
+Next, I will show you examples
+of how mip bias affects your output
+
+
+304
+00:14:47.521 --> 00:14:49.656 line:-1 align:center
+in different situations.
+
+
+305
+00:14:50.524 --> 00:14:52.659 line:-1 align:center
+Here are MetalFX temporal AA
+
+
+306
+00:14:52,693 --> 00:14:54,461 line:-1
+and upscaling outputs of the same scene
+
+
+307
+00:14:54,494 --> 00:14:57,998 line:-1
+using mip bias of 0, -1, and -2.
+
+
+308
+00:15:00.167 --> 00:15:01.869 line:-1 align:center
+Mip bias of -2 produces
+
+
+309
+00:15:01.902 --> 00:15:03.904 line:-1 align:center
+the sharpest and clearest output,
+
+
+310
+00:15:03,937 --> 00:15:05,639 line:-1
+while mip bias of 0 produces
+
+
+311
+00:15:05,672 --> 00:15:08,175 line:-1
+the softest and most blurry output.
+
+
+312
+00:15:09,610 --> 00:15:11,712 line:-2
+Here are three renderings
+of a circuit board
+
+
+313
+00:15:11.745 --> 00:15:14.381 line:-1 align:center
+that use the temporal upscaling effect.
+
+
+314
+00:15:14,414 --> 00:15:16,984 line:-2
+From top to bottom,
+the mip bias values applied
+
+
+315
+00:15:17.017 --> 00:15:19.319 line:-1 align:center
+when sampling textures are 0,
+
+
+316
+00:15:19.353 --> 00:15:21.922 line:-1 align:center
+-1, and -2.
+
+
+317
+00:15:21,955 --> 00:15:25,359 line:-2
+Because the circuit board’s textures
+have high-frequency patterns,
+
+
+318
+00:15:25,392 --> 00:15:27,661 line:-1
+such as its tiny trace wires,
+
+
+319
+00:15:27.694 --> 00:15:30.264 line:-1 align:center
+mip bias of -2 generates flickering
+
+
+320
+00:15:30.297 --> 00:15:31.865 line:-1 align:center
+and moire effects.
+
+
+321
+00:15:31.899 --> 00:15:34.134 line:-1 align:center
+However, mip bias of -1
+
+
+322
+00:15:34.168 --> 00:15:35.769 line:-1 align:center
+greatly reduces these effects,
+
+
+323
+00:15:35,802 --> 00:15:38,705 line:-2
+and mip bias of 0
+completely eliminates them.
+
+
+324
+00:15:39.673 --> 00:15:43.143 line:-2 align:center
+Lower mip levels
+generally result in more details.
+
+
+325
+00:15:43,177 --> 00:15:45,913 line:-2
+Use our mip bias suggestion
+as a starting point,
+
+
+326
+00:15:45.946 --> 00:15:47.948 line:-1 align:center
+but be mindful when choosing a mip bias
+
+
+327
+00:15:47,981 --> 00:15:50,150 line:-1
+for textures with high-frequency patterns.
+
+
+328
+00:15:50.184 --> 00:15:53.120 line:-2 align:center
+Follow these practices
+to ensure an anti-aliased,
+
+
+329
+00:15:53,153 --> 00:15:54,621 line:-1
+high-quality upscaled output
+
+
+330
+00:15:54.655 --> 00:15:57.858 line:-1 align:center
+from MetalFX Temporal AA and upscaling.
+
+
+331
+00:16:00,561 --> 00:16:02,863 line:-2
+Finally, I will cover
+performance best practice
+
+
+332
+00:16:02,896 --> 00:16:05,399 line:-1
+when using MetalFX Upscaling.
+
+
+333
+00:16:05.432 --> 00:16:08.468 line:-2 align:center
+To get the best performance
+with MetalFX Upscaling,
+
+
+334
+00:16:08.502 --> 00:16:11.338 line:-2 align:center
+you should be careful
+to avoid binding the same resources
+
+
+335
+00:16:11.371 --> 00:16:14.174 line:-2 align:center
+for reading and writing
+in two non-dependent render
+
+
+336
+00:16:14.208 --> 00:16:16.043 line:-1 align:center
+or compute passes.
+
+
+337
+00:16:16,076 --> 00:16:18,879 line:-1
+Doing so creates false dependencies.
+
+
+338
+00:16:18,912 --> 00:16:21,014 line:-1
+In Metal, it's always a good idea
+
+
+339
+00:16:21,048 --> 00:16:22,816 line:-1
+to avoid false dependencies.
+
+
+340
+00:16:22,850 --> 00:16:25,786 line:-2
+But this is especially important
+for MetalFX Upscaling,
+
+
+341
+00:16:25.819 --> 00:16:27.688 line:-1 align:center
+as I will describe next.
+
+
+342
+00:16:27,721 --> 00:16:30,424 line:-1
+In this example, there are two frames.
+
+
+343
+00:16:30.457 --> 00:16:33.794 line:-2 align:center
+The shadow and the post processing passes
+are completely unrelated
+
+
+344
+00:16:33.827 --> 00:16:36.997 line:-1 align:center
+and have no resource dependencies.
+
+
+345
+00:16:37.030 --> 00:16:39.666 line:-2 align:center
+Metal will overlap the next frame’s
+shadow pass
+
+
+346
+00:16:39.700 --> 00:16:42.369 line:-2 align:center
+with the current frame’s
+post processing pass.
+
+
+347
+00:16:43,504 --> 00:16:45,906 align:center
+However,
+if the post processing pass writes
+
+
+348
+00:16:45,939 --> 00:16:48,475 align:center
+to a Metal buffer while the shadow pass
+
+
+349
+00:16:48,509 --> 00:16:50,410 line:0
+also reads from the same buffer,
+
+
+350
+00:16:50,444 --> 00:16:53,347 align:center
+Metal will prevent the GPU
+from running these two passes
+
+
+351
+00:16:53,380 --> 00:16:56,617 line:0
+in parallel in order
+to avoid the potential hazard of reading
+
+
+352
+00:16:56,650 --> 00:16:59,786 align:center
+and writing to the same resource
+at the same time.
+
+
+353
+00:16:59,820 --> 00:17:01,555 align:center
+False dependencies between frames
+
+
+354
+00:17:01.588 --> 00:17:03.223 line:-1 align:center
+can negatively affect performance
+
+
+355
+00:17:03,257 --> 00:17:05,492 line:-1
+of MetalFX Upscaling.
+
+
+356
+00:17:05.526 --> 00:17:07.160 line:-1 align:center
+Notice that if there is no
+
+
+357
+00:17:07.194 --> 00:17:09.496 line:-1 align:center
+false dependency between frames,
+
+
+358
+00:17:09.530 --> 00:17:11.965 line:-2 align:center
+the next frame’s shadow pass
+could have overlapped
+
+
+359
+00:17:11.999 --> 00:17:14.935 line:-1 align:center
+with the previous frame's MetalFX Upscaling.
+
+
+360
+00:17:14.968 --> 00:17:17.204 line:-1 align:center
+However, because of the false dependency
+
+
+361
+00:17:17.237 --> 00:17:18.272 line:-1 align:center
+between frames,
+
+
+362
+00:17:18,305 --> 00:17:19,540 line:-1
+the performance loss now
+
+
+363
+00:17:19.573 --> 00:17:20.674 line:-1 align:center
+also includes the time
+
+
+364
+00:17:20,707 --> 00:17:22,109 line:-1
+it takes for MetalFX Upscaling
+
+
+365
+00:17:22.142 --> 00:17:23.944 line:-1 align:center
+to finish its process.
+
+
+366
+00:17:23.977 --> 00:17:25.479 line:-1 align:center
+Ideally, you should ensure that
+
+
+367
+00:17:25.512 --> 00:17:26.847 line:-1 align:center
+there are no false dependencies
+
+
+368
+00:17:26.880 --> 00:17:28.715 line:-1 align:center
+between frames to allow overlapping
+
+
+369
+00:17:28,749 --> 00:17:30,851 line:-1
+of workloads between different frames,
+
+
+370
+00:17:30.884 --> 00:17:32.786 line:-1 align:center
+ensuring the most optimal performance
+
+
+371
+00:17:32.819 --> 00:17:35.822 line:-1 align:center
+when using MetalFX Upscaling.
+
+
+372
+00:17:35.856 --> 00:17:36.957 line:-1 align:center
+In this example,
+
+
+373
+00:17:36,990 --> 00:17:38,725 line:-1
+you can instead create a separate buffer
+
+
+374
+00:17:38.759 --> 00:17:40.894 line:-1 align:center
+for the post processing and shadow passes
+
+
+375
+00:17:40,928 --> 00:17:44,264 line:-1
+to prevent the false dependency,
+
+
+376
+00:17:44.298 --> 00:17:46.233 line:-1 align:center
+resulting in parallel execution
+
+
+377
+00:17:46,266 --> 00:17:48,435 line:-1
+of independent passes.
+
+
+378
+00:17:49.436 --> 00:17:52.306 line:-2 align:center
+Avoiding false dependencies
+is something you always want
+
+
+379
+00:17:52,339 --> 00:17:55,142 line:-2
+to keep in mind
+when adopting MetalFX Upscaling.
+
+
+380
+00:17:55.175 --> 00:17:57.978 line:-2 align:center
+When deciding which
+of these two effects to choose,
+
+
+381
+00:17:58.011 --> 00:18:01.215 line:-2 align:center
+there are some considerations
+you should also keep in mind.
+
+
+382
+00:18:01.949 --> 00:18:05.152 line:-2 align:center
+With ever-increasing shading costs
+and pixel counts,
+
+
+383
+00:18:05.185 --> 00:18:07.855 line:-2 align:center
+temporal AA and upscaling
+is here to stay.
+
+
+384
+00:18:07,888 --> 00:18:11,058 line:-2
+Amortizing pixels temporally
+increases visual fidelity
+
+
+385
+00:18:11.091 --> 00:18:12.993 line:-1 align:center
+and boosts performance.
+
+
+386
+00:18:13.026 --> 00:18:15.996 line:-2 align:center
+If you don’t already have
+a great temporal AA solution
+
+
+387
+00:18:16,029 --> 00:18:17,664 line:-1
+and can render jittered color,
+
+
+388
+00:18:17,698 --> 00:18:19,933 line:-1
+motion, and depth buffers,
+
+
+389
+00:18:19,967 --> 00:18:22,336 line:-1
+MetalFX temporal AA and upscaling provides
+
+
+390
+00:18:22,369 --> 00:18:24,438 line:-1
+a compelling platform-optimized solution
+
+
+391
+00:18:24,471 --> 00:18:26,206 line:-1
+that you should consider.
+
+
+392
+00:18:26.240 --> 00:18:28.275 line:-1 align:center
+If you don’t have the necessary inputs
+
+
+393
+00:18:28.308 --> 00:18:30.644 line:-1 align:center
+or already have a well tuned AA solution,
+
+
+394
+00:18:30.677 --> 00:18:34.114 line:-1 align:center
+consider using MetalFX spatial upscaling.
+
+
+395
+00:18:34,147 --> 00:18:36,917 line:-2
+With that, hopefully you now
+have a better understanding
+
+
+396
+00:18:36,950 --> 00:18:39,219 line:-1
+of which upscaling effect to choose.
+
+
+397
+00:18:39,253 --> 00:18:42,256 line:-2
+I will next show examples
+of both of these effects running live
+
+
+398
+00:18:42,289 --> 00:18:44,658 line:-1
+in Metal applications.
+
+
+399
+00:18:44,691 --> 00:18:47,361 line:-2
+Here’s a side by side comparison
+of the “Bistro” scene
+
+
+400
+00:18:47,394 --> 00:18:50,130 line:-2
+from our “Modern Rendering with Metal”
+sample code,
+
+
+401
+00:18:50,163 --> 00:18:52,666 line:-2
+which features
+real-time rendering algorithms,
+
+
+402
+00:18:52.699 --> 00:18:56.203 line:-1 align:center
+like ambient occlusion and volumetric fog.
+
+
+403
+00:18:56.236 --> 00:18:58.839 line:-1 align:center
+Native rendering at 1080p on the left
+
+
+404
+00:18:58.872 --> 00:19:00.140 line:-1 align:center
+versus 4K output
+
+
+405
+00:19:00.174 --> 00:19:02.876 line:-2 align:center
+with MetalFX Spatial upscaling
+on the right.
+
+
+406
+00:19:02.910 --> 00:19:06.246 line:-2 align:center
+Note that this sample has
+its own temporal anti-aliasing solution,
+
+
+407
+00:19:06,280 --> 00:19:09,550 line:-2
+which we use as input
+for MetalFX spatial upscaling.
+
+
+408
+00:19:10,584 --> 00:19:13,520 line:-1
+Zooming in more closely at the scooter...
+
+
+409
+00:19:15,422 --> 00:19:18,692 line:-2
+On the left, the image is a bit blurry,
+while on the right,
+
+
+410
+00:19:18,725 --> 00:19:20,894 line:-1
+the spatially upscaled output results
+
+
+411
+00:19:20.928 --> 00:19:23.697 line:-1 align:center
+in a sharper image with cleaner edges.
+
+
+412
+00:19:23.730 --> 00:19:26.967 line:-2 align:center
+The straight line
+on the handle bar is nicely antialiased.
+
+
+413
+00:19:28.268 --> 00:19:31.305 line:-2 align:center
+The curve on the body
+is also much smoother.
+
+
+414
+00:19:32.239 --> 00:19:35.509 line:-1 align:center
+Let's do a performance comparison.
+
+
+415
+00:19:35.542 --> 00:19:38.512 line:-1 align:center
+On the left is a native rendering at 4K.
+
+
+416
+00:19:38.545 --> 00:19:40.547 line:-1 align:center
+On the right is the 4K output
+
+
+417
+00:19:40,581 --> 00:19:42,850 line:-1
+from MetalFX Spatial upscaling.
+
+
+418
+00:19:44.184 --> 00:19:46.954 line:-2 align:center
+As the camera moves,
+the native rendering on the left
+
+
+419
+00:19:46.987 --> 00:19:48.956 line:-1 align:center
+is running at a choppy frame rate,
+
+
+420
+00:19:48.989 --> 00:19:50.891 line:-1 align:center
+while the spatially upscaled output
+
+
+421
+00:19:50,924 --> 00:19:53,060 line:-1
+on the right is much smoother.
+
+
+422
+00:19:55,429 --> 00:19:57,531 line:-1
+Next is a side-by-side comparison
+
+
+423
+00:19:57.564 --> 00:20:00.400 line:-2 align:center
+of a ray-traced scene
+with many reflections and shadows.
+
+
+424
+00:20:01.235 --> 00:20:04.438 line:-2 align:center
+On the left is
+a native rendering at 1080p.
+
+
+425
+00:20:04,471 --> 00:20:06,507 line:-1
+On the right is the 4K output
+
+
+426
+00:20:06.540 --> 00:20:08.976 line:-1 align:center
+with MetalFX Temporal AA and upscaling.
+
+
+427
+00:20:10.310 --> 00:20:13.347 line:-2 align:center
+Zooming in more closely
+at the chandelier...
+
+
+428
+00:20:14.448 --> 00:20:17.651 line:-2 align:center
+The native output
+on the left has an aliased look,
+
+
+429
+00:20:17.684 --> 00:20:19.720 line:-2 align:center
+while the temporally upscaled output
+on the right
+
+
+430
+00:20:19.753 --> 00:20:22.890 line:-1 align:center
+has sharp edges with more fine details.
+
+
+431
+00:20:22,923 --> 00:20:26,393 line:-2
+The shadow is nice and crisp
+rather than fuzzy looking.
+
+
+432
+00:20:26.426 --> 00:20:29.396 line:-2 align:center
+And fine details on the chandelier
+can now be recognized.
+
+
+433
+00:20:32.266 --> 00:20:34.201 line:-1 align:center
+Performance gains are also apparent
+
+
+434
+00:20:34.234 --> 00:20:37.037 line:-1 align:center
+with MetalFX Temporal AA and upscaling.
+
+
+435
+00:20:37.070 --> 00:20:40.007 line:-1 align:center
+On the left is native rendering at 4K.
+
+
+436
+00:20:40.040 --> 00:20:41.909 line:-1 align:center
+On the right is the 4K output
+
+
+437
+00:20:41.942 --> 00:20:44.978 line:-1 align:center
+with MetalFX Temporal AA and upscaling.
+
+
+438
+00:20:45,012 --> 00:20:47,748 line:-2
+As the camera moves,
+the native rendering on the left
+
+
+439
+00:20:47,781 --> 00:20:49,983 line:-1
+is running at a very low frame rate,
+
+
+440
+00:20:50.017 --> 00:20:51.585 line:-1 align:center
+while the temporally upscaled output
+
+
+441
+00:20:51,618 --> 00:20:53,654 line:-1
+on the right is much smoother.
+
+
+442
+00:21:06,967 --> 00:21:08,836 line:-1
+Leading game developers are excited
+
+
+443
+00:21:08.869 --> 00:21:11.605 line:-1 align:center
+by the capabilities of MetalFX Upscaling
+
+
+444
+00:21:11.638 --> 00:21:13.807 line:-1 align:center
+and will be bringing "Grid: Legends,"
+
+
+445
+00:21:13.841 --> 00:21:15.576 line:-1 align:center
+"Resident Evil: Village,"
+
+
+446
+00:21:15,609 --> 00:21:18,512 line:-1
+and "No Man’s Sky" to Mac later this year.
+
+
+447
+00:21:18,545 --> 00:21:21,682 line:-2
+Next, I’ll show you some early work
+using the framework.
+
+
+448
+00:21:21.715 --> 00:21:24.718 line:-1 align:center
+[rumbling and impacts]
+
+
+449
+00:21:25.986 --> 00:21:28.689 line:-2 align:center
+In this scene,
+we can see the incredible visuals
+
+
+450
+00:21:28,722 --> 00:21:30,824 line:-1
+and fluid gameplay of "No Man’s Sky"
+
+
+451
+00:21:30.858 --> 00:21:33.794 line:-1 align:center
+using MetalFX Temporal AA and Upscaling.
+
+
+452
+00:21:33.827 --> 00:21:34.795 line:-1 align:center
+[ship beeps]
+
+
+453
+00:21:34.828 --> 00:21:37.331 line:-1 align:center
+[engine rumbles]
+
+
+454
+00:21:41.301 --> 00:21:42.269 line:-1 align:center
+To recap,
+
+
+455
+00:21:42.302 --> 00:21:45.639 line:-2 align:center
+MetalFX is a new API
+with a focus on upscaling.
+
+
+456
+00:21:45.672 --> 00:21:47.841 line:-1 align:center
+Spatial upscaling is easy to adopt
+
+
+457
+00:21:47.875 --> 00:21:50.043 line:-2 align:center
+and delivers
+substantial performance gains,
+
+
+458
+00:21:50.077 --> 00:21:52.246 line:-1 align:center
+and you can use Temporal AA and upscaling
+
+
+459
+00:21:52.279 --> 00:21:54.715 line:-1 align:center
+to deliver higher quality rendering.
+
+
+460
+00:21:54,748 --> 00:21:57,818 line:-2
+Following the best practices
+I talked about earlier will ensure
+
+
+461
+00:21:57,851 --> 00:22:01,121 line:-1
+you get the most out of MetalFX Upscaling.
+
+
+462
+00:22:01.154 --> 00:22:02.656 line:-1 align:center
+Thank you for watching.
+
+
+463
+00:22:02,689 --> 00:22:06,193 line:0
+♪ ♪
+

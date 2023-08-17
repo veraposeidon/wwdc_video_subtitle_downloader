@@ -1,0 +1,1145 @@
+1
+00:00:03,904 --> 00:00:06,974 line:-1
+Hello, and welcome to WWDC.
+
+
+2
+00:00:08,775 --> 00:00:10,444 line:0
+Hi. I'm Tommy Pauly.
+
+
+3
+00:00:10,943 --> 00:00:15,282 line:0
+Encrypted DNS is a key technology
+for improving internet privacy.
+
+
+4
+00:00:15,816 --> 00:00:18,385 line:-2
+And it's supported natively
+on Apple platforms
+
+
+5
+00:00:18,452 --> 00:00:21,121 line:-2
+as an underlying technology
+that you as a developer
+
+
+6
+00:00:21,188 --> 00:00:22,456 line:-1
+can enable for users.
+
+
+7
+00:00:23,557 --> 00:00:25,792 line:-1
+If you provide a public DNS service,
+
+
+8
+00:00:26,260 --> 00:00:29,129 line:-2
+you can write an app,
+or a configuration profile,
+
+
+9
+00:00:29,196 --> 00:00:32,198 line:-2
+to let people use
+your encrypted DNS server.
+
+
+10
+00:00:33,834 --> 00:00:38,272 line:-2
+You can also opt in to encrypted DNS
+for specific connections
+
+
+11
+00:00:38,338 --> 00:00:39,673 line:-1
+within your own apps.
+
+
+12
+00:00:40,507 --> 00:00:44,978 line:-2
+Before we dive into how you use
+encrypted DNS on Apple platforms,
+
+
+13
+00:00:45,045 --> 00:00:49,716 line:-2
+let's talk about what DNS is,
+and why it matters for privacy.
+
+
+14
+00:00:50,317 --> 00:00:53,053 line:-1
+DNS is the domain name system.
+
+
+15
+00:00:53,620 --> 00:00:56,924 line:-2
+It's what takes a name that you see
+for a web page in Safari,
+
+
+16
+00:00:57,324 --> 00:01:01,828 line:-2
+and turns it into the actual IP addresses
+of servers on the internet.
+
+
+17
+00:01:02,829 --> 00:01:07,534 line:-2
+Your devices are using DNS
+every time you access the internet.
+
+
+18
+00:01:08,202 --> 00:01:13,640 line:-2
+When your app accesses a website,
+the system asks a question, a DNS query,
+
+
+19
+00:01:13,974 --> 00:01:16,743 line:-1
+to turn that name into a set of addresses.
+
+
+20
+00:01:17,377 --> 00:01:20,414 line:-2
+Generally, the question is sent
+to a DNS server
+
+
+21
+00:01:20,480 --> 00:01:22,516 line:-1
+configured by your local network.
+
+
+22
+00:01:23,083 --> 00:01:25,219 line:-2
+So where does privacy
+come into the picture?
+
+
+23
+00:01:26,186 --> 00:01:29,790 line:-2
+One concern
+is that DNS questions and answers
+
+
+24
+00:01:29,857 --> 00:01:33,660 line:-2
+are usually sent over
+an unencrypted transport, UDP.
+
+
+25
+00:01:34,228 --> 00:01:36,597 line:-2
+That means that other devices
+on the network
+
+
+26
+00:01:36,663 --> 00:01:39,433 line:-2
+can not only see
+what names you're looking up,
+
+
+27
+00:01:39,600 --> 00:01:42,503 line:-2
+but they can even interfere
+with the answers.
+
+
+28
+00:01:43,036 --> 00:01:47,908 line:-2
+The other privacy concern
+is that you may not trust the DNS resolver
+
+
+29
+00:01:47,975 --> 00:01:49,309 line:-1
+on your local network.
+
+
+30
+00:01:49,877 --> 00:01:52,145 line:-1
+If you've joined a public Wi-Fi network,
+
+
+31
+00:01:52,346 --> 00:01:55,482 line:-2
+your internet usage could be tracked
+or blocked.
+
+
+32
+00:01:56,283 --> 00:01:59,720 line:-2
+So how does encrypted DNS
+improve this situation?
+
+
+33
+00:02:00,787 --> 00:02:02,990 line:-1
+Encrypted DNS, simply put,
+
+
+34
+00:02:03,056 --> 00:02:07,227 line:-2
+is using encryption to protect
+your DNS questions and answers.
+
+
+35
+00:02:08,662 --> 00:02:11,498 line:-2
+And if you don't trust
+the network you're on,
+
+
+36
+00:02:11,798 --> 00:02:16,937 line:-2
+it can also involve sending your questions
+to a DNS server that you do trust.
+
+
+37
+00:02:18,539 --> 00:02:19,773 line:-1
+Starting this year,
+
+
+38
+00:02:20,073 --> 00:02:23,377 line:-2
+Apple platforms natively support
+encrypted DNS.
+
+
+39
+00:02:24,211 --> 00:02:25,946 line:-1
+There are two supported protocols.
+
+
+40
+00:02:26,547 --> 00:02:29,983 line:-1
+DNS over TLS, also called DoT,
+
+
+41
+00:02:30,317 --> 00:02:34,321 line:-1
+and DNS over HTTPS, also called DoH.
+
+
+42
+00:02:35,088 --> 00:02:39,126 line:-2
+Both of these use TLS
+to encrypt DNS messages.
+
+
+43
+00:02:39,693 --> 00:02:44,798 line:-2
+DoH additionally uses HTTP
+to improve performance.
+
+
+44
+00:02:45,966 --> 00:02:48,836 line:-2
+There are two ways that encrypted DNS
+can be enabled.
+
+
+45
+00:02:49,169 --> 00:02:52,139 line:-2
+The first way is to choose
+a single DNS server
+
+
+46
+00:02:52,206 --> 00:02:55,676 line:-2
+as the default resolver
+for all apps on the system.
+
+
+47
+00:02:56,276 --> 00:02:58,912 line:-1
+If you provide a public DNS server,
+
+
+48
+00:02:58,979 --> 00:03:01,248 line:-2
+you can now write
+a NetworkExtension app
+
+
+49
+00:03:01,315 --> 00:03:04,084 line:-2
+that configures the system
+to use your server.
+
+
+50
+00:03:05,519 --> 00:03:09,156 line:-2
+Or, if you use mobile device management,
+MDM,
+
+
+51
+00:03:09,389 --> 00:03:11,825 line:-2
+to configure enterprise settings
+on devices,
+
+
+52
+00:03:12,192 --> 00:03:16,263 line:-2
+you can push down a profile
+to configure encrypted DNS settings
+
+
+53
+00:03:16,330 --> 00:03:17,698 line:-1
+for your networks.
+
+
+54
+00:03:18,165 --> 00:03:23,537 line:-2
+The second way to enable encrypted DNS
+is to opt in directly from an app.
+
+
+55
+00:03:24,304 --> 00:03:27,040 line:-2
+If you want your app
+to use encrypted DNS,
+
+
+56
+00:03:27,107 --> 00:03:29,643 line:-1
+even if the rest of the system isn't yet,
+
+
+57
+00:03:30,310 --> 00:03:35,482 line:-2
+you can select a specific server to use
+for some or all of your app's connections.
+
+
+58
+00:03:37,584 --> 00:03:41,421 line:-2
+Let's start by looking at how
+the system-wide DNS settings work.
+
+
+59
+00:03:42,356 --> 00:03:46,793 line:-2
+System DNS settings can be configured
+either by a NetworkExtension app
+
+
+60
+00:03:46,860 --> 00:03:50,063 line:-1
+that uses NEDNSSettingsManager,
+
+
+61
+00:03:50,597 --> 00:03:54,868 line:-2
+or an MDM profile that contains
+a DNSSettings payload.
+
+
+62
+00:03:56,003 --> 00:03:59,806 line:-2
+Both of these methods allow you
+to specify the same content.
+
+
+63
+00:04:01,275 --> 00:04:05,579 line:-2
+A DNS server configuration
+that identifies which server to use,
+
+
+64
+00:04:05,646 --> 00:04:07,648 line:-1
+and which protocol the server supports,
+
+
+65
+00:04:08,348 --> 00:04:10,184 line:-1
+and a set of Network Rules
+
+
+66
+00:04:10,450 --> 00:04:14,888 line:-2
+that allows you to customize
+when your DNS settings should apply.
+
+
+67
+00:04:16,490 --> 00:04:18,091 line:-1
+Let's look at how you specify
+
+
+68
+00:04:18,158 --> 00:04:21,394 line:-2
+the server configuration
+using NetworkExtension.
+
+
+69
+00:04:22,829 --> 00:04:26,867 line:-2
+Use the shared
+NEDNSSettingsManager object
+
+
+70
+00:04:26,934 --> 00:04:30,571 line:-2
+to first load in
+any existing configuration.
+
+
+71
+00:04:32,706 --> 00:04:38,879 line:-2
+Next, you can define settings
+for either a DNS over HTTPS server,
+
+
+72
+00:04:38,946 --> 00:04:41,114 line:-1
+or a DNS over TLS server.
+
+
+73
+00:04:42,115 --> 00:04:44,284 line:-1
+In this example, we're using DoH.
+
+
+74
+00:04:45,285 --> 00:04:47,521 line:-2
+You can provide
+the server's IP addresses,
+
+
+75
+00:04:47,588 --> 00:04:49,323 line:-1
+which are optional,
+
+
+76
+00:04:49,389 --> 00:04:52,226 line:-1
+and the server URL, which is required.
+
+
+77
+00:04:52,993 --> 00:04:56,997 line:-2
+You set this object
+into the "dnsSettings" property.
+
+
+78
+00:04:59,132 --> 00:05:04,137 line:-2
+You then call saveToPreferences
+to apply the configuration to the system.
+
+
+79
+00:05:04,872 --> 00:05:08,842 line:-2
+At this point,
+a user can enable your DNS server
+
+
+80
+00:05:08,909 --> 00:05:10,377 line:-1
+in the settings app.
+
+
+81
+00:05:12,012 --> 00:05:15,516 line:-2
+Next, let's look at the Network Rules part
+of the configuration.
+
+
+82
+00:05:16,183 --> 00:05:20,954 line:-2
+Specifying Network Rules allows you
+to ensure that your DNS settings
+
+
+83
+00:05:21,021 --> 00:05:23,290 line:-1
+are compatible with different networks.
+
+
+84
+00:05:23,357 --> 00:05:26,126 line:-1
+Encrypted DNS can be great for privacy,
+
+
+85
+00:05:26,193 --> 00:05:30,297 line:-2
+but a public DNS server isn't able
+to resolve private names
+
+
+86
+00:05:30,364 --> 00:05:32,566 line:-1
+that are only known to local networks.
+
+
+87
+00:05:33,100 --> 00:05:37,304 line:-2
+For example, only a DNS server
+on an enterprise Wi-Fi network
+
+
+88
+00:05:37,371 --> 00:05:41,742 line:-2
+can resolve certain private names
+that are accessed by employees.
+
+
+89
+00:05:42,609 --> 00:05:46,246 line:-2
+Some aspects of compatibility
+are handled for you automatically.
+
+
+90
+00:05:46,446 --> 00:05:49,483 line:-2
+For these, you don't need to specify
+Network Rules.
+
+
+91
+00:05:50,384 --> 00:05:52,019 line:-1
+Captive network detection,
+
+
+92
+00:05:52,085 --> 00:05:54,888 line:-2
+like when someone logs on
+to a café network
+
+
+93
+00:05:54,955 --> 00:05:57,558 line:-1
+is automatically granted an exception.
+
+
+94
+00:05:58,559 --> 00:06:01,828 line:-1
+Similarly, if a VPN is active,
+
+
+95
+00:06:02,229 --> 00:06:07,601 line:-2
+resolution within the VPN tunnel
+will use the VPN's DNS settings
+
+
+96
+00:06:07,668 --> 00:06:10,237 line:-1
+and not your system-wide settings.
+
+
+97
+00:06:11,538 --> 00:06:14,975 line:-2
+However,
+handling cases like private names
+
+
+98
+00:06:15,042 --> 00:06:16,944 line:-1
+on enterprise Wi-Fi networks
+
+
+99
+00:06:17,010 --> 00:06:19,580 line:-1
+requires setting up Network Rules.
+
+
+100
+00:06:20,180 --> 00:06:24,618 line:-2
+Your Network Rules can define behavior
+for specific network types,
+
+
+101
+00:06:24,685 --> 00:06:29,156 line:-2
+like Wi-Fi or cellular,
+and specific Wi-Fi SSIDs.
+
+
+102
+00:06:30,157 --> 00:06:31,592 line:-1
+On matching networks,
+
+
+103
+00:06:31,658 --> 00:06:34,962 line:-2
+you can disable
+your DNS settings entirely,
+
+
+104
+00:06:35,028 --> 00:06:38,999 line:-2
+or only grant exceptions
+for specific private domains.
+
+
+105
+00:06:39,466 --> 00:06:42,769 line:-2
+Here's how to set up some Network Rules
+in your app.
+
+
+106
+00:06:42,836 --> 00:06:46,540 line:-2
+Your app should allow users
+to configure these kinds of rules.
+
+
+107
+00:06:48,208 --> 00:06:50,777 line:-2
+To create an exception
+for a work network,
+
+
+108
+00:06:50,844 --> 00:06:55,215 line:-2
+define a rule for a Wi-Fi network
+with a particular SSID.
+
+
+109
+00:06:56,016 --> 00:06:59,019 line:-2
+The list of connection rules
+defines a domain,
+
+
+110
+00:06:59,086 --> 00:07:02,489 line:-1
+in this case, enterprise.example.net,
+
+
+111
+00:07:02,556 --> 00:07:04,992 line:-1
+that should not use your DNS settings.
+
+
+112
+00:07:06,593 --> 00:07:09,796 line:-2
+Overall, this rule says
+that your DNS settings
+
+
+113
+00:07:09,863 --> 00:07:12,065 line:-1
+should be used on the work Wi-Fi network
+
+
+114
+00:07:12,132 --> 00:07:16,069 line:-2
+for everything other than
+the private enterprise domain.
+
+
+115
+00:07:17,905 --> 00:07:21,475 line:-2
+You can also set up rules
+to disable your DNS settings
+
+
+116
+00:07:21,542 --> 00:07:25,646 line:-2
+on an entire category of networks
+using a Disconnect rule.
+
+
+117
+00:07:26,413 --> 00:07:30,551 line:-2
+Here, we're disabling DNS settings
+on all cellular networks.
+
+
+118
+00:07:32,586 --> 00:07:36,356 line:-2
+The last rule you should set
+should always be a catchall.
+
+
+119
+00:07:36,890 --> 00:07:37,925 line:-1
+In this case,
+
+
+120
+00:07:37,991 --> 00:07:41,028 line:-2
+let's make sure your DNS settings
+are on by default
+
+
+121
+00:07:41,094 --> 00:07:43,130 line:-1
+by using a Connect rule.
+
+
+122
+00:07:45,499 --> 00:07:48,735 line:-2
+You store your Network Rules
+as an ordered list,
+
+
+123
+00:07:48,802 --> 00:07:50,938 line:-1
+and then can save the configuration.
+
+
+124
+00:07:52,606 --> 00:07:56,443 line:-2
+Now we're ready to see
+a DNS Settings app in action.
+
+
+125
+00:07:58,612 --> 00:08:03,183 line:-2
+Here's an example project that configures
+the system-wide DNS settings.
+
+
+126
+00:08:03,684 --> 00:08:07,754 line:-2
+In our app,
+we use NEDNSSettingsManager.
+
+
+127
+00:08:08,789 --> 00:08:11,992 line:-2
+Here, we can define
+the server configuration,
+
+
+128
+00:08:13,160 --> 00:08:18,232 line:-2
+and we can also set up the Network Rules
+based on the user preferences.
+
+
+129
+00:08:18,966 --> 00:08:22,836 line:-2
+This particular app supports enabling
+or disabling
+
+
+130
+00:08:22,903 --> 00:08:25,539 line:-1
+on both cellular and Wi-Fi networks.
+
+
+131
+00:08:27,207 --> 00:08:28,308 line:-1
+Before we run the app,
+
+
+132
+00:08:28,375 --> 00:08:31,445 line:-2
+we need to make sure that
+the DNS Settings capability
+
+
+133
+00:08:31,512 --> 00:08:33,145 line:-1
+is enabled in Xcode.
+
+
+134
+00:08:33,881 --> 00:08:36,817 line:-2
+To check this,
+go to your Project Settings,
+
+
+135
+00:08:39,219 --> 00:08:42,222 line:-1
+and then over to Signing & Capabilities.
+
+
+136
+00:08:44,558 --> 00:08:49,096 line:-2
+The DNS Settings capability is one
+of the NetworkExtension capabilities.
+
+
+137
+00:08:49,863 --> 00:08:53,500 line:-2
+And since we're configuring a protocol
+that's supported by the system,
+
+
+138
+00:08:54,301 --> 00:08:56,670 line:-2
+we don't need to implement
+an extension point.
+
+
+139
+00:08:56,737 --> 00:08:58,939 line:-1
+We only need to build an app.
+
+
+140
+00:09:00,140 --> 00:09:01,675 line:-1
+Let's look at that app now.
+
+
+141
+00:09:03,343 --> 00:09:07,414 line:-2
+When we run the app,
+the configuration is installed,
+
+
+142
+00:09:07,481 --> 00:09:09,082 line:-1
+but not active immediately.
+
+
+143
+00:09:10,250 --> 00:09:14,087 line:-2
+We can enable or disable our settings
+on Wi-Fi or cellular,
+
+
+144
+00:09:14,688 --> 00:09:18,592 line:-2
+and then enable the entire configuration
+in the settings app.
+
+
+145
+00:09:20,561 --> 00:09:25,098 line:-1
+We go to Settings, General,
+
+
+146
+00:09:26,433 --> 00:09:28,569 line:-1
+and look at VPN & Network.
+
+
+147
+00:09:29,536 --> 00:09:32,406 line:-1
+Here, there's a section for DNS
+
+
+148
+00:09:32,472 --> 00:09:36,076 line:-2
+where your app will show up
+once you've installed your configuration.
+
+
+149
+00:09:37,010 --> 00:09:39,813 line:-1
+If you select your settings,
+
+
+150
+00:09:39,880 --> 00:09:42,683 line:-2
+they will be automatically applied
+to the whole system.
+
+
+151
+00:09:43,050 --> 00:09:44,585 line:-1
+And if you go back to your app,
+
+
+152
+00:09:44,651 --> 00:09:47,421 line:-2
+you can now see that the configuration
+is active.
+
+
+153
+00:09:48,589 --> 00:09:49,890 line:-1
+That's all you have to do.
+
+
+154
+00:09:49,957 --> 00:09:54,595 line:-2
+At this point, your DNS settings
+will apply to all apps on the system.
+
+
+155
+00:09:55,796 --> 00:09:58,365 line:-1
+Be aware that some networks may block
+
+
+156
+00:09:58,432 --> 00:10:01,935 line:-2
+using your encrypted DNS server
+by policy.
+
+
+157
+00:10:02,002 --> 00:10:04,304 line:-2
+These networks might be trying
+to filter traffic
+
+
+158
+00:10:04,371 --> 00:10:06,306 line:-1
+by looking at DNS queries.
+
+
+159
+00:10:07,040 --> 00:10:11,645 line:-2
+If this occurs, a Wi-Fi network is marked
+with a privacy warning.
+
+
+160
+00:10:12,212 --> 00:10:16,416 line:-2
+Connections in apps will fail
+rather than compromise your privacy.
+
+
+161
+00:10:17,484 --> 00:10:21,121 line:-2
+If you don't provide a DNS service
+that the entire system can use,
+
+
+162
+00:10:21,188 --> 00:10:24,124 line:-2
+but you still want to use encrypted DNS
+in your app,
+
+
+163
+00:10:24,758 --> 00:10:27,461 line:-2
+you can enable encrypted DNS
+throughout your app,
+
+
+164
+00:10:27,528 --> 00:10:29,429 line:-1
+or for specific connections.
+
+
+165
+00:10:30,264 --> 00:10:33,834 line:-2
+This approach works
+no matter what system APIs you use:
+
+
+166
+00:10:34,468 --> 00:10:38,505 line:-2
+URLSessionTasks,
+Network framework connections,
+
+
+167
+00:10:38,572 --> 00:10:41,475 line:-1
+or POSIX APIs like getaddrinfo.
+
+
+168
+00:10:42,376 --> 00:10:45,179 line:-2
+Let's take a look
+at enabling encrypted DNS
+
+
+169
+00:10:45,245 --> 00:10:46,880 line:-1
+with Network framework.
+
+
+170
+00:10:47,481 --> 00:10:50,517 line:-2
+You select your options
+with a PrivacyContext.
+
+
+171
+00:10:51,151 --> 00:10:53,487 line:-1
+You create one PrivacyContext
+
+
+172
+00:10:53,554 --> 00:10:57,124 line:-2
+for every set of connections
+that share DNS settings.
+
+
+173
+00:10:59,326 --> 00:11:01,495 line:-1
+When you require encryption,
+
+
+174
+00:11:01,562 --> 00:11:05,699 line:-2
+you can provide a DNS server
+configuration to use as a fallback.
+
+
+175
+00:11:06,300 --> 00:11:11,471 line:-2
+That means that any system-wide
+DNS configuration will take precedence,
+
+
+176
+00:11:11,538 --> 00:11:14,575 line:-2
+but your app's fallback
+will kick in otherwise.
+
+
+177
+00:11:15,442 --> 00:11:19,112 line:-1
+Here, we use the URL of a DoH server.
+
+
+178
+00:11:21,782 --> 00:11:24,518 line:-2
+When you create parameters
+for your connections,
+
+
+179
+00:11:24,585 --> 00:11:27,688 line:-2
+set the PrivacyContext
+you created earlier.
+
+
+180
+00:11:29,389 --> 00:11:33,260 line:-2
+Then, start your connections,
+and they will use encrypted DNS.
+
+
+181
+00:11:36,463 --> 00:11:38,932 line:-2
+You can also check
+whether encrypted DNS
+
+
+182
+00:11:38,999 --> 00:11:41,068 line:-1
+was used on a given connection.
+
+
+183
+00:11:42,603 --> 00:11:46,473 line:-2
+Once a connection is ready,
+request an EstablishmentReport.
+
+
+184
+00:11:48,308 --> 00:11:51,278 line:-2
+This report has a list
+of resolution steps.
+
+
+185
+00:11:52,145 --> 00:11:54,982 line:-2
+You can check which protocol
+was used for DNS:
+
+
+186
+00:11:55,916 --> 00:12:00,621 line:-1
+HTTPS, TLS, UDP, or TCP.
+
+
+187
+00:12:01,388 --> 00:12:06,393 line:-2
+Note that answers that came from a cache
+may not have any protocol set.
+
+
+188
+00:12:06,760 --> 00:12:09,763 line:-2
+If you want to use encrypted DNS
+throughout your app,
+
+
+189
+00:12:09,830 --> 00:12:12,900 line:-2
+you can configure
+the default PrivacyContext.
+
+
+190
+00:12:13,901 --> 00:12:15,869 line:-1
+This applies your configuration
+
+
+191
+00:12:15,936 --> 00:12:19,206 line:-2
+to every DNS resolution initiated
+by your app,
+
+
+192
+00:12:20,941 --> 00:12:24,077 line:-1
+either when you use URLSessionTasks,
+
+
+193
+00:12:25,846 --> 00:12:30,083 line:-2
+or when you use lower-layer APIs
+like getaddrinfo.
+
+
+194
+00:12:32,686 --> 00:12:35,255 line:-2
+Now you're ready
+to try out encrypted DNS.
+
+
+195
+00:12:36,056 --> 00:12:38,725 line:-1
+If you provide a public DNS service,
+
+
+196
+00:12:38,792 --> 00:12:42,462 line:-2
+write an app
+that uses NEDNSSettingsManager
+
+
+197
+00:12:42,529 --> 00:12:43,997 line:-1
+to deliver your settings.
+
+
+198
+00:12:45,132 --> 00:12:48,235 line:-1
+If you have an enterprise MDM solution,
+
+
+199
+00:12:48,302 --> 00:12:52,239 line:-2
+use profiles to enable encrypted DNS
+on your networks.
+
+
+200
+00:12:53,507 --> 00:12:56,577 line:-2
+And if you want to opt in directly
+from your app,
+
+
+201
+00:12:56,643 --> 00:12:59,947 line:-2
+adopt PrivacyContexts
+in Network framework.
+
+
+202
+00:13:00,814 --> 00:13:05,385 line:-2
+For more information on this topic,
+please visit the following session URL.
+
+
+203
+00:13:05,719 --> 00:13:07,120 line:-1
+And thanks for watching.
+

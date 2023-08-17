@@ -1,0 +1,1368 @@
+2
+00:00:09.309 --> 00:00:15.082 line:-2 align:center
+Sam Lazarus: Hi my name is Sam,
+and I'm an engineer on the SwiftUI team.
+
+
+3
+00:00:15.115 --> 00:00:18.852 line:-2 align:center
+When designing SwiftUI,
+we've always strived to make decisions
+
+
+4
+00:00:18,886 --> 00:00:21,421 line:-1
+based on clearly defined principles,
+
+
+5
+00:00:21,455 --> 00:00:26,260 line:-2
+and today, we're going to highlight
+one of them: progressive disclosure.
+
+
+6
+00:00:26.293 --> 00:00:30.430 line:-2 align:center
+On the SwiftUI team,
+we spend a lot of time thinking about
+
+
+7
+00:00:30.464 --> 00:00:34.501 line:-2 align:center
+and building new API,
+but what you might not have realized
+
+
+8
+00:00:34.535 --> 00:00:37.037 line:-2 align:center
+is that the moment
+you build a reusable component
+
+
+9
+00:00:37,070 --> 00:00:38,572 line:-1
+or abstraction,
+
+
+10
+00:00:38,605 --> 00:00:41,808 line:-1
+you, too, are an API designer.
+
+
+11
+00:00:41,842 --> 00:00:46,413 line:-2
+In this talk, we wanted to peel back
+the curtains on our design process
+
+
+12
+00:00:46,446 --> 00:00:49,683 line:-2
+and share what we've learned
+about progressive disclosure,
+
+
+13
+00:00:49.716 --> 00:00:54.021 line:-2 align:center
+so the next time you're building
+a reusable component, or abstraction,
+
+
+14
+00:00:54,054 --> 00:00:56,056 line:-1
+you have a new tool in your tool belt.
+
+
+15
+00:00:57.457 --> 00:01:00.661 line:-2 align:center
+Let's start by talking
+about what progressive disclosure
+
+
+16
+00:01:00,694 --> 00:01:02,462 line:-1
+actually means.
+
+
+17
+00:01:02.496 --> 00:01:06.934 line:-2 align:center
+As it turns out,
+it's not unique to the design of APIs!
+
+
+18
+00:01:06.967 --> 00:01:12.406 line:-2 align:center
+In fact, you can see it in action
+in one of the most common macOS UIs:
+
+
+19
+00:01:12,439 --> 00:01:13,974 line:-1
+the save dialog.
+
+
+20
+00:01:14,875 --> 00:01:16,810 line:-1
+When you're first shown a save dialog,
+
+
+21
+00:01:16.844 --> 00:01:20.647 line:-2 align:center
+there's a default location
+already populated for you.
+
+
+22
+00:01:20.681 --> 00:01:25.786 line:-2 align:center
+Additionally, the dialog shows you
+a drop-down with some common locations,
+
+
+23
+00:01:25.819 --> 00:01:29.957 line:-2 align:center
+so locations you're likely to select
+are easy to reach.
+
+
+24
+00:01:29,990 --> 00:01:34,728 line:-2
+And finally, if you need to browse
+the filesystem to find the right path,
+
+
+25
+00:01:34,761 --> 00:01:40,667 line:-2
+you can expand the dialog to reveal
+a more complex but more powerful UI.
+
+
+26
+00:01:40,701 --> 00:01:45,572 line:-2
+There are different layers of complexity
+here that can be revealed when needed.
+
+
+27
+00:01:45,606 --> 00:01:51,345 line:-2
+This is the same experience that we want
+to provide with our APIs.
+
+
+28
+00:01:51.378 --> 00:01:55.349 line:-2 align:center
+The code equivalent
+to providing a nice UI experience
+
+
+29
+00:01:55.382 --> 00:01:58.418 line:-1 align:center
+is making your APIs feel great to use.
+
+
+30
+00:02:00.053 --> 00:02:03.090 line:-2 align:center
+As developers,
+we're used to looking at our code
+
+
+31
+00:02:03.123 --> 00:02:07.160 line:-2 align:center
+from the perspective of where
+we write it: the declaration site.
+
+
+32
+00:02:07,194 --> 00:02:09,997 line:-1
+But to make code feel great to use,
+
+
+33
+00:02:10.030 --> 00:02:13.033 line:-2 align:center
+we have to look at it
+from a different perspective:
+
+
+34
+00:02:13.066 --> 00:02:15.068 line:-1 align:center
+where the code actually gets used,
+
+
+35
+00:02:15,102 --> 00:02:17,337 line:-1
+or what we refer to as the call site.
+
+
+36
+00:02:19,173 --> 00:02:22,509 line:-2
+Progressive disclosure, then,
+is designing APIs
+
+
+37
+00:02:22,543 --> 00:02:27,314 line:-2
+so that the complexity of the call site
+grows with the complexity of the use case.
+
+
+38
+00:02:28.515 --> 00:02:32.486 line:-2 align:center
+An ideal API is both simple
+and approachable
+
+
+39
+00:02:32.519 --> 00:02:35.923 line:-2 align:center
+but also be able to accommodate
+powerful use cases.
+
+
+40
+00:02:37.257 --> 00:02:40.961 line:-1 align:center
+This has real benefits for developers.
+
+
+41
+00:02:40.994 --> 00:02:45.799 line:-2 align:center
+First, it minimizes the time
+to the the first build and run,
+
+
+42
+00:02:45,832 --> 00:02:49,336 line:-1
+letting you make use of your API quickly.
+
+
+43
+00:02:49.369 --> 00:02:53.907 line:-2 align:center
+It also lowers the learning curve
+of your code, preventing APIs
+
+
+44
+00:02:53,941 --> 00:02:58,145 line:-2
+from getting bogged down by concepts
+that aren't relevant in all use cases.
+
+
+45
+00:02:59.479 --> 00:03:02.950 line:-1 align:center
+Finally, it creates a tight feedback loop.
+
+
+46
+00:03:02,983 --> 00:03:05,853 line:-2
+With APIs that embrace
+progressive disclosure,
+
+
+47
+00:03:05,886 --> 00:03:10,357 line:-2
+you can add pieces bit by bit,
+seeing what you've created at each step.
+
+
+48
+00:03:11,391 --> 00:03:16,263 line:-2
+All of these things together make
+building apps a cycle of quick refinements
+
+
+49
+00:03:16.296 --> 00:03:19.066 line:-2 align:center
+rather than a single, large,
+up-front investment.
+
+
+50
+00:03:20.634 --> 00:03:24.104 line:-2 align:center
+So progressive disclosure
+is a useful guiding light,
+
+
+51
+00:03:24,137 --> 00:03:28,809 line:-2
+but how can we design specific API
+so they embrace that principle?
+
+
+52
+00:03:28.842 --> 00:03:34.481 line:-2 align:center
+On the SwiftUI team, we start
+by considering common use cases.
+
+
+53
+00:03:34,515 --> 00:03:37,184 line:-2
+In order to progressively disclose
+functionality,
+
+
+54
+00:03:37.217 --> 00:03:40.087 line:-2 align:center
+we need to identify
+what the simple cases should be.
+
+
+55
+00:03:41.088 --> 00:03:44.291 line:-2 align:center
+We also strive
+to provide intelligent defaults,
+
+
+56
+00:03:44.324 --> 00:03:49.096 line:-2 align:center
+so those common cases
+can specify only what they need to.
+
+
+57
+00:03:49,129 --> 00:03:52,199 line:-1
+Next, we aim to optimize the call site,
+
+
+58
+00:03:52.232 --> 00:03:56.537 line:-2 align:center
+ensuring every character
+of your call site has a purpose.
+
+
+59
+00:03:56.570 --> 00:03:59.540 line:-1 align:center
+And finally, we design our APIs
+
+
+60
+00:03:59.573 --> 00:04:03.477 line:-2 align:center
+so they compose pieces
+rather than enumerating possibilities.
+
+
+61
+00:04:04,344 --> 00:04:08,982 line:-2
+Let's dive right in and take a look
+at some examples from SwiftUI,
+
+
+62
+00:04:09,016 --> 00:04:12,920 line:-2
+starting with how we consider
+common use cases.
+
+
+63
+00:04:12.953 --> 00:04:17.291 line:-2 align:center
+One place where SwiftUI does this
+particularly well is with labels.
+
+
+64
+00:04:18,492 --> 00:04:22,162 line:-2
+When you create a button, for example,
+we require that you provide
+
+
+65
+00:04:22,196 --> 00:04:24,131 line:-1
+a label for the button.
+
+
+66
+00:04:24.164 --> 00:04:27.768 line:-2 align:center
+Most of the time,
+that label will just be some text,
+
+
+67
+00:04:27,801 --> 00:04:31,238 line:-2
+describing the purpose of the button,
+and SwiftUI provides you
+
+
+68
+00:04:31.271 --> 00:04:33.540 line:-1 align:center
+a concise way to spell that.
+
+
+69
+00:04:33.574 --> 00:04:35.876 line:-2 align:center
+But if you want to customize
+the button further,
+
+
+70
+00:04:35.909 --> 00:04:38.145 line:-1 align:center
+SwiftUI provides another overload.
+
+
+71
+00:04:38,178 --> 00:04:40,614 line:-1
+which takes an arbitrary view as a label.
+
+
+72
+00:04:41.815 --> 00:04:44.618 line:-2 align:center
+This allows you to build
+complex functionality
+
+
+73
+00:04:44,651 --> 00:04:47,221 line:-1
+out of this simple control.
+
+
+74
+00:04:47.254 --> 00:04:51.225 line:-2 align:center
+But because this API carefully considers
+its common use cases,
+
+
+75
+00:04:51.258 --> 00:04:55.262 line:-2 align:center
+99% percent of the time,
+you only need the simple version.
+
+
+76
+00:04:56.930 --> 00:05:00.767 line:-2 align:center
+This label pattern
+shows up everywhere in SwiftUI.
+
+
+77
+00:05:00.801 --> 00:05:03.704 line:-2 align:center
+And when I say everywhere,
+I really mean it.
+
+
+78
+00:05:04,671 --> 00:05:07,708 line:-2
+So considering common use cases
+is something we do
+
+
+79
+00:05:07,741 --> 00:05:10,010 line:-1
+across the entire framework.
+
+
+80
+00:05:10,043 --> 00:05:14,081 line:-2
+Next, let's look
+at providing intelligent defaults.
+
+
+81
+00:05:14,114 --> 00:05:16,850 line:-2
+In order to streamline
+our common use cases,
+
+
+82
+00:05:16.884 --> 00:05:19.052 line:-1 align:center
+we have to provide intelligent defaults
+
+
+83
+00:05:19,086 --> 00:05:22,189 line:-2
+for all the things
+we don't specify explicitly.
+
+
+84
+00:05:22,222 --> 00:05:26,627 line:-2
+And there's no better example of this
+than one of the most commonly used APIs
+
+
+85
+00:05:26.660 --> 00:05:28.595 line:-1 align:center
+in all of SwiftUI:
+
+
+86
+00:05:28,629 --> 00:05:29,730 line:-1
+Text.
+
+
+87
+00:05:30,464 --> 00:05:34,034 line:-2
+Text is such a great example
+of intelligent defaults
+
+
+88
+00:05:34.067 --> 00:05:37.804 line:-2 align:center
+that you've probably written code
+like this hundreds of times
+
+
+89
+00:05:37,838 --> 00:05:41,308 line:-2
+without thinking about everything
+you don't have to specify.
+
+
+90
+00:05:42,309 --> 00:05:45,913 line:-2
+Just with this code,
+SwiftUI will localize your text
+
+
+91
+00:05:45.946 --> 00:05:48.849 line:-2 align:center
+by looking up the localized string
+in your app bundle
+
+
+92
+00:05:48,882 --> 00:05:50,784 line:-1
+with the environment locale.
+
+
+93
+00:05:50.817 --> 00:05:53.720 line:-2 align:center
+It will automatically adapt
+to the current color scheme,
+
+
+94
+00:05:53,754 --> 00:05:56,857 line:-1
+supporting dark mode right out of the box.
+
+
+95
+00:05:56.890 --> 00:06:00.761 line:-2 align:center
+And it will automatically scale
+the text up or down
+
+
+96
+00:06:00.794 --> 00:06:03.964 line:-2 align:center
+depending on the current
+accessibility dynamic type size.
+
+
+97
+00:06:04.831 --> 00:06:07.100 line:-1 align:center
+We've talked about these behaviors before,
+
+
+98
+00:06:07.134 --> 00:06:10.337 line:-2 align:center
+but text is doing even more
+behind the scenes than that.
+
+
+99
+00:06:11,905 --> 00:06:14,308 line:-2
+When you put two texts
+next to each other into a stack,
+
+
+100
+00:06:14,341 --> 00:06:19,179 line:-2
+for example, the space between the texts
+is automatically adjusted
+
+
+101
+00:06:19,213 --> 00:06:22,583 line:-2
+to the correct line spacing
+for text in the current context.
+
+
+102
+00:06:23,383 --> 00:06:26,787 line:-2
+All that behavior
+can be manually specified,
+
+
+103
+00:06:26.820 --> 00:06:30.424 line:-2 align:center
+but SwiftUI's intelligent defaults
+mean that when they aren't relevant
+
+
+104
+00:06:30.457 --> 00:06:33.427 line:-2 align:center
+to your use case,
+they don't appear at the call site.
+
+
+105
+00:06:34,695 --> 00:06:39,533 line:-2
+Text is an example of an API where
+the simplest case is extremely minimal,
+
+
+106
+00:06:39.566 --> 00:06:43.337 line:-2 align:center
+but intelligent defaults apply
+to all sorts of call sites.
+
+
+107
+00:06:43,370 --> 00:06:45,305 line:-1
+Take toolbar, for example.
+
+
+108
+00:06:45,339 --> 00:06:49,643 line:-2
+Here, we have a toolbar
+with a bunch of buttons.
+
+
+109
+00:06:49.676 --> 00:06:52.846 line:-2 align:center
+Without having to explicitly specify
+their position,
+
+
+110
+00:06:52,880 --> 00:06:57,184 line:-2
+the toolbar buttons are placed
+according to platform convention.
+
+
+111
+00:06:57.217 --> 00:07:01.388 line:-2 align:center
+On macOS, they'll appear
+in the leading edge of the toolbar,
+
+
+112
+00:07:01.421 --> 00:07:04.958 line:-2 align:center
+but on iOS, they'll appear
+in the navigation bar,
+
+
+113
+00:07:04,992 --> 00:07:07,261 line:-1
+starting from the trailing edge.
+
+
+114
+00:07:07.294 --> 00:07:11.565 line:-2 align:center
+And finally, on watchOS,
+only the first item appears,
+
+
+115
+00:07:11,598 --> 00:07:14,201 line:-1
+pinned under the navigation bar.
+
+
+116
+00:07:14,234 --> 00:07:17,704 line:-2
+This works great for the large majority
+of cases,
+
+
+117
+00:07:17.738 --> 00:07:20.040 line:-1 align:center
+but if you do need more control,
+
+
+118
+00:07:20,073 --> 00:07:23,744 line:-2
+we provide additional API
+to explicitly specify
+
+
+119
+00:07:23.777 --> 00:07:25.712 line:-1 align:center
+the placement of items.
+
+
+120
+00:07:25.746 --> 00:07:28.749 line:-2 align:center
+Again, the customization
+is there if you need it,
+
+
+121
+00:07:28,782 --> 00:07:32,085 line:-2
+but intelligent defaults
+handle the majority of cases.
+
+
+122
+00:07:33,420 --> 00:07:37,357 line:-2
+Considering common use cases
+and providing intelligent defaults
+
+
+123
+00:07:37,391 --> 00:07:42,529 line:-2
+create some really great experiences,
+but if using those APIs feels clunky,
+
+
+124
+00:07:42.563 --> 00:07:46.200 line:-2 align:center
+or unrefined,
+it can ruin the whole effect.
+
+
+125
+00:07:46.233 --> 00:07:50.604 line:-2 align:center
+That brings us to our last strategy:
+optimize the call site.
+
+
+126
+00:07:50,637 --> 00:07:54,808 line:-2
+And for that, let's look
+at another API: Table.
+
+
+127
+00:07:55,909 --> 00:08:00,013 line:-2
+Multi-column tables
+are a very feature-rich control.
+
+
+128
+00:08:00,047 --> 00:08:03,684 line:-2
+There's lots to configure
+and lots of functionality.
+
+
+129
+00:08:03,717 --> 00:08:06,920 line:-2
+But the large majority
+of tables are much simpler
+
+
+130
+00:08:06,954 --> 00:08:09,056 line:-1
+and don't need all those features.
+
+
+131
+00:08:09,089 --> 00:08:13,594 line:-2
+We want table to be capable
+of this more complex behavior,
+
+
+132
+00:08:13.627 --> 00:08:16.897 line:-2 align:center
+and in its most verbose format,
+it has that.
+
+
+133
+00:08:16,930 --> 00:08:19,099 line:-1
+It has support for sorting,
+
+
+134
+00:08:19,132 --> 00:08:24,838 line:-2
+multiple columns with rich cell content,
+sectioned rows, and much, much more.
+
+
+135
+00:08:25,906 --> 00:08:28,342 line:-2
+But we also want to provide
+a great experience
+
+
+136
+00:08:28.375 --> 00:08:30.777 line:-1 align:center
+in the more common cases,
+
+
+137
+00:08:30.811 --> 00:08:33.614 line:-2 align:center
+so let's take a look
+at the fully specified code
+
+
+138
+00:08:33.647 --> 00:08:35.382 line:-1 align:center
+for this simpler table
+
+
+139
+00:08:35.415 --> 00:08:38.819 line:-1 align:center
+and see how we can optimize its call site.
+
+
+140
+00:08:38.852 --> 00:08:42.389 line:-1 align:center
+First, let's break down this example.
+
+
+141
+00:08:42,422 --> 00:08:46,527 line:-2
+Table starts by specifying
+how it generates the data for each row.
+
+
+142
+00:08:48,128 --> 00:08:52,099 line:-2
+Here, I'm iterating over each book
+we're currently reading
+
+
+143
+00:08:52.132 --> 00:08:56.136 line:-2 align:center
+and creating a table row
+for each of those books.
+
+
+144
+00:08:56,170 --> 00:09:01,775 line:-2
+Next, it specifies how to populate
+the columns from the data for each row.
+
+
+145
+00:09:01.808 --> 00:09:06.180 line:-2 align:center
+Here, I create a Title column
+and an Author column.
+
+
+146
+00:09:08,448 --> 00:09:13,587 line:-2
+It also takes a binding to the sort order
+to allow table to change the sort
+
+
+147
+00:09:13,620 --> 00:09:16,323 line:-2
+when users click
+on the table column headers.
+
+
+148
+00:09:18,158 --> 00:09:22,529 line:-2
+Finally, I've added some code
+which re-sorts the table's data
+
+
+149
+00:09:22,563 --> 00:09:24,998 line:-1
+whenever the sort order changes.
+
+
+150
+00:09:25.032 --> 00:09:27.734 line:-2 align:center
+That's a lot of information,
+so let's take a look
+
+
+151
+00:09:27.768 --> 00:09:32.072 line:-2 align:center
+at how to optimize this call site
+to really embrace progressive disclosure.
+
+
+152
+00:09:33,240 --> 00:09:38,145 line:-2
+One common use case that stands out
+right away has to do with rows.
+
+
+153
+00:09:38.178 --> 00:09:43.083 line:-2 align:center
+Most of the time, the rows field will look
+just like it does in this example:
+
+
+154
+00:09:43,116 --> 00:09:47,120 line:-2
+a ForEach over a collection,
+providing a table row for each item.
+
+
+155
+00:09:48.655 --> 00:09:51.859 line:-2 align:center
+The developer doesn't need to loop
+through all of this themselves,
+
+
+156
+00:09:51.892 --> 00:09:56.964 line:-2 align:center
+so SwiftUI provides a convenience
+that handles this under the hood.
+
+
+157
+00:09:56,997 --> 00:09:59,900 line:-2
+By passing the collection
+directly to table,
+
+
+158
+00:09:59.933 --> 00:10:03.504 line:-2 align:center
+the ForEach behavior can be provided
+behind the scenes,
+
+
+159
+00:10:03,537 --> 00:10:10,010 line:-2
+drastically simplifying our call site,
+but this can still be simplified further.
+
+
+160
+00:10:10.043 --> 00:10:12.279 line:-1 align:center
+What are other common use cases?
+
+
+161
+00:10:12,312 --> 00:10:13,947 line:-1
+Well, most of the time,
+
+
+162
+00:10:13,981 --> 00:10:15,582 line:-2
+when one of the values
+I want to show in a table
+
+
+163
+00:10:15,616 --> 00:10:19,753 line:-2
+is a string, I'll just use
+a text to display it in the column.
+
+
+164
+00:10:20.721 --> 00:10:23.156 line:-2 align:center
+We optimize the call site
+for this case too.
+
+
+165
+00:10:25,058 --> 00:10:27,961 line:-2
+Whenever the value keypath
+points to a string,
+
+
+166
+00:10:27.995 --> 00:10:31.832 line:-2 align:center
+we allow the view associated
+with the TableColumn to be omitted.
+
+
+167
+00:10:32,933 --> 00:10:38,172 line:-2
+That's another significant simplification,
+but there's still more to optimize!
+
+
+168
+00:10:38.205 --> 00:10:41.875 line:-2 align:center
+There's information in the call site
+which not all tables need
+
+
+169
+00:10:41.909 --> 00:10:46.079 line:-2 align:center
+to concern themselves with:
+the sort order.
+
+
+170
+00:10:46.113 --> 00:10:50.350 line:-2 align:center
+The simplest use case for table
+doesn't care about sorting at all!
+
+
+171
+00:10:50,384 --> 00:10:53,320 line:-2
+So we provide a version of table
+which doesn't concern itself
+
+
+172
+00:10:53.353 --> 00:10:55.355 line:-1 align:center
+with sorting either.
+
+
+173
+00:10:55.389 --> 00:10:59.660 line:-2 align:center
+And this brings us to our final iteration.
+Much simpler!
+
+
+174
+00:10:59,693 --> 00:11:03,764 line:-2
+Every character of this call site
+serves a clear purpose,
+
+
+175
+00:11:03,797 --> 00:11:08,702 line:-2
+and we got here by asking ourselves
+two key questions at every step:
+
+
+176
+00:11:08,735 --> 00:11:14,074 line:-2
+"What are the most common use cases
+that we should build conveniences for?"
+
+
+177
+00:11:14,107 --> 00:11:19,680 line:-2
+and "What is the essential information
+that should always be required?"
+
+
+178
+00:11:19.713 --> 00:11:22.916 line:-2 align:center
+These guiding questions are
+great for helping you optimize
+
+
+179
+00:11:22,950 --> 00:11:26,587 line:-2
+your call sites, but they need
+to be applied carefully.
+
+
+180
+00:11:26.620 --> 00:11:29.857 line:-2 align:center
+If you don't think through
+their implications for your API,
+
+
+181
+00:11:29,890 --> 00:11:31,758 line:-1
+they can lead you astray.
+
+
+182
+00:11:31,792 --> 00:11:37,464 line:-2
+That brings us to our final strategy:
+Compose, don't enumerate.
+
+
+183
+00:11:37,497 --> 00:11:40,501 line:-2
+And to illustrate this,
+let's talk about the design
+
+
+184
+00:11:40,534 --> 00:11:44,471 line:-2
+of a part of SwiftUI's layout system:
+stacks,
+
+
+185
+00:11:44,505 --> 00:11:46,907 line:-1
+in particular, HStack.
+
+
+186
+00:11:46,940 --> 00:11:51,144 line:-2
+First, let's think about what
+the essential information is
+
+
+187
+00:11:51,178 --> 00:11:52,746 line:-1
+for an HStack.
+
+
+188
+00:11:52,779 --> 00:11:57,451 line:-2
+Well, it needs to know
+what content should be in the stack
+
+
+189
+00:11:57,484 --> 00:12:01,788 line:-2
+and how that content
+should be arranged within the stack.
+
+
+190
+00:12:01.822 --> 00:12:05.692 line:-2 align:center
+We already have view builders
+to specify the content of the HStack,
+
+
+191
+00:12:05.726 --> 00:12:08.529 line:-1 align:center
+so let's focus on the arrangement.
+
+
+192
+00:12:08.562 --> 00:12:10.964 line:-2 align:center
+Going back to the guiding questions
+we highlighted,
+
+
+193
+00:12:10.998 --> 00:12:15.402 line:-2 align:center
+what are the most common use cases
+when arranging elements in an Hstack?
+
+
+194
+00:12:15,435 --> 00:12:19,606 line:-2
+Well, sometimes I want to show a stack
+like this one
+
+
+195
+00:12:19,640 --> 00:12:23,944 line:-2
+that shows the boxes one after another,
+starting from the leading edge.
+
+
+196
+00:12:25.045 --> 00:12:28.715 line:-2 align:center
+Another common case is
+wanting to center the elements.
+
+
+197
+00:12:28.749 --> 00:12:31.451 line:-2 align:center
+And finally, I might want
+to align the elements
+
+
+198
+00:12:31.485 --> 00:12:32.886 line:-1 align:center
+against the trailing edge.
+
+
+199
+00:12:34,388 --> 00:12:39,526 line:-2
+VStack already has an API
+with similar cases to this, alignment,
+
+
+200
+00:12:39.560 --> 00:12:42.396 line:-2 align:center
+so it might seem tempting
+to create a similar enum
+
+
+201
+00:12:42,429 --> 00:12:45,532 line:-2
+for the arrangement
+of elements within the stack.
+
+
+202
+00:12:45,566 --> 00:12:48,135 line:-1
+This supports all the cases we mentioned!
+
+
+203
+00:12:48,168 --> 00:12:52,706 line:-2
+By specifying the arrangement
+of an HStack, I could select a leading,
+
+
+204
+00:12:52,739 --> 00:12:57,277 line:-2
+trailing, or centered arrangement,
+depending on which I wanted.
+
+
+205
+00:12:57,311 --> 00:13:01,114 line:-2
+But now what if I want to space
+the elements out evenly
+
+
+206
+00:13:01.148 --> 00:13:04.284 line:-1 align:center
+or put spacing only between the elements
+
+
+207
+00:13:04,318 --> 00:13:08,322 line:-2
+or put space
+only before the last element?
+
+
+208
+00:13:08.355 --> 00:13:10.190 line:-1 align:center
+This is getting really messy!
+
+
+209
+00:13:10.224 --> 00:13:13.293 line:-1 align:center
+But more importantly, it's unsustainable.
+
+
+210
+00:13:13.327 --> 00:13:16.997 line:-2 align:center
+I have to add an enum case
+for every behavior we want,
+
+
+211
+00:13:17,030 --> 00:13:20,534 line:-2
+and we might not think
+of all the useful cases!
+
+
+212
+00:13:20,567 --> 00:13:23,203 line:-2
+When you find yourself
+enumerating common cases
+
+
+213
+00:13:23.237 --> 00:13:25.973 line:-2 align:center
+rather than providing conveniences
+for them,
+
+
+214
+00:13:26,006 --> 00:13:29,843 line:-2
+try breaking your API apart into
+composable pieces
+
+
+215
+00:13:29.877 --> 00:13:34.014 line:-2 align:center
+that can build a solution:
+Compose, don't enumerate.
+
+
+216
+00:13:35.449 --> 00:13:41.154 line:-2 align:center
+In the case of stacks, SwiftUI
+provides Spacer and lets you compose it
+
+
+217
+00:13:41,188 --> 00:13:45,626 line:-2
+with the elements of your stack to build
+all of the spacing schemes we enumerated,
+
+
+218
+00:13:45.659 --> 00:13:50.397 line:-2 align:center
+and many, many more, which is
+how we arrived at the API we have today.
+
+
+219
+00:13:51.798 --> 00:13:55.068 line:-2 align:center
+Designing the best experience
+for progressive disclosure here
+
+
+220
+00:13:55.102 --> 00:13:57.604 line:-2 align:center
+wasn't just
+about minimizing the call site,
+
+
+221
+00:13:57.638 --> 00:14:02.109 line:-2 align:center
+but also involved careful thought
+about how that call site should scale
+
+
+222
+00:14:02.142 --> 00:14:05.946 line:-2 align:center
+to handle all its cases: in this case,
+through composition.
+
+
+223
+00:14:07.614 --> 00:14:11.451 line:-2 align:center
+When writing code yourself,
+it can be incredibly helpful to apply
+
+
+224
+00:14:11,485 --> 00:14:15,789 line:-2
+the same kind of careful consideration
+for the components you create.
+
+
+225
+00:14:15,822 --> 00:14:20,627 line:-2
+And to recap, that starts
+by considering common use cases.
+
+
+226
+00:14:20,661 --> 00:14:23,997 line:-2
+By applying progressive disclosure,
+the code you write
+
+
+227
+00:14:24,031 --> 00:14:27,601 line:-2
+will save you time
+in the most common use cases.
+
+
+228
+00:14:27.634 --> 00:14:31.371 line:-2 align:center
+Intelligent defaults will mean
+you won't have to think about the details
+
+
+229
+00:14:31.405 --> 00:14:33.740 line:-1 align:center
+in those common cases.
+
+
+230
+00:14:33.774 --> 00:14:36.410 line:-2 align:center
+Working to optimize the call sites
+you build
+
+
+231
+00:14:36.443 --> 00:14:37.945 line:-1 align:center
+will allow you to iterate quickly.
+
+
+232
+00:14:38.645 --> 00:14:41.415 line:-1 align:center
+And finally, utilizing composition
+
+
+233
+00:14:41.448 --> 00:14:46.386 line:-2 align:center
+will let you build APIs that are flexible
+enough to accommodate all their use cases.
+
+
+234
+00:14:47,521 --> 00:14:51,558 line:-2
+And because you are an API designer,
+you can apply these lessons
+
+
+235
+00:14:51,592 --> 00:14:53,694 line:-1
+to the code you write every day,
+
+
+236
+00:14:53,727 --> 00:14:56,063 line:-2
+whether it's
+being designed for someone else,
+
+
+237
+00:14:56,096 --> 00:14:57,664 line:-1
+or just for you to use.
+
+
+238
+00:14:58.465 --> 00:14:59.967 line:-1 align:center
+Thank you for watching.
+
+
+239
+00:15:00,000 --> 00:15:02,102 line:-1
+[spacey music]
+

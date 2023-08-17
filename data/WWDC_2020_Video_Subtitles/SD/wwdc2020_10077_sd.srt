@@ -1,0 +1,1299 @@
+1
+00:00:03,770 --> 00:00:06,507 line:-1
+Hello and welcome to WWDC.
+
+
+2
+00:00:08,141 --> 00:00:10,410 line:0
+Hi, everyone. My name is Tanuja Mohan,
+
+
+3
+00:00:10,477 --> 00:00:13,547 line:0
+and I'm a software engineer on
+the Power and Performance team at Apple.
+
+
+4
+00:00:13,947 --> 00:00:18,485 line:-2
+Animations are an important part
+in our application's customer experience.
+
+
+5
+00:00:18,552 --> 00:00:19,887 line:-1
+Animations can be subtle,
+
+
+6
+00:00:19,953 --> 00:00:23,624 line:-2
+such as when we tap on the back button
+to navigate from one screen to another,
+
+
+7
+00:00:24,424 --> 00:00:26,560 line:-2
+or they can be
+the main focus of a gesture,
+
+
+8
+00:00:26,627 --> 00:00:29,062 line:-2
+such as when we scroll up or down
+on an application.
+
+
+9
+00:00:29,830 --> 00:00:32,499 line:-2
+We want these gestures
+to produce smooth responses
+
+
+10
+00:00:32,566 --> 00:00:35,469 line:-2
+since it's noticeable when a navigation
+takes too long
+
+
+11
+00:00:35,536 --> 00:00:37,104 line:-1
+or a scroll appears to jitter.
+
+
+12
+00:00:38,305 --> 00:00:41,208 line:-2
+We call these user perceptible jitters
+"hitches."
+
+
+13
+00:00:41,875 --> 00:00:46,346 line:-2
+A hitch is any time that a frame appears
+on the screen later than expected.
+
+
+14
+00:00:46,813 --> 00:00:48,849 line:-1
+This is distracting to your users
+
+
+15
+00:00:48,916 --> 00:00:52,119 line:-2
+and is detrimental to
+the perceived quality of your application.
+
+
+16
+00:00:52,819 --> 00:00:55,556 line:-2
+Let's zoom in on the individual frames
+of our application
+
+
+17
+00:00:55,622 --> 00:00:57,224 line:-1
+to see what is really going on.
+
+
+18
+00:00:58,058 --> 00:01:01,495 line:-2
+The first three frames are displayed
+as expected.
+
+
+19
+00:01:01,562 --> 00:01:03,530 line:-1
+We have a gradual movement of the list,
+
+
+20
+00:01:03,597 --> 00:01:05,799 line:-2
+perfectly matching
+the movement of our finger.
+
+
+21
+00:01:07,334 --> 00:01:09,403 line:-2
+But then frame three remains
+on the screen.
+
+
+22
+00:01:09,803 --> 00:01:13,240 line:-2
+The application no longer appears
+to track the movement of your finger.
+
+
+23
+00:01:14,741 --> 00:01:17,344 line:-2
+Then, when frame four
+is displayed to screen,
+
+
+24
+00:01:17,411 --> 00:01:20,047 line:-2
+the list makes a sudden large jump
+back to your finger.
+
+
+25
+00:01:20,681 --> 00:01:23,817 line:-2
+This is not what we expect
+and what we want to avoid.
+
+
+26
+00:01:24,318 --> 00:01:26,320 line:-1
+To understand what is happening here,
+
+
+27
+00:01:26,386 --> 00:01:30,023 line:-2
+we first need to understand
+how frames are displayed to the screen.
+
+
+28
+00:01:30,557 --> 00:01:35,429 line:-2
+Frames on iPhones and iPads are
+usually expected to update at 60 hertz,
+
+
+29
+00:01:35,495 --> 00:01:39,466 line:-2
+giving a cadence of 16.67 milliseconds
+for each frame.
+
+
+30
+00:01:40,334 --> 00:01:44,404 line:-2
+On iPad Pro,
+we can expect 120 hertz updates,
+
+
+31
+00:01:44,471 --> 00:01:47,341 line:-1
+or a cadence of 8.33 milliseconds.
+
+
+32
+00:01:47,674 --> 00:01:50,244 line:-1
+This cadence is represented by VSYNCs,
+
+
+33
+00:01:50,310 --> 00:01:52,045 line:-1
+which are when the screen determines
+
+
+34
+00:01:52,112 --> 00:01:54,815 line:-2
+whether to swap a frame
+onto the display or not.
+
+
+35
+00:01:55,516 --> 00:01:58,619 line:0
+We see a hitch
+when a frame misses its expected VSYNC.
+
+
+36
+00:01:59,419 --> 00:02:03,724 line:0
+The severity of a hitch is measured by
+how late the frame is to appear on-screen.
+
+
+37
+00:02:04,758 --> 00:02:09,363 line:0
+In this example,
+frame four is 16.67 milliseconds late.
+
+
+38
+00:02:10,564 --> 00:02:12,699 line:-2
+There are two ways
+we can quantify hitches.
+
+
+39
+00:02:14,401 --> 00:02:18,939 line:-2
+Hitch time is the time in milliseconds
+that a frame is late to display on-screen.
+
+
+40
+00:02:19,673 --> 00:02:23,810 line:-2
+We prefer to express hitch ratio,
+milliseconds per second,
+
+
+41
+00:02:23,877 --> 00:02:26,280 line:-2
+which is the total hitch time
+in milliseconds
+
+
+42
+00:02:26,346 --> 00:02:28,949 line:-2
+over some other duration
+of time in seconds.
+
+
+43
+00:02:29,016 --> 00:02:31,285 line:-1
+For example, over the duration of a test.
+
+
+44
+00:02:31,351 --> 00:02:33,120 line:-1
+This sounds complicated.
+
+
+45
+00:02:33,187 --> 00:02:36,924 line:-2
+Why don't we just say dropped frames
+and measure frames per second?
+
+
+46
+00:02:37,758 --> 00:02:40,994 line:-2
+Frames per second is an absolute target
+that is easily skewed.
+
+
+47
+00:02:41,528 --> 00:02:45,866 line:-2
+If your test contains any resting time
+during the execution of an animation,
+
+
+48
+00:02:45,933 --> 00:02:49,937 line:-2
+then fps is useless since we did not
+expect any frames to be swapped
+
+
+49
+00:02:50,003 --> 00:02:51,438 line:-1
+during the resting period.
+
+
+50
+00:02:53,140 --> 00:02:56,743 line:-2
+And we often intentionally
+do not target the maximum fps.
+
+
+51
+00:02:56,810 --> 00:03:02,149 line:-2
+Maybe a game only wants to run at 30 fps,
+or a video at 24 fps.
+
+
+52
+00:03:02,216 --> 00:03:04,351 line:-1
+For power and performance reasons,
+
+
+53
+00:03:04,418 --> 00:03:07,921 line:-2
+the hands on the Clock app icon
+only run at ten fps.
+
+
+54
+00:03:08,922 --> 00:03:13,961 line:-2
+Hitch time's target is always zero and is
+reliable even with these considerations.
+
+
+55
+00:03:14,795 --> 00:03:17,197 line:-1
+But hitch time is not always comparable.
+
+
+56
+00:03:17,631 --> 00:03:20,067 line:-1
+Total hitch time for a one-second test
+
+
+57
+00:03:20,133 --> 00:03:22,970 line:-2
+cannot be compared
+to that over a ten-second test.
+
+
+58
+00:03:24,037 --> 00:03:29,176 line:-2
+By normalizing hitch ratio as milliseconds
+of hitches per second of test duration,
+
+
+59
+00:03:29,610 --> 00:03:33,146 line:-2
+we get a metric that is both comparable
+across different tests
+
+
+60
+00:03:33,213 --> 00:03:36,750 line:-2
+and can be used as an approximation
+for the end user impact.
+
+
+61
+00:03:37,451 --> 00:03:41,421 line:-2
+For end user impact, these are the target
+hitch ratios we recommend
+
+
+62
+00:03:41,488 --> 00:03:42,856 line:-1
+and use in our tools.
+
+
+63
+00:03:44,791 --> 00:03:47,728 line:0
+A hitch ratio of less than
+five milliseconds per second
+
+
+64
+00:03:47,794 --> 00:03:49,496 line:0
+is good user experience.
+
+
+65
+00:03:50,364 --> 00:03:53,133 line:-2
+In the five-to-ten millisecond
+per second range,
+
+
+66
+00:03:53,200 --> 00:03:57,137 line:-2
+users will start to notice hitches,
+and these hitches should be investigated.
+
+
+67
+00:03:58,805 --> 00:04:03,443 line:-2
+At ten milliseconds per second or more,
+hitches are quite distracting to the user,
+
+
+68
+00:04:03,510 --> 00:04:06,246 line:-2
+and we should take immediate action
+to resolve them.
+
+
+69
+00:04:06,313 --> 00:04:11,451 line:-2
+In iOS 14, you can track hitches in both
+your development and production workflows
+
+
+70
+00:04:11,518 --> 00:04:13,187 line:-1
+using our suite of tools.
+
+
+71
+00:04:13,954 --> 00:04:17,757 line:-2
+The XCTest framework allows you to collect
+hitch and animation data
+
+
+72
+00:04:17,824 --> 00:04:19,760 line:-1
+directly in unit and UI tests,
+
+
+73
+00:04:20,260 --> 00:04:23,397 line:0
+while MetricKit and Xcode Organizer
+give you access
+
+
+74
+00:04:23,463 --> 00:04:25,732 line:0
+to performance metrics
+from your customers.
+
+
+75
+00:04:26,433 --> 00:04:29,970 line:-2
+In this portion of the talk, we're going
+to focus on the development workflow
+
+
+76
+00:04:30,037 --> 00:04:32,539 line:-2
+of catching hitches
+using Performance XCTests.
+
+
+77
+00:04:33,473 --> 00:04:37,044 line:0
+If you wanna learn how you can view
+hitches in your production workflow,
+
+
+78
+00:04:37,110 --> 00:04:40,581 line:0
+check out the separate talks we have
+for MetricKit and Xcode Organizer
+
+
+79
+00:04:40,647 --> 00:04:43,717 line:0
+this year at WWDC 2020 as well.
+
+
+80
+00:04:44,251 --> 00:04:47,688 line:-1
+In Xcode 11, we introduced XCTMetrics.
+
+
+81
+00:04:47,754 --> 00:04:50,190 line:-2
+These metrics specify
+what part of the system
+
+
+82
+00:04:50,257 --> 00:04:51,959 line:-1
+you want to measure in your test.
+
+
+83
+00:04:52,025 --> 00:04:57,030 line:-2
+The XCTMetrics we have available today
+allow you to test around clock time,
+
+
+84
+00:04:57,097 --> 00:05:02,069 line:-2
+CPU utilization, memory use,
+os_signposts, storage,
+
+
+85
+00:05:02,135 --> 00:05:03,270 line:-1
+and with Xcode 12,
+
+
+86
+00:05:03,337 --> 00:05:06,740 line:-2
+we have a separate metric
+to measure application launch times.
+
+
+87
+00:05:06,807 --> 00:05:10,244 line:-2
+We also have a template for you
+to write your own custom metrics.
+
+
+88
+00:05:11,612 --> 00:05:15,349 line:-2
+In this talk, we will focus
+on the XCTOSSignpostMetric,
+
+
+89
+00:05:15,415 --> 00:05:19,353 line:-2
+which is the XCTMetric
+used to do animation performance testing.
+
+
+90
+00:05:20,521 --> 00:05:24,658 line:-2
+Starting with Xcode 11,
+you can use the XCTOSSignpostMetric
+
+
+91
+00:05:24,725 --> 00:05:27,594 line:-2
+to measure the duration
+of the os_signpost interval.
+
+
+92
+00:05:28,228 --> 00:05:32,499 line:-2
+Now, with Xcode 12, when using
+an animation os_signpost interval,
+
+
+93
+00:05:32,566 --> 00:05:34,701 line:-1
+you will receive not just duration,
+
+
+94
+00:05:34,768 --> 00:05:39,306 line:-2
+but also three hitch related metrics,
+frame rate, and frame count.
+
+
+95
+00:05:40,574 --> 00:05:43,510 line:-2
+You may already be familiar
+with frame rate and frame count.
+
+
+96
+00:05:43,577 --> 00:05:45,412 line:-1
+These two values measure the frequency
+
+
+97
+00:05:45,479 --> 00:05:48,515 line:-2
+and number of frames
+displayed to the screen respectively.
+
+
+98
+00:05:49,583 --> 00:05:52,286 line:-2
+And now you are also familiar
+with hitches.
+
+
+99
+00:05:52,352 --> 00:05:55,756 line:-2
+You can now track how many hitches
+occur in the tested code block,
+
+
+100
+00:05:55,822 --> 00:05:58,492 line:-2
+what the total duration is
+we spent hitching in our test,
+
+
+101
+00:05:58,559 --> 00:06:01,161 line:-1
+and the ratio of this total time hitching
+
+
+102
+00:06:01,228 --> 00:06:03,397 line:-2
+over the duration
+of the measured code block.
+
+
+103
+00:06:04,498 --> 00:06:06,033 line:-1
+To collect these metrics,
+
+
+104
+00:06:06,099 --> 00:06:09,770 line:-2
+you first need to instrument your code
+to emit an os_signpost interval.
+
+
+105
+00:06:09,837 --> 00:06:11,872 line:-1
+There are three ways you can do this,
+
+
+106
+00:06:11,939 --> 00:06:14,775 line:-2
+and we will refer to them
+as non-animation intervals--
+
+
+107
+00:06:14,842 --> 00:06:17,077 line:-1
+intervals that only return back duration,
+
+
+108
+00:06:17,144 --> 00:06:18,579 line:-1
+and animation intervals--
+
+
+109
+00:06:18,645 --> 00:06:21,715 line:-2
+intervals that return back
+the additional animation metrics.
+
+
+110
+00:06:22,683 --> 00:06:27,221 line:-2
+With Xcode 11, you could only instrument
+a non-animation os_signpost interval
+
+
+111
+00:06:27,287 --> 00:06:29,890 line:-1
+using the "begin" and "end" interfaces.
+
+
+112
+00:06:29,957 --> 00:06:32,092 line:-1
+This would just return back duration.
+
+
+113
+00:06:33,260 --> 00:06:37,497 line:-2
+Now, in Xcode 12, to specify
+an animation os_signpost interval,
+
+
+114
+00:06:37,564 --> 00:06:41,134 line:-2
+all you need to do is use
+the animationBegin interface instead.
+
+
+115
+00:06:41,735 --> 00:06:46,006 line:-2
+With just this one change, you can convert
+any of your existing instrumentation
+
+
+116
+00:06:46,073 --> 00:06:48,175 line:-1
+to emit animation intervals instead
+
+
+117
+00:06:48,242 --> 00:06:51,178 line:-2
+and receive back the animation metrics
+mentioned earlier.
+
+
+118
+00:06:53,013 --> 00:06:55,048 line:-1
+Aside from using a custom interval,
+
+
+119
+00:06:55,115 --> 00:06:58,352 line:-2
+you can use one of the predefined
+UIKit instrumented intervals
+
+
+120
+00:06:58,418 --> 00:07:01,355 line:-2
+for testing around navigation transitions
+and scrolling.
+
+
+121
+00:07:01,955 --> 00:07:05,926 line:-2
+These are sub-metrics provided on
+the XCTOSSignpostMetric class.
+
+
+122
+00:07:06,727 --> 00:07:11,331 line:-2
+Let's take a look at an example of writing
+a test using one of these sub-metrics.
+
+
+123
+00:07:11,865 --> 00:07:14,168 line:-1
+Here I have a performance XCTest
+
+
+124
+00:07:14,234 --> 00:07:18,071 line:-2
+that is going to launch my application,
+tap on the "Meal Planner" cell,
+
+
+125
+00:07:18,138 --> 00:07:21,141 line:-2
+and swipe up on the foodCollection view
+to scroll down.
+
+
+126
+00:07:22,409 --> 00:07:23,644 line:-1
+In this test,
+
+
+127
+00:07:23,710 --> 00:07:27,781 line:-2
+I'm specifying that I want to measure
+the scrollDeceleration sub-metric.
+
+
+128
+00:07:29,416 --> 00:07:32,319 line:-2
+In the body of the measure block,
+I'm swiping up,
+
+
+129
+00:07:32,386 --> 00:07:35,956 line:-2
+and now with Xcode 12, you can customize
+the velocity of the scroll.
+
+
+130
+00:07:37,925 --> 00:07:41,862 line:-2
+This test looks good so far,
+but there is an improvement we can make.
+
+
+131
+00:07:42,429 --> 00:07:43,530 line:-1
+Remember by default
+
+
+132
+00:07:43,597 --> 00:07:46,967 line:-2
+a measure block is run five times
+to collect performance measurements.
+
+
+133
+00:07:47,034 --> 00:07:49,469 line:-2
+Meaning that
+in the current implementation,
+
+
+134
+00:07:49,536 --> 00:07:52,239 line:-2
+we are going to swipe up five times
+back-to-back
+
+
+135
+00:07:52,306 --> 00:07:56,043 line:-2
+and will most likely be swiping
+over different content in each iteration.
+
+
+136
+00:07:57,077 --> 00:08:01,782 line:-2
+To avoid this, we want to reset
+the application state between runs.
+
+
+137
+00:08:01,849 --> 00:08:05,285 line:-2
+We can do this
+by using the XCTMeasureOptions
+
+
+138
+00:08:05,352 --> 00:08:06,620 line:-1
+to let our measure block know
+
+
+139
+00:08:06,687 --> 00:08:09,690 line:-2
+that we are going to manually stop
+our measurement collection.
+
+
+140
+00:08:10,290 --> 00:08:12,326 line:-1
+Then, pass this into our measure block,
+
+
+141
+00:08:13,160 --> 00:08:14,394 line:-1
+call stopMeasuring,
+
+
+142
+00:08:15,329 --> 00:08:17,731 line:-1
+and then reset our application state.
+
+
+143
+00:08:18,131 --> 00:08:20,968 line:-2
+Now that we have our test written,
+we wanna run it.
+
+
+144
+00:08:21,034 --> 00:08:25,005 line:-2
+But before we do so, we first wanna modify
+some settings on our test scheme
+
+
+145
+00:08:25,072 --> 00:08:28,075 line:-2
+to eliminate their impact
+on our performance measurements.
+
+
+146
+00:08:28,141 --> 00:08:32,546 line:-2
+We first wanna make sure we use a separate
+test scheme for our Performance XCTests.
+
+
+147
+00:08:33,746 --> 00:08:38,352 line:-2
+Then, we wanna select the release build
+configuration and disable the debugger.
+
+
+148
+00:08:39,919 --> 00:08:42,756 line:0
+We also wanna disable
+automatic screenshot collection
+
+
+149
+00:08:42,823 --> 00:08:44,525 line:0
+and turn off code coverage.
+
+
+150
+00:08:45,692 --> 00:08:48,962 line:0
+And finally, we wanna turn off
+all diagnostic options.
+
+
+151
+00:08:49,429 --> 00:08:52,633 line:0
+These are the options listed under
+Runtime Sanitization,
+
+
+152
+00:08:52,699 --> 00:08:55,536 line:0
+Runtime API Checking,
+and Memory Management.
+
+
+153
+00:08:56,170 --> 00:09:00,974 line:-2
+Now we can run our Performance XCTest
+and view our results in the report UI.
+
+
+154
+00:09:01,375 --> 00:09:04,678 line:-2
+In the drop-down,
+we can see our new animation metrics.
+
+
+155
+00:09:04,745 --> 00:09:07,080 line:-1
+Let's select the Hitch Time Ratio metric.
+
+
+156
+00:09:08,248 --> 00:09:11,585 line:0
+We see that we collected measurements
+for five iterations...
+
+
+157
+00:09:13,153 --> 00:09:17,958 line:-2
+and we got an average of 1.2 milliseconds
+per second for our hitch time ratio.
+
+
+158
+00:09:19,893 --> 00:09:22,496 line:0
+As a next step,
+we could set this average value
+
+
+159
+00:09:22,563 --> 00:09:25,632 line:0
+of 1.2 milliseconds per second
+as our baseline,
+
+
+160
+00:09:25,999 --> 00:09:29,870 line:0
+so that any future runs of this test
+would be compared to this baseline value.
+
+
+161
+00:09:31,238 --> 00:09:35,275 line:-2
+Let's take a look at an example of how you
+might encounter a hitch in your code base
+
+
+162
+00:09:35,342 --> 00:09:37,344 line:-1
+and how you can use a Performance XCTest
+
+
+163
+00:09:37,411 --> 00:09:39,713 line:-2
+to prevent it from shipping
+to your customers.
+
+
+164
+00:09:40,948 --> 00:09:43,817 line:-2
+Let's say I'm an app developer
+at a meal planner company
+
+
+165
+00:09:43,884 --> 00:09:46,820 line:-2
+that wants to support online orders
+and deliveries.
+
+
+166
+00:09:47,387 --> 00:09:51,458 line:-2
+So far, I've implemented a view that lists
+the different menu items available.
+
+
+167
+00:09:53,026 --> 00:09:55,863 line:-2
+As a next step,
+I wanna make my food appealing
+
+
+168
+00:09:55,929 --> 00:09:58,999 line:-2
+by including images of what
+the different dishes look like.
+
+
+169
+00:09:59,066 --> 00:10:01,502 line:-2
+Before I dive into writing
+this new feature,
+
+
+170
+00:10:01,568 --> 00:10:04,004 line:-2
+I wanna measure
+my current animation performance,
+
+
+171
+00:10:04,071 --> 00:10:07,908 line:-2
+so I can use it as a baseline
+to compare for after I add the feature.
+
+
+172
+00:10:09,776 --> 00:10:12,913 line:-2
+I've set up a separate test scheme
+for my performance test
+
+
+173
+00:10:12,980 --> 00:10:15,916 line:-2
+and have configured the settings
+to what we talked about earlier.
+
+
+174
+00:10:16,550 --> 00:10:18,118 line:-1
+I can now write my test.
+
+
+175
+00:10:23,056 --> 00:10:25,926 line:-2
+As we saw before,
+I'm going to launch my application,
+
+
+176
+00:10:26,426 --> 00:10:28,028 line:-1
+tap on the "Meal Planner" cell,
+
+
+177
+00:10:28,095 --> 00:10:30,631 line:-2
+and measure
+my scrolling animation performance.
+
+
+178
+00:10:32,432 --> 00:10:35,903 line:-2
+I've already pre-ran this test,
+so let's take a look at our measurements.
+
+
+179
+00:10:39,640 --> 00:10:41,475 line:-1
+It looks like we have zero hitches
+
+
+180
+00:10:41,542 --> 00:10:44,311 line:-2
+and our animations are performing
+as expected.
+
+
+181
+00:10:44,945 --> 00:10:47,581 line:-1
+Let's go ahead and add in our new feature.
+
+
+182
+00:10:49,183 --> 00:10:52,553 line:-2
+First, I'm gonna set my image view
+to contain the images
+
+
+183
+00:10:52,619 --> 00:10:54,955 line:-1
+I've already pre-included in my project.
+
+
+184
+00:10:59,026 --> 00:11:03,130 line:-2
+Second, I'm gonna scale these images
+so that they fit well in my application.
+
+
+185
+00:11:04,264 --> 00:11:07,234 line:-2
+Now we can go ahead
+and rerun our performance test.
+
+
+186
+00:11:12,606 --> 00:11:15,676 line:-2
+Note that when using
+the XCTOSSignpostMetric,
+
+
+187
+00:11:15,742 --> 00:11:19,079 line:-2
+the measure block will listen for when
+your instrumented os_signpost interval
+
+
+188
+00:11:19,146 --> 00:11:20,681 line:-1
+is emitted within the code block
+
+
+189
+00:11:20,747 --> 00:11:24,318 line:-2
+and collect metrics only for the code
+executed within this interval.
+
+
+190
+00:11:24,751 --> 00:11:27,588 line:-2
+Another thing to note
+is that a measure block supports listening
+
+
+191
+00:11:27,654 --> 00:11:30,557 line:-2
+for multiple distinct
+os_signpost intervals.
+
+
+192
+00:11:30,858 --> 00:11:34,161 line:-2
+For example, you could listen
+for both the scrollDeceleration
+
+
+193
+00:11:34,228 --> 00:11:36,430 line:-1
+and scrollDragging os_signpost intervals
+
+
+194
+00:11:36,496 --> 00:11:39,166 line:-2
+within the same block of code
+that calls swipe up.
+
+
+195
+00:11:39,766 --> 00:11:42,302 line:-2
+Let's skip ahead
+to the completion of this test.
+
+
+196
+00:11:43,303 --> 00:11:45,973 line:-2
+It looks like we have an increase
+in the number of hitches
+
+
+197
+00:11:46,039 --> 00:11:47,908 line:-1
+and we should immediately investigate.
+
+
+198
+00:11:50,544 --> 00:11:53,914 line:-2
+It looks like our issue is here
+in our scaleAspectFit call.
+
+
+199
+00:11:54,581 --> 00:11:56,783 line:-2
+We are redrawing the image
+on the main thread
+
+
+200
+00:11:56,850 --> 00:11:59,786 line:-2
+which is responsible for rendering
+the rest of the UI.
+
+
+201
+00:12:00,287 --> 00:12:04,391 line:-2
+We are using the CPU, which creates
+new pixels and allocates memory.
+
+
+202
+00:12:05,459 --> 00:12:09,930 line:-2
+We can reduce this impact
+by using Core Animation's setContentMode
+
+
+203
+00:12:09,997 --> 00:12:13,300 line:-2
+which will hand off redrawing these images
+to the GPU.
+
+
+204
+00:12:13,734 --> 00:12:16,603 line:-2
+This allows us to use
+the existing image pixels,
+
+
+205
+00:12:16,670 --> 00:12:19,439 line:-2
+reducing the amount of work we do
+on the main thread.
+
+
+206
+00:12:20,674 --> 00:12:24,711 line:-2
+We can rerun our Performance XCTest again
+to see if this resolves the issue.
+
+
+207
+00:12:31,251 --> 00:12:35,622 line:-2
+We can confirm that our animation metrics
+now report back zero hitches
+
+
+208
+00:12:35,689 --> 00:12:38,058 line:-2
+and our performance is back
+to what we expect.
+
+
+209
+00:12:39,593 --> 00:12:41,695 line:-1
+Using our Performance XCTest,
+
+
+210
+00:12:41,762 --> 00:12:44,765 line:-2
+we were able to see
+that our new feature caused a regression,
+
+
+211
+00:12:44,831 --> 00:12:46,700 line:-1
+giving us a chance to fix it,
+
+
+212
+00:12:46,767 --> 00:12:49,903 line:-2
+and that now our feature
+is ready to reach our customers.
+
+
+213
+00:12:51,071 --> 00:12:52,906 line:-1
+Let's recap what we've talked about.
+
+
+214
+00:12:53,674 --> 00:12:55,108 line:-1
+We learned that a hitch occurs
+
+
+215
+00:12:55,175 --> 00:12:58,378 line:-2
+any time a frame appears on the screen
+later than expected.
+
+
+216
+00:12:58,879 --> 00:13:00,414 line:-1
+And we can quantify these hitches
+
+
+217
+00:13:00,480 --> 00:13:04,284 line:-2
+using the recommended good,
+warning and critical categories.
+
+
+218
+00:13:05,719 --> 00:13:08,755 line:-2
+We then learned that we can catch hitches
+in our development workflow
+
+
+219
+00:13:08,822 --> 00:13:10,490 line:-1
+using Performance XCTest.
+
+
+220
+00:13:11,058 --> 00:13:15,562 line:-2
+We can do this by using a UIKit or custom
+animation os_signpost interval.
+
+
+221
+00:13:16,363 --> 00:13:18,665 line:-1
+We also talked about best practices,
+
+
+222
+00:13:18,732 --> 00:13:22,436 line:-2
+which include resetting our
+application content between iterations
+
+
+223
+00:13:22,503 --> 00:13:25,672 line:-2
+and configuring our scheme settings
+to prevent inaccuracies.
+
+
+224
+00:13:25,739 --> 00:13:29,576 line:-2
+With this knowledge, you are now ready
+to prevent hitches in your code base
+
+
+225
+00:13:29,643 --> 00:13:32,779 line:-2
+and provide smooth animation experiences
+to your customers.
+
+
+226
+00:13:33,180 --> 00:13:34,381 line:-1
+Thank you for listening,
+
+
+227
+00:13:34,448 --> 00:13:36,717 line:-2
+and we hope you have a great
+rest of your conference.
+

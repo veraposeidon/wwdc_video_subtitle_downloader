@@ -1,0 +1,2388 @@
+1
+00:00:03,836 --> 00:00:06,907 line:-1
+Hello and welcome to WWDC.
+
+
+2
+00:00:08,775 --> 00:00:12,613 line:0
+Hello, I'm Mike Lamb. I'm a software
+engineer on the Apple Watch team.
+
+
+3
+00:00:12,679 --> 00:00:17,084 line:-2
+I'm here today to talk about the best ways
+to keep your complications up to date.
+
+
+4
+00:00:17,150 --> 00:00:19,386 line:-2
+We have a lot to cover,
+so let's get started.
+
+
+5
+00:00:19,453 --> 00:00:23,323 line:-2
+Complications are intrinsic
+to the user experience on the Apple Watch.
+
+
+6
+00:00:23,390 --> 00:00:25,926 line:-1
+With Face Sharing, SwiftUI complications
+
+
+7
+00:00:25,993 --> 00:00:29,997 line:-2
+and multiple complication APIs
+being released in watchOS 7,
+
+
+8
+00:00:30,063 --> 00:00:32,966 line:-2
+complications are an even bigger focus
+for Watch apps this year.
+
+
+9
+00:00:33,634 --> 00:00:36,336 line:-2
+Complications are a great way to provide
+timely and relevant information
+
+
+10
+00:00:36,403 --> 00:00:39,039 line:-1
+on the Watch face at a quick glance.
+
+
+11
+00:00:39,106 --> 00:00:41,041 line:-2
+Keeping complications up to date
+is imperative
+
+
+12
+00:00:41,108 --> 00:00:42,943 line:-2
+to making a great experience
+for customers.
+
+
+13
+00:00:43,810 --> 00:00:46,580 line:-2
+watchOS provides complication apps'
+special capabilities
+
+
+14
+00:00:46,647 --> 00:00:48,549 line:-1
+to enable a great experience.
+
+
+15
+00:00:49,449 --> 00:00:52,786 line:-2
+Complication apps are kept around
+even when other apps may be stopped
+
+
+16
+00:00:52,853 --> 00:00:54,221 line:-1
+and removed from memory.
+
+
+17
+00:00:54,288 --> 00:00:56,790 line:-2
+If the system does need
+to stop a complication app,
+
+
+18
+00:00:56,857 --> 00:00:59,526 line:-2
+it will be restarted later
+to update its complications.
+
+
+19
+00:01:01,094 --> 00:01:03,197 line:-1
+Since complications are always visible,
+
+
+20
+00:01:03,263 --> 00:01:06,400 line:-2
+complication apps
+are considered in use for privacy.
+
+
+21
+00:01:06,466 --> 00:01:08,969 line:-2
+Our goal today
+is to go over the techniques apps can use
+
+
+22
+00:01:09,036 --> 00:01:11,405 line:-1
+to keep dynamic complications up to date.
+
+
+23
+00:01:11,972 --> 00:01:14,041 line:-2
+We'll start by discussing
+an example app I'm building
+
+
+24
+00:01:14,107 --> 00:01:15,809 line:-1
+to illustrate these techniques.
+
+
+25
+00:01:17,144 --> 00:01:19,246 line:-2
+An excellent time
+to update our complications
+
+
+26
+00:01:19,313 --> 00:01:21,648 line:-1
+is when the app is being actively used.
+
+
+27
+00:01:21,715 --> 00:01:23,650 line:-1
+We'll go over how to do this.
+
+
+28
+00:01:23,717 --> 00:01:25,786 line:-1
+Even when the app isn't in the foreground,
+
+
+29
+00:01:25,853 --> 00:01:30,357 line:-2
+watchOS provides mechanisms to allow it
+to keep its complications up to date.
+
+
+30
+00:01:30,424 --> 00:01:33,193 line:-2
+Background updates
+make complications feel like magic.
+
+
+31
+00:01:33,994 --> 00:01:37,598 line:-2
+The first background update mechanism
+is Background App Refresh.
+
+
+32
+00:01:38,265 --> 00:01:41,535 line:-2
+Background App Refresh
+allows apps to schedule background runtime
+
+
+33
+00:01:41,602 --> 00:01:44,137 line:-1
+to access APIs and data on the Watch.
+
+
+34
+00:01:44,538 --> 00:01:47,274 line:-2
+Apps can also schedule
+background URLSessions
+
+
+35
+00:01:47,341 --> 00:01:50,744 line:-2
+to pull data from servers
+while the app isn't active.
+
+
+36
+00:01:50,811 --> 00:01:54,982 line:-2
+And data can be sent directly to the app
+on the Watch using complication pushes.
+
+
+37
+00:01:55,449 --> 00:01:58,252 line:-2
+We'll end today's talk
+with an example of how to do this.
+
+
+38
+00:01:59,453 --> 00:02:02,923 line:-2
+To reiterate, for each of the three
+background mechanisms,
+
+
+39
+00:02:02,990 --> 00:02:05,025 line:-2
+the app doesn't need to be active
+all the time.
+
+
+40
+00:02:05,092 --> 00:02:08,328 line:-2
+It will be launched as necessary
+to update its complications.
+
+
+41
+00:02:09,263 --> 00:02:11,798 line:-2
+All these mechanisms
+can be used separately or in combination
+
+
+42
+00:02:11,865 --> 00:02:13,400 line:-1
+depending on your app's needs.
+
+
+43
+00:02:13,901 --> 00:02:15,969 line:-2
+To illustrate
+how to keep complications up to date,
+
+
+44
+00:02:16,036 --> 00:02:18,405 line:-2
+I've been working
+on an example kite flying app.
+
+
+45
+00:02:18,472 --> 00:02:21,742 line:-2
+Our goal is to provide a compelling
+experience without requiring a phone,
+
+
+46
+00:02:21,808 --> 00:02:24,077 line:-2
+so we're building
+an independent Watch app.
+
+
+47
+00:02:24,144 --> 00:02:27,481 line:-2
+We're gonna make use of the new APIs
+available in watchOS 7
+
+
+48
+00:02:27,548 --> 00:02:29,917 line:-1
+to support multiple active complications.
+
+
+49
+00:02:30,551 --> 00:02:34,021 line:-2
+To be clear, today we're showing
+how to keep complications up to date.
+
+
+50
+00:02:34,087 --> 00:02:36,089 line:-2
+We're not showing
+how to design or build them.
+
+
+51
+00:02:36,156 --> 00:02:39,326 line:-2
+See our other sessions
+for information on how to do that.
+
+
+52
+00:02:39,393 --> 00:02:42,996 line:-2
+We want the app to encourage people to
+be more active, so our first complication
+
+
+53
+00:02:43,063 --> 00:02:46,099 line:-2
+will pull information
+about the day's activity from HealthKit.
+
+
+54
+00:02:46,166 --> 00:02:48,735 line:-2
+We'll use Background App Refresh
+to pull that data.
+
+
+55
+00:02:48,802 --> 00:02:51,805 line:-2
+It's important to track the weather
+when you're thinking about flying a kite,
+
+
+56
+00:02:51,872 --> 00:02:54,174 line:-2
+so we'll need weather data,
+especially wind.
+
+
+57
+00:02:54,241 --> 00:02:56,910 line:-2
+We'll use background URLSessions
+to grab weather data
+
+
+58
+00:02:56,977 --> 00:02:59,446 line:-2
+for the latest cached location
+periodically.
+
+
+59
+00:02:59,513 --> 00:03:02,983 line:0
+Flying kites with friends is great fun,
+so we'll want to provide a complication
+
+
+60
+00:03:03,050 --> 00:03:05,452 line:0
+that displays encouragement
+from our friends.
+
+
+61
+00:03:05,519 --> 00:03:08,755 line:0
+We'll use complication pushes
+to provide updates for this complication.
+
+
+62
+00:03:08,822 --> 00:03:11,191 line:-2
+Let's talk about updating
+in the foreground first.
+
+
+63
+00:03:11,258 --> 00:03:12,893 line:-1
+Any time our app is launched by the user
+
+
+64
+00:03:12,960 --> 00:03:15,295 line:-2
+is a great time
+to update our complications.
+
+
+65
+00:03:15,362 --> 00:03:18,899 line:-2
+Once we have updates we want to display,
+we use the ClockKit APIs
+
+
+66
+00:03:18,966 --> 00:03:20,868 line:-1
+to reload our complication's timeline.
+
+
+67
+00:03:21,535 --> 00:03:24,271 line:-2
+A complication consists
+of a timeline of entries.
+
+
+68
+00:03:24,338 --> 00:03:26,840 line:-2
+When an app wants to update
+a complication,
+
+
+69
+00:03:26,907 --> 00:03:29,443 line:-2
+it calls reloadTimeline
+on the complication's server
+
+
+70
+00:03:29,510 --> 00:03:30,978 line:-1
+for that complication.
+
+
+71
+00:03:32,012 --> 00:03:34,915 line:-2
+Here we've written
+an updateActiveComplications method
+
+
+72
+00:03:34,982 --> 00:03:36,917 line:-1
+which we'll use throughout our app.
+
+
+73
+00:03:38,185 --> 00:03:41,588 line:-2
+This method iterates
+over the array of active complications
+
+
+74
+00:03:41,655 --> 00:03:44,591 line:-2
+and asks the complication's server
+to reload each one.
+
+
+75
+00:03:45,192 --> 00:03:48,695 line:-2
+In this example, we're updating
+all complications each time.
+
+
+76
+00:03:49,363 --> 00:03:51,231 line:-1
+Typically, you should be more selective
+
+
+77
+00:03:51,298 --> 00:03:54,168 line:-2
+and only update those complications
+that need to be updated.
+
+
+78
+00:03:54,735 --> 00:03:56,637 line:-1
+We will call updateActiveComplications
+
+
+79
+00:03:56,703 --> 00:03:59,139 line:-2
+any time we want to update
+our complications.
+
+
+80
+00:04:00,274 --> 00:04:03,043 line:-2
+After reloadTimeline is called
+by updateActiveComplications,
+
+
+81
+00:04:03,110 --> 00:04:04,711 line:-1
+or at other times as needed,
+
+
+82
+00:04:04,778 --> 00:04:08,649 line:-2
+the complication server will call
+the app's CLKComplicationDataSource
+
+
+83
+00:04:08,715 --> 00:04:10,551 line:-1
+to get the current timeline entry.
+
+
+84
+00:04:11,685 --> 00:04:15,856 line:-2
+In response, our app then builds an entry
+using a template and providers.
+
+
+85
+00:04:17,524 --> 00:04:19,326 line:-2
+When the app is finished building
+the entry,
+
+
+86
+00:04:19,392 --> 00:04:21,628 line:-2
+our app passes it
+to the complication server
+
+
+87
+00:04:21,695 --> 00:04:23,697 line:-1
+using the provided completion handler.
+
+
+88
+00:04:24,798 --> 00:04:27,067 line:-2
+Here's the code.
+After reloadTimeline is called
+
+
+89
+00:04:27,134 --> 00:04:28,802 line:-1
+by updateActiveComplications,
+
+
+90
+00:04:28,869 --> 00:04:31,705 line:-1
+our CLKComplicationDataSource is invoked.
+
+
+91
+00:04:32,372 --> 00:04:36,109 line:-2
+It is asked for the current timeline entry
+for the complication to update.
+
+
+92
+00:04:37,010 --> 00:04:40,180 line:-2
+A handler is provided
+to pass back the entry after it's built.
+
+
+93
+00:04:41,281 --> 00:04:44,218 line:-2
+We use a template that's appropriate
+for the type of complication.
+
+
+94
+00:04:44,284 --> 00:04:47,421 line:-2
+We fill the template with providers
+to build a timeline entry.
+
+
+95
+00:04:47,888 --> 00:04:49,623 line:-1
+Once the entry has been created,
+
+
+96
+00:04:49,690 --> 00:04:52,092 line:-2
+you pass it back
+using the handler that was provided.
+
+
+97
+00:04:52,893 --> 00:04:55,495 line:-2
+As you can see, updating complications
+while in the foreground
+
+
+98
+00:04:55,562 --> 00:04:56,763 line:-1
+is straightforward.
+
+
+99
+00:04:57,397 --> 00:05:00,067 line:-2
+We ask the complication server
+to reload our complications
+
+
+100
+00:05:00,133 --> 00:05:02,503 line:-2
+and then provide the current entry
+for each one.
+
+
+101
+00:05:03,203 --> 00:05:05,873 line:-2
+We'll do this whenever the user
+changes selections in the app
+
+
+102
+00:05:05,939 --> 00:05:08,775 line:-2
+or our app receives new data
+while it's in the foreground.
+
+
+103
+00:05:10,010 --> 00:05:12,379 line:-2
+Often though,
+our app isn't in the foreground,
+
+
+104
+00:05:12,446 --> 00:05:15,616 line:-2
+and in that case we can use mechanisms
+like Background App Refresh
+
+
+105
+00:05:15,682 --> 00:05:18,252 line:-2
+to get the data needed
+to refresh our complications.
+
+
+106
+00:05:20,320 --> 00:05:21,955 line:-1
+Going back to our example app,
+
+
+107
+00:05:22,022 --> 00:05:25,225 line:-2
+we want to pull data from HealthKit
+for our activity complication.
+
+
+108
+00:05:26,059 --> 00:05:28,729 line:-2
+Background App Refresh allows us
+to schedule periodic updates
+
+
+109
+00:05:28,795 --> 00:05:32,699 line:-2
+to keep that complication up to date
+even when the app isn't in use.
+
+
+110
+00:05:33,934 --> 00:05:35,836 line:-1
+Our app can use Background App Refresh
+
+
+111
+00:05:35,903 --> 00:05:38,539 line:-2
+to refresh complications
+up to four times per hour.
+
+
+112
+00:05:39,173 --> 00:05:42,576 line:-2
+This number doesn't change regardless
+of how many of our app's complications
+
+
+113
+00:05:42,643 --> 00:05:45,078 line:-2
+might be configured
+on the active Watch face.
+
+
+114
+00:05:45,979 --> 00:05:49,516 line:-2
+The actual number of updates an app
+receives is dependent on conditions
+
+
+115
+00:05:49,583 --> 00:05:52,853 line:-2
+such as how many other processes
+are running and battery usage.
+
+
+116
+00:05:54,154 --> 00:05:55,689 line:-1
+To schedule Background App Refresh,
+
+
+117
+00:05:55,756 --> 00:05:58,892 line:-2
+call scheduleBackgroundRefresh
+on WKExtension.
+
+
+118
+00:05:59,326 --> 00:06:01,528 line:-2
+It's possible your app will be launched
+in the background,
+
+
+119
+00:06:01,595 --> 00:06:05,399 line:-2
+so consider scheduling your first request
+in applicationDidFinishLaunching.
+
+
+120
+00:06:06,533 --> 00:06:09,803 line:-2
+We've written a method
+to schedule Background App Refresh.
+
+
+121
+00:06:09,870 --> 00:06:11,738 line:-1
+First we choose the schedule date.
+
+
+122
+00:06:11,805 --> 00:06:15,475 line:-2
+This is our first request.
+We make that request sooner as shown.
+
+
+123
+00:06:15,943 --> 00:06:18,345 line:-2
+The system will choose
+the right time to launch your app.
+
+
+124
+00:06:18,412 --> 00:06:20,747 line:-2
+This will always be after the time
+you've requested.
+
+
+125
+00:06:20,814 --> 00:06:24,885 line:-2
+Typically, it is within a minute or two,
+but that depends on system conditions.
+
+
+126
+00:06:24,952 --> 00:06:28,555 line:-2
+Use the userInfo dictionary
+to supply your own data.
+
+
+127
+00:06:28,622 --> 00:06:31,124 line:-2
+In this case,
+just to illustrate how this is done,
+
+
+128
+00:06:31,191 --> 00:06:33,393 line:-2
+we're passing the time
+the request was made.
+
+
+129
+00:06:34,394 --> 00:06:37,364 line:-2
+Once we have the schedule date
+and the optional userInfo,
+
+
+130
+00:06:37,431 --> 00:06:40,501 line:-2
+we call scheduleBackgroundRefresh
+on WKExtension.
+
+
+131
+00:06:41,869 --> 00:06:45,772 line:-2
+WKExtension will call our completion
+handler asynchronously on the main thread
+
+
+132
+00:06:45,839 --> 00:06:47,908 line:-1
+when the request has been scheduled.
+
+
+133
+00:06:47,975 --> 00:06:50,010 line:-2
+Process any errors
+that might have occurred.
+
+
+134
+00:06:51,345 --> 00:06:54,314 line:-2
+When the task is ready,
+our app will be made active,
+
+
+135
+00:06:54,381 --> 00:06:57,784 line:-2
+and the extension delegate will be called
+to handle the background task.
+
+
+136
+00:06:58,819 --> 00:07:02,222 line:-2
+After doing some processing,
+we'll request a complication update
+
+
+137
+00:07:02,289 --> 00:07:04,992 line:-2
+and schedule our next
+Background App Refresh.
+
+
+138
+00:07:05,058 --> 00:07:06,793 line:-1
+Then we'll set the task completed.
+
+
+139
+00:07:08,328 --> 00:07:10,030 line:-1
+Let's look at our extension delegate.
+
+
+140
+00:07:10,731 --> 00:07:12,866 line:-2
+When Xcode generates
+our extension delegate,
+
+
+141
+00:07:12,933 --> 00:07:15,836 line:-2
+it also generates a method
+to handle background tasks.
+
+
+142
+00:07:16,904 --> 00:07:19,373 line:-2
+The system might have
+more than one task to complete.
+
+
+143
+00:07:19,439 --> 00:07:22,943 line:-2
+Our extension delegate loops
+through all tasks and hails each one.
+
+
+144
+00:07:24,311 --> 00:07:28,115 line:-2
+Generated code provides default handlers
+for all types of background tasks
+
+
+145
+00:07:28,182 --> 00:07:29,683 line:-1
+the app can receive.
+
+
+146
+00:07:30,417 --> 00:07:33,453 line:-2
+We're handling it
+WKApplicationRefreshBackgroundTask
+
+
+147
+00:07:33,520 --> 00:07:36,156 line:-2
+and replacing the default handler
+with our own code.
+
+
+148
+00:07:37,224 --> 00:07:39,226 line:-1
+In this code, purely as an example,
+
+
+149
+00:07:39,293 --> 00:07:42,462 line:-2
+we retrieve the userInfo we added
+when we scheduled the request.
+
+
+150
+00:07:42,529 --> 00:07:44,431 line:-1
+We use a date that we stored within it
+
+
+151
+00:07:44,498 --> 00:07:47,000 line:-2
+to calculate the time
+since the request was made.
+
+
+152
+00:07:48,001 --> 00:07:50,771 line:0
+Then we call
+our updateActiveComplications method
+
+
+153
+00:07:50,838 --> 00:07:54,508 line:0
+and ask the complication server
+to reload our active complications.
+
+
+154
+00:07:55,108 --> 00:07:57,411 line:0
+We then schedule
+the next background refresh.
+
+
+155
+00:07:58,078 --> 00:08:01,615 line:0
+After we've updated our complications
+and scheduled another request,
+
+
+156
+00:08:01,682 --> 00:08:03,550 line:0
+then we complete the current task.
+
+
+157
+00:08:04,351 --> 00:08:07,154 line:0
+We pass "false" to indicate
+that no snapshot is needed.
+
+
+158
+00:08:07,221 --> 00:08:10,023 line:0
+Each complication update
+results in a snapshot request,
+
+
+159
+00:08:10,090 --> 00:08:12,226 line:0
+so we don't have to request one
+separately.
+
+
+160
+00:08:13,327 --> 00:08:16,463 line:0
+The app may be suspended as soon
+as it completes the background task,
+
+
+161
+00:08:16,530 --> 00:08:19,399 line:0
+so we must do all our work
+before setting the task completed.
+
+
+162
+00:08:20,567 --> 00:08:23,871 line:-2
+If we want to do something more complex,
+like access HealthKit,
+
+
+163
+00:08:23,937 --> 00:08:25,839 line:-1
+we'll need to revise our strategy.
+
+
+164
+00:08:27,040 --> 00:08:29,576 line:-2
+To avoid putting too much code
+in our extension delegate,
+
+
+165
+00:08:29,643 --> 00:08:32,179 line:-2
+I've added a data provider
+that uses HealthKit
+
+
+166
+00:08:32,246 --> 00:08:35,282 line:-2
+and adds a method
+that takes its own completion handler.
+
+
+167
+00:08:36,316 --> 00:08:38,385 line:-1
+HealthKit queries can be asynchronous,
+
+
+168
+00:08:38,452 --> 00:08:40,654 line:-2
+so we'll need to wait
+until the refresh is completed
+
+
+169
+00:08:40,721 --> 00:08:44,491 line:-2
+before updating our complications,
+scheduling our next request
+
+
+170
+00:08:44,558 --> 00:08:46,326 line:-1
+and setting the task complete.
+
+
+171
+00:08:47,427 --> 00:08:50,430 line:-2
+Doing this is pretty straightforward
+because the HealthKit work is done
+
+
+172
+00:08:50,497 --> 00:08:52,232 line:-1
+by our new HealthDataProvider.
+
+
+173
+00:08:53,300 --> 00:08:55,669 line:-2
+We call the HealthDataProvider
+to refresh this data.
+
+
+174
+00:08:55,736 --> 00:08:57,204 line:-1
+It does that asynchronously.
+
+
+175
+00:08:58,105 --> 00:09:01,108 line:-2
+When it's finished refreshing its data,
+it calls the completion handler,
+
+
+176
+00:09:01,175 --> 00:09:03,544 line:-2
+telling us whether or not
+to update the complications.
+
+
+177
+00:09:04,344 --> 00:09:07,814 line:-2
+Within the completion handler,
+we actually update our complications,
+
+
+178
+00:09:07,881 --> 00:09:10,651 line:-2
+schedule our next refresh
+and set the task completed.
+
+
+179
+00:09:11,852 --> 00:09:17,357 line:-2
+To review, Background App Refresh is great
+for scheduling periodic background tasks.
+
+
+180
+00:09:17,424 --> 00:09:19,693 line:-2
+Your app can be resumed or launched
+to handle these tasks
+
+
+181
+00:09:19,760 --> 00:09:21,261 line:-1
+up to four times per hour.
+
+
+182
+00:09:22,162 --> 00:09:24,064 line:-1
+Here are some guidelines to keep in mind.
+
+
+183
+00:09:24,998 --> 00:09:27,868 line:-1
+Only one request is outstanding at a time.
+
+
+184
+00:09:27,935 --> 00:09:30,170 line:-2
+If you need periodic updates,
+do what I've shown
+
+
+185
+00:09:30,237 --> 00:09:33,273 line:-2
+and schedule the next one
+before marking the current one complete.
+
+
+186
+00:09:33,974 --> 00:09:35,776 line:-1
+No networking activity is allowed.
+
+
+187
+00:09:35,843 --> 00:09:38,212 line:-2
+You use most of the APIs
+available on the Watch,
+
+
+188
+00:09:38,278 --> 00:09:40,380 line:-1
+but URLSession is an exception.
+
+
+189
+00:09:40,447 --> 00:09:43,183 line:-2
+If you do try to use URLSession,
+it will fail with an error.
+
+
+190
+00:09:44,451 --> 00:09:47,721 line:-2
+Your app is limited to a maximum
+of four seconds of active CPU time.
+
+
+191
+00:09:47,788 --> 00:09:49,022 line:-1
+That may not sound like much,
+
+
+192
+00:09:49,089 --> 00:09:52,059 line:-2
+but four seconds of constant processing
+is actually quite a lot.
+
+
+193
+00:09:52,125 --> 00:09:54,294 line:-2
+If you need to do
+more processing than that,
+
+
+194
+00:09:54,361 --> 00:09:56,563 line:-1
+consider breaking it into smaller chunks.
+
+
+195
+00:09:58,198 --> 00:10:02,169 line:0
+The app has a maximum of 15 seconds
+of total time to complete the task.
+
+
+196
+00:10:02,236 --> 00:10:06,940 line:0
+A common reason for going over 15 seconds
+is neglecting to mark the task completed.
+
+
+197
+00:10:08,275 --> 00:10:09,743 line:-1
+Background App Refresh is great,
+
+
+198
+00:10:09,810 --> 00:10:12,446 line:-2
+but if you need to access data
+over a network while in the background,
+
+
+199
+00:10:12,513 --> 00:10:14,982 line:-1
+use a background URLSession.
+
+
+200
+00:10:15,048 --> 00:10:18,385 line:-2
+Background URLSessions allow your app
+to schedule and receive data
+
+
+201
+00:10:18,452 --> 00:10:20,220 line:-1
+even when the app isn't running.
+
+
+202
+00:10:21,688 --> 00:10:25,192 line:-2
+Background URLSession can be used
+in addition to Background App Refresh.
+
+
+203
+00:10:25,259 --> 00:10:28,829 line:-2
+You can even change the request on the fly
+and insert authentication challenges.
+
+
+204
+00:10:28,896 --> 00:10:30,197 line:-1
+It's pretty cool.
+
+
+205
+00:10:31,632 --> 00:10:33,467 line:-2
+We'll use it
+to retrieve weather information
+
+
+206
+00:10:33,534 --> 00:10:36,603 line:-2
+for the localized wind complication
+we're planning to add to our app.
+
+
+207
+00:10:37,471 --> 00:10:41,408 line:-2
+Under most conditions, your app can make
+and receive up to four requests per hour.
+
+
+208
+00:10:41,475 --> 00:10:43,477 line:-2
+The actual number depends
+on a number of factors,
+
+
+209
+00:10:43,544 --> 00:10:48,315 line:-2
+including the availability of Wi-Fi,
+cellular reception and battery life.
+
+
+210
+00:10:49,449 --> 00:10:52,819 line:-2
+Your app can have multiple
+outstanding background download tasks.
+
+
+211
+00:10:52,886 --> 00:10:55,889 line:-2
+Always make sure to attach to your session
+when your app is launched
+
+
+212
+00:10:55,956 --> 00:10:58,525 line:-2
+so you can receive
+the URLSession delegate callbacks.
+
+
+213
+00:10:59,259 --> 00:11:02,129 line:-2
+First, let's go over how to schedule
+background URLSessions.
+
+
+214
+00:11:03,764 --> 00:11:06,567 line:-2
+In our app,
+we want to get weather data periodically,
+
+
+215
+00:11:06,633 --> 00:11:09,403 line:-2
+and we'll use the URLSession framework
+for this purpose.
+
+
+216
+00:11:09,903 --> 00:11:13,874 line:-2
+We've created a WeatherDataProvider
+to be our URLSession delegate.
+
+
+217
+00:11:13,941 --> 00:11:17,344 line:-2
+Our data provider creates a background
+URLSession configuration.
+
+
+218
+00:11:17,411 --> 00:11:20,380 line:-2
+We set sessionSendsLaunchEvents
+on the background configuration
+
+
+219
+00:11:20,447 --> 00:11:22,316 line:-1
+to wake the app in the background.
+
+
+220
+00:11:23,016 --> 00:11:27,087 line:-2
+We use the configuration to create
+a URLSession in a download task.
+
+
+221
+00:11:27,454 --> 00:11:29,756 line:-1
+We set the task's earliest begin date.
+
+
+222
+00:11:29,823 --> 00:11:32,092 line:-2
+That will be the date
+the task is scheduled for.
+
+
+223
+00:11:32,159 --> 00:11:34,361 line:-1
+Then we resume the task to start it.
+
+
+224
+00:11:34,428 --> 00:11:36,363 line:-2
+Here's the first part
+of our WeatherDataProvider.
+
+
+225
+00:11:36,430 --> 00:11:38,498 line:-1
+It's a URLSessionDownloadDelegate.
+
+
+226
+00:11:39,233 --> 00:11:42,736 line:-2
+To create our URLSession,
+we get a background configuration,
+
+
+227
+00:11:42,803 --> 00:11:45,305 line:-2
+we mark the configuration
+as nondiscretionary
+
+
+228
+00:11:45,372 --> 00:11:49,142 line:-2
+and make sure sessionSendsLaunchEvents
+is set to "true"
+
+
+229
+00:11:49,209 --> 00:11:51,144 line:-1
+so the app is launched in the background.
+
+
+230
+00:11:51,211 --> 00:11:54,515 line:-2
+Then we use a configuration
+to create the URLSession.
+
+
+231
+00:11:54,581 --> 00:11:56,416 line:-1
+So, if we set the delegateQueue to "nil,"
+
+
+232
+00:11:56,483 --> 00:11:59,887 line:-2
+URLSession's responses will be sent
+on a background serial queue.
+
+
+233
+00:12:00,420 --> 00:12:03,090 line:-1
+Continuing with our WeatherDataProvider,
+
+
+234
+00:12:03,156 --> 00:12:06,493 line:-2
+we've added a schedule method
+to create and schedule a download task.
+
+
+235
+00:12:06,560 --> 00:12:09,897 line:-2
+We have multiple outstanding requests,
+but in this case, you only need one,
+
+
+236
+00:12:09,963 --> 00:12:13,600 line:-2
+so we'll schedule a new background task
+as long as one isn't already outstanding.
+
+
+237
+00:12:13,667 --> 00:12:17,604 line:-2
+We build the URL we need using the latest
+cached location from Core Location
+
+
+238
+00:12:17,671 --> 00:12:20,140 line:-2
+and create our download task
+for the background session.
+
+
+239
+00:12:20,207 --> 00:12:22,709 line:-2
+We set the earliest begin date
+for this task.
+
+
+240
+00:12:22,776 --> 00:12:25,312 line:-2
+As we did earlier,
+we make our first request right away
+
+
+241
+00:12:25,379 --> 00:12:27,781 line:-2
+and schedule follow-on requests
+for every 15 minutes.
+
+
+242
+00:12:27,848 --> 00:12:30,717 line:-2
+We set the number of bytes
+we expect to send and receive.
+
+
+243
+00:12:30,784 --> 00:12:33,587 line:-2
+Finally,
+we resume the task that is ready to run.
+
+
+244
+00:12:34,154 --> 00:12:37,524 line:-2
+After it's scheduled, the download task
+will run independently of our app.
+
+
+245
+00:12:37,591 --> 00:12:38,792 line:-1
+When it's completed,
+
+
+246
+00:12:38,859 --> 00:12:41,929 line:-2
+our app will be resumed in the background
+or launched as necessary
+
+
+247
+00:12:41,995 --> 00:12:43,664 line:-1
+to handle the request.
+
+
+248
+00:12:44,431 --> 00:12:47,367 line:-2
+When the download is complete,
+the WKExtension delivers
+
+
+249
+00:12:47,434 --> 00:12:51,338 line:-2
+a WKURLSessionRefreshBackgroundTask
+to our extension delegate.
+
+
+250
+00:12:52,439 --> 00:12:55,175 line:-2
+We use our WeatherDataProvider
+to handle the request.
+
+
+251
+00:12:56,210 --> 00:12:58,478 line:-1
+Until we mark the task completed,
+
+
+252
+00:12:58,545 --> 00:13:00,547 line:-2
+URLSession delegate methods
+will be delivered.
+
+
+253
+00:13:00,614 --> 00:13:03,951 line:-2
+Don't mark the task as completed
+before handling those calls.
+
+
+254
+00:13:05,419 --> 00:13:07,354 line:-1
+If the task completed successfully,
+
+
+255
+00:13:07,421 --> 00:13:11,024 line:-2
+our delegate receives
+a didFinishDownloadingTo delegate call.
+
+
+256
+00:13:11,825 --> 00:13:14,761 line:-2
+Regardless of whether the download
+completed successfully or not,
+
+
+257
+00:13:14,828 --> 00:13:17,831 line:-2
+our delegate will receive
+didCompleteWithOptionalError.
+
+
+258
+00:13:17,898 --> 00:13:19,233 line:-1
+When that call is completed,
+
+
+259
+00:13:19,299 --> 00:13:22,236 line:-2
+the WeatherDataProvider calls
+the completion handler it was given,
+
+
+260
+00:13:22,302 --> 00:13:24,938 line:-2
+which allows us to update
+our complications,
+
+
+261
+00:13:25,005 --> 00:13:28,175 line:0
+schedule a new request
+and then set the task completed.
+
+
+262
+00:13:29,643 --> 00:13:31,645 line:-2
+The download task we scheduled earlier
+is complete,
+
+
+263
+00:13:31,712 --> 00:13:33,580 line:-1
+and now it's time to handle the results.
+
+
+264
+00:13:34,348 --> 00:13:38,852 line:-2
+Our session delegate is asked to handle
+WKURLSessionRefreshBackgroundTask.
+
+
+265
+00:13:39,419 --> 00:13:42,523 line:-2
+The session delegate asks
+the WeatherDataProvider to refresh
+
+
+266
+00:13:42,589 --> 00:13:44,892 line:-2
+and passes a closure to be called
+when done.
+
+
+267
+00:13:45,926 --> 00:13:50,030 line:-2
+When the refresh is done,
+the WeatherDataProvider calls the closure.
+
+
+268
+00:13:50,097 --> 00:13:52,933 line:-2
+Within that closure,
+we schedule our next retrieval,
+
+
+269
+00:13:53,000 --> 00:13:56,703 line:-2
+update complications as necessary
+and then mark the task completed.
+
+
+270
+00:13:57,104 --> 00:14:00,340 line:-2
+Within our WeatherDateProvider,
+our refresh method
+
+
+271
+00:14:00,974 --> 00:14:03,177 line:-1
+stores the completion handler it is passed
+
+
+272
+00:14:03,243 --> 00:14:06,613 line:-2
+so it can call it once the expected
+delegate methods have been delivered.
+
+
+273
+00:14:07,047 --> 00:14:09,550 line:-2
+Our WeatherDataProvider,
+since the task is completed,
+
+
+274
+00:14:09,616 --> 00:14:14,254 line:-2
+receives the URLSession delegate method
+downloadTask didFinishDownloadingTo.
+
+
+275
+00:14:15,088 --> 00:14:18,392 line:-2
+The data we asked for has been downloaded
+to a file, we check for that,
+
+
+276
+00:14:18,458 --> 00:14:21,695 line:-2
+and then process the json weather data
+we received.
+
+
+277
+00:14:22,896 --> 00:14:25,966 line:-2
+After the download task is complete
+and we've processed the data,
+
+
+278
+00:14:26,033 --> 00:14:28,502 line:-2
+our app receives
+didCompleteWithOptionalError.
+
+
+279
+00:14:29,069 --> 00:14:31,171 line:-2
+We want to call a completion handler
+on the main queue,
+
+
+280
+00:14:31,238 --> 00:14:34,808 line:-2
+so we dispatch to the main queue
+and call the completion handler.
+
+
+281
+00:14:34,875 --> 00:14:38,045 line:-2
+If there's no error,
+we tell it to update the complications.
+
+
+282
+00:14:38,111 --> 00:14:41,582 line:-2
+We then set the completion handler to
+"nil" so it isn't called more than once.
+
+
+283
+00:14:42,482 --> 00:14:45,953 line:-2
+Depending on the request,
+our app may get intermediate requests
+
+
+284
+00:14:46,019 --> 00:14:49,623 line:-2
+that allow our app to update the URL,
+cancel the download task
+
+
+285
+00:14:49,690 --> 00:14:52,926 line:-2
+or answer authentication challenges
+before the download completes.
+
+
+286
+00:14:54,194 --> 00:14:56,196 line:-1
+Let's look at those briefly.
+
+
+287
+00:14:56,263 --> 00:14:59,766 line:-2
+As in other cases we've looked at
+so far involving URLSession tasks,
+
+
+288
+00:14:59,833 --> 00:15:03,737 line:-2
+these will come to our app
+as WKURLSessionRefreshBackgroundTask.
+
+
+289
+00:15:04,538 --> 00:15:08,008 line:-2
+As before, our extension delegate
+will be asked to handle these tasks.
+
+
+290
+00:15:08,876 --> 00:15:11,578 line:-2
+We'll use our WeatherDataProvider
+to handle these requests.
+
+
+291
+00:15:12,479 --> 00:15:14,047 line:-1
+While the task is active,
+
+
+292
+00:15:14,114 --> 00:15:16,817 line:-2
+the WeatherDataProvider
+will receive delegate calls
+
+
+293
+00:15:16,884 --> 00:15:18,785 line:-1
+from the URLSession subsystem.
+
+
+294
+00:15:19,820 --> 00:15:24,358 line:-2
+WillBeginDelayRequest allows our app
+to update or cancel our URL request.
+
+
+295
+00:15:24,424 --> 00:15:27,494 line:-2
+For example, if it's been a long time
+since we initiated our request,
+
+
+296
+00:15:27,561 --> 00:15:30,631 line:-2
+we might substitute the latest
+cached location from Core Location
+
+
+297
+00:15:30,697 --> 00:15:33,467 line:-2
+for the one we specified
+when we first made the request.
+
+
+298
+00:15:35,002 --> 00:15:38,572 line:-2
+DidReceiveChallenge allows our app to
+respond to any authentication challenges
+
+
+299
+00:15:38,639 --> 00:15:39,873 line:-1
+that may occur.
+
+
+300
+00:15:40,440 --> 00:15:43,443 line:-2
+Our delegate will receive
+SessionDidFinishEvents
+
+
+301
+00:15:43,510 --> 00:15:45,045 line:-1
+when all events have been delivered,
+
+
+302
+00:15:45,112 --> 00:15:47,481 line:-2
+so this is when we'll call
+our completion handler.
+
+
+303
+00:15:48,448 --> 00:15:50,884 line:-2
+You might be tempted
+to schedule a new task at this point,
+
+
+304
+00:15:50,951 --> 00:15:54,488 line:-2
+but don't, as the current task
+hasn't been fully completed.
+
+
+305
+00:15:55,322 --> 00:15:57,891 line:-1
+Instead, just mark this task as completed.
+
+
+306
+00:15:57,958 --> 00:16:01,195 line:-2
+The guidelines are the same
+as for Background App Refresh.
+
+
+307
+00:16:02,229 --> 00:16:04,231 line:0
+Your app should avoid
+expensive processing,
+
+
+308
+00:16:04,298 --> 00:16:08,836 line:0
+and make sure to set the task completed
+within 15 seconds of when it was received.
+
+
+309
+00:16:08,902 --> 00:16:12,339 line:-2
+Background URLSessions are great
+for retrieving data from remote servers.
+
+
+310
+00:16:12,406 --> 00:16:15,275 line:-2
+They can be scheduled, revised
+or canceled as needed.
+
+
+311
+00:16:16,510 --> 00:16:20,113 line:-2
+The last mechanism we'll look at today
+are complication pushes.
+
+
+312
+00:16:20,180 --> 00:16:21,748 line:-1
+Depending on the use case,
+
+
+313
+00:16:21,815 --> 00:16:24,618 line:-2
+pushes can be more efficient
+than pulling servers for data.
+
+
+314
+00:16:25,652 --> 00:16:28,355 line:-2
+This is especially true
+for event-driven data.
+
+
+315
+00:16:28,422 --> 00:16:31,792 line:-2
+We'll use complication pushes
+to provide data for our last complication,
+
+
+316
+00:16:31,859 --> 00:16:34,494 line:-2
+which keeps track of encouragement
+from fellow kite flyers.
+
+
+317
+00:16:34,561 --> 00:16:39,333 line:-2
+Servers can send up to 50 complication
+pushes per day to each individual Watch.
+
+
+318
+00:16:39,399 --> 00:16:42,302 line:-2
+Complication pushes
+don't need to be regularly spaced.
+
+
+319
+00:16:42,369 --> 00:16:44,972 line:-2
+If the data are bursty,
+requests can be sent more rapidly
+
+
+320
+00:16:45,038 --> 00:16:46,840 line:-2
+than with the other mechanisms
+we discussed.
+
+
+321
+00:16:46,907 --> 00:16:50,010 line:-2
+Throttling may be necessary
+to prevent exceeding the daily cap.
+
+
+322
+00:16:51,078 --> 00:16:54,815 line:-2
+The server sending the pushes to the Watch
+needs to have a proper certificate,
+
+
+323
+00:16:54,882 --> 00:16:57,818 line:-2
+so let's take a quick look
+at how to set that up.
+
+
+324
+00:16:57,885 --> 00:17:00,721 line:-2
+First we need an identifier
+that includes your app's bundle ID
+
+
+325
+00:17:00,787 --> 00:17:03,991 line:-1
+and ends in .watchkitapp.complication.
+
+
+326
+00:17:04,057 --> 00:17:05,157 line:-1
+This is crucial.
+
+
+327
+00:17:05,224 --> 00:17:07,528 line:-2
+If the app identifier
+isn't in the correct format,
+
+
+328
+00:17:07,594 --> 00:17:11,632 line:-2
+your push may be rejected by Apple servers
+or may not be received on the Watch.
+
+
+329
+00:17:13,133 --> 00:17:16,569 line:-2
+Once the .complication app identifier
+has been created,
+
+
+330
+00:17:16,637 --> 00:17:21,108 line:-2
+use that to create an Apple
+Push Notification service SSL Certificate.
+
+
+331
+00:17:21,175 --> 00:17:22,742 line:-1
+Your server will use that certificate
+
+
+332
+00:17:22,809 --> 00:17:25,546 line:-2
+to authenticate
+to Apple's push notification servers.
+
+
+333
+00:17:27,047 --> 00:17:30,350 line:-2
+Your app also needs
+the remote notification background mode
+
+
+334
+00:17:30,417 --> 00:17:33,754 line:-2
+and the push notifications capabilities
+in its WatchKit extension.
+
+
+335
+00:17:35,155 --> 00:17:39,059 line:-2
+With our Watch app,
+we'll use our PushNotificationProvider
+
+
+336
+00:17:39,126 --> 00:17:40,661 line:-1
+to register it with PushKit.
+
+
+337
+00:17:42,129 --> 00:17:45,832 line:-2
+When the registration succeeds,
+the app receives credentials.
+
+
+338
+00:17:45,899 --> 00:17:47,801 line:-1
+Upload these credentials to your server
+
+
+339
+00:17:47,868 --> 00:17:50,070 line:-2
+so your server can communicate
+with the Watch.
+
+
+340
+00:17:50,737 --> 00:17:52,673 line:-1
+Here's our PushNotificationProvider.
+
+
+341
+00:17:52,739 --> 00:17:55,242 line:-1
+It is a PKPushRegistryDelegate.
+
+
+342
+00:17:55,309 --> 00:17:59,379 line:-2
+It creates a PKPushRegistry instance
+and provides the main queue for callbacks.
+
+
+343
+00:18:00,247 --> 00:18:02,082 line:-1
+It sets itself as a delegate.
+
+
+344
+00:18:03,550 --> 00:18:06,053 line:-2
+It also sets the desiredPushType
+to .complication,
+
+
+345
+00:18:06,119 --> 00:18:08,088 line:-1
+which matches the .complication identifier
+
+
+346
+00:18:08,155 --> 00:18:10,891 line:-2
+and certificate we created
+and installed on our server.
+
+
+347
+00:18:11,925 --> 00:18:13,527 line:-1
+When registration is complete,
+
+
+348
+00:18:13,594 --> 00:18:17,030 line:-2
+registry returns credentials
+and the didUpdate pushCredentials call.
+
+
+349
+00:18:17,531 --> 00:18:19,533 line:-1
+We send these credentials to our server
+
+
+350
+00:18:19,600 --> 00:18:22,135 line:-2
+so they can communicate
+with this instance of the app.
+
+
+351
+00:18:23,337 --> 00:18:26,039 line:-2
+Once the Watch uploads its credentials
+to the server,
+
+
+352
+00:18:26,673 --> 00:18:31,745 line:-2
+the server uses those credentials to send
+pushes for that Watch to Apple servers,
+
+
+353
+00:18:31,812 --> 00:18:33,847 line:-1
+which will then deliver them to the Watch.
+
+
+354
+00:18:34,348 --> 00:18:38,552 line:-2
+As we said earlier, 50 of these
+are allowed per Watch per day.
+
+
+355
+00:18:39,820 --> 00:18:44,057 line:-2
+When sending a complication push,
+format as you would any background push
+
+
+356
+00:18:44,124 --> 00:18:48,128 line:-2
+providing the content-available entry
+in the aps dictionary.
+
+
+357
+00:18:48,195 --> 00:18:50,964 line:-2
+After the push is received
+by PushKit on the Watch...
+
+
+358
+00:18:52,032 --> 00:18:56,103 line:-2
+it is passed to our app with
+didReceiveIncomingPushWithPayload.
+
+
+359
+00:18:56,837 --> 00:18:59,173 line:-2
+A completion handler is provided
+for after call
+
+
+360
+00:18:59,239 --> 00:19:01,108 line:-1
+when it has finished processing the push.
+
+
+361
+00:19:02,075 --> 00:19:05,345 line:-2
+Back to the implementation
+of our PushNotificationProvider.
+
+
+362
+00:19:05,412 --> 00:19:09,249 line:-2
+When a push is available, our app will be
+resumed or launched, if it's not active.
+
+
+363
+00:19:10,317 --> 00:19:14,121 line:-2
+At that time, the
+didReceiveIncomingPush payload for type
+
+
+364
+00:19:14,188 --> 00:19:15,722 line:-1
+will be called on our delegate.
+
+
+365
+00:19:15,789 --> 00:19:18,225 line:-2
+The queue we specify
+when registering with PushKit
+
+
+366
+00:19:18,292 --> 00:19:20,027 line:-1
+is used to make this call.
+
+
+367
+00:19:20,827 --> 00:19:22,896 line:-1
+In our case, that's the main queue.
+
+
+368
+00:19:23,864 --> 00:19:25,566 line:-1
+The completion handler is provided.
+
+
+369
+00:19:25,632 --> 00:19:28,235 line:-2
+It must be called
+when the payload has been processed.
+
+
+370
+00:19:28,302 --> 00:19:29,703 line:-1
+Process the payload
+
+
+371
+00:19:29,770 --> 00:19:32,406 line:-2
+and call our extension delegate
+to update our complications.
+
+
+372
+00:19:32,472 --> 00:19:34,341 line:-1
+Here we're updating all complications.
+
+
+373
+00:19:34,408 --> 00:19:35,676 line:-1
+If this were a shipping app,
+
+
+374
+00:19:35,742 --> 00:19:37,945 line:-2
+we'd want to update
+only the complications that need it.
+
+
+375
+00:19:38,579 --> 00:19:40,380 line:-1
+That's it for complication pushes.
+
+
+376
+00:19:40,447 --> 00:19:44,518 line:-2
+To wrap up, each instance of an app
+can receive up to 50 per day.
+
+
+377
+00:19:44,585 --> 00:19:48,422 line:-2
+That number doesn't change when an app
+has multiple active complications.
+
+
+378
+00:19:49,389 --> 00:19:53,126 line:0
+The guidelines are the same as they are
+for other types of background updates.
+
+
+379
+00:19:53,193 --> 00:19:56,129 line:-2
+To summarize the techniques
+we discussed today,
+
+
+380
+00:19:56,196 --> 00:19:59,566 line:-2
+use foreground opportunities, when active,
+to update your complications.
+
+
+381
+00:19:59,633 --> 00:20:03,070 line:-2
+Do this especially when the app's state
+changes in response to input
+
+
+382
+00:20:03,136 --> 00:20:06,173 line:-2
+or if your app pulls data from a server
+while it's in the foreground.
+
+
+383
+00:20:07,474 --> 00:20:09,543 line:-1
+Apps can use a ProcessInfo activity
+
+
+384
+00:20:09,610 --> 00:20:12,713 line:-2
+to complete work when your app moves
+from the foreground to the background.
+
+
+385
+00:20:14,448 --> 00:20:16,750 line:-2
+Background App Refresh
+is great to schedule runtime
+
+
+386
+00:20:16,817 --> 00:20:21,121 line:-2
+for accessing your own data or using
+the watchOS APIs such as HealthKit.
+
+
+387
+00:20:21,755 --> 00:20:24,258 line:-2
+Apps can use background refresh
+to update its complications
+
+
+388
+00:20:24,324 --> 00:20:26,093 line:-1
+up to four times per hour.
+
+
+389
+00:20:27,628 --> 00:20:30,831 line:-2
+Background URLSession tasks
+can be scheduled to pull data from servers
+
+
+390
+00:20:30,898 --> 00:20:32,733 line:-1
+up to four times per hour.
+
+
+391
+00:20:32,799 --> 00:20:36,370 line:-2
+Remember to always reattach your delegate
+when your app is activated
+
+
+392
+00:20:36,436 --> 00:20:39,173 line:-2
+so that it can receive updates
+that might be pending.
+
+
+393
+00:20:40,040 --> 00:20:42,576 line:0
+Push notifications can be sent
+from your servers to each Watch
+
+
+394
+00:20:42,643 --> 00:20:44,077 line:0
+up to 50 times per day.
+
+
+395
+00:20:44,144 --> 00:20:45,445 line:0
+Space them at regular intervals
+
+
+396
+00:20:45,512 --> 00:20:47,948 line:0
+or send them more frequently
+if the data are bursty.
+
+
+397
+00:20:48,015 --> 00:20:50,484 line:0
+The 51st and later notifications
+will be ignored,
+
+
+398
+00:20:50,551 --> 00:20:53,120 line:0
+so apply throttling on the server
+as needed.
+
+
+399
+00:20:53,187 --> 00:20:56,290 line:0
+Use these mechanisms individually
+or combine them as needed.
+
+
+400
+00:20:56,356 --> 00:20:59,927 line:-2
+You can see how important it is
+to keep your complications up to date.
+
+
+401
+00:20:59,993 --> 00:21:02,296 line:-2
+There are multiple mechanisms
+at your disposal
+
+
+402
+00:21:02,362 --> 00:21:04,698 line:-2
+to allow you
+to keep your complications up to date
+
+
+403
+00:21:04,765 --> 00:21:06,466 line:-1
+even when the app isn't active.
+
+
+404
+00:21:06,533 --> 00:21:08,335 line:-2
+Mix and match
+the techniques we've discussed
+
+
+405
+00:21:08,402 --> 00:21:10,804 line:-1
+to deliver the best possible experience.
+
+
+406
+00:21:10,871 --> 00:21:13,841 line:-2
+All the mechanisms we discussed today
+can be used with independent Watch apps
+
+
+407
+00:21:13,907 --> 00:21:16,476 line:-2
+to give your app
+the greatest possible flexibility.
+
+
+408
+00:21:17,044 --> 00:21:19,646 line:0
+The "Meet Watch Face Sharing" video
+from earlier this week
+
+
+409
+00:21:19,713 --> 00:21:23,083 line:0
+discusses the new multiple
+complication APIs in greater detail.
+
+
+410
+00:21:23,884 --> 00:21:25,819 line:0
+"Build Complications in SwiftUI"
+
+
+411
+00:21:25,886 --> 00:21:28,989 line:0
+describes how to build
+beautiful complications using SwiftUI.
+
+
+412
+00:21:29,690 --> 00:21:33,327 line:0
+Lastly, there's a great video on "Creating
+Independent Watch Apps" from last year.
+
+
+413
+00:21:33,393 --> 00:21:34,895 line:0
+Check all of these out.
+
+
+414
+00:21:34,962 --> 00:21:37,965 line:-2
+Thank you, and I can't wait to see
+the magical complications you build
+
+
+415
+00:21:38,031 --> 00:21:39,266 line:-1
+using these techniques.
+
+
+416
+00:21:39,333 --> 00:21:41,602 line:-1
+Have a great WWDC.
+

@@ -1,0 +1,1611 @@
+1
+00:00:03,971 --> 00:00:06,840 line:-1
+Hello and welcome to WWDC.
+
+
+2
+00:00:07,975 --> 00:00:09,109 line:0
+I'm Anders,
+
+
+3
+00:00:09,176 --> 00:00:12,713 line:0
+and today I'll be talking about
+Swift package resources and localization.
+
+
+4
+00:00:13,480 --> 00:00:16,416 line:-2
+First we'll see how to add resources
+to a Swift package.
+
+
+5
+00:00:17,050 --> 00:00:20,454 line:-2
+Next, we'll talk about what happens
+when the package is built,
+
+
+6
+00:00:20,521 --> 00:00:23,557 line:-2
+and how code in a package
+can use resources at runtime.
+
+
+7
+00:00:24,424 --> 00:00:28,128 line:-2
+Finally, we'll take a look at how to
+localize the resources in a package.
+
+
+8
+00:00:29,730 --> 00:00:32,266 line:-2
+Let's start by adding resources
+to a package.
+
+
+9
+00:00:33,100 --> 00:00:36,503 line:-2
+Xcode 11 introduced support
+for Swift packages,
+
+
+10
+00:00:36,570 --> 00:00:38,071 line:-1
+letting you create packages
+
+
+11
+00:00:38,138 --> 00:00:41,341 line:-2
+as well as use existing packages
+in your Xcode projects.
+
+
+12
+00:00:41,909 --> 00:00:45,846 line:0
+You can implement a package in Swift
+or in any of the C-based languages.
+
+
+13
+00:00:45,913 --> 00:00:48,415 line:0
+And in Xcode 12, you can add resources,
+
+
+14
+00:00:48,482 --> 00:00:51,685 line:0
+such as images, storyboards,
+and other files to a package.
+
+
+15
+00:00:52,519 --> 00:00:56,490 line:-2
+You can also localize those resources
+so that internationalized apps
+
+
+16
+00:00:56,557 --> 00:00:59,560 line:-2
+can take advantage of the functionality
+your package provides.
+
+
+17
+00:00:59,960 --> 00:01:03,530 line:-2
+And adding resources to a package
+works with existing APIs,
+
+
+18
+00:01:03,597 --> 00:01:06,934 line:-2
+so it does not affect the OS version
+requirements of your package.
+
+
+19
+00:01:07,367 --> 00:01:09,570 line:-1
+Let's take a look at how this works.
+
+
+20
+00:01:10,504 --> 00:01:13,740 line:-2
+Here I have a package
+that implements a SwiftUI view.
+
+
+21
+00:01:13,807 --> 00:01:15,375 line:-1
+It shows the side of a die
+
+
+22
+00:01:15,442 --> 00:01:17,878 line:-2
+and has a button
+that lets you roll the die.
+
+
+23
+00:01:18,278 --> 00:01:20,514 line:-2
+And one of the things
+that's new in Xcode 12
+
+
+24
+00:01:20,581 --> 00:01:24,618 line:-2
+is that it can show previews
+for SwiftUI views in packages
+
+
+25
+00:01:24,685 --> 00:01:27,554 line:-2
+without having to have a client app
+in the same workspace.
+
+
+26
+00:01:28,121 --> 00:01:30,324 line:-2
+But as we can see,
+there's something missing.
+
+
+27
+00:01:30,390 --> 00:01:34,795 line:-2
+This package view is showing a black box
+instead of the dots on the die.
+
+
+28
+00:01:35,729 --> 00:01:37,564 line:-1
+When I click the button to roll the die,
+
+
+29
+00:01:37,631 --> 00:01:40,801 line:-2
+it picks a new number of dots,
+but it doesn't display it.
+
+
+30
+00:01:40,868 --> 00:01:42,069 line:-1
+Let's fix that.
+
+
+31
+00:01:42,903 --> 00:01:44,671 line:-1
+I'm going to create an asset catalog
+
+
+32
+00:01:44,738 --> 00:01:47,274 line:-2
+right next to the source code
+in the DiceUI target.
+
+
+33
+00:01:49,176 --> 00:01:50,944 line:-1
+Because of its filename suffix,
+
+
+34
+00:01:51,011 --> 00:01:54,748 line:-2
+Xcode will know that it's an asset catalog
+and will know how to process it.
+
+
+35
+00:01:54,815 --> 00:01:57,017 line:-1
+The asset catalog starts out empty,
+
+
+36
+00:01:57,084 --> 00:01:59,753 line:-2
+but I'm going to add some images
+that show dice
+
+
+37
+00:01:59,820 --> 00:02:02,756 line:-2
+with various numbers of dots
+at three different resolutions.
+
+
+38
+00:02:03,891 --> 00:02:06,126 line:-2
+Now I go into the implementation
+of the view,
+
+
+39
+00:02:06,193 --> 00:02:08,495 line:-2
+and I replace the Rectangle view
+with an Image.
+
+
+40
+00:02:10,163 --> 00:02:14,301 line:-2
+I've chosen the names of my images
+so they match the names of the dot count,
+
+
+41
+00:02:14,368 --> 00:02:16,870 line:-2
+so I can just pass the name
+to the initializer.
+
+
+42
+00:02:21,708 --> 00:02:25,245 line:-2
+I'm going to specify a bundle parameter
+to indicate that the images should come
+
+
+43
+00:02:25,312 --> 00:02:28,582 line:-2
+from the resource bundle for the module
+into which my code is built.
+
+
+44
+00:02:35,222 --> 00:02:39,493 line:-2
+Package resources use existing
+Foundation APIs of the bundle type
+
+
+45
+00:02:39,560 --> 00:02:41,094 line:-1
+to access resources,
+
+
+46
+00:02:41,528 --> 00:02:44,932 line:-2
+so you can then pass that to any API
+that takes a bundle parameter.
+
+
+47
+00:02:44,998 --> 00:02:47,768 line:-2
+We'll take a closer look at how this works
+in a moment.
+
+
+48
+00:02:48,368 --> 00:02:51,505 line:0
+And then I see
+that the image of the dice shows up.
+
+
+49
+00:02:53,707 --> 00:02:55,075 line:-1
+And if I click the "roll" button,
+
+
+50
+00:02:55,142 --> 00:02:57,110 line:-2
+I can see that
+it picks the different numbers.
+
+
+51
+00:02:57,177 --> 00:02:59,513 line:-2
+Now, I can actually delete
+the bundle part here,
+
+
+52
+00:02:59,580 --> 00:03:03,517 line:-2
+because with Swift type inference,
+I can just have .module.
+
+
+53
+00:03:05,285 --> 00:03:09,356 line:0
+So here we've seen how you can easily
+add resources to a Swift package,
+
+
+54
+00:03:09,423 --> 00:03:12,893 line:-2
+and to show the preview
+while working on the package in Xcode.
+
+
+55
+00:03:13,527 --> 00:03:16,363 line:-2
+Files in a package
+are processed according to their type,
+
+
+56
+00:03:16,430 --> 00:03:18,966 line:-1
+as indicated by the filename suffix.
+
+
+57
+00:03:19,032 --> 00:03:20,167 line:-1
+Some kinds of files,
+
+
+58
+00:03:20,234 --> 00:03:23,203 line:-2
+such as asset catalogs,
+storyboards and Core Data models,
+
+
+59
+00:03:23,270 --> 00:03:24,538 line:-1
+have a clear purpose.
+
+
+60
+00:03:25,405 --> 00:03:28,242 line:0
+These kinds of files
+can just be added to the package,
+
+
+61
+00:03:28,308 --> 00:03:30,377 line:0
+and Xcode knows what to do with them.
+
+
+62
+00:03:31,712 --> 00:03:34,481 line:-2
+Other kinds of files could have
+a variety of purposes.
+
+
+63
+00:03:34,982 --> 00:03:37,751 line:-2
+A plain text file might be needed
+at runtime,
+
+
+64
+00:03:37,818 --> 00:03:39,953 line:-2
+or it might only be used
+during development.
+
+
+65
+00:03:40,387 --> 00:03:42,856 line:-2
+The same is true for images,
+shell scripts,
+
+
+66
+00:03:42,923 --> 00:03:44,691 line:-1
+and other common types of files.
+
+
+67
+00:03:46,059 --> 00:03:47,461 line:0
+For those kinds of files,
+
+
+68
+00:03:47,528 --> 00:03:50,264 line:0
+you need to declare the intent
+in the package manifest.
+
+
+69
+00:03:50,998 --> 00:03:52,633 line:-1
+Let's look at an example.
+
+
+70
+00:03:53,467 --> 00:03:57,437 line:-2
+Here is the file system structure
+of an example package called MyGame
+
+
+71
+00:03:57,504 --> 00:03:59,706 line:-1
+with a single target called GameLogic.
+
+
+72
+00:04:00,274 --> 00:04:04,144 line:-2
+All the target's source files are located
+underneath the Sources directory,
+
+
+73
+00:04:04,211 --> 00:04:07,080 line:-2
+in a subdirectory
+with the same name as the target.
+
+
+74
+00:04:08,649 --> 00:04:11,351 line:-2
+If we look at the contents
+of the package manifest file,
+
+
+75
+00:04:11,418 --> 00:04:13,887 line:-2
+we see the corresponding product
+and target definitions
+
+
+76
+00:04:13,954 --> 00:04:15,522 line:-1
+for the GameLogic target.
+
+
+77
+00:04:16,589 --> 00:04:18,791 line:-2
+This is where we're going to declare
+what to do
+
+
+78
+00:04:18,858 --> 00:04:21,562 line:-2
+with any target files
+whose purpose is ambiguous.
+
+
+79
+00:04:22,763 --> 00:04:25,165 line:0
+To learn more about the syntax
+of the package manifest
+
+
+80
+00:04:25,232 --> 00:04:27,534 line:0
+and how it relates
+to the file system structure,
+
+
+81
+00:04:27,601 --> 00:04:32,439 line:0
+see the video for the "Adopting Swift
+Packages in Xcode" session from WWDC 19.
+
+
+82
+00:04:34,074 --> 00:04:35,976 line:-1
+So let's focus in on the target directory,
+
+
+83
+00:04:36,043 --> 00:04:39,146 line:-2
+under which all the target's sources
+and resources are located.
+
+
+84
+00:04:39,847 --> 00:04:43,383 line:-2
+There's already a Swift source file there,
+and the intent is pretty clear:
+
+
+85
+00:04:43,450 --> 00:04:45,819 line:-2
+It should be compiled
+when the package is built.
+
+
+86
+00:04:45,886 --> 00:04:47,888 line:-2
+We don't need anything extra
+in the manifest.
+
+
+87
+00:04:48,589 --> 00:04:50,390 line:-1
+Now let's add an asset catalog.
+
+
+88
+00:04:51,191 --> 00:04:54,494 line:-2
+An asset catalog is a directory
+with a well-defined filename suffix
+
+
+89
+00:04:54,561 --> 00:04:55,729 line:-1
+and a structure.
+
+
+90
+00:04:56,263 --> 00:04:59,766 line:-2
+It'll be processed at build time
+and included in the client of the package.
+
+
+91
+00:05:00,267 --> 00:05:02,703 line:-2
+We don't need anything special
+in the manifest.
+
+
+92
+00:05:03,470 --> 00:05:05,939 line:-2
+The same thing is true
+if we add a storyboard.
+
+
+93
+00:05:06,473 --> 00:05:08,075 line:-1
+It has a clear purpose, too,
+
+
+94
+00:05:08,141 --> 00:05:11,478 line:-2
+and will be compiled the same way
+as if it were in an Xcode project.
+
+
+95
+00:05:12,646 --> 00:05:14,615 line:-1
+Next, let's add a plain text file.
+
+
+96
+00:05:15,716 --> 00:05:17,918 line:-1
+Now things get a bit more interesting.
+
+
+97
+00:05:17,985 --> 00:05:20,120 line:-2
+Text files could be used
+for all kinds of things,
+
+
+98
+00:05:20,187 --> 00:05:22,556 line:-2
+so it isn't obvious
+what Xcode should do with it.
+
+
+99
+00:05:23,090 --> 00:05:25,259 line:-1
+Maybe it's a resource for use at runtime,
+
+
+100
+00:05:25,325 --> 00:05:27,561 line:-2
+or maybe it's just some
+internal development notes.
+
+
+101
+00:05:28,262 --> 00:05:31,565 line:-2
+In this example, we don't want Xcode
+to treat it as a resource.
+
+
+102
+00:05:32,232 --> 00:05:35,335 line:-2
+We add it to the list of excluded files
+in the manifest,
+
+
+103
+00:05:35,402 --> 00:05:38,038 line:-2
+which will cause it to be ignored
+when the package is built.
+
+
+104
+00:05:39,506 --> 00:05:42,242 line:-2
+We can also add a directory
+full of files and folders,
+
+
+105
+00:05:42,309 --> 00:05:45,779 line:-2
+such as the sketches and design documents
+for creating the artwork in the game.
+
+
+106
+00:05:46,446 --> 00:05:50,017 line:-2
+Just as for a file, we can add the name
+or sub-path of a directory
+
+
+107
+00:05:50,083 --> 00:05:52,419 line:-1
+to the exclusion list in the manifest.
+
+
+108
+00:05:52,486 --> 00:05:54,621 line:-2
+This will cause that directory
+and everything under it
+
+
+109
+00:05:54,688 --> 00:05:56,790 line:-1
+to be skipped when the package is built.
+
+
+110
+00:05:57,958 --> 00:05:59,993 line:-1
+Now let's add a stand-alone image file.
+
+
+111
+00:06:00,060 --> 00:06:02,329 line:-1
+In this case, we will need it at runtime,
+
+
+112
+00:06:02,396 --> 00:06:04,898 line:-2
+so we add it to the manifest
+as a resource,
+
+
+113
+00:06:04,965 --> 00:06:07,301 line:-1
+and we specify the process action for it.
+
+
+114
+00:06:08,335 --> 00:06:11,104 line:-2
+Most resources should use
+the process action
+
+
+115
+00:06:11,171 --> 00:06:13,874 line:-2
+so that they are transformed
+as appropriate at build time.
+
+
+116
+00:06:14,374 --> 00:06:16,410 line:-2
+The exact type of processing
+that will happen
+
+
+117
+00:06:16,476 --> 00:06:18,979 line:-2
+depends on the platform
+for which the package is built.
+
+
+118
+00:06:20,914 --> 00:06:24,918 line:0
+Now let's add a directory full of files
+that our sample game will need at runtime.
+
+
+119
+00:06:25,619 --> 00:06:29,623 line:0
+In this case, there is a whole hierarchy
+of files and folders underneath it.
+
+
+120
+00:06:30,757 --> 00:06:33,060 line:-2
+We want all of it to be available
+at runtime,
+
+
+121
+00:06:33,126 --> 00:06:35,028 line:-1
+including the directory structure.
+
+
+122
+00:06:35,896 --> 00:06:37,831 line:0
+So we declare it as a resource,
+
+
+123
+00:06:37,898 --> 00:06:40,133 line:0
+but this time,
+we specify the "copy" action.
+
+
+124
+00:06:40,834 --> 00:06:43,203 line:0
+This will cause it to be copied
+exactly as it is,
+
+
+125
+00:06:43,270 --> 00:06:45,272 line:0
+preserving its directory structure.
+
+
+126
+00:06:46,273 --> 00:06:48,742 line:-2
+So now we've seen how to add
+several different kinds of files
+
+
+127
+00:06:48,809 --> 00:06:50,110 line:-1
+to a package target,
+
+
+128
+00:06:50,177 --> 00:06:52,179 line:-1
+and we've seen how to declare the intent
+
+
+129
+00:06:52,246 --> 00:06:54,548 line:-2
+for any cases where it isn't clear
+from the file type.
+
+
+130
+00:06:55,649 --> 00:06:56,884 line:-1
+As we saw,
+
+
+131
+00:06:56,950 --> 00:07:00,354 line:-2
+any resource can be either processed
+or copied byte for byte.
+
+
+132
+00:07:00,954 --> 00:07:03,690 line:-2
+The "process" action is usually
+the recommended choice,
+
+
+133
+00:07:03,757 --> 00:07:06,994 line:-2
+because it will apply the appropriate
+built-in rules for the platform.
+
+
+134
+00:07:07,961 --> 00:07:10,797 line:-2
+This might include converting
+a storyboard or asset catalog
+
+
+135
+00:07:10,864 --> 00:07:13,634 line:-1
+into a form suitable for use at runtime,
+
+
+136
+00:07:13,700 --> 00:07:16,136 line:-2
+or it might include compressing an image,
+etcetera.
+
+
+137
+00:07:17,371 --> 00:07:19,072 line:-1
+If the file type is unknown,
+
+
+138
+00:07:19,139 --> 00:07:22,242 line:-2
+or no special processing is needed
+for the platform,
+
+
+139
+00:07:22,309 --> 00:07:23,810 line:-1
+the file will be copied.
+
+
+140
+00:07:25,145 --> 00:07:27,214 line:0
+The processing rules
+are applied recursively
+
+
+141
+00:07:27,281 --> 00:07:29,483 line:0
+to every file under a directory,
+
+
+142
+00:07:29,550 --> 00:07:33,520 line:0
+and each resulting output file is included
+in the product as a separate resource.
+
+
+143
+00:07:35,122 --> 00:07:36,790 line:-1
+The "copy" action is appropriate
+
+
+144
+00:07:36,857 --> 00:07:40,527 line:-2
+when you want to make an exact copy
+of the resource, regardless of its type.
+
+
+145
+00:07:42,296 --> 00:07:44,798 line:-2
+Copying doesn't do
+any transformation at all,
+
+
+146
+00:07:44,865 --> 00:07:46,333 line:-1
+so it can be used, for example,
+
+
+147
+00:07:46,400 --> 00:07:49,303 line:-2
+to copy a source file that would
+normally have been compiled
+
+
+148
+00:07:49,369 --> 00:07:51,805 line:-2
+if you want to use it
+as a template at runtime.
+
+
+149
+00:07:53,340 --> 00:07:56,643 line:-2
+Copying can also be used
+if you want to include a whole directory
+
+
+150
+00:07:56,710 --> 00:07:58,879 line:-1
+and preserve its hierarchical structure.
+
+
+151
+00:07:59,613 --> 00:08:02,783 line:-2
+So what happens to the files in a target
+when it's built?
+
+
+152
+00:08:02,850 --> 00:08:06,954 line:-2
+For example, here we have a package,
+and an app that uses the package.
+
+
+153
+00:08:07,821 --> 00:08:10,891 line:-2
+The package contains source files
+as well as resource files.
+
+
+154
+00:08:11,658 --> 00:08:14,528 line:-2
+Each target's sources get compiled
+into a code module
+
+
+155
+00:08:14,595 --> 00:08:16,396 line:-1
+and linked into the client app.
+
+
+156
+00:08:16,864 --> 00:08:21,235 line:-2
+Each target's resources are processed
+into a resource bundle for that module,
+
+
+157
+00:08:21,301 --> 00:08:23,303 line:-1
+which then gets embedded into the app.
+
+
+158
+00:08:24,438 --> 00:08:25,939 line:-1
+On Apple platforms,
+
+
+159
+00:08:26,006 --> 00:08:28,141 line:-2
+applications
+and app extensions are bundles,
+
+
+160
+00:08:28,208 --> 00:08:30,043 line:-1
+so nothing more needs to be done.
+
+
+161
+00:08:30,677 --> 00:08:33,080 line:-2
+The resource bundles
+for each package module
+
+
+162
+00:08:33,145 --> 00:08:34,615 line:-1
+are a part of the app bundle,
+
+
+163
+00:08:34,681 --> 00:08:36,750 line:-2
+and will therefore be available
+at runtime.
+
+
+164
+00:08:37,985 --> 00:08:41,087 line:-2
+When building an unbundled product,
+such as a command line tool,
+
+
+165
+00:08:41,154 --> 00:08:44,191 line:-2
+the resource bundles would need to be
+installed alongside the tool.
+
+
+166
+00:08:45,993 --> 00:08:49,162 line:-2
+There's one more thing to note
+about the package manifest,
+
+
+167
+00:08:49,229 --> 00:08:51,231 line:-1
+and that is the minimum tools version.
+
+
+168
+00:08:51,698 --> 00:08:54,301 line:-2
+The Swift Package Manager
+is part of the Swift toolchain.
+
+
+169
+00:08:55,002 --> 00:08:58,772 line:-2
+Support for package resources is new
+in Swift 5.3,
+
+
+170
+00:08:58,839 --> 00:09:01,408 line:-2
+so the package manifest
+needs to declare 5.3
+
+
+171
+00:09:01,475 --> 00:09:03,076 line:-1
+as its required tools version.
+
+
+172
+00:09:04,011 --> 00:09:06,346 line:-2
+But how does this relate
+to the Xcode version?
+
+
+173
+00:09:07,781 --> 00:09:11,084 line:-2
+Every Xcode release
+includes a version of the Swift toolchain.
+
+
+174
+00:09:11,852 --> 00:09:15,389 line:-2
+Xcode 11 was the first version
+to support Swift packages,
+
+
+175
+00:09:15,455 --> 00:09:17,991 line:-1
+and its Swift toolchain version was 5.1.
+
+
+176
+00:09:18,792 --> 00:09:23,063 line:-2
+In Xcode 12, the included version
+of the Swift toolchain is 5.3.
+
+
+177
+00:09:23,564 --> 00:09:25,766 line:-2
+The tool version should be set
+to the lowest version
+
+
+178
+00:09:25,832 --> 00:09:28,235 line:-2
+that supports the features needed
+by the package.
+
+
+179
+00:09:28,302 --> 00:09:31,038 line:-2
+This is because any package or project
+that uses it
+
+
+180
+00:09:31,104 --> 00:09:33,507 line:-2
+will also need to have
+that tool version or later
+
+
+181
+00:09:33,574 --> 00:09:35,209 line:-1
+in order to build the package.
+
+
+182
+00:09:35,275 --> 00:09:38,245 line:-2
+Now that we have added the resources
+to the package,
+
+
+183
+00:09:38,312 --> 00:09:40,614 line:-2
+let's talk about how to access them
+from code.
+
+
+184
+00:09:41,548 --> 00:09:42,649 line:-1
+As we saw,
+
+
+185
+00:09:42,716 --> 00:09:46,954 line:-2
+you use Foundation's Bundle API
+to access package resources at runtime.
+
+
+186
+00:09:48,021 --> 00:09:51,892 line:-2
+Foundation is available on all platforms
+that support Swift packages,
+
+
+187
+00:09:51,959 --> 00:09:54,394 line:-2
+so this provides a consistent
+and platform-neutral way
+
+
+188
+00:09:54,461 --> 00:09:57,297 line:-2
+to access resources,
+regardless of what kind of artifacts
+
+
+189
+00:09:57,364 --> 00:09:59,900 line:-2
+the build system creates
+for a particular platform.
+
+
+190
+00:10:01,368 --> 00:10:04,471 line:-2
+When Xcode builds a package target
+that contains resources,
+
+
+191
+00:10:04,538 --> 00:10:07,341 line:-2
+it synthesizes an accessor
+for the resource bundle
+
+
+192
+00:10:07,407 --> 00:10:10,611 line:-2
+and includes it in the code module
+that it creates for the target.
+
+
+193
+00:10:11,411 --> 00:10:14,147 line:-2
+The module can then access
+its resource bundle
+
+
+194
+00:10:14,214 --> 00:10:17,284 line:-2
+regardless of whether it's implemented
+in Swift or Objective-C.
+
+
+195
+00:10:18,352 --> 00:10:21,755 line:-2
+The bundle object that's returned
+is specific to each code module,
+
+
+196
+00:10:21,822 --> 00:10:25,192 line:-2
+but the way you access it
+is always the same in the source code.
+
+
+197
+00:10:26,727 --> 00:10:31,231 line:-2
+Here's an example of using Bundle APIs
+to access the files in the resource bundle
+
+
+198
+00:10:31,298 --> 00:10:33,166 line:-1
+from both Swift and Objective-C.
+
+
+199
+00:10:34,501 --> 00:10:38,438 line:-2
+In both languages, the accessor returns
+a Foundation Bundle object
+
+
+200
+00:10:38,505 --> 00:10:41,108 line:-2
+that can be used to look up resources
+by name.
+
+
+201
+00:10:42,743 --> 00:10:45,846 line:-2
+But the resource bundle can also be passed
+to any system API
+
+
+202
+00:10:45,913 --> 00:10:47,681 line:-1
+that takes a bundle as a parameter.
+
+
+203
+00:10:48,682 --> 00:10:52,452 line:-2
+In the example shown here,
+it's being passed to a UIImage method
+
+
+204
+00:10:52,519 --> 00:10:55,155 line:-2
+that can look up images
+from the package resource bundle.
+
+
+205
+00:10:56,456 --> 00:10:58,725 line:-1
+When adding a resource to a package,
+
+
+206
+00:10:58,792 --> 00:11:01,895 line:-2
+you should add it to the target
+for the code module that uses it.
+
+
+207
+00:11:02,729 --> 00:11:05,632 line:-2
+The resource bundle accessor
+is only visible to the code
+
+
+208
+00:11:05,699 --> 00:11:08,302 line:-2
+that's in the same module
+as the resources.
+
+
+209
+00:11:08,368 --> 00:11:11,071 line:-2
+If you need to provide resources
+to other modules,
+
+
+210
+00:11:11,138 --> 00:11:14,408 line:-2
+it's best to do so
+by adding specific typed accessors
+
+
+211
+00:11:14,474 --> 00:11:16,543 line:-1
+that vend the individual resources.
+
+
+212
+00:11:17,411 --> 00:11:18,912 line:0
+It's generally not recommended
+
+
+213
+00:11:18,979 --> 00:11:21,715 line:0
+to vend the whole resource bundle
+to other modules,
+
+
+214
+00:11:21,782 --> 00:11:23,984 line:0
+because that would create
+an external dependency
+
+
+215
+00:11:24,051 --> 00:11:26,320 line:0
+on the specific names of resources.
+
+
+216
+00:11:27,487 --> 00:11:31,625 line:-2
+Xcode 12 also lets you add
+localized resources to your packages.
+
+
+217
+00:11:32,092 --> 00:11:35,462 line:-2
+Let's take a look at localizing the text
+in the sample package we saw earlier.
+
+
+218
+00:11:37,631 --> 00:11:38,999 line:-1
+First thing I'm going to do
+
+
+219
+00:11:39,066 --> 00:11:42,336 line:-2
+is to add a defaultLocalization parameter
+to my package manifest.
+
+
+220
+00:11:51,111 --> 00:11:53,714 line:-2
+This declares the language
+I'm using during development
+
+
+221
+00:11:53,780 --> 00:11:56,483 line:-2
+and will be used as
+the fallback localization at runtime
+
+
+222
+00:11:56,550 --> 00:11:58,552 line:-1
+if no better match is available.
+
+
+223
+00:11:58,619 --> 00:12:01,488 line:-2
+This is needed for any package
+that contains resources.
+
+
+224
+00:12:02,656 --> 00:12:05,058 line:-2
+Next, I'm going to create
+a localization directory
+
+
+225
+00:12:05,125 --> 00:12:07,294 line:-1
+for my default localization, English...
+
+
+226
+00:12:08,495 --> 00:12:10,430 line:-1
+and name it "en.lproj."
+
+
+227
+00:12:11,899 --> 00:12:15,536 line:-2
+And inside, I create a file
+called "Localizable.strings."
+
+
+228
+00:12:24,211 --> 00:12:26,113 line:-1
+I add one entry to the strings file
+
+
+229
+00:12:26,180 --> 00:12:29,883 line:-2
+that just maps the localizable string key
+I used in the code
+
+
+230
+00:12:29,950 --> 00:12:31,518 line:-1
+to the English word "roll."
+
+
+231
+00:12:33,687 --> 00:12:36,423 line:-2
+Now I'm going to do the same thing,
+but for French.
+
+
+232
+00:12:36,490 --> 00:12:39,159 line:-1
+I create a directory called "fr.lproj,"
+
+
+233
+00:12:39,226 --> 00:12:41,962 line:-2
+and I create
+a "Localizable.strings" file in it.
+
+
+234
+00:12:52,039 --> 00:12:56,944 line:-2
+In this file, I'm going to add a mapping
+from the English string key...
+
+
+235
+00:12:58,478 --> 00:13:00,547 line:-1
+to the French translation of the word.
+
+
+236
+00:13:01,081 --> 00:13:03,383 line:-2
+Now I'm going to do the same thing
+with the Text view
+
+
+237
+00:13:03,450 --> 00:13:04,852 line:-1
+as I did with the Image view,
+
+
+238
+00:13:04,918 --> 00:13:08,589 line:-2
+which is to pass in the resource bundle
+for the module that contains my code.
+
+
+239
+00:13:09,323 --> 00:13:11,925 line:-2
+This uses Foundation support
+for localization
+
+
+240
+00:13:11,992 --> 00:13:15,996 line:-2
+to find the right localized content
+based on the user's chosen language.
+
+
+241
+00:13:26,540 --> 00:13:28,442 line:0
+The preview is still showing in English,
+
+
+242
+00:13:28,509 --> 00:13:30,878 line:0
+and that's because
+my system language is English.
+
+
+243
+00:13:31,378 --> 00:13:34,448 line:0
+But with SwiftUI,
+we can customize our preview.
+
+
+244
+00:13:34,515 --> 00:13:36,683 line:0
+For example,
+we can add an environment override
+
+
+245
+00:13:36,750 --> 00:13:39,086 line:0
+to see the French localization
+in the preview.
+
+
+246
+00:13:39,586 --> 00:13:41,955 line:0
+And we can see that it's using
+the localized strings
+
+
+247
+00:13:42,022 --> 00:13:43,790 line:0
+from the generated resource bundle.
+
+
+248
+00:13:45,192 --> 00:13:46,960 line:-1
+As we saw in the demo,
+
+
+249
+00:13:47,027 --> 00:13:50,564 line:-2
+a localization directory
+has a .lproj filename suffix.
+
+
+250
+00:13:51,231 --> 00:13:54,234 line:-2
+Localization directories can be included
+in package targets
+
+
+251
+00:13:54,301 --> 00:13:56,203 line:-1
+without mentioning them in the manifest
+
+
+252
+00:13:56,270 --> 00:13:59,139 line:-2
+because the .lproj suffix
+makes their purpose clear.
+
+
+253
+00:14:00,407 --> 00:14:03,210 line:-2
+A localization directory
+usually contains string files
+
+
+254
+00:14:03,277 --> 00:14:06,246 line:-2
+and string dictionary files
+for translating text,
+
+
+255
+00:14:06,313 --> 00:14:08,282 line:-2
+but it can also contain
+customized versions
+
+
+256
+00:14:08,348 --> 00:14:10,484 line:-1
+of individual resources in the package.
+
+
+257
+00:14:11,552 --> 00:14:14,922 line:-2
+It's also possible to localize
+the contents of an asset catalog.
+
+
+258
+00:14:15,756 --> 00:14:19,193 line:-2
+This lets you provide different artwork
+for specific localizations
+
+
+259
+00:14:19,259 --> 00:14:20,627 line:-1
+where that's appropriate.
+
+
+260
+00:14:21,995 --> 00:14:23,931 line:0
+You can learn more about how to do this
+
+
+261
+00:14:23,997 --> 00:14:26,800 line:0
+in the "Creating Great
+Localized Experiences" session
+
+
+262
+00:14:26,867 --> 00:14:28,402 line:0
+from WWDC 19.
+
+
+263
+00:14:29,803 --> 00:14:32,406 line:-2
+When you add localized resources
+to a package,
+
+
+264
+00:14:32,472 --> 00:14:35,742 line:-2
+you need to declare the default
+localization in the package manifest.
+
+
+265
+00:14:36,910 --> 00:14:38,912 line:-1
+This uses the same kind of language ID
+
+
+266
+00:14:38,979 --> 00:14:41,615 line:-2
+that is used for all localization
+on Apple platforms
+
+
+267
+00:14:41,682 --> 00:14:44,852 line:-2
+and specifies the language
+that will be used as a last resort
+
+
+268
+00:14:44,918 --> 00:14:46,787 line:-1
+if no preferred language is available.
+
+
+269
+00:14:47,788 --> 00:14:49,823 line:0
+You can find more information
+about this topic
+
+
+270
+00:14:49,890 --> 00:14:53,627 line:0
+in the "Language and Locale IDs" document
+on developer.apple.com.
+
+
+271
+00:14:54,628 --> 00:14:55,662 line:-1
+In this video,
+
+
+272
+00:14:55,729 --> 00:14:58,332 line:-2
+we've seen how to add resources
+to a Swift package,
+
+
+273
+00:14:58,398 --> 00:15:00,267 line:-1
+and how Xcode builds resource bundles
+
+
+274
+00:15:00,334 --> 00:15:02,736 line:-2
+that let you access those resources
+at runtime.
+
+
+275
+00:15:03,437 --> 00:15:06,540 line:-2
+We also saw how to localize the resources
+in your package.
+
+
+276
+00:15:07,774 --> 00:15:11,245 line:-2
+Xcode lets you create Swift packages
+and also take advantage
+
+
+277
+00:15:11,311 --> 00:15:14,314 line:-2
+of a great and growing ecosystem
+of existing packages.
+
+
+278
+00:15:14,715 --> 00:15:18,852 line:-2
+Xcode 12 makes it easier to develop
+packages containing SwiftUI views
+
+
+279
+00:15:18,919 --> 00:15:22,489 line:-2
+by letting you interact with your views
+even in the absence of a client app.
+
+
+280
+00:15:23,190 --> 00:15:26,026 line:-2
+And the support
+for localized package resources
+
+
+281
+00:15:26,093 --> 00:15:28,795 line:-2
+lets you create packages
+whose functionality is available
+
+
+282
+00:15:28,862 --> 00:15:30,531 line:-1
+to people all over the world.
+
+
+283
+00:15:31,131 --> 00:15:34,401 line:-1
+Thank you, and enjoy the rest of WWDC 20.
+

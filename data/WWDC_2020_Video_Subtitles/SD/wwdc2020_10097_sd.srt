@@ -1,0 +1,947 @@
+1
+00:00:04,003 --> 00:00:07,341 line:-1
+Hello and welcome to WWDC.
+
+
+2
+00:00:08,609 --> 00:00:13,013 line:0
+Welcome. My name is Steve Breen,
+and I'm an engineer on the UIKit team.
+
+
+3
+00:00:13,080 --> 00:00:16,683 line:0
+In this video, we're going to chat a bit
+about advances in UICollectionView
+
+
+4
+00:00:16,750 --> 00:00:18,385 line:0
+for iOS 14.
+
+
+5
+00:00:19,253 --> 00:00:20,988 line:-1
+Before we dive into our content,
+
+
+6
+00:00:21,054 --> 00:00:24,992 line:-2
+I'm gonna highlight a portion of the
+companion sample project for this video,
+
+
+7
+00:00:25,058 --> 00:00:27,361 line:-1
+entitled Emoji Explorer.
+
+
+8
+00:00:27,961 --> 00:00:31,999 line:-2
+This sample has a lot of interesting
+components baked in to its design.
+
+
+9
+00:00:32,064 --> 00:00:36,537 line:-2
+In this first section, there's
+a horizontally scrolling grid of emoji.
+
+
+10
+00:00:36,603 --> 00:00:40,641 line:-2
+This is a pretty common design element
+in today's applications.
+
+
+11
+00:00:40,707 --> 00:00:44,678 line:-2
+Now, this middle section of Emoji Explorer
+is especially novel.
+
+
+12
+00:00:44,745 --> 00:00:49,583 line:-2
+It's an expandable-collapsible outline,
+which is new in iOS 14.
+
+
+13
+00:00:50,250 --> 00:00:52,286 line:0
+And finally, in this last section,
+
+
+14
+00:00:52,352 --> 00:00:56,156 line:0
+there's a design that looks suspiciously
+like a UITableView right here,
+
+
+15
+00:00:56,223 --> 00:00:58,892 line:0
+camped out in the middle
+of our UICollectionView.
+
+
+16
+00:00:59,660 --> 00:01:01,895 line:-1
+Okay, so that's Emoji Explorer.
+
+
+17
+00:01:01,962 --> 00:01:05,098 line:-2
+And we'll be referring back to this
+throughout the video.
+
+
+18
+00:01:05,866 --> 00:01:08,635 line:-1
+The APIs that comprise UICollectionView
+
+
+19
+00:01:08,702 --> 00:01:11,738 line:-2
+can be slotted
+into three distinct categories--
+
+
+20
+00:01:11,805 --> 00:01:14,942 line:-1
+Data, Layout and Presentation.
+
+
+21
+00:01:15,008 --> 00:01:18,111 line:-2
+One of the novel concepts
+UICollectionView was built on
+
+
+22
+00:01:18,178 --> 00:01:22,850 line:-2
+was the separation of concerns
+between the data, or the "what,"
+
+
+23
+00:01:22,916 --> 00:01:26,854 line:-2
+from the layout,
+the "where" content is being rendered.
+
+
+24
+00:01:26,920 --> 00:01:31,124 line:-2
+This distinction is at the core of
+what makes UICollectionView so flexible.
+
+
+25
+00:01:31,725 --> 00:01:35,229 line:-2
+When UICollectionView
+was first released back in iOS 6,
+
+
+26
+00:01:35,295 --> 00:01:38,765 line:-2
+data was managed
+via an indexPath-based protocol,
+
+
+27
+00:01:38,832 --> 00:01:41,001 line:-1
+UICollectionViewDataSource.
+
+
+28
+00:01:41,768 --> 00:01:46,039 line:-2
+For layout we had an abstract class,
+UICollectionViewLayout,
+
+
+29
+00:01:46,106 --> 00:01:50,344 line:-2
+and we shipped a concrete subclass,
+UICollectionViewFlowLayout.
+
+
+30
+00:01:51,612 --> 00:01:54,448 line:-2
+And on the presentation side,
+we published two view types--
+
+
+31
+00:01:54,515 --> 00:01:58,919 line:-2
+UICollectionViewCell
+and UICollectionReusableView.
+
+
+32
+00:02:00,153 --> 00:02:01,321 line:-1
+Back in iOS 13,
+
+
+33
+00:02:01,388 --> 00:02:04,925 line:-2
+we introduced two new components
+for Data and Layout respectively
+
+
+34
+00:02:04,992 --> 00:02:08,495 line:-2
+with Diffable Data Source
+and Compositional Layout.
+
+
+35
+00:02:08,562 --> 00:02:12,733 line:-2
+These are APIs to use for building apps
+with UICollectionViews today.
+
+
+36
+00:02:14,434 --> 00:02:17,771 line:-1
+For iOS 14, we built on these modern APIs
+
+
+37
+00:02:17,838 --> 00:02:21,408 line:-2
+and introduced new features
+across all three of these API categories
+
+
+38
+00:02:21,475 --> 00:02:23,844 line:-2
+with enhancements
+to Diffable Data Sources,
+
+
+39
+00:02:23,911 --> 00:02:26,847 line:-1
+Compositional Layout and cells.
+
+
+40
+00:02:28,715 --> 00:02:32,219 line:-2
+First up, let's chat about enhancements
+to Diffable Data Source.
+
+
+41
+00:02:33,153 --> 00:02:36,190 line:-2
+Diffable Data Source,
+introduced in iOS 13,
+
+
+42
+00:02:36,256 --> 00:02:38,525 line:-2
+greatly simplifies the management
+of UI State
+
+
+43
+00:02:38,592 --> 00:02:41,728 line:-2
+through the addition
+of the new snapshot data type.
+
+
+44
+00:02:42,596 --> 00:02:45,098 line:-1
+Snapshots encapsulate the entire UI State
+
+
+45
+00:02:45,165 --> 00:02:48,435 line:-2
+via the use of unique section
+and item identifiers.
+
+
+46
+00:02:49,303 --> 00:02:52,506 line:-2
+When updating a UICollectionView,
+we first create a new snapshot,
+
+
+47
+00:02:52,573 --> 00:02:56,743 line:-2
+populate it with the current UI State
+and then apply it to the data source.
+
+
+48
+00:02:57,411 --> 00:02:59,479 line:-2
+Diffable Data Source
+computes the differences
+
+
+49
+00:02:59,546 --> 00:03:01,281 line:-1
+and generates animations automatically
+
+
+50
+00:03:01,348 --> 00:03:03,684 line:-2
+without requiring any additional work
+from you.
+
+
+51
+00:03:04,451 --> 00:03:09,590 line:0
+So we covered this API
+in detail in the WWDC 2019 video
+
+
+52
+00:03:09,656 --> 00:03:11,425 line:0
+"Advances in UI Data Sources."
+
+
+53
+00:03:11,491 --> 00:03:14,595 line:0
+And I encourage you
+to check out that video to learn more.
+
+
+54
+00:03:15,596 --> 00:03:21,201 line:-2
+For iOS 14, we're adding a new
+snapshot type we call section snapshots.
+
+
+55
+00:03:21,268 --> 00:03:22,903 line:-1
+And as the name implies,
+
+
+56
+00:03:22,970 --> 00:03:26,473 line:-2
+section snapshots encapsulates the data
+for a single section
+
+
+57
+00:03:26,540 --> 00:03:28,408 line:-1
+in a UICollectionView.
+
+
+58
+00:03:28,475 --> 00:03:30,878 line:-2
+There are two reasons
+for this enhancement--
+
+
+59
+00:03:30,944 --> 00:03:34,648 line:-2
+first, to allow data sources
+to be more composable
+
+
+60
+00:03:34,715 --> 00:03:37,184 line:-1
+into section-sized chunks of data...
+
+
+61
+00:03:38,986 --> 00:03:42,189 line:-2
+and second,
+to allow modeling of hierarchical data,
+
+
+62
+00:03:42,256 --> 00:03:45,859 line:-2
+which is needed
+to support rendering outline-style UIs,
+
+
+63
+00:03:45,926 --> 00:03:50,264 line:-2
+a common visual design
+found all throughout iOS 14.
+
+
+64
+00:03:50,330 --> 00:03:52,299 line:-1
+So let's go back to Emoji Explorer
+
+
+65
+00:03:52,366 --> 00:03:56,603 line:-2
+and see how section snapshots
+are used to build out this sample app.
+
+
+66
+00:03:56,670 --> 00:03:58,672 line:-2
+First,
+in our horizontally scrolling section,
+
+
+67
+00:03:58,739 --> 00:04:01,475 line:-2
+we see we're using
+a single section snapshot
+
+
+68
+00:04:01,542 --> 00:04:04,211 line:-2
+to completely model the content
+found here.
+
+
+69
+00:04:04,878 --> 00:04:06,847 line:-1
+And next in our second section,
+
+
+70
+00:04:06,914 --> 00:04:10,450 line:-2
+where we see this
+expandable-collapsible outline style,
+
+
+71
+00:04:10,517 --> 00:04:15,155 line:-2
+a second section snapshot is used
+to model this hierarchical data.
+
+
+72
+00:04:15,222 --> 00:04:16,757 line:0
+And finally in our list section,
+
+
+73
+00:04:16,822 --> 00:04:21,595 line:0
+we again model this section's content
+with a third section snapshot.
+
+
+74
+00:04:21,661 --> 00:04:23,197 line:0
+So for Emoji Explorer,
+
+
+75
+00:04:23,263 --> 00:04:28,035 line:-2
+we have composed our Diffable Data Source
+into three distinct section snapshots,
+
+
+76
+00:04:28,101 --> 00:04:31,572 line:-2
+each representing
+a single section's content.
+
+
+77
+00:04:31,638 --> 00:04:34,274 line:-2
+That's a brief overview
+of the new section snapshots
+
+
+78
+00:04:34,341 --> 00:04:38,512 line:-2
+we've added to UICollectionView's
+Diffable Data Source for iOS 14.
+
+
+79
+00:04:38,579 --> 00:04:39,880 line:-1
+But there's more.
+
+
+80
+00:04:40,314 --> 00:04:43,283 line:-1
+We've also added new reordering APIs.
+
+
+81
+00:04:43,350 --> 00:04:46,019 line:0
+To take a deeper dive into these new APIs,
+
+
+82
+00:04:46,086 --> 00:04:50,357 line:0
+please check out the video
+"Advances in Diffable Data Sources."
+
+
+83
+00:04:50,791 --> 00:04:56,096 line:-2
+Next up, let's talk about some advances
+in Compositional Layout for iOS 14.
+
+
+84
+00:04:57,130 --> 00:05:00,267 line:-2
+Compositional Layout was introduced
+back in iOS 13,
+
+
+85
+00:05:00,334 --> 00:05:03,437 line:-2
+and it allows us to build rich,
+complex layouts
+
+
+86
+00:05:03,504 --> 00:05:07,307 line:-2
+by composing smaller,
+easy-to-reason bits of layout together.
+
+
+87
+00:05:07,374 --> 00:05:08,876 line:-1
+Compositional Layout is fast
+
+
+88
+00:05:08,942 --> 00:05:11,845 line:-2
+because you describe
+what you want the layout to look like
+
+
+89
+00:05:11,912 --> 00:05:14,147 line:-1
+instead of how the layout ought to work.
+
+
+90
+00:05:14,214 --> 00:05:16,583 line:-2
+Compositional Layout
+also includes the ability
+
+
+91
+00:05:16,650 --> 00:05:21,455 line:-2
+to have section-specific layouts
+to help you build more sophisticated UIs.
+
+
+92
+00:05:21,522 --> 00:05:24,925 line:-2
+And there's even support
+for orthogonal scrolling sections.
+
+
+93
+00:05:24,992 --> 00:05:27,227 line:0
+To learn more about Compositional Layout,
+
+
+94
+00:05:27,294 --> 00:05:32,833 line:0
+check out the WWDC 2019 video
+"Advances in Collection View Layout."
+
+
+95
+00:05:34,201 --> 00:05:36,069 line:-1
+Okay, so for iOS 14,
+
+
+96
+00:05:36,136 --> 00:05:38,705 line:-2
+we've built on the foundation
+of Compositional Layout
+
+
+97
+00:05:38,772 --> 00:05:41,441 line:-1
+with a new feature we call Lists.
+
+
+98
+00:05:43,610 --> 00:05:46,847 line:-2
+Lists allow you to include
+UITableView-like sections
+
+
+99
+00:05:46,914 --> 00:05:49,583 line:-1
+right in to any UICollectionView.
+
+
+100
+00:05:50,517 --> 00:05:54,588 line:-2
+And these lists are rich with features
+you've come to expect from UITableView,
+
+
+101
+00:05:54,655 --> 00:05:58,358 line:-2
+like swipe actions
+and many common cell layouts.
+
+
+102
+00:05:58,425 --> 00:06:01,562 line:-1
+Creating a list-style layout is simple.
+
+
+103
+00:06:02,162 --> 00:06:04,531 line:-2
+Since Lists is built
+on top of Compositional Layout,
+
+
+104
+00:06:04,598 --> 00:06:08,368 line:-2
+we can easily mix and match Lists
+with other kinds of layout
+
+
+105
+00:06:08,435 --> 00:06:09,837 line:-1
+on a per-section basis.
+
+
+106
+00:06:10,237 --> 00:06:13,106 line:-2
+Let's check out a code snippet
+to see just how easy it is
+
+
+107
+00:06:13,173 --> 00:06:15,843 line:-2
+to create a list-styled layout
+with Compositional Layout.
+
+
+108
+00:06:17,077 --> 00:06:20,147 line:-2
+As you can see, it's quite simple--
+just two lines of code.
+
+
+109
+00:06:20,781 --> 00:06:24,117 line:-2
+In this example,
+we're creating a UICollectionView layout
+
+
+110
+00:06:24,184 --> 00:06:26,820 line:-2
+where every section
+in our CollectionView is a list
+
+
+111
+00:06:26,887 --> 00:06:28,689 line:-1
+with an insetGrouped appearance.
+
+
+112
+00:06:30,023 --> 00:06:32,025 line:-2
+And here's what that layout
+would look like.
+
+
+113
+00:06:33,527 --> 00:06:36,897 line:-2
+So that's just a brief tour
+of Compositional Layout lists.
+
+
+114
+00:06:36,964 --> 00:06:39,233 line:-1
+But there's a lot more to Lists.
+
+
+115
+00:06:39,299 --> 00:06:42,536 line:-2
+There's a new concrete
+UICollectionViewListCell,
+
+
+116
+00:06:42,603 --> 00:06:44,238 line:-1
+header and footer support,
+
+
+117
+00:06:44,304 --> 00:06:48,675 line:-2
+and also a new Sidebar appearance
+we see in many iPadOS system apps.
+
+
+118
+00:06:49,243 --> 00:06:53,847 line:0
+For a deeper dive, please check out
+the video "Lists in UICollectionView."
+
+
+119
+00:06:55,782 --> 00:06:59,920 line:-2
+Finally, let's chat a little bit
+about UICollectionView and modern cells.
+
+
+120
+00:07:01,221 --> 00:07:04,758 line:-2
+For iOS 14, we have a brand-new way
+to configure cells
+
+
+121
+00:07:04,825 --> 00:07:08,028 line:-1
+with a new API we call cell registrations.
+
+
+122
+00:07:08,829 --> 00:07:11,331 line:-2
+Cell registrations are a simple,
+reusable way
+
+
+123
+00:07:11,398 --> 00:07:13,734 line:-1
+to set up a cell from a view model.
+
+
+124
+00:07:14,401 --> 00:07:16,770 line:-2
+Cell registrations eliminate
+the extra step
+
+
+125
+00:07:16,837 --> 00:07:21,475 line:-2
+of registering a cell class or nib
+to associate it with a reuse identifier.
+
+
+126
+00:07:22,142 --> 00:07:25,112 line:-1
+We instead use a generic registration type
+
+
+127
+00:07:25,179 --> 00:07:27,881 line:-1
+which incorporates a configuration closure
+
+
+128
+00:07:27,948 --> 00:07:30,417 line:-2
+for setting up a new cell
+from a view model.
+
+
+129
+00:07:30,484 --> 00:07:32,886 line:-1
+Let's take a look at this API in action.
+
+
+130
+00:07:33,387 --> 00:07:37,324 line:-2
+First, we create our cell registration,
+which is generic over the cell class--
+
+
+131
+00:07:37,391 --> 00:07:39,493 line:-1
+in this case MyCell--
+
+
+132
+00:07:39,560 --> 00:07:41,361 line:-1
+and our ViewModel class.
+
+
+133
+00:07:42,296 --> 00:07:44,264 line:-1
+Notice the registration takes a closure,
+
+
+134
+00:07:44,331 --> 00:07:47,634 line:-2
+which is called
+whenever a new cell is constructed.
+
+
+135
+00:07:47,701 --> 00:07:51,104 line:-2
+This is where we configure
+the cell's content from our ViewModel.
+
+
+136
+00:07:51,572 --> 00:07:55,542 line:-2
+With cell registrations, we no longer
+need the extra step of calling register.
+
+
+137
+00:07:55,609 --> 00:08:00,214 line:-2
+We simply use the cell registration from
+our Diffable Data Source cell provider
+
+
+138
+00:08:00,280 --> 00:08:03,884 line:-2
+with the new API
+dequeueConfiguredReusableCell
+
+
+139
+00:08:03,951 --> 00:08:05,519 line:-1
+using registration.
+
+
+140
+00:08:05,586 --> 00:08:07,521 line:-1
+So that's cell registrations.
+
+
+141
+00:08:08,155 --> 00:08:11,859 line:-1
+Next up, cell content configurations.
+
+
+142
+00:08:11,925 --> 00:08:15,429 line:-2
+Cell content configurations provide
+standardized layouts for cells
+
+
+143
+00:08:15,495 --> 00:08:19,700 line:-2
+similar to what is seen
+in UITableView standard cell types.
+
+
+144
+00:08:20,601 --> 00:08:25,138 line:-2
+These configurations can be used
+with any cell, or even a generic UIView.
+
+
+145
+00:08:25,205 --> 00:08:26,573 line:-1
+They're very flexible.
+
+
+146
+00:08:26,640 --> 00:08:30,644 line:-2
+Let's check out a few visual examples
+to get a taste of how these work.
+
+
+147
+00:08:31,044 --> 00:08:34,881 line:0
+Here we can see a simple case
+of an image and some text
+
+
+148
+00:08:34,948 --> 00:08:38,051 line:0
+in a very standard-looking cell layout.
+
+
+149
+00:08:38,118 --> 00:08:40,187 line:0
+And here's the valueCell variant,
+
+
+150
+00:08:40,254 --> 00:08:43,724 line:0
+where the second text
+is on the trailing side of the cell.
+
+
+151
+00:08:45,225 --> 00:08:47,694 line:0
+And finally we have the subtitleCell,
+
+
+152
+00:08:47,761 --> 00:08:51,565 line:0
+which has the secondary text
+underneath the main text.
+
+
+153
+00:08:54,301 --> 00:08:58,605 line:-2
+Note here-- these content
+configuration types are very lightweight
+
+
+154
+00:08:58,672 --> 00:09:01,542 line:-2
+and simply describe
+what the content should look like.
+
+
+155
+00:09:01,608 --> 00:09:04,478 line:-2
+The framework takes care
+of all the layout considerations
+
+
+156
+00:09:04,545 --> 00:09:07,381 line:-2
+and automatically optimizes
+for performance.
+
+
+157
+00:09:07,981 --> 00:09:10,884 line:-1
+And finally, background configurations.
+
+
+158
+00:09:10,951 --> 00:09:13,554 line:-2
+These are quite similar
+to content configurations
+
+
+159
+00:09:13,620 --> 00:09:15,589 line:-1
+but apply to any cell's background
+
+
+160
+00:09:15,656 --> 00:09:20,360 line:-2
+with the ability to adjust properties
+such as color, border styles and more.
+
+
+161
+00:09:21,228 --> 00:09:24,798 line:-2
+So we've barely scratched the surface
+with modern cell configuration.
+
+
+162
+00:09:25,365 --> 00:09:29,736 line:0
+For a deeper dive, please check out
+the video "Modern Cell Configuration."
+
+
+163
+00:09:30,671 --> 00:09:35,609 line:-2
+That wraps up this overview
+of advances in CollectionView for iOS 14.
+
+
+164
+00:09:35,676 --> 00:09:39,213 line:-2
+Go download the sample app
+to see these APIs in action.
+
+
+165
+00:09:39,279 --> 00:09:43,617 line:-2
+And use our code as a basis
+for adding these features to your apps.
+
+
+166
+00:09:44,484 --> 00:09:47,254 line:-2
+And to learn more,
+go check out the related videos.
+
+
+167
+00:09:47,855 --> 00:09:48,956 line:-1
+And thanks for watching.
+

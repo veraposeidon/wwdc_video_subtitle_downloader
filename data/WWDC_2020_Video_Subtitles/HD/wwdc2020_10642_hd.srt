@@ -1,0 +1,1125 @@
+1
+00:00:03,904 --> 00:00:06,573 line:-1
+Hello and welcome to WWDC.
+
+
+2
+00:00:08,942 --> 00:00:09,943 line:0
+Hey, everyone.
+
+
+3
+00:00:10,010 --> 00:00:13,480 line:0
+I'm David, a machine learning engineer
+from the Create ML team,
+
+
+4
+00:00:13,547 --> 00:00:15,549 line:0
+and in this session,
+we're going to talk about
+
+
+5
+00:00:15,616 --> 00:00:17,718 line:0
+building style transfer models
+in Create ML.
+
+
+6
+00:00:18,385 --> 00:00:20,487 line:-2
+Style transfer
+is a new machine learning task
+
+
+7
+00:00:20,554 --> 00:00:22,623 line:-1
+available this year in the Create ML app.
+
+
+8
+00:00:23,223 --> 00:00:26,860 line:-2
+It can be used to blend
+a style and content image together.
+
+
+9
+00:00:27,995 --> 00:00:31,665 line:-2
+Let's see what happens when we apply
+style transfer to this pair of images.
+
+
+10
+00:00:32,566 --> 00:00:36,637 line:-2
+Wow. That's pretty cool.
+The stylized result looks great.
+
+
+11
+00:00:37,104 --> 00:00:40,073 line:-2
+The model has transferred the colors,
+shapes, and textures
+
+
+12
+00:00:40,140 --> 00:00:42,276 line:-1
+from the style image to the content image.
+
+
+13
+00:00:44,011 --> 00:00:46,513 line:-2
+The color of the style image
+is very important.
+
+
+14
+00:00:46,580 --> 00:00:49,316 line:-2
+The white background
+and black paint strokes from this style
+
+
+15
+00:00:49,383 --> 00:00:52,486 line:-2
+are transferred by the model
+to create a black-and-white result.
+
+
+16
+00:00:53,720 --> 00:00:55,856 line:-1
+Paintings aren't the only source of style.
+
+
+17
+00:00:55,923 --> 00:00:59,459 line:-2
+The model can learn and transfer the tiles
+from this mosaic as well.
+
+
+18
+00:01:00,761 --> 00:01:03,864 line:-2
+Express your creativity
+by using different patterns from nature.
+
+
+19
+00:01:04,598 --> 00:01:08,435 line:-2
+For example, the ice cracks in this style
+can be transferred by the model
+
+
+20
+00:01:08,502 --> 00:01:10,370 line:-1
+to produce a pretty compelling result.
+
+
+21
+00:01:12,272 --> 00:01:13,807 line:-1
+These are just a few examples
+
+
+22
+00:01:13,874 --> 00:01:16,677 line:-2
+of what you can do with style transfer
+in Create ML.
+
+
+23
+00:01:17,377 --> 00:01:19,947 line:-2
+But wouldn't it be great
+if we could do even better?
+
+
+24
+00:01:20,681 --> 00:01:24,218 line:-2
+What if you could apply style transfer
+to more than just a static image?
+
+
+25
+00:01:25,619 --> 00:01:28,922 line:-2
+Amazing.
+Each frame is stylized fast enough
+
+
+26
+00:01:28,989 --> 00:01:31,191 line:-2
+to maintain
+a smooth stylization experience.
+
+
+27
+00:01:31,825 --> 00:01:35,262 line:-2
+You can use a style transfer model
+in real time for your video apps.
+
+
+28
+00:01:36,597 --> 00:01:38,665 line:-1
+Using the A13 Bionic chip,
+
+
+29
+00:01:39,166 --> 00:01:42,836 line:-2
+we can achieve a processing speed
+up to 120 frames per second.
+
+
+30
+00:01:44,271 --> 00:01:47,741 line:0
+To train a style transfer model,
+we need to provide some training data:
+
+
+31
+00:01:48,509 --> 00:01:52,045 line:-2
+a style image
+and a directory of content images.
+
+
+32
+00:01:53,180 --> 00:01:56,650 line:-2
+The model learns the balance between
+content and style from your images.
+
+
+33
+00:01:57,918 --> 00:02:00,988 line:-2
+For optimal results,
+the content images used for training
+
+
+34
+00:02:01,054 --> 00:02:04,525 line:-2
+should be similar to what you expect
+to stylize at inference time.
+
+
+35
+00:02:05,659 --> 00:02:08,662 line:-2
+In this example, I have a directory
+of natural content images.
+
+
+36
+00:02:09,795 --> 00:02:11,131 line:0
+You can use model parameters
+
+
+37
+00:02:11,198 --> 00:02:13,667 line:0
+to optimize the behavior
+of a style transfer model.
+
+
+38
+00:02:14,268 --> 00:02:16,170 line:-1
+You can configure your model behavior
+
+
+39
+00:02:16,236 --> 00:02:19,273 line:-2
+with style strength and style density
+model parameters.
+
+
+40
+00:02:20,073 --> 00:02:21,842 line:-1
+Let's explore style strength first.
+
+
+41
+00:02:22,476 --> 00:02:24,111 line:-1
+With a style strength parameter,
+
+
+42
+00:02:24,178 --> 00:02:26,680 line:-2
+you can tune the balance
+between style and content.
+
+
+43
+00:02:27,314 --> 00:02:28,515 line:-1
+With low style strength,
+
+
+44
+00:02:28,882 --> 00:02:31,885 line:-2
+only parts of the background
+adopt the style image qualities,
+
+
+45
+00:02:32,319 --> 00:02:35,956 line:-2
+and the people dancing have adopted
+only a small amount of blue color.
+
+
+46
+00:02:37,558 --> 00:02:42,129 line:-2
+Now, with high style strength,
+the background is even more stylized,
+
+
+47
+00:02:42,196 --> 00:02:46,366 line:-2
+and the people dancing completely adopt
+the style image colors and ice cracks.
+
+
+48
+00:02:47,267 --> 00:02:50,003 line:-2
+Notice the difference
+when I put them next to each other.
+
+
+49
+00:02:51,205 --> 00:02:52,973 line:-1
+Next, let's explore style density.
+
+
+50
+00:02:54,141 --> 00:02:55,876 line:-1
+With the style density parameter,
+
+
+51
+00:02:55,943 --> 00:02:58,011 line:-2
+coarse details
+can be learned by the model.
+
+
+52
+00:02:58,612 --> 00:03:01,081 line:-2
+Here, I've drawn a grid
+on top of the style image.
+
+
+53
+00:03:01,982 --> 00:03:03,483 line:-1
+Let's zoom in on a region.
+
+
+54
+00:03:04,117 --> 00:03:07,087 line:-2
+The model focuses
+on high-level details in this region,
+
+
+55
+00:03:07,154 --> 00:03:09,923 line:-2
+such as the bird,
+and learns these coarse qualities.
+
+
+56
+00:03:11,258 --> 00:03:13,527 line:-1
+Here's an example of coarse stylization.
+
+
+57
+00:03:15,829 --> 00:03:18,298 line:-2
+Fine details
+can also be learned by the model
+
+
+58
+00:03:18,365 --> 00:03:21,201 line:-2
+by setting the style density parameter
+to a higher setting.
+
+
+59
+00:03:23,670 --> 00:03:28,542 line:-2
+With a fine grid, the zoomed-in region
+contains mostly color and brush strokes.
+
+
+60
+00:03:29,343 --> 00:03:31,512 line:-1
+This produces a different stylized result.
+
+
+61
+00:03:32,546 --> 00:03:36,984 line:-2
+Let's compare the coarse and fine results
+side by side to visualize the difference.
+
+
+62
+00:03:38,018 --> 00:03:39,753 line:-1
+You can use the style density parameter
+
+
+63
+00:03:39,820 --> 00:03:42,055 line:-2
+to explore a wide range
+of such stylizations.
+
+
+64
+00:03:43,090 --> 00:03:45,826 line:-2
+Let's train a style transfer model
+together in the Create ML app.
+
+
+65
+00:03:46,927 --> 00:03:48,428 line:-1
+I'll open the Create ML app...
+
+
+66
+00:03:50,030 --> 00:03:51,498 line:-1
+and create a new document.
+
+
+67
+00:03:52,633 --> 00:03:54,768 line:-2
+I'll select
+the new style transfer template.
+
+
+68
+00:03:58,739 --> 00:03:59,940 line:-1
+I'll name the project...
+
+
+69
+00:04:02,609 --> 00:04:03,710 line:-1
+Dance Stylizer...
+
+
+70
+00:04:04,811 --> 00:04:06,346 line:-1
+and fill in a short description.
+
+
+71
+00:04:14,421 --> 00:04:16,890 line:-2
+The app has already selected
+the Settings tab
+
+
+72
+00:04:16,957 --> 00:04:19,426 line:-2
+and is ready for my training data
+and model parameters.
+
+
+73
+00:04:20,260 --> 00:04:23,030 line:-2
+I have this style image
+that you saw earlier in the session.
+
+
+74
+00:04:24,064 --> 00:04:26,433 line:-2
+I'll drag it into
+the Training Style Image datawell.
+
+
+75
+00:04:27,134 --> 00:04:29,436 line:-1
+I also have an image of people dancing.
+
+
+76
+00:04:29,837 --> 00:04:31,138 line:-1
+I'll use that for validation
+
+
+77
+00:04:31,205 --> 00:04:34,107 line:-2
+in order to visualize the model quality
+throughout the training process.
+
+
+78
+00:04:35,108 --> 00:04:37,377 line:-2
+Lastly,
+I need a directory of content images
+
+
+79
+00:04:37,444 --> 00:04:39,479 line:-2
+to learn the balance
+between content and style.
+
+
+80
+00:04:40,414 --> 00:04:44,084 line:-2
+I can either download a set
+of a few hundred natural content images
+
+
+81
+00:04:44,151 --> 00:04:45,552 line:-1
+directly from the app,
+
+
+82
+00:04:45,619 --> 00:04:47,888 line:-2
+which works
+in a wide variety of use cases,
+
+
+83
+00:04:48,655 --> 00:04:51,425 line:-2
+or I can use my own folder
+of content images.
+
+
+84
+00:04:52,092 --> 00:04:55,362 line:-2
+I'll drag in a folder
+of 600 natural content images.
+
+
+85
+00:04:57,164 --> 00:04:59,867 line:-2
+I have the option to optimize
+for image or video use cases.
+
+
+86
+00:05:00,968 --> 00:05:04,671 line:-2
+I'll choose video, since I'm interested
+in real-time style transfer apps.
+
+
+87
+00:05:05,706 --> 00:05:08,275 line:-1
+And I'll train for 400 iterations.
+
+
+88
+00:05:09,977 --> 00:05:11,545 line:-1
+I can use the style strength slider
+
+
+89
+00:05:11,612 --> 00:05:14,014 line:-2
+to control the balance
+between content and style.
+
+
+90
+00:05:14,882 --> 00:05:17,451 line:-2
+And I can also use
+the style density slider
+
+
+91
+00:05:17,518 --> 00:05:19,586 line:-1
+to explore coarse or fine stylization.
+
+
+92
+00:05:20,787 --> 00:05:23,390 line:-2
+The default parameters
+work pretty well in most cases.
+
+
+93
+00:05:24,024 --> 00:05:26,493 line:-2
+Now that I'm finished
+configuring my training settings,
+
+
+94
+00:05:26,560 --> 00:05:28,629 line:-2
+I'll click the Train button
+in the toolbar.
+
+
+95
+00:05:29,062 --> 00:05:31,698 line:-2
+The app processes
+the style and content images
+
+
+96
+00:05:31,765 --> 00:05:33,667 line:-1
+and immediately starts training the model.
+
+
+97
+00:05:34,768 --> 00:05:36,003 line:-1
+Every five iterations,
+
+
+98
+00:05:36,069 --> 00:05:38,906 line:-2
+a new model checkpoint
+stylizes my validation image.
+
+
+99
+00:05:39,573 --> 00:05:42,876 line:-2
+I can use this to visualize
+the model stylization interactively
+
+
+100
+00:05:42,943 --> 00:05:44,244 line:-1
+through the training process.
+
+
+101
+00:05:44,745 --> 00:05:46,847 line:-1
+At any point, I can take a model snapshot
+
+
+102
+00:05:46,914 --> 00:05:49,082 line:-2
+by clicking the Snapshot button
+in the toolbar.
+
+
+103
+00:05:50,350 --> 00:05:53,587 line:-2
+A snapshot is an ML model
+that I can use later in an app.
+
+
+104
+00:05:54,655 --> 00:05:56,957 line:-2
+My model snapshots are saved
+under Model Sources.
+
+
+105
+00:05:57,891 --> 00:06:00,127 line:-1
+Style loss and content loss graphs
+
+
+106
+00:06:00,194 --> 00:06:03,197 line:-2
+help me understand
+the balance between content and style.
+
+
+107
+00:06:04,998 --> 00:06:06,333 line:-1
+The style loss decreases
+
+
+108
+00:06:06,400 --> 00:06:09,937 line:-2
+as my model learns to adopt
+the artistic qualities of my style image.
+
+
+109
+00:06:12,306 --> 00:06:15,142 line:-2
+The model has completed training
+400 iterations,
+
+
+110
+00:06:15,209 --> 00:06:17,444 line:-2
+and it looks like the style loss
+has converged.
+
+
+111
+00:06:18,946 --> 00:06:20,981 line:-1
+I can train my model for more iterations
+
+
+112
+00:06:21,048 --> 00:06:23,383 line:-2
+by clicking the Train More button
+in the toolbar.
+
+
+113
+00:06:24,451 --> 00:06:27,588 line:-2
+I'm happy with my model stylization
+on the validation image,
+
+
+114
+00:06:27,654 --> 00:06:29,089 line:-1
+so let's go to the Preview tab.
+
+
+115
+00:06:30,157 --> 00:06:33,627 line:-2
+I can navigate to the Preview tab
+to test out my model with some new data.
+
+
+116
+00:06:34,828 --> 00:06:36,263 line:-1
+I'll drag in a test image.
+
+
+117
+00:06:39,233 --> 00:06:41,835 line:-2
+I can toggle back and forth
+between the stylized image
+
+
+118
+00:06:42,135 --> 00:06:43,504 line:-1
+and the original content,
+
+
+119
+00:06:43,570 --> 00:06:46,006 line:-2
+so that I can clearly visualize
+the stylized effect.
+
+
+120
+00:06:47,241 --> 00:06:51,078 line:-2
+I can compare the stylized result
+from different model snapshots.
+
+
+121
+00:06:52,846 --> 00:06:56,817 line:-2
+Since this model was optimized for video,
+I'll try dragging in a test video.
+
+
+122
+00:07:02,456 --> 00:07:04,291 line:-1
+Now this is really getting interesting.
+
+
+123
+00:07:05,559 --> 00:07:09,796 line:-2
+At this point, I can choose to download,
+share with a colleague,
+
+
+124
+00:07:10,731 --> 00:07:13,634 line:-2
+or open the stylized result
+in the QuickTime Player app.
+
+
+125
+00:07:14,835 --> 00:07:18,138 line:-2
+In the Output tab, I can find out
+more information about my model.
+
+
+126
+00:07:19,173 --> 00:07:22,910 line:-2
+The size of the model is quite small,
+under one megabyte,
+
+
+127
+00:07:22,976 --> 00:07:25,512 line:-2
+which makes it really convenient
+to bundle with my apps.
+
+
+128
+00:07:26,580 --> 00:07:29,816 line:-2
+I can see the OS availability of my model
+to ensure compatibility.
+
+
+129
+00:07:30,684 --> 00:07:34,488 line:-2
+And by selecting "Predictions,"
+I can find out even more about my model,
+
+
+130
+00:07:34,922 --> 00:07:36,957 line:-1
+such as input and output layer names.
+
+
+131
+00:07:37,758 --> 00:07:40,427 line:-2
+At this point,
+I can get the model to use in my apps
+
+
+132
+00:07:40,494 --> 00:07:44,298 line:-2
+by clicking the Get, Open in Xcode,
+or Share button in the toolbar.
+
+
+133
+00:07:46,400 --> 00:07:48,969 line:-2
+And that's how easy it is
+to train a style transfer model.
+
+
+134
+00:07:49,036 --> 00:07:53,173 line:-2
+As you just saw in the demo,
+training a model takes only a few minutes.
+
+
+135
+00:07:53,841 --> 00:07:56,510 line:-2
+Let's recap some important concepts
+from the demo.
+
+
+136
+00:07:57,110 --> 00:07:58,645 line:-1
+We learned about training checkpoints
+
+
+137
+00:07:58,712 --> 00:08:01,014 line:-2
+and how to interact
+with the model training process
+
+
+138
+00:08:01,081 --> 00:08:02,349 line:-1
+in a new and exciting way.
+
+
+139
+00:08:02,983 --> 00:08:05,919 line:-2
+We compared model snapshots
+at different training iterations
+
+
+140
+00:08:06,753 --> 00:08:09,122 line:-2
+and discovered a new ability
+to extend training
+
+
+141
+00:08:09,189 --> 00:08:10,891 line:-1
+to improve the quality of a model.
+
+
+142
+00:08:11,859 --> 00:08:14,628 line:0
+For more finite control,
+be sure to check out the session
+
+
+143
+00:08:14,695 --> 00:08:17,197 line:0
+"Control Training in Create ML
+with Swift."
+
+
+144
+00:08:17,965 --> 00:08:21,969 line:-2
+To show you some amazing experiences
+style transfer can bring to your apps,
+
+
+145
+00:08:22,035 --> 00:08:23,904 line:-1
+I'd like to introduce Geppy.
+
+
+146
+00:08:24,805 --> 00:08:26,540 line:-1
+Hello. I'm Geppy Parziale.
+
+
+147
+00:08:26,607 --> 00:08:29,877 line:-2
+I'm going to show you how to combine
+style transfer with ARKit.
+
+
+148
+00:08:30,911 --> 00:08:33,514 line:-2
+I got several style transfer models
+from David,
+
+
+149
+00:08:33,580 --> 00:08:35,883 line:-2
+and I decided to create
+a new virtual world with them.
+
+
+150
+00:08:36,650 --> 00:08:38,018 line:-1
+Let me show you how.
+
+
+151
+00:08:42,623 --> 00:08:45,492 line:-2
+ARKit captures the surrounding
+real-world environment,
+
+
+152
+00:08:45,559 --> 00:08:48,662 line:-2
+and each style transfer model allows me
+to stylize the scene.
+
+
+153
+00:08:49,429 --> 00:08:50,430 line:-1
+Cool.
+
+
+154
+00:08:53,333 --> 00:08:54,935 line:-1
+Let me show how to do it.
+
+
+155
+00:08:56,937 --> 00:09:01,475 line:-2
+Here, I'm using ARKit to capture
+the surrounding real-world environment
+
+
+156
+00:09:01,542 --> 00:09:03,944 line:-1
+and stylizing it with one of our models.
+
+
+157
+00:09:04,711 --> 00:09:06,713 line:-1
+ARKit generates ARFrames.
+
+
+158
+00:09:07,514 --> 00:09:10,784 line:-1
+Each ARFrame contains a CVPixelBuffer
+
+
+159
+00:09:10,851 --> 00:09:14,888 line:-2
+that I rescale to the input size
+expected by my style transfer model.
+
+
+160
+00:09:17,291 --> 00:09:22,229 line:-2
+Then the rescaled CVPixelBuffer
+is stylized using the Core ML model
+
+
+161
+00:09:22,296 --> 00:09:24,164 line:-1
+and rendered on the screen using Metal.
+
+
+162
+00:09:25,832 --> 00:09:28,936 line:-2
+I can use ARKit
+to add a virtual object to the scene.
+
+
+163
+00:09:33,240 --> 00:09:35,008 line:-1
+And here she is. Michelle.
+
+
+164
+00:09:35,542 --> 00:09:37,911 line:-1
+Oh, and she's a very good dancer.
+
+
+165
+00:09:42,382 --> 00:09:46,186 line:-2
+To add a 3D object to the scene,
+I can define an ARAnchor
+
+
+166
+00:09:46,253 --> 00:09:48,789 line:-1
+to specify its location in the real world.
+
+
+167
+00:09:50,290 --> 00:09:54,261 line:-2
+The virtual object is then rendered
+seamlessly in the scene using Metal.
+
+
+168
+00:09:54,995 --> 00:09:56,430 line:-1
+But I can do more.
+
+
+169
+00:10:01,068 --> 00:10:02,135 line:-1
+Here it is.
+
+
+170
+00:10:03,036 --> 00:10:05,339 line:-2
+And it seems
+she really likes her new look.
+
+
+171
+00:10:07,407 --> 00:10:12,012 line:-2
+Here, I stylized off-line the virtual
+object texture with a different style.
+
+
+172
+00:10:13,180 --> 00:10:15,182 line:-1
+But I want to do even more.
+
+
+173
+00:10:18,085 --> 00:10:22,456 line:-2
+Using the power of the Apple Neural Engine
+and these optimized style transfer models,
+
+
+174
+00:10:23,323 --> 00:10:26,293 line:-2
+I can run multiple styles concurrently
+in real time.
+
+
+175
+00:10:28,896 --> 00:10:33,867 line:0
+Combined with ARKit person segmentation,
+I'm executing two style transfer models:
+
+
+176
+00:10:33,934 --> 00:10:37,037 line:0
+one for the background environment
+and one for the segmented person.
+
+
+177
+00:10:37,771 --> 00:10:40,507 line:0
+The stylized results
+are blended together using Metal.
+
+
+178
+00:10:41,141 --> 00:10:42,309 line:0
+Pretty cool, huh?
+
+
+179
+00:10:43,177 --> 00:10:47,581 line:-2
+These highly optimized style transfer
+models generated with Create ML,
+
+
+180
+00:10:47,648 --> 00:10:48,949 line:-1
+combined with ARKit
+
+
+181
+00:10:49,016 --> 00:10:52,519 line:-2
+and the hardware acceleration
+of the Apple Neural Engine and Metal,
+
+
+182
+00:10:52,586 --> 00:10:56,657 line:-2
+allow you to unleash
+all the power of iOS 14 for your apps.
+
+
+183
+00:10:57,090 --> 00:11:00,227 line:-2
+I can't wait to see
+all the cool experiences you will build
+
+
+184
+00:11:00,294 --> 00:11:03,130 line:-2
+with style transfer models
+trained with Create ML.
+
+
+185
+00:11:04,164 --> 00:11:06,700 line:-2
+And now,
+I'll hand it back to David for a recap.
+
+
+186
+00:11:07,534 --> 00:11:10,270 line:-2
+Thanks, Geppy.
+Your app looks really amazing.
+
+
+187
+00:11:11,138 --> 00:11:12,239 line:-1
+Let's summarize.
+
+
+188
+00:11:12,706 --> 00:11:14,474 line:-1
+With style transfer in Create ML,
+
+
+189
+00:11:14,541 --> 00:11:17,244 line:-2
+you can train models
+for both image and video use cases.
+
+
+190
+00:11:18,345 --> 00:11:21,315 line:-2
+The video style transfer model
+is extremely performant
+
+
+191
+00:11:21,381 --> 00:11:23,951 line:-2
+and can be easily combined
+with other Apple technologies,
+
+
+192
+00:11:24,017 --> 00:11:25,018 line:-1
+such as ARKit.
+
+
+193
+00:11:25,986 --> 00:11:27,354 line:-1
+The model size is small,
+
+
+194
+00:11:27,421 --> 00:11:29,690 line:-2
+which makes it convenient
+to bundle with your apps.
+
+
+195
+00:11:30,724 --> 00:11:33,961 line:-2
+Reduced training time makes the training
+experience interactive and fun.
+
+
+196
+00:11:34,561 --> 00:11:36,296 line:-1
+You can train a model in a few minutes
+
+
+197
+00:11:36,363 --> 00:11:39,032 line:-2
+and quickly iterate with different styles
+and model parameters.
+
+
+198
+00:11:39,766 --> 00:11:43,003 line:-2
+We can't wait to see what you come up with
+using style transfer in Create ML.
+
+
+199
+00:11:43,070 --> 00:11:44,071 line:-1
+Thank you.
+

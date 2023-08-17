@@ -1,0 +1,2214 @@
+1
+00:00:03,871 --> 00:00:07,441 line:-1
+Hello and welcome to WWDC.
+
+
+2
+00:00:08,475 --> 00:00:10,878 line:0
+Hello, everyone. My name is Shu Gao.
+
+
+3
+00:00:10,943 --> 00:00:14,014 line:0
+Today I'm going to talk about
+HDR video editing
+
+
+4
+00:00:14,081 --> 00:00:16,717 line:0
+and play back using AVFoundation.
+
+
+5
+00:00:17,150 --> 00:00:21,622 line:-2
+Apple brought HDR play back on iOS
+a couple of years back,
+
+
+6
+00:00:21,688 --> 00:00:23,924 line:-1
+and on macOS last year.
+
+
+7
+00:00:23,991 --> 00:00:27,728 line:-2
+This year, we're also adding HDR support
+in our framework
+
+
+8
+00:00:27,794 --> 00:00:30,163 line:-1
+to enable HDR for video editing.
+
+
+9
+00:00:30,230 --> 00:00:33,901 line:-2
+In this session, I will show you how
+you can take advantage of that,
+
+
+10
+00:00:33,967 --> 00:00:35,536 line:-1
+using AVFoundation.
+
+
+11
+00:00:36,103 --> 00:00:39,173 line:-2
+We will start
+with a very quick introduction to HDR
+
+
+12
+00:00:39,706 --> 00:00:42,776 line:-2
+followed by a video of different
+video editing workflows.
+
+
+13
+00:00:43,377 --> 00:00:46,580 line:-2
+Then we'll talk about how to enable HDR
+on them.
+
+
+14
+00:00:46,647 --> 00:00:49,917 line:-2
+We will also discuss some finer controls
+you can have
+
+
+15
+00:00:49,983 --> 00:00:54,254 line:-2
+in configuring the HDR editing,
+mainly about the color properties.
+
+
+16
+00:00:54,788 --> 00:00:57,925 line:-1
+At the end, we'll touch upon HDR playback.
+
+
+17
+00:00:58,725 --> 00:01:00,327 line:-1
+Now, what's HDR?
+
+
+18
+00:01:00,394 --> 00:01:03,397 line:-1
+HDR stands for high dynamic range.
+
+
+19
+00:01:03,463 --> 00:01:06,934 line:-2
+It greatly extends the dynamic range
+of the video
+
+
+20
+00:01:07,000 --> 00:01:11,071 line:-2
+above and beyond what is capable
+by standard dynamic range video.
+
+
+21
+00:01:11,939 --> 00:01:15,542 line:-2
+Because of this,
+you can produce more vibrant videos
+
+
+22
+00:01:15,609 --> 00:01:19,313 line:-2
+with brighter whites and deeper blacks,
+better contrast
+
+
+23
+00:01:19,379 --> 00:01:21,982 line:-2
+and more details in shadows
+and highlights.
+
+
+24
+00:01:22,883 --> 00:01:25,252 line:-1
+To give you a quantitative idea,
+
+
+25
+00:01:25,319 --> 00:01:31,258 line:-2
+SDR video is limited to up to 100 candelas
+per square meter, or nits.
+
+
+26
+00:01:31,758 --> 00:01:37,130 line:-2
+HDR video can go 100 times brighter
+all the way up to 10,000 nits.
+
+
+27
+00:01:38,298 --> 00:01:42,169 line:-2
+HDR is often implicitly paired
+with Wide Color.
+
+
+28
+00:01:42,236 --> 00:01:45,606 line:-2
+The combination of Wide Color
+and high dynamic range
+
+
+29
+00:01:45,672 --> 00:01:48,475 line:-1
+can define a much larger color volume.
+
+
+30
+00:01:48,542 --> 00:01:53,881 line:-2
+In other words, it can produce colors
+you have never seen in any SDR video.
+
+
+31
+00:01:55,015 --> 00:01:58,685 line:-2
+To accommodate the larger luminance
+and color range,
+
+
+32
+00:01:58,752 --> 00:02:03,090 line:-2
+HDR is also typically associated
+with higher bit depths,
+
+
+33
+00:02:03,156 --> 00:02:06,026 line:-1
+with 10-bit common for distribution media.
+
+
+34
+00:02:07,194 --> 00:02:10,564 line:-2
+Transfer functions describe
+how scene linear lights
+
+
+35
+00:02:10,631 --> 00:02:14,101 line:-2
+is mapped to nonlinear code values
+in the video,
+
+
+36
+00:02:14,168 --> 00:02:15,836 line:-1
+and then back to display light.
+
+
+37
+00:02:16,570 --> 00:02:21,241 line:-2
+HDR video comes with either HLG,
+or PQ transfer function.
+
+
+38
+00:02:21,575 --> 00:02:24,578 line:-2
+Apple supports both types
+of transfer functions.
+
+
+39
+00:02:25,612 --> 00:02:28,482 line:0
+To get a more detailed introduction
+to HDR,
+
+
+40
+00:02:28,549 --> 00:02:31,618 line:0
+I recommend you check out
+the HDR Export session
+
+
+41
+00:02:31,685 --> 00:02:33,187 line:0
+of this year's WWDC.
+
+
+42
+00:02:34,188 --> 00:02:36,857 line:0
+With this high-level concept of HDR,
+
+
+43
+00:02:36,924 --> 00:02:39,760 line:-2
+let's move on
+to review video editing workflows.
+
+
+44
+00:02:40,894 --> 00:02:42,729 line:-1
+Before I get to the details,
+
+
+45
+00:02:42,796 --> 00:02:44,898 line:0
+I would like to direct your attention
+
+
+46
+00:02:44,965 --> 00:02:48,669 line:0
+to the previous WWDC sessions
+on video editing.
+
+
+47
+00:02:48,735 --> 00:02:50,170 line:0
+If you're new to video editing,
+
+
+48
+00:02:50,237 --> 00:02:53,540 line:0
+I highly recommend
+you watch the recordings of these talks.
+
+
+49
+00:02:53,607 --> 00:02:56,243 line:0
+They will help you
+to get a basic understanding
+
+
+50
+00:02:56,310 --> 00:02:59,179 line:0
+of the important classes
+we will discuss here.
+
+
+51
+00:02:59,680 --> 00:03:02,416 line:0
+Here is a common workflow
+for video editing.
+
+
+52
+00:03:02,482 --> 00:03:05,485 line:0
+You start with an asset,
+or a set of assets,
+
+
+53
+00:03:05,986 --> 00:03:09,723 line:0
+then you build AVComposition
+and AVVideoComposition.
+
+
+54
+00:03:10,190 --> 00:03:15,028 line:0
+These two objects together
+specify how to slice, splice,
+
+
+55
+00:03:15,095 --> 00:03:19,533 line:0
+position and blend tracks in assets
+to achieve the artistic intent
+
+
+56
+00:03:19,600 --> 00:03:21,001 line:0
+of your video editing.
+
+
+57
+00:03:21,535 --> 00:03:25,405 line:-2
+AVComposition specifies
+the temporal alignment
+
+
+58
+00:03:25,472 --> 00:03:26,807 line:-1
+of the source tracks.
+
+
+59
+00:03:27,307 --> 00:03:31,478 line:-2
+AVVideoComposition specifies
+geometry transformation
+
+
+60
+00:03:31,545 --> 00:03:35,015 line:-2
+and blending of tracks
+at any given time point.
+
+
+61
+00:03:35,716 --> 00:03:40,153 line:0
+We can use these two objects
+to construct an AVPlayerItem
+
+
+62
+00:03:40,220 --> 00:03:44,291 line:0
+and create an AVPlayer from it
+to play back the editing effects.
+
+
+63
+00:03:44,892 --> 00:03:47,995 line:0
+This is the preview pass of our workflow.
+
+
+64
+00:03:48,395 --> 00:03:52,299 line:0
+We can also use AVComposition
+and AVVideoComposition
+
+
+65
+00:03:52,366 --> 00:03:55,602 line:0
+to provide to an AVAssetExportSession
+
+
+66
+00:03:55,669 --> 00:03:58,672 line:0
+which can write the editing results
+to a movie file.
+
+
+67
+00:04:00,007 --> 00:04:03,844 line:-2
+Here is another workflow
+using a lower level API.
+
+
+68
+00:04:03,911 --> 00:04:08,415 line:-2
+This is an export only workflow.
+There's no preview path.
+
+
+69
+00:04:08,482 --> 00:04:10,250 line:-1
+We start with an asset,
+
+
+70
+00:04:10,317 --> 00:04:14,154 line:-2
+use an AVAssetReader to read the samples
+of the asset.
+
+
+71
+00:04:14,221 --> 00:04:16,055 line:-1
+The editing work is inserted
+
+
+72
+00:04:16,123 --> 00:04:19,726 line:-2
+in the AVAssetReaderVideoComposition
+Output object.
+
+
+73
+00:04:20,160 --> 00:04:23,530 line:-2
+This object contains
+an AVVideoComposition object
+
+
+74
+00:04:23,597 --> 00:04:26,633 line:-2
+that specifies the details
+of the editing intentions.
+
+
+75
+00:04:27,401 --> 00:04:29,937 line:-1
+We can then extract the edited frames
+
+
+76
+00:04:30,003 --> 00:04:33,106 line:-2
+from the AVAssetReaderVideoComposition
+Output object,
+
+
+77
+00:04:33,674 --> 00:04:38,212 line:-2
+send it to an AVAssetWriter
+to write it out to a movie file.
+
+
+78
+00:04:39,112 --> 00:04:42,182 line:-2
+Now we have reviewed
+the video editing workflows.
+
+
+79
+00:04:42,716 --> 00:04:47,754 line:-2
+Next, let's look at how we can enable
+HDR on these workflows.
+
+
+80
+00:04:48,155 --> 00:04:53,260 line:-2
+In each of the workflows we just reviewed,
+AVVideoComposition is in the center.
+
+
+81
+00:04:53,327 --> 00:04:57,130 line:-2
+Some of the workflows also need
+an AVComposition object,
+
+
+82
+00:04:57,197 --> 00:05:00,934 line:-2
+but it is specifying the temporal
+alignment of the tracks only,
+
+
+83
+00:05:01,001 --> 00:05:03,403 line:-1
+so it is pretty much HDR agnostic.
+
+
+84
+00:05:04,338 --> 00:05:06,707 line:-1
+The AVVideoComposition, on the other hand,
+
+
+85
+00:05:06,773 --> 00:05:09,610 line:-2
+has to do with blending
+and transformations,
+
+
+86
+00:05:09,676 --> 00:05:13,347 line:-2
+which must be HDR aware
+to support HDR editing.
+
+
+87
+00:05:14,381 --> 00:05:16,350 line:-1
+When you preview your editing,
+
+
+88
+00:05:16,416 --> 00:05:20,254 line:-2
+you also want to make sure your system
+can play back HDR video.
+
+
+89
+00:05:20,621 --> 00:05:23,423 line:-2
+We will touch upon that
+toward the end of this session.
+
+
+90
+00:05:24,224 --> 00:05:26,593 line:-1
+If you export your video composition,
+
+
+91
+00:05:26,660 --> 00:05:29,296 line:-2
+you want to make sure you select
+the right settings
+
+
+92
+00:05:29,363 --> 00:05:32,966 line:-2
+on your AVAssetExportSession
+or AVAssetWriter.
+
+
+93
+00:05:33,500 --> 00:05:35,435 line:0
+There is a separate session this year
+
+
+94
+00:05:35,502 --> 00:05:39,540 line:0
+that provides all the details
+you need to know on exporting HDR.
+
+
+95
+00:05:41,275 --> 00:05:44,378 line:-2
+Now, assume your display
+can display HDR video,
+
+
+96
+00:05:44,444 --> 00:05:48,615 line:-2
+and your export settings are set
+to the ones supporting HDR,
+
+
+97
+00:05:48,682 --> 00:05:51,385 line:-1
+let's dig deep into AVVideoComposition
+
+
+98
+00:05:51,451 --> 00:05:55,022 line:-2
+and see what you need to do
+to enable HDR supports there.
+
+
+99
+00:05:55,088 --> 00:05:58,659 line:-2
+There are three ways to construct
+an AVVideoComposition.
+
+
+100
+00:05:58,725 --> 00:06:00,827 line:-1
+We will discuss them one by one.
+
+
+101
+00:06:00,894 --> 00:06:05,999 line:-2
+The first one is to build it ground up
+using AVMutableVideoComposition
+
+
+102
+00:06:06,066 --> 00:06:08,168 line:-1
+but use a built-in compositor.
+
+
+103
+00:06:09,469 --> 00:06:13,574 line:-2
+This is best suited if you want to blend
+multiple layers of video,
+
+
+104
+00:06:13,640 --> 00:06:17,344 line:-2
+and/or you want to apply
+frame level geometry transformations,
+
+
+105
+00:06:17,411 --> 00:06:20,647 line:-2
+like cropping, scaling,
+translation and rotation.
+
+
+106
+00:06:21,215 --> 00:06:24,117 line:-2
+The most common use case
+is for transition effects
+
+
+107
+00:06:24,184 --> 00:06:28,755 line:-2
+between two clips of video,
+like swipe, fade in, fade out, et cetera.
+
+
+108
+00:06:29,189 --> 00:06:32,993 line:-2
+This method is not good if you want
+to apply some filtering effects,
+
+
+109
+00:06:33,060 --> 00:06:37,631 line:-2
+like blurring, color tint
+or some fancy artistic effects.
+
+
+110
+00:06:37,698 --> 00:06:42,035 line:-2
+Let's look at a code snippet that
+builds AVVideoComposition in this way.
+
+
+111
+00:06:43,270 --> 00:06:46,773 line:-2
+We start with an empty
+AVMutableVideoComposition
+
+
+112
+00:06:46,840 --> 00:06:48,242 line:-1
+and build it out.
+
+
+113
+00:06:48,842 --> 00:06:51,545 line:-2
+Note that the video
+composition instruction,
+
+
+114
+00:06:51,612 --> 00:06:56,049 line:-2
+contains a complex hierarchy of parameters
+to instruct the compositor
+
+
+115
+00:06:56,116 --> 00:06:59,353 line:-2
+precisely how to blend
+or transform the layers.
+
+
+116
+00:07:00,320 --> 00:07:03,957 line:-2
+You can also have an array
+of composition instructions,
+
+
+117
+00:07:04,024 --> 00:07:07,828 line:-2
+each covers a different segment
+in the timeline of your editing.
+
+
+118
+00:07:08,495 --> 00:07:12,232 line:-2
+In our example here,
+there's only one element in the array.
+
+
+119
+00:07:12,699 --> 00:07:15,769 line:-2
+If you do have multiple video
+composition instructions,
+
+
+120
+00:07:15,836 --> 00:07:20,307 line:-2
+they must not overlap in time
+and must have no gaps in between.
+
+
+121
+00:07:20,841 --> 00:07:23,877 line:-2
+We will not expand on that
+for the consideration of time.
+
+
+122
+00:07:25,212 --> 00:07:29,082 line:-2
+We left the customVideoCompositor Class
+field unset.
+
+
+123
+00:07:29,516 --> 00:07:33,387 line:-2
+This tells the framework that we want
+to use the built-in compositor
+
+
+124
+00:07:33,453 --> 00:07:35,956 line:-1
+to carry out the composition instructions.
+
+
+125
+00:07:36,023 --> 00:07:39,092 line:-2
+Note that nothing here
+says anything about HDR.
+
+
+126
+00:07:39,726 --> 00:07:43,830 line:-2
+In fact, you may have a piece of code
+in your existing video editing app
+
+
+127
+00:07:43,897 --> 00:07:45,632 line:-1
+looking just like this.
+
+
+128
+00:07:46,266 --> 00:07:48,535 line:-2
+Now, let's look at the code
+you need to add
+
+
+129
+00:07:48,602 --> 00:07:52,005 line:-2
+to make this AVVideoComposition
+HDR capable.
+
+
+130
+00:07:53,974 --> 00:07:55,175 line:-1
+Nothing.
+
+
+131
+00:07:55,242 --> 00:07:58,312 line:-2
+Apple has put in the heavy lifting
+in the framework,
+
+
+132
+00:07:58,378 --> 00:08:00,547 line:-1
+especially in the built-in compositor,
+
+
+133
+00:08:00,614 --> 00:08:04,051 line:-2
+to do the right thing
+when the video frames are HDR.
+
+
+134
+00:08:04,518 --> 00:08:06,987 line:-2
+If you take your existing
+video editing app
+
+
+135
+00:08:07,054 --> 00:08:10,157 line:-2
+using built-in compositor,
+without modifying it,
+
+
+136
+00:08:10,224 --> 00:08:12,826 line:-1
+and start to feed HDR video to it,
+
+
+137
+00:08:12,893 --> 00:08:15,529 line:-2
+chances are that you will get
+HDR video out
+
+
+138
+00:08:15,596 --> 00:08:21,034 line:-2
+with the same composition instructions
+properly applied to the HDR sources.
+
+
+139
+00:08:22,102 --> 00:08:26,073 line:-2
+Now, let's look at the second way
+of constructing a AVVideoComposition,
+
+
+140
+00:08:26,607 --> 00:08:30,878 line:-2
+that is to use the
+"applyingCIFiltersWithHandler" parameter
+
+
+141
+00:08:30,944 --> 00:08:33,847 line:-2
+in the constructor
+of AVMutableVideoComposition.
+
+
+142
+00:08:34,914 --> 00:08:38,051 line:-2
+This is useful when you want to apply
+filtering effects
+
+
+143
+00:08:38,118 --> 00:08:40,821 line:-2
+and you are working
+on a single layer of video.
+
+
+144
+00:08:41,554 --> 00:08:45,526 line:-2
+This method does not give you the ability
+to blend multiple layers.
+
+
+145
+00:08:46,159 --> 00:08:47,394 line:-1
+Let's look at the code.
+
+
+146
+00:08:48,562 --> 00:08:51,365 line:-2
+You can see we are using
+a different constructor
+
+
+147
+00:08:51,431 --> 00:08:54,034 line:-1
+of the AVMutableVideoComposition class.
+
+
+148
+00:08:54,835 --> 00:08:58,138 line:-2
+We pass in the asset we want
+to apply the composition on,
+
+
+149
+00:08:58,772 --> 00:09:01,675 line:-1
+and a handler that applies CIFilters
+
+
+150
+00:09:01,742 --> 00:09:05,412 line:-2
+to the frames of the first
+enabled video track of the asset.
+
+
+151
+00:09:06,480 --> 00:09:11,585 line:-2
+Please note that only the first enabled
+video track of the asset gets filtered
+
+
+152
+00:09:11,652 --> 00:09:13,987 line:-1
+and come out of the video composition.
+
+
+153
+00:09:15,689 --> 00:09:17,591 line:-1
+When your handler is invoked,
+
+
+154
+00:09:17,658 --> 00:09:22,996 line:-2
+a AVAsynchronousCIImageFilteringRequest
+object is passed in.
+
+
+155
+00:09:23,964 --> 00:09:28,268 line:-2
+You can use this request object to get
+the current frame of the input track
+
+
+156
+00:09:28,335 --> 00:09:30,571 line:-1
+as a CIImage object,
+
+
+157
+00:09:30,637 --> 00:09:34,508 line:-2
+suitable to send to a CIFilter
+to apply filtering effects.
+
+
+158
+00:09:35,542 --> 00:09:37,845 line:-1
+Once you have a filtered output image,
+
+
+159
+00:09:37,911 --> 00:09:41,148 line:-2
+you can call "request.finish"
+to send it out.
+
+
+160
+00:09:42,249 --> 00:09:44,685 line:-1
+This way of building the video composition
+
+
+161
+00:09:44,751 --> 00:09:47,788 line:-2
+frees you up from setting up
+the composition instructions
+
+
+162
+00:09:47,855 --> 00:09:51,692 line:-2
+and other churns of constructing
+the AVVideoComposition object.
+
+
+163
+00:09:52,159 --> 00:09:53,694 line:-1
+It lets you focus on
+
+
+164
+00:09:53,760 --> 00:09:58,198 line:-2
+and gives you full control on how
+you want to filter the source images.
+
+
+165
+00:09:58,599 --> 00:10:04,705 line:-2
+In this example, we pass the sourceImage
+to a built-in "CIZoomBlur" CIFilter.
+
+
+166
+00:10:05,138 --> 00:10:07,741 line:-2
+You can do more complicated
+filtering effects
+
+
+167
+00:10:07,808 --> 00:10:10,677 line:-1
+by chaining multiple built-in CIFilters,
+
+
+168
+00:10:10,744 --> 00:10:12,813 line:-1
+or apply your own CIFilter
+
+
+169
+00:10:12,880 --> 00:10:16,283 line:-2
+that you can build from your own
+CoreImage metal kernel code.
+
+
+170
+00:10:17,618 --> 00:10:22,022 line:-2
+Now, how do we bring up this type
+of AVVideoComposition to support HDR?
+
+
+171
+00:10:22,489 --> 00:10:25,726 line:-2
+Again, the answer is mostly
+you don't need to do anything.
+
+
+172
+00:10:26,860 --> 00:10:30,631 line:-2
+If your handler is calling
+into CoreImage's built-in CIFilters,
+
+
+173
+00:10:31,765 --> 00:10:34,034 line:-1
+all of them can handle HDR sources.
+
+
+174
+00:10:34,968 --> 00:10:39,473 line:-2
+The only thing you need to worry about
+is if you are using your own CIFilter
+
+
+175
+00:10:39,540 --> 00:10:43,577 line:-2
+built from your own metal
+CoreImage kernel code in your handler.
+
+
+176
+00:10:44,178 --> 00:10:46,280 line:-1
+In the metal CoreImage kernel code,
+
+
+177
+00:10:46,346 --> 00:10:51,285 line:-2
+you need to be aware of the extended
+dynamic range that comes with HDR.
+
+
+178
+00:10:51,818 --> 00:10:53,820 line:-1
+Let's look at a couple of examples.
+
+
+179
+00:10:54,655 --> 00:10:57,624 line:-2
+This is a piece
+of metal CoreImage kernel code
+
+
+180
+00:10:57,691 --> 00:11:00,561 line:-2
+that is aware
+of the extended dynamic range.
+
+
+181
+00:11:00,961 --> 00:11:02,663 line:-1
+The intention of this filter
+
+
+182
+00:11:02,729 --> 00:11:07,367 line:-2
+is to highlight any pixel that exceeds
+the normal zero to 1 dynamic range.
+
+
+183
+00:11:07,868 --> 00:11:12,172 line:-2
+If any of the r, g,
+or b channel's intensity exceeds 1,
+
+
+184
+00:11:12,239 --> 00:11:14,975 line:-2
+we will paint that pixel
+in ultra-bright red.
+
+
+185
+00:11:15,609 --> 00:11:19,313 line:-2
+You may have noticed that we include
+CoreImage header here,
+
+
+186
+00:11:19,379 --> 00:11:23,116 line:-2
+and the syntax is a bit different
+from your normal metal code.
+
+
+187
+00:11:23,183 --> 00:11:26,620 line:-2
+This type of code is called
+the "Metal CoreImage Kernel."
+
+
+188
+00:11:27,454 --> 00:11:29,356 line:0
+If you want to learn more about it,
+
+
+189
+00:11:29,423 --> 00:11:32,559 line:0
+you can go to this session
+in this year's WWDC.
+
+
+190
+00:11:34,328 --> 00:11:39,266 line:-2
+Here is an example that an existing
+SDR metal CoreImage filter
+
+
+191
+00:11:39,333 --> 00:11:41,235 line:-1
+may break down with HDR.
+
+
+192
+00:11:41,735 --> 00:11:43,904 line:-1
+This is a color inverter.
+
+
+193
+00:11:43,971 --> 00:11:48,175 line:-2
+In the SDR world,
+you assume the maximum intensity is 1
+
+
+194
+00:11:48,242 --> 00:11:51,879 line:-2
+and you subtract
+each channel's intensity from 1.
+
+
+195
+00:11:52,312 --> 00:11:56,984 line:-2
+With HDR frames, your resulted intensity
+could go to negative.
+
+
+196
+00:11:57,985 --> 00:12:02,356 line:-2
+Next, let's talk about the third way
+of creating an AVVideoComposition,
+
+
+197
+00:12:02,422 --> 00:12:06,326 line:-2
+which is the most flexible way,
+using a custom compositor.
+
+
+198
+00:12:06,827 --> 00:12:09,263 line:-2
+It allows you to blend
+multiple video layers,
+
+
+199
+00:12:09,329 --> 00:12:12,566 line:-2
+do frame-level geometry transformations
+on each layer,
+
+
+200
+00:12:12,633 --> 00:12:16,970 line:-2
+and it also gives you control
+to apply filtering effects to each layer.
+
+
+201
+00:12:17,905 --> 00:12:21,475 line:-2
+With this greater flexibility,
+you need to do more yourself.
+
+
+202
+00:12:21,975 --> 00:12:25,379 line:-2
+First, you need to define
+a custom compositor class.
+
+
+203
+00:12:25,846 --> 00:12:30,017 line:-2
+The framework will use your class
+to create and maintain the lifecycle
+
+
+204
+00:12:30,083 --> 00:12:33,420 line:-2
+of a custom compositor object
+to do the real composite job.
+
+
+205
+00:12:35,055 --> 00:12:38,125 line:-2
+To construct
+the AVVideoComposition object,
+
+
+206
+00:12:38,192 --> 00:12:40,494 line:-1
+just like in the built-in compositor case,
+
+
+207
+00:12:40,561 --> 00:12:43,730 line:-2
+you start with an empty
+AVMutableVideoComposition,
+
+
+208
+00:12:43,797 --> 00:12:45,199 line:-1
+and you build it up.
+
+
+209
+00:12:46,133 --> 00:12:48,769 line:-2
+The difference here
+is that you tell the framework
+
+
+210
+00:12:48,836 --> 00:12:50,804 line:-1
+about your custom compositor class
+
+
+211
+00:12:50,871 --> 00:12:55,576 line:-2
+by setting the customVideoCompositorClass
+field of the video composition.
+
+
+212
+00:12:56,610 --> 00:13:01,448 line:-2
+What do you need to do to enable HDR
+on this type of AVVideoComposition?
+
+
+213
+00:13:01,882 --> 00:13:05,152 line:-2
+It's not free
+like in the previous two cases.
+
+
+214
+00:13:06,253 --> 00:13:08,689 line:-2
+First obvious thing
+is the real work you do
+
+
+215
+00:13:08,755 --> 00:13:12,059 line:-2
+in your custom compositor
+needs to be HDR capable.
+
+
+216
+00:13:12,626 --> 00:13:16,763 line:-2
+Most HDR sources come in
+with 10-bit pixel formats.
+
+
+217
+00:13:16,830 --> 00:13:19,967 line:-2
+Your custom compositor needs
+to be able to handle them.
+
+
+218
+00:13:20,734 --> 00:13:22,970 line:-1
+When you are manipulating pixel values,
+
+
+219
+00:13:23,036 --> 00:13:27,841 line:-2
+you need to be aware of the extended
+dynamic range brought by HDR sources.
+
+
+220
+00:13:28,942 --> 00:13:30,677 line:-1
+After you have done all that,
+
+
+221
+00:13:30,744 --> 00:13:32,579 line:-1
+there are two more group of things
+
+
+222
+00:13:32,646 --> 00:13:35,415 line:-2
+you need to set
+on the custom compositor class
+
+
+223
+00:13:35,482 --> 00:13:39,887 line:-2
+to inform the framework that
+you are capable of doing the HDR work.
+
+
+224
+00:13:40,487 --> 00:13:42,556 line:-1
+This includes, number one,
+
+
+225
+00:13:42,623 --> 00:13:46,727 line:-2
+indicate that you support 10-bit
+or higher bit depth pixel formats
+
+
+226
+00:13:46,793 --> 00:13:48,695 line:-1
+for both input and output.
+
+
+227
+00:13:48,996 --> 00:13:52,032 line:-2
+Number two,
+indicate that your custom compositor
+
+
+228
+00:13:52,099 --> 00:13:55,569 line:-1
+can accept HDR source frames as its input.
+
+
+229
+00:13:56,036 --> 00:13:57,271 line:-1
+Let's look at the code.
+
+
+230
+00:13:58,739 --> 00:14:03,277 line:-2
+This custom compositor is set up properly
+to support HDR.
+
+
+231
+00:14:03,844 --> 00:14:07,814 line:-2
+First, we set both
+sourcePixelBufferAttributes
+
+
+232
+00:14:07,881 --> 00:14:11,818 line:-2
+and requiredPixelBufferAttributes-
+ForRenderContext
+
+
+233
+00:14:11,885 --> 00:14:14,488 line:-1
+to include 10-bit pixel formats.
+
+
+234
+00:14:15,222 --> 00:14:17,991 line:-2
+Fill in the formats
+that you actually support.
+
+
+235
+00:14:18,058 --> 00:14:21,061 line:-2
+The framework will make sure
+you get source frames
+
+
+236
+00:14:21,128 --> 00:14:23,330 line:-1
+in one of the listed pixel formats,
+
+
+237
+00:14:23,830 --> 00:14:27,000 line:-2
+and create the render context
+for your output frame
+
+
+238
+00:14:27,067 --> 00:14:28,802 line:-1
+in the format you can support.
+
+
+239
+00:14:29,303 --> 00:14:32,306 line:-2
+It will do format conversions
+if necessary.
+
+
+240
+00:14:33,707 --> 00:14:37,144 line:-2
+Next is
+the supportsHDRSourceFrames field.
+
+
+241
+00:14:37,477 --> 00:14:40,314 line:-1
+This is a new field introduced for HDR.
+
+
+242
+00:14:40,647 --> 00:14:45,986 line:-2
+You must set it to true to welcome HDR
+source frames into your custom compositor.
+
+
+243
+00:14:46,386 --> 00:14:49,523 line:-2
+If you don't have this field,
+or set it false,
+
+
+244
+00:14:49,590 --> 00:14:52,492 line:-2
+the framework will think
+you cannot handle HDR frames
+
+
+245
+00:14:52,559 --> 00:14:56,697 line:-2
+and will convert them to standard
+dynamic range before sending it to you.
+
+
+246
+00:14:57,264 --> 00:15:00,501 line:-2
+So don't forget to set this field
+after all your hard work
+
+
+247
+00:15:00,567 --> 00:15:03,437 line:-2
+to actually handle HDR
+in your custom compositor.
+
+
+248
+00:15:04,404 --> 00:15:10,143 line:-2
+Like I stated in the introduction,
+HDR video normally comes with Wide Color.
+
+
+249
+00:15:10,210 --> 00:15:14,715 line:-2
+So you also need to make sure your
+custom compositor can handle Wide Color.
+
+
+250
+00:15:15,115 --> 00:15:19,920 line:-2
+Actually, the framework assumes
+if you are capable of handling HDR,
+
+
+251
+00:15:19,987 --> 00:15:22,623 line:-2
+you are also capable
+of handling Wide Color.
+
+
+252
+00:15:23,023 --> 00:15:26,026 line:-1
+Here I'm setting it to true explicitly.
+
+
+253
+00:15:27,494 --> 00:15:32,165 line:-2
+The startRequest is the function where
+you do the real work of the composition.
+
+
+254
+00:15:32,533 --> 00:15:33,901 line:-1
+As mentioned before,
+
+
+255
+00:15:33,967 --> 00:15:38,205 line:-2
+the work you do need to be aware
+of the extended dynamic range of HDR.
+
+
+256
+00:15:38,672 --> 00:15:44,111 line:-2
+Next, let's see a demo of HDR
+enabled custom compositor in action.
+
+
+257
+00:15:47,080 --> 00:15:50,517 line:-2
+Depending on whether your streaming link
+is HDR or not,
+
+
+258
+00:15:50,584 --> 00:15:53,587 line:-2
+you may not be able to see this demo
+in HDR,
+
+
+259
+00:15:53,654 --> 00:15:56,523 line:-2
+but the video editing effect
+should still be evident.
+
+
+260
+00:15:56,957 --> 00:16:00,160 line:-2
+This is the live preview produced
+by a custom compositor
+
+
+261
+00:16:00,227 --> 00:16:03,931 line:-2
+using a custom CIFilter
+to add filtering effects.
+
+
+262
+00:16:04,998 --> 00:16:07,935 line:-1
+It is an upgraded version of the HDR
+
+
+263
+00:16:08,001 --> 00:16:11,405 line:-2
+highlighting metal CoreImage kernel code
+we saw earlier.
+
+
+264
+00:16:11,839 --> 00:16:17,244 line:-2
+Here, instead of painting the HDR region
+to solid color, we use rolling stripes.
+
+
+265
+00:16:17,744 --> 00:16:23,050 line:-2
+The bright stripes you see is our proof
+that the source video is actually HDR.
+
+
+266
+00:16:23,750 --> 00:16:27,521 line:-2
+If you download our sample code
+and run it on your new macOS,
+
+
+267
+00:16:27,588 --> 00:16:32,059 line:-2
+you will experience the high dynamic range
+of the ultra-bright red stripes.
+
+
+268
+00:16:34,394 --> 00:16:37,030 line:-2
+So far, we have talked about
+different ways
+
+
+269
+00:16:37,097 --> 00:16:40,968 line:-2
+of constructing AVVideoComposition
+for your video editing,
+
+
+270
+00:16:41,034 --> 00:16:43,637 line:-1
+and how to enable HDR support on them.
+
+
+271
+00:16:44,338 --> 00:16:48,642 line:-2
+Next, we will go further to talk about
+how you can control some aspect
+
+
+272
+00:16:48,709 --> 00:16:51,945 line:-1
+of the HDR behavior once you enable it,
+
+
+273
+00:16:52,012 --> 00:16:56,049 line:-2
+mainly controlling the color properties
+of your video composition.
+
+
+274
+00:16:56,483 --> 00:17:00,020 line:-2
+If you just do the bare minimum
+to turn on HDR support
+
+
+275
+00:17:00,087 --> 00:17:02,523 line:-1
+and leave everything else in default,
+
+
+276
+00:17:02,589 --> 00:17:05,893 line:-2
+what will happen
+if you get different types of video coming
+
+
+277
+00:17:05,959 --> 00:17:07,661 line:-1
+into your video composition?
+
+
+278
+00:17:08,262 --> 00:17:12,098 line:-2
+This table shows the output format
+of the video composition
+
+
+279
+00:17:12,165 --> 00:17:14,401 line:-1
+given different mixture of inputs.
+
+
+280
+00:17:15,169 --> 00:17:20,973 line:-2
+Apple supports two types of HDR video,
+categorized by their transfer functions,
+
+
+281
+00:17:21,040 --> 00:17:23,844 line:-1
+namely HLG and PQ.
+
+
+282
+00:17:24,744 --> 00:17:31,118 line:-2
+So you have three possible types
+of inputs, HLG, PQ and SDR.
+
+
+283
+00:17:31,185 --> 00:17:34,121 line:-2
+If you don't specify
+the composition color properties,
+
+
+284
+00:17:34,188 --> 00:17:39,426 line:-2
+the framework takes a policy,
+preferring HLG over PQ, over SDR.
+
+
+285
+00:17:39,860 --> 00:17:44,298 line:-2
+This table shows how the policy
+play out for two video inputs.
+
+
+286
+00:17:44,364 --> 00:17:47,401 line:-1
+This can easily expand to multiple inputs.
+
+
+287
+00:17:47,868 --> 00:17:49,303 line:-1
+To change this behavior,
+
+
+288
+00:17:49,369 --> 00:17:52,840 line:-2
+you can specify the color properties
+of your video composition
+
+
+289
+00:17:52,906 --> 00:17:55,209 line:-1
+in your AVVideoComposition object.
+
+
+290
+00:17:55,275 --> 00:17:59,012 line:-2
+Namely the colorPrimaries,
+the colorTransferFunction
+
+
+291
+00:17:59,079 --> 00:18:01,715 line:-1
+and the colorYCbCrMatrix fields.
+
+
+292
+00:18:02,382 --> 00:18:06,753 line:-2
+If you set these three to color properties
+with HLG transfer function,
+
+
+293
+00:18:06,820 --> 00:18:10,324 line:-2
+the output of your composition
+will always be HLG
+
+
+294
+00:18:10,390 --> 00:18:12,426 line:-1
+regardless of your input video format.
+
+
+295
+00:18:13,026 --> 00:18:17,297 line:-2
+Likewise, you can set them to PQ
+or SDR properties.
+
+
+296
+00:18:18,332 --> 00:18:21,935 line:-2
+Under the hood, the framework converts
+the input source frames
+
+
+297
+00:18:22,002 --> 00:18:26,707 line:-2
+to the specified color properties
+before it sends them to the compositor,
+
+
+298
+00:18:26,773 --> 00:18:30,577 line:-2
+be it the built-in compositor
+or the custom compositor.
+
+
+299
+00:18:31,178 --> 00:18:34,047 line:-2
+Remember I mentioned earlier
+in this session that
+
+
+300
+00:18:34,114 --> 00:18:38,552 line:-2
+if you have an existing video editing app
+that uses built-in compositor
+
+
+301
+00:18:38,619 --> 00:18:41,388 line:-1
+and start feeding HDR sources to it,
+
+
+302
+00:18:41,455 --> 00:18:45,726 line:-2
+chances are that you will get HDR output
+without modifying your code.
+
+
+303
+00:18:45,792 --> 00:18:48,929 line:-1
+Well, I said "chances are" for a reason.
+
+
+304
+00:18:49,663 --> 00:18:53,901 line:-2
+If your app does not explicitly specify
+these color properties
+
+
+305
+00:18:53,967 --> 00:18:55,802 line:-1
+in the AVVideoComposition,
+
+
+306
+00:18:55,869 --> 00:18:58,539 line:-2
+the default behavior
+of the built-in compositor
+
+
+307
+00:18:58,605 --> 00:19:00,440 line:-1
+will produce HDR video.
+
+
+308
+00:19:00,507 --> 00:19:04,778 line:-2
+If, however, your app is explicitly
+setting these properties
+
+
+309
+00:19:04,845 --> 00:19:06,580 line:-1
+to SDR color space,
+
+
+310
+00:19:06,647 --> 00:19:09,683 line:-2
+then the built-in compositor
+will respect that setting
+
+
+311
+00:19:09,750 --> 00:19:13,587 line:-2
+and convert the HDR sources
+to SDR before compositing.
+
+
+312
+00:19:14,321 --> 00:19:17,824 line:-2
+There are scenarios that this is actually
+what you do want.
+
+
+313
+00:19:17,891 --> 00:19:22,729 line:-2
+For example, you want to attach
+your edited HDR video to an e-mail
+
+
+314
+00:19:22,796 --> 00:19:25,866 line:-2
+and you know the recipient doesn't have
+the system capable
+
+
+315
+00:19:25,933 --> 00:19:27,801 line:-1
+of playing back HDR video.
+
+
+316
+00:19:27,868 --> 00:19:32,072 line:-2
+In this case, you want to produce
+an SDR version of your editing.
+
+
+317
+00:19:32,506 --> 00:19:36,410 line:-2
+Let's look at some typical values
+for these color properties.
+
+
+318
+00:19:37,411 --> 00:19:39,646 line:-1
+Here is a table showing example values
+
+
+319
+00:19:39,713 --> 00:19:42,749 line:-2
+of the video composition color properties
+you can set.
+
+
+320
+00:19:43,250 --> 00:19:46,587 line:-2
+Note that if you want your composition
+to be in HLG,
+
+
+321
+00:19:46,653 --> 00:19:50,257 line:-2
+you must set the color transfer function
+to "HLG."
+
+
+322
+00:19:51,158 --> 00:19:53,861 line:-1
+If you want your composition to be in PQ,
+
+
+323
+00:19:53,927 --> 00:19:56,530 line:-2
+you must set the transfer function
+to "PQ."
+
+
+324
+00:19:57,731 --> 00:19:59,833 line:-1
+For either HLG or PQ,
+
+
+325
+00:19:59,900 --> 00:20:04,538 line:-2
+you normally want to set
+the colorPrimaries and YCbCrMatrix
+
+
+326
+00:20:04,605 --> 00:20:09,943 line:-2
+to ITU_R_2020,
+which are associated with Wide Color.
+
+
+327
+00:20:11,211 --> 00:20:13,714 line:-1
+We have talked about video compositions.
+
+
+328
+00:20:13,780 --> 00:20:15,782 line:-1
+Now let's look at the playback path.
+
+
+329
+00:20:16,917 --> 00:20:20,287 line:-2
+Like we reviewed earlier,
+to playback your editing,
+
+
+330
+00:20:20,354 --> 00:20:22,723 line:-1
+you build your pipeline like this.
+
+
+331
+00:20:23,223 --> 00:20:25,959 line:-1
+After you constructed the AVPlayerItem
+
+
+332
+00:20:26,026 --> 00:20:29,396 line:-2
+from your AVComposition
+and AVVideoComposition,
+
+
+333
+00:20:29,463 --> 00:20:33,634 line:-2
+you create an AVPlayer
+to play that AVPlayerItem,
+
+
+334
+00:20:33,700 --> 00:20:36,570 line:-2
+just like what you have been doing
+for any playback.
+
+
+335
+00:20:37,404 --> 00:20:38,906 line:-1
+There's nothing special here.
+
+
+336
+00:20:38,972 --> 00:20:41,508 line:-2
+You would expect
+your HDR video composition
+
+
+337
+00:20:41,575 --> 00:20:43,810 line:-1
+to be displayed in HDR, right?
+
+
+338
+00:20:43,877 --> 00:20:45,779 line:-1
+This is not always the case.
+
+
+339
+00:20:45,846 --> 00:20:48,482 line:-2
+You have to make sure
+that you are on a system
+
+
+340
+00:20:48,549 --> 00:20:51,084 line:-1
+that is capable of playing back HDR.
+
+
+341
+00:20:51,552 --> 00:20:55,923 line:-2
+That's obvious, but how do you find out
+if you are on such a system?
+
+
+342
+00:20:55,989 --> 00:21:00,294 line:-2
+There is the eligibleForHDRPlayback API
+coming to rescue.
+
+
+343
+00:21:01,361 --> 00:21:05,032 line:-2
+Instead of remembering which platform
+supports HDR playback,
+
+
+344
+00:21:05,098 --> 00:21:08,402 line:-2
+you can query
+this eligibleForHDRPlayback field
+
+
+345
+00:21:08,468 --> 00:21:11,205 line:-1
+on the AVPlayer class to get an answer.
+
+
+346
+00:21:11,972 --> 00:21:13,640 line:-1
+Note this is a class var,
+
+
+347
+00:21:13,707 --> 00:21:17,411 line:-2
+so you don't need to have
+an AVPlayer instance to query.
+
+
+348
+00:21:17,878 --> 00:21:19,479 line:-1
+If the property is "true,"
+
+
+349
+00:21:19,546 --> 00:21:24,551 line:-2
+it means, number one, your system
+is capable of consuming HDR video,
+
+
+350
+00:21:24,618 --> 00:21:27,788 line:-2
+and number two,
+there is at least one display,
+
+
+351
+00:21:27,855 --> 00:21:31,859 line:-2
+built in or external,
+that can display HDR video.
+
+
+352
+00:21:32,226 --> 00:21:34,061 line:-1
+I would like to point out here
+
+
+353
+00:21:34,127 --> 00:21:39,433 line:-2
+that HDR playback is not available
+on watchOS and macOS Catalyst.
+
+
+354
+00:21:40,467 --> 00:21:44,938 line:-2
+Here is an example code that sets
+the video composition color properties
+
+
+355
+00:21:45,005 --> 00:21:47,641 line:-1
+based on the HDR playback eligibility.
+
+
+356
+00:21:48,108 --> 00:21:51,445 line:-2
+If the system is not capable
+of playing back HDR,
+
+
+357
+00:21:51,512 --> 00:21:53,881 line:-2
+we don't want to waste
+the processing power
+
+
+358
+00:21:53,947 --> 00:21:58,519 line:-2
+to compose in HDR,
+so we set the color properties to SDR.
+
+
+359
+00:21:59,253 --> 00:22:02,523 line:-2
+Please note this field is only
+a playback statement.
+
+
+360
+00:22:02,890 --> 00:22:06,460 line:-2
+A system that is not capable
+of playing back HDR
+
+
+361
+00:22:06,527 --> 00:22:10,130 line:-1
+does not mean it cannot export HDR either.
+
+
+362
+00:22:10,197 --> 00:22:13,834 line:-2
+You can still set your composition
+color properties to HDR
+
+
+363
+00:22:13,901 --> 00:22:15,269 line:-1
+for your export path.
+
+
+364
+00:22:15,636 --> 00:22:20,574 line:0
+You can check out the "HDR Export" session
+of this year's WWDC
+
+
+365
+00:22:20,641 --> 00:22:24,444 line:0
+for information on supported platforms
+for HDR export.
+
+
+366
+00:22:26,079 --> 00:22:29,416 line:-2
+Now, let's summarize
+what we have discussed today.
+
+
+367
+00:22:29,850 --> 00:22:33,654 line:-2
+First and foremost,
+HDR video editing is available.
+
+
+368
+00:22:34,254 --> 00:22:37,624 line:-2
+You have been on the consuming side
+of the HDR story,
+
+
+369
+00:22:37,691 --> 00:22:41,862 line:-2
+now you can help your users
+to get onto the production side.
+
+
+370
+00:22:41,929 --> 00:22:44,865 line:-2
+You can enable them
+to express their creativity
+
+
+371
+00:22:44,932 --> 00:22:48,068 line:-1
+in HDR through HDR video editing.
+
+
+372
+00:22:48,135 --> 00:22:53,373 line:-2
+Through reviewing video editing workflow
+we understand that AVVideoComposition
+
+
+373
+00:22:53,440 --> 00:22:55,709 line:-1
+is at the center of video editing.
+
+
+374
+00:22:56,243 --> 00:23:00,013 line:-2
+The good news is that there is
+no additional work to enable HDR
+
+
+375
+00:23:00,080 --> 00:23:01,949 line:-1
+if you are using built-in compositor,
+
+
+376
+00:23:02,015 --> 00:23:05,719 line:-2
+or you are using
+the applyingCIFiltersWithHandler
+
+
+377
+00:23:05,786 --> 00:23:09,556 line:-2
+with built-in CIFilters
+to create your AVVideoComposition.
+
+
+378
+00:23:11,091 --> 00:23:14,795 line:-2
+If you are using custom compositor,
+there is some additional work,
+
+
+379
+00:23:14,862 --> 00:23:18,832 line:-2
+that is to indicate you support 10-bit
+or higher pixel formats,
+
+
+380
+00:23:18,899 --> 00:23:22,603 line:-2
+and you support HDR
+and Wide Color source frames,
+
+
+381
+00:23:22,669 --> 00:23:26,206 line:-2
+aside of making the real work you do
+be HDR capable.
+
+
+382
+00:23:27,007 --> 00:23:30,677 line:-2
+Then we talked about how you can control
+the composition color properties
+
+
+383
+00:23:30,744 --> 00:23:33,747 line:-2
+and the default behavior
+if you leave them to default.
+
+
+384
+00:23:34,448 --> 00:23:37,951 line:-2
+Last, we talked about
+the eligibleForHDRPlayback API
+
+
+385
+00:23:38,018 --> 00:23:41,989 line:-2
+you can use to check
+if your system supports HDR playback.
+
+
+386
+00:23:42,055 --> 00:23:45,359 line:-2
+Thank you very much for participating
+in this session.
+
+
+387
+00:23:45,425 --> 00:23:48,295 line:-1
+We hope you have a great time in WWDC
+
+
+388
+00:23:48,362 --> 00:23:52,266 line:-2
+and look forward to your HDR enabled
+video editing apps.
+

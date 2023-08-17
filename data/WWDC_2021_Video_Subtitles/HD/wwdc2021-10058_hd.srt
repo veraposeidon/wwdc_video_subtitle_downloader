@@ -1,0 +1,1859 @@
+2
+00:00:00,234 --> 00:00:02,069 line:-1
+[MAC STARTUP CHIME]
+
+
+3
+00:00:02.069 --> 00:00:05.606 line:-1 position:50%
+♪ Bass music playing ♪
+
+
+4
+00:00:05,606 --> 00:00:06,406 line:-1
+[KEYSTROKES]
+
+
+5
+00:00:06,406 --> 00:00:09,476 align:center line:0 position:89%
+♪
+
+
+6
+00:00:09.476 --> 00:00:11.011 line:-1 position:50%
+Philippe Hausler: Hi,
+my name is Philippe,
+
+
+7
+00:00:11.011 --> 00:00:13.113 line:-1 position:50%
+and I am really excited
+to introduce you
+
+
+8
+00:00:13,113 --> 00:00:17,417 line:-1
+to a cool new feature in Swift,
+AsyncSequence.
+
+
+9
+00:00:17,417 --> 00:00:20,087 line:-1
+Today we'll go over
+what async sequences are
+
+
+10
+00:00:20,087 --> 00:00:22,556 line:-1
+and the fundamentals
+behind them.
+
+
+11
+00:00:22,556 --> 00:00:25,826 line:-1
+Then we'll talk about how
+you can use them in your code
+
+
+12
+00:00:25,826 --> 00:00:29,563 line:-1
+and go over a few of the new
+AsyncSequence APIs.
+
+
+13
+00:00:29,563 --> 00:00:30,764 line:-1
+And finally,
+
+
+14
+00:00:30,764 --> 00:00:34,835 line:-1
+we'll explore how you can build
+your own async sequences.
+
+
+15
+00:00:34,835 --> 00:00:36,570 line:-1
+So let's dive right in.
+
+
+16
+00:00:36,570 --> 00:00:38,772 line:-1
+This is a really simple tool
+I wrote to illustrate
+
+
+17
+00:00:38,772 --> 00:00:42,743 line:-1
+some of the cool new stuff
+you can do with AsyncSequence.
+
+
+18
+00:00:42,743 --> 00:00:46,380 line:-1
+In this tool, we start off
+with a URL to an endpoint.
+
+
+19
+00:00:46.380 --> 00:00:48.849 line:-1 position:50%
+It lists recent earthquakes.
+
+
+20
+00:00:48.849 --> 00:00:52.819 line:-1 position:50%
+Now, normally downloading stuff
+is really an asynchronous task
+
+
+21
+00:00:52,819 --> 00:00:54,221 line:-1
+that can take some time.
+
+
+22
+00:00:54,221 --> 00:00:55,122 line:-1
+But in this case,
+
+
+23
+00:00:55.122 --> 00:00:57.624 line:-1 position:50%
+we don't want to wait
+for all the things to download;
+
+
+24
+00:00:57,624 --> 00:01:00,761 line:-1
+instead, we want to show things
+as they are received.
+
+
+25
+00:01:00,761 --> 00:01:03,263 line:-1
+So I decided
+to shake things up a bit
+
+
+26
+00:01:03.263 --> 00:01:05.599 line:-1 position:50%
+and use the new
+async/await features
+
+
+27
+00:01:05.599 --> 00:01:08.669 line:-1 position:50%
+to get the lines responded
+from this endpoint.
+
+
+28
+00:01:08.669 --> 00:01:09.703 line:-1 position:50%
+The data that we're fetching
+
+
+29
+00:01:09,703 --> 00:01:12,005 line:-1
+is formatted
+as comma-separated text,
+
+
+30
+00:01:12,005 --> 00:01:14,708 line:-1
+so each line is
+a complete row of data.
+
+
+31
+00:01:14,708 --> 00:01:17,244 line:-1
+Since the async sequence
+of lines is emitting each line
+
+
+32
+00:01:17,244 --> 00:01:18,712 line:-1
+as it's received,
+
+
+33
+00:01:18,712 --> 00:01:21,181 line:-1
+that means we can potentially
+have a really large download
+
+
+34
+00:01:21,181 --> 00:01:22,349 line:-1
+ahead of us.
+
+
+35
+00:01:22.349 --> 00:01:24.618 line:-1 position:50%
+But by emitting them
+as we get them,
+
+
+36
+00:01:24,618 --> 00:01:27,020 line:-1
+the snippet feels
+really responsive,
+
+
+37
+00:01:27.020 --> 00:01:30.023 line:-1 position:50%
+and the most awesome part
+about it is that you can use
+
+
+38
+00:01:30,023 --> 00:01:31,892 line:-1
+the same things
+that you're familiar with using
+
+
+39
+00:01:31,892 --> 00:01:35,729 line:-1
+from regular sequences
+in this new async context.
+
+
+40
+00:01:35,729 --> 00:01:39,333 line:-1
+That means that you can use
+the new for-await-in syntax
+
+
+41
+00:01:39,333 --> 00:01:43,437 line:-1
+to iterate, and functions
+like map, filter, and reduce;
+
+
+42
+00:01:43,437 --> 00:01:46,173 line:-1
+or -- like in this sample --
+the dropFirst function
+
+
+43
+00:01:46.173 --> 00:01:48.475 line:-1 position:50%
+to manipulate those values.
+
+
+44
+00:01:48,475 --> 00:01:50,911 line:-1
+So how does this work?
+
+
+45
+00:01:50,911 --> 00:01:53,814 line:-1
+Well, a lot of things that I'm
+going to talk about today
+
+
+46
+00:01:53.814 --> 00:01:56.950 line:-1 position:50%
+have their groundwork
+based in the async/await talk.
+
+
+47
+00:01:56,950 --> 00:01:59,753 line:-1
+But let's recap
+a few key points.
+
+
+48
+00:01:59.753 --> 00:02:02.756 line:-1 position:50%
+Async functions let you
+write concurrent code
+
+
+49
+00:02:02,756 --> 00:02:06,727 line:-1
+without the need for callbacks,
+by using the await keyword.
+
+
+50
+00:02:06.727 --> 00:02:09.930 line:-1 position:50%
+Calling an async function will
+suspend and then be resumed
+
+
+51
+00:02:09,930 --> 00:02:12,899 line:-1
+whenever a value
+or error is produced.
+
+
+52
+00:02:12,899 --> 00:02:14,634 line:-1
+AsyncSequence,
+on the other hand,
+
+
+53
+00:02:14,634 --> 00:02:17,671 line:-1
+will suspend on each
+element and resume
+
+
+54
+00:02:17.671 --> 00:02:22.476 line:-1 position:50%
+when the underlying iterator
+produces a value or throws.
+
+
+55
+00:02:22,476 --> 00:02:24,478 line:-1
+Basically, as the name implies,
+
+
+56
+00:02:24,478 --> 00:02:26,613 line:-1
+they're just like
+regular sequences
+
+
+57
+00:02:26.613 --> 00:02:29.049 line:-1 position:50%
+but with a few key differences.
+
+
+58
+00:02:29,049 --> 00:02:33,253 line:-1
+Namely, each element
+is delivered asynchronously.
+
+
+59
+00:02:33.253 --> 00:02:35.589 line:-1 position:50%
+But because they are
+an asynchronous delivery,
+
+
+60
+00:02:35,589 --> 00:02:39,593 line:-1
+that means that failure
+is definitely a possibility.
+
+
+61
+00:02:39.593 --> 00:02:41.595 line:-1 position:50%
+Some async sequences throw,
+
+
+62
+00:02:41.595 --> 00:02:45.699 line:-1 position:50%
+but if failure is not an option,
+others do not.
+
+
+63
+00:02:45,699 --> 00:02:47,300 line:-1
+Just like functions that throw,
+
+
+64
+00:02:47,300 --> 00:02:49,970 line:-1
+the compiler will help make sure
+that errors are handled
+
+
+65
+00:02:49,970 --> 00:02:52,239 line:-1
+when iterating or composing.
+
+
+66
+00:02:52,239 --> 00:02:53,440 line:-1
+Generally speaking,
+
+
+67
+00:02:53.440 --> 00:02:55.509 line:-1 position:50%
+asynchronous sequences
+are a description
+
+
+68
+00:02:55.509 --> 00:02:57.644 line:-1 position:50%
+of how to produce values
+over time.
+
+
+69
+00:02:57,644 --> 00:03:00,547 line:-1
+So an async sequence
+may be zero or more values
+
+
+70
+00:03:00.547 --> 00:03:02.182 line:-1 position:50%
+and then signify completion
+
+
+71
+00:03:02.182 --> 00:03:04.151 line:-1 position:50%
+with returning a nil
+from its iterator,
+
+
+72
+00:03:04.151 --> 00:03:05.952 line:-1 position:50%
+just like sequences.
+
+
+73
+00:03:05.952 --> 00:03:08.288 line:-1 position:50%
+When an error occurs,
+that's also a point
+
+
+74
+00:03:08,288 --> 00:03:11,558 line:-1
+at which the async sequence
+is at a terminal state,
+
+
+75
+00:03:11,558 --> 00:03:14,094 line:-1
+and after an error happens,
+they'll return nil
+
+
+76
+00:03:14,094 --> 00:03:17,798 line:-1
+for any subsequent calls
+to next on their iterator.
+
+
+77
+00:03:17.798 --> 00:03:20.967 line:-1 position:50%
+So let's take a dive into
+how that definition works
+
+
+78
+00:03:20,967 --> 00:03:24,104 line:-1
+by first starting off
+with regular iteration.
+
+
+79
+00:03:24,104 --> 00:03:26,273 line:-1
+Here we have
+a pretty familiar pattern.
+
+
+80
+00:03:26.273 --> 00:03:28.408 line:-1 position:50%
+This is a for-in loop.
+
+
+81
+00:03:28.408 --> 00:03:31.645 line:-1 position:50%
+In this case, it's iterating
+quakes from a sequence
+
+
+82
+00:03:31,645 --> 00:03:32,813 line:-1
+and then calling a function
+
+
+83
+00:03:32,813 --> 00:03:35,449 line:-1
+when the magnitude
+is above a certain value.
+
+
+84
+00:03:35,449 --> 00:03:36,550 line:-1
+The compiler has knowledge
+
+
+85
+00:03:36.550 --> 00:03:38.752 line:-1 position:50%
+of how this iteration
+should work,
+
+
+86
+00:03:38,752 --> 00:03:41,755 line:-1
+but what it does isn't magic.
+
+
+87
+00:03:41,755 --> 00:03:42,823 line:-1
+The compilation step
+
+
+88
+00:03:42,823 --> 00:03:46,493 line:-1
+really just does some
+straightforward transformations.
+
+
+89
+00:03:46,493 --> 00:03:48,028 line:-1
+Let's examine
+those transformations
+
+
+90
+00:03:48.028 --> 00:03:52.065 line:-1 position:50%
+so you can understand what the
+asynchronous form of this is.
+
+
+91
+00:03:52,065 --> 00:03:54,067 line:-1
+This is roughly what
+the compiler does
+
+
+92
+00:03:54,067 --> 00:03:56,103 line:-1
+when building the previous code.
+
+
+93
+00:03:56.103 --> 00:03:59.172 line:-1 position:50%
+It first starts off by creating
+an iterator variable
+
+
+94
+00:03:59,172 --> 00:04:01,875 line:-1
+and then uses a while loop
+to get every quake
+
+
+95
+00:04:01,875 --> 00:04:04,744 line:-1
+produced by the iterator
+when next is invoked.
+
+
+96
+00:04:04.744 --> 00:04:07.047 line:-1 position:50%
+To use the new
+async/await functionality,
+
+
+97
+00:04:07,047 --> 00:04:10,884 line:-1
+there is one slight alteration
+that can be made.
+
+
+98
+00:04:10,884 --> 00:04:13,386 line:-1
+It's as simple as changing
+that next function
+
+
+99
+00:04:13.386 --> 00:04:15.856 line:-1 position:50%
+to be an asynchronous one.
+
+
+100
+00:04:15,856 --> 00:04:19,226 line:-1
+We can now have the iteration
+participate in Swift concurrency
+
+
+101
+00:04:19.226 --> 00:04:21.695 line:-1 position:50%
+by awaiting the next quake.
+
+
+102
+00:04:21.695 --> 00:04:25.265 line:-1 position:50%
+Let's rewind back to uncover
+what this would have been like
+
+
+103
+00:04:25.265 --> 00:04:28.335 line:-1 position:50%
+if the loop
+was on an async sequence.
+
+
+104
+00:04:28.335 --> 00:04:29.669 line:-1 position:50%
+As previously mentioned,
+
+
+105
+00:04:29.669 --> 00:04:33.640 line:-1 position:50%
+we need to await each item
+out of the async sequence.
+
+
+106
+00:04:33,640 --> 00:04:37,744 line:-1
+This is reflected
+in the new for-await-in syntax.
+
+
+107
+00:04:37.744 --> 00:04:40.814 line:-1 position:50%
+This all means that if you know
+how to use Sequence,
+
+
+108
+00:04:40.814 --> 00:04:44.384 line:-1 position:50%
+you already have a good idea
+on how to use AsyncSequence.
+
+
+109
+00:04:44,384 --> 00:04:47,821 line:-1
+There are a few ways
+you can utilize async sequences.
+
+
+110
+00:04:47,821 --> 00:04:49,055 line:-1
+As we just covered,
+
+
+111
+00:04:49.055 --> 00:04:52.893 line:-1 position:50%
+you can use the new
+for-await-in syntax;
+
+
+112
+00:04:52,893 --> 00:04:54,761 line:-1
+or if the async sequence throws,
+
+
+113
+00:04:54,761 --> 00:04:59,466 line:-1
+you can use the new
+for-try-await-in syntax.
+
+
+114
+00:04:59.466 --> 00:05:00.934 line:-1 position:50%
+This lets you easily iterate
+
+
+115
+00:05:00,934 --> 00:05:03,537 line:-1
+the values produced
+asynchronously --
+
+
+116
+00:05:03,537 --> 00:05:05,739 line:-1
+without having to muck about
+with closures --
+
+
+117
+00:05:05.739 --> 00:05:08.675 line:-1 position:50%
+and use the syntax
+you are already familiar with
+
+
+118
+00:05:08,675 --> 00:05:10,744 line:-1
+to iterate through them.
+
+
+119
+00:05:10,744 --> 00:05:14,414 line:-1
+Even things like break
+and continue just work.
+
+
+120
+00:05:14,414 --> 00:05:15,615 line:-1
+Now you have now had
+a good introduction
+
+
+121
+00:05:15.615 --> 00:05:18.018 line:-1 position:50%
+to the theory
+of async sequences.
+
+
+122
+00:05:18.018 --> 00:05:21.354 line:-1 position:50%
+Let's explore that iteration
+just a bit further.
+
+
+123
+00:05:21,354 --> 00:05:23,990 line:-1
+Given a source
+that is an async sequence,
+
+
+124
+00:05:23.990 --> 00:05:25.725 line:-1 position:50%
+you can await each value
+
+
+125
+00:05:25,725 --> 00:05:28,695 line:-1
+by using
+the for-await-in syntax.
+
+
+126
+00:05:28.695 --> 00:05:31.331 line:-1 position:50%
+This means that
+it will await each item
+
+
+127
+00:05:31.331 --> 00:05:32.699 line:-1 position:50%
+produced by the iterator,
+
+
+128
+00:05:32,699 --> 00:05:34,134 line:-1
+and when it would hit
+a terminal,
+
+
+129
+00:05:34.134 --> 00:05:36.002 line:-1 position:50%
+it completes the loop.
+
+
+130
+00:05:36.002 --> 00:05:37.938 line:-1 position:50%
+When iterating async sequences,
+
+
+131
+00:05:37.938 --> 00:05:41.274 line:-1 position:50%
+breaking is obviously a good way
+to terminate iteration early
+
+
+132
+00:05:41.274 --> 00:05:43.510 line:-1 position:50%
+from inside the loop.
+
+
+133
+00:05:43.510 --> 00:05:46.279 line:-1 position:50%
+This works just like
+regular sequences.
+
+
+134
+00:05:46.279 --> 00:05:47.347 line:-1 position:50%
+Here we're breaking
+
+
+135
+00:05:47.347 --> 00:05:50.917 line:-1 position:50%
+when the location data
+is not present for the quake.
+
+
+136
+00:05:50,917 --> 00:05:53,787 line:-1
+Or if we have some of value
+we want to skip,
+
+
+137
+00:05:53.787 --> 00:05:55.555 line:-1 position:50%
+we can use continue.
+
+
+138
+00:05:55,555 --> 00:05:58,758 line:-1
+In this case, if the depth
+is greater than some value,
+
+
+139
+00:05:58.758 --> 00:05:59.693 line:-1 position:50%
+we're skipping those
+
+
+140
+00:05:59,693 --> 00:06:04,898 line:-1
+and continuing on
+to await the next quake.
+
+
+141
+00:06:04.898 --> 00:06:07.500 line:-1 position:50%
+This next iteration
+from the download
+
+
+142
+00:06:07,500 --> 00:06:10,270 line:-1
+works just like before,
+but in this case,
+
+
+143
+00:06:10.270 --> 00:06:12.672 line:-1 position:50%
+the source that we have
+can throw an error.
+
+
+144
+00:06:12.672 --> 00:06:14.474 line:-1 position:50%
+Just like throwing functions,
+
+
+145
+00:06:14.474 --> 00:06:16.943 line:-1 position:50%
+try is required
+to process each element
+
+
+146
+00:06:16.943 --> 00:06:20.013 line:-1 position:50%
+when the AsyncSequence
+being iterated can throw.
+
+
+147
+00:06:20,013 --> 00:06:22,382 line:-1
+And also just like
+throwing functions,
+
+
+148
+00:06:22,382 --> 00:06:24,884 line:-1
+the compiler will detect
+when you're missing a try
+
+
+149
+00:06:24,884 --> 00:06:28,121 line:-1
+and offer you a Fix-it
+to correct the mistake.
+
+
+150
+00:06:28.121 --> 00:06:28.922 line:-1 position:50%
+This means that
+
+
+151
+00:06:28.922 --> 00:06:31.658 line:-1 position:50%
+when an async sequence
+can produce errors,
+
+
+152
+00:06:31.658 --> 00:06:32.859 line:-1 position:50%
+you're always safe,
+
+
+153
+00:06:32,859 --> 00:06:35,929 line:-1
+because the language forces
+you to either throw that error
+
+
+154
+00:06:35.929 --> 00:06:37.264 line:-1 position:50%
+or catch it.
+
+
+155
+00:06:37.264 --> 00:06:39.666 line:-1 position:50%
+This second iteration
+runs sequentially
+
+
+156
+00:06:39.666 --> 00:06:42.002 line:-1 position:50%
+after the iteration
+of the first loop.
+
+
+157
+00:06:42,002 --> 00:06:46,206 line:-1
+Running code sequentially
+isn't always what's desired.
+
+
+158
+00:06:46,206 --> 00:06:48,241 line:-1
+If it's useful to run
+the iteration
+
+
+159
+00:06:48,241 --> 00:06:50,277 line:-1
+concurrent to other things
+going on,
+
+
+160
+00:06:50.277 --> 00:06:55.115 line:-1 position:50%
+you can create a new async task
+that encapsulates the iteration.
+
+
+161
+00:06:55,115 --> 00:06:58,585 line:-1
+This can be useful when you know
+the async sequences you're using
+
+
+162
+00:06:58.585 --> 00:07:01.187 line:-1 position:50%
+might run indefinitely.
+
+
+163
+00:07:01.187 --> 00:07:04.758 line:-1 position:50%
+Now, even though that sequence
+could potentially be indefinite,
+
+
+164
+00:07:04.758 --> 00:07:07.761 line:-1 position:50%
+it's considerably
+less common to occur.
+
+
+165
+00:07:07,761 --> 00:07:09,996 line:-1
+But in the world
+of asynchronous behavior,
+
+
+166
+00:07:09,996 --> 00:07:12,198 line:-1
+it is something
+much more common
+
+
+167
+00:07:12.198 --> 00:07:15.468 line:-1 position:50%
+and something that you need
+to consider when using them.
+
+
+168
+00:07:15.468 --> 00:07:17.904 line:-1 position:50%
+Thankfully, the facilities
+for concurrency in Swift
+
+
+169
+00:07:17,904 --> 00:07:21,241 line:-1
+make this really easy
+and safe to do.
+
+
+170
+00:07:21,241 --> 00:07:23,009 line:0
+This can be also really helpful
+
+
+171
+00:07:23,009 --> 00:07:27,047 position:50%
+when you want to potentially
+cancel the iteration externally.
+
+
+172
+00:07:27,047 --> 00:07:29,783 line:0
+Here we can run the
+two iterations concurrently
+
+
+173
+00:07:29,783 --> 00:07:32,919 line:0
+and terminate the iteration
+later on.
+
+
+174
+00:07:32,919 --> 00:07:35,455 position:50%
+It's pretty easy with tasks
+to scope the work
+
+
+175
+00:07:35,455 --> 00:07:38,224 position:50%
+of an iteration
+that might be indefinite
+
+
+176
+00:07:38,224 --> 00:07:40,860 line:0
+to the lifetime
+of some container.
+
+
+177
+00:07:40.860 --> 00:07:44.831 line:-1 position:50%
+Let's next take a tour of some
+of the AsyncSequence APIs
+
+
+178
+00:07:44,831 --> 00:07:47,367 line:-1
+that are available
+as of macOS Monterey,
+
+
+179
+00:07:47,367 --> 00:07:51,104 line:-1
+iOS 15, tvOS 15,
+and watchOS 8.
+
+
+180
+00:07:51,104 --> 00:07:52,706 line:-1
+There are a lot of them,
+
+
+181
+00:07:52.706 --> 00:07:55.275 line:-1 position:50%
+but I'll show you
+some of the highlights.
+
+
+182
+00:07:55.275 --> 00:07:58.044 line:-1 position:50%
+Reading from files is often
+a prime use case
+
+
+183
+00:07:58,044 --> 00:08:00,580 line:-1
+for asynchronous behavior.
+
+
+184
+00:08:00,580 --> 00:08:04,284 line:-1
+FileHandle now has a new bytes
+property that gives access
+
+
+185
+00:08:04,284 --> 00:08:07,987 line:-1
+to an asynchronous sequence
+of bytes from that FileHandle.
+
+
+186
+00:08:07,987 --> 00:08:10,457 line:-1
+This can be used in conjunction
+with the new extension
+
+
+187
+00:08:10,457 --> 00:08:12,125 line:-1
+on AsyncSequence
+
+
+188
+00:08:12.125 --> 00:08:16.796 line:-1 position:50%
+that converts asynchronous
+sequences of bytes into lines.
+
+
+189
+00:08:16.796 --> 00:08:19.432 line:-1 position:50%
+But dealing with files
+is so common
+
+
+190
+00:08:19,432 --> 00:08:21,901 line:-1
+that we decided that URL
+should have accessors
+
+
+191
+00:08:21,901 --> 00:08:24,304 line:-1
+for both bytes and lines.
+
+
+192
+00:08:24.304 --> 00:08:25.372 line:-1 position:50%
+This is that same API
+
+
+193
+00:08:25,372 --> 00:08:28,208 line:-1
+that I used
+in the initial example.
+
+
+194
+00:08:28,208 --> 00:08:30,210 line:-1
+It's a convenience property
+on URL
+
+
+195
+00:08:30.210 --> 00:08:34.114 line:-1 position:50%
+to return an AsyncSequence
+of lines from the contents,
+
+
+196
+00:08:34,114 --> 00:08:37,016 line:-1
+either from a file
+or from the network.
+
+
+197
+00:08:37.016 --> 00:08:38.218 line:-1 position:50%
+I'm certain this will
+make a number
+
+
+198
+00:08:38.218 --> 00:08:42.355 line:-1 position:50%
+of previously really complicated
+tasks easy and safe.
+
+
+199
+00:08:42,355 --> 00:08:44,624 line:-1
+Sometimes getting things
+from the network
+
+
+200
+00:08:44,624 --> 00:08:47,127 line:-1
+requires a bit more control
+over the responses
+
+
+201
+00:08:47.127 --> 00:08:48.928 line:-1 position:50%
+and authentication.
+
+
+202
+00:08:48,928 --> 00:08:51,898 position:50%
+So URLSession now
+has a bytes function
+
+
+203
+00:08:51,898 --> 00:08:57,103 position:50%
+to fetch an async sequence of
+bytes given a URL or URLRequest.
+
+
+204
+00:08:57,103 --> 00:08:59,205 line:0
+If you want to know more,
+you should definitely check out
+
+
+205
+00:08:59,205 --> 00:09:03,009 position:50%
+the session "Use async/
+await with URLSession"
+
+
+206
+00:09:03,009 --> 00:09:06,379 line:-1
+for some more details on this
+and a whole lot more
+
+
+207
+00:09:06.379 --> 00:09:10.450 line:-1 position:50%
+new asynchronous capabilities
+with URLSession.
+
+
+208
+00:09:10,450 --> 00:09:13,119 line:-1
+But files and networks
+are not the only thing
+
+
+209
+00:09:13,119 --> 00:09:15,688 line:-1
+that makes sense
+for AsyncSequence.
+
+
+210
+00:09:15,688 --> 00:09:20,894 line:-1
+Notifications can be now awaited
+with the new notifications API.
+
+
+211
+00:09:20.894 --> 00:09:22.796 line:-1 position:50%
+And iteration
+is not the only way
+
+
+212
+00:09:22.796 --> 00:09:25.465 line:-1 position:50%
+to interact with
+an AsyncSequence.
+
+
+213
+00:09:25,465 --> 00:09:28,835 line:-1
+In this example, we're awaiting
+the first notification
+
+
+214
+00:09:28.835 --> 00:09:33.339 line:-1 position:50%
+for remote changes that has
+a store UUID that matches.
+
+
+215
+00:09:33.339 --> 00:09:35.375 line:-1 position:50%
+Using methods like firstWhere,
+
+
+216
+00:09:35.375 --> 00:09:37.677 line:-1 position:50%
+along with the notifications
+async sequence,
+
+
+217
+00:09:37.677 --> 00:09:40.380 line:-1 position:50%
+allows for some really neat
+new design patterns
+
+
+218
+00:09:40.380 --> 00:09:42.849 line:-1 position:50%
+that can make code
+that was previously expressing
+
+
+219
+00:09:42.849 --> 00:09:44.184 line:-1 position:50%
+complicated logic
+
+
+220
+00:09:44,184 --> 00:09:47,253 line:-1
+now compact and easier to read.
+
+
+221
+00:09:47.253 --> 00:09:49.522 line:-1 position:50%
+And if all of those
+weren't cool enough,
+
+
+222
+00:09:49.522 --> 00:09:51.324 line:-1 position:50%
+there are a whole
+lot of new APIs
+
+
+223
+00:09:51,324 --> 00:09:55,261 line:-1
+for asynchronously manipulating
+values from async sequences.
+
+
+224
+00:09:55.261 --> 00:09:56.296 line:-1 position:50%
+These should be pretty familiar,
+
+
+225
+00:09:56.296 --> 00:09:58.064 line:-1 position:50%
+because they're some
+of the same functions
+
+
+226
+00:09:58,064 --> 00:10:00,033 line:-1
+that are available on Sequence.
+
+
+227
+00:10:00,033 --> 00:10:01,601 line:-1
+We've already
+covered a few so far,
+
+
+228
+00:10:01,601 --> 00:10:04,137 line:-1
+like dropFirst and firstWhere,
+
+
+229
+00:10:04,137 --> 00:10:06,706 line:-1
+but there are a whole lot more
+than just those.
+
+
+230
+00:10:06,706 --> 00:10:09,476 line:-1
+Pretty much anything you can
+think of for using on Sequence
+
+
+231
+00:10:09.476 --> 00:10:11.678 line:-1 position:50%
+now has
+an asynchronous counterpart
+
+
+232
+00:10:11.678 --> 00:10:14.080 line:-1 position:50%
+for working with AsyncSequence.
+
+
+233
+00:10:14,080 --> 00:10:17,050 line:-1
+Now that was a lot to take in,
+and you might be thinking,
+
+
+234
+00:10:17,050 --> 00:10:19,886 line:-1
+"Hey, those new APIs
+are really cool,
+
+
+235
+00:10:19,886 --> 00:10:22,355 line:-1
+and that syntax is super neat,
+
+
+236
+00:10:22.355 --> 00:10:25.158 line:-1 position:50%
+but how can I make
+my own async sequences?"
+
+
+237
+00:10:25,158 --> 00:10:27,961 line:-1
+Well, let's do exactly that!
+
+
+238
+00:10:27.961 --> 00:10:30.964 line:-1 position:50%
+There are a few ways of
+implementing an async sequence,
+
+
+239
+00:10:30,964 --> 00:10:35,268 line:-1
+but I'm going to focus in on
+how to adapt your existing code.
+
+
+240
+00:10:35,268 --> 00:10:37,337 line:-1
+Particularly, there are
+a few design patterns
+
+
+241
+00:10:37.337 --> 00:10:40.106 line:-1 position:50%
+that work really well
+with AsyncSequence,
+
+
+242
+00:10:40.106 --> 00:10:42.141 line:-1 position:50%
+and we have some
+fantastic facilities
+
+
+243
+00:10:42,141 --> 00:10:46,980 line:-1
+for making what you already have
+interact with this new concept.
+
+
+244
+00:10:46.980 --> 00:10:49.449 line:-1 position:50%
+Some of those design patterns
+are like closures
+
+
+245
+00:10:49,449 --> 00:10:51,284 line:-1
+that are called multiple times,
+
+
+246
+00:10:51,284 --> 00:10:54,487 line:-1
+but also some delegates
+can work nicely too.
+
+
+247
+00:10:54.487 --> 00:10:57.657 line:-1 position:50%
+Pretty much anything that does
+not need a response back
+
+
+248
+00:10:57,657 --> 00:11:00,827 line:-1
+and is just informing
+of a new value that occurs
+
+
+249
+00:11:00,827 --> 00:11:04,531 line:-1
+can be a prime candidate
+for making an async sequence.
+
+
+250
+00:11:04.531 --> 00:11:06.733 line:-1 position:50%
+These design patterns
+are really common
+
+
+251
+00:11:06.733 --> 00:11:09.903 line:-1 position:50%
+and you likely already have
+a few in your apps today.
+
+
+252
+00:11:09.903 --> 00:11:12.939 line:-1 position:50%
+This is an example
+of a common handler pattern.
+
+
+253
+00:11:12,939 --> 00:11:15,308 line:-1
+It's a class that has
+a handler property
+
+
+254
+00:11:15.308 --> 00:11:17.277 line:-1 position:50%
+and a start and stop method.
+
+
+255
+00:11:17,277 --> 00:11:21,314 line:-1
+It seems like a perfect
+candidate for AsyncSequence.
+
+
+256
+00:11:21.314 --> 00:11:24.150 line:-1 position:50%
+Existing usage might be
+something like this
+
+
+257
+00:11:24,150 --> 00:11:25,685 line:-1
+where a monitor is created,
+
+
+258
+00:11:25,685 --> 00:11:28,588 line:-1
+and a handler to get values
+is assigned,
+
+
+259
+00:11:28,588 --> 00:11:29,956 line:-1
+and then the monitor is started
+
+
+260
+00:11:29,956 --> 00:11:32,692 line:-1
+so that quakes can be sent
+to the handler.
+
+
+261
+00:11:32,692 --> 00:11:34,961 line:-1
+Later on, the monitor might
+be stopped
+
+
+262
+00:11:34.961 --> 00:11:38.298 line:-1 position:50%
+to cancel the events
+being produced.
+
+
+263
+00:11:38.298 --> 00:11:42.135 line:-1 position:50%
+We can use the same interface
+to adapt the usage
+
+
+264
+00:11:42,135 --> 00:11:44,837 line:-1
+to the new AsyncStream type.
+
+
+265
+00:11:44,837 --> 00:11:47,907 line:-1
+It takes only a small bit
+of code to use it
+
+
+266
+00:11:47,907 --> 00:11:51,711 line:-1
+and allows you to build
+an async sequence.
+
+
+267
+00:11:51.711 --> 00:11:53.713 line:-1 position:50%
+When constructing
+an async stream,
+
+
+268
+00:11:53.713 --> 00:11:57.517 line:-1 position:50%
+an element type and construction
+closure is specified.
+
+
+269
+00:11:57,517 --> 00:11:59,018 line:-1
+The closure has a continuation
+
+
+270
+00:11:59.018 --> 00:12:01.654 line:-1 position:50%
+that can yield values
+more than once, finish,
+
+
+271
+00:12:01,654 --> 00:12:04,657 line:-1
+or handle termination.
+
+
+272
+00:12:04,657 --> 00:12:06,693 line:-1
+So this means, in this case,
+
+
+273
+00:12:06,693 --> 00:12:10,663 line:-1
+the monitor can be created
+inside the construction closure.
+
+
+274
+00:12:10.663 --> 00:12:13.299 line:-1 position:50%
+And then the handler can be
+assigned to yield quakes
+
+
+275
+00:12:13,299 --> 00:12:14,867 line:-1
+to the continuation.
+
+
+276
+00:12:14.867 --> 00:12:17.570 line:-1 position:50%
+And then the onTermination
+can handle the cancellation
+
+
+277
+00:12:17.570 --> 00:12:18.705 line:-1 position:50%
+and cleanup.
+
+
+278
+00:12:18.705 --> 00:12:20.540 line:-1 position:50%
+And then we can
+start monitoring.
+
+
+279
+00:12:20,540 --> 00:12:23,076 line:-1
+The same monitor code
+that we had before
+
+
+280
+00:12:23.076 --> 00:12:24.577 line:-1 position:50%
+can easily be encapsulated
+
+
+281
+00:12:24,577 --> 00:12:26,779 line:-1
+within the async stream's
+construction.
+
+
+282
+00:12:26.779 --> 00:12:29.282 line:-1 position:50%
+This reduces the need
+to replicate the same logic
+
+
+283
+00:12:29,282 --> 00:12:30,750 line:-1
+in every use site.
+
+
+284
+00:12:30,750 --> 00:12:34,454 line:-1
+And this is how the usage
+of this async stream would work.
+
+
+285
+00:12:34.454 --> 00:12:37.190 line:-1 position:50%
+You can use the powerful
+transformation functions --
+
+
+286
+00:12:37.190 --> 00:12:38.124 line:-1 position:50%
+like filter --
+
+
+287
+00:12:38,124 --> 00:12:40,927 line:-1
+and the new
+for-await-in syntax.
+
+
+288
+00:12:40,927 --> 00:12:43,563 line:-1
+This lets you focus on
+the intent of your code
+
+
+289
+00:12:43.563 --> 00:12:44.664 line:-1 position:50%
+instead of needing
+to worry about
+
+
+290
+00:12:44,664 --> 00:12:46,633 line:-1
+replicating the bookkeeping,
+
+
+291
+00:12:46.633 --> 00:12:49.369 line:-1 position:50%
+since everything is wrapped up
+into one place.
+
+
+292
+00:12:49,369 --> 00:12:51,738 line:-1
+There's a lot of flexibility
+with AsyncStream
+
+
+293
+00:12:51.738 --> 00:12:54.307 line:-1 position:50%
+to create
+your own async sequences.
+
+
+294
+00:12:54.307 --> 00:12:55.908 line:-1 position:50%
+This is really just one example
+
+
+295
+00:12:55.908 --> 00:12:58.378 line:-1 position:50%
+and there are likely numerous
+others that you can adapt
+
+
+296
+00:12:58.378 --> 00:12:59.879 line:-1 position:50%
+in your own code.
+
+
+297
+00:12:59.879 --> 00:13:03.182 line:-1 position:50%
+AsyncStream is a great way
+to adapt your existing code
+
+
+298
+00:13:03.182 --> 00:13:05.551 line:-1 position:50%
+to become an async sequence.
+
+
+299
+00:13:05,551 --> 00:13:07,487 position:50%
+It handles all of the things
+you would expect
+
+
+300
+00:13:07,487 --> 00:13:10,590 line:0
+from an async sequence,
+like safety, iteration,
+
+
+301
+00:13:10,590 --> 00:13:11,758 position:50%
+and cancellation;
+
+
+302
+00:13:11,758 --> 00:13:14,027 line:0
+but they also
+handle buffering.
+
+
+303
+00:13:14,027 --> 00:13:16,429 position:50%
+AsyncStream is a solid way
+
+
+304
+00:13:16,429 --> 00:13:18,464 position:50%
+of building your own
+async sequences
+
+
+305
+00:13:18,464 --> 00:13:21,534 line:0
+and a suitable return type
+from your own APIs,
+
+
+306
+00:13:21,534 --> 00:13:23,670 position:50%
+since the only source
+of elements being produced
+
+
+307
+00:13:23,670 --> 00:13:25,638 line:0
+is from the construction.
+
+
+308
+00:13:25,638 --> 00:13:27,907 position:50%
+And if you need to represent
+errors being thrown?
+
+
+309
+00:13:27,907 --> 00:13:30,143 position:50%
+Well, we have a type for that!
+
+
+310
+00:13:30,143 --> 00:13:33,546 position:50%
+AsyncThrowingStream
+that is just like AsyncStream
+
+
+311
+00:13:33,546 --> 00:13:35,181 line:0
+but can handle errors.
+
+
+312
+00:13:35,181 --> 00:13:38,718 position:50%
+It offers the same flexibility
+and safety as AsyncStream
+
+
+313
+00:13:38,718 --> 00:13:42,889 line:0
+but can handle failures
+by throwing from its iteration.
+
+
+314
+00:13:42,889 --> 00:13:46,092 line:0
+AsyncSequence is
+a really powerful tool
+
+
+315
+00:13:46,092 --> 00:13:47,960 line:0
+that is both safe and familiar
+
+
+316
+00:13:47,960 --> 00:13:51,030 position:50%
+for dealing with more
+than one asynchronous value.
+
+
+317
+00:13:51,030 --> 00:13:52,799 line:0
+If you know how to use Sequence,
+
+
+318
+00:13:52,799 --> 00:13:56,002 position:50%
+you already know
+how to use AsyncSequence.
+
+
+319
+00:13:56.002 --> 00:13:58.504 line:-1 position:50%
+We've gone over what
+async sequences are,
+
+
+320
+00:13:58,504 --> 00:14:00,239 line:-1
+and how they're used,
+
+
+321
+00:14:00,239 --> 00:14:02,709 line:-1
+and introduced you
+to AsyncStream.
+
+
+322
+00:14:02,709 --> 00:14:06,079 line:-1
+We've dived into the theory
+and what defines them,
+
+
+323
+00:14:06,079 --> 00:14:09,515 line:-1
+and a few of the newly
+introduced async sequences,
+
+
+324
+00:14:09,515 --> 00:14:11,584 line:-1
+and finally,
+how to build your own.
+
+
+325
+00:14:11,584 --> 00:14:14,520 line:-1
+I eagerly await
+what you do with them next.
+
+
+326
+00:14:14,520 --> 00:14:18,357 line:0 position:89% align:center
+♪
+

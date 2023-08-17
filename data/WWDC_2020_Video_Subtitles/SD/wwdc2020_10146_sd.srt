@@ -1,0 +1,2126 @@
+1
+00:00:00,167 --> 00:00:02,102 line:-1
+[chimes]
+
+
+2
+00:00:03,871 --> 00:00:06,540 line:-1
+Hello and welcome to WWDC.
+
+
+3
+00:00:07,941 --> 00:00:11,678 line:0
+Hi, everyone.
+I'm Ada, an engineer on App Clips.
+
+
+4
+00:00:12,179 --> 00:00:14,348 line:-2
+I'll be joined
+by my colleague Luming today
+
+
+5
+00:00:14,414 --> 00:00:17,851 line:-2
+to show you all you need to know
+about linking to your app clips.
+
+
+6
+00:00:19,753 --> 00:00:22,356 line:-2
+App Clips provides an entry point
+for your users
+
+
+7
+00:00:22,422 --> 00:00:25,259 line:-2
+to experience your app
+with minimum friction.
+
+
+8
+00:00:26,093 --> 00:00:30,030 line:-2
+When your users need your app's
+functionality to perform a task,
+
+
+9
+00:00:30,097 --> 00:00:35,169 line:-2
+your app clip is presented to the user
+seamlessly with a deep-link navigation.
+
+
+10
+00:00:35,969 --> 00:00:39,973 line:-2
+This session covers what you have to do
+to handle linking into your app clip
+
+
+11
+00:00:40,040 --> 00:00:42,309 line:-1
+and configure the linking experience.
+
+
+12
+00:00:42,809 --> 00:00:46,813 line:-2
+First, let's take a look at an example
+of how one can perform a task
+
+
+13
+00:00:46,880 --> 00:00:48,081 line:-1
+with an app clip.
+
+
+14
+00:00:49,850 --> 00:00:52,319 line:-1
+Imagine you come across a smoothie stand.
+
+
+15
+00:00:52,386 --> 00:00:54,421 line:-1
+You really want a nice, cold smoothie.
+
+
+16
+00:00:55,556 --> 00:00:59,593 line:-2
+You find an NFC tag with a sign that says,
+"Tap here to order."
+
+
+17
+00:01:01,128 --> 00:01:05,132 line:-2
+You tap the tag and a card pops up
+at the bottom of the screen
+
+
+18
+00:01:05,199 --> 00:01:08,468 line:-2
+which has a brief description
+of the smoothie-ordering app clip.
+
+
+19
+00:01:10,103 --> 00:01:14,541 line:-2
+When you tap on the "Open" button,
+the app clip is launched on your device,
+
+
+20
+00:01:14,608 --> 00:01:17,244 line:-2
+taking you directly
+to the smoothie-ordering page.
+
+
+21
+00:01:18,512 --> 00:01:23,050 line:-2
+You complete the purchase with Apple Pay,
+and now you have a smoothie in your hand.
+
+
+22
+00:01:24,685 --> 00:01:28,021 line:-1
+The linking magic happens in these steps.
+
+
+23
+00:01:28,088 --> 00:01:34,428 line:-2
+The NFC tag actually encodes a URL that's
+registered with an app clip experience,
+
+
+24
+00:01:34,494 --> 00:01:36,763 line:-1
+which I'll explain later in this session.
+
+
+25
+00:01:37,664 --> 00:01:39,466 line:-1
+Once you tap "Open,"
+
+
+26
+00:01:39,533 --> 00:01:44,938 line:-2
+the app clip gets launched with a URL
+that is passed via an NSUserActivity,
+
+
+27
+00:01:45,005 --> 00:01:48,175 line:-2
+and the app clip takes you directly
+to the ordering page.
+
+
+28
+00:01:49,610 --> 00:01:53,714 line:-2
+Besides NFC, app clip links
+can also appear in other places.
+
+
+29
+00:01:54,381 --> 00:01:58,919 line:-2
+These are URLs that could be encoded
+in physical tags or visual codes,
+
+
+30
+00:01:58,986 --> 00:02:01,889 line:-2
+or associated
+with a physical location on the map.
+
+
+31
+00:02:02,489 --> 00:02:05,359 line:-2
+Let's go through
+each of these linking methods.
+
+
+32
+00:02:06,894 --> 00:02:09,630 line:-1
+As I mentioned in my example earlier,
+
+
+33
+00:02:09,696 --> 00:02:14,368 line:-2
+an NFC tag can encode an app clip URL
+that users can tap their phones on
+
+
+34
+00:02:14,434 --> 00:02:15,669 line:-1
+to open an app clip.
+
+
+35
+00:02:17,437 --> 00:02:21,141 line:-2
+An app clip URL can also be encoded
+in a QR code,
+
+
+36
+00:02:21,208 --> 00:02:23,510 line:-1
+which people can scan to open an app clip.
+
+
+37
+00:02:25,412 --> 00:02:26,780 line:0
+App clip links can show up
+
+
+38
+00:02:26,847 --> 00:02:29,483 line:0
+on the Maps place card
+for registered businesses,
+
+
+39
+00:02:30,350 --> 00:02:33,187 line:-1
+and also in the Siri nearby suggestions.
+
+
+40
+00:02:34,555 --> 00:02:37,457 line:-1
+You can also open an app clip from Safari.
+
+
+41
+00:02:37,524 --> 00:02:41,228 line:-2
+If your web page is configured
+with a Smart App Banner for app clip,
+
+
+42
+00:02:41,295 --> 00:02:45,232 line:-2
+people can tap the "Open" button
+in that banner to open the app clip.
+
+
+43
+00:02:46,567 --> 00:02:50,037 line:-2
+And when they send an iMessage
+with that web page's URL,
+
+
+44
+00:02:50,103 --> 00:02:52,873 line:-2
+it's presented as
+a special app clip link bubble,
+
+
+45
+00:02:52,940 --> 00:02:57,611 line:-2
+which gives the user a choice to open
+the link in the app clip, or in Safari.
+
+
+46
+00:02:59,146 --> 00:03:03,050 line:-2
+And to give you an even better experience,
+later this year,
+
+
+47
+00:03:03,116 --> 00:03:05,986 line:-2
+Apple will be releasing
+the new app clip codes,
+
+
+48
+00:03:06,053 --> 00:03:09,623 line:-2
+which is the best way for your users
+to discover your app clip.
+
+
+49
+00:03:10,257 --> 00:03:12,793 line:-1
+It's visually beautiful and distinct,
+
+
+50
+00:03:12,860 --> 00:03:16,396 line:-2
+so when they see one, they know
+there's an app clip waiting for them.
+
+
+51
+00:03:17,464 --> 00:03:20,367 line:-1
+Each app clip code encodes a URL.
+
+
+52
+00:03:20,434 --> 00:03:23,136 line:-2
+Apple will be releasing tools
+later this year
+
+
+53
+00:03:23,203 --> 00:03:25,672 line:-2
+that can create
+these beautiful visual codes.
+
+
+54
+00:03:27,774 --> 00:03:29,543 line:-2
+Now that we've looked
+at the different ways
+
+
+55
+00:03:29,610 --> 00:03:32,012 line:-2
+people can follow links
+into your app clip,
+
+
+56
+00:03:32,079 --> 00:03:35,215 line:-2
+let's go through the steps
+an app clip developer needs to do
+
+
+57
+00:03:35,282 --> 00:03:37,217 line:-1
+to set up this linking experience.
+
+
+58
+00:03:38,218 --> 00:03:41,188 line:-2
+First, you have to make changes
+to your web server
+
+
+59
+00:03:41,255 --> 00:03:42,956 line:-1
+and your app clip project
+
+
+60
+00:03:43,023 --> 00:03:45,559 line:-2
+so these links
+can be handled by the app clip.
+
+
+61
+00:03:46,927 --> 00:03:49,796 line:-2
+Next, you have to configure
+the app clip card,
+
+
+62
+00:03:49,863 --> 00:03:52,933 line:-2
+which is the card that introduces the user
+to the app clip
+
+
+63
+00:03:53,000 --> 00:03:55,202 line:-1
+and is part of the app clip experience.
+
+
+64
+00:03:55,903 --> 00:03:59,373 line:-2
+You can set up the default
+and advanced app clip experiences
+
+
+65
+00:03:59,439 --> 00:04:00,807 line:-1
+on App Store Connect.
+
+
+66
+00:04:02,509 --> 00:04:05,145 line:0
+Lastly, let's configure
+the Smart App Banner
+
+
+67
+00:04:05,212 --> 00:04:07,848 line:0
+to show your app clip on your web page.
+
+
+68
+00:04:07,915 --> 00:04:10,450 line:0
+If the contents of your web page
+can be delivered
+
+
+69
+00:04:10,517 --> 00:04:14,054 line:0
+as a better and more streamlined
+app clip experience,
+
+
+70
+00:04:14,121 --> 00:04:17,391 line:0
+consider adding this banner
+to provide a way for your users
+
+
+71
+00:04:17,457 --> 00:04:19,726 line:0
+to get to the app clip from that web page.
+
+
+72
+00:04:21,795 --> 00:04:25,465 line:-2
+First, let's start with configuring
+your web server and your app clip
+
+
+73
+00:04:25,532 --> 00:04:26,567 line:-1
+for link handling.
+
+
+74
+00:04:28,168 --> 00:04:32,840 line:-2
+The association between your website
+and your app clip must be validated
+
+
+75
+00:04:32,906 --> 00:04:35,442 line:-2
+for the app clip to be able
+to present contents
+
+
+76
+00:04:35,509 --> 00:04:37,544 line:-1
+in place of the website's URL.
+
+
+77
+00:04:38,345 --> 00:04:41,381 line:-2
+To securely associate your app clip
+with the server,
+
+
+78
+00:04:41,448 --> 00:04:44,251 line:-2
+you will need
+the apple-app-site-association file
+
+
+79
+00:04:44,318 --> 00:04:45,552 line:-1
+on your web server,
+
+
+80
+00:04:45,619 --> 00:04:48,889 line:-2
+along with the appropriate
+associated domains entitlement
+
+
+81
+00:04:48,956 --> 00:04:50,123 line:-1
+on your app clip.
+
+
+82
+00:04:50,858 --> 00:04:53,260 line:-2
+Then you have to update the code
+in your app clip
+
+
+83
+00:04:53,327 --> 00:04:56,296 line:-2
+to handle links from incoming
+NSUserActivities.
+
+
+84
+00:04:58,065 --> 00:05:01,668 line:-2
+First, let's update
+the apple-app-site-association file
+
+
+85
+00:05:01,735 --> 00:05:02,936 line:-1
+on the web server.
+
+
+86
+00:05:04,938 --> 00:05:07,941 line:-2
+This file is located in
+a .well-known subdirectory
+
+
+87
+00:05:08,008 --> 00:05:09,510 line:-1
+in your server's root folder.
+
+
+88
+00:05:10,177 --> 00:05:13,180 line:-2
+If you have set up universal links
+for your app before,
+
+
+89
+00:05:13,247 --> 00:05:16,583 line:-2
+you probably have this file
+already set up on your server,
+
+
+90
+00:05:16,650 --> 00:05:19,319 line:-2
+and the root dictionary
+has other entries already,
+
+
+91
+00:05:19,386 --> 00:05:21,622 line:-1
+such as web credentials and app links.
+
+
+92
+00:05:22,556 --> 00:05:26,059 line:-2
+To declare the new app clips association
+in this file,
+
+
+93
+00:05:26,126 --> 00:05:30,531 line:-2
+add another entry in the root dictionary
+with the key "appclips"
+
+
+94
+00:05:30,597 --> 00:05:35,235 line:-2
+and the value containing a dictionary
+containing a single "apps" key
+
+
+95
+00:05:35,302 --> 00:05:39,339 line:-2
+that is set to an array containing
+your app clips app identifier.
+
+
+96
+00:05:41,775 --> 00:05:46,413 line:-2
+Next, let's update the app clip project
+to add the associated domains entitlement.
+
+
+97
+00:05:49,016 --> 00:05:51,785 line:-2
+In Xcode,
+navigate to your project settings
+
+
+98
+00:05:51,852 --> 00:05:54,354 line:-1
+and add the associated domains capability.
+
+
+99
+00:05:56,456 --> 00:06:01,828 line:-2
+Under domains, add a new string
+"appclips:your-website-domain."
+
+
+100
+00:06:04,531 --> 00:06:06,667 line:-2
+Now that both your website
+and your app clip
+
+
+101
+00:06:06,733 --> 00:06:09,303 line:-1
+have been set up with associated domains,
+
+
+102
+00:06:09,369 --> 00:06:12,105 line:-1
+let's add code to handle NSUserActivity,
+
+
+103
+00:06:12,172 --> 00:06:15,075 line:-2
+which contains the URL
+passed into your app clip.
+
+
+104
+00:06:17,211 --> 00:06:21,515 line:-2
+If your app clip has adopted
+the new SwiftUI app life cycle,
+
+
+105
+00:06:21,582 --> 00:06:25,085 line:-2
+this is how you would add a handler
+for the web-browsing userActivity.
+
+
+106
+00:06:25,686 --> 00:06:30,791 line:-2
+In that method, you can get the web page
+URL property from the NSUserActivity.
+
+
+107
+00:06:31,592 --> 00:06:35,929 line:-2
+Then you can parse that URL
+and direct the user to the linked content.
+
+
+108
+00:06:37,764 --> 00:06:41,635 line:-2
+Keep in mind that once the user upgrades
+from the app clip to the app,
+
+
+109
+00:06:41,702 --> 00:06:45,205 line:-2
+navigating to that app clip link
+will actually open your app,
+
+
+110
+00:06:45,272 --> 00:06:46,406 line:-1
+rather than the app clip.
+
+
+111
+00:06:47,107 --> 00:06:49,543 line:-2
+So make sure your app
+also has similar code
+
+
+112
+00:06:49,610 --> 00:06:52,880 line:-2
+for handling the URLs
+for universal links as well.
+
+
+113
+00:06:54,448 --> 00:06:58,418 line:-2
+If your app clip uses
+the UIKit's SceneDelegate life cycle,
+
+
+114
+00:06:58,485 --> 00:07:01,922 line:-2
+here's some similar code
+for handling incoming user activities
+
+
+115
+00:07:01,989 --> 00:07:03,390 line:-1
+in the UISceneDelegate.
+
+
+116
+00:07:06,226 --> 00:07:08,929 line:0
+To learn about
+how to set up associated domains,
+
+
+117
+00:07:08,996 --> 00:07:11,231 line:0
+and handling NSUserActivities,
+
+
+118
+00:07:11,298 --> 00:07:14,601 line:0
+please refer to the "What's New
+in Universal Links" sessions.
+
+
+119
+00:07:16,470 --> 00:07:19,973 line:-2
+To test the URL handling code
+in your app clip in Xcode,
+
+
+120
+00:07:20,040 --> 00:07:23,911 line:-2
+you can specify a test URL
+to be passed to your app clip.
+
+
+121
+00:07:23,977 --> 00:07:26,680 line:-1
+Open up the scheme editor in Xcode.
+
+
+122
+00:07:26,747 --> 00:07:28,515 line:-1
+Select the "arguments" tab.
+
+
+123
+00:07:31,952 --> 00:07:37,357 line:-2
+Under "environment variables,"
+specify the _XCAppClipURL variable.
+
+
+124
+00:07:38,225 --> 00:07:42,763 line:-2
+Now when you run your app clip from Xcode,
+it'll be launched with this URL.
+
+
+125
+00:07:44,665 --> 00:07:47,801 line:-2
+Now that we're done configuring
+the web server and the app clip,
+
+
+126
+00:07:47,868 --> 00:07:50,270 line:-1
+let's configure the app clip experiences.
+
+
+127
+00:07:52,272 --> 00:07:55,209 line:-2
+Each app clip experience starts
+with the app clip card
+
+
+128
+00:07:55,275 --> 00:07:57,978 line:-2
+that the user sees
+when they tap on an app clip link.
+
+
+129
+00:07:58,712 --> 00:08:01,048 line:-2
+It shows the information about
+the app clip,
+
+
+130
+00:08:01,114 --> 00:08:03,283 line:-2
+and asks for the user's consent
+to open it.
+
+
+131
+00:08:05,552 --> 00:08:09,456 line:0
+When coming up with the metadata to use
+to configure the app clip card,
+
+
+132
+00:08:09,523 --> 00:08:13,794 line:0
+please follow these requirements
+on the length of the title and subtitle
+
+
+133
+00:08:13,861 --> 00:08:15,762 line:0
+for the optimal layout of the card.
+
+
+134
+00:08:16,730 --> 00:08:22,069 line:0
+There are also requirements for
+the image's size, aspect ratio and format
+
+
+135
+00:08:22,135 --> 00:08:25,305 line:0
+for the best user experience
+across all devices.
+
+
+136
+00:08:26,240 --> 00:08:29,042 line:0
+The image you choose
+should match the experience
+
+
+137
+00:08:29,109 --> 00:08:31,044 line:0
+this app clip action delivers.
+
+
+138
+00:08:32,645 --> 00:08:35,849 line:-2
+Now let's set up the app clip card
+on App Store Connect.
+
+
+139
+00:08:37,049 --> 00:08:40,754 line:-2
+After you've delivered a build
+containing both your app and your app clip
+
+
+140
+00:08:40,821 --> 00:08:42,322 line:-1
+to App Store Connect,
+
+
+141
+00:08:42,389 --> 00:08:44,658 line:-2
+the app clip should be visible
+on App Store Connect
+
+
+142
+00:08:44,725 --> 00:08:47,027 line:-1
+with a new app clip configuration section.
+
+
+143
+00:08:47,995 --> 00:08:49,596 line:-1
+This is where you can start setting up
+
+
+144
+00:08:49,663 --> 00:08:52,399 line:-2
+the default and advanced
+app clip experiences.
+
+
+145
+00:08:55,402 --> 00:08:58,071 line:-2
+The metadata for
+the default app clip experience
+
+
+146
+00:08:58,138 --> 00:09:03,177 line:-2
+includes the app clip card's image,
+subtitle and the verb for the action.
+
+
+147
+00:09:03,243 --> 00:09:06,713 line:-2
+There's a list of predefined actions
+you can choose from.
+
+
+148
+00:09:06,780 --> 00:09:10,384 line:-2
+This metadata will be used
+in a Smart App Banner in Safari,
+
+
+149
+00:09:10,450 --> 00:09:13,187 line:-2
+and in the app clip link bubble
+in Messages.
+
+
+150
+00:09:13,253 --> 00:09:15,889 line:-2
+And also in the app clip card
+when it's presented.
+
+
+151
+00:09:17,658 --> 00:09:22,296 line:0
+If you want your app clip to be accessible
+from more than just Safari and Messages,
+
+
+152
+00:09:22,362 --> 00:09:25,232 line:0
+you must set up
+an advanced app clip experience
+
+
+153
+00:09:25,299 --> 00:09:27,668 line:0
+by clicking the "Get Started" link here.
+
+
+154
+00:09:28,468 --> 00:09:31,939 line:0
+Each advanced app clip experience is tied
+to a URL
+
+
+155
+00:09:32,005 --> 00:09:37,544 line:0
+which can be encoded in a physical tag,
+such as the NFC tag, or a QR code,
+
+
+156
+00:09:37,611 --> 00:09:41,448 line:0
+so your app clip can be launched
+from these physical invocation methods.
+
+
+157
+00:09:43,483 --> 00:09:45,953 line:-2
+After clicking through
+some introduction screens,
+
+
+158
+00:09:46,019 --> 00:09:47,821 line:-1
+you will arrive on this page
+
+
+159
+00:09:47,888 --> 00:09:51,692 line:-2
+where you can specify the URL
+for the advanced app clip experience.
+
+
+160
+00:09:52,392 --> 00:09:56,897 line:-2
+For the same app clip, you can set up
+multiple advanced app clip experiences,
+
+
+161
+00:09:56,964 --> 00:09:58,532 line:-1
+each with a different URL.
+
+
+162
+00:09:59,399 --> 00:10:03,337 line:-2
+I'll give you some examples
+of multiple app clip experiences in a bit.
+
+
+163
+00:10:05,038 --> 00:10:09,409 line:-2
+On the next page,
+you can set up the image, title, subtitle,
+
+
+164
+00:10:09,476 --> 00:10:13,780 line:-2
+and choose an action verb
+for the app clip card for this experience.
+
+
+165
+00:10:13,847 --> 00:10:16,984 line:-2
+You can also choose to associate
+this app clip experience
+
+
+166
+00:10:17,050 --> 00:10:18,519 line:-1
+with a physical location.
+
+
+167
+00:10:21,488 --> 00:10:25,893 line:-2
+Now let's take a look at some use cases
+of advanced app clip experiences,
+
+
+168
+00:10:25,959 --> 00:10:29,863 line:-2
+and the best practices for
+registering URLs for these experiences.
+
+
+169
+00:10:30,864 --> 00:10:34,101 line:-2
+A single app clip could handle
+different types of tasks,
+
+
+170
+00:10:34,168 --> 00:10:36,537 line:-2
+and therefore
+different app clip experiences
+
+
+171
+00:10:36,603 --> 00:10:38,772 line:-1
+can be customized for the same app clip.
+
+
+172
+00:10:39,506 --> 00:10:43,744 line:-2
+For example, this restaurant app clip
+provides two types of experiences
+
+
+173
+00:10:43,810 --> 00:10:44,845 line:-1
+for their customers:
+
+
+174
+00:10:45,445 --> 00:10:47,114 line:-1
+the food-ordering experience,
+
+
+175
+00:10:47,181 --> 00:10:50,551 line:-2
+where users can view the menu
+and place their order,
+
+
+176
+00:10:50,617 --> 00:10:54,221 line:-2
+and the reservation experience,
+where customers can reserve tables.
+
+
+177
+00:10:55,856 --> 00:11:00,294 line:-2
+In this case, two advanced
+app clip experiences can be set up.
+
+
+178
+00:11:00,360 --> 00:11:03,397 line:0
+One for melamela.example/order
+
+
+179
+00:11:03,463 --> 00:11:05,899 line:0
+where the image could be
+a picture of their menu,
+
+
+180
+00:11:05,966 --> 00:11:08,802 line:0
+and the subtitle "View menu and order."
+
+
+181
+00:11:08,869 --> 00:11:12,940 line:0
+And another one
+for melamela.example/reservation
+
+
+182
+00:11:13,006 --> 00:11:16,043 line:0
+where the image could be a picture
+of the restaurant setting,
+
+
+183
+00:11:16,109 --> 00:11:18,312 line:0
+and the subtitle "Reserve a table."
+
+
+184
+00:11:20,480 --> 00:11:24,218 line:-2
+One thing to remember about the way
+the URL is mapped to the app clip
+
+
+185
+00:11:24,284 --> 00:11:27,521 line:-2
+is that it's based on
+the most specific prefix match
+
+
+186
+00:11:27,588 --> 00:11:30,991 line:-2
+against registered
+app clip experience URLs.
+
+
+187
+00:11:31,058 --> 00:11:35,529 line:-2
+That means you don't need to register
+every single possible app clip URL
+
+
+188
+00:11:35,596 --> 00:11:36,597 line:-1
+for the business.
+
+
+189
+00:11:38,332 --> 00:11:42,369 line:-2
+Do keep in mind, though, that even if
+your registered experience URL
+
+
+190
+00:11:42,436 --> 00:11:44,705 line:-1
+is used only as a prefix,
+
+
+191
+00:11:44,771 --> 00:11:47,341 line:-2
+your app clip must be able
+to handle being launched
+
+
+192
+00:11:47,407 --> 00:11:49,610 line:-1
+with the exact registered URL.
+
+
+193
+00:11:50,244 --> 00:11:54,548 line:-2
+This can happen when your app clip is
+invoked through Siri nearby suggestions,
+
+
+194
+00:11:54,615 --> 00:11:56,083 line:-1
+and from Maps.
+
+
+195
+00:11:57,050 --> 00:12:01,188 line:-2
+Here's an example of how you can register
+one app clip experience URL
+
+
+196
+00:12:01,255 --> 00:12:03,724 line:-1
+to work with multiple invocation URLs.
+
+
+197
+00:12:04,525 --> 00:12:07,661 line:-2
+A bike shop
+has an online bike rental system.
+
+
+198
+00:12:07,728 --> 00:12:11,932 line:-2
+It has hundreds of bikes for rent,
+which are identified by an ID number.
+
+
+199
+00:12:13,033 --> 00:12:16,270 line:-2
+The URLs for reserving these bikes
+will specify that ID
+
+
+200
+00:12:16,336 --> 00:12:17,738 line:-1
+in the query string argument.
+
+
+201
+00:12:18,839 --> 00:12:21,542 line:-2
+Fortunately,
+this bike shop does not need to register
+
+
+202
+00:12:21,608 --> 00:12:25,579 line:-2
+an advanced app clip experience
+for every one of these URLs
+
+
+203
+00:12:25,646 --> 00:12:28,549 line:-2
+because URLs are matched
+based on prefix match.
+
+
+204
+00:12:29,216 --> 00:12:32,719 line:-2
+Only one app clip experience URL
+needs to be registered:
+
+
+205
+00:12:33,220 --> 00:12:37,891 line:-1
+https://bikesrental.example/rent.
+
+
+206
+00:12:38,358 --> 00:12:40,894 line:-2
+That is enough to deliver
+an app clip experience
+
+
+207
+00:12:40,961 --> 00:12:46,033 line:-2
+for all these bike URLs with that prefix
+and different query string arguments.
+
+
+208
+00:12:47,801 --> 00:12:50,304 line:-2
+Here's another example
+to explain a strategy
+
+
+209
+00:12:50,370 --> 00:12:54,408 line:-2
+for picking the URLs to register
+for advanced app clip experiences.
+
+
+210
+00:12:55,075 --> 00:12:59,580 line:-2
+The café in this example
+is a big chain with multiple locations,
+
+
+211
+00:12:59,646 --> 00:13:03,884 line:-2
+where each location basically offers
+similar experiences to their customers.
+
+
+212
+00:13:04,918 --> 00:13:08,488 line:-2
+Because of the common URL format
+for all the locations,
+
+
+213
+00:13:08,555 --> 00:13:15,495 line:-2
+which all start with
+https://brighteggcafe.example/store/,
+
+
+214
+00:13:15,562 --> 00:13:17,965 line:-2
+we can just register
+an app clip experience
+
+
+215
+00:13:18,031 --> 00:13:19,533 line:-1
+for that URL prefix.
+
+
+216
+00:13:20,267 --> 00:13:23,504 line:-2
+When their customers follow a link
+to any of their stores,
+
+
+217
+00:13:23,570 --> 00:13:25,606 line:-1
+they'll get the same app clip card.
+
+
+218
+00:13:27,407 --> 00:13:29,743 line:-2
+But let's say the coffee shop
+wants to provide
+
+
+219
+00:13:29,810 --> 00:13:33,881 line:-2
+a more special app clip experience
+for its flagship store in Cupertino.
+
+
+220
+00:13:34,681 --> 00:13:39,086 line:-2
+To handle this, you can also register
+the Cupertino store URL
+
+
+221
+00:13:39,152 --> 00:13:44,224 line:-2
+for a different app clip experience
+with a different image and subtitle text.
+
+
+222
+00:13:44,291 --> 00:13:50,063 line:-2
+The main takeaway here is you can register
+a shorter, more general URL prefix
+
+
+223
+00:13:50,130 --> 00:13:51,899 line:-1
+that covers most cases,
+
+
+224
+00:13:51,965 --> 00:13:55,936 line:-2
+and register a more specific URL
+only when you need to provide
+
+
+225
+00:13:56,003 --> 00:13:58,238 line:-1
+a different app clip experience.
+
+
+226
+00:13:59,473 --> 00:14:01,208 line:0
+For more information on setting up
+
+
+227
+00:14:01,275 --> 00:14:03,577 line:0
+the default and advanced
+app clip experiences
+
+
+228
+00:14:03,644 --> 00:14:05,312 line:0
+on App Store Connect,
+
+
+229
+00:14:05,379 --> 00:14:08,482 line:0
+please refer to the "What's New
+in App Store Connect" session.
+
+
+230
+00:14:09,283 --> 00:14:12,686 line:0
+And for best practices
+on the app clip card design,
+
+
+231
+00:14:12,753 --> 00:14:15,656 line:0
+please refer to
+the "Design Great App Clips" session.
+
+
+232
+00:14:17,591 --> 00:14:20,627 line:0
+Now to the last step for handling
+linking into your app clip,
+
+
+233
+00:14:21,261 --> 00:14:24,097 line:0
+setting up the Smart App Banner
+to open your app clip.
+
+
+234
+00:14:25,165 --> 00:14:29,169 line:-2
+This is how people can open app clips
+from a web page in Safari,
+
+
+235
+00:14:29,236 --> 00:14:34,575 line:-2
+or in Messages when a web page URL
+that has this banner configured is sent.
+
+
+236
+00:14:35,809 --> 00:14:39,012 line:-2
+If you have set up Smart App Banners
+for your app before,
+
+
+237
+00:14:39,079 --> 00:14:42,716 line:-2
+you must be familiar with
+the Apple iTunes App Meta Tag
+
+
+238
+00:14:42,783 --> 00:14:47,888 line:-2
+that you add to your web page's HTML
+to specify your app's unique identifier.
+
+
+239
+00:14:48,689 --> 00:14:51,058 line:-2
+To configure this banner
+for your app clip,
+
+
+240
+00:14:51,124 --> 00:14:53,994 line:-2
+set the app-clip-bundle-id
+content attribute
+
+
+241
+00:14:54,061 --> 00:14:55,963 line:-1
+to the app clip's bundle identifier.
+
+
+242
+00:14:56,563 --> 00:15:00,334 line:-2
+You should continue to set
+the app ID attribute as well,
+
+
+243
+00:15:00,400 --> 00:15:03,036 line:-2
+so it will fall back to
+the full app-linking behavior
+
+
+244
+00:15:03,103 --> 00:15:06,106 line:-1
+for users with systems older than iOS 14.
+
+
+245
+00:15:07,407 --> 00:15:11,879 line:-2
+Safari will verify the domain association
+between the website and the app clip
+
+
+246
+00:15:11,945 --> 00:15:13,347 line:-1
+before showing the banner.
+
+
+247
+00:15:15,048 --> 00:15:19,386 line:0
+By default, when the user taps on
+a Smart App Banner's "Open" button,
+
+
+248
+00:15:19,453 --> 00:15:22,756 line:0
+they will see the default app clip card
+configured for this app clip.
+
+
+249
+00:15:23,891 --> 00:15:27,628 line:0
+But if you register this URL
+with an advanced app clip experience,
+
+
+250
+00:15:27,694 --> 00:15:30,697 line:0
+you can customize the metadata
+for the experience
+
+
+251
+00:15:30,764 --> 00:15:34,401 line:0
+such that the user could see
+a more descriptive title in the banner
+
+
+252
+00:15:34,468 --> 00:15:39,106 line:0
+and get an app clip card that's tailored
+for the task this app clip performs.
+
+
+253
+00:15:41,608 --> 00:15:45,579 line:-2
+To demonstrate what we have talked about
+on handling linking for your app clip,
+
+
+254
+00:15:45,646 --> 00:15:48,815 line:-2
+I'll ask my colleague Luming
+to give us a demo.
+
+
+255
+00:15:48,882 --> 00:15:50,050 line:-1
+Luming.
+
+
+256
+00:15:50,984 --> 00:15:51,985 line:-1
+Thanks, Ada,
+
+
+257
+00:15:52,052 --> 00:15:54,988 line:-2
+for your wonderful introduction
+on linking to your app clips.
+
+
+258
+00:15:55,055 --> 00:15:57,658 line:-2
+I'm Luming, an engineer
+from the App Clips team,
+
+
+259
+00:15:57,724 --> 00:16:00,561 line:-2
+and today, I'll be showing you
+how to link to your app clip.
+
+
+260
+00:16:00,627 --> 00:16:04,798 line:-2
+To link your users to your app clip
+through physical or digital invocation
+
+
+261
+00:16:04,865 --> 00:16:07,467 line:-2
+you need to set up
+associated domains first.
+
+
+262
+00:16:07,534 --> 00:16:10,270 line:-2
+As my colleague, Ada,
+mentioned earlier in this talk,
+
+
+263
+00:16:10,337 --> 00:16:13,440 line:-2
+we need to both configure our web server
+and our app clip project
+
+
+264
+00:16:13,507 --> 00:16:14,808 line:-1
+for link handling.
+
+
+265
+00:16:14,875 --> 00:16:16,944 line:-1
+So let's start with the web server first.
+
+
+266
+00:16:18,378 --> 00:16:20,948 line:-2
+Here, I have the source code
+of my web server.
+
+
+267
+00:16:21,014 --> 00:16:23,517 line:-2
+It's a pretty straightforward
+static website.
+
+
+268
+00:16:23,584 --> 00:16:25,786 line:-1
+Under the root directory of my web server,
+
+
+269
+00:16:25,853 --> 00:16:29,456 line:-2
+I have already created
+a .well-known folder, and within it,
+
+
+270
+00:16:29,523 --> 00:16:32,492 line:-2
+there's
+an apple-app-site-association file.
+
+
+271
+00:16:32,559 --> 00:16:37,831 line:-2
+My AASA file has already been configured
+for universal links, Handoff,
+
+
+272
+00:16:37,898 --> 00:16:40,334 line:-2
+and web credentials
+with Password AutoFill.
+
+
+273
+00:16:40,400 --> 00:16:46,373 line:-2
+Now all we need to do here is to update
+the AASA file to link to our app clip.
+
+
+274
+00:16:48,375 --> 00:16:49,409 line:-1
+And there we go.
+
+
+275
+00:16:52,579 --> 00:16:55,115 line:-2
+Now that we have already configured
+our web server,
+
+
+276
+00:16:55,182 --> 00:16:57,851 line:-2
+let's come back
+to the Fruta Xcode project.
+
+
+277
+00:16:59,753 --> 00:17:03,824 line:-2
+To link your app clip, you need
+to register to handle userActivity
+
+
+278
+00:17:03,891 --> 00:17:06,693 line:-1
+of type NSUserActivityTypeBrowsingWeb.
+
+
+279
+00:17:07,661 --> 00:17:10,396 line:-1
+In our app clip's WindowGroup declaration,
+
+
+280
+00:17:10,464 --> 00:17:13,733 line:-2
+I'll add a new
+onContinueUserActivity handler
+
+
+281
+00:17:13,800 --> 00:17:15,502 line:-1
+of TypeBrowsingWeb.
+
+
+282
+00:17:16,904 --> 00:17:22,209 line:-2
+Inside it, I'll parse the incoming URL
+and get the queryItems in the URL.
+
+
+283
+00:17:23,644 --> 00:17:28,115 line:-2
+After that, I'll get the first queryItem
+that has the name "smoothie,"
+
+
+284
+00:17:28,182 --> 00:17:29,316 line:-1
+and if there is one,
+
+
+285
+00:17:29,383 --> 00:17:33,320 line:-2
+set the selectedSmoothieID
+on the data store to that URL parameter,
+
+
+286
+00:17:33,387 --> 00:17:35,022 line:-1
+which is our smoothie identifier.
+
+
+287
+00:17:36,190 --> 00:17:38,058 line:-1
+Back in the Fruta Xcode project,
+
+
+288
+00:17:38,125 --> 00:17:40,460 line:-2
+I'll go to
+the "Signings and Capabilities" tab.
+
+
+289
+00:17:41,295 --> 00:17:43,397 line:-1
+In it, I'll add a new capability.
+
+
+290
+00:17:44,031 --> 00:17:46,433 line:-1
+I'll choose to add "associated domains."
+
+
+291
+00:17:47,868 --> 00:17:49,636 line:-1
+I'll expand this capability
+
+
+292
+00:17:49,703 --> 00:17:52,873 line:-2
+and click on the plus button
+to add a new associated domain.
+
+
+293
+00:17:53,574 --> 00:17:58,946 line:-2
+Here I will enter
+"appclips:Fruta.example."
+
+
+294
+00:17:59,780 --> 00:18:02,416 line:-2
+Now that we have set up
+our associated domain,
+
+
+295
+00:18:02,482 --> 00:18:05,485 line:-2
+let's configure a launch URL
+to debug our app clip with.
+
+
+296
+00:18:05,552 --> 00:18:08,555 line:-2
+To do this,
+I'll click on the "Target Popup" button
+
+
+297
+00:18:08,622 --> 00:18:10,357 line:-1
+and click "Edit Scheme."
+
+
+298
+00:18:10,958 --> 00:18:14,962 line:-2
+You'll see the environment variables
+section has already been prepopulated
+
+
+299
+00:18:15,028 --> 00:18:17,431 line:-1
+with the value "example.com."
+
+
+300
+00:18:18,465 --> 00:18:20,968 line:-2
+All we need to do here
+is to tick the checkbox
+
+
+301
+00:18:21,034 --> 00:18:25,973 line:-2
+before the environment variable
+of name _XCAppClipURL.
+
+
+302
+00:18:27,941 --> 00:18:31,778 line:-2
+In it, I'll enter a URL
+that our app clip is able to parse,
+
+
+303
+00:18:31,845 --> 00:18:35,249 line:-2
+and our app clip will pick up
+the smoothie=BerryBlue parameter
+
+
+304
+00:18:35,315 --> 00:18:36,783 line:-1
+as we have set up earlier.
+
+
+305
+00:18:38,552 --> 00:18:41,788 line:-2
+I'll close the editor
+and build and run the clip on the device.
+
+
+306
+00:18:56,336 --> 00:18:57,337 line:-1
+Voilà.
+
+
+307
+00:18:58,372 --> 00:19:01,408 line:-2
+Our app has automatically parsed
+the app launch URL
+
+
+308
+00:19:01,475 --> 00:19:03,977 line:-2
+and navigated us
+to the Berry Blue smoothie.
+
+
+309
+00:19:04,511 --> 00:19:07,714 line:0
+I'll order, pay with Apple Pay...
+
+
+310
+00:19:09,816 --> 00:19:11,485 line:0
+and wait for my order to be ready.
+
+
+311
+00:19:13,020 --> 00:19:14,588 line:0
+Looks like my smoothie is ready.
+
+
+312
+00:19:16,690 --> 00:19:20,460 line:-2
+I would love to enjoy the smoothie myself,
+but there's more to demo.
+
+
+313
+00:19:20,527 --> 00:19:23,797 line:-2
+Since I've already submitted my Fruta app
+to App Store Connect,
+
+
+314
+00:19:23,864 --> 00:19:26,166 line:-2
+and have configured
+an app clip card experience
+
+
+315
+00:19:26,233 --> 00:19:27,434 line:-1
+on App Store Connect
+
+
+316
+00:19:27,501 --> 00:19:30,470 line:-2
+using the flow Ada has discussed earlier
+in this talk,
+
+
+317
+00:19:30,537 --> 00:19:36,109 line:-2
+so now, if I tap my phone on this NFC tag,
+an app clip card shows up
+
+
+318
+00:19:36,176 --> 00:19:39,680 line:-2
+and I can launch the clip right here
+through physical invocation.
+
+
+319
+00:19:42,316 --> 00:19:45,619 line:-2
+Another way, as my colleague, Ada,
+has discussed earlier in this talk,
+
+
+320
+00:19:45,686 --> 00:19:48,121 line:-1
+is through the Smart App Banner in Safari.
+
+
+321
+00:19:50,724 --> 00:19:53,493 line:-1
+So now I'm back at my website sources,
+
+
+322
+00:19:53,560 --> 00:19:55,495 line:-1
+and in the index.html file,
+
+
+323
+00:19:55,562 --> 00:19:58,899 line:-2
+all we need to do is to add a new meta tag
+for our app clip.
+
+
+324
+00:20:01,835 --> 00:20:04,905 line:-2
+I've specified a name
+of "apple-iTunes-app"
+
+
+325
+00:20:04,972 --> 00:20:07,841 line:-1
+and "app-clip-bundle-id" as its content.
+
+
+326
+00:20:07,908 --> 00:20:10,544 line:-1
+Notice I'm keeping the app-ID parameter
+
+
+327
+00:20:10,611 --> 00:20:14,081 line:-2
+so that my users running an iOS release
+before iOS 14
+
+
+328
+00:20:14,147 --> 00:20:15,949 line:-1
+can still see a Smart App Banner,
+
+
+329
+00:20:16,016 --> 00:20:18,385 line:-2
+referring them to download the app
+from the App Store.
+
+
+330
+00:20:19,553 --> 00:20:20,621 line:-1
+All right.
+
+
+331
+00:20:20,687 --> 00:20:22,990 line:-1
+After pushing my changes up to the server,
+
+
+332
+00:20:23,056 --> 00:20:27,661 line:-2
+I'm back onto my phone and have navigated
+to Fruta.example in Safari.
+
+
+333
+00:20:29,663 --> 00:20:30,764 line:-1
+As you have guessed,
+
+
+334
+00:20:30,831 --> 00:20:34,968 line:-2
+while Fruta.example is
+a .example domain, and it's not for sale,
+
+
+335
+00:20:35,035 --> 00:20:37,604 line:-2
+we have a lot of production budget
+this year.
+
+
+336
+00:20:37,671 --> 00:20:41,942 line:-2
+You all are really worth the exhilarating
+14-hour domain auction marathon.
+
+
+337
+00:20:42,009 --> 00:20:43,043 line:-1
+So, of course,
+
+
+338
+00:20:43,110 --> 00:20:46,446 line:-2
+you can still browse through the menu
+on the web page as you would before,
+
+
+339
+00:20:46,513 --> 00:20:49,383 line:-2
+but on top of the page,
+there's a new Smart App Banner.
+
+
+340
+00:20:50,184 --> 00:20:51,618 line:0
+When I tap on "Open,"
+
+
+341
+00:20:51,685 --> 00:20:54,421 line:0
+I'll see the same app clip card
+as we saw earlier
+
+
+342
+00:20:54,488 --> 00:20:56,557 line:0
+with physical invocation via NFC.
+
+
+343
+00:20:57,958 --> 00:21:01,261 line:-2
+And after tapping "Open,"
+we're brought to the app clip again.
+
+
+344
+00:21:05,399 --> 00:21:08,635 line:-2
+And that is a quick demo
+on linking to your app clip.
+
+
+345
+00:21:08,702 --> 00:21:11,104 line:-1
+Thank you, and back to you, Ada.
+
+
+346
+00:21:11,171 --> 00:21:15,108 line:-2
+Thanks, Luming, for showing us
+how to set up linking in app clips.
+
+
+347
+00:21:15,175 --> 00:21:17,978 line:-2
+That Berry Blue smoothie
+sure looks refreshing.
+
+
+348
+00:21:19,112 --> 00:21:21,915 line:-2
+There's one more thing
+that I want to briefly talk about,
+
+
+349
+00:21:21,982 --> 00:21:24,017 line:-1
+which is beta testing for app clips.
+
+
+350
+00:21:25,219 --> 00:21:29,323 line:-2
+So, after you've delivered your build that
+includes both your app and your app clip
+
+
+351
+00:21:29,389 --> 00:21:30,824 line:-1
+to App Store Connect,
+
+
+352
+00:21:30,891 --> 00:21:33,961 line:-2
+you should find a new app clip section
+in TestFlight
+
+
+353
+00:21:34,027 --> 00:21:37,598 line:-2
+that lets you add test invocation points
+for your app clip
+
+
+354
+00:21:37,664 --> 00:21:40,701 line:-2
+so your beta testers
+can test opening the URLs
+
+
+355
+00:21:40,767 --> 00:21:43,036 line:-1
+for the different app clip experiences.
+
+
+356
+00:21:43,937 --> 00:21:46,473 line:-1
+Click on "Add App Clip Invocation"...
+
+
+357
+00:21:47,708 --> 00:21:50,911 line:-2
+and set up the title and URL
+of an app clip experience
+
+
+358
+00:21:50,978 --> 00:21:53,213 line:-1
+you'd like your beta testers to try out.
+
+
+359
+00:21:54,281 --> 00:21:57,451 line:0
+For more information about testing
+and submitting app clips
+
+
+360
+00:21:57,518 --> 00:21:59,019 line:0
+in App Store Connect,
+
+
+361
+00:21:59,086 --> 00:22:02,256 line:0
+please refer to the "What's New
+in App Store Connect" session.
+
+
+362
+00:22:04,024 --> 00:22:05,125 line:-1
+To summarize,
+
+
+363
+00:22:05,192 --> 00:22:09,696 line:-2
+in this session, we have shown you how
+you can handle links into your app clip
+
+
+364
+00:22:09,763 --> 00:22:13,934 line:-2
+by setting up the associated domains
+for the new app clip service type,
+
+
+365
+00:22:14,001 --> 00:22:17,538 line:-2
+and handling the web-browsing
+NSUserActivity in your app clip...
+
+
+366
+00:22:19,206 --> 00:22:22,509 line:-2
+how you can configure default
+and advanced app clip experiences
+
+
+367
+00:22:22,576 --> 00:22:24,144 line:-1
+on App Store Connect,
+
+
+368
+00:22:24,211 --> 00:22:27,481 line:-2
+including best practices
+on what URLs to use
+
+
+369
+00:22:27,548 --> 00:22:29,983 line:-1
+when registering app clip experiences...
+
+
+370
+00:22:31,118 --> 00:22:36,089 line:-2
+how to set up the Smart App Banner
+to open your app clip on your web page,
+
+
+371
+00:22:36,156 --> 00:22:39,993 line:-2
+and finally, what's new in TestFlight
+for testing app clips.
+
+
+372
+00:22:42,763 --> 00:22:44,398 line:-1
+Thanks for watching this session,
+
+
+373
+00:22:44,464 --> 00:22:47,367 line:-2
+and I can't wait to see
+the cool app clips you will create.
+
+
+374
+00:22:48,368 --> 00:22:50,270 line:-1
+[chimes]
+

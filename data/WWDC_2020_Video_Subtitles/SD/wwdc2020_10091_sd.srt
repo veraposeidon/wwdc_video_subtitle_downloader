@@ -1,0 +1,1703 @@
+1
+00:00:03,904 --> 00:00:06,406 line:-1
+Hello and welcome to WWDC.
+
+
+2
+00:00:08,007 --> 00:00:10,811 line:0
+Hello and welcome to
+"Write Tests to Fail."
+
+
+3
+00:00:10,878 --> 00:00:13,280 line:0
+My name is Kelly Keenan
+and in this session,
+
+
+4
+00:00:13,347 --> 00:00:15,482 line:-2
+I'll be sharing
+some of the lessons I've learned
+
+
+5
+00:00:15,549 --> 00:00:19,953 line:-2
+over the years of writing user interface
+and integration tests for Xcode.
+
+
+6
+00:00:20,487 --> 00:00:22,122 line:-1
+While I'll focus on UI tests,
+
+
+7
+00:00:22,189 --> 00:00:25,125 line:-2
+many of these lessons are applicable
+to unit tests as well.
+
+
+8
+00:00:25,192 --> 00:00:30,097 line:-2
+Regardless of whether I wrote my tests
+before or after I wrote my code,
+
+
+9
+00:00:30,163 --> 00:00:34,801 line:-2
+my main motivation has always been
+to get our tests to green,
+
+
+10
+00:00:34,868 --> 00:00:39,006 line:-2
+because seeing this icon tells me
+that my tests are passing,
+
+
+11
+00:00:39,072 --> 00:00:41,008 line:-1
+which means I can ship my product.
+
+
+12
+00:00:41,074 --> 00:00:46,647 line:-2
+However, my new mantra for this year
+is write tests to fail,
+
+
+13
+00:00:46,713 --> 00:00:52,119 line:-2
+because great tests catch bugs,
+so we should plan for failure.
+
+
+14
+00:00:52,186 --> 00:00:56,290 line:-2
+Tests are written once,
+but are triaged many times.
+
+
+15
+00:00:56,356 --> 00:00:59,793 line:-2
+When my tests find a product bug,
+it fails,
+
+
+16
+00:00:59,860 --> 00:01:02,262 line:-2
+which is exactly
+what they're designed to do.
+
+
+17
+00:01:02,329 --> 00:01:06,934 line:-2
+In my case, my tests all run
+in a continuous integration system,
+
+
+18
+00:01:07,000 --> 00:01:09,536 line:-2
+so the tool I have
+for triaging the failure
+
+
+19
+00:01:09,603 --> 00:01:11,939 line:-1
+is the test result bundle.
+
+
+20
+00:01:12,005 --> 00:01:14,808 line:-2
+In this session,
+we'll explore ways I've found
+
+
+21
+00:01:14,875 --> 00:01:18,745 line:-2
+to make my tests easier to triage
+with just the result bundle
+
+
+22
+00:01:18,812 --> 00:01:21,915 line:-2
+as well as ways to make
+my tests more robust
+
+
+23
+00:01:21,982 --> 00:01:25,252 line:-2
+so that I'm spending time
+triaging the product failures
+
+
+24
+00:01:25,319 --> 00:01:27,521 line:-1
+instead of debugging my tests.
+
+
+25
+00:01:27,588 --> 00:01:30,824 line:-2
+The test templates follow
+the testing pattern
+
+
+26
+00:01:30,891 --> 00:01:33,894 line:-1
+of set up, test, and tear down.
+
+
+27
+00:01:34,795 --> 00:01:38,298 line:-2
+Within the test section,
+we can break this down into
+
+
+28
+00:01:38,365 --> 00:01:41,101 line:-1
+actions and assertions.
+
+
+29
+00:01:41,168 --> 00:01:44,304 line:-2
+We'll use this
+as the agenda for this session.
+
+
+30
+00:01:44,371 --> 00:01:48,208 line:-2
+So, let's start
+with the set up for our tests.
+
+
+31
+00:01:49,109 --> 00:01:52,513 line:-2
+This is where I explicitly state
+the assumptions I require
+
+
+32
+00:01:52,579 --> 00:01:57,017 line:-2
+and set the state of my app
+and environment before I run my tests.
+
+
+33
+00:01:57,417 --> 00:02:01,455 line:-2
+In Xcode 11.4, we introduced
+a new setUp function
+
+
+34
+00:02:01,522 --> 00:02:04,558 line:-1
+called setUpWithError which now throws,
+
+
+35
+00:02:04,625 --> 00:02:10,097 line:-2
+allowing me to catch or pass on any
+errors that are thrown during my setup.
+
+
+36
+00:02:10,163 --> 00:02:13,767 line:-2
+I found it useful to modernize
+my existing setUp methods
+
+
+37
+00:02:13,834 --> 00:02:17,070 line:-1
+to take advantage of the error management.
+
+
+38
+00:02:17,137 --> 00:02:19,173 line:-1
+I use the setUpWithErrors method
+
+
+39
+00:02:19,239 --> 00:02:23,277 line:-2
+to set the initial state
+required for my tests before they run
+
+
+40
+00:02:23,343 --> 00:02:27,014 line:-2
+because previous tests
+may have changed the state of my app
+
+
+41
+00:02:27,080 --> 00:02:29,783 line:-1
+or modified data that my tests use.
+
+
+42
+00:02:31,118 --> 00:02:35,689 line:-2
+In this example,
+I set continueAfterFailure to false
+
+
+43
+00:02:35,756 --> 00:02:39,693 line:-2
+so that my test fails immediately
+when an issue is found.
+
+
+44
+00:02:40,194 --> 00:02:42,863 line:-2
+This helps me to find
+the first error faster
+
+
+45
+00:02:42,930 --> 00:02:45,933 line:-1
+instead of wading through multiple errors.
+
+
+46
+00:02:45,999 --> 00:02:48,335 line:-1
+I also use this as an opportunity
+
+
+47
+00:02:48,402 --> 00:02:51,538 line:-2
+to launch the app
+for each test in this class.
+
+
+48
+00:02:51,605 --> 00:02:53,373 line:-1
+One technique that I've incorporated
+
+
+49
+00:02:53,440 --> 00:02:57,477 line:-2
+is to leverage launchArguments
+and environment variables
+
+
+50
+00:02:57,544 --> 00:03:00,380 line:-1
+to set up state within my app quickly.
+
+
+51
+00:03:00,447 --> 00:03:02,883 line:-1
+This should not be used to set all state,
+
+
+52
+00:03:02,950 --> 00:03:05,485 line:-1
+but there may be cases where it's needed,
+
+
+53
+00:03:05,552 --> 00:03:08,689 line:-2
+like bypassing two-factor authentication
+during testing.
+
+
+54
+00:03:08,755 --> 00:03:13,360 line:-2
+In this case, I'm using it as a way
+to bypass the Menu tab,
+
+
+55
+00:03:13,427 --> 00:03:16,363 line:-1
+and instead, start from the Recipes tab.
+
+
+56
+00:03:16,430 --> 00:03:19,833 line:-2
+Small changes like this
+can improve the speed of running my tests
+
+
+57
+00:03:19,900 --> 00:03:23,770 line:-2
+by avoiding unnecessary work,
+but more importantly,
+
+
+58
+00:03:23,837 --> 00:03:28,509 line:-2
+it avoids me having to triage failures
+that might be happening in the Menu tab
+
+
+59
+00:03:28,575 --> 00:03:32,379 line:-2
+while I'm expecting to see results
+for testing my Recipes tab.
+
+
+60
+00:03:33,180 --> 00:03:36,383 line:-1
+To recap, I'm using setUpWithError throws
+
+
+61
+00:03:36,450 --> 00:03:38,318 line:-1
+to improve error handling.
+
+
+62
+00:03:38,385 --> 00:03:42,456 line:-2
+I perform common setup tasks
+for every test in the class
+
+
+63
+00:03:42,523 --> 00:03:43,924 line:-1
+like launching the app.
+
+
+64
+00:03:44,791 --> 00:03:50,197 line:-2
+I'm using launchArguments
+to communicate with the app to set state.
+
+
+65
+00:03:50,264 --> 00:03:56,403 line:-2
+And I adopt product changes
+to quickly setup state and focus testing.
+
+
+66
+00:03:56,470 --> 00:03:58,972 line:-1
+The next step is to run our tests.
+
+
+67
+00:03:59,773 --> 00:04:02,743 line:-1
+Tests should be focused on doing an action
+
+
+68
+00:04:02,809 --> 00:04:05,546 line:-2
+and then asserting
+that the action completed.
+
+
+69
+00:04:06,346 --> 00:04:09,983 line:-2
+Let's start with how I can
+make my actions easier to triage.
+
+
+70
+00:04:10,050 --> 00:04:12,052 line:-1
+The first thing I consider
+
+
+71
+00:04:12,119 --> 00:04:16,023 line:-2
+is that each test should have
+a specific goal in mind.
+
+
+72
+00:04:16,089 --> 00:04:19,026 line:-2
+That goal should be reflected
+in the title of the test.
+
+
+73
+00:04:19,091 --> 00:04:23,430 line:-2
+In this case, I'm testing
+the ingredients list for accuracy.
+
+
+74
+00:04:23,497 --> 00:04:28,836 line:-2
+The only action my test needs to perform
+is to select the Berry Blue Recipe.
+
+
+75
+00:04:28,902 --> 00:04:33,106 line:-2
+Minimizing the actions
+makes it easier to triage failures later.
+
+
+76
+00:04:34,107 --> 00:04:36,977 line:-1
+Tapping this row brings up the recipe
+
+
+77
+00:04:37,044 --> 00:04:41,315 line:-2
+and I can verify the ingredient list
+as a result of my action.
+
+
+78
+00:04:41,381 --> 00:04:43,851 line:-1
+As such, in my result bundle,
+
+
+79
+00:04:43,917 --> 00:04:46,820 line:-2
+I can easily see
+what the test is validating
+
+
+80
+00:04:46,887 --> 00:04:48,655 line:-1
+thanks to the name of my test.
+
+
+81
+00:04:49,256 --> 00:04:51,558 line:-1
+Speaking of naming, over the years,
+
+
+82
+00:04:51,625 --> 00:04:55,062 line:-2
+I've found that the labels
+of UI elements change often,
+
+
+83
+00:04:55,128 --> 00:05:00,133 line:-2
+so as a preventative measure,
+I use enums for all string values.
+
+
+84
+00:05:00,200 --> 00:05:02,536 line:-1
+That way, when the UI changes,
+
+
+85
+00:05:02,603 --> 00:05:07,207 line:-2
+I can easily update my tests
+to react to those changes.
+
+
+86
+00:05:07,274 --> 00:05:11,245 line:-2
+This not only saves me time
+to update my tests to UI changes,
+
+
+87
+00:05:11,311 --> 00:05:14,948 line:-2
+it has also minimized the number of times
+I've dealt with one test failing
+
+
+88
+00:05:15,015 --> 00:05:17,484 line:-2
+due to a spelling mistake
+that was hard to recognize.
+
+
+89
+00:05:17,551 --> 00:05:20,821 line:-2
+Just like collecting all the strings
+into enums,
+
+
+90
+00:05:20,888 --> 00:05:23,257 line:-1
+another way that I've minimized mistakes
+
+
+91
+00:05:23,323 --> 00:05:27,294 line:-2
+is by factoring common code
+into helper functions,
+
+
+92
+00:05:27,361 --> 00:05:30,597 line:-2
+so that multiple tests
+can use the same code path.
+
+
+93
+00:05:30,664 --> 00:05:35,235 line:-2
+In this case, multiple tests need to
+access the Smoothie List in the app,
+
+
+94
+00:05:35,302 --> 00:05:36,870 line:-1
+and to select a recipe.
+
+
+95
+00:05:36,937 --> 00:05:41,508 line:-2
+Pulling out this common testing path
+means that rather than duplicating code,
+
+
+96
+00:05:41,575 --> 00:05:46,346 line:-2
+I can spend my efforts hardening
+these paths to reduce test errors.
+
+
+97
+00:05:46,413 --> 00:05:50,484 line:-2
+Another technique I've employed
+is to model the domain of my app
+
+
+98
+00:05:50,551 --> 00:05:53,487 line:-2
+and design a test language
+around that domain.
+
+
+99
+00:05:53,554 --> 00:05:56,657 line:-2
+Then my test reflects
+the language of my app.
+
+
+100
+00:05:56,723 --> 00:06:01,528 line:-2
+In this example, I can ask my Fruta app
+for it's Smoothie List,
+
+
+101
+00:06:01,595 --> 00:06:05,899 line:-2
+and I can do an action on my Smoothie List
+like select a recipe,
+
+
+102
+00:06:05,966 --> 00:06:09,336 line:-1
+which returns the Recipe UI element.
+
+
+103
+00:06:09,403 --> 00:06:13,340 line:-2
+These are based on
+the FrutaUIElement class I've created
+
+
+104
+00:06:13,407 --> 00:06:16,810 line:-2
+to keep track of the app
+and the element at a lower level.
+
+
+105
+00:06:16,877 --> 00:06:21,548 line:-2
+In this way, I've made
+my shared code object-oriented-ish.
+
+
+106
+00:06:21,615 --> 00:06:23,951 line:-2
+While testing is treated
+as very functional
+
+
+107
+00:06:24,017 --> 00:06:26,253 line:-1
+and based on elements and queries,
+
+
+108
+00:06:26,320 --> 00:06:30,524 line:-2
+I can simulate an object-oriented
+environment for readability.
+
+
+109
+00:06:30,591 --> 00:06:35,028 line:-2
+Doing so, gives me the ability
+to make calls from my test
+
+
+110
+00:06:35,095 --> 00:06:39,533 line:-2
+that map to how I think of my app,
+as a series of subviews.
+
+
+111
+00:06:39,600 --> 00:06:41,735 line:-1
+The result of doing this modeling
+
+
+112
+00:06:41,802 --> 00:06:45,973 line:-2
+is that I'm working with
+a reduced hierarchy with each element
+
+
+113
+00:06:46,039 --> 00:06:50,577 line:-2
+and can focus my queries
+on just the subelements of that element.
+
+
+114
+00:06:51,245 --> 00:06:55,182 line:-2
+Over the years, our shared testing code
+has become quite large.
+
+
+115
+00:06:55,782 --> 00:06:59,086 line:-2
+So, to deal with that,
+we treat it like our product code
+
+
+116
+00:06:59,152 --> 00:07:02,856 line:-2
+and have created a shared framework
+for our tests.
+
+
+117
+00:07:02,923 --> 00:07:05,659 line:-2
+You may also consider
+using a Swift package
+
+
+118
+00:07:05,726 --> 00:07:07,261 line:-1
+to share your testing code,
+
+
+119
+00:07:07,327 --> 00:07:10,764 line:-2
+especially if you're sharing code
+between multiple applications.
+
+
+120
+00:07:11,265 --> 00:07:12,766 line:-1
+To recap this section,
+
+
+121
+00:07:12,833 --> 00:07:16,703 line:-2
+I design tests for a specific goal
+to focus what I'm testing.
+
+
+122
+00:07:16,770 --> 00:07:21,408 line:-2
+I'm using enums and factoring
+common code into helper functions
+
+
+123
+00:07:21,475 --> 00:07:24,278 line:-1
+to simplify resolving UI changes.
+
+
+124
+00:07:24,344 --> 00:07:29,883 line:-2
+I'm modeling objects in my tests
+to reflect the UI hierarchy of my app.
+
+
+125
+00:07:29,950 --> 00:07:34,154 line:-2
+And I'm using a framework,
+or you can use a Swift package,
+
+
+126
+00:07:34,221 --> 00:07:36,089 line:-1
+to share code between projects.
+
+
+127
+00:07:36,156 --> 00:07:40,093 line:-2
+Now, let's look at my favorite section:
+test assertions.
+
+
+128
+00:07:40,160 --> 00:07:43,730 line:-2
+Because this is where we are actually
+doing the heart of our testing.
+
+
+129
+00:07:44,097 --> 00:07:47,734 line:-2
+Here are some of the lessons I've learned
+with test assertions and error handling
+
+
+130
+00:07:47,801 --> 00:07:51,238 line:-2
+for making test failures
+easily triage-able.
+
+
+131
+00:07:51,305 --> 00:07:54,474 line:-2
+One small thing
+that has helped me immensely
+
+
+132
+00:07:54,541 --> 00:07:59,112 line:-2
+is to use the optional message
+in XCTAssert functions.
+
+
+133
+00:07:59,179 --> 00:08:04,318 line:-2
+Leaving out the message is fine
+when I'm triaging tests at my desk,
+
+
+134
+00:08:04,384 --> 00:08:09,223 line:-2
+but when all I have is the result bundle,
+there's a lot of context missing.
+
+
+135
+00:08:09,289 --> 00:08:13,026 line:-2
+In this case,
+I know that three is not equal to two,
+
+
+136
+00:08:13,093 --> 00:08:14,728 line:-1
+but two what?
+
+
+137
+00:08:14,795 --> 00:08:17,564 line:-1
+If I add a message, I can add context.
+
+
+138
+00:08:17,631 --> 00:08:20,734 line:-2
+Humans are reading
+my assertion messages most of the time,
+
+
+139
+00:08:20,801 --> 00:08:21,969 line:-1
+and it's often me,
+
+
+140
+00:08:22,035 --> 00:08:25,873 line:-2
+so I like to leave myself a clue
+as to why this expression failed.
+
+
+141
+00:08:25,939 --> 00:08:31,245 line:-2
+However, sometimes, my assertion failures
+are read by automation systems,
+
+
+142
+00:08:31,311 --> 00:08:36,683 line:-2
+in which case, I want my messages
+to be specific, but not too specific.
+
+
+143
+00:08:37,251 --> 00:08:43,590 line:-2
+So, I leave out things like
+date/time stamps or unique file paths
+
+
+144
+00:08:43,657 --> 00:08:48,962 line:-2
+so that assertion messages
+can be used to recognize multiple tests
+
+
+145
+00:08:49,029 --> 00:08:51,198 line:-1
+that are failing for the same reason.
+
+
+146
+00:08:51,798 --> 00:08:55,869 line:-2
+I also try to make sure
+that I am using the correct assertion
+
+
+147
+00:08:55,936 --> 00:08:57,971 line:-1
+for what I'm trying to accomplish.
+
+
+148
+00:08:58,038 --> 00:08:59,506 line:-1
+Doing so ensures that
+
+
+149
+00:08:59,573 --> 00:09:03,644 line:-2
+the automatic message
+that I see when it fails is more relevant.
+
+
+150
+00:09:03,710 --> 00:09:07,781 line:-1
+In Xcode 12, we added XCTIssue
+
+
+151
+00:09:07,848 --> 00:09:10,684 line:-2
+which is a new low-level way
+of reporting failures.
+
+
+152
+00:09:10,751 --> 00:09:14,288 line:-2
+For more information,
+watch the related video,
+
+
+153
+00:09:14,354 --> 00:09:17,224 line:-1
+"Triage Test Failures with XCTIssue."
+
+
+154
+00:09:17,658 --> 00:09:22,930 line:-2
+One of the pitfalls of asserting that I've
+come across is asynchronous events.
+
+
+155
+00:09:22,996 --> 00:09:26,533 line:-2
+I've sometimes had difficulty
+triaging asynchronous events.
+
+
+156
+00:09:26,600 --> 00:09:29,469 line:-1
+In this case, I tap the recipe button,
+
+
+157
+00:09:29,536 --> 00:09:33,307 line:-2
+but it may take a while to load
+depending on what my code is doing.
+
+
+158
+00:09:33,373 --> 00:09:36,076 line:-2
+If I immediately return
+the recipe element,
+
+
+159
+00:09:36,143 --> 00:09:37,711 line:-1
+it may not exist yet.
+
+
+160
+00:09:37,778 --> 00:09:42,182 line:-2
+In the past, I've used sleep
+to give my test a little built-in time.
+
+
+161
+00:09:42,249 --> 00:09:46,386 line:-2
+However, I wouldn't sleep on the job,
+so why let my tests do it?
+
+
+162
+00:09:46,453 --> 00:09:48,755 line:-1
+And it delays getting my results faster.
+
+
+163
+00:09:48,822 --> 00:09:51,124 line:-1
+XCTest has built-in retries,
+
+
+164
+00:09:51,191 --> 00:09:54,728 line:-2
+but depending on my app code,
+it might not be enough.
+
+
+165
+00:09:54,795 --> 00:09:58,031 line:-2
+So, I prefer to use
+waitForExistence with a timeout.
+
+
+166
+00:09:58,098 --> 00:09:59,633 line:-1
+This provides polling
+
+
+167
+00:09:59,700 --> 00:10:03,403 line:-2
+so that if the expectation is true
+earlier than the timeout,
+
+
+168
+00:10:03,470 --> 00:10:05,939 line:-1
+then I've saved that much time waiting.
+
+
+169
+00:10:06,006 --> 00:10:07,508 line:-1
+It also allows my test
+
+
+170
+00:10:07,574 --> 00:10:11,612 line:-2
+to pass or fail deterministically
+in an environment I've designed.
+
+
+171
+00:10:11,678 --> 00:10:15,282 line:-2
+In the result bundle, I'm able to see
+that my test waited five seconds
+
+
+172
+00:10:15,349 --> 00:10:17,150 line:-1
+to find the Ingredients View.
+
+
+173
+00:10:17,217 --> 00:10:20,387 line:-2
+Another recommendation
+is to unwrap optionals.
+
+
+174
+00:10:20,454 --> 00:10:23,423 line:-2
+In this example, I want to return
+the count of the favorites
+
+
+175
+00:10:23,490 --> 00:10:25,559 line:-1
+in a string array that is passed in,
+
+
+176
+00:10:25,626 --> 00:10:28,996 line:-2
+however, I didn't take the time
+to unwrap my optional.
+
+
+177
+00:10:29,062 --> 00:10:30,898 line:-1
+When I'm running the code locally,
+
+
+178
+00:10:30,964 --> 00:10:33,834 line:-2
+this results
+in a crash and halts my tests,
+
+
+179
+00:10:33,901 --> 00:10:36,737 line:-2
+which is really unfortunate
+if I set them to run
+
+
+180
+00:10:36,803 --> 00:10:40,340 line:-2
+while I went to get lunch
+and they didn't finish when I returned.
+
+
+181
+00:10:40,407 --> 00:10:43,810 line:-2
+When this happens
+in a continuous integration environment,
+
+
+182
+00:10:43,877 --> 00:10:46,713 line:-2
+I get a result bundle
+with a failing test that reads,
+
+
+183
+00:10:46,780 --> 00:10:48,749 line:-1
+"Test crashed with signal ill."
+
+
+184
+00:10:48,815 --> 00:10:53,820 line:-2
+I can easily avoid this situation
+by making sure that I unwrap my optionals.
+
+
+185
+00:10:53,887 --> 00:10:57,891 line:-2
+I can use the Swift-provided methods
+of unwrapping optionals
+
+
+186
+00:10:57,958 --> 00:11:03,197 line:-2
+such as "if let", where I can then use
+the unwrapped value in the if-block.
+
+
+187
+00:11:04,097 --> 00:11:06,767 line:-2
+If I want to use
+the unwrapped variable later,
+
+
+188
+00:11:06,834 --> 00:11:08,535 line:-1
+I can use "guard let".
+
+
+189
+00:11:08,602 --> 00:11:12,706 line:-2
+This allows me to throw an error
+that I provide in the guard-block
+
+
+190
+00:11:12,773 --> 00:11:14,274 line:-1
+if I encounter nil.
+
+
+191
+00:11:15,275 --> 00:11:18,846 line:-2
+The third option is using
+the nil-coalescing operator,
+
+
+192
+00:11:18,912 --> 00:11:22,850 line:-2
+which allows me to provide
+a default value if I encounter nil,
+
+
+193
+00:11:22,916 --> 00:11:24,651 line:-1
+in this case, an empty array.
+
+
+194
+00:11:25,586 --> 00:11:28,055 line:-1
+The fourth option, is to use XCTUnwrap,
+
+
+195
+00:11:28,121 --> 00:11:30,958 line:-1
+which is provided by the XCTest framework.
+
+
+196
+00:11:31,024 --> 00:11:33,126 line:-1
+It's a simplification of "guard let"
+
+
+197
+00:11:33,193 --> 00:11:35,963 line:-2
+where it throws an error
+if my test encounters nil.
+
+
+198
+00:11:36,930 --> 00:11:40,968 line:-2
+Using XCTUnwrap
+shows my comment from the call
+
+
+199
+00:11:41,034 --> 00:11:44,805 line:-2
+in addition to the auto-generated message
+in my result bundle.
+
+
+200
+00:11:44,872 --> 00:11:47,307 line:-1
+The best part about unwrapping optionals
+
+
+201
+00:11:47,374 --> 00:11:50,344 line:-2
+is that by failing gracefully
+instead of crashing,
+
+
+202
+00:11:50,410 --> 00:11:52,779 line:-1
+my tearDown method will be called.
+
+
+203
+00:11:52,846 --> 00:11:56,850 line:-2
+Speaking of failing gracefully,
+let's talk about throwing errors.
+
+
+204
+00:11:58,018 --> 00:12:02,956 line:-2
+In my tests, the rule is that I always
+throw instead of assert from shared code.
+
+
+205
+00:12:03,023 --> 00:12:06,994 line:-2
+The reason is because the shared code
+is being run from many tests,
+
+
+206
+00:12:07,060 --> 00:12:11,465 line:-2
+and in some of those tests, I may
+purposely be testing negative test cases
+
+
+207
+00:12:11,532 --> 00:12:14,268 line:-1
+to ensure something hidden isn't shown
+
+
+208
+00:12:14,334 --> 00:12:18,372 line:-2
+or to force an error dialog
+to appear for testing purposes.
+
+
+209
+00:12:18,438 --> 00:12:23,844 line:-2
+So, in a case like this, where I have
+a shared method to verify the ingredients,
+
+
+210
+00:12:23,911 --> 00:12:28,215 line:-2
+I may be testing a bug where I had
+extra ingredients showing previously,
+
+
+211
+00:12:28,282 --> 00:12:31,919 line:-2
+and I'm testing that those extra
+ingredients aren't showing up anymore.
+
+
+212
+00:12:31,985 --> 00:12:33,453 line:-1
+So, I throw an error.
+
+
+213
+00:12:33,520 --> 00:12:39,793 line:0
+In my errors, I often pass in values that
+I want to appear in my error descriptions,
+
+
+214
+00:12:39,860 --> 00:12:44,431 line:0
+which are a requirement
+of the CustomStringConvertible protocol.
+
+
+215
+00:12:44,498 --> 00:12:50,704 line:-2
+Using the description function means that
+I see a more contextually relevant error
+
+
+216
+00:12:50,771 --> 00:12:55,676 line:-2
+in the result bundle for those times
+I'm not triaging my results locally.
+
+
+217
+00:12:55,742 --> 00:12:59,913 line:-2
+If I am triaging locally,
+then new in Xcode 12 is the ability
+
+
+218
+00:12:59,980 --> 00:13:03,050 line:-2
+to see the backtrace for errors
+directly in my code,
+
+
+219
+00:13:03,116 --> 00:13:04,818 line:-1
+so I don't have to wonder anymore
+
+
+220
+00:13:04,885 --> 00:13:08,488 line:-2
+where the error is actually hiding
+in my shared code.
+
+
+221
+00:13:08,555 --> 00:13:12,125 line:-2
+I can also find a backtrace
+in the Runtime Issues Navigator
+
+
+222
+00:13:12,192 --> 00:13:13,861 line:0
+as well as the result bundle.
+
+
+223
+00:13:13,927 --> 00:13:17,631 line:-2
+To learn more about
+how to leverage the testing backtraces,
+
+
+224
+00:13:17,698 --> 00:13:22,002 line:-2
+see the related video,
+"Triage Test Failures with XCTIssue."
+
+
+225
+00:13:23,003 --> 00:13:27,174 line:-2
+Also in this result bundle,
+is a user-readable disclosure group
+
+
+226
+00:13:27,241 --> 00:13:32,746 line:-2
+that my code added to provide more context
+of what action I was taking at the time.
+
+
+227
+00:13:32,813 --> 00:13:36,984 line:-2
+I can easily see here that I was looking
+for Grape in my Berry Blue smoothie,
+
+
+228
+00:13:37,050 --> 00:13:38,685 line:-1
+which is definitely wrong.
+
+
+229
+00:13:38,752 --> 00:13:41,255 line:-2
+To provide myself
+little breadcrumbs like this,
+
+
+230
+00:13:41,321 --> 00:13:45,259 line:-2
+I use XCTContext.runActivity
+and provide a name.
+
+
+231
+00:13:45,325 --> 00:13:47,494 line:0
+This is what appears in the result bundle
+
+
+232
+00:13:47,561 --> 00:13:50,898 line:0
+along with any actions
+performed in its block.
+
+
+233
+00:13:50,964 --> 00:13:54,067 line:0
+This is a great way to add
+some organization and context
+
+
+234
+00:13:54,134 --> 00:13:56,103 line:0
+to my result bundle
+and make it easy to read
+
+
+235
+00:13:56,170 --> 00:13:58,772 line:0
+according to the actions
+my test is taking.
+
+
+236
+00:13:58,839 --> 00:14:01,508 line:-2
+Another thing I can do
+with the runActivity
+
+
+237
+00:14:01,575 --> 00:14:04,244 line:-1
+is to add attachments with XCTAttachment.
+
+
+238
+00:14:04,311 --> 00:14:08,015 line:-2
+I can add attachments
+like files, images, and data
+
+
+239
+00:14:08,081 --> 00:14:13,253 line:-2
+to my XCTContext or the test case
+and it will show up in a result bundle.
+
+
+240
+00:14:13,320 --> 00:14:16,890 line:-2
+It's a great way to gather
+extra logging for a failed test
+
+
+241
+00:14:16,957 --> 00:14:19,593 line:-2
+especially when it's coming
+from a CI system.
+
+
+242
+00:14:19,660 --> 00:14:23,997 line:-2
+Earlier I said not to add file paths
+into assert comments
+
+
+243
+00:14:24,064 --> 00:14:27,234 line:-2
+because instead,
+I can add both the file path
+
+
+244
+00:14:27,301 --> 00:14:30,270 line:-1
+and the file itself as an attachment.
+
+
+245
+00:14:31,338 --> 00:14:34,274 line:-2
+This makes it easier
+to triage the failures later.
+
+
+246
+00:14:35,375 --> 00:14:37,611 line:-1
+I believe that tests should be responsible
+
+
+247
+00:14:37,678 --> 00:14:41,315 line:-2
+for gathering all the data needed
+to triage the product failures
+
+
+248
+00:14:41,381 --> 00:14:44,518 line:-2
+because that data
+may not be available later.
+
+
+249
+00:14:44,585 --> 00:14:48,055 line:-1
+Now sometimes, a test shouldn't run at all
+
+
+250
+00:14:48,121 --> 00:14:53,994 line:-2
+and for that I use XCTSkip,
+XCTSkipUnless, and XCTSkipIf
+
+
+251
+00:14:54,061 --> 00:14:58,131 line:-2
+for documenting tests that aren't running
+by adding the optional message.
+
+
+252
+00:14:58,198 --> 00:15:01,134 line:-2
+The main use is to skip tests
+that aren't relevant
+
+
+253
+00:15:01,201 --> 00:15:03,604 line:-1
+to the platform my tests are running on.
+
+
+254
+00:15:03,670 --> 00:15:06,173 line:-2
+Some alternatives
+that I've used in practice
+
+
+255
+00:15:06,240 --> 00:15:09,843 line:-2
+are for stubbing out tests
+I want to write for a new feature,
+
+
+256
+00:15:09,910 --> 00:15:13,013 line:-2
+which allows me to see
+which tests are unimplemented
+
+
+257
+00:15:13,080 --> 00:15:15,415 line:-1
+versus what tests regressed.
+
+
+258
+00:15:15,482 --> 00:15:19,887 line:-2
+The third is that there are sometimes
+tests that just can't be fixed for now,
+
+
+259
+00:15:19,953 --> 00:15:21,388 line:-1
+for various reasons,
+
+
+260
+00:15:21,455 --> 00:15:24,224 line:-2
+and I don't want to continue
+triaging the failures,
+
+
+261
+00:15:24,291 --> 00:15:28,228 line:-2
+but I also don't want to lose track
+of the test by disabling it.
+
+
+262
+00:15:28,295 --> 00:15:33,901 line:-2
+Using XCTSkip allows me to continue to
+see the skipped test in the result bundle
+
+
+263
+00:15:33,967 --> 00:15:36,603 line:-2
+so that I don't forget
+that I need to write the test
+
+
+264
+00:15:36,670 --> 00:15:38,906 line:-1
+or fix it when the issue is resolved.
+
+
+265
+00:15:40,807 --> 00:15:42,609 line:-1
+To recap this section,
+
+
+266
+00:15:42,676 --> 00:15:48,649 line:-2
+I like to add assertion messages
+and use the relevant XCTAssert functions
+
+
+267
+00:15:48,715 --> 00:15:52,286 line:-2
+to add context to the failures
+in my result bundle.
+
+
+268
+00:15:52,352 --> 00:15:55,055 line:-1
+I definitely unwrap my optionals
+
+
+269
+00:15:55,122 --> 00:15:58,192 line:-2
+to ensure that my tests don't crash
+while I went to lunch,
+
+
+270
+00:15:58,258 --> 00:16:00,961 line:-2
+but also so that my tearDown methods
+are called.
+
+
+271
+00:16:01,929 --> 00:16:05,165 line:-2
+I use the waitForExistence method
+for asynchronous events
+
+
+272
+00:16:05,232 --> 00:16:07,534 line:-1
+and timing issues instead of sleep.
+
+
+273
+00:16:08,468 --> 00:16:11,538 line:-2
+I throw errors from shared code
+instead of asserting
+
+
+274
+00:16:11,605 --> 00:16:16,276 line:-2
+so that other tests using that code
+can catch the errors for negative testing.
+
+
+275
+00:16:16,977 --> 00:16:20,881 line:-2
+I use XCTContext.runActivity
+and attachments
+
+
+276
+00:16:20,948 --> 00:16:24,818 line:-2
+for adding more context
+and content to my result bundles.
+
+
+277
+00:16:25,652 --> 00:16:30,224 line:-2
+And I use XCTSkip for tests
+that just aren't expected to be running
+
+
+278
+00:16:30,290 --> 00:16:31,758 line:-1
+in the current scenario.
+
+
+279
+00:16:31,825 --> 00:16:34,061 line:-1
+Lastly, let's look at tear down.
+
+
+280
+00:16:34,127 --> 00:16:36,663 line:-1
+Since most of my work is already done,
+
+
+281
+00:16:36,730 --> 00:16:39,600 line:-2
+there are only three recommendations
+I have for tear down.
+
+
+282
+00:16:39,666 --> 00:16:45,506 line:-2
+The first is that I've modernized my tests
+to use tearDownWithError that throws
+
+
+283
+00:16:45,572 --> 00:16:48,542 line:-2
+to take advantage
+of the new error management.
+
+
+284
+00:16:48,609 --> 00:16:53,146 line:-2
+I use the tearDown method
+as a time to collect additional logging,
+
+
+285
+00:16:53,213 --> 00:16:55,816 line:-1
+including some analysis of the failures.
+
+
+286
+00:16:55,883 --> 00:17:01,154 line:-2
+And this is when I reset the environment
+from the changes I made during setup.
+
+
+287
+00:17:01,221 --> 00:17:03,524 line:-1
+To recap this video,
+
+
+288
+00:17:03,590 --> 00:17:06,593 line:-2
+we looked at set up,
+where I change the environment
+
+
+289
+00:17:06,660 --> 00:17:09,596 line:-2
+and confirm my assumptions
+needed for my test.
+
+
+290
+00:17:10,597 --> 00:17:14,601 line:-2
+Test actions are where I perform
+the necessary actions I want to test
+
+
+291
+00:17:14,667 --> 00:17:17,604 line:-1
+through shared code modeled after my app.
+
+
+292
+00:17:18,571 --> 00:17:21,708 line:-2
+I then verify
+that the actions completed properly
+
+
+293
+00:17:21,775 --> 00:17:25,244 line:-2
+by using helper methods,
+errors, and test assertions.
+
+
+294
+00:17:26,046 --> 00:17:31,919 line:-2
+Then, I finished with the tearDown method
+to gather data and clean up after my test.
+
+
+295
+00:17:31,985 --> 00:17:35,055 line:-2
+I hope that these techniques
+and recommendations
+
+
+296
+00:17:35,122 --> 00:17:37,791 line:-1
+help you to make your tests more robust
+
+
+297
+00:17:37,858 --> 00:17:41,261 line:-2
+and to easily and quickly
+triage your product issues
+
+
+298
+00:17:41,328 --> 00:17:46,033 line:-2
+so that your tests turn green
+and you can ship a quality product.
+
+
+299
+00:17:46,099 --> 00:17:47,134 line:-1
+Thank you.
+

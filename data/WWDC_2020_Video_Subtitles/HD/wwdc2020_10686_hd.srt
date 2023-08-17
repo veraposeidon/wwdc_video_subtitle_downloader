@@ -1,0 +1,2119 @@
+1
+00:00:03,703 --> 00:00:06,907 line:-1
+Hello and welcome to WWDC.
+
+
+2
+00:00:08,675 --> 00:00:11,044 line:0
+Hi. I'm Gavin.
+
+
+3
+00:00:11,111 --> 00:00:12,746 line:0
+I'm in the Core OS group,
+
+
+4
+00:00:12,813 --> 00:00:17,351 line:0
+and my team have been working
+on bringing macOS to Apple Silicon.
+
+
+5
+00:00:17,851 --> 00:00:20,654 line:-1
+So I'm delighted to get to introduce
+
+
+6
+00:00:20,721 --> 00:00:24,024 line:-2
+some of the changes
+coming in these systems.
+
+
+7
+00:00:24,558 --> 00:00:26,460 line:-1
+We're going to talk about new features
+
+
+8
+00:00:26,527 --> 00:00:30,197 line:-2
+and how to take advantage of them
+in your macOS applications.
+
+
+9
+00:00:30,264 --> 00:00:32,432 line:-1
+We'll go over some security enhancements,
+
+
+10
+00:00:32,499 --> 00:00:35,202 line:-2
+and we'll touch on
+application compatibility.
+
+
+11
+00:00:35,269 --> 00:00:37,404 line:-2
+Then I'll hand over to my colleague,
+Anand,
+
+
+12
+00:00:37,471 --> 00:00:40,607 line:-2
+who'll be taking you through
+boot features and recovery.
+
+
+13
+00:00:40,674 --> 00:00:46,213 line:-2
+Intel-based Macs contain a multi-core CPU,
+and many have a discrete GPU,
+
+
+14
+00:00:46,280 --> 00:00:48,715 line:-1
+and recent Macs also have a T2 chip
+
+
+15
+00:00:48,782 --> 00:00:53,487 line:-2
+which enables features such as Apple Pay,
+TouchID and Hey Siri.
+
+
+16
+00:00:54,321 --> 00:00:59,159 line:-2
+Machines with a discrete GPU
+have separate memory for the CPU and GPU.
+
+
+17
+00:01:00,460 --> 00:01:02,296 line:-1
+Now, the new Apple Silicon Macs
+
+
+18
+00:01:02,362 --> 00:01:07,367 line:-2
+combine all these components
+into a single system on a chip, or SoC.
+
+
+19
+00:01:08,001 --> 00:01:10,037 line:-1
+Building everything into one chip
+
+
+20
+00:01:10,103 --> 00:01:13,173 line:-2
+gives the system
+a unified memory architecture.
+
+
+21
+00:01:13,874 --> 00:01:18,679 line:-2
+This means that the GPU and CPU
+are working over the same memory.
+
+
+22
+00:01:18,745 --> 00:01:23,650 line:-2
+Graphics resources, such as textures,
+images and geometry data,
+
+
+23
+00:01:23,717 --> 00:01:27,387 line:-2
+can be shared
+between the CPU and GPU efficiently,
+
+
+24
+00:01:27,454 --> 00:01:31,959 line:-2
+with no overhead, as there's no need
+to copy data across a PCIe bus.
+
+
+25
+00:01:33,260 --> 00:01:36,263 line:-2
+Using Apple Silicon in the Mac
+also allows us
+
+
+26
+00:01:36,330 --> 00:01:39,666 line:-2
+to bring unique technologies
+developed for the iPhone and iPad
+
+
+27
+00:01:39,733 --> 00:01:41,502 line:-1
+over to the Apple Mac.
+
+
+28
+00:01:41,568 --> 00:01:44,271 line:-1
+Apple Silicon contains coprocessors,
+
+
+29
+00:01:44,338 --> 00:01:48,008 line:-2
+including powerful and efficient
+video encoders and decoders,
+
+
+30
+00:01:48,075 --> 00:01:49,443 line:-1
+the Neural Engine
+
+
+31
+00:01:49,510 --> 00:01:52,980 line:-2
+and matrix multiplication
+machine learning accelerators.
+
+
+32
+00:01:54,448 --> 00:01:57,584 line:-2
+The Mac has had a multi-core CPU
+for years,
+
+
+33
+00:01:57,651 --> 00:02:01,488 line:-2
+but for Intel-based Macs,
+all cores have similar performance.
+
+
+34
+00:02:02,189 --> 00:02:04,958 line:-2
+Apple Silicon Macs
+have a mix of performance cores
+
+
+35
+00:02:05,025 --> 00:02:07,628 line:-2
+for when your application needs
+the maximum performance,
+
+
+36
+00:02:07,694 --> 00:02:10,931 line:-2
+and more power-efficient cores
+for less CPU-intensive tasks.
+
+
+37
+00:02:12,366 --> 00:02:16,803 line:-2
+We call this asymmetric multiprocessing,
+or AMP.
+
+
+38
+00:02:17,704 --> 00:02:20,774 line:-2
+The cores support
+the same architectural features
+
+
+39
+00:02:20,841 --> 00:02:23,410 line:-1
+and command all the same software.
+
+
+40
+00:02:23,477 --> 00:02:26,513 line:-2
+macOS will use
+all these cores simultaneously,
+
+
+41
+00:02:26,580 --> 00:02:29,650 line:-2
+and applications are scheduled
+onto the appropriate cores
+
+
+42
+00:02:29,716 --> 00:02:32,319 line:-2
+depending on
+their current performance requirements.
+
+
+43
+00:02:33,820 --> 00:02:35,789 line:-1
+So, how should your applications
+
+
+44
+00:02:35,856 --> 00:02:39,860 line:-2
+take advantage
+of these new capabilities from macOS?
+
+
+45
+00:02:40,894 --> 00:02:43,197 line:-2
+You might be expecting us
+to announce new APIs
+
+
+46
+00:02:43,263 --> 00:02:45,132 line:-1
+for you to adopt in your applications.
+
+
+47
+00:02:45,199 --> 00:02:47,201 line:-1
+But we've been working for years
+
+
+48
+00:02:47,267 --> 00:02:50,537 line:-2
+to build a consistent set of APIs
+across all our platforms
+
+
+49
+00:02:50,604 --> 00:02:53,540 line:-2
+and to optimize those frameworks
+for Apple Silicon.
+
+
+50
+00:02:55,542 --> 00:02:57,311 line:-1
+To run work on the GPU,
+
+
+51
+00:02:57,377 --> 00:03:02,416 line:-2
+you should be using the Metal API on both
+Intel-based and Apple Silicon Macs.
+
+
+52
+00:03:03,217 --> 00:03:06,119 line:-2
+On Apple Silicon,
+you'll just see a significant speed boost
+
+
+53
+00:03:06,186 --> 00:03:09,923 line:-2
+when running tasks that benefit
+from the unified memory architecture.
+
+
+54
+00:03:12,059 --> 00:03:15,829 line:-2
+To take advantage of the hardware
+video encoders and decoders,
+
+
+55
+00:03:15,896 --> 00:03:19,466 line:-2
+you can use the same AVFoundation
+and VideoToolbox frameworks
+
+
+56
+00:03:19,533 --> 00:03:21,401 line:-1
+that are in macOS today.
+
+
+57
+00:03:21,468 --> 00:03:23,837 line:-1
+To get the very best performance,
+
+
+58
+00:03:23,904 --> 00:03:28,208 line:-2
+you'll want to use the pixel formats
+that the hardware is optimized for.
+
+
+59
+00:03:28,275 --> 00:03:31,144 line:-1
+Apple Silicon is particularly efficient
+
+
+60
+00:03:31,211 --> 00:03:34,581 line:-2
+at handling BiPlanar formats,
+such as this one.
+
+
+61
+00:03:35,649 --> 00:03:37,384 line:-1
+I'm not going to attempt to read that,
+
+
+62
+00:03:37,451 --> 00:03:40,521 line:-2
+but just look out for the ones
+with BiPlanar in the name.
+
+
+63
+00:03:41,622 --> 00:03:44,925 line:-1
+Your same Core ML code can run on any Mac.
+
+
+64
+00:03:44,992 --> 00:03:48,295 line:-2
+The functionality is available
+on Intel-based Macs too,
+
+
+65
+00:03:48,362 --> 00:03:52,366 line:-2
+but on Apple Silicon,
+Core ML is much faster and more efficient,
+
+
+66
+00:03:52,432 --> 00:03:54,334 line:-2
+and it takes advantage
+of the Neural Engine
+
+
+67
+00:03:54,401 --> 00:03:56,370 line:-1
+and the machine learning accelerators.
+
+
+68
+00:03:57,671 --> 00:04:02,276 line:-2
+Your Core ML code
+should just run on the Neural Engine
+
+
+69
+00:04:02,342 --> 00:04:04,912 line:-1
+without you needing to make any changes.
+
+
+70
+00:04:05,779 --> 00:04:07,915 line:-1
+You might want to check that you're not
+
+
+71
+00:04:07,981 --> 00:04:13,487 line:-2
+explicitly configuring your model
+to run on cpuOnly, or cpuAndGPU.
+
+
+72
+00:04:13,554 --> 00:04:15,722 line:-2
+To be eligible to run
+on the Neural Engine,
+
+
+73
+00:04:15,789 --> 00:04:19,993 line:-2
+you want computeUnits set to "all,"
+which is also the default.
+
+
+74
+00:04:23,397 --> 00:04:26,867 line:-2
+On Apple Silicon, you can also leverage
+the machine learning accelerators
+
+
+75
+00:04:26,934 --> 00:04:29,770 line:-2
+more directly
+using the accelerate framework.
+
+
+76
+00:04:30,671 --> 00:04:31,772 line:-1
+And, of course,
+
+
+77
+00:04:31,839 --> 00:04:36,076 line:-2
+everything in the accelerate,
+compression and SIMD frameworks
+
+
+78
+00:04:36,143 --> 00:04:40,647 line:-2
+all have highly tuned implementations for
+both Intel-based and Apple Silicon Macs.
+
+
+79
+00:04:42,916 --> 00:04:46,920 line:-2
+We have two key pieces of advice
+when it comes to AMP.
+
+
+80
+00:04:46,987 --> 00:04:51,625 line:-2
+First, make sure you're setting
+the quality of service, or QoS,
+
+
+81
+00:04:51,692 --> 00:04:54,094 line:-1
+on all of your work items.
+
+
+82
+00:04:54,161 --> 00:04:58,465 line:-2
+These QoS properties
+are an indication to macOS
+
+
+83
+00:04:58,532 --> 00:05:00,601 line:-1
+of how work should be prioritized.
+
+
+84
+00:05:01,468 --> 00:05:06,206 line:-2
+Whether an action needs to be completed
+at the highest performance possible,
+
+
+85
+00:05:06,273 --> 00:05:10,310 line:-2
+or whether the OS
+should be prioritizing power efficiency.
+
+
+86
+00:05:11,979 --> 00:05:16,016 line:-2
+Setting QoS correctly
+is important on all our platforms,
+
+
+87
+00:05:16,083 --> 00:05:19,987 line:-2
+but it's particularly important
+on platforms with AMP,
+
+
+88
+00:05:20,053 --> 00:05:24,791 line:-2
+as QoS is a factor in determining
+which core a task will be run on.
+
+
+89
+00:05:26,293 --> 00:05:30,764 line:-2
+My second piece of advice
+is to use Grand Central Dispatch.
+
+
+90
+00:05:31,431 --> 00:05:34,635 line:-2
+Again, this is just good advice
+on all our platforms,
+
+
+91
+00:05:34,701 --> 00:05:37,905 line:-2
+but, again, it's particularly important
+on AMP systems.
+
+
+92
+00:05:39,573 --> 00:05:40,607 line:-1
+Why?
+
+
+93
+00:05:42,009 --> 00:05:46,280 line:-2
+Well, dividing up work across
+multiple cores is particularly tricky
+
+
+94
+00:05:46,346 --> 00:05:49,716 line:-2
+when those cores have very different
+performance characteristics.
+
+
+95
+00:05:49,783 --> 00:05:52,252 line:-2
+For optimal performance,
+you need to distribute
+
+
+96
+00:05:52,319 --> 00:05:55,622 line:-2
+the right proportion of the task
+to each thread.
+
+
+97
+00:05:56,623 --> 00:06:00,594 line:-2
+API in Grand Central Dispatch,
+like concurrentPerform,
+
+
+98
+00:06:00,661 --> 00:06:04,398 line:-2
+can help with the hard work
+of distributing tasks optimally
+
+
+99
+00:06:04,464 --> 00:06:06,934 line:-1
+to run in parallel across all cores.
+
+
+100
+00:06:08,602 --> 00:06:10,270 line:-1
+When using API like this,
+
+
+101
+00:06:10,337 --> 00:06:14,474 line:-2
+make sure you're breaking your task
+over a large enough number of iterations.
+
+
+102
+00:06:14,541 --> 00:06:18,045 line:-2
+This will help the system
+to load balance effectively.
+
+
+103
+00:06:20,047 --> 00:06:23,417 line:-2
+These frameworks
+have been in macOS for years,
+
+
+104
+00:06:23,483 --> 00:06:27,955 line:-2
+so there's plenty more documentation
+if you'd like to learn more.
+
+
+105
+00:06:28,021 --> 00:06:31,658 line:-2
+A great starting point
+will be these WWDC sessions.
+
+
+106
+00:06:33,627 --> 00:06:36,864 line:-2
+And the Metal team
+have a couple of new sessions this year
+
+
+107
+00:06:36,930 --> 00:06:39,867 line:-2
+that's all about Metal
+on the Apple Silicon Macs.
+
+
+108
+00:06:41,602 --> 00:06:44,137 line:-1
+Okay, so that was macOS on Apple Silicon.
+
+
+109
+00:06:44,204 --> 00:06:46,573 line:-2
+Now let's move on
+to talking about security.
+
+
+110
+00:06:48,075 --> 00:06:50,744 line:-2
+Building our own Silicon
+has enabled us to develop
+
+
+111
+00:06:50,811 --> 00:06:53,146 line:-1
+awesome security features for the iPhone,
+
+
+112
+00:06:53,213 --> 00:06:56,216 line:-2
+and we're excited to bring
+these protections to the Mac
+
+
+113
+00:06:56,283 --> 00:06:58,952 line:-2
+while making sure not to lose
+any of the capability
+
+
+114
+00:06:59,019 --> 00:07:00,954 line:-1
+that makes a Mac what it is.
+
+
+115
+00:07:01,688 --> 00:07:06,159 line:-2
+These features include write XOR execute,
+kernel integrity protection,
+
+
+116
+00:07:06,226 --> 00:07:09,463 line:-2
+pointer authentication
+and device isolation.
+
+
+117
+00:07:11,398 --> 00:07:16,036 line:-2
+Apple Silicon enforces a restriction
+called write XOR execute.
+
+
+118
+00:07:16,103 --> 00:07:21,475 line:-2
+That means that memory pages
+can be either writable or executable,
+
+
+119
+00:07:21,542 --> 00:07:23,777 line:-1
+but never both at the same time.
+
+
+120
+00:07:24,411 --> 00:07:26,813 line:-2
+Pages that are both
+writable and executable
+
+
+121
+00:07:26,880 --> 00:07:29,550 line:-1
+can be a dangerous security vulnerability.
+
+
+122
+00:07:29,616 --> 00:07:34,688 line:-2
+However, many modern applications
+embed just-in-time compilers
+
+
+123
+00:07:34,755 --> 00:07:38,659 line:-2
+to support languages
+such as Java or JavaScript.
+
+
+124
+00:07:39,359 --> 00:07:42,196 line:-1
+These JIT compilers frequently rely
+
+
+125
+00:07:42,262 --> 00:07:45,666 line:-2
+on memory being
+both writable and executable.
+
+
+126
+00:07:47,868 --> 00:07:52,306 line:-2
+So, we're adding new API
+that allows memory to be quickly toggled
+
+
+127
+00:07:52,372 --> 00:07:55,375 line:-2
+between writable
+and executable permissions.
+
+
+128
+00:07:55,442 --> 00:07:59,246 line:-2
+What's really cool
+is that this works per-thread,
+
+
+129
+00:07:59,313 --> 00:08:04,117 line:-2
+so two threads can see
+different permissions for the same page.
+
+
+130
+00:08:04,184 --> 00:08:07,955 line:-2
+This makes it easy to adopt
+in multi-threaded JITs.
+
+
+131
+00:08:08,021 --> 00:08:12,726 line:-2
+And it's going to enable JIT compilers
+that are both fast and secure.
+
+
+132
+00:08:13,560 --> 00:08:17,164 line:-2
+Apple Silicon has hardware support
+in the memory controller
+
+
+133
+00:08:17,231 --> 00:08:20,133 line:-1
+to make the OS kernel code immutable.
+
+
+134
+00:08:20,200 --> 00:08:22,569 line:-2
+Once the kernel
+has been loaded into memory,
+
+
+135
+00:08:22,636 --> 00:08:27,774 line:-2
+kernel integrity protection prevents pages
+containing kernel code from being modified
+
+
+136
+00:08:27,841 --> 00:08:30,677 line:-2
+or additional pages
+from being made executable.
+
+
+137
+00:08:30,744 --> 00:08:32,111 line:-1
+This blocks attacks
+
+
+138
+00:08:32,179 --> 00:08:35,749 line:-2
+that would inject new code into the kernel
+while it's running.
+
+
+139
+00:08:37,317 --> 00:08:40,854 line:-2
+Pointer authentication
+prevents misuse of pointers,
+
+
+140
+00:08:40,921 --> 00:08:45,225 line:-2
+and it can harden against attacks
+such as return-oriented programming.
+
+
+141
+00:08:45,292 --> 00:08:51,098 line:-2
+Unused bits in 64-bit pointers are used
+to store a pointer authentication code,
+
+
+142
+00:08:51,164 --> 00:08:53,433 line:-2
+which is then checked
+when the pointer is used.
+
+
+143
+00:08:54,501 --> 00:08:57,971 line:-2
+Right now,
+we're enabling use of this in our kernel,
+
+
+144
+00:08:58,038 --> 00:09:00,707 line:-1
+system applications and system services.
+
+
+145
+00:09:00,774 --> 00:09:04,545 line:-2
+We're not yet ready for you
+to start distributing your applications
+
+
+146
+00:09:04,611 --> 00:09:06,180 line:-1
+with pointer authentication.
+
+
+147
+00:09:06,246 --> 00:09:08,549 line:-1
+But if you're interested to experiment,
+
+
+148
+00:09:08,615 --> 00:09:12,486 line:-2
+then there's a boot-arg that you can set
+so you can try this out for yourself.
+
+
+149
+00:09:14,188 --> 00:09:19,593 line:-2
+PCIe devices access system memory
+through an IOMMU.
+
+
+150
+00:09:20,294 --> 00:09:21,895 line:-1
+On Intel-based Macs,
+
+
+151
+00:09:21,962 --> 00:09:25,866 line:-2
+macOS gives all devices
+a shared view of system memory.
+
+
+152
+00:09:27,801 --> 00:09:32,806 line:-2
+On Apple Silicon, all devices are given
+separate memory mappings.
+
+
+153
+00:09:32,873 --> 00:09:35,642 line:-2
+This restricts devices
+to only accessing memory
+
+
+154
+00:09:35,709 --> 00:09:37,077 line:-1
+that they were intended to.
+
+
+155
+00:09:37,144 --> 00:09:40,814 line:-2
+And it prevents devices
+from snooping on each other.
+
+
+156
+00:09:42,749 --> 00:09:46,954 line:-2
+To set up a DMA transfer
+in a PCIe device driver,
+
+
+157
+00:09:47,020 --> 00:09:50,557 line:-2
+you should use the IOMapper
+and IODMACommand API.
+
+
+158
+00:09:51,725 --> 00:09:55,128 line:-2
+Make sure you're getting
+the IOMapper from your device
+
+
+159
+00:09:55,195 --> 00:09:58,866 line:-2
+and then passing that
+when you're configuring an IODMACommand.
+
+
+160
+00:10:01,134 --> 00:10:03,871 line:0
+Some older drivers don't use this API
+
+
+161
+00:10:03,937 --> 00:10:08,642 line:0
+and just use getPhysicalSegment
+on ioMemoryDescriptor directly.
+
+
+162
+00:10:08,709 --> 00:10:10,444 line:-1
+That's not going to work,
+
+
+163
+00:10:10,511 --> 00:10:13,780 line:-2
+and those drivers will need updating
+to the newer API
+
+
+164
+00:10:13,847 --> 00:10:16,550 line:-1
+before porting over to the new platform.
+
+
+165
+00:10:16,617 --> 00:10:19,152 line:-1
+Now, you'd only be using this old API
+
+
+166
+00:10:19,219 --> 00:10:22,523 line:-2
+in an IOKit driver
+written with a kernel extension.
+
+
+167
+00:10:24,124 --> 00:10:26,660 line:-1
+Kernel extensions are still supported,
+
+
+168
+00:10:26,727 --> 00:10:28,829 line:-2
+but you're going to see
+increased inconvenience
+
+
+169
+00:10:28,896 --> 00:10:32,199 line:-2
+for both you, as a developer,
+and for your users.
+
+
+170
+00:10:32,266 --> 00:10:34,535 line:-2
+The last three security features
+I introduced
+
+
+171
+00:10:34,601 --> 00:10:36,870 line:-1
+all impact kernel extension development.
+
+
+172
+00:10:37,838 --> 00:10:40,741 line:-2
+To be able to support
+kernel integrity protection,
+
+
+173
+00:10:40,807 --> 00:10:43,944 line:-2
+we had to change
+how macOS loads kernel extensions.
+
+
+174
+00:10:44,945 --> 00:10:47,147 line:-1
+Which means this now requires a reboot.
+
+
+175
+00:10:48,282 --> 00:10:49,816 line:-1
+And point authentication.
+
+
+176
+00:10:49,883 --> 00:10:51,952 line:-1
+If you develop a kernel extension,
+
+
+177
+00:10:52,019 --> 00:10:55,689 line:-2
+you are going to need
+to enable point authentication.
+
+
+178
+00:10:55,756 --> 00:10:58,158 line:-2
+And as we continue
+to improve the platform,
+
+
+179
+00:10:58,225 --> 00:11:01,862 line:-2
+you should expect to see
+more friction around kernel extensions.
+
+
+180
+00:11:02,963 --> 00:11:05,399 line:-2
+We introduced DriverKit
+last year in Catalina
+
+
+181
+00:11:05,465 --> 00:11:09,236 line:-2
+to enable you to build drivers
+that run in user space,
+
+
+182
+00:11:09,303 --> 00:11:12,239 line:-2
+which improves system stability
+and security.
+
+
+183
+00:11:13,140 --> 00:11:16,410 line:-2
+If you're not already looking into
+DriverKit for any drivers you develop,
+
+
+184
+00:11:16,476 --> 00:11:18,512 line:-1
+then now's the time to do so.
+
+
+185
+00:11:19,213 --> 00:11:21,782 line:0
+Here are some resources
+to help you learn more
+
+
+186
+00:11:21,849 --> 00:11:23,851 line:0
+and get started with DriverKit.
+
+
+187
+00:11:24,918 --> 00:11:26,820 line:-1
+Okay, that was security.
+
+
+188
+00:11:26,887 --> 00:11:30,624 line:-2
+Now, let's take a look
+at application support on this platform.
+
+
+189
+00:11:31,458 --> 00:11:37,698 line:0
+Rosetta is our translator
+to run existing x86_64 applications.
+
+
+190
+00:11:37,764 --> 00:11:43,036 line:0
+It runs all kinds of apps:
+macOS apps, Catalyst apps, games
+
+
+191
+00:11:43,103 --> 00:11:47,074 line:0
+and complicated apps like web browsers
+with embedded JIT compilers.
+
+
+192
+00:11:48,909 --> 00:11:53,647 line:0
+Apps using Metal will directly generate
+the right commands for the Apple GPU,
+
+
+193
+00:11:53,714 --> 00:11:58,552 line:0
+and translated apps that use Core ML
+get to run on the Neural Engine.
+
+
+194
+00:11:59,286 --> 00:12:01,822 line:-2
+The performance and compatibility
+of Rosetta
+
+
+195
+00:12:01,889 --> 00:12:04,224 line:-1
+was only possible through Apple Silicon
+
+
+196
+00:12:04,291 --> 00:12:07,094 line:-2
+and software teams
+working closely together.
+
+
+197
+00:12:08,161 --> 00:12:10,097 line:-1
+Now, Rosetta sets to work
+
+
+198
+00:12:10,163 --> 00:12:13,800 line:-2
+right from the moment
+your application is being installed.
+
+
+199
+00:12:13,867 --> 00:12:16,737 line:-2
+Triggered by the App Store
+or the package installer,
+
+
+200
+00:12:16,803 --> 00:12:18,605 line:-1
+Rosetta will start translating
+
+
+201
+00:12:18,672 --> 00:12:21,808 line:-2
+all the executable code
+in your application.
+
+
+202
+00:12:21,875 --> 00:12:24,845 line:-2
+If your application doesn't use
+one of our installers,
+
+
+203
+00:12:24,912 --> 00:12:28,815 line:-2
+then you may see an extra bounce or two
+in the dock the first time it's launched,
+
+
+204
+00:12:28,882 --> 00:12:30,984 line:-1
+as we'll start translating it then.
+
+
+205
+00:12:32,286 --> 00:12:36,123 line:-2
+And security is deeply integrated
+into this translation process.
+
+
+206
+00:12:37,024 --> 00:12:40,594 line:-2
+Translations of your application
+are all code-signed,
+
+
+207
+00:12:40,661 --> 00:12:46,133 line:-2
+tied to a single machine, securely stored,
+and get refreshed over OS updates.
+
+
+208
+00:12:47,634 --> 00:12:51,905 line:-2
+When your application is launched,
+we load our stored translation.
+
+
+209
+00:12:51,972 --> 00:12:56,376 line:-2
+Rosetta then fully emulates
+a x86_64 process,
+
+
+210
+00:12:56,443 --> 00:12:58,846 line:-1
+right down to the system call interface.
+
+
+211
+00:12:58,912 --> 00:13:03,150 line:-2
+Everything in the process is translated,
+including all system frameworks.
+
+
+212
+00:13:03,817 --> 00:13:08,388 line:-2
+If Rosetta newly encounters code that
+haven't been translated at install time,
+
+
+213
+00:13:08,455 --> 00:13:10,324 line:-1
+then we'll compile it on the fly.
+
+
+214
+00:13:11,191 --> 00:13:13,794 line:-2
+And Rosetta maintains the security
+you'd expect
+
+
+215
+00:13:13,861 --> 00:13:15,863 line:-1
+with hardened run-time protections,
+
+
+216
+00:13:15,929 --> 00:13:19,399 line:-2
+all fully enforced
+on processes running in Rosetta.
+
+
+217
+00:13:20,000 --> 00:13:22,269 line:-2
+Now, hopefully,
+everything should just work,
+
+
+218
+00:13:22,336 --> 00:13:25,239 line:-2
+but if you do need to debug
+or profile your app,
+
+
+219
+00:13:25,305 --> 00:13:27,107 line:-1
+well, that's all fully supported.
+
+
+220
+00:13:27,174 --> 00:13:31,411 line:-2
+You can build and run translated apps
+directly from Xcode,
+
+
+221
+00:13:31,478 --> 00:13:33,313 line:-1
+and you can profile from Instruments.
+
+
+222
+00:13:33,380 --> 00:13:37,184 line:-2
+You could also use command-line tools
+like LLDB.
+
+
+223
+00:13:37,751 --> 00:13:39,920 line:-2
+There are some differences
+between processes
+
+
+224
+00:13:39,987 --> 00:13:43,056 line:-2
+running on an Intel-based
+and Apple Silicon Mac.
+
+
+225
+00:13:43,123 --> 00:13:49,062 line:-2
+Page size, memory ordering rules,
+the frequency of mach_absolute_time
+
+
+226
+00:13:49,129 --> 00:13:52,132 line:-2
+and some details
+of floating point behavior,
+
+
+227
+00:13:52,199 --> 00:13:53,667 line:-1
+these all change.
+
+
+228
+00:13:54,768 --> 00:13:56,904 line:-1
+For applications running in Rosetta,
+
+
+229
+00:13:56,970 --> 00:14:01,808 line:-2
+we've made sure that everything matches
+behavior on an Intel-based Mac.
+
+
+230
+00:14:01,875 --> 00:14:07,314 line:-2
+Now, Rosetta does not support
+the AVX vector extensions to x86.
+
+
+231
+00:14:08,048 --> 00:14:12,219 line:-2
+Applications should already be checking
+whether the machine supports AVX
+
+
+232
+00:14:12,286 --> 00:14:14,021 line:-1
+before trying to use it.
+
+
+233
+00:14:14,087 --> 00:14:17,291 line:-2
+There's a sysctl you can use
+if you need to do so.
+
+
+234
+00:14:18,592 --> 00:14:23,597 line:-2
+Also, you will see some limitations
+running on the Developer Transition Kit,
+
+
+235
+00:14:23,664 --> 00:14:27,334 line:-2
+as there are some compatibility
+restrictions on that hardware.
+
+
+236
+00:14:27,401 --> 00:14:30,237 line:-2
+The DTK release notes
+have more information.
+
+
+237
+00:14:30,671 --> 00:14:34,308 line:-2
+And finally,
+if your application does need to know
+
+
+238
+00:14:34,374 --> 00:14:36,844 line:-2
+when it's being run in Rosetta,
+then we have added
+
+
+239
+00:14:36,910 --> 00:14:40,380 line:-2
+a sysctl.proc_translated
+to check for this.
+
+
+240
+00:14:42,883 --> 00:14:44,351 line:-1
+Okay, that's Rosetta.
+
+
+241
+00:14:44,418 --> 00:14:46,820 line:-1
+Of course, what your customers really want
+
+
+242
+00:14:46,887 --> 00:14:49,790 line:-2
+is a native arm64 port
+of your application.
+
+
+243
+00:14:50,390 --> 00:14:53,393 line:0
+We have a ton of great information for you
+on porting
+
+
+244
+00:14:53,460 --> 00:14:57,431 line:0
+and optimizing your applications
+on the developer documentation website.
+
+
+245
+00:14:58,265 --> 00:15:03,136 line:0
+And there's a whole session full of advice
+around porting your applications,
+
+
+246
+00:15:03,203 --> 00:15:06,573 line:0
+so please go check that out,
+and please get started on a native port.
+
+
+247
+00:15:07,941 --> 00:15:09,276 line:0
+And for the first time,
+
+
+248
+00:15:09,343 --> 00:15:14,114 line:0
+compatible iPad and iPhone apps
+will also be available on the Mac.
+
+
+249
+00:15:14,181 --> 00:15:17,217 line:0
+Again, we have a whole session on that
+for you to learn more.
+
+
+250
+00:15:17,718 --> 00:15:22,155 line:-2
+I hope I've given you some useful insights
+into macOS on Apple Silicon,
+
+
+251
+00:15:22,222 --> 00:15:25,592 line:-2
+the new security enhancements
+and application support.
+
+
+252
+00:15:26,226 --> 00:15:27,794 line:-1
+I'll hand over now to Anand,
+
+
+253
+00:15:27,861 --> 00:15:30,731 line:-2
+who is going to dive into
+boot architecture of these systems.
+
+
+254
+00:15:30,797 --> 00:15:31,965 line:-1
+Thank you.
+
+
+255
+00:15:32,332 --> 00:15:36,637 line:0
+Thanks, Gavin. Transition to Apple Silicon
+has been a great adventure,
+
+
+256
+00:15:36,703 --> 00:15:40,140 line:0
+and boot process
+is an essential part of it.
+
+
+257
+00:15:40,207 --> 00:15:42,376 line:0
+I'm excited to tell you all about it.
+
+
+258
+00:15:43,110 --> 00:15:47,781 line:-2
+This part of the session will give you
+an overview of the new boot process.
+
+
+259
+00:15:47,848 --> 00:15:52,252 line:-2
+We will talk about changes
+to the start-up and log-in experience,
+
+
+260
+00:15:52,319 --> 00:15:54,855 line:-1
+changes to macOS Recovery Mode
+
+
+261
+00:15:54,922 --> 00:15:59,026 line:-2
+and enhancements to Boot Security
+and data protection layers of the system.
+
+
+262
+00:16:00,894 --> 00:16:03,664 line:-2
+On Apple Silicon Macs,
+the boot process is based on
+
+
+263
+00:16:03,730 --> 00:16:06,567 line:-2
+Secure Boot architecture
+of iOS and iPadOS.
+
+
+264
+00:16:07,267 --> 00:16:10,337 line:-2
+Secure Boot ensures that
+each start-up component
+
+
+265
+00:16:10,404 --> 00:16:13,240 line:-1
+is cryptographically signed by Apple
+
+
+266
+00:16:13,307 --> 00:16:18,378 line:-2
+and that the boot happens only after
+the verification of the chain of trust.
+
+
+267
+00:16:18,879 --> 00:16:22,649 line:-2
+This offers much stronger security
+at boot time on macOS.
+
+
+268
+00:16:24,017 --> 00:16:26,587 line:-1
+In addition, we have added support
+
+
+269
+00:16:26,653 --> 00:16:31,758 line:-2
+to boot from multiple macOS installed
+on internal or external volumes,
+
+
+270
+00:16:31,825 --> 00:16:37,030 line:-2
+as well as enabled booting
+any version of macOS signed by Apple.
+
+
+271
+00:16:37,631 --> 00:16:41,602 line:-2
+This will allow future macOS
+to continue booting older versions.
+
+
+272
+00:16:42,369 --> 00:16:46,206 line:-2
+Lastly, we have introduced
+new macOS Recovery flows.
+
+
+273
+00:16:46,273 --> 00:16:49,276 line:-2
+So how does
+start-up on Apple Silicon Macs work?
+
+
+274
+00:16:50,310 --> 00:16:53,881 line:-2
+The start-up experience
+is much simpler than before.
+
+
+275
+00:16:53,947 --> 00:16:56,416 line:-1
+All of the start-up keys are now unified.
+
+
+276
+00:16:58,585 --> 00:17:02,623 line:-2
+Just press and hold the TouchID button
+on your Mac portable
+
+
+277
+00:17:02,689 --> 00:17:06,792 line:-2
+or press Power button on your desktop
+to launch Startup Options.
+
+
+278
+00:17:06,859 --> 00:17:11,064 line:-2
+Startup Options
+is part of the new macOS Recovery UI.
+
+
+279
+00:17:11,131 --> 00:17:12,965 line:-1
+Once you are in Startup Options,
+
+
+280
+00:17:13,032 --> 00:17:18,438 line:-2
+you can access features and tools
+using the UI or shortcut keys.
+
+
+281
+00:17:19,473 --> 00:17:21,108 line:-1
+Here's what it looks like.
+
+
+282
+00:17:21,175 --> 00:17:24,978 line:-1
+This is macOS Recovery Startup Options UI
+
+
+283
+00:17:25,045 --> 00:17:28,916 line:-2
+with integrated Startup Manager
+on Apple Silicon Macs.
+
+
+284
+00:17:29,616 --> 00:17:32,119 line:-1
+macOS Recovery is your one-stop shop
+
+
+285
+00:17:32,186 --> 00:17:35,522 line:-2
+for all things related to startup
+and recovery.
+
+
+286
+00:17:35,589 --> 00:17:38,225 line:-1
+It's transformed with new user experience.
+
+
+287
+00:17:38,292 --> 00:17:42,563 line:-2
+Two features worth highlighting
+are Startup Disk and Mac Sharing Mode.
+
+
+288
+00:17:43,063 --> 00:17:45,132 line:-1
+Let's start with Mac Sharing Mode first.
+
+
+289
+00:17:45,199 --> 00:17:47,901 line:-2
+Mac Sharing Mode
+replaces Target Disk Mode.
+
+
+290
+00:17:48,435 --> 00:17:53,807 line:-2
+It uses SMB file sharing
+to provide file-level access to user data.
+
+
+291
+00:17:54,675 --> 00:17:57,678 line:-2
+User authentication is required
+to enable this service.
+
+
+292
+00:17:58,312 --> 00:18:00,214 line:-1
+Next, Startup Disk.
+
+
+293
+00:18:01,014 --> 00:18:05,853 line:-2
+macOS Recovery Startup Disk
+focuses on selecting the security policy
+
+
+294
+00:18:05,919 --> 00:18:09,122 line:-2
+for each of the volume
+with macOS installed.
+
+
+295
+00:18:09,189 --> 00:18:13,093 line:-2
+You can choose from full
+or reduced security, as shown here.
+
+
+296
+00:18:13,694 --> 00:18:15,362 line:-1
+So, what are the security modes?
+
+
+297
+00:18:16,697 --> 00:18:19,433 line:-2
+In full security mode,
+new Apple Silicon Macs
+
+
+298
+00:18:19,499 --> 00:18:23,303 line:-2
+enjoy the same
+best-in-class security technologies
+
+
+299
+00:18:23,370 --> 00:18:25,472 line:-1
+that exist on iPhone.
+
+
+300
+00:18:25,539 --> 00:18:27,908 line:-1
+This mode is enabled by default.
+
+
+301
+00:18:27,975 --> 00:18:31,111 line:-2
+In addition,
+you can now boot from external disk
+
+
+302
+00:18:31,178 --> 00:18:33,981 line:-2
+without downgrading
+the security of the system.
+
+
+303
+00:18:34,047 --> 00:18:35,749 line:-1
+We think this is great.
+
+
+304
+00:18:36,350 --> 00:18:38,452 line:-1
+By contrast, reduced security
+
+
+305
+00:18:38,519 --> 00:18:42,990 line:-2
+provides flexibility
+and configurability of your Mac,
+
+
+306
+00:18:43,690 --> 00:18:45,259 line:-1
+and it keeps the Mac what it is.
+
+
+307
+00:18:46,360 --> 00:18:49,596 line:-2
+Reduced security allows you
+to run any version of macOS,
+
+
+308
+00:18:49,663 --> 00:18:53,433 line:-2
+including the versions
+that are no longer signed by Apple.
+
+
+309
+00:18:53,500 --> 00:18:58,505 line:-2
+In addition, users that want to install
+notarized kernel extensions
+
+
+310
+00:18:58,572 --> 00:19:01,508 line:-1
+must enable this mode in order to do so.
+
+
+311
+00:19:02,409 --> 00:19:07,414 line:-2
+To enable reduced security, users must
+authenticate in macOS Recovery first.
+
+
+312
+00:19:08,415 --> 00:19:12,319 line:-2
+Using existing security configuration tool
+CSRUtil,
+
+
+313
+00:19:12,386 --> 00:19:16,890 line:-2
+you can also configure the security
+of your Mac to support specific workflows.
+
+
+314
+00:19:17,591 --> 00:19:22,863 line:-2
+For example, you might want to do this
+if you develop kernel extensions,
+
+
+315
+00:19:22,930 --> 00:19:27,701 line:-2
+or if you are a researcher or a hobbyist
+exploring the Apple platform.
+
+
+316
+00:19:28,936 --> 00:19:33,106 line:-2
+CSRUtil provides many norms.
+Few of them are highlighted here.
+
+
+317
+00:19:34,074 --> 00:19:37,010 line:-1
+Now, on Intel-based Macs,
+
+
+318
+00:19:37,077 --> 00:19:40,881 line:-2
+the active security policy
+applies to the entire system.
+
+
+319
+00:19:41,515 --> 00:19:45,953 line:-2
+So, if you have macOS
+installed on multiple volumes,
+
+
+320
+00:19:46,019 --> 00:19:50,257 line:-2
+downgrading the security of one
+affects all of the installations.
+
+
+321
+00:19:50,791 --> 00:19:53,393 line:-1
+However, Apple Silicon Macs
+
+
+322
+00:19:53,460 --> 00:19:58,465 line:-2
+maintain a separate security policy
+for each macOS installation.
+
+
+323
+00:19:58,532 --> 00:20:03,737 line:-2
+You can downgrade security for an OS
+being used for development or testing
+
+
+324
+00:20:03,804 --> 00:20:08,876 line:-2
+and still have a full security
+macOS installation for daily use.
+
+
+325
+00:20:08,942 --> 00:20:11,445 line:-1
+Let's move on and talk about new log-in.
+
+
+326
+00:20:13,313 --> 00:20:15,082 line:-1
+This is gorgeous.
+
+
+327
+00:20:15,148 --> 00:20:19,686 line:-2
+On Apple Silicon Macs,
+macOS has a unified log-in experience.
+
+
+328
+00:20:19,753 --> 00:20:23,457 line:-2
+It supports a richer UI
+with accelerated graphics
+
+
+329
+00:20:23,524 --> 00:20:26,927 line:-2
+that is also consistent
+with macOS look and feel.
+
+
+330
+00:20:26,994 --> 00:20:30,631 line:-2
+This experience is made possible
+by fully booting macOS
+
+
+331
+00:20:30,697 --> 00:20:33,534 line:-2
+without requiring the user
+to unlock the system.
+
+
+332
+00:20:34,001 --> 00:20:38,472 line:-2
+The unified log-in experience
+allows the introduction of new features
+
+
+333
+00:20:38,539 --> 00:20:40,174 line:-1
+even when FileVault is on.
+
+
+334
+00:20:41,141 --> 00:20:44,077 line:-1
+For example, it now has built-in support
+
+
+335
+00:20:44,144 --> 00:20:49,416 line:-2
+for authentication with CCID-
+and PIV-compatible smart cards,
+
+
+336
+00:20:49,483 --> 00:20:53,520 line:-2
+as well as VoiceOver support
+for accessibility improvements.
+
+
+337
+00:20:54,021 --> 00:20:55,956 line:-1
+Let's touch on data protection.
+
+
+338
+00:20:56,423 --> 00:21:00,694 line:-2
+Similar to T2 Macs,
+macOS on Apple Silicon Macs
+
+
+339
+00:21:00,761 --> 00:21:04,298 line:-2
+supports full data volume encryption
+by default.
+
+
+340
+00:21:04,364 --> 00:21:08,569 line:-2
+When FileVault is on, this encryption
+is tied to user's credentials.
+
+
+341
+00:21:10,437 --> 00:21:13,874 line:-2
+Apple Silicon Macs
+also support secure hibernation.
+
+
+342
+00:21:14,975 --> 00:21:17,845 line:-2
+In addition to preserving
+the desktop and applications
+
+
+343
+00:21:17,911 --> 00:21:19,413 line:-1
+during a low-battery event,
+
+
+344
+00:21:19,479 --> 00:21:24,351 line:-2
+secure hibernation provides full
+at-rest protection of the memory contents
+
+
+345
+00:21:24,418 --> 00:21:27,154 line:-2
+by offering integrity
+and anti-replay protection.
+
+
+346
+00:21:27,588 --> 00:21:30,390 line:-2
+Transition to Apple Silicon
+made this feature possible.
+
+
+347
+00:21:30,924 --> 00:21:34,828 line:-2
+Let's talk about how the recovery
+of Apple Silicon Macs will work.
+
+
+348
+00:21:35,696 --> 00:21:38,999 line:-2
+At a high level,
+software is composed of two components:
+
+
+349
+00:21:39,066 --> 00:21:41,468 line:-1
+macOS and macOS Recovery.
+
+
+350
+00:21:41,535 --> 00:21:43,670 line:-1
+If macOS is not accessible,
+
+
+351
+00:21:43,737 --> 00:21:47,674 line:-2
+you can use macOS Recovery
+to reinstall and recover your system.
+
+
+352
+00:21:48,308 --> 00:21:52,212 line:-2
+But what happens when macOS Recovery
+itself is not accessible?
+
+
+353
+00:21:53,080 --> 00:21:56,650 line:-2
+On Intel-based Macs,
+you can use Internet Recovery.
+
+
+354
+00:21:57,985 --> 00:22:01,955 line:-2
+On Apple Silicon Macs,
+we are introducing System Recovery.
+
+
+355
+00:22:02,022 --> 00:22:06,860 line:-2
+It's a minimal macOS environment
+installed in a separate hidden container.
+
+
+356
+00:22:07,528 --> 00:22:12,866 line:-2
+It enables you to restore your Mac
+by reinstalling macOS and macOS Recovery.
+
+
+357
+00:22:14,902 --> 00:22:18,605 line:-2
+Apple Configurator 2
+will continue to be supported.
+
+
+358
+00:22:18,672 --> 00:22:20,474 line:-1
+It will allow you to recover your Mac
+
+
+359
+00:22:20,541 --> 00:22:23,310 line:-2
+when System Recovery itself
+is not functional.
+
+
+360
+00:22:23,944 --> 00:22:28,115 line:-2
+You can erase and reinstall macOS,
+including System Recovery.
+
+
+361
+00:22:28,949 --> 00:22:33,554 line:-2
+To wrap up, in this session,
+we touched on Apple Silicon features,
+
+
+362
+00:22:33,620 --> 00:22:36,156 line:-1
+including security enhancements,
+
+
+363
+00:22:36,223 --> 00:22:39,893 line:-2
+and how macOS application
+can take advantage of them.
+
+
+364
+00:22:40,460 --> 00:22:43,463 line:-2
+We also went over
+application compatibility
+
+
+365
+00:22:43,530 --> 00:22:45,566 line:-1
+and introduced Rosetta.
+
+
+366
+00:22:45,632 --> 00:22:50,404 line:-2
+And finally, we described
+new boot features and recovery process.
+
+
+367
+00:22:50,871 --> 00:22:55,509 line:-2
+Transition to Apple Silicon
+brings significant improvements to macOS.
+
+
+368
+00:22:55,576 --> 00:22:59,346 line:-2
+We hope this session provided you
+with good insights into them.
+
+
+369
+00:22:59,913 --> 00:23:02,883 line:-2
+We look forward to seeing
+how you take advantage
+
+
+370
+00:23:02,950 --> 00:23:06,253 line:-2
+of these improvements
+in your own application.
+
+
+371
+00:23:06,320 --> 00:23:07,788 line:-1
+Thank you very much for joining us.
+

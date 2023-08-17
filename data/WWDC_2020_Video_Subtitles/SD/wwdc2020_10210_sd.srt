@@ -1,0 +1,3542 @@
+1
+00:00:03,937 --> 00:00:06,440 line:-1
+Hello and welcome to WWDC.
+
+
+2
+00:00:07,674 --> 00:00:11,011 line:0
+Hi, my name is Kevin, and I'll be
+joined later by my colleague, Madhu.
+
+
+3
+00:00:11,411 --> 00:00:14,214 line:0
+Today we'll be going over
+what's new in DriverKit.
+
+
+4
+00:00:14,281 --> 00:00:18,418 line:-2
+First I will give a brief recap
+of system extensions with DriverKit.
+
+
+5
+00:00:20,153 --> 00:00:23,357 line:-2
+Then I will talk about the new
+PCIDriverKit framework.
+
+
+6
+00:00:25,125 --> 00:00:26,560 line:-1
+Then I'll hand it over to Madhu,
+
+
+7
+00:00:26,627 --> 00:00:29,630 line:-2
+who will be going in-depth
+on writing a SCSI controller driver
+
+
+8
+00:00:29,696 --> 00:00:33,600 line:-2
+using PCIDriverKit in the new
+SCSIControllerDriverKit framework.
+
+
+9
+00:00:35,035 --> 00:00:38,038 line:-2
+Then she'll be showing us a demo
+of these new frameworks in action.
+
+
+10
+00:00:39,740 --> 00:00:41,942 line:-2
+Finally I will wrap things up
+with a summary
+
+
+11
+00:00:42,009 --> 00:00:44,278 line:-1
+of everything that we went over today.
+
+
+12
+00:00:44,344 --> 00:00:46,847 line:0
+Last year, we introduced DriverKit,
+
+
+13
+00:00:46,914 --> 00:00:49,183 line:0
+a replacement for IOKit device drivers.
+
+
+14
+00:00:50,317 --> 00:00:53,453 line:0
+DriverKit brought a new way
+to extend the operating system
+
+
+15
+00:00:53,520 --> 00:00:55,989 line:0
+that is more reliable, more secure,
+
+
+16
+00:00:56,056 --> 00:00:57,758 line:0
+and easier to develop.
+
+
+17
+00:00:58,559 --> 00:01:02,863 line:0
+Driver extensions allow developers to make
+powerful and innovative apps
+
+
+18
+00:01:02,930 --> 00:01:06,066 line:0
+without the pitfalls of writing code
+that runs in the kernel.
+
+
+19
+00:01:06,934 --> 00:01:09,870 line:-2
+For an in-depth look at DriverKit
+and how it works,
+
+
+20
+00:01:09,937 --> 00:01:14,308 line:-2
+please check out last year's video titled
+"System Extensions and DriverKit"
+
+
+21
+00:01:14,374 --> 00:01:16,210 line:-1
+on the Apple Developer website.
+
+
+22
+00:01:17,177 --> 00:01:19,646 line:-2
+DriverKit system extensions
+run in user space,
+
+
+23
+00:01:19,713 --> 00:01:21,048 line:-1
+not kernel space.
+
+
+24
+00:01:21,982 --> 00:01:23,450 line:-1
+Like other apps,
+
+
+25
+00:01:23,517 --> 00:01:26,220 line:-2
+they have to follow the rules
+of the system-security policy.
+
+
+26
+00:01:26,787 --> 00:01:27,988 line:-1
+Unlike other apps,
+
+
+27
+00:01:28,055 --> 00:01:32,960 line:-2
+system extensions are granted
+special privileges to do special jobs.
+
+
+28
+00:01:33,026 --> 00:01:35,495 line:-1
+For example, they have direct control
+
+
+29
+00:01:35,562 --> 00:01:37,364 line:-1
+of specific hardware devices,
+
+
+30
+00:01:37,431 --> 00:01:40,100 line:-2
+or special APIs to interface
+directly with the kernel.
+
+
+31
+00:01:41,168 --> 00:01:43,871 line:-2
+Because DriverKit drivers
+are in user space,
+
+
+32
+00:01:43,937 --> 00:01:45,506 line:-1
+their access is limited
+
+
+33
+00:01:45,572 --> 00:01:49,243 line:-2
+and their resources are separate
+from the rest of the system's resources.
+
+
+34
+00:01:50,644 --> 00:01:52,746 line:-1
+When a driver extension crashes,
+
+
+35
+00:01:52,813 --> 00:01:55,749 line:-2
+the kernel and the rest of the system
+can keep running.
+
+
+36
+00:01:57,317 --> 00:01:59,520 line:-1
+The development cycle is much faster,
+
+
+37
+00:01:59,586 --> 00:02:03,357 line:-2
+where you can build, test and debug
+on one machine,
+
+
+38
+00:02:04,024 --> 00:02:07,094 line:-2
+whereas kernel extensions
+bring along security implications.
+
+
+39
+00:02:07,160 --> 00:02:10,264 line:-2
+A bug in a kext can compromise
+the entire kernel.
+
+
+40
+00:02:10,330 --> 00:02:13,100 line:-2
+A kext has access
+to all of the computer's resources,
+
+
+41
+00:02:13,166 --> 00:02:16,537 line:-2
+not just a specific piece of hardware
+or resource.
+
+
+42
+00:02:16,603 --> 00:02:18,472 line:-1
+When a kernel extension crashes,
+
+
+43
+00:02:18,539 --> 00:02:21,575 line:-2
+the kernel panics
+and takes down the entire machine.
+
+
+44
+00:02:22,209 --> 00:02:24,344 line:-1
+Debugging and development can be slow.
+
+
+45
+00:02:24,411 --> 00:02:25,913 line:-1
+We need multiple machines,
+
+
+46
+00:02:25,979 --> 00:02:28,515 line:-1
+and we'll need to reboot on every crash.
+
+
+47
+00:02:28,582 --> 00:02:32,819 line:-2
+Another great benefit to driver extensions
+is installation is much easier.
+
+
+48
+00:02:33,654 --> 00:02:36,456 line:-2
+Your driver extension
+stays in your app bundle.
+
+
+49
+00:02:36,523 --> 00:02:40,060 line:-2
+You should not copy your driver extension
+directly to any system folders.
+
+
+50
+00:02:41,261 --> 00:02:44,331 line:-2
+To install your app, you'll use
+SystemExtensions framework
+
+
+51
+00:02:44,398 --> 00:02:46,667 line:-1
+and create an activation request
+
+
+52
+00:02:46,733 --> 00:02:49,570 line:-2
+to request the extension
+to be made available to the system.
+
+
+53
+00:02:50,704 --> 00:02:53,607 line:-2
+A system administrator would need
+to approve this request.
+
+
+54
+00:02:54,975 --> 00:02:57,744 line:-2
+Most apps should create
+an activation request during app launch
+
+
+55
+00:02:57,811 --> 00:03:00,447 line:-2
+so the extension is made available
+right away.
+
+
+56
+00:03:00,514 --> 00:03:03,650 line:-2
+However, you may wish
+to activate your system extension
+
+
+57
+00:03:03,717 --> 00:03:06,286 line:-2
+at different points
+in your app's life cycle,
+
+
+58
+00:03:06,353 --> 00:03:09,189 line:-2
+such as after the user has agreed
+to a license agreement,
+
+
+59
+00:03:09,256 --> 00:03:12,826 line:-2
+or made an in-app purchase if
+that's required for your system extension.
+
+
+60
+00:03:14,695 --> 00:03:17,564 line:-2
+You can get started writing
+DriverKit drivers right away,
+
+
+61
+00:03:17,631 --> 00:03:19,533 line:-2
+before they're ready
+to go into the App Store,
+
+
+62
+00:03:19,600 --> 00:03:21,101 line:-1
+without a provisioning profile.
+
+
+63
+00:03:21,969 --> 00:03:26,106 line:-2
+To do this, you'll need to disable
+system integrity protection,
+
+
+64
+00:03:26,173 --> 00:03:28,575 line:-1
+sign your dext to run locally,
+
+
+65
+00:03:28,642 --> 00:03:32,012 line:-2
+and be sure to include all
+the entitlements needed for your driver.
+
+
+66
+00:03:33,213 --> 00:03:34,948 line:-1
+Last year, when DriverKit first launched,
+
+
+67
+00:03:35,015 --> 00:03:36,783 line:-1
+there was support for USB,
+
+
+68
+00:03:36,850 --> 00:03:39,186 line:-1
+serial, network interface controllers,
+
+
+69
+00:03:39,253 --> 00:03:41,288 line:-1
+and human interface devices.
+
+
+70
+00:03:42,089 --> 00:03:44,725 line:-1
+Then later, PCI support was introduced,
+
+
+71
+00:03:44,791 --> 00:03:47,528 line:-2
+and now SCSI controller support
+has been added as well.
+
+
+72
+00:03:48,829 --> 00:03:52,933 line:-2
+Because DriverKit brings so many
+great improvements over kernel extensions,
+
+
+73
+00:03:53,000 --> 00:03:56,603 line:-2
+we recommend migrating to DriverKit
+immediately for available frameworks.
+
+
+74
+00:03:57,938 --> 00:04:00,507 line:-2
+Catalina was the last release
+to fully support kexts
+
+
+75
+00:04:00,574 --> 00:04:02,276 line:-1
+without any compromises.
+
+
+76
+00:04:03,143 --> 00:04:05,145 line:-1
+We've begun deprecating kernel extensions
+
+
+77
+00:04:05,212 --> 00:04:08,849 line:-2
+that can perform the same function
+as a system extension,
+
+
+78
+00:04:08,916 --> 00:04:11,585 line:-2
+including the device families
+supported by DriverKit.
+
+
+79
+00:04:12,653 --> 00:04:13,987 line:-1
+In macOS Big Sur,
+
+
+80
+00:04:14,054 --> 00:04:17,991 line:-2
+kexts that were deprecated in
+macOS Catalina will not load by default.
+
+
+81
+00:04:18,058 --> 00:04:20,861 line:-2
+We will continue to add
+more types of system extensions,
+
+
+82
+00:04:20,928 --> 00:04:22,996 line:-1
+and more device families to DriverKit.
+
+
+83
+00:04:23,964 --> 00:04:27,868 line:-2
+In turn, kernel extensions of these kinds
+will also be deprecated.
+
+
+84
+00:04:29,303 --> 00:04:33,273 line:-2
+This year, we've added support
+for PCI and SCSI controller drivers.
+
+
+85
+00:04:33,974 --> 00:04:36,376 line:-1
+This means kext support is now deprecated
+
+
+86
+00:04:36,443 --> 00:04:39,413 line:-2
+for PCI and SCSI controller
+device families
+
+
+87
+00:04:39,479 --> 00:04:43,917 line:-2
+for kernel extensions that can perform
+the same function as a system extension.
+
+
+88
+00:04:44,718 --> 00:04:48,055 line:-2
+This also means
+PCI and SCSI controller kexts
+
+
+89
+00:04:48,121 --> 00:04:50,824 line:-2
+will not load by default
+in a future macOS release.
+
+
+90
+00:04:53,193 --> 00:04:56,563 line:-2
+Now we'll talk about one of the exciting
+new additions to DriverKit,
+
+
+91
+00:04:56,630 --> 00:04:57,865 line:-1
+PCIDriverKit.
+
+
+92
+00:04:57,931 --> 00:05:00,734 line:-2
+I'll show you some of the key differences
+in driver models
+
+
+93
+00:05:00,801 --> 00:05:02,636 line:-1
+between PCI driver extensions
+
+
+94
+00:05:02,703 --> 00:05:04,605 line:-1
+and kernel extensions.
+
+
+95
+00:05:04,671 --> 00:05:06,106 line:-1
+Then I'll be showing some code examples
+
+
+96
+00:05:06,173 --> 00:05:08,609 line:-2
+almost every PCIDriverKit driver
+will need.
+
+
+97
+00:05:09,209 --> 00:05:12,613 line:-2
+PCIe is used to expand
+the capabilities of a machine
+
+
+98
+00:05:12,679 --> 00:05:14,748 line:-1
+as though they were built into the system.
+
+
+99
+00:05:15,182 --> 00:05:17,451 line:-1
+PCIe brings a lot of advantages,
+
+
+100
+00:05:17,518 --> 00:05:20,587 line:-2
+as it can handle the most demanding,
+high-performance jobs.
+
+
+101
+00:05:21,822 --> 00:05:26,693 line:-2
+Some common PCIe devices include
+serial, Ethernet and SCSI controllers.
+
+
+102
+00:05:28,262 --> 00:05:32,799 line:-2
+Users can add PCIe devices
+through Thunderbolt or through PCIe slots,
+
+
+103
+00:05:32,866 --> 00:05:34,768 line:-1
+such as in the latest Mac Pro.
+
+
+104
+00:05:36,370 --> 00:05:38,138 line:0
+As with all driver extensions,
+
+
+105
+00:05:38,205 --> 00:05:42,809 line:0
+PCIDriverKit requires entitlements
+to grant access to your PCI devices.
+
+
+106
+00:05:43,677 --> 00:05:46,446 line:0
+This is to ensure another app
+or malicious software
+
+
+107
+00:05:46,513 --> 00:05:48,615 line:0
+cannot access your PCI device.
+
+
+108
+00:05:49,616 --> 00:05:54,855 line:0
+The new entitlement uses the same
+IOPCIFamily driver-matching criteria
+
+
+109
+00:05:54,922 --> 00:05:57,124 line:0
+as the Info.plist.
+
+
+110
+00:05:57,191 --> 00:05:59,826 line:0
+However, you can make
+the entitlements more generic
+
+
+111
+00:05:59,893 --> 00:06:02,062 line:0
+if you need to support multiple devices.
+
+
+112
+00:06:03,197 --> 00:06:05,332 line:0
+In this example, I have an entitlement
+
+
+113
+00:06:05,399 --> 00:06:08,502 line:0
+that will allow you to access any device
+with a provided vendor ID.
+
+
+114
+00:06:09,102 --> 00:06:12,039 line:0
+In this case, we're going to use ABCD.
+
+
+115
+00:06:12,105 --> 00:06:15,742 line:0
+The PCI entitlement takes a list
+of PCI matching dictionaries.
+
+
+116
+00:06:15,809 --> 00:06:18,378 line:0
+You can be as specific
+or generic as you want
+
+
+117
+00:06:18,445 --> 00:06:21,148 line:0
+by using the IOPCIFamily
+matching categories.
+
+
+118
+00:06:23,016 --> 00:06:25,152 line:0
+In this case, we're doing a primary match,
+
+
+119
+00:06:25,219 --> 00:06:27,988 line:0
+which means we'll be comparing
+the primary vendor ID
+
+
+120
+00:06:28,055 --> 00:06:30,557 line:0
+and device ID of the device
+
+
+121
+00:06:30,624 --> 00:06:32,793 line:0
+to the entry that we have
+in our dictionary.
+
+
+122
+00:06:33,760 --> 00:06:36,129 line:-1
+By using the ampersand, we can have a mask
+
+
+123
+00:06:36,196 --> 00:06:39,933 line:-2
+that allows the matching dictionary
+to be more generic.
+
+
+124
+00:06:40,000 --> 00:06:43,504 line:-2
+This effectively removes the device ID
+from the matching dictionary,
+
+
+125
+00:06:43,570 --> 00:06:45,506 line:-2
+allowing the driver extension
+to be entitled
+
+
+126
+00:06:45,572 --> 00:06:47,741 line:-1
+for all devices of this vendor ID.
+
+
+127
+00:06:49,176 --> 00:06:50,577 line:0
+With PCIDriverKit,
+
+
+128
+00:06:50,644 --> 00:06:54,515 line:0
+you will likely need to interact with one
+of the many other DriverKit frameworks.
+
+
+129
+00:06:55,249 --> 00:06:57,284 line:0
+This is an example
+of what your entitlements will be
+
+
+130
+00:06:57,351 --> 00:07:00,254 line:0
+if you wanted to write
+a custom Ethernet NIC driver.
+
+
+131
+00:07:01,989 --> 00:07:04,591 line:0
+In this case, you'll add
+the networking family entitlement.
+
+
+132
+00:07:05,092 --> 00:07:06,393 line:0
+With this family entitlement,
+
+
+133
+00:07:06,460 --> 00:07:08,462 line:0
+you can now use
+the networking DriverKit framework
+
+
+134
+00:07:08,529 --> 00:07:10,764 line:0
+to interact
+with a networking stack as well.
+
+
+135
+00:07:12,266 --> 00:07:13,767 line:0
+With PCIDriverKit,
+
+
+136
+00:07:13,834 --> 00:07:17,070 line:0
+the only class in the framework
+is the IOPCIDevice.
+
+
+137
+00:07:18,005 --> 00:07:20,774 line:0
+This class is not intended
+to be subclassed.
+
+
+138
+00:07:20,841 --> 00:07:25,679 line:0
+You'll use this class as the PCI provider
+to access all of your PCI resources.
+
+
+139
+00:07:27,447 --> 00:07:29,349 line:0
+Here's what your driver extension
+may look like,
+
+
+140
+00:07:29,416 --> 00:07:31,518 line:0
+using our network interface controller
+example.
+
+
+141
+00:07:33,720 --> 00:07:35,622 line:0
+The user-space IOPCIDevice
+
+
+142
+00:07:35,689 --> 00:07:38,926 line:0
+will do the PCI-related communication
+needed with the kernel.
+
+
+143
+00:07:40,160 --> 00:07:43,630 line:0
+Your driver will use the IOPCIDevice
+for any PCI-resource access.
+
+
+144
+00:07:44,932 --> 00:07:47,434 line:0
+Your driver can then use
+the PCI device resources
+
+
+145
+00:07:47,501 --> 00:07:50,070 line:0
+to talk to the networking family
+and other user clients.
+
+
+146
+00:07:51,772 --> 00:07:53,574 line:0
+The layering structure
+for the driver extension
+
+
+147
+00:07:53,640 --> 00:07:55,709 line:0
+is mostly the same
+as the kernel extension.
+
+
+148
+00:07:55,776 --> 00:07:57,945 line:0
+However, almost everything
+is in user space.
+
+
+149
+00:07:58,779 --> 00:08:00,814 line:0
+While encouraged in kernel extensions,
+
+
+150
+00:08:00,881 --> 00:08:04,918 line:0
+PCIDriverKit mandates that,
+prior to accessing the PCI device,
+
+
+151
+00:08:04,985 --> 00:08:07,554 line:0
+you must successfully call Open
+on the device.
+
+
+152
+00:08:08,055 --> 00:08:09,656 line:0
+Once Open returns successfully,
+
+
+153
+00:08:09,723 --> 00:08:12,793 line:0
+your driver has exclusive access
+to the PCI device.
+
+
+154
+00:08:12,860 --> 00:08:16,463 line:0
+If your device has resources that are
+intended to be shared by multiple clients,
+
+
+155
+00:08:16,530 --> 00:08:18,665 line:0
+you will need to design
+your driver extension
+
+
+156
+00:08:18,732 --> 00:08:21,635 line:0
+in a way that has a single
+PCI resource manager
+
+
+157
+00:08:21,702 --> 00:08:24,938 line:0
+that distributes its resources
+amongst all of its clients.
+
+
+158
+00:08:25,005 --> 00:08:26,740 line:0
+This is to enforce good design
+
+
+159
+00:08:26,807 --> 00:08:30,210 line:0
+and allows the system to handle
+driver-extension crashes more gracefully.
+
+
+160
+00:08:30,644 --> 00:08:33,614 line:-2
+When done using the device,
+such as during the driver stop routine,
+
+
+161
+00:08:33,679 --> 00:08:36,149 line:-1
+you will need to call Close on the device.
+
+
+162
+00:08:36,216 --> 00:08:38,485 line:-2
+You should not expect
+the state of the device to remain
+
+
+163
+00:08:38,552 --> 00:08:39,720 line:-1
+after calling Close.
+
+
+164
+00:08:39,785 --> 00:08:40,787 line:0
+For instance,
+
+
+165
+00:08:40,854 --> 00:08:44,391 line:0
+the PCI stack will disable
+bus mastering and memory space
+
+
+166
+00:08:44,458 --> 00:08:46,426 line:0
+once Close has successfully completed.
+
+
+167
+00:08:46,493 --> 00:08:49,062 line:0
+Another driver may open the device
+and change its state
+
+
+168
+00:08:49,129 --> 00:08:50,597 line:0
+if it's entitled to do so.
+
+
+169
+00:08:52,032 --> 00:08:54,334 line:0
+Another difference
+between PCI kernel extensions
+
+
+170
+00:08:54,401 --> 00:08:55,569 line:0
+and PCIDriverKit
+
+
+171
+00:08:55,636 --> 00:08:59,306 line:0
+is that PCIDriverKit framework takes care
+of all the device mappings for you.
+
+
+172
+00:08:59,940 --> 00:09:02,910 line:0
+There are new APIs
+that all memory accesses will use.
+
+
+173
+00:09:02,976 --> 00:09:04,711 line:0
+This allows developers to take advantage
+
+
+174
+00:09:04,778 --> 00:09:07,714 line:0
+of any future optimizations
+Apple may explore.
+
+
+175
+00:09:07,781 --> 00:09:10,184 line:0
+It removes the need
+for any device-memory management
+
+
+176
+00:09:10,250 --> 00:09:13,787 line:0
+and will also allow more observability
+and debuggability.
+
+
+177
+00:09:13,854 --> 00:09:15,422 line:0
+With a single point of access,
+
+
+178
+00:09:15,489 --> 00:09:19,826 line:0
+you can now use programs such as DTrace
+to observe all device-memory accesses.
+
+
+179
+00:09:19,893 --> 00:09:21,328 line:0
+This can be especially helpful
+
+
+180
+00:09:21,395 --> 00:09:24,631 line:0
+when debugging PCI issues
+in a multi-threaded environment.
+
+
+181
+00:09:24,698 --> 00:09:28,502 line:-2
+The APIs work by passing the memory index
+of the memory space
+
+
+182
+00:09:28,569 --> 00:09:30,671 line:-2
+that you wish to access
+along with the offset.
+
+
+183
+00:09:30,737 --> 00:09:34,107 line:0
+I will go over what the difference
+between a memory index is
+
+
+184
+00:09:34,174 --> 00:09:36,810 line:0
+versus a base address register index now.
+
+
+185
+00:09:37,711 --> 00:09:41,682 line:-2
+This is a diagram of the PCI device's
+base address registers,
+
+
+186
+00:09:41,748 --> 00:09:43,250 line:-1
+or BARs.
+
+
+187
+00:09:43,317 --> 00:09:45,052 line:-1
+For 32-bit BARs,
+
+
+188
+00:09:45,118 --> 00:09:48,088 line:-2
+the memory index and the BAR index
+are the exact same.
+
+
+189
+00:09:49,156 --> 00:09:50,157 line:0
+For example,
+
+
+190
+00:09:50,224 --> 00:09:51,825 line:0
+with 32-bit addresses,
+
+
+191
+00:09:52,326 --> 00:09:54,228 line:0
+if you want to access BAR2,
+
+
+192
+00:09:54,294 --> 00:09:56,396 line:0
+you'd use two as the memory index
+
+
+193
+00:09:56,463 --> 00:09:59,533 line:0
+because it's the same index
+into the device's BAR space.
+
+
+194
+00:10:01,335 --> 00:10:02,769 line:0
+64-bit BARs
+
+
+195
+00:10:02,836 --> 00:10:05,439 line:0
+are where the memory index and BAR index
+can differ.
+
+
+196
+00:10:06,440 --> 00:10:09,243 line:0
+The memory index
+is the index for each memory entry.
+
+
+197
+00:10:10,210 --> 00:10:12,112 line:0
+All memory indexes are base zero.
+
+
+198
+00:10:13,213 --> 00:10:18,218 line:-2
+So for example, if BAR0 AND BAR1 combined
+are one 64-bit address,
+
+
+199
+00:10:18,285 --> 00:10:22,055 line:-2
+your memory index would be zero
+because it's the first memory entry.
+
+
+200
+00:10:23,323 --> 00:10:27,027 line:-2
+Then if BAR2 and BAR3
+are another 64-bit address,
+
+
+201
+00:10:27,494 --> 00:10:29,363 line:-1
+they would memory index one
+
+
+202
+00:10:29,429 --> 00:10:32,766 line:-2
+because it's the second memory entry
+in the device's BAR table.
+
+
+203
+00:10:33,967 --> 00:10:36,103 line:0
+Accessing configuration space
+of your device
+
+
+204
+00:10:36,170 --> 00:10:37,671 line:0
+is mostly a one-to-one mapping,
+
+
+205
+00:10:37,738 --> 00:10:40,073 line:0
+and still works the same
+with just a new name.
+
+
+206
+00:10:40,941 --> 00:10:44,711 line:0
+The major difference between PCIDriverKit
+and kernel extensions
+
+
+207
+00:10:44,778 --> 00:10:46,146 line:0
+for configuration space
+
+
+208
+00:10:46,213 --> 00:10:48,515 line:0
+is that you will first need to have
+an open session
+
+
+209
+00:10:48,582 --> 00:10:51,685 line:0
+to read or write
+any configuration-space registers.
+
+
+210
+00:10:53,253 --> 00:10:57,224 line:-2
+Next I'll be going over some examples
+of common code you'll likely need.
+
+
+211
+00:10:58,258 --> 00:11:01,328 line:-2
+First is how you enable
+bus mastering in memory space.
+
+
+212
+00:11:01,795 --> 00:11:05,132 line:-2
+These will be needed in order to access
+memory on your device
+
+
+213
+00:11:05,199 --> 00:11:08,235 line:-2
+along with enabling your device
+to issue I/O.
+
+
+214
+00:11:08,569 --> 00:11:11,004 line:-2
+Previously, there were
+explicit kernel APIs
+
+
+215
+00:11:11,071 --> 00:11:12,706 line:-1
+for each of these operations.
+
+
+216
+00:11:13,307 --> 00:11:17,311 line:-2
+Now, in order to achieve the same result,
+you'll first read the command register
+
+
+217
+00:11:17,377 --> 00:11:21,381 line:-2
+and write back to it with the bus-master
+and memory-space bits set.
+
+
+218
+00:11:22,482 --> 00:11:25,219 line:-2
+This example is what
+most PCI drivers will look like.
+
+
+219
+00:11:26,220 --> 00:11:30,090 line:-2
+In their start routine, they will first
+start a session with the PCI provider.
+
+
+220
+00:11:30,991 --> 00:11:33,727 line:-2
+Then they will read the PCI device's
+command register.
+
+
+221
+00:11:34,862 --> 00:11:37,164 line:-1
+Set the bus-master and memory-enable bits.
+
+
+222
+00:11:38,031 --> 00:11:40,367 line:-2
+Then write the values
+back to the PCI device.
+
+
+223
+00:11:40,834 --> 00:11:44,238 line:-2
+This will need to be done before issuing
+any memory reads or writes.
+
+
+224
+00:11:44,972 --> 00:11:46,807 line:-1
+All these offsets and definitions
+
+
+225
+00:11:46,874 --> 00:11:49,409 line:-2
+can be found
+in the PCIDriverKit framework headers.
+
+
+226
+00:11:50,043 --> 00:11:53,046 line:-2
+To disable bus mastering,
+the processes are the same,
+
+
+227
+00:11:53,113 --> 00:11:56,083 line:-2
+but instead of setting the bits,
+the driver will mask them out.
+
+
+228
+00:11:57,451 --> 00:12:01,288 line:-2
+In this example,
+Close is also called in the stop routine.
+
+
+229
+00:12:01,355 --> 00:12:03,891 line:-2
+This means that we are done
+talking to the PCI device
+
+
+230
+00:12:03,957 --> 00:12:05,492 line:-1
+and can close our session.
+
+
+231
+00:12:05,559 --> 00:12:07,928 line:-2
+Now we'll be going over
+how to set up an interrupt handler.
+
+
+232
+00:12:09,196 --> 00:12:11,532 line:-2
+First we'll need to declare
+an Interrupt-Occurred method
+
+
+233
+00:12:11,598 --> 00:12:13,367 line:-1
+in our iig header file.
+
+
+234
+00:12:14,401 --> 00:12:16,069 line:-1
+In the definition of our interrupt handler
+
+
+235
+00:12:16,136 --> 00:12:18,472 line:-2
+we'll be using
+an implementation definition.
+
+
+236
+00:12:20,040 --> 00:12:22,576 line:-1
+In this example when we begin interrupt,
+
+
+237
+00:12:22,643 --> 00:12:26,847 line:-2
+the handler will clear the interrupt
+by writing a register in MMIO space
+
+
+238
+00:12:26,914 --> 00:12:29,016 line:-1
+to one of the device's memory indexes.
+
+
+239
+00:12:31,051 --> 00:12:32,519 line:-1
+Now we need to do the setup
+
+
+240
+00:12:32,586 --> 00:12:35,155 line:-2
+to make it so
+our Interrupt-Occurred method gets called
+
+
+241
+00:12:35,222 --> 00:12:36,690 line:-1
+when an interrupt fires.
+
+
+242
+00:12:38,625 --> 00:12:40,127 line:-1
+First thing we'll need to do
+
+
+243
+00:12:40,194 --> 00:12:42,663 line:-2
+is find out which interrupt index
+we want to use.
+
+
+244
+00:12:43,797 --> 00:12:46,433 line:-2
+To do this, we'll iterate
+through all the interrupt indexes
+
+
+245
+00:12:46,500 --> 00:12:48,435 line:-1
+associated with the PCI device.
+
+
+246
+00:12:49,603 --> 00:12:51,471 line:-1
+Then we'll check its interrupt type.
+
+
+247
+00:12:51,972 --> 00:12:55,442 line:-2
+In this example, we want to handle
+the device's MSI interrupts.
+
+
+248
+00:12:56,610 --> 00:12:58,612 line:-2
+So that means
+we want to break out of the loop
+
+
+249
+00:12:58,679 --> 00:13:01,748 line:-2
+once we've found the interrupt index
+that supports MSIs.
+
+
+250
+00:13:02,816 --> 00:13:04,885 line:-2
+Then we'll need to choose
+which dispatch queue
+
+
+251
+00:13:04,952 --> 00:13:07,487 line:-1
+the interrupt will be handled in.
+
+
+252
+00:13:07,554 --> 00:13:10,490 line:-2
+For this example, we're going to keep
+everything single-threaded
+
+
+253
+00:13:10,557 --> 00:13:12,559 line:-1
+and use the default dispatch queue.
+
+
+254
+00:13:13,060 --> 00:13:15,829 line:-2
+If you want to create a new dispatch queue
+just for interrupt handling,
+
+
+255
+00:13:15,896 --> 00:13:17,531 line:-1
+that's supported as well.
+
+
+256
+00:13:18,932 --> 00:13:21,668 line:-1
+Next we will create the dispatch source
+
+
+257
+00:13:21,735 --> 00:13:24,271 line:-2
+by specifying the interrupters
+for the PCI device
+
+
+258
+00:13:24,338 --> 00:13:28,609 line:-2
+at the interrupt index we found earlier
+in our default dispatch queue.
+
+
+259
+00:13:30,377 --> 00:13:32,446 line:-2
+Then we'll need to create
+an interrupt action
+
+
+260
+00:13:32,513 --> 00:13:35,549 line:-2
+for our newly created source
+to use to handle the interrupts.
+
+
+261
+00:13:36,617 --> 00:13:37,818 line:-1
+Once the source is enabled,
+
+
+262
+00:13:37,885 --> 00:13:41,655 line:-2
+our interrupt handler will get called
+when our device triggers an interrupt.
+
+
+263
+00:13:43,457 --> 00:13:45,959 line:-2
+Lastly we'll go over
+how to set up a DMA transfer
+
+
+264
+00:13:46,026 --> 00:13:47,828 line:-1
+for your PCI device.
+
+
+265
+00:13:47,895 --> 00:13:50,497 line:-2
+First we'll create
+a buffer-memory descriptor.
+
+
+266
+00:13:52,533 --> 00:13:55,869 line:-2
+We'll need to set the length of the buffer
+prior to writing to the buffer.
+
+
+267
+00:13:57,538 --> 00:14:01,341 line:-2
+And then here's an example of how you can
+take the virtual address of our segment
+
+
+268
+00:14:01,408 --> 00:14:03,177 line:-1
+and write some data to it.
+
+
+269
+00:14:04,678 --> 00:14:08,582 line:-2
+Next, in order to give the PCI device
+access to our buffer,
+
+
+270
+00:14:08,649 --> 00:14:10,651 line:-1
+we'll need to create an I/O DMA command.
+
+
+271
+00:14:12,352 --> 00:14:14,421 line:-1
+First we'll set up the DMA specification
+
+
+272
+00:14:14,488 --> 00:14:17,457 line:-2
+that describes our hardware's
+DMA capabilities.
+
+
+273
+00:14:18,592 --> 00:14:20,694 line:-1
+Then we'll create the I/O DMA command,
+
+
+274
+00:14:20,761 --> 00:14:23,130 line:-1
+specifying this is for our PCI device.
+
+
+275
+00:14:23,864 --> 00:14:26,433 line:-2
+This is to ensure
+the correct memory mapper
+
+
+276
+00:14:26,500 --> 00:14:28,402 line:-1
+is used for all of your transfers.
+
+
+277
+00:14:30,504 --> 00:14:34,241 line:-2
+Next we're going to take the DMA command
+and prepare our buffer-memory descriptor
+
+
+278
+00:14:34,308 --> 00:14:37,578 line:-2
+so we get a physical address
+to give to our PCI device.
+
+
+279
+00:14:38,612 --> 00:14:41,348 line:-2
+Then we can use the result
+of the physical address segment
+
+
+280
+00:14:41,415 --> 00:14:44,885 line:-2
+to get the buffer's physical address
+to write it to our PCI device.
+
+
+281
+00:14:45,619 --> 00:14:49,656 line:-2
+Once our transfer has finished, we'll need
+to call Complete on our DMA command
+
+
+282
+00:14:49,723 --> 00:14:53,160 line:-2
+so that the physical memory can be used
+by another process or device.
+
+
+283
+00:14:53,227 --> 00:14:56,897 line:-2
+That was a brief introduction
+to the new PCIDriverKit framework.
+
+
+284
+00:14:57,631 --> 00:14:59,399 line:-1
+Now I'd like to hand it over to Madhu,
+
+
+285
+00:14:59,466 --> 00:15:03,203 line:-2
+who will be going into detail on how
+to write a SCSI driver using DriverKit.
+
+
+286
+00:15:04,004 --> 00:15:06,206 line:0
+Hi, I'm Madhu,
+
+
+287
+00:15:06,273 --> 00:15:09,910 line:0
+and I'm going to be talking about
+the SCSIControllerDriverKit framework.
+
+
+288
+00:15:10,577 --> 00:15:12,980 line:-1
+It's a brand-new framework in DriverKit
+
+
+289
+00:15:13,046 --> 00:15:15,849 line:-2
+to build driver extensions
+for SCSI controllers.
+
+
+290
+00:15:17,518 --> 00:15:19,820 line:-1
+Let's start with an overview.
+
+
+291
+00:15:19,887 --> 00:15:24,591 line:-2
+SCSIControllerDriverKit framework
+is available today in macOS Big Sur.
+
+
+292
+00:15:26,793 --> 00:15:29,830 line:-2
+It supports all IOKit-based
+device-driver features
+
+
+293
+00:15:29,897 --> 00:15:32,432 line:-2
+that SCSI kexts
+have supported in the past.
+
+
+294
+00:15:33,133 --> 00:15:35,736 line:-2
+This framework is going to serve
+as a replacement
+
+
+295
+00:15:35,802 --> 00:15:38,939 line:-2
+for IO-SCSI-Parallel-Interface-Controller
+implementation,
+
+
+296
+00:15:39,006 --> 00:15:42,042 line:-2
+which was being used until now
+for kext development.
+
+
+297
+00:15:44,778 --> 00:15:48,248 line:-2
+The framework has been built
+keeping performance as a top priority.
+
+
+298
+00:15:49,216 --> 00:15:52,186 line:-2
+It is highly optimized
+to minimize interactions
+
+
+299
+00:15:52,252 --> 00:15:53,887 line:-1
+between the user space and the kernel
+
+
+300
+00:15:53,954 --> 00:15:55,923 line:-1
+in the I/O performance path.
+
+
+301
+00:15:57,724 --> 00:16:00,727 line:-2
+It can support a variety
+of SCSI-based devices,
+
+
+302
+00:16:00,794 --> 00:16:02,629 line:-1
+like fiber-channel controllers,
+
+
+303
+00:16:02,696 --> 00:16:04,198 line:-1
+RAID controllers,
+
+
+304
+00:16:04,264 --> 00:16:06,333 line:-1
+serial-attached SCSI, and more.
+
+
+305
+00:16:08,902 --> 00:16:11,872 line:-2
+Since these will be
+PCIe-based controllers,
+
+
+306
+00:16:11,939 --> 00:16:14,708 line:-2
+we've make sure our framework
+is fully compatible
+
+
+307
+00:16:14,775 --> 00:16:16,710 line:-1
+with the PCIDriverKit framework.
+
+
+308
+00:16:18,478 --> 00:16:22,516 line:-2
+IO-User-SCSI-Parallel-Interface-Controller
+is a new class
+
+
+309
+00:16:22,583 --> 00:16:25,252 line:-1
+defined in the iig interface file.
+
+
+310
+00:16:26,386 --> 00:16:31,458 line:-2
+SCSI dexts are required to subclass this
+and implement its functions.
+
+
+311
+00:16:32,459 --> 00:16:36,430 line:-2
+Now, we have tried to maintain
+similar API structure here
+
+
+312
+00:16:36,496 --> 00:16:39,800 line:-2
+compared to the kernel class
+with the prefix "User"
+
+
+313
+00:16:39,867 --> 00:16:41,502 line:-1
+added to API names.
+
+
+314
+00:16:42,936 --> 00:16:46,106 line:-1
+For example, User-Process-Parallel-Task
+
+
+315
+00:16:46,173 --> 00:16:49,142 line:-1
+is the new API dexts need to implement
+
+
+316
+00:16:49,209 --> 00:16:51,445 line:-1
+to submit I/O requests to the hardware.
+
+
+317
+00:16:53,013 --> 00:16:55,048 line:-1
+It is quite simple to determine
+
+
+318
+00:16:55,115 --> 00:16:58,318 line:-2
+which framework functions to override
+in the dext.
+
+
+319
+00:16:59,219 --> 00:17:02,589 line:-2
+Just override all the functions
+that are marked "pure virtual."
+
+
+320
+00:17:04,090 --> 00:17:07,594 line:-2
+These functions are calls
+made by the framework into the dext,
+
+
+321
+00:17:07,661 --> 00:17:12,132 line:-2
+to get controller-specific information
+or to perform specific tasks.
+
+
+322
+00:17:13,800 --> 00:17:14,902 line:-1
+For example,
+
+
+323
+00:17:14,968 --> 00:17:19,138 line:-2
+the framework calls
+User-Does-HBA-Perform-Auto-Sense
+
+
+324
+00:17:19,205 --> 00:17:21,808 line:-1
+to check if the HBA supports AutoSense.
+
+
+325
+00:17:23,010 --> 00:17:25,612 line:-1
+It calls User-Initialize-Controller
+
+
+326
+00:17:25,679 --> 00:17:28,382 line:-2
+to initialize the controller
+and dext data structures.
+
+
+327
+00:17:30,951 --> 00:17:34,855 line:-2
+All non-pure virtual functions
+get invoked by the dext
+
+
+328
+00:17:34,922 --> 00:17:39,626 line:-2
+to perform specific tasks like
+creating a SCSI target with a unique ID,
+
+
+329
+00:17:39,693 --> 00:17:42,696 line:-2
+or setting target properties
+for a specific target.
+
+
+330
+00:17:43,664 --> 00:17:47,401 line:-2
+The implementations of these functions
+will be present in the kernel.
+
+
+331
+00:17:49,169 --> 00:17:53,173 line:-2
+Like we already know,
+entitlements are required to be added
+
+
+332
+00:17:53,240 --> 00:17:56,176 line:-2
+before we build and load
+driver extensions.
+
+
+333
+00:17:57,511 --> 00:18:00,047 line:-2
+Other than the generic
+DriverKit entitlement
+
+
+334
+00:18:00,113 --> 00:18:02,416 line:-1
+and the transport-specific entitlement,
+
+
+335
+00:18:02,482 --> 00:18:05,986 line:-2
+we have added a new family entitlement
+for SCSI controllers.
+
+
+336
+00:18:07,421 --> 00:18:10,757 line:-1
+A SCSI dext needs to add this entitlement
+
+
+337
+00:18:10,824 --> 00:18:13,460 line:-2
+to run and have full access
+to the framework.
+
+
+338
+00:18:15,395 --> 00:18:18,899 line:-2
+With that, let's create
+an example SCSI dext.
+
+
+339
+00:18:19,967 --> 00:18:23,237 line:-2
+I have divided this
+into four important phases.
+
+
+340
+00:18:23,303 --> 00:18:28,108 line:-2
+In each phase, I will show
+how to override some important functions,
+
+
+341
+00:18:28,175 --> 00:18:32,112 line:-2
+discuss some guidelines,
+and share some performance tips.
+
+
+342
+00:18:34,114 --> 00:18:36,650 line:-1
+Let's begin with start and initialization.
+
+
+343
+00:18:38,552 --> 00:18:42,155 line:-2
+The kernel is going to control the start
+and initialization phase of the dext
+
+
+344
+00:18:42,222 --> 00:18:44,024 line:-1
+by making a whole bunch of calls.
+
+
+345
+00:18:45,926 --> 00:18:49,429 line:-2
+Other than making calls
+to initialize the controller,
+
+
+346
+00:18:49,496 --> 00:18:51,832 line:-2
+it is also going to be making
+a number of calls
+
+
+347
+00:18:51,899 --> 00:18:56,570 line:-2
+to gather controller-specific information,
+like maximum task count supported,
+
+
+348
+00:18:56,637 --> 00:18:59,239 line:-1
+highest supported device ID, <i>et cetera</i>.
+
+
+349
+00:18:59,806 --> 00:19:02,743 line:-2
+And sets up all the kernel data structures
+accordingly.
+
+
+350
+00:19:04,912 --> 00:19:08,682 line:0
+Let's see what happens when
+a SCSI controller device is plugged in.
+
+
+351
+00:19:10,083 --> 00:19:12,019 line:0
+IOKit Matching kicks off,
+
+
+352
+00:19:12,085 --> 00:19:14,288 line:0
+and an IOService object of that type,
+
+
+353
+00:19:14,354 --> 00:19:18,625 line:0
+IO-User-SCSI-Parallel-Interface-Controller
+starts up in the kernel.
+
+
+354
+00:19:20,861 --> 00:19:25,999 line:0
+IOKit's IOService implementation
+will now start creating resources required
+
+
+355
+00:19:26,066 --> 00:19:28,368 line:0
+to start the dext in the user space.
+
+
+356
+00:19:30,537 --> 00:19:34,141 line:0
+It initializes the IO-User-Server IPC
+layer,
+
+
+357
+00:19:34,208 --> 00:19:39,213 line:0
+and creates a process hosting the dext
+with its DriverKit classes initialized.
+
+
+358
+00:19:41,415 --> 00:19:43,717 line:0
+DriverKit SCSI device is loaded,
+
+
+359
+00:19:43,784 --> 00:19:46,587 line:0
+and
+IO-User-SCSI-Parallel-Interface-Controller
+
+
+360
+00:19:46,653 --> 00:19:49,256 line:0
+will first call its start implementation.
+
+
+361
+00:19:51,258 --> 00:19:54,061 line:0
+It will then call
+a whole bunch of other functions,
+
+
+362
+00:19:54,127 --> 00:19:56,463 line:0
+like User-Initialize-Controller...
+
+
+363
+00:19:57,998 --> 00:20:02,669 line:0
+and User-Start-Controller to finish
+the start and initialization phase.
+
+
+364
+00:20:04,738 --> 00:20:06,673 line:-1
+Let's start implementing.
+
+
+365
+00:20:06,740 --> 00:20:10,377 line:-2
+I'm only going to be discussing
+some important framework functions
+
+
+366
+00:20:10,444 --> 00:20:12,446 line:-1
+that the dext needs to implement,
+
+
+367
+00:20:13,146 --> 00:20:16,083 line:-2
+the first one being
+User-Initialize-Controller.
+
+
+368
+00:20:18,218 --> 00:20:20,921 line:-2
+We're first going to be opening
+a new session
+
+
+369
+00:20:20,988 --> 00:20:23,924 line:-2
+with PCIDriverKit,
+like Kevin discussed before.
+
+
+370
+00:20:25,759 --> 00:20:29,663 line:-2
+The DriverKit framework already creates
+a default dispatch queue for us.
+
+
+371
+00:20:30,597 --> 00:20:34,668 line:-2
+We are going to be creating and setting up
+two additional dispatch queues here.
+
+
+372
+00:20:36,570 --> 00:20:39,840 line:-2
+We are also going to create
+an Interrupt-Dispatch-Source,
+
+
+373
+00:20:39,907 --> 00:20:42,776 line:-2
+and register a handler
+to process interrupts.
+
+
+374
+00:20:45,045 --> 00:20:48,515 line:-2
+This brings us to the queuing model
+we would like you to follow
+
+
+375
+00:20:48,582 --> 00:20:50,217 line:-1
+while building your dext.
+
+
+376
+00:20:51,485 --> 00:20:54,655 line:-2
+We suggest having
+three dispatch queues in total.
+
+
+377
+00:20:56,423 --> 00:20:57,624 line:-1
+The default queue,
+
+
+378
+00:20:57,691 --> 00:21:00,761 line:-2
+which is created for you
+by the DriverKit environment.
+
+
+379
+00:21:01,595 --> 00:21:05,132 line:-2
+Additionally, an interrupt queue
+and an auxiliary queue.
+
+
+380
+00:21:07,134 --> 00:21:11,305 line:-2
+Default queue will run all the calls
+that originate from the kernel.
+
+
+381
+00:21:12,206 --> 00:21:15,275 line:-1
+For example, User-Initialize-Controller...
+
+
+382
+00:21:17,644 --> 00:21:20,380 line:-1
+User-Process-Parallel-Task, and so on.
+
+
+383
+00:21:22,950 --> 00:21:26,353 line:-2
+It helps to have a separate queue
+to service interrupts.
+
+
+384
+00:21:27,221 --> 00:21:30,057 line:-2
+Since DriverKit dispatch queues
+are serial,
+
+
+385
+00:21:30,123 --> 00:21:33,560 line:-2
+interrupts and I/Os
+won't be competing with each other to run.
+
+
+386
+00:21:34,962 --> 00:21:37,564 line:-2
+This will give
+a huge performance boost as well.
+
+
+387
+00:21:39,166 --> 00:21:43,437 line:-2
+This queue can also be used to service
+dext I/O time-out handlers.
+
+
+388
+00:21:45,172 --> 00:21:49,443 line:-2
+A separate auxiliary queue
+needs to be set up to create SCSI targets.
+
+
+389
+00:21:50,444 --> 00:21:52,379 line:-1
+As part of creating targets,
+
+
+390
+00:21:52,446 --> 00:21:55,015 line:-2
+the kernel makes
+a number of calls to the dext
+
+
+391
+00:21:55,082 --> 00:21:56,950 line:-1
+to help initialize the target.
+
+
+392
+00:21:58,218 --> 00:22:01,154 line:-2
+Since these calls will run
+on the default queue,
+
+
+393
+00:22:01,221 --> 00:22:05,692 line:-2
+the dext needs to create the SCSI target
+from a separate auxiliary queue.
+
+
+394
+00:22:07,895 --> 00:22:11,732 line:-2
+The kernel is going to be maintaining
+a list of I/O DMA commands,
+
+
+395
+00:22:12,299 --> 00:22:14,134 line:-1
+SCSI-Parallel-Task in this case,
+
+
+396
+00:22:15,002 --> 00:22:19,072 line:-2
+based on the total outstanding commands
+the controller can support at a time.
+
+
+397
+00:22:20,307 --> 00:22:23,944 line:-2
+Every time it creates
+a new SCSI-Parallel-Task object,
+
+
+398
+00:22:24,011 --> 00:22:28,315 line:-2
+it calls User-Map-HBA-Data implementation
+of the dext.
+
+
+399
+00:22:30,851 --> 00:22:33,587 line:-2
+The dext can use this opportunity
+to create
+
+
+400
+00:22:33,654 --> 00:22:35,889 line:-2
+its controller-specific task
+data structure.
+
+
+401
+00:22:37,424 --> 00:22:39,092 line:-1
+And maintain a list of them.
+
+
+402
+00:22:40,827 --> 00:22:44,398 line:-2
+Here are some implementation details
+of my example SCSI dext.
+
+
+403
+00:22:45,799 --> 00:22:49,269 line:-2
+I have created
+an IO-Buffer-Memory-Descriptor object
+
+
+404
+00:22:49,336 --> 00:22:51,638 line:-2
+for my controller-specific
+task data structure.
+
+
+405
+00:22:52,573 --> 00:22:55,542 line:-2
+I have also mapped
+the buffer-memory descriptor
+
+
+406
+00:22:55,609 --> 00:22:57,110 line:-1
+in my dext address space.
+
+
+407
+00:22:57,945 --> 00:23:01,515 line:-2
+It is important to do any kind
+of preprocessing like this here
+
+
+408
+00:23:01,582 --> 00:23:03,517 line:-1
+before we start serving I/Os.
+
+
+409
+00:23:04,451 --> 00:23:08,088 line:-2
+Doing this in the I/O path
+can negatively impact performance.
+
+
+410
+00:23:10,057 --> 00:23:13,060 line:-1
+I add this task data to my task data list.
+
+
+411
+00:23:14,094 --> 00:23:17,898 line:-2
+I also assign a unique task ID
+to this task
+
+
+412
+00:23:17,965 --> 00:23:19,766 line:-1
+so that the kernel can correlate this
+
+
+413
+00:23:19,833 --> 00:23:22,369 line:-2
+with its corresponding
+SCSI-Parallel-Task object.
+
+
+414
+00:23:24,371 --> 00:23:27,841 line:-2
+Next, in my
+User-Start-Controller implementation,
+
+
+415
+00:23:27,908 --> 00:23:30,077 line:-1
+I enable interrupts on the hardware.
+
+
+416
+00:23:31,645 --> 00:23:34,515 line:-2
+I then enable
+the interrupt dispatch source.
+
+
+417
+00:23:35,516 --> 00:23:38,151 line:-2
+Returning success from
+User-Start-Controller
+
+
+418
+00:23:38,218 --> 00:23:42,556 line:-2
+indicates to the kernel the dext is up
+and ready to serve I/Os.
+
+
+419
+00:23:44,758 --> 00:23:47,060 line:-2
+That brings us to
+the most interesting part
+
+
+420
+00:23:47,127 --> 00:23:49,630 line:-1
+of any storage driver: the I/O path.
+
+
+421
+00:23:50,664 --> 00:23:52,432 line:-1
+Let's first refresh our memory a little,
+
+
+422
+00:23:52,499 --> 00:23:54,668 line:-2
+and review how this works
+in the kernel today.
+
+
+423
+00:23:56,603 --> 00:24:00,841 line:0
+Before, the kext would override
+the function Process-Parallel-Task
+
+
+424
+00:24:00,908 --> 00:24:03,777 line:0
+and would have access
+to SCSI-Parallel-Task object.
+
+
+425
+00:24:05,145 --> 00:24:08,715 line:0
+SCSI-Parallel-Task is a subclass
+of I/O DMA command.
+
+
+426
+00:24:09,750 --> 00:24:12,786 line:0
+The kext was responsible
+to prepare the I/O DMA command
+
+
+427
+00:24:12,853 --> 00:24:16,023 line:0
+and generate physical segments
+for DMA to happen.
+
+
+428
+00:24:17,491 --> 00:24:19,726 line:0
+It would call Complete-Parallel-Task
+
+
+429
+00:24:19,793 --> 00:24:22,696 line:0
+once it receives the interrupt completion
+for the I/O.
+
+
+430
+00:24:24,731 --> 00:24:27,467 line:0
+We have changed a whole lot
+of this behavior with the dext.
+
+
+431
+00:24:28,335 --> 00:24:32,806 line:0
+The kernel will now call the dext
+User-Process-Parallel-Task implementation
+
+
+432
+00:24:32,873 --> 00:24:34,007 line:0
+to submit an I/O.
+
+
+433
+00:24:35,876 --> 00:24:37,244 line:0
+As part of this call,
+
+
+434
+00:24:37,311 --> 00:24:40,280 line:0
+it'll send a copy
+of SCSI-User-Parallel-Task object
+
+
+435
+00:24:40,347 --> 00:24:41,715 line:0
+to the dext.
+
+
+436
+00:24:44,418 --> 00:24:46,987 line:0
+This object will contain
+all the information
+
+
+437
+00:24:47,054 --> 00:24:49,256 line:0
+the dext will need to perform this I/O.
+
+
+438
+00:24:49,790 --> 00:24:53,093 line:0
+And the dext will not have to make
+any more calls to the kernel.
+
+
+439
+00:24:54,194 --> 00:24:56,063 line:0
+Like I mentioned at the beginning,
+
+
+440
+00:24:56,129 --> 00:24:59,900 line:0
+this framework has been built
+keeping I/O performance as a top priority.
+
+
+441
+00:25:01,668 --> 00:25:05,539 line:0
+Note that the dext does not have access
+to SCSI-Parallel-Task object.
+
+
+442
+00:25:07,040 --> 00:25:09,576 line:0
+The kernel will do
+all of the heavy lifting
+
+
+443
+00:25:09,643 --> 00:25:11,545 line:0
+of preparing the I/O DMA command
+
+
+444
+00:25:11,612 --> 00:25:14,448 line:0
+and generating physical segments
+for the dext.
+
+
+445
+00:25:16,483 --> 00:25:19,987 line:0
+This way of letting the kernel handle
+all of the operations required
+
+
+446
+00:25:20,053 --> 00:25:23,824 line:0
+to prepare an I/O for DMA
+has obvious performance benefits.
+
+
+447
+00:25:25,125 --> 00:25:28,061 line:0
+Preparing an I/O DMA command
+in the user space
+
+
+448
+00:25:28,128 --> 00:25:32,299 line:0
+will result in additional IPC calls
+being made to the kernel,
+
+
+449
+00:25:32,366 --> 00:25:35,903 line:0
+and we would want to avoid that
+at any cost in the performance path.
+
+
+450
+00:25:37,938 --> 00:25:42,209 line:0
+After the I/O is submitted,
+dext interrupt handler gets invoked
+
+
+451
+00:25:42,276 --> 00:25:44,778 line:0
+whenever the hardware
+sends an interrupt completion.
+
+
+452
+00:25:47,114 --> 00:25:50,150 line:0
+It will then have to call
+Parallel-Task-Completion,
+
+
+453
+00:25:50,217 --> 00:25:53,120 line:0
+which is an OSAction callback,
+to complete this I/O.
+
+
+454
+00:25:54,955 --> 00:25:57,324 line:-2
+Here are the two main functions
+we need to care about.
+
+
+455
+00:25:58,458 --> 00:26:01,728 line:-2
+The dext needs to implement
+User-Process-Parallel-Task functions
+
+
+456
+00:26:01,795 --> 00:26:03,063 line:-1
+for I/O submission,
+
+
+457
+00:26:03,497 --> 00:26:07,701 line:-2
+and needs to call Parallel-Task-Completion
+to indicate I/O completion.
+
+
+458
+00:26:10,504 --> 00:26:14,041 line:0
+We already discussed about
+SCSI-User-Parallel-Task a little.
+
+
+459
+00:26:14,875 --> 00:26:18,579 line:0
+As we can see, it contains
+a lot of information about an I/O,
+
+
+460
+00:26:18,645 --> 00:26:23,650 line:0
+like the CDB, data transfer count,
+data transfer direction, <i>et cetera</i>.
+
+
+461
+00:26:25,552 --> 00:26:30,224 line:0
+An important field in this structure
+is f-Buffer-IOVMA-ddr.
+
+
+462
+00:26:31,191 --> 00:26:32,793 line:0
+Like I mentioned before,
+
+
+463
+00:26:32,860 --> 00:26:35,796 line:0
+the kernel generates
+DMA physical segments for us.
+
+
+464
+00:26:36,797 --> 00:26:41,001 line:0
+F-Buffer-IOVMA-ddr is going to be
+the start physical address
+
+
+465
+00:26:41,068 --> 00:26:42,269 line:0
+of this segment.
+
+
+466
+00:26:43,504 --> 00:26:46,173 line:0
+It is guaranteed
+that the kernel is going to generate
+
+
+467
+00:26:46,240 --> 00:26:50,511 line:0
+one long contiguous segment
+that can fit all of the buffer data.
+
+
+468
+00:26:52,613 --> 00:26:54,848 line:-1
+The dext needs to send its response object
+
+
+469
+00:26:54,915 --> 00:26:57,784 line:-2
+as part of
+Parallel-Task-Completion callback.
+
+
+470
+00:26:58,785 --> 00:27:01,154 line:-2
+It needs to have
+all the relevant information
+
+
+471
+00:27:01,221 --> 00:27:03,156 line:-1
+for the specific I/O completion,
+
+
+472
+00:27:03,223 --> 00:27:07,694 line:-2
+like completion status,
+number of bytes transferred, <i>et cetera</i>,
+
+
+473
+00:27:07,761 --> 00:27:09,229 line:-1
+and sense data, if any.
+
+
+474
+00:27:11,098 --> 00:27:13,367 line:0
+Let's look at our example implementation.
+
+
+475
+00:27:14,134 --> 00:27:18,438 line:0
+I first fetched the specific task data
+for the task ID from my list.
+
+
+476
+00:27:20,140 --> 00:27:23,443 line:0
+I set all the metadata for this I/O
+in my task data.
+
+
+477
+00:27:24,144 --> 00:27:27,381 line:0
+The kernel is going to generate
+one long physical segment
+
+
+478
+00:27:27,447 --> 00:27:30,884 line:0
+with f-Buffer-IOVMA-ddr
+as the start address.
+
+
+479
+00:27:31,618 --> 00:27:34,388 line:0
+Feel free to prepare
+your own Scatter-Gather-List
+
+
+480
+00:27:34,454 --> 00:27:37,491 line:0
+if your hardware specification
+requires you to chop this up
+
+
+481
+00:27:37,558 --> 00:27:39,159 line:0
+into multiple segments.
+
+
+482
+00:27:41,128 --> 00:27:45,566 line:0
+I retain and stash away
+the completion callback object for later.
+
+
+483
+00:27:47,668 --> 00:27:49,503 line:-1
+I post the request to the hardware,
+
+
+484
+00:27:49,570 --> 00:27:52,706 line:-2
+and send an appropriate response
+back to the kernel.
+
+
+485
+00:27:54,408 --> 00:27:56,643 line:0
+Once I receive an interrupt completion,
+
+
+486
+00:27:56,710 --> 00:27:58,712 line:0
+I process the interrupt response,
+
+
+487
+00:27:58,779 --> 00:28:01,949 line:0
+and fill out
+the SCSI-User-Parallel-Response structure.
+
+
+488
+00:28:03,951 --> 00:28:06,520 line:0
+I then invoke the completion callback.
+
+
+489
+00:28:06,954 --> 00:28:09,756 line:0
+We now have I/O submission
+and completion logic
+
+
+490
+00:28:09,823 --> 00:28:11,625 line:0
+implemented in our example dext.
+
+
+491
+00:28:13,760 --> 00:28:17,464 line:-2
+Let's move on to the next phase
+of our driver development:
+
+
+492
+00:28:17,531 --> 00:28:18,932 line:-1
+power management.
+
+
+493
+00:28:20,701 --> 00:28:23,403 line:-2
+Supporting power state transitions
+in DriverKit
+
+
+494
+00:28:23,470 --> 00:28:27,040 line:-2
+is as simple as
+overriding Set-Power-State function
+
+
+495
+00:28:27,107 --> 00:28:30,110 line:-2
+and implementing
+your hardware-specific functionalities
+
+
+496
+00:28:30,177 --> 00:28:32,079 line:-1
+for every power state supported.
+
+
+497
+00:28:34,014 --> 00:28:37,518 line:-2
+DriverKit framework today
+supports three power states,
+
+
+498
+00:28:37,584 --> 00:28:41,755 line:-2
+an off state, an on state,
+and a low-power state.
+
+
+499
+00:28:42,656 --> 00:28:44,558 line:-1
+For PCIe-based devices,
+
+
+500
+00:28:44,625 --> 00:28:48,662 line:-2
+we need to mainly care about
+the off and the on states.
+
+
+501
+00:28:49,763 --> 00:28:53,133 line:-2
+Off state for when
+the device is entering sleep state,
+
+
+502
+00:28:53,200 --> 00:28:57,437 line:-2
+like during system sleep,
+or even during a PCI pause operation.
+
+
+503
+00:28:58,906 --> 00:29:02,075 line:-2
+An on state for when
+the device is fully powered on,
+
+
+504
+00:29:02,142 --> 00:29:03,744 line:-1
+or during a system break.
+
+
+505
+00:29:06,413 --> 00:29:08,782 line:-2
+Delayed acknowledgement
+of power state transition
+
+
+506
+00:29:08,849 --> 00:29:10,751 line:-1
+is also possible in DriverKit.
+
+
+507
+00:29:11,852 --> 00:29:13,153 line:-1
+Let's look at an example.
+
+
+508
+00:29:14,154 --> 00:29:17,157 line:-1
+Here, I have overridden Set-Power-State,
+
+
+509
+00:29:17,224 --> 00:29:20,961 line:-2
+and to keep it brief, I have only shown
+Power-State-On transition.
+
+
+510
+00:29:22,496 --> 00:29:23,864 line:-1
+For my hardware,
+
+
+511
+00:29:23,931 --> 00:29:28,635 line:-2
+I'm going to be issuing a hard reset
+to change the power state to on.
+
+
+512
+00:29:30,370 --> 00:29:32,773 line:-1
+I then return the callback to the kernel.
+
+
+513
+00:29:34,541 --> 00:29:36,510 line:-1
+Since I issued a hard reset,
+
+
+514
+00:29:36,577 --> 00:29:40,814 line:-2
+my driver starts a complete
+SCSI Target-Rescan on the hardware.
+
+
+515
+00:29:42,216 --> 00:29:44,918 line:-1
+I make sure all my targets are up,
+
+
+516
+00:29:44,985 --> 00:29:47,855 line:-2
+and then acknowledge
+the power state transition
+
+
+517
+00:29:47,921 --> 00:29:51,191 line:-2
+by issuing a SUPERDISPATCH
+Set-Power-State call.
+
+
+518
+00:29:53,360 --> 00:29:57,331 line:-2
+I now have power management support
+implemented in my example dext.
+
+
+519
+00:29:58,532 --> 00:30:01,535 line:-1
+Let's finish by discussing termination.
+
+
+520
+00:30:04,137 --> 00:30:06,707 line:-2
+DriverKit termination
+is quite straightforward.
+
+
+521
+00:30:07,207 --> 00:30:11,311 line:-2
+Just override Stop method,
+and tear everything down in there.
+
+
+522
+00:30:12,212 --> 00:30:14,181 line:-1
+We have made it simpler for you.
+
+
+523
+00:30:15,883 --> 00:30:21,054 line:-2
+The dext is not responsible for completing
+any outstanding I/O requests.
+
+
+524
+00:30:22,322 --> 00:30:24,858 line:-1
+The kernel handles all of that for you.
+
+
+525
+00:30:25,459 --> 00:30:26,927 line:-1
+Let's look at an example.
+
+
+526
+00:30:29,062 --> 00:30:31,131 line:-1
+In my Stop implementation,
+
+
+527
+00:30:31,198 --> 00:30:34,535 line:-1
+I first close my outstanding PCI session.
+
+
+528
+00:30:36,170 --> 00:30:39,840 line:-2
+I then cancel
+all of my dispatch queues and sources.
+
+
+529
+00:30:40,641 --> 00:30:43,577 line:-1
+I release them in a finalize code block,
+
+
+530
+00:30:43,644 --> 00:30:47,514 line:-2
+which gets called by the framework
+once the cancel call completes.
+
+
+531
+00:30:48,248 --> 00:30:49,249 line:-1
+That's it.
+
+
+532
+00:30:49,316 --> 00:30:53,420 line:-2
+We now have all the major features
+of our example SCSI dext implemented.
+
+
+533
+00:30:55,088 --> 00:30:57,691 line:-1
+Now, I know what you all must be thinking.
+
+
+534
+00:30:57,758 --> 00:31:01,728 line:-2
+Here we have a system
+where every single I/O that is coming down
+
+
+535
+00:31:01,795 --> 00:31:03,730 line:-1
+from the file system in the kernel
+
+
+536
+00:31:03,797 --> 00:31:08,135 line:-2
+gets sent to the dext running
+in the user space via an IPC call.
+
+
+537
+00:31:08,936 --> 00:31:12,840 line:-2
+The interrupt handler is getting invoked
+via an IPC call from the kernel.
+
+
+538
+00:31:14,241 --> 00:31:18,912 line:-2
+And the dext I/O completion is sent from
+the user space back to the kernel
+
+
+539
+00:31:18,979 --> 00:31:20,447 line:-1
+via an IPC call.
+
+
+540
+00:31:21,081 --> 00:31:23,050 line:-1
+This sounds like a lot of overhead.
+
+
+541
+00:31:24,084 --> 00:31:26,253 line:-1
+Will this affect my dext's performance?
+
+
+542
+00:31:27,955 --> 00:31:31,525 line:-2
+Will my dext be able to achieve
+the same throughput as my kext?
+
+
+543
+00:31:32,860 --> 00:31:36,496 line:-2
+Can I still run pro workloads
+on these devices like I used to?
+
+
+544
+00:31:38,065 --> 00:31:39,967 line:-1
+These are all great questions.
+
+
+545
+00:31:40,701 --> 00:31:44,771 line:-2
+We had the same concerns
+when we started developing this framework.
+
+
+546
+00:31:46,406 --> 00:31:48,909 line:-2
+Like I have mentioned
+a couple of times already,
+
+
+547
+00:31:48,976 --> 00:31:53,714 line:-2
+we designed and implemented this framework
+keeping performance as a top priority.
+
+
+548
+00:31:55,082 --> 00:31:58,218 line:-2
+I am happy to report
+that SCSIControllerDriverKit
+
+
+549
+00:31:58,285 --> 00:32:00,521 line:-1
+can handle the same workloads as kexts.
+
+
+550
+00:32:01,188 --> 00:32:04,758 line:-2
+Let's run a realistic workload
+on our example SCSI dext
+
+
+551
+00:32:04,825 --> 00:32:06,126 line:-1
+and see how it performs.
+
+
+552
+00:32:06,660 --> 00:32:08,228 line:-1
+My device setup includes
+
+
+553
+00:32:08,295 --> 00:32:11,932 line:-2
+a four gigabits per second
+fiber-channel host bus adapter
+
+
+554
+00:32:11,999 --> 00:32:13,534 line:-1
+connected to a RAID disk array.
+
+
+555
+00:32:14,535 --> 00:32:19,506 line:-2
+I have connected this setup
+to a MacBook Pro here via Thunderbolt 3.
+
+
+556
+00:32:20,674 --> 00:32:23,443 line:-1
+To build and install my example SCSI dext,
+
+
+557
+00:32:23,510 --> 00:32:27,114 line:-2
+I made sure I added
+all the required entitlements,
+
+
+558
+00:32:27,181 --> 00:32:30,017 line:-2
+and packaged it inside
+a system extension app.
+
+
+559
+00:32:30,751 --> 00:32:34,121 line:-1
+I also made sure my system extension app
+
+
+560
+00:32:34,188 --> 00:32:37,291 line:-2
+created an activation request
+during app launch
+
+
+561
+00:32:37,357 --> 00:32:39,860 line:-1
+so that my dext is available right away.
+
+
+562
+00:32:40,527 --> 00:32:44,565 line:-2
+I then built my system extension app
+and code-signed it appropriately.
+
+
+563
+00:32:46,500 --> 00:32:51,171 line:-2
+I have already installed
+my system extension app on this system.
+
+
+564
+00:32:52,472 --> 00:32:56,143 line:-2
+Let's peek into the I/O registry
+and see if our dext has matched.
+
+
+565
+00:32:56,543 --> 00:32:57,544 line:-1
+There it is.
+
+
+566
+00:32:57,611 --> 00:33:01,582 line:-2
+Our example SCSI dext
+has started successfully and is running.
+
+
+567
+00:33:02,583 --> 00:33:07,487 line:-2
+Our fiber-channel controller in this case
+is actually a multifunction PCI device.
+
+
+568
+00:33:07,821 --> 00:33:12,459 line:-2
+So we see two separate instances
+of example SCSI dexts running.
+
+
+569
+00:33:14,628 --> 00:33:18,498 line:-2
+Let's open Disk Utility to see
+if our dext is providing any disks.
+
+
+570
+00:33:19,032 --> 00:33:23,437 line:-2
+Looks like we have one external disk here
+with a fiber-channel interface.
+
+
+571
+00:33:24,538 --> 00:33:27,474 line:-2
+The disk is formatted
+to have one APFS volume.
+
+
+572
+00:33:28,342 --> 00:33:32,913 line:-2
+The volume is already mounted
+as we can see here on the desktop.
+
+
+573
+00:33:35,382 --> 00:33:38,252 line:-2
+We thought it would be a great idea
+to demonstrate performance
+
+
+574
+00:33:38,318 --> 00:33:40,687 line:-1
+by running an actual pro workload.
+
+
+575
+00:33:42,456 --> 00:33:46,059 line:-2
+I have a Final Cut Pro library
+on this external SCSI disk.
+
+
+576
+00:33:46,126 --> 00:33:47,127 line:-1
+Let's open that.
+
+
+577
+00:33:48,829 --> 00:33:53,467 line:-2
+Video processing and playback
+can be CPU and disk-intensive.
+
+
+578
+00:33:54,401 --> 00:33:55,802 line:-1
+While serving I/Os,
+
+
+579
+00:33:55,869 --> 00:33:59,573 line:-2
+if our dext CPU utilization
+increases for any reason,
+
+
+580
+00:33:59,640 --> 00:34:01,074 line:-1
+it is going to show.
+
+
+581
+00:34:02,209 --> 00:34:06,813 line:-2
+Our dext process can steal CPU time
+from the actual video playback,
+
+
+582
+00:34:06,880 --> 00:34:08,849 line:-1
+which would result in frame drops.
+
+
+583
+00:34:10,250 --> 00:34:14,788 line:-2
+Our goal here is to make sure our dext
+is able to stream this video
+
+
+584
+00:34:14,855 --> 00:34:16,389 line:-1
+without any frame drops.
+
+
+585
+00:34:18,158 --> 00:34:22,396 line:-2
+Just to be sure we'll see if this happens,
+I'll enable this option here,
+
+
+586
+00:34:23,230 --> 00:34:26,934 line:-2
+so that we get warned about frame drops
+because of disk performance.
+
+
+587
+00:34:29,436 --> 00:34:31,103 line:-1
+Let's start playing the video.
+
+
+588
+00:34:32,706 --> 00:34:34,708 line:-1
+[music playing]
+
+
+589
+00:34:36,409 --> 00:34:39,413 line:-2
+I'm also going to open
+Activity Monitor on the side
+
+
+590
+00:34:39,478 --> 00:34:41,014 line:-1
+so we can see disk usage.
+
+
+591
+00:34:43,884 --> 00:34:47,221 line:-2
+I have already selected
+the Final Cut Pro process here.
+
+
+592
+00:34:47,286 --> 00:34:51,525 line:-2
+We have this beautiful video playing
+in Apple ProRes format.
+
+
+593
+00:34:52,893 --> 00:34:58,365 line:-2
+This video has a maximum disk throughput
+of around 350 megabytes per second,
+
+
+594
+00:34:59,032 --> 00:35:01,468 line:-2
+which is quite close
+to the maximum throughput
+
+
+595
+00:35:01,535 --> 00:35:04,938 line:-2
+that our four gigabits per second
+fiber-channel controller can support.
+
+
+596
+00:35:05,973 --> 00:35:08,375 line:-1
+Our dext is doing great so far.
+
+
+597
+00:35:09,309 --> 00:35:10,911 line:-1
+[music ends]
+
+
+598
+00:35:10,978 --> 00:35:14,915 line:-2
+This entire video was streamed
+from our example SCSI dext
+
+
+599
+00:35:14,982 --> 00:35:16,350 line:-1
+running in user space.
+
+
+600
+00:35:16,416 --> 00:35:18,252 line:-1
+How cool is that?
+
+
+601
+00:35:18,318 --> 00:35:21,121 line:-2
+And we did not get alerted
+of any frame drops,
+
+
+602
+00:35:21,188 --> 00:35:25,692 line:-2
+which means our dext was able
+to handle this pro workload like a pro.
+
+
+603
+00:35:26,560 --> 00:35:28,262 line:-1
+There we have it.
+
+
+604
+00:35:28,328 --> 00:35:30,364 line:-1
+All the advantages of DriverKit,
+
+
+605
+00:35:30,430 --> 00:35:33,934 line:-2
+like security, ease of development,
+and debugging
+
+
+606
+00:35:34,001 --> 00:35:36,170 line:-1
+without compromising on performance.
+
+
+607
+00:35:37,404 --> 00:35:41,441 line:-2
+So that was a brief overview
+of SCSIControllerDriverKit framework,
+
+
+608
+00:35:41,508 --> 00:35:42,976 line:-1
+a brand-new framework
+
+
+609
+00:35:43,043 --> 00:35:45,812 line:-2
+to build driver extensions
+for SCSI controllers.
+
+
+610
+00:35:46,513 --> 00:35:47,814 line:-1
+Back to you, Kevin.
+
+
+611
+00:35:48,315 --> 00:35:49,416 line:-1
+Thanks, Madhu.
+
+
+612
+00:35:50,417 --> 00:35:54,054 line:-2
+Today, we briefly went over
+DriverKit system extensions,
+
+
+613
+00:35:54,121 --> 00:35:57,024 line:-2
+and saw how you can adopt
+the new PCIDriverKit
+
+
+614
+00:35:57,090 --> 00:36:00,561 line:-2
+and SCSIControllerDriverKit frameworks,
+for your devices.
+
+
+615
+00:36:01,495 --> 00:36:03,197 line:-1
+We went over an in-depth example
+
+
+616
+00:36:03,263 --> 00:36:06,133 line:-2
+of writing a SCSI controller driver
+over PCI.
+
+
+617
+00:36:06,400 --> 00:36:09,703 line:-2
+And got to see a real-world demo
+of how you can use these frameworks.
+
+
+618
+00:36:10,904 --> 00:36:14,441 line:-2
+With the new SCSI controller
+and PCIDriverKit frameworks,
+
+
+619
+00:36:14,508 --> 00:36:17,945 line:-2
+SCSI controller and PCI kernel drivers
+are now deprecated
+
+
+620
+00:36:18,011 --> 00:36:20,781 line:-2
+when a system extension
+can perform the same function.
+
+
+621
+00:36:20,848 --> 00:36:22,716 line:-1
+For an in-depth look at DriverKit,
+
+
+622
+00:36:22,783 --> 00:36:26,220 line:-2
+please check out last year's
+"System Extensions and DriverKit" session
+
+
+623
+00:36:26,286 --> 00:36:27,588 line:-1
+on the Developer website.
+
+
+624
+00:36:27,654 --> 00:36:31,258 line:-2
+I encourage developers
+to start adopting DriverKit immediately
+
+
+625
+00:36:31,325 --> 00:36:33,360 line:-2
+for the device families
+that are available.
+
+
+626
+00:36:34,428 --> 00:36:37,164 line:-2
+Please go and download
+the latest DriverKit SDK,
+
+
+627
+00:36:37,231 --> 00:36:40,467 line:-2
+and let us know any feedback you have
+through Feedback Assistant.
+
+
+628
+00:36:41,235 --> 00:36:44,505 line:-2
+We'd love to hear from you,
+and are excited to see what you'll create.
+

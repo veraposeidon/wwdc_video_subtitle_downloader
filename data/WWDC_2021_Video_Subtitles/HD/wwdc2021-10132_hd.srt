@@ -1,0 +1,3878 @@
+2
+00:00:00,334 --> 00:00:03,003 line:-1
+[upbeat music]
+
+
+3
+00:00:03,036 --> 00:00:09,643 line:-1
+♪ ♪
+
+
+4
+00:00:09,676 --> 00:00:13,514 line:-2
+[Nate] Hi, I’m Nate, an engineer
+on the Swift team here at Apple.
+
+
+5
+00:00:13,547 --> 00:00:14,681 line:-1
+Today my colleague Robert
+
+
+6
+00:00:14,715 --> 00:00:18,051 line:-2
+and I will tell you about
+async/await in Swift.
+
+
+7
+00:00:18,085 --> 00:00:20,287 line:-2
+Asynchronous programming is
+a regular activity
+
+
+8
+00:00:20.320 --> 00:00:21.488 line:-1 align:center
+for many of you.
+
+
+9
+00:00:21,522 --> 00:00:24,258 line:-2
+So you know it’s all too easy
+to write asynchronous code
+
+
+10
+00:00:24,291 --> 00:00:28,729 line:-2
+that’s verbose,
+complex, and even incorrect.
+
+
+11
+00:00:28.762 --> 00:00:31.365 line:-2 align:center
+Async/await in Swift
+can help out.
+
+
+12
+00:00:31.398 --> 00:00:33.667 line:-2 align:center
+Using it,
+you can write asynchronous code
+
+
+13
+00:00:33,700 --> 00:00:36,537 line:-2
+just as easily
+as you write regular code.
+
+
+14
+00:00:36.570 --> 00:00:40.340 line:-2 align:center
+And when you do, your code
+will better reflect your ideas.
+
+
+15
+00:00:40,374 --> 00:00:42,476 line:-1
+It’ll be safer too.
+
+
+16
+00:00:42,509 --> 00:00:44,912 line:-2
+On top of that,
+the SDK has hundreds
+
+
+17
+00:00:44,945 --> 00:00:48,482 line:-2
+of awaitable methods
+available for you to use.
+
+
+18
+00:00:48.515 --> 00:00:51.218 line:-2 align:center
+For example,
+UIKit provides functionality
+
+
+19
+00:00:51,251 --> 00:00:53,654 line:-2
+to form a thumbnail
+from a UIImage.
+
+
+20
+00:00:53,687 --> 00:00:55,789 line:-2
+In fact,
+it provides both synchronous
+
+
+21
+00:00:55.822 --> 00:00:58.325 line:-2 align:center
+and asynchronous functions
+to complete that task.
+
+
+22
+00:00:59.893 --> 00:01:01.328 line:-1 align:center
+As a quick reminder,
+
+
+23
+00:01:01.361 --> 00:01:03.597 line:-2 align:center
+when you call a function
+that is synchronous--
+
+
+24
+00:01:03.630 --> 00:01:05.832 line:-2 align:center
+that is,
+a regular old function--
+
+
+25
+00:01:05.866 --> 00:01:09.636 line:-2 align:center
+your thread is blocked, waiting
+for that function to finish.
+
+
+26
+00:01:09.670 --> 00:01:11.271 line:-2 align:center
+So if your fetchThumbnail
+function
+
+
+27
+00:01:11.305 --> 00:01:13.974 line:-2 align:center
+calls preparingThumbnail--
+the synchronous function
+
+
+28
+00:01:14.007 --> 00:01:16.710 line:-2 align:center
+UIKit provides--
+until it finishes,
+
+
+29
+00:01:16.743 --> 00:01:19.479 line:-2 align:center
+your thread
+can’t do anything else.
+
+
+30
+00:01:19,513 --> 00:01:21,315 line:-1
+In contrast, if you call
+
+
+31
+00:01:21,348 --> 00:01:23,851 line:-2
+prepareThumbnail
+(of:completionHandler:)--
+
+
+32
+00:01:23.884 --> 00:01:26.453 line:-2 align:center
+the asynchronous version
+of that function--
+
+
+33
+00:01:26,486 --> 00:01:30,457 line:-2
+while it runs, your thread
+is free to do other work.
+
+
+34
+00:01:30.490 --> 00:01:32.993 line:-2 align:center
+When it’s done,
+it will notify you by calling
+
+
+35
+00:01:33.026 --> 00:01:35.262 line:-1 align:center
+its completion handler.
+
+
+36
+00:01:35.295 --> 00:01:38.498 line:-2 align:center
+The SDK provides many
+asynchronous functions.
+
+
+37
+00:01:38.532 --> 00:01:40.100 line:-2 align:center
+They let you know
+that they’ve completed
+
+
+38
+00:01:40.133 --> 00:01:42.236 line:-1 align:center
+in a few different ways.
+
+
+39
+00:01:42,269 --> 00:01:44,771 line:-2
+Some use a completion handler
+like this.
+
+
+40
+00:01:44.805 --> 00:01:47.307 line:-2 align:center
+Others rely
+on delegate callbacks.
+
+
+41
+00:01:47.341 --> 00:01:49.943 line:-2 align:center
+And many are marked async
+and just return a value.
+
+
+42
+00:01:50.711 --> 00:01:53.280 line:-2 align:center
+What these asynchronous
+functions all have in common
+
+
+43
+00:01:53,313 --> 00:01:57,451 line:-2
+is this: when you call one,
+it unblocks your thread quickly,
+
+
+44
+00:01:57.484 --> 00:01:59.520 line:-1 align:center
+having kicked off its work.
+
+
+45
+00:01:59.553 --> 00:02:01.755 line:-2 align:center
+That allows the thread
+to do other things
+
+
+46
+00:02:01,788 --> 00:02:04,625 line:-2
+while that long
+running work completes.
+
+
+47
+00:02:04,658 --> 00:02:06,860 line:-2
+To see that difference,
+let’s take a look
+
+
+48
+00:02:06,894 --> 00:02:09,396 line:-2
+at an example that may be
+familiar to many of you.
+
+
+49
+00:02:10.030 --> 00:02:12.466 line:-2 align:center
+In the app Robert
+and I are building together,
+
+
+50
+00:02:12,499 --> 00:02:15,135 line:-2
+we have a list of items,
+each row of which displays
+
+
+51
+00:02:15.169 --> 00:02:18.238 line:-2 align:center
+a thumbnail of an image
+stored on a server.
+
+
+52
+00:02:18,272 --> 00:02:20,073 line:-2
+When it’s time to get
+a thumbnail ready to be
+
+
+53
+00:02:20.107 --> 00:02:22.976 line:-2 align:center
+displayed in that list,
+in our view model,
+
+
+54
+00:02:23,010 --> 00:02:25,579 line:-2
+the fetchThumbnail method
+is called.
+
+
+55
+00:02:25.612 --> 00:02:27.014 line:-1 align:center
+It transforms a string
+
+
+56
+00:02:27.047 --> 00:02:30.417 line:-2 align:center
+to a UIImage via a series
+of steps.
+
+
+57
+00:02:30,450 --> 00:02:33,787 line:-2
+First, the view model’s
+thumbnailURLRequest method
+
+
+58
+00:02:33.820 --> 00:02:36.790 line:-2 align:center
+creates a URLRequest
+from the string.
+
+
+59
+00:02:36.823 --> 00:02:40.160 line:-2 align:center
+Next, URLSession’s
+dataTask method gets
+
+
+60
+00:02:40.194 --> 00:02:42.296 line:-1 align:center
+the data for that request.
+
+
+61
+00:02:42.329 --> 00:02:45.966 line:-2 align:center
+Then UIImage initWithData
+creates an image from that data,
+
+
+62
+00:02:45,999 --> 00:02:48,202 align:center
+and finally,
+UIImage’s prepareThumbnail
+
+
+63
+00:02:48,235 --> 00:02:51,805 line:0
+method renders a thumbnail
+from the original image.
+
+
+64
+00:02:51,839 --> 00:02:55,609 align:center
+Each of these operations depends
+on the previous one’s result.
+
+
+65
+00:02:55,642 --> 00:02:58,412 line:0
+That means they must
+be performed in sequence.
+
+
+66
+00:02:59,546 --> 00:03:02,616 line:0
+Some of these operations
+return values quickly--
+
+
+67
+00:03:02,649 --> 00:03:06,186 line:0
+both constructing a URLRequest
+from a string and a UIImage
+
+
+68
+00:03:06,220 --> 00:03:09,223 align:center
+from data are like this--
+so it’s fine to run them
+
+
+69
+00:03:09,256 --> 00:03:12,025 align:center
+on whatever thread
+the function happens to be on
+
+
+70
+00:03:12,059 --> 00:03:15,095 align:center
+and for these
+to be synchronous calls.
+
+
+71
+00:03:15,128 --> 00:03:17,631 align:center
+However, some of them take time.
+
+
+72
+00:03:17,664 --> 00:03:21,935 align:center
+It takes awhile to download all
+the data that makes up an image.
+
+
+73
+00:03:21,969 --> 00:03:24,905 align:center
+And rendering a nice-looking
+thumbnail from it requires
+
+
+74
+00:03:24,938 --> 00:03:27,574 align:center
+a device to do
+some expensive work.
+
+
+75
+00:03:27,608 --> 00:03:30,544 line:0
+That’s why the SDK
+provides asynchronous functions
+
+
+76
+00:03:30,577 --> 00:03:32,446 align:center
+to complete those tasks.
+
+
+77
+00:03:32,479 --> 00:03:34,848 align:center
+So these calls
+should be asynchronous.
+
+
+78
+00:03:35,582 --> 00:03:39,019 line:0
+Before Robert and I took
+async/await out for a spin,
+
+
+79
+00:03:39,052 --> 00:03:41,855 line:0
+we were writing the function
+using completion handlers.
+
+
+80
+00:03:43,190 --> 00:03:45,859 line:-2
+The function takes
+as its arguments a string,
+
+
+81
+00:03:45,893 --> 00:03:49,263 line:-2
+the input to the first operation
+and a completion handler,
+
+
+82
+00:03:49.296 --> 00:03:52.399 line:-2 align:center
+used to give the output
+back to the caller.
+
+
+83
+00:03:52.432 --> 00:03:54.434 line:-1 align:center
+When fetchThumbnail is called,
+
+
+84
+00:03:54.468 --> 00:03:57.671 line:-2 align:center
+we first
+call thumbnailURLRequest.
+
+
+85
+00:03:57,704 --> 00:03:59,907 line:-2
+This method is synchronous,
+so it doesn’t need
+
+
+86
+00:03:59.940 --> 00:04:02.442 line:-1 align:center
+a completion handler.
+
+
+87
+00:04:02.476 --> 00:04:04.278 line:-1 align:center
+Next we call dataTask
+
+
+88
+00:04:04.311 --> 00:04:06.613 line:-2 align:center
+on the shared
+URLSession instance,
+
+
+89
+00:04:06,647 --> 00:04:08,282 line:-1
+passing that URLRequest
+
+
+90
+00:04:08.315 --> 00:04:10.584 line:-1 align:center
+and a completion handler.
+
+
+91
+00:04:10,617 --> 00:04:13,554 line:-2
+It synchronously produces
+a URLSessionDataTask
+
+
+92
+00:04:13.587 --> 00:04:17.724 line:-2 align:center
+which must be resumed to kick
+off the asynchronous work.
+
+
+93
+00:04:17,758 --> 00:04:20,394 line:-2
+FetchThumbnail then returns,
+and the thread is
+
+
+94
+00:04:20,427 --> 00:04:22,896 line:-1
+free to do other work.
+
+
+95
+00:04:22,930 --> 00:04:25,332 line:-2
+That’s really important
+because downloading
+
+
+96
+00:04:25,365 --> 00:04:27,634 line:-2
+an image takes time,
+and you don’t want
+
+
+97
+00:04:27,668 --> 00:04:32,105 line:-2
+to block a thread waiting
+for data to stream in.
+
+
+98
+00:04:32.139 --> 00:04:35.275 line:-2 align:center
+Eventually either the image
+finishes downloading
+
+
+99
+00:04:35.309 --> 00:04:37.344 line:-1 align:center
+or something goes wrong.
+
+
+100
+00:04:37.377 --> 00:04:39.880 line:-2 align:center
+Either way,
+the request completes
+
+
+101
+00:04:39.913 --> 00:04:43.183 line:-2 align:center
+and the completion handler
+passed to dataTask is invoked
+
+
+102
+00:04:43,217 --> 00:04:45,953 line:-1
+with several optional values:
+
+
+103
+00:04:45.986 --> 00:04:49.523 line:-2 align:center
+the data, a response,
+and an error.
+
+
+104
+00:04:50.457 --> 00:04:53.193 line:-2 align:center
+If something does go wrong,
+then we need to invoke
+
+
+105
+00:04:53.227 --> 00:04:57.331 line:-2 align:center
+the completion handler
+and pass the error along.
+
+
+106
+00:04:57,364 --> 00:04:59,700 line:-2
+If everything worked out,
+then we create an image
+
+
+107
+00:04:59,733 --> 00:05:03,003 line:-2
+from the data using
+UIImage’s initWithData.
+
+
+108
+00:05:03.036 --> 00:05:05.506 line:-2 align:center
+Because it’s synchronous,
+we get to write normal
+
+
+109
+00:05:05.539 --> 00:05:08.575 line:-2 align:center
+straight-line code
+to handle the results.
+
+
+110
+00:05:08,609 --> 00:05:11,645 line:-2
+If no image is produced,
+we’re done.
+
+
+111
+00:05:11.678 --> 00:05:14.515 line:-2 align:center
+And if an image was produced,
+then finally we call
+
+
+112
+00:05:14.548 --> 00:05:16.817 line:-2 align:center
+UIKit’s method prepareThumbnail
+on it
+
+
+113
+00:05:16.850 --> 00:05:19.586 line:-1 align:center
+and pass a completion handler.
+
+
+114
+00:05:19,620 --> 00:05:22,489 line:-2
+While its work completes,
+the thread is unblocked
+
+
+115
+00:05:22,523 --> 00:05:24,024 line:-1
+and freed up to do other work.
+
+
+116
+00:05:25.692 --> 00:05:27.794 line:-1 align:center
+After the thumbnail is prepared,
+
+
+117
+00:05:27,828 --> 00:05:30,531 line:-2
+that completion handler is
+invoked with an image
+
+
+118
+00:05:30,564 --> 00:05:34,268 line:-2
+if preparing a thumbnail
+succeeds or else nil.
+
+
+119
+00:05:34,301 --> 00:05:38,138 line:-2
+If it does succeed, then we call
+our completion handler
+
+
+120
+00:05:38,172 --> 00:05:39,773 line:-1
+and pass along the image.
+
+
+121
+00:05:41.408 --> 00:05:44.912 line:-2 align:center
+But as Robert pointed out to me,
+there’s a problem.
+
+
+122
+00:05:44.945 --> 00:05:47.614 line:-2 align:center
+FetchThumbnail’s caller
+expects to be notified
+
+
+123
+00:05:47.648 --> 00:05:51.652 line:-2 align:center
+when fetchThumbnail finishes
+its work, even if it fails.
+
+
+124
+00:05:51,685 --> 00:05:55,422 line:-2
+And currently, we’re leaving
+the caller in the lurch.
+
+
+125
+00:05:55.455 --> 00:05:57.891 line:-2 align:center
+I’m so used to writing
+“guard else return”
+
+
+126
+00:05:57,925 --> 00:06:01,662 line:-2
+that I forgot to invoke
+the completion handler twice.
+
+
+127
+00:06:01.695 --> 00:06:04.164 line:-2 align:center
+So if creating a UIImage
+from data
+
+
+128
+00:06:04.198 --> 00:06:06.333 line:-1 align:center
+or preparing a thumbnail fails,
+
+
+129
+00:06:06.366 --> 00:06:09.236 line:-2 align:center
+the caller of fetchThumbnail
+will never be notified
+
+
+130
+00:06:09.269 --> 00:06:11.438 line:-2 align:center
+and the row
+will never be updated.
+
+
+131
+00:06:11,471 --> 00:06:13,807 line:-2
+It’ll just show
+a spinner forever.
+
+
+132
+00:06:15.576 --> 00:06:17.744 line:-2 align:center
+That’s why it’s
+so important for us,
+
+
+133
+00:06:17,778 --> 00:06:19,279 line:-1
+the authors of fetchThumbnail,
+
+
+134
+00:06:19,313 --> 00:06:22,082 line:-2
+to notify our callers
+no matter what happens.
+
+
+135
+00:06:22.115 --> 00:06:24.051 line:-2 align:center
+So every path
+through the function
+
+
+136
+00:06:24.084 --> 00:06:26.019 line:-1 align:center
+should notify them.
+
+
+137
+00:06:26.053 --> 00:06:28.822 line:-2 align:center
+To do that, we need to invoke
+our completion handler
+
+
+138
+00:06:28.856 --> 00:06:32.359 line:-2 align:center
+if an error occurs
+and pass the error along.
+
+
+139
+00:06:32,392 --> 00:06:34,328 line:-2
+A normal function
+gives an error back
+
+
+140
+00:06:34,361 --> 00:06:36,396 line:-1
+to its caller by throwing it.
+
+
+141
+00:06:36,430 --> 00:06:39,166 line:-2
+And Swift ensures that
+no matter how execution
+
+
+142
+00:06:39.199 --> 00:06:41.034 line:-1 align:center
+proceeds through the function,
+
+
+143
+00:06:41,068 --> 00:06:44,471 line:-2
+if a value isn’t returned,
+an error is thrown.
+
+
+144
+00:06:44.505 --> 00:06:48.509 line:-2 align:center
+But we can’t use Swift’s usual
+error handling mechanism here.
+
+
+145
+00:06:48,542 --> 00:06:50,244 line:-2
+We can’t just throw
+an error from within
+
+
+146
+00:06:50.277 --> 00:06:52.646 line:-2 align:center
+these completion handlers
+if we run into a problem.
+
+
+147
+00:06:52.679 --> 00:06:54.548 line:-2 align:center
+That’s unfortunate
+because it means
+
+
+148
+00:06:54,581 --> 00:06:57,217 line:-1
+Swift can’t check our work.
+
+
+149
+00:06:57,251 --> 00:06:59,720 line:-1
+To Swift, a completion handler
+
+
+150
+00:06:59,753 --> 00:07:02,856 line:-2
+like fetchThumbnails
+is just a closure.
+
+
+151
+00:07:02.890 --> 00:07:05.626 line:-2 align:center
+While we want to be sure
+that it’s always invoked,
+
+
+152
+00:07:05.659 --> 00:07:08.862 line:-2 align:center
+in Swift there’s no way
+to enforce that it is.
+
+
+153
+00:07:08.896 --> 00:07:10.964 line:-2 align:center
+That’s why I didn’t get
+a compilation error
+
+
+154
+00:07:10.998 --> 00:07:13.901 line:-2 align:center
+when I just returned
+from those two guards.
+
+
+155
+00:07:13.934 --> 00:07:15.602 line:-2 align:center
+It took Robert
+pointing out that there was
+
+
+156
+00:07:15.636 --> 00:07:18.038 line:-1 align:center
+a problem for me to fix it.
+
+
+157
+00:07:18.071 --> 00:07:20.874 line:-2 align:center
+So it’s up to you to make sure
+that your completion handler
+
+
+158
+00:07:20,908 --> 00:07:23,744 line:-1
+eventually gets called.
+
+
+159
+00:07:23.777 --> 00:07:26.413 line:-2 align:center
+When the two of us sat down
+to write this function,
+
+
+160
+00:07:26.446 --> 00:07:30.150 line:-2 align:center
+we just wanted to do a few
+operations one after the next.
+
+
+161
+00:07:30,184 --> 00:07:32,619 line:-2
+Two were synchronous
+and two were asynchronous,
+
+
+162
+00:07:32.653 --> 00:07:35.055 line:-1 align:center
+taking completion handlers.
+
+
+163
+00:07:35.088 --> 00:07:39.126 line:-2 align:center
+We succeeded, but we ended up
+with around 20 lines of code
+
+
+164
+00:07:39,159 --> 00:07:43,664 line:-2
+containing five opportunities
+for subtle bugs to creep in.
+
+
+165
+00:07:43,697 --> 00:07:45,098 line:-1
+What we wanted was to perform
+
+
+166
+00:07:45.132 --> 00:07:47.334 line:-2 align:center
+those four operations
+in sequence,
+
+
+167
+00:07:47,367 --> 00:07:49,837 line:-2
+but what we got is hard
+to follow,
+
+
+168
+00:07:49.870 --> 00:07:52.606 line:-2 align:center
+hard to get right,
+and obscures our intent.
+
+
+169
+00:07:53,740 --> 00:07:56,844 line:-2
+Now, there are ways we could
+have made this a bit safer.
+
+
+170
+00:07:56.877 --> 00:07:59.079 line:-1 align:center
+For example, we could’ve used
+
+
+171
+00:07:59,112 --> 00:08:01,648 line:-2
+the standard library’s
+result type.
+
+
+172
+00:08:01.682 --> 00:08:05.452 line:-2 align:center
+And while this is a little
+safer, it also adds ceremony,
+
+
+173
+00:08:05.485 --> 00:08:08.889 line:-2 align:center
+making our code uglier
+and slightly longer.
+
+
+174
+00:08:08,922 --> 00:08:11,525 line:-2
+People have also used
+techniques like futures
+
+
+175
+00:08:11.558 --> 00:08:14.428 line:-2 align:center
+to improve asynchronous code
+in other ways.
+
+
+176
+00:08:14,461 --> 00:08:16,029 line:-2
+But none
+of these approaches give us
+
+
+177
+00:08:16.063 --> 00:08:19.700 line:-2 align:center
+code that is simple, easy,
+and safe.
+
+
+178
+00:08:19.733 --> 00:08:22.903 line:-2 align:center
+With async/await,
+we can do better.
+
+
+179
+00:08:22,936 --> 00:08:24,304 line:-2
+Robert and I rewrote
+the function
+
+
+180
+00:08:24.338 --> 00:08:26.573 line:-1 align:center
+that performs those four steps.
+
+
+181
+00:08:26,607 --> 00:08:29,276 line:-2
+And this time,
+we used async/await.
+
+
+182
+00:08:30,344 --> 00:08:33,180 line:-2
+The function still takes
+a string as an argument.
+
+
+183
+00:08:33.213 --> 00:08:35.816 line:-2 align:center
+But while last time,
+a completion handler was passed
+
+
+184
+00:08:35.849 --> 00:08:40.420 line:-2 align:center
+as well, this time instead,
+the function is async.
+
+
+185
+00:08:40,454 --> 00:08:43,490 line:-2
+When you mark a function async,
+the keyword should go just
+
+
+186
+00:08:43,524 --> 00:08:46,627 line:-2
+before “throws” in the function
+signature, like this,
+
+
+187
+00:08:46.660 --> 00:08:50.731 line:-2 align:center
+or before the arrow
+if the function doesn’t throw.
+
+
+188
+00:08:50.764 --> 00:08:53.700 line:-2 align:center
+Marking the function
+async allows it
+
+
+189
+00:08:53.734 --> 00:08:56.837 line:-1 align:center
+and its signature to be simpler.
+
+
+190
+00:08:56.870 --> 00:08:59.206 line:-2 align:center
+If an image
+is thumbnailed successfully,
+
+
+191
+00:08:59,239 --> 00:09:01,675 line:-2
+that thumbnail is
+simply returned.
+
+
+192
+00:09:01.708 --> 00:09:05.345 line:-2 align:center
+And if an error is encountered,
+it’s just thrown.
+
+
+193
+00:09:05,379 --> 00:09:08,515 line:-2
+When fetchThumbnail is called,
+just like before,
+
+
+194
+00:09:08.549 --> 00:09:12.219 line:-2 align:center
+it starts off by calling
+thumbnailURLRequest.
+
+
+195
+00:09:12.252 --> 00:09:14.154 line:-2 align:center
+This function is synchronous,
+so the thread
+
+
+196
+00:09:14.188 --> 00:09:15.989 line:-1 align:center
+is blocked, doing its work.
+
+
+197
+00:09:17,591 --> 00:09:21,161 line:-2
+Next, it starts downloading data
+by calling data(for: request)
+
+
+198
+00:09:21.195 --> 00:09:23.530 line:-1 align:center
+on the shared URLSession.
+
+
+199
+00:09:23.564 --> 00:09:26.066 line:-2 align:center
+Like dataTask,
+this method is also provided
+
+
+200
+00:09:26,099 --> 00:09:29,203 line:-2
+by Foundation
+and is also asynchronous.
+
+
+201
+00:09:29,236 --> 00:09:33,273 line:-2
+But unlike dataTask,
+the data method is awaitable.
+
+
+202
+00:09:33,307 --> 00:09:36,410 line:-2
+So after it’s called,
+it suspends itself quickly,
+
+
+203
+00:09:36.443 --> 00:09:38.345 line:-1 align:center
+unblocking the thread.
+
+
+204
+00:09:38,378 --> 00:09:40,380 line:-2
+The thread is then free
+to do other work.
+
+
+205
+00:09:42.115 --> 00:09:45.853 line:-2 align:center
+“Try” is here because the data
+method is marked “throws.”
+
+
+206
+00:09:45.886 --> 00:09:49.356 line:-2 align:center
+In the earlier version, remember
+how we had to check for an error
+
+
+207
+00:09:49,389 --> 00:09:52,426 line:-2
+and then explicitly call
+our completion handler with it?
+
+
+208
+00:09:52,459 --> 00:09:55,762 line:-2
+Here in the awaitable version,
+all of that code is
+
+
+209
+00:09:55.796 --> 00:09:59.466 line:-2 align:center
+boiled down
+to just the try keyword.
+
+
+210
+00:09:59.499 --> 00:10:01.301 line:-2 align:center
+Just like “try” is
+needed to call functions
+
+
+211
+00:10:01.335 --> 00:10:02.769 line:-1 align:center
+that are marked “throws,”
+
+
+212
+00:10:02.803 --> 00:10:04.605 line:-2 align:center
+“await” is needed
+to call functions
+
+
+213
+00:10:04.638 --> 00:10:06.773 line:-1 align:center
+that are marked “async.”
+
+
+214
+00:10:06.807 --> 00:10:10.277 line:-2 align:center
+If an expression has multiple
+async function calls in it,
+
+
+215
+00:10:10.310 --> 00:10:12.446 line:-2 align:center
+you only need
+to write “await” once,
+
+
+216
+00:10:12.479 --> 00:10:14.314 line:-2 align:center
+just like you only need
+one “try”
+
+
+217
+00:10:14,348 --> 00:10:18,252 line:-2
+for an expression with multiple
+throwing function calls.
+
+
+218
+00:10:18.285 --> 00:10:22.723 line:-2 align:center
+All told, the function call
+is marked “try await.”
+
+
+219
+00:10:22,756 --> 00:10:25,659 line:-2
+When dealing with an async
+expression that throws,
+
+
+220
+00:10:25.692 --> 00:10:29.029 line:-2 align:center
+you’ll need to put try
+before await, like this.
+
+
+221
+00:10:30,664 --> 00:10:33,600 line:-2
+Eventually, when the data
+finishes downloading,
+
+
+222
+00:10:33,634 --> 00:10:38,172 line:-2
+the data method will resume
+and return to fetchThumbnail.
+
+
+223
+00:10:38,205 --> 00:10:41,341 line:-2
+At that point, the values
+the data method returns
+
+
+224
+00:10:41,375 --> 00:10:44,378 line:-1
+or error it throws will flow in.
+
+
+225
+00:10:44.411 --> 00:10:46.813 line:-2 align:center
+If it threw an error,
+then fetchThumbnail
+
+
+226
+00:10:46.847 --> 00:10:49.616 line:-2 align:center
+will throw that error
+in turn itself.
+
+
+227
+00:10:49.650 --> 00:10:54.121 line:-2 align:center
+Otherwise, the data and response
+variables will be defined.
+
+
+228
+00:10:54,154 --> 00:10:56,423 line:-2
+This is similar to what happened
+in the earlier version
+
+
+229
+00:10:56,456 --> 00:10:58,725 line:-2
+of fetchThumbnail
+when the completion handler
+
+
+230
+00:10:58.759 --> 00:11:01.395 line:-2 align:center
+passed to URLSession’s
+dataTask method was invoked.
+
+
+231
+00:11:02,629 --> 00:11:05,365 line:-2
+In both versions,
+values and errors that were
+
+
+232
+00:11:05,399 --> 00:11:08,902 line:-2
+produced by URLSession’s
+asynchronous method flowed in.
+
+
+233
+00:11:08.936 --> 00:11:12.172 line:-2 align:center
+But the awaitable version
+is so much simpler.
+
+
+234
+00:11:12.206 --> 00:11:14.374 line:-1 align:center
+It says exactly what we mean.
+
+
+235
+00:11:14.408 --> 00:11:16.710 line:-2 align:center
+Make this request
+and assign the values
+
+
+236
+00:11:16,743 --> 00:11:19,980 line:-2
+we get back to variables
+so we can use them.
+
+
+237
+00:11:20,013 --> 00:11:23,350 line:-2
+And if we happen to run
+into a problem, throw an error.
+
+
+238
+00:11:24.952 --> 00:11:27.321 line:-2 align:center
+Next, fetchThumbnail
+will try to create
+
+
+239
+00:11:27.354 --> 00:11:30.724 line:-2 align:center
+a UIImage
+from the data it downloaded.
+
+
+240
+00:11:30.757 --> 00:11:33.427 line:-2 align:center
+If that succeeds, then
+a thumbnail will be rendered
+
+
+241
+00:11:33,460 --> 00:11:37,331 line:-2
+for that image by accessing
+its thumbnail property.
+
+
+242
+00:11:37,364 --> 00:11:40,334 line:-2
+While the thumbnail is formed,
+the thread is free to do
+
+
+243
+00:11:40.367 --> 00:11:43.937 line:-2 align:center
+other things until the thumbnail
+property eventually resumes
+
+
+244
+00:11:43.971 --> 00:11:45.973 line:-1 align:center
+and returns to fetchThumbnail.
+
+
+245
+00:11:48.141 --> 00:11:51.979 line:-2 align:center
+If a thumbnail is rendered,
+fetchThumbnail will return it.
+
+
+246
+00:11:52.012 --> 00:11:53.914 line:-1 align:center
+Otherwise, it’ll throw an error.
+
+
+247
+00:11:54.815 --> 00:11:57.484 line:-2 align:center
+In contrast to the
+completion handler version,
+
+
+248
+00:11:57.518 --> 00:11:59.219 line:-1 align:center
+if no thumbnail is rendered,
+
+
+249
+00:11:59,253 --> 00:12:03,724 line:-2
+Swift ensures that we throw
+an error here or return a value.
+
+
+250
+00:12:03.757 --> 00:12:06.693 line:-1 align:center
+But we can’t just silently fail.
+
+
+251
+00:12:06.727 --> 00:12:10.097 line:-2 align:center
+And that’s it.
+That’s the all code we need.
+
+
+252
+00:12:10.130 --> 00:12:12.266 line:-2 align:center
+The function does exactly
+what the completion
+
+
+253
+00:12:12.299 --> 00:12:14.034 line:-1 align:center
+handler version did before.
+
+
+254
+00:12:14,067 --> 00:12:17,571 line:-2
+But instead of 20 lines of code,
+it just has 6.
+
+
+255
+00:12:17.604 --> 00:12:19.540 line:-1 align:center
+And it’s all straight-line code.
+
+
+256
+00:12:20.240 --> 00:12:22.276 line:-2 align:center
+The four operations
+that need to be performed
+
+
+257
+00:12:22.309 --> 00:12:25.212 line:-2 align:center
+in sequence are listed
+one after the next.
+
+
+258
+00:12:25,245 --> 00:12:27,514 line:-2
+And Swift makes sure
+that the function always
+
+
+259
+00:12:27.548 --> 00:12:29.650 line:-2 align:center
+notifies its caller
+when it’s done,
+
+
+260
+00:12:29.683 --> 00:12:33.754 line:-2 align:center
+either by returning or by
+throwing if a problem comes up.
+
+
+261
+00:12:33.787 --> 00:12:38.759 line:-2 align:center
+This is just one example of how
+using async/await can transform
+
+
+262
+00:12:38.792 --> 00:12:43.263 line:-2 align:center
+your asynchronous Swift code,
+making it safer, shorter,
+
+
+263
+00:12:43,297 --> 00:12:45,332 line:-2
+and making it better reflect
+your intent.
+
+
+264
+00:12:46,200 --> 00:12:47,801 line:-2
+Let’s dig in
+to some of the details
+
+
+265
+00:12:47.835 --> 00:12:50.404 line:-2 align:center
+of how fetchThumbnail
+is implemented.
+
+
+266
+00:12:50,437 --> 00:12:52,773 line:-2
+On the second-to-last line,
+even though there’s
+
+
+267
+00:12:52.806 --> 00:12:55.309 line:-2 align:center
+no function call,
+the expression that kicks off
+
+
+268
+00:12:55,342 --> 00:12:58,212 line:-2
+rendering the thumbnail
+is marked with “await.”
+
+
+269
+00:12:58,245 --> 00:13:01,481 line:-2
+That’s because
+the thumbnail property is async.
+
+
+270
+00:13:01.515 --> 00:13:03.917 line:-1 align:center
+Not just functions can be async.
+
+
+271
+00:13:03,951 --> 00:13:08,188 line:-2
+Properties can be too,
+so can initializers.
+
+
+272
+00:13:08.222 --> 00:13:11.291 line:-2 align:center
+Now, the thumbnail property is
+not part of the SDK.
+
+
+273
+00:13:11.325 --> 00:13:13.660 line:-2 align:center
+It’s actually one
+that Robert added.
+
+
+274
+00:13:13.694 --> 00:13:15.162 line:-1 align:center
+Let’s take a look at it.
+
+
+275
+00:13:16.697 --> 00:13:20.100 line:-2 align:center
+He defined this property
+in an extension on UIImage,
+
+
+276
+00:13:20.133 --> 00:13:22.536 line:-1 align:center
+and its implementation is short.
+
+
+277
+00:13:22.569 --> 00:13:25.372 line:-2 align:center
+It forms a CGSize
+and awaits the result
+
+
+278
+00:13:25.405 --> 00:13:29.309 line:-2 align:center
+of passing it along
+to byPreparingThumbnail(ofSize).
+
+
+279
+00:13:29,343 --> 00:13:31,478 line:-2
+By the way,
+this method on self is
+
+
+280
+00:13:31,512 --> 00:13:33,881 line:-2
+the awaitable version
+of the method we used earlier.
+
+
+281
+00:13:35,749 --> 00:13:38,118 line:-2
+There are a couple things
+to notice.
+
+
+282
+00:13:38.151 --> 00:13:40.954 line:-2 align:center
+First, it has
+an explicit getter.
+
+
+283
+00:13:40.988 --> 00:13:44.191 line:-2 align:center
+This is required to mark
+a property async.
+
+
+284
+00:13:44,224 --> 00:13:48,562 line:-2
+As of Swift 5.5,
+property getters can also throw.
+
+
+285
+00:13:48,595 --> 00:13:51,331 line:-2
+And like with async
+function signatures,
+
+
+286
+00:13:51.365 --> 00:13:54.101 line:-2 align:center
+if a property is both
+async and throws,
+
+
+287
+00:13:54,134 --> 00:13:56,904 line:-2
+the async keyword goes
+right before throws.
+
+
+288
+00:13:58.138 --> 00:14:01.308 line:-2 align:center
+Second, the property has
+no setter.
+
+
+289
+00:14:01,341 --> 00:14:03,677 line:-2
+Only read-only properties can
+be async.
+
+
+290
+00:14:05,312 --> 00:14:08,115 line:-2
+In functions, properties,
+and initializers,
+
+
+291
+00:14:08,148 --> 00:14:10,784 line:-2
+await can be used
+on expressions to indicate
+
+
+292
+00:14:10,817 --> 00:14:13,554 line:-2
+where the function might
+unblock the thread.
+
+
+293
+00:14:13.587 --> 00:14:16.623 line:-2 align:center
+There’s another place that await
+can be used as well:
+
+
+294
+00:14:16.657 --> 00:14:20.727 line:-2 align:center
+in for loops to iterate
+over async sequences.
+
+
+295
+00:14:20,761 --> 00:14:23,597 line:-2
+An async sequence is
+just like a normal sequence
+
+
+296
+00:14:23,630 --> 00:14:26,934 line:-2
+except that it vends
+its elements asynchronously.
+
+
+297
+00:14:26,967 --> 00:14:29,136 line:-2
+So fetching the next item
+must be marked
+
+
+298
+00:14:29.169 --> 00:14:32.139 line:-2 align:center
+with the await keyword,
+indicating that it’s async.
+
+
+299
+00:14:33.540 --> 00:14:36.577 line:-2 align:center
+As the function iterates
+over the async sequence,
+
+
+300
+00:14:36.610 --> 00:14:38.912 line:-2 align:center
+over and over,
+it may unblock the thread
+
+
+301
+00:14:38.946 --> 00:14:42.282 line:-2 align:center
+while awaiting the next element
+and then resume
+
+
+302
+00:14:42.316 --> 00:14:45.886 line:-2 align:center
+either with the next element
+into the body of the loop
+
+
+303
+00:14:45,919 --> 00:14:49,489 line:-2
+or, if there are no elements
+left, after the loop.
+
+
+304
+00:14:50,791 --> 00:14:52,993 align:center
+To learn more
+about AsyncSequence,
+
+
+305
+00:14:53,026 --> 00:14:55,863 line:0
+watch the “Meet AsyncSequence”
+session.
+
+
+306
+00:14:55,896 --> 00:14:57,231 line:0
+And if you’re interested
+in running
+
+
+307
+00:14:57,264 --> 00:14:59,533 line:0
+many asynchronous tasks
+in parallel,
+
+
+308
+00:14:59,566 --> 00:15:02,002 line:0
+check out the “Structured
+concurrency in Swift” session.
+
+
+309
+00:15:03.170 --> 00:15:06.907 line:-2 align:center
+So there are a lot of places
+where you can use await.
+
+
+310
+00:15:06.940 --> 00:15:08.041 line:-1 align:center
+The keyword indicates
+
+
+311
+00:15:08.075 --> 00:15:11.345 line:-2 align:center
+that your async function
+might suspend there.
+
+
+312
+00:15:11,378 --> 00:15:15,148 line:-2
+What does it mean for an async
+function to suspend?
+
+
+313
+00:15:15,182 --> 00:15:17,684 line:-2
+To answer that,
+let’s think about what happens
+
+
+314
+00:15:17.718 --> 00:15:19.019 line:-1 align:center
+when you call a function.
+
+
+315
+00:15:19,820 --> 00:15:23,290 line:-2
+When you call any function,
+you hand control of the thread
+
+
+316
+00:15:23.323 --> 00:15:27.561 line:-2 align:center
+your function’s running on
+over to that function.
+
+
+317
+00:15:27.594 --> 00:15:29.496 line:-2 align:center
+If it’s a normal function you’re
+calling,
+
+
+318
+00:15:29.530 --> 00:15:31.765 line:-1 align:center
+like thumbnailURLRequest here,
+
+
+319
+00:15:31,798 --> 00:15:34,635 line:-2
+then the thread will be
+fully occupied doing work
+
+
+320
+00:15:34,668 --> 00:15:37,871 line:-2
+on behalf of that one function
+until it finishes.
+
+
+321
+00:15:39.406 --> 00:15:42.376 line:-2 align:center
+That work might be in the body
+of the function itself
+
+
+322
+00:15:42.409 --> 00:15:45.145 line:-2 align:center
+or in other functions
+that it calls.
+
+
+323
+00:15:45.179 --> 00:15:47.814 line:-2 align:center
+Eventually,
+that function will finish,
+
+
+324
+00:15:47,848 --> 00:15:51,618 line:-2
+either by returning a value
+or throwing an error.
+
+
+325
+00:15:51,652 --> 00:15:55,222 line:-2
+When it does, it hands control
+back to your function.
+
+
+326
+00:15:55,255 --> 00:15:57,391 line:-2
+That’s the only way
+that a normal function
+
+
+327
+00:15:57.424 --> 00:16:00.761 line:-2 align:center
+can give up control
+of a thread: by finishing.
+
+
+328
+00:16:00.794 --> 00:16:04.932 line:-2 align:center
+And your function is the only
+one it can give control to.
+
+
+329
+00:16:04.965 --> 00:16:08.969 line:-2 align:center
+If it’s an async function you’re
+calling, things are different.
+
+
+330
+00:16:09,002 --> 00:16:11,238 line:-2
+Like a normal function,
+when it’s done,
+
+
+331
+00:16:11,271 --> 00:16:14,341 line:-2
+it will finish and return
+control to your function.
+
+
+332
+00:16:14.374 --> 00:16:17.044 line:-2 align:center
+But unlike a normal function,
+it can give up control
+
+
+333
+00:16:17.077 --> 00:16:21.448 line:-2 align:center
+of the thread in an entirely
+different way: by suspending.
+
+
+334
+00:16:22.649 --> 00:16:25.586 line:-2 align:center
+Just like a normal function,
+when you call an async function,
+
+
+335
+00:16:25.619 --> 00:16:26.987 line:-2 align:center
+you give control
+of the thread to it.
+
+
+336
+00:16:28,355 --> 00:16:32,459 line:-2
+Once it’s running,
+an async function can suspend.
+
+
+337
+00:16:32,492 --> 00:16:35,662 line:-2
+When it does, it gives up
+control of the thread.
+
+
+338
+00:16:35,696 --> 00:16:38,365 line:-2
+But rather than giving control
+back to your function,
+
+
+339
+00:16:38.398 --> 00:16:41.869 line:-2 align:center
+it instead gives control
+of the thread to the system.
+
+
+340
+00:16:41.902 --> 00:16:46.306 line:-2 align:center
+When that happens,
+your function is suspended too.
+
+
+341
+00:16:46,340 --> 00:16:49,309 line:-2
+Suspending is the function’s way
+of telling the system,
+
+
+342
+00:16:49.343 --> 00:16:51.245 line:-2 align:center
+“I know you have
+a lot of work to do.
+
+
+343
+00:16:51.278 --> 00:16:52.913 line:-2 align:center
+You decide
+what’s most important.”
+
+
+344
+00:16:53.480 --> 00:16:55.949 line:-1 align:center
+How cooperative is that?
+
+
+345
+00:16:55.983 --> 00:16:58.452 line:-2 align:center
+So once
+the function suspends itself,
+
+
+346
+00:16:58.485 --> 00:17:02.456 line:-2 align:center
+the system is free to use
+the thread to do other work.
+
+
+347
+00:17:02.489 --> 00:17:05.392 line:-2 align:center
+At some point, the system
+will decide that the most
+
+
+348
+00:17:05,425 --> 00:17:08,128 line:-2
+important work to be done
+is to continue running
+
+
+349
+00:17:08.161 --> 00:17:11.298 line:-2 align:center
+the async function that had
+suspended itself earlier.
+
+
+350
+00:17:11.331 --> 00:17:14.902 line:-2 align:center
+At that point,
+the system will resume it.
+
+
+351
+00:17:14,935 --> 00:17:18,038 line:-2
+That async function is
+then back in control
+
+
+352
+00:17:18.071 --> 00:17:20.841 line:-2 align:center
+of the thread and able to keep
+going about its work.
+
+
+353
+00:17:21.675 --> 00:17:25.312 line:-2 align:center
+And if it wants,
+it can suspend itself again.
+
+
+354
+00:17:25.345 --> 00:17:28.448 line:-2 align:center
+In fact, it can suspend itself
+as many times as it needs to.
+
+
+355
+00:17:29.249 --> 00:17:33.620 line:-2 align:center
+On the other hand, it may not
+need to suspend itself at all.
+
+
+356
+00:17:33.654 --> 00:17:36.456 line:-2 align:center
+While an async function
+may suspend,
+
+
+357
+00:17:36,490 --> 00:17:37,958 line:-1
+just because it’s marked async
+
+
+358
+00:17:37,991 --> 00:17:41,128 line:-2
+doesn’t necessarily mean
+that it will suspend.
+
+
+359
+00:17:41,161 --> 00:17:44,898 line:-2
+And by the same token,
+just because you see an “await”
+
+
+360
+00:17:44,932 --> 00:17:48,969 line:-2
+doesn’t mean the function
+will definitely suspend there.
+
+
+361
+00:17:49,002 --> 00:17:52,539 line:-2
+But eventually,
+whether without ever suspending
+
+
+362
+00:17:52.573 --> 00:17:55.042 line:-2 align:center
+or after resuming
+for the last time,
+
+
+363
+00:17:55,075 --> 00:17:58,245 line:-2
+the function will finish,
+handing control of the thread
+
+
+364
+00:17:58.278 --> 00:18:00.814 line:-2 align:center
+back to your function,
+along with a value or an error.
+
+
+365
+00:18:02.649 --> 00:18:05.018 line:-2 align:center
+Let’s take another look
+at fetchThumbnail to see
+
+
+366
+00:18:05.052 --> 00:18:06.753 line:-2 align:center
+what can happen
+when it suspends.
+
+
+367
+00:18:07.855 --> 00:18:11.458 line:-2 align:center
+When fetchThumbnail calls
+URLSession’s async data method,
+
+
+368
+00:18:11,491 --> 00:18:15,028 line:-2
+the data method stops executing
+on the thread in the special way
+
+
+369
+00:18:15.062 --> 00:18:19.099 line:-2 align:center
+that only async functions can:
+by suspending.
+
+
+370
+00:18:19,132 --> 00:18:21,902 line:-2
+It gives control of the thread
+to the system and asks
+
+
+371
+00:18:21,935 --> 00:18:25,606 line:-2
+the system to schedule the work
+for URLSession’s data method.
+
+
+372
+00:18:26,540 --> 00:18:29,543 line:-2
+But at this point,
+the system is in control,
+
+
+373
+00:18:29.576 --> 00:18:32.379 line:-2 align:center
+and that work may not be
+started immediately.
+
+
+374
+00:18:32,412 --> 00:18:35,582 line:-2
+The thread can be used
+for other things instead.
+
+
+375
+00:18:35,616 --> 00:18:38,352 align:center
+Let’s see how that might happen.
+
+
+376
+00:18:38,385 --> 00:18:39,920 line:0
+Suppose that
+after fetchThumbnail
+
+
+377
+00:18:39,953 --> 00:18:42,155 align:center
+has been called,
+the user taps a button
+
+
+378
+00:18:42,189 --> 00:18:44,458 align:center
+which will upload some data.
+
+
+379
+00:18:44,491 --> 00:18:47,794 line:0
+Say, for example,
+that they react to a post.
+
+
+380
+00:18:47,828 --> 00:18:50,163 line:0
+Then the system is free
+to execute the work
+
+
+381
+00:18:50,197 --> 00:18:52,032 line:0
+to post the user’s reaction
+
+
+382
+00:18:52.065 --> 00:18:54.234 line:-2 align:center
+before the previously
+queued-up work.
+
+
+383
+00:18:55,402 --> 00:18:57,905 line:-2
+Once that late-breaking
+work has completed,
+
+
+384
+00:18:57,938 --> 00:19:01,241 line:-2
+URLSession’s data
+method may be resumed.
+
+
+385
+00:19:01,275 --> 00:19:04,678 line:-2
+Or the system might execute
+other work instead.
+
+
+386
+00:19:04,711 --> 00:19:07,814 line:-2
+Finally,
+once the data method finishes,
+
+
+387
+00:19:07.848 --> 00:19:11.285 line:-2 align:center
+it will return
+to fetchThumbnail.
+
+
+388
+00:19:11,318 --> 00:19:13,253 line:-2
+The fact that other work
+can be performed
+
+
+389
+00:19:13,287 --> 00:19:16,290 line:-2
+while a function is suspended
+is why Swift insists
+
+
+390
+00:19:16.323 --> 00:19:19.459 line:-2 align:center
+that you mark async calls
+with the await keyword.
+
+
+391
+00:19:19.493 --> 00:19:21.528 line:-2 align:center
+You need to be aware
+that the state of your app
+
+
+392
+00:19:21,562 --> 00:19:24,598 line:-2
+can change dramatically
+when your function suspends.
+
+
+393
+00:19:25,699 --> 00:19:26,967 line:-1
+Now, this is also true
+
+
+394
+00:19:27,000 --> 00:19:29,336 line:-2
+when you use
+completion handlers.
+
+
+395
+00:19:29.369 --> 00:19:31.338 line:-2 align:center
+But because you don’t have
+all the ceremony
+
+
+396
+00:19:31.371 --> 00:19:35.175 line:-2 align:center
+and indentation they entail
+in async/await code,
+
+
+397
+00:19:35,209 --> 00:19:38,445 line:-2
+the await keyword is
+how you notice that a block
+
+
+398
+00:19:38.478 --> 00:19:41.982 line:-2 align:center
+of code doesn’t execute
+as one transaction.
+
+
+399
+00:19:42,015 --> 00:19:44,985 line:-2
+The function may suspend,
+and other things may happen
+
+
+400
+00:19:45,018 --> 00:19:48,355 line:-2
+while it’s suspended between
+the lines of the function.
+
+
+401
+00:19:49,256 --> 00:19:51,592 line:-2
+More than that,
+the function may resume
+
+
+402
+00:19:51,625 --> 00:19:54,127 line:-2
+onto an entirely
+different thread.
+
+
+403
+00:19:54,161 --> 00:19:56,964 line:0
+To learn about these issues,
+see the “Protect mutable
+
+
+404
+00:19:56,997 --> 00:20:00,200 align:center
+state with Swift actors”
+session.
+
+
+405
+00:20:00.234 --> 00:20:03.770 line:-2 align:center
+Here are a few important things
+to remember about async/await.
+
+
+406
+00:20:03.804 --> 00:20:06.340 line:-2 align:center
+First, when you mark
+a function async,
+
+
+407
+00:20:06,373 --> 00:20:08,342 line:-1
+you’re allowing it to suspend.
+
+
+408
+00:20:08.375 --> 00:20:10.544 line:-2 align:center
+And when a function
+suspends itself,
+
+
+409
+00:20:10,577 --> 00:20:12,613 line:-1
+it suspends its callers too.
+
+
+410
+00:20:12,646 --> 00:20:14,948 line:-2
+So its callers must be async
+as well.
+
+
+411
+00:20:15.649 --> 00:20:18.919 line:-2 align:center
+Second, to point out where
+in an async function it might
+
+
+412
+00:20:18,952 --> 00:20:23,190 line:-2
+suspend one or many times,
+the await keyword is used.
+
+
+413
+00:20:24,157 --> 00:20:27,060 line:-2
+Third, while an async
+function is suspended,
+
+
+414
+00:20:27,094 --> 00:20:28,862 line:-1
+the thread is not blocked.
+
+
+415
+00:20:28.896 --> 00:20:31.899 line:-2 align:center
+So the system is free
+to schedule other work.
+
+
+416
+00:20:31,932 --> 00:20:35,602 line:-2
+Even work that gets kicked off
+later can be executed first.
+
+
+417
+00:20:35.636 --> 00:20:38.639 line:-2 align:center
+That means your app’s state
+can change a great deal
+
+
+418
+00:20:38,672 --> 00:20:40,707 line:-1
+while the function is suspended.
+
+
+419
+00:20:40.741 --> 00:20:43.844 line:-2 align:center
+Finally,
+when an async function resumes,
+
+
+420
+00:20:43.877 --> 00:20:47.047 line:-2 align:center
+the results returned from
+the async function it called
+
+
+421
+00:20:47,080 --> 00:20:49,383 line:-2
+flow back
+into the original function,
+
+
+422
+00:20:49,416 --> 00:20:52,920 line:-2
+and execution continues
+right where it left off.
+
+
+423
+00:20:52,953 --> 00:20:56,190 line:-2
+You’ve seen
+how async/await works in Swift.
+
+
+424
+00:20:56.223 --> 00:20:58.425 line:-2 align:center
+Now Robert will show you
+how to start using it
+
+
+425
+00:20:58.458 --> 00:21:00.327 line:-1 align:center
+in your own projects.
+
+
+426
+00:21:00,360 --> 00:21:02,062 line:-1
+[Robert] Thanks, Nate.
+
+
+427
+00:21:02,095 --> 00:21:05,766 line:-2
+Earlier, Nate showed you the app
+we’re building together.
+
+
+428
+00:21:05,799 --> 00:21:07,534 line:-2
+The thumbnail function
+he converted
+
+
+429
+00:21:07,568 --> 00:21:10,737 line:-2
+to adopt async/await
+was called in a few places,
+
+
+430
+00:21:10,771 --> 00:21:15,075 line:-2
+so we’ll need to migrate them
+to adopt concurrency as well.
+
+
+431
+00:21:15,108 --> 00:21:16,877 line:-2
+Let’s start
+with something critical
+
+
+432
+00:21:16,910 --> 00:21:20,180 line:-2
+to modern software
+development: testing.
+
+
+433
+00:21:20,214 --> 00:21:23,283 line:-2
+We wanted testing async code
+to be just as easy
+
+
+434
+00:21:23.317 --> 00:21:25.219 line:-1 align:center
+as testing synchronous code,
+
+
+435
+00:21:25,252 --> 00:21:29,389 line:-2
+so XCTest supports
+async out of the box.
+
+
+436
+00:21:29,423 --> 00:21:31,091 line:-2
+What used to be
+a tedious process
+
+
+437
+00:21:31.124 --> 00:21:35.562 line:-2 align:center
+of setting up an expectation,
+calling the API under test,
+
+
+438
+00:21:35.596 --> 00:21:39.199 line:-2 align:center
+fulfilling the expectation,
+and then making sure to wait
+
+
+439
+00:21:39,233 --> 00:21:43,704 line:-2
+for an arbitrary amount of time
+becomes as easy as adding
+
+
+440
+00:21:43.737 --> 00:21:45.973 line:-2 align:center
+the async keyword
+to the test function,
+
+
+441
+00:21:46,006 --> 00:21:48,542 line:-2
+removing
+the XCTest expectations,
+
+
+442
+00:21:48,575 --> 00:21:51,778 line:-2
+its fulfillment,
+and the explicit await,
+
+
+443
+00:21:51,812 --> 00:21:56,717 line:-2
+and instead awaiting the results
+of calling the new asynchronous
+
+
+444
+00:21:56,750 --> 00:21:59,353 line:-2
+fetchThumbnail function
+that Nate showed you earlier.
+
+
+445
+00:22:01,121 --> 00:22:02,756 line:-1
+Now that our tests are settled,
+
+
+446
+00:22:02,789 --> 00:22:06,493 line:-2
+let’s zoom in
+on the application code itself.
+
+
+447
+00:22:06.527 --> 00:22:09.162 line:-2 align:center
+In particular,
+the SwiftUI code behind
+
+
+448
+00:22:09.196 --> 00:22:11.632 line:-2 align:center
+the thumbnail views
+in each of row of this list.
+
+
+449
+00:22:13,367 --> 00:22:15,903 line:-2
+An image cell
+is created with a post,
+
+
+450
+00:22:15.936 --> 00:22:19.273 line:-2 align:center
+and each post has an ID
+that we pass to the viewModel
+
+
+451
+00:22:19.306 --> 00:22:22.910 line:-2 align:center
+so it can asynchronously
+retrieve the thumbnail.
+
+
+452
+00:22:22.943 --> 00:22:25.546 line:-2 align:center
+You’ve already seen how
+to transform this call
+
+
+453
+00:22:25.579 --> 00:22:29.116 line:-2 align:center
+from the testing code,
+so let’s give it a shot.
+
+
+454
+00:22:29,149 --> 00:22:32,352 line:-2
+First we remove
+the completion handler,
+
+
+455
+00:22:32,386 --> 00:22:36,290 line:-2
+then “try” is added
+to handle any errors,
+
+
+456
+00:22:36,323 --> 00:22:40,360 line:-2
+and “await” to complete the call
+to an async function.
+
+
+457
+00:22:40,394 --> 00:22:44,431 line:-2
+But when we try to build
+this code, something goes wrong.
+
+
+458
+00:22:44,464 --> 00:22:46,300 line:-1
+The Swift compiler is telling us
+
+
+459
+00:22:46.333 --> 00:22:48.669 line:-2 align:center
+that we cannot call
+async functions
+
+
+460
+00:22:48.702 --> 00:22:52.773 line:-2 align:center
+in contexts
+that aren’t themselves async.
+
+
+461
+00:22:52,806 --> 00:22:56,643 line:-2
+Here, the onAppear modifier
+takes a plain,
+
+
+462
+00:22:56,677 --> 00:23:00,180 line:-2
+non-async closure, so there
+needs to be a way to bridge
+
+
+463
+00:23:00.214 --> 00:23:03.717 line:-2 align:center
+the gap between the synchronous
+and the asynchronous worlds.
+
+
+464
+00:23:05,285 --> 00:23:09,489 line:-2
+The solution is to use
+the async task function.
+
+
+465
+00:23:09.523 --> 00:23:12.426 line:-2 align:center
+An async task packages up
+the work in the closure
+
+
+466
+00:23:12.459 --> 00:23:14.928 line:-2 align:center
+and sends it to the system
+for immediate execution
+
+
+467
+00:23:14.962 --> 00:23:16.797 line:-1 align:center
+on the next available thread,
+
+
+468
+00:23:16.830 --> 00:23:19.366 line:-2 align:center
+like the async function
+on a global dispatch queue.
+
+
+469
+00:23:20.300 --> 00:23:23.504 line:-2 align:center
+Its main benefit here
+is that async code can be
+
+
+470
+00:23:23,537 --> 00:23:25,839 line:-2
+called from inside
+of sync contexts.
+
+
+471
+00:23:27.007 --> 00:23:31.678 line:-2 align:center
+After another rebuild,
+the compiler is satisfied.
+
+
+472
+00:23:31.712 --> 00:23:34.815 line:-2 align:center
+Async tasks are part
+of a family of APIs
+
+
+473
+00:23:34.848 --> 00:23:37.684 line:-2 align:center
+that allow you to build
+rich concurrent Swift code
+
+
+474
+00:23:37,718 --> 00:23:40,320 line:-2
+in a familiar
+and naturally structured style.
+
+
+475
+00:23:41,054 --> 00:23:42,022 line:0
+To learn more,
+
+
+476
+00:23:42,055 --> 00:23:45,058 align:center
+See “Explore structured
+concurrency in Swift.”
+
+
+477
+00:23:45,859 --> 00:23:48,495 align:center
+And to learn how you can take
+full advantage of async code
+
+
+478
+00:23:48,529 --> 00:23:52,733 align:center
+in SwiftUI apps, see “Discover
+concurrency in SwiftUI.”
+
+
+479
+00:23:54,501 --> 00:23:57,070 align:center
+We’ve finished up migrating
+all the places we were
+
+
+480
+00:23:57.104 --> 00:23:59.239 line:-2 align:center
+calling the fetchThumbnail
+function.
+
+
+481
+00:23:59.273 --> 00:24:01.175 line:-2 align:center
+But our app has
+a lot more opportunities
+
+
+482
+00:24:01,208 --> 00:24:03,577 line:-1
+to adopt async/await.
+
+
+483
+00:24:03,610 --> 00:24:06,947 line:-2
+To get up and running quickly,
+we recommend starting small
+
+
+484
+00:24:06,980 --> 00:24:11,118 line:-2
+with an async alternative
+to an existing API.
+
+
+485
+00:24:11.151 --> 00:24:16.290 line:-2 align:center
+The SDK offers hundreds of APIs
+that take completion handlers
+
+
+486
+00:24:16.323 --> 00:24:18.025 line:-2 align:center
+because they do work
+on your behalf
+
+
+487
+00:24:18,058 --> 00:24:20,627 line:-1
+in an asynchronous manner.
+
+
+488
+00:24:20,661 --> 00:24:24,031 line:-2
+When these APIs
+are lined up side by side,
+
+
+489
+00:24:24,064 --> 00:24:25,832 line:-1
+patterns begin to emerge.
+
+
+490
+00:24:27.134 --> 00:24:29.403 line:-2 align:center
+Even though they may
+have different names
+
+
+491
+00:24:29,436 --> 00:24:32,105 line:-2
+and different purposes,
+all of these functions
+
+
+492
+00:24:32.139 --> 00:24:35.242 line:-2 align:center
+have the same essential
+API contract.
+
+
+493
+00:24:35.275 --> 00:24:38.178 line:-2 align:center
+You call them, and they call
+you back with the provided
+
+
+494
+00:24:38,212 --> 00:24:42,382 line:-2
+completion handlers, passing
+the result they obtained.
+
+
+495
+00:24:42.416 --> 00:24:44.685 line:-2 align:center
+Earlier, Nate showed you
+that you could
+
+
+496
+00:24:44.718 --> 00:24:47.020 line:-2 align:center
+await the results
+of asynchronous functions
+
+
+497
+00:24:47,054 --> 00:24:49,623 line:-2
+to write
+more natural-looking code.
+
+
+498
+00:24:49,656 --> 00:24:51,458 line:-2
+Wouldn’t it be awesome
+if we could turn
+
+
+499
+00:24:51,491 --> 00:24:53,927 line:-1
+these callback blocks
+
+
+500
+00:24:53.961 --> 00:24:57.364 line:-1 align:center
+into these async functions?
+
+
+501
+00:24:57,397 --> 00:25:01,969 line:-2
+As of Swift 5.5,
+this is exactly what happens.
+
+
+502
+00:25:02,002 --> 00:25:04,037 line:-2
+The Swift compiler
+automatically takes
+
+
+503
+00:25:04.071 --> 00:25:07.474 line:-2 align:center
+a look at completion handler
+code imported from Objective-C
+
+
+504
+00:25:07.508 --> 00:25:10.377 line:-2 align:center
+and provides
+an async alternative.
+
+
+505
+00:25:10.410 --> 00:25:12.446 line:-1 align:center
+But we didn’t stop there.
+
+
+506
+00:25:12.479 --> 00:25:15.449 line:-2 align:center
+Many delegate APIs
+also include methods
+
+
+507
+00:25:15,482 --> 00:25:18,452 line:-2
+that pass
+a completion handler to you.
+
+
+508
+00:25:18.485 --> 00:25:20.120 line:-2 align:center
+Calling the handler
+cooperatively
+
+
+509
+00:25:20.153 --> 00:25:21.255 line:-1 align:center
+informs the framework
+
+
+510
+00:25:21.288 --> 00:25:24.091 line:-2 align:center
+when an asynchronous task
+has completed.
+
+
+511
+00:25:24.124 --> 00:25:27.394 line:-2 align:center
+Take this ClockKit
+complication data source
+
+
+512
+00:25:27.427 --> 00:25:28.729 line:-1 align:center
+that calls fetchThumbnail
+
+
+513
+00:25:28,762 --> 00:25:30,931 line:-2
+to display a timeline entry
+for a given post.
+
+
+514
+00:25:32.733 --> 00:25:34.935 line:-2 align:center
+Just as before,
+we have to make sure
+
+
+515
+00:25:34.968 --> 00:25:37.838 line:-2 align:center
+to call the completion handler
+on all paths,
+
+
+516
+00:25:37.871 --> 00:25:40.641 line:-2 align:center
+and there’s a lot of extra noise
+here because of the closure.
+
+
+517
+00:25:41.842 --> 00:25:45.946 line:-2 align:center
+With async await, this no longer
+needs to be the case.
+
+
+518
+00:25:45,979 --> 00:25:48,282 line:-2
+This delegate method has
+an async alternative
+
+
+519
+00:25:48.315 --> 00:25:50.551 line:-1 align:center
+we can use instead.
+
+
+520
+00:25:50,584 --> 00:25:54,154 line:-2
+First, the async alternative’s
+name is used
+
+
+521
+00:25:54.188 --> 00:25:56.723 line:-1 align:center
+which drops the leading “get.”
+
+
+522
+00:25:56,757 --> 00:25:58,625 line:-2
+We recommend
+that async functions
+
+
+523
+00:25:58.659 --> 00:26:01.662 line:-2 align:center
+omit leading words
+like “get” that communicate
+
+
+524
+00:26:01,695 --> 00:26:05,766 line:-2
+when the results of a call
+are not directly returned.
+
+
+525
+00:26:05,799 --> 00:26:08,068 line:-2
+After all,
+since this is an async
+
+
+526
+00:26:08,101 --> 00:26:13,006 line:-2
+alternative function, it returns
+a timeline entry directly.
+
+
+527
+00:26:13,040 --> 00:26:15,809 line:-2
+Now that there is
+an async context set up,
+
+
+528
+00:26:15,843 --> 00:26:19,346 line:-2
+we call the async version
+of fetchThumbnail.
+
+
+529
+00:26:19,379 --> 00:26:23,083 line:-2
+Finally, we return a timeline
+entry from this method
+
+
+530
+00:26:23,116 --> 00:26:26,053 line:-2
+rather than calling the
+now-deleted completion block.
+
+
+531
+00:26:27,788 --> 00:26:32,159 line:-2
+The async APIs we’ve highlighted
+here barely scratch the surface.
+
+
+532
+00:26:32,893 --> 00:26:35,495 align:center
+To learn more,
+see these sessions
+
+
+533
+00:26:35,529 --> 00:26:39,366 line:0
+which go into much greater
+detail about the APIs themselves
+
+
+534
+00:26:39,399 --> 00:26:41,802 align:center
+and how you can use them
+when adopting async/await.
+
+
+535
+00:26:43.170 --> 00:26:45.472 line:-2 align:center
+All of these are examples
+of situations
+
+
+536
+00:26:45.506 --> 00:26:49.510 line:-2 align:center
+where Swift will create async
+alternatives on your behalf.
+
+
+537
+00:26:49.543 --> 00:26:51.979 line:-2 align:center
+But there will inevitably be
+places in your code
+
+
+538
+00:26:52.012 --> 00:26:54.848 line:-2 align:center
+where you will need to create
+an async alternative yourself.
+
+
+539
+00:26:56.116 --> 00:26:58.452 line:-2 align:center
+Let’s see what this
+looks like in practice.
+
+
+540
+00:26:59,553 --> 00:27:03,624 align:center
+In our app, we use
+this getPersistentPosts function
+
+
+541
+00:27:03,657 --> 00:27:05,526 line:0
+to retrieve any posts
+we persisted
+
+
+542
+00:27:05,559 --> 00:27:07,761 line:0
+to our Core Data store.
+
+
+543
+00:27:07,794 --> 00:27:10,664 align:center
+This function is called
+in a lot more places in our app
+
+
+544
+00:27:10,697 --> 00:27:13,634 align:center
+than the async thumbnail
+function was, so it would be
+
+
+545
+00:27:13,667 --> 00:27:18,238 align:center
+a really big change to just
+use async everywhere.
+
+
+546
+00:27:18,272 --> 00:27:21,108 align:center
+And since we’re using
+NSAsynchronousFetchRequest,
+
+
+547
+00:27:21,141 --> 00:27:24,144 line:0
+it seems like this function
+is a perfect candidate
+
+
+548
+00:27:24,178 --> 00:27:26,780 align:center
+for an async alternative.
+
+
+549
+00:27:26.813 --> 00:27:31.852 line:-2 align:center
+First, we make an async function
+and convert the return value.
+
+
+550
+00:27:31.885 --> 00:27:34.154 line:-2 align:center
+Since this function
+can yield an error,
+
+
+551
+00:27:34.188 --> 00:27:36.356 line:-2 align:center
+we mark this function
+“throws” as well.
+
+
+552
+00:27:37.691 --> 00:27:40.961 line:-2 align:center
+Next, we call
+the completion handler version
+
+
+553
+00:27:40,994 --> 00:27:45,065 line:-2
+of getPersistentPosts
+and, well, now we’re stuck.
+
+
+554
+00:27:46.066 --> 00:27:47.534 line:-1 align:center
+We need to return the result
+
+
+555
+00:27:47.568 --> 00:27:49.803 line:-2 align:center
+from the callback back
+to the places awaiting
+
+
+556
+00:27:49.837 --> 00:27:53.173 line:-2 align:center
+calls to the async
+persistentPosts function.
+
+
+557
+00:27:53,207 --> 00:27:57,211 line:-2
+Not only that, those callers
+are in a suspended state.
+
+
+558
+00:27:57,244 --> 00:27:59,213 line:-2
+We need to make sure
+to resume them
+
+
+559
+00:27:59.246 --> 00:28:01.915 line:-2 align:center
+at the right point in time
+and with the right data
+
+
+560
+00:28:01.949 --> 00:28:03.917 line:-2 align:center
+so that they can get on
+with the rest of their work.
+
+
+561
+00:28:05.285 --> 00:28:08.622 line:-2 align:center
+Earlier, Nate showed you
+how Swift and the system
+
+
+562
+00:28:08.655 --> 00:28:12.826 line:-2 align:center
+cooperate to take care
+of resuming async code for us.
+
+
+563
+00:28:12,860 --> 00:28:14,094 line:-1
+Let’s dive a little deeper
+
+
+564
+00:28:14.127 --> 00:28:17.998 line:-2 align:center
+into how this suspend/resume
+process works to see if we can
+
+
+565
+00:28:18,031 --> 00:28:20,834 line:-2
+come up with a similar solution
+for our problem.
+
+
+566
+00:28:22,202 --> 00:28:24,104 line:-2
+When the async version
+of persistentPosts
+
+
+567
+00:28:24,137 --> 00:28:27,608 line:-2
+is called,
+it calls into Core Data.
+
+
+568
+00:28:27,641 --> 00:28:31,512 line:-2
+At some later time, Core Data
+calls the completion handler
+
+
+569
+00:28:31.545 --> 00:28:34.648 line:-2 align:center
+and passes the result
+of the fetch request.
+
+
+570
+00:28:34,681 --> 00:28:37,417 line:-2
+This situation looks
+almost identical to the one
+
+
+571
+00:28:37,451 --> 00:28:40,220 line:-2
+Nate showed you earlier
+when our fetchThumbnail function
+
+
+572
+00:28:40,254 --> 00:28:42,789 line:-1
+asked the system, not Core Data,
+
+
+573
+00:28:42,823 --> 00:28:45,025 line:-2
+to resume a suspended
+async function call.
+
+
+574
+00:28:46.360 --> 00:28:50.063 line:-2 align:center
+All that’s missing is a bridge
+to await the completion handler
+
+
+575
+00:28:50.097 --> 00:28:52.466 line:-2 align:center
+and resume with
+the fetch request’s results.
+
+
+576
+00:28:53.333 --> 00:28:55.702 line:-2 align:center
+This pattern comes up
+all the time,
+
+
+577
+00:28:55.736 --> 00:28:59.039 line:-2 align:center
+and it has a name:
+a continuation.
+
+
+578
+00:28:59.072 --> 00:29:01.341 line:-2 align:center
+Throughout this session,
+Nate and I have already
+
+
+579
+00:29:01,375 --> 00:29:04,211 line:-2
+showed you lots of examples
+of continuations:
+
+
+580
+00:29:04,244 --> 00:29:06,013 line:-2
+methods that take
+completion blocks.
+
+
+581
+00:29:07,548 --> 00:29:11,285 line:-2
+The caller of the method awaits
+the result of the function call
+
+
+582
+00:29:11.318 --> 00:29:15.122 line:-2 align:center
+and provides a closure
+to specify what to do next.
+
+
+583
+00:29:15.155 --> 00:29:16.990 line:-2 align:center
+When the function call
+completes,
+
+
+584
+00:29:17.024 --> 00:29:19.826 line:-2 align:center
+it calls the completion handler
+to resume
+
+
+585
+00:29:19,860 --> 00:29:23,363 line:-2
+whatever the caller wanted
+to do with the result.
+
+
+586
+00:29:23.397 --> 00:29:25.599 line:-2 align:center
+This kind
+of cooperative execution
+
+
+587
+00:29:25.632 --> 00:29:28.669 line:-2 align:center
+is exactly the way
+async functions in Swift work.
+
+
+588
+00:29:29,636 --> 00:29:32,673 line:-2
+To make this explicit,
+Swift provides a feature
+
+
+589
+00:29:32,706 --> 00:29:34,775 line:-1
+so that you can create, manage,
+
+
+590
+00:29:34,808 --> 00:29:38,645 line:-2
+and resume continuations
+in a high-level and safe way.
+
+
+591
+00:29:40.047 --> 00:29:41.748 line:-1 align:center
+Let’s return to our example
+
+
+592
+00:29:41.782 --> 00:29:44.251 line:-2 align:center
+to see how continuations
+can help us finish
+
+
+593
+00:29:44.284 --> 00:29:45.953 line:-1 align:center
+writing our async alternative.
+
+
+594
+00:29:47.521 --> 00:29:49.890 line:-2 align:center
+The
+withCheckedThrowingContinuation
+
+
+595
+00:29:49.923 --> 00:29:52.860 line:-2 align:center
+function lifts completion blocks
+with errors
+
+
+596
+00:29:52,893 --> 00:29:55,996 line:-2
+up to throwing
+async Swift functions.
+
+
+597
+00:29:56.029 --> 00:29:57.698 line:-1 align:center
+It has a counterpart called
+
+
+598
+00:29:57.731 --> 00:30:00.534 line:-2 align:center
+withCheckedContinuations
+for the situations
+
+
+599
+00:30:00.567 --> 00:30:04.404 line:-2 align:center
+where you know a function
+will never throw an error.
+
+
+600
+00:30:04.438 --> 00:30:05.739 line:-1 align:center
+These functions are the way
+
+
+601
+00:30:05.772 --> 00:30:08.108 line:-2 align:center
+to gain access
+to a continuation value
+
+
+602
+00:30:08.141 --> 00:30:12.079 line:-2 align:center
+you can use to resume
+a suspended async function.
+
+
+603
+00:30:12.112 --> 00:30:14.548 line:-2 align:center
+This also builds
+the first part of the bridge
+
+
+604
+00:30:14.581 --> 00:30:17.985 line:-2 align:center
+by allowing us to await calls
+to getPersistentPosts.
+
+
+605
+00:30:19,152 --> 00:30:22,189 line:-2
+Let’s finish building
+the bridge.
+
+
+606
+00:30:22.222 --> 00:30:25.826 line:-2 align:center
+The continuation value provides
+a resume function
+
+
+607
+00:30:25,859 --> 00:30:29,630 line:-2
+into which we place the results
+from the completion handler.
+
+
+608
+00:30:29,663 --> 00:30:32,132 line:-2
+Not only that,
+but resume provides
+
+
+609
+00:30:32,165 --> 00:30:35,502 line:-2
+the missing link we need
+to unsuspend any calls
+
+
+610
+00:30:35.536 --> 00:30:38.839 line:-2 align:center
+awaiting the result
+of the persistentPosts function.
+
+
+611
+00:30:38.872 --> 00:30:42.543 line:-2 align:center
+And there, in one neat package,
+is our finished bridge
+
+
+612
+00:30:42.576 --> 00:30:45.012 line:-2 align:center
+from completion handlers
+to async functions.
+
+
+613
+00:30:46,346 --> 00:30:48,916 line:-2
+Continuations provide
+a powerful way
+
+
+614
+00:30:48.949 --> 00:30:50.751 line:-1 align:center
+to manually take control
+
+
+615
+00:30:50.784 --> 00:30:53.654 line:-2 align:center
+over the execution
+of an async function,
+
+
+616
+00:30:53.687 --> 00:30:56.290 line:-2 align:center
+but there are some things
+to keep in mind.
+
+
+617
+00:30:56,323 --> 00:31:00,394 line:-2
+Continuations have a simple
+but important contract.
+
+
+618
+00:31:00.427 --> 00:31:04.932 line:-2 align:center
+Resume must be called
+exactly once on every path.
+
+
+619
+00:31:04,965 --> 00:31:07,267 line:-2
+But don’t worry.
+Swift has your back here.
+
+
+620
+00:31:08.435 --> 00:31:12.039 line:-2 align:center
+If the continuation is discarded
+without resume being called,
+
+
+621
+00:31:12,072 --> 00:31:14,308 line:-2
+the Swift runtime
+will log a warning
+
+
+622
+00:31:14,341 --> 00:31:18,011 line:-2
+since this will result in async
+calls never unsuspending.
+
+
+623
+00:31:18,979 --> 00:31:21,415 align:center
+If a continuation is
+resumed multiple times
+
+
+624
+00:31:21,448 --> 00:31:23,150 line:0
+in the same function, however,
+
+
+625
+00:31:23,183 --> 00:31:27,855 line:0
+this is a more serious error
+as it can corrupt program data.
+
+
+626
+00:31:27,888 --> 00:31:30,457 align:center
+To combat this,
+the Swift runtime will detect
+
+
+627
+00:31:30,490 --> 00:31:33,794 align:center
+attempts to call resume
+multiple times and will ensure
+
+
+628
+00:31:33,827 --> 00:31:36,396 line:0
+a fatal error occurs
+at the second resumption point.
+
+
+629
+00:31:37,731 --> 00:31:40,267 align:center
+With this in mind,
+let’s highlight one more
+
+
+630
+00:31:40,300 --> 00:31:43,203 align:center
+important place you might use
+checked continuations.
+
+
+631
+00:31:44,404 --> 00:31:47,174 line:-1
+Many APIs are event driven.
+
+
+632
+00:31:47,207 --> 00:31:49,610 line:-2
+They provide delegate
+callbacks to notify
+
+
+633
+00:31:49,643 --> 00:31:52,112 line:-2
+our application
+at specific critical points
+
+
+634
+00:31:52,145 --> 00:31:55,148 line:-2
+and allow it
+to respond appropriately.
+
+
+635
+00:31:55.182 --> 00:31:57.651 line:-2 align:center
+In order to properly adopt
+async/await,
+
+
+636
+00:31:57,684 --> 00:31:59,786 line:-2
+we’ll have to store
+the continuation
+
+
+637
+00:31:59.820 --> 00:32:02.856 line:-1 align:center
+and resume it later.
+
+
+638
+00:32:02.890 --> 00:32:05.526 line:-2 align:center
+As before, we create
+a checked continuation.
+
+
+639
+00:32:07.027 --> 00:32:11.031 line:-2 align:center
+Then we save it
+and kick off the work.
+
+
+640
+00:32:12.900 --> 00:32:14.535 line:-1 align:center
+To respect the API contract
+
+
+641
+00:32:14,568 --> 00:32:17,604 line:-2
+of checked continuations,
+we make sure to resume
+
+
+642
+00:32:17.638 --> 00:32:22.276 line:-2 align:center
+the active continuation,
+and finally nil it out
+
+
+643
+00:32:22,309 --> 00:32:24,545 line:-2
+so we’re protected from
+calling it more than once.
+
+
+644
+00:32:25,679 --> 00:32:29,049 line:-2
+Always remember: the checked
+continuation value here
+
+
+645
+00:32:29,082 --> 00:32:31,852 line:-2
+represents the ability
+to manually resume
+
+
+646
+00:32:31.885 --> 00:32:34.454 line:-1 align:center
+any async calls to this API,
+
+
+647
+00:32:34,488 --> 00:32:36,523 line:-2
+so it must be called
+on all paths.
+
+
+648
+00:32:37,291 --> 00:32:40,928 line:-2
+If your delegate API is called
+many times or not at all
+
+
+649
+00:32:40.961 --> 00:32:44.064 line:-2 align:center
+in certain circumstances,
+it is critical to resume
+
+
+650
+00:32:44,097 --> 00:32:46,633 line:-2
+any active continuations
+exactly once.
+
+
+651
+00:32:49,303 --> 00:32:51,238 line:0
+To learn more about
+the lower-level details
+
+
+652
+00:32:51,271 --> 00:32:54,408 align:center
+of Swift concurrency,
+including continuations,
+
+
+653
+00:32:54,441 --> 00:32:57,611 align:center
+see the “Swift concurrency:
+Behind the scenes” session.
+
+
+654
+00:32:58.879 --> 00:33:03.050 line:-2 align:center
+This has been a whirlwind tour
+of async/await in Swift.
+
+
+655
+00:33:03,083 --> 00:33:06,086 line:-2
+We’ve shown you just how
+the async and await keywords
+
+
+656
+00:33:06,119 --> 00:33:08,455 line:-2
+work at runtime
+and how you can adopt them
+
+
+657
+00:33:08.488 --> 00:33:11.225 line:-2 align:center
+in your applications
+and frameworks.
+
+
+658
+00:33:11,258 --> 00:33:14,661 line:-2
+To get you started, we gave you
+a sampling of the async APIs
+
+
+659
+00:33:14.695 --> 00:33:17.631 line:-2 align:center
+available in the SDK
+and showed you how to bridge
+
+
+660
+00:33:17.664 --> 00:33:20.133 line:-2 align:center
+your existing code
+from the synchronous world
+
+
+661
+00:33:20.167 --> 00:33:21.835 line:-1 align:center
+to the async world.
+
+
+662
+00:33:23,203 --> 00:33:25,138 line:-1
+Async/await is the foundation
+
+
+663
+00:33:25.172 --> 00:33:28.509 line:-2 align:center
+of a whole universe of Swift
+concurrency features.
+
+
+664
+00:33:28.542 --> 00:33:31.211 line:-2 align:center
+We’re excited to see
+what you build with them.
+
+
+665
+00:33:31.245 --> 00:33:32.846 line:-1 align:center
+Thank you for watching.
+

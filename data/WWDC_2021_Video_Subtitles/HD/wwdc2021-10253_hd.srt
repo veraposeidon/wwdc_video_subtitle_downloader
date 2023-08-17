@@ -1,0 +1,6131 @@
+2
+00:00:00,000 --> 00:00:03,003 line:-1
+[MAC STARTUP CHIME]
+
+
+3
+00:00:03,003 --> 00:00:05,973 line:-1
+♪ Bass music playing ♪
+
+
+4
+00:00:05.973 --> 00:00:07.107 line:-1 position:50%
+[KEYSTROKES]
+
+
+5
+00:00:07,107 --> 00:00:09,042 line:0 align:right size:2%
+♪
+
+
+6
+00:00:09,042 --> 00:00:10,577 line:-1
+Becca Royal-Gordon:
+Hi, I’m Becca
+
+
+7
+00:00:10.577 --> 00:00:12.412 line:-1 position:50%
+from the Swift Compiler team.
+
+
+8
+00:00:12,412 --> 00:00:13,647 line:-1
+I’m going to be talking today
+
+
+9
+00:00:13.647 --> 00:00:17.351 line:-1 position:50%
+about how you can
+implement DSLs in Swift.
+
+
+10
+00:00:17,351 --> 00:00:19,086 line:-1
+If you’ve never heard that term,
+
+
+11
+00:00:19,086 --> 00:00:21,622 line:-1
+a DSL is a domain-specific
+language,
+
+
+12
+00:00:21.622 --> 00:00:23.390 line:-1 position:50%
+and even if
+the name is new to you,
+
+
+13
+00:00:23.390 --> 00:00:25.425 line:-1 position:50%
+you’ve probably used one before.
+
+
+14
+00:00:25,425 --> 00:00:28,495 line:-1
+I’m going to start by explaining
+what DSLs actually are
+
+
+15
+00:00:28,495 --> 00:00:31,632 line:-1
+and what they look like
+in Swift.
+
+
+16
+00:00:31.632 --> 00:00:34.401 line:-1 position:50%
+Then I’ll explain
+how result builders work.
+
+
+17
+00:00:34.401 --> 00:00:39.206 line:-1 position:50%
+They’re one of the main features
+used to implement Swift DSLs.
+
+
+18
+00:00:39.206 --> 00:00:42.409 line:-1 position:50%
+After that, I’ll walk you
+through designing a simple DSL
+
+
+19
+00:00:42.409 --> 00:00:46.146 line:-1 position:50%
+for part of our sample app,
+Fruta.
+
+
+20
+00:00:46.146 --> 00:00:49.149 line:-1 position:50%
+And finally, I’ll show you
+how to write the implementation
+
+
+21
+00:00:49,149 --> 00:00:52,819 line:-1
+that’s in the Fruta sample code.
+
+
+22
+00:00:52,819 --> 00:00:56,623 line:-1
+But let’s start by explaining
+that acronym a little better.
+
+
+23
+00:00:56.623 --> 00:00:59.826 line:-1 position:50%
+A DSL is a sort of
+miniature programming language
+
+
+24
+00:00:59,826 --> 00:01:02,529 line:-1
+that’s designed for programs
+that work in a specific area
+
+
+25
+00:01:02.529 --> 00:01:05.232 line:-1 position:50%
+called a "domain."
+
+
+26
+00:01:05,232 --> 00:01:06,433 line:-1
+Because the language is designed
+
+
+27
+00:01:06,433 --> 00:01:08,302 line:-1
+with a particular kind of work
+in mind,
+
+
+28
+00:01:08.302 --> 00:01:09.803 line:-1 position:50%
+it can have special features
+
+
+29
+00:01:09,803 --> 00:01:12,372 line:-1
+which make that kind of work
+easier to do.
+
+
+30
+00:01:12.372 --> 00:01:14.041 line:-1 position:50%
+So when you write code
+for a DSL
+
+
+31
+00:01:14,041 --> 00:01:16,009 line:-1
+instead of
+a general-purpose language,
+
+
+32
+00:01:16,009 --> 00:01:17,544 line:-1
+you only have
+to write the things
+
+
+33
+00:01:17,544 --> 00:01:21,381 line:-1
+that are specific
+to your exact problem.
+
+
+34
+00:01:21,381 --> 00:01:23,583 line:-1
+Many DSLs are declarative.
+
+
+35
+00:01:23.583 --> 00:01:25.953 line:-1 position:50%
+That is, you’re not really
+writing precise instructions
+
+
+36
+00:01:25,953 --> 00:01:27,421 line:-1
+to solve the problem;
+
+
+37
+00:01:27.421 --> 00:01:29.990 line:-1 position:50%
+it’s more like you’re describing
+the problem in the language,
+
+
+38
+00:01:29,990 --> 00:01:32,693 line:-1
+and then it goes
+and solves it for you.
+
+
+39
+00:01:32,693 --> 00:01:34,194 line:-1
+The traditional way
+you would do this
+
+
+40
+00:01:34,194 --> 00:01:36,830 line:-1
+is called a "standalone DSL."
+
+
+41
+00:01:36,830 --> 00:01:38,899 line:-1
+You would design the entire
+language from scratch
+
+
+42
+00:01:38.899 --> 00:01:43.503 line:-1 position:50%
+and write an interpreter
+or compiler for it.
+
+
+43
+00:01:43.503 --> 00:01:46.606 line:-1 position:50%
+Embedded DSLs
+are a more modern alternative.
+
+
+44
+00:01:46,606 --> 00:01:49,443 line:-1
+In an embedded DSL,
+you use the built-in features
+
+
+45
+00:01:49.443 --> 00:01:51.445 line:-1 position:50%
+of a host language like Swift
+
+
+46
+00:01:51,445 --> 00:01:53,180 line:-1
+to add the DSL’s
+implicit behavior
+
+
+47
+00:01:53,180 --> 00:01:55,248 line:-1
+to some parts of your code,
+
+
+48
+00:01:55.248 --> 00:01:56.917 line:-1 position:50%
+effectively modifying
+the host language
+
+
+49
+00:01:56.917 --> 00:02:00.187 line:-1 position:50%
+into one tailored
+for your domain.
+
+
+50
+00:02:00.187 --> 00:02:01.955 line:-1 position:50%
+This is obviously way easier
+
+
+51
+00:02:01.955 --> 00:02:03.457 line:-1 position:50%
+than designing
+the entire language
+
+
+52
+00:02:03.457 --> 00:02:05.325 line:-1 position:50%
+and writing a compiler for it
+
+
+53
+00:02:05.325 --> 00:02:07.094 line:-1 position:50%
+because you’re starting
+from an existing language
+
+
+54
+00:02:07,094 --> 00:02:09,529 line:-1
+that has already decided
+the basics of the syntax
+
+
+55
+00:02:09.529 --> 00:02:13.100 line:-1 position:50%
+and already has a compiler.
+
+
+56
+00:02:13.100 --> 00:02:15.369 line:-1 position:50%
+It also makes it easier
+to mix the DSL code
+
+
+57
+00:02:15,369 --> 00:02:17,838 line:-1
+together with non-DSL code.
+
+
+58
+00:02:17,838 --> 00:02:20,040 line:-1
+Often you want to use a DSL
+to solve a problem
+
+
+59
+00:02:20,040 --> 00:02:22,976 line:-1
+that’s just one part
+of a much larger app.
+
+
+60
+00:02:22.976 --> 00:02:24.745 line:-1 position:50%
+If you’re writing
+a standalone DSL,
+
+
+61
+00:02:24,745 --> 00:02:28,348 line:-1
+you have to design a way to call
+from one language to the other.
+
+
+62
+00:02:28.348 --> 00:02:31.118 line:-1 position:50%
+With an embedded DSL,
+the parts written in the DSL
+
+
+63
+00:02:31,118 --> 00:02:33,754 line:-1
+look like normal code
+to the rest of the app,
+
+
+64
+00:02:33.754 --> 00:02:38.325 line:-1 position:50%
+so you have a much easier time
+interoperating.
+
+
+65
+00:02:38,325 --> 00:02:40,827 line:-1
+An embedded DSL
+can also use the tools designed
+
+
+66
+00:02:40,827 --> 00:02:42,262 line:-1
+for the host language.
+
+
+67
+00:02:42.262 --> 00:02:44.931 line:-1 position:50%
+You already have debuggers
+and editors for Swift,
+
+
+68
+00:02:44.931 --> 00:02:48.135 line:-1 position:50%
+and those work just fine
+for a Swift DSL;
+
+
+69
+00:02:48.135 --> 00:02:49.936 line:-1 position:50%
+if you wanted those
+for a standalone DSL,
+
+
+70
+00:02:49,936 --> 00:02:53,240 line:-1
+you’d have to write your own.
+
+
+71
+00:02:53,240 --> 00:02:55,609 position:50%
+And because you’re starting
+from the host language,
+
+
+72
+00:02:55,609 --> 00:02:57,277 position:50%
+clients who already
+know that language
+
+
+73
+00:02:57,277 --> 00:02:59,079 line:0
+have a lot less to learn.
+
+
+74
+00:02:59,079 --> 00:03:00,881 line:0
+They already know
+how to declare a variable
+
+
+75
+00:03:00,881 --> 00:03:03,383 position:50%
+or whether there’s
+a space in "else if";
+
+
+76
+00:03:03,383 --> 00:03:08,488 line:0
+all they need to learn is how
+you’ve customized the language.
+
+
+77
+00:03:08,488 --> 00:03:11,758 line:0
+Swift is designed to support
+embedded DSLs.
+
+
+78
+00:03:11,758 --> 00:03:13,860 line:0
+And in fact,
+if you’ve used SwiftUI,
+
+
+79
+00:03:13,860 --> 00:03:15,762 line:0
+you’ve already used one.
+
+
+80
+00:03:15.762 --> 00:03:18.265 line:-1 position:50%
+The SwiftUI view DSL
+assumes you want to describe
+
+
+81
+00:03:18.265 --> 00:03:21.034 line:-1 position:50%
+the layout of views
+on a device’s screen.
+
+
+82
+00:03:21,034 --> 00:03:23,403 line:-1
+So when you’re writing
+in the SwiftUI DSL,
+
+
+83
+00:03:23,403 --> 00:03:26,306 line:-1
+your custom code
+simply creates the views,
+
+
+84
+00:03:26.306 --> 00:03:28.642 line:-1 position:50%
+and the DSL is responsible
+for building a tree out of them
+
+
+85
+00:03:28,642 --> 00:03:31,178 line:-1
+for SwiftUI to process.
+
+
+86
+00:03:31.178 --> 00:03:33.180 line:-1 position:50%
+To understand
+the value of a DSL,
+
+
+87
+00:03:33.180 --> 00:03:35.048 line:-1 position:50%
+think about what SwiftUI
+might be like
+
+
+88
+00:03:35,048 --> 00:03:39,386 line:-1
+if you wrote views
+in ordinary Swift instead.
+
+
+89
+00:03:39,386 --> 00:03:41,888 line:-1
+You’d have to create views,
+modify them,
+
+
+90
+00:03:41,888 --> 00:03:45,025 line:-1
+add them to other views,
+and return one at the end.
+
+
+91
+00:03:45.025 --> 00:03:47.227 line:-1 position:50%
+You’d be creating temporary
+variables all over the place
+
+
+92
+00:03:47.227 --> 00:03:49.062 line:-1 position:50%
+to hold individual views,
+
+
+93
+00:03:49,062 --> 00:03:51,198 line:-1
+and the result
+wouldn’t really convey
+
+
+94
+00:03:51,198 --> 00:03:54,935 line:-1
+the way the views are nested
+in the same way the DSL does.
+
+
+95
+00:03:54,935 --> 00:03:58,638 line:-1
+You’d write more code but
+it would convey less meaning.
+
+
+96
+00:03:58.638 --> 00:04:00.273 line:-1 position:50%
+The SwiftUI DSL,
+by contrast,
+
+
+97
+00:04:00.273 --> 00:04:03.176 line:-1 position:50%
+makes all of those
+tedious details implicit.
+
+
+98
+00:04:03.176 --> 00:04:05.812 line:-1 position:50%
+It’s your job
+to describe the views;
+
+
+99
+00:04:05,812 --> 00:04:08,582 line:-1
+it’s the DSL’s job to collect
+the views you’re describing
+
+
+100
+00:04:08.582 --> 00:04:11.017 line:-1 position:50%
+and figure out
+how to show them.
+
+
+101
+00:04:11,017 --> 00:04:13,653 line:-1
+But DSLs take extra effort
+to implement,
+
+
+102
+00:04:13.653 --> 00:04:15.889 line:-1 position:50%
+and they take
+extra effort to use.
+
+
+103
+00:04:15.889 --> 00:04:18.792 line:-1 position:50%
+So when do you want
+to create one?
+
+
+104
+00:04:18.792 --> 00:04:20.227 line:-1 position:50%
+Well, there are no
+hard-and-fast rules,
+
+
+105
+00:04:20,227 --> 00:04:25,365 line:-1
+but here are some signs
+that you might want to use one.
+
+
+106
+00:04:25,365 --> 00:04:28,568 line:-1
+Look for places where the
+mechanics of using vanilla Swift
+
+
+107
+00:04:28,568 --> 00:04:31,204 line:-1
+obscure the meaning
+of the code.
+
+
+108
+00:04:31,204 --> 00:04:33,406 line:-1
+Where you spend half your time
+rearranging commas
+
+
+109
+00:04:33,406 --> 00:04:34,941 line:-1
+and square brackets
+and parentheses
+
+
+110
+00:04:34.941 --> 00:04:36.943 line:-1 position:50%
+every time you change something,
+
+
+111
+00:04:36,943 --> 00:04:38,745 line:-1
+or have to append things
+to temporary arrays
+
+
+112
+00:04:38,745 --> 00:04:41,948 line:-1
+to accommodate the control flow.
+
+
+113
+00:04:41,948 --> 00:04:43,850 line:-1
+Look for situations
+where the best approach
+
+
+114
+00:04:43.850 --> 00:04:46.620 line:-1 position:50%
+is to describe something
+to another part of your code
+
+
+115
+00:04:46,620 --> 00:04:48,155 line:-1
+instead of directly
+writing instructions
+
+
+116
+00:04:48.155 --> 00:04:49.689 line:-1 position:50%
+about what to do with it.
+
+
+117
+00:04:49,689 --> 00:04:52,225 line:-1
+Like, in a server-side
+web framework,
+
+
+118
+00:04:52.225 --> 00:04:54.361 line:-1 position:50%
+there might be an area
+that registers handlers
+
+
+119
+00:04:54.361 --> 00:04:57.397 line:-1 position:50%
+for the URLs it supports.
+
+
+120
+00:04:57,397 --> 00:05:00,167 line:-1
+Instead of calling an add handler
+method over and over,
+
+
+121
+00:05:00,167 --> 00:05:01,635 line:-1
+you could design a DSL
+for clients
+
+
+122
+00:05:01.635 --> 00:05:03.937 line:-1 position:50%
+to declare each URL
+and its handler,
+
+
+123
+00:05:03.937 --> 00:05:08.208 line:-1 position:50%
+and then your framework
+can register them automatically.
+
+
+124
+00:05:08,208 --> 00:05:10,377 line:-1
+Look for parts of your code
+that will be maintained
+
+
+125
+00:05:10,377 --> 00:05:13,413 line:-1
+by people whose primary job
+isn’t programming.
+
+
+126
+00:05:13,413 --> 00:05:16,550 line:-1
+Like, imagine you’re writing
+a text adventure game;
+
+
+127
+00:05:16.550 --> 00:05:19.119 line:-1 position:50%
+only a few developers will work
+on most of the code,
+
+
+128
+00:05:19,119 --> 00:05:21,755 line:-1
+but the map of rooms will be
+updated by game designers,
+
+
+129
+00:05:21,755 --> 00:05:25,392 line:-1
+and NPC dialog
+will be added by writers.
+
+
+130
+00:05:25,392 --> 00:05:29,629 line:-1
+Maybe a DSL would make
+their jobs easier.
+
+
+131
+00:05:29.629 --> 00:05:32.532 line:-1 position:50%
+And look for situations where
+you’ll get a lot of mileage
+
+
+132
+00:05:32.532 --> 00:05:34.668 line:-1 position:50%
+out of the DSL.
+
+
+133
+00:05:34,668 --> 00:05:36,036 line:-1
+Libraries are a good example
+
+
+134
+00:05:36,036 --> 00:05:38,672 line:-1
+because they get used
+by many different clients.
+
+
+135
+00:05:38,672 --> 00:05:41,875 line:-1
+But a good DSL could also
+handle something in your project
+
+
+136
+00:05:41.875 --> 00:05:43.376 line:-1 position:50%
+that you define a lot,
+
+
+137
+00:05:43,376 --> 00:05:46,012 line:-1
+or even just something you have
+to read or update frequently
+
+
+138
+00:05:46,012 --> 00:05:49,983 line:-1
+and you want to make that
+as easy as possible.
+
+
+139
+00:05:49.983 --> 00:05:52.719 line:-1 position:50%
+Whatever reason you see
+to create a DSL,
+
+
+140
+00:05:52,719 --> 00:05:54,854 line:-1
+you need to balance it against
+the fact that it will not only
+
+
+141
+00:05:54,854 --> 00:05:57,290 line:-1
+take some effort for you
+to design and implement,
+
+
+142
+00:05:57,290 --> 00:06:00,727 line:-1
+it will also take some effort
+for its clients to learn.
+
+
+143
+00:06:00.727 --> 00:06:03.964 line:-1 position:50%
+If methods and array literals
+are nearly as good as a DSL,
+
+
+144
+00:06:03.964 --> 00:06:06.733 line:-1 position:50%
+they’re often the right answer,
+because Swift programmers
+
+
+145
+00:06:06.733 --> 00:06:10.870 line:-1 position:50%
+will already know
+exactly how to use them.
+
+
+146
+00:06:10.870 --> 00:06:12.505 line:-1 position:50%
+But sometimes,
+like in SwiftUI,
+
+
+147
+00:06:12.505 --> 00:06:14.608 line:-1 position:50%
+a DSL is the right answer.
+
+
+148
+00:06:14.608 --> 00:06:17.177 line:-1 position:50%
+So how do you make one?
+
+
+149
+00:06:17,177 --> 00:06:19,779 line:-1
+Well, let’s break down how
+Swift features are used together
+
+
+150
+00:06:19,779 --> 00:06:23,350 line:-1
+to build the SwiftUI DSL.
+
+
+151
+00:06:23,350 --> 00:06:25,752 line:-1
+In addition to Swift’s
+generally clean syntax,
+
+
+152
+00:06:25.752 --> 00:06:30.190 line:-1 position:50%
+the SwiftUI DSL takes advantage
+of four things.
+
+
+153
+00:06:30.190 --> 00:06:31.791 line:-1 position:50%
+Property wrappers.
+
+
+154
+00:06:31,791 --> 00:06:33,326 line:-1
+These let clients
+declare variables
+
+
+155
+00:06:33.326 --> 00:06:36.830 line:-1 position:50%
+that are tied to DSL behavior.
+
+
+156
+00:06:36.830 --> 00:06:38.598 line:-1 position:50%
+Trailing closure arguments.
+
+
+157
+00:06:38.598 --> 00:06:41.268 line:-1 position:50%
+These let the DSL provide
+functions or initializers
+
+
+158
+00:06:41.268 --> 00:06:43.370 line:-1 position:50%
+that read almost like
+custom syntax
+
+
+159
+00:06:43,370 --> 00:06:46,539 line:-1
+that’s been added
+to the language.
+
+
+160
+00:06:46,539 --> 00:06:48,074 line:-1
+Result builders.
+
+
+161
+00:06:48.074 --> 00:06:50.510 line:-1 position:50%
+These collect the values
+computed in your DSL’s code
+
+
+162
+00:06:50.510 --> 00:06:54.347 line:-1 position:50%
+into a return value
+so you can process them.
+
+
+163
+00:06:54,347 --> 00:06:57,517 position:50%
+And finally,
+modifier-style methods.
+
+
+164
+00:06:57,517 --> 00:06:59,986 line:0
+These are basically just methods
+that return a wrapped
+
+
+165
+00:06:59,986 --> 00:07:02,455 position:50%
+or modified version
+of the value they’re called on;
+
+
+166
+00:07:02,455 --> 00:07:03,556 line:0
+since result builders
+
+
+167
+00:07:03,556 --> 00:07:05,592 line:0
+collect the values
+computed by your code,
+
+
+168
+00:07:05,592 --> 00:07:07,761 line:0
+this pattern works really well
+with them.
+
+
+169
+00:07:07,761 --> 00:07:09,629 position:50%
+Now, property wrappers
+were already covered
+
+
+170
+00:07:09,629 --> 00:07:12,265 line:0
+in the last half of this session
+from 2019,
+
+
+171
+00:07:12,265 --> 00:07:15,935 line:0
+so I’m not going to talk
+much about them today.
+
+
+172
+00:07:15,935 --> 00:07:18,505 position:50%
+But these other three,
+and especially result builders,
+
+
+173
+00:07:18,505 --> 00:07:21,708 line:0
+are going to be
+major topics of this session.
+
+
+174
+00:07:21,708 --> 00:07:23,943 line:0
+Trailing closures and
+modifier-style methods
+
+
+175
+00:07:23,943 --> 00:07:26,546 line:0
+are things a lot of Swift
+programmers are familiar with,
+
+
+176
+00:07:26,546 --> 00:07:30,850 position:50%
+but result builders are a more
+behind-the-scenes feature.
+
+
+177
+00:07:30.850 --> 00:07:32.786 line:-1 position:50%
+So let’s talk about
+how they work
+
+
+178
+00:07:32,786 --> 00:07:35,789 line:-1
+so we can start
+building DSLs with them.
+
+
+179
+00:07:35.789 --> 00:07:38.058 line:-1 position:50%
+Result builders are used
+to gather up the values
+
+
+180
+00:07:38,058 --> 00:07:40,660 line:-1
+created in your DSL
+and stitch them together
+
+
+181
+00:07:40.660 --> 00:07:44.197 line:-1 position:50%
+into whatever data structure
+your language wants them in.
+
+
+182
+00:07:44,197 --> 00:07:45,999 line:-1
+They’re a bit like
+property wrappers
+
+
+183
+00:07:45.999 --> 00:07:47.834 line:-1 position:50%
+in that you declare
+a special type
+
+
+184
+00:07:47.834 --> 00:07:51.071 line:-1 position:50%
+and then you can use that type
+as an attribute.
+
+
+185
+00:07:51.071 --> 00:07:53.106 line:-1 position:50%
+Specifically,
+you can apply a result builder
+
+
+186
+00:07:53,106 --> 00:07:55,875 line:-1
+to pretty much any function body
+with a return value,
+
+
+187
+00:07:55.875 --> 00:07:57.444 line:-1 position:50%
+like a function or method,
+
+
+188
+00:07:57.444 --> 00:08:02.148 line:-1 position:50%
+the getter of a computed
+property, or a closure.
+
+
+189
+00:08:02,148 --> 00:08:04,451 line:-1
+When you apply a result
+builder to a function body,
+
+
+190
+00:08:04.451 --> 00:08:07.053 line:-1 position:50%
+Swift inserts various calls
+to static methods
+
+
+191
+00:08:07,053 --> 00:08:08,988 line:-1
+on the result builder.
+
+
+192
+00:08:08,988 --> 00:08:11,157 line:-1
+These end up capturing
+the results of statements
+
+
+193
+00:08:11.157 --> 00:08:13.760 line:-1 position:50%
+that would otherwise
+have been discarded.
+
+
+194
+00:08:13.760 --> 00:08:16.296 line:-1 position:50%
+So where Swift would normally
+ignore a return value,
+
+
+195
+00:08:16,296 --> 00:08:20,100 line:-1
+it instead gets passed
+to the result builder.
+
+
+196
+00:08:20.100 --> 00:08:22.569 line:-1 position:50%
+These calls ultimately
+compute a value
+
+
+197
+00:08:22,569 --> 00:08:24,838 line:-1
+which is returned
+from the function body.
+
+
+198
+00:08:24,838 --> 00:08:26,940 line:-1
+So when you call the function,
+it executes
+
+
+199
+00:08:26,940 --> 00:08:29,409 line:-1
+all of the statements
+in that function normally,
+
+
+200
+00:08:29,409 --> 00:08:31,378 line:-1
+gathers up the values
+produced by them,
+
+
+201
+00:08:31,378 --> 00:08:33,279 line:-1
+and combines them
+into a single value
+
+
+202
+00:08:33,279 --> 00:08:35,615 line:-1
+that becomes
+the closure’s result.
+
+
+203
+00:08:35,615 --> 00:08:37,617 line:-1
+Result builders
+are a compile-time feature,
+
+
+204
+00:08:37,617 --> 00:08:41,087 line:-1
+so they work on any OS
+that your app will run on.
+
+
+205
+00:08:41.087 --> 00:08:42.856 line:-1 position:50%
+The final version
+of the feature,
+
+
+206
+00:08:42.856 --> 00:08:45.959 line:-1 position:50%
+from open-source
+Swift Evolution proposal 289,
+
+
+207
+00:08:45,959 --> 00:08:48,194 line:-1
+was included in Swift 5.4,
+
+
+208
+00:08:48,194 --> 00:08:52,265 line:-1
+so it shipped in Xcode 12.5
+back in April.
+
+
+209
+00:08:52,265 --> 00:08:54,768 line:-1
+But prototypes of the feature
+were available before that,
+
+
+210
+00:08:54,768 --> 00:08:57,504 line:-1
+so you might see some older
+tutorials or libraries
+
+
+211
+00:08:57.504 --> 00:08:59.606 line:-1 position:50%
+that use the prototype.
+
+
+212
+00:08:59,606 --> 00:09:01,007 line:-1
+Those will say
+"function builder"
+
+
+213
+00:09:01,007 --> 00:09:02,008 line:-1
+instead of "result builder,"
+
+
+214
+00:09:02,008 --> 00:09:05,345 line:-1
+and they might not quite
+match the final feature.
+
+
+215
+00:09:05,345 --> 00:09:08,748 line:-1
+So I pointed out the features
+used in the SwiftUI DSL before,
+
+
+216
+00:09:08,748 --> 00:09:11,985 line:-1
+but now let’s talk about
+how they work.
+
+
+217
+00:09:11,985 --> 00:09:13,920 line:-1
+I’ll be simplifying
+a few details --
+
+
+218
+00:09:13,920 --> 00:09:16,823 line:-1
+like removing irrelevant parts
+of some SwiftUI types
+
+
+219
+00:09:16,823 --> 00:09:19,659 line:-1
+and showing some fake
+variable names like v0
+
+
+220
+00:09:19,659 --> 00:09:22,162 line:-1
+for variables generated
+by the compiler --
+
+
+221
+00:09:22,162 --> 00:09:25,698 line:-1
+but this should help you
+understand the basics.
+
+
+222
+00:09:25,698 --> 00:09:28,134 line:-1
+The first thing to realize
+is that, at the top level,
+
+
+223
+00:09:28.134 --> 00:09:31.438 line:-1 position:50%
+this VStack thing with a block
+that looks like new syntax
+
+
+224
+00:09:31,438 --> 00:09:34,641 line:-1
+is actually
+a trailing closure argument.
+
+
+225
+00:09:34.641 --> 00:09:36.409 line:-1 position:50%
+If we look up what VStack is,
+
+
+226
+00:09:36.409 --> 00:09:39.479 line:-1 position:50%
+we find that
+it’s a struct in SwiftUI.
+
+
+227
+00:09:39,479 --> 00:09:43,149 line:-1
+So the trailing closure argument
+gets passed to this initializer
+
+
+228
+00:09:43.149 --> 00:09:44.884 line:-1 position:50%
+on that struct.
+
+
+229
+00:09:44.884 --> 00:09:46.453 line:-1 position:50%
+Now, when we look
+at the parameter
+
+
+230
+00:09:46.453 --> 00:09:48.054 line:-1 position:50%
+the closure gets passed to,
+
+
+231
+00:09:48.054 --> 00:09:51.157 line:-1 position:50%
+we notice that it has
+a ViewBuilder attribute on it.
+
+
+232
+00:09:51.157 --> 00:09:53.626 line:-1 position:50%
+That attribute tells
+the compiler that it should
+
+
+233
+00:09:53,626 --> 00:09:55,428 line:-1
+apply the result builder
+named ViewBuilder
+
+
+234
+00:09:55.428 --> 00:09:56.863 line:-1 position:50%
+to the closure.
+
+
+235
+00:09:56,863 --> 00:09:58,531 line:-1
+But what is ViewBuilder?
+
+
+236
+00:09:58,531 --> 00:10:01,067 line:0
+Well, we look for
+a type by that name,
+
+
+237
+00:10:01,067 --> 00:10:03,970 line:0
+and we find this type,
+again in SwiftUI.
+
+
+238
+00:10:03,970 --> 00:10:06,706 position:50%
+Note how it has an
+@resultBuilder attribute on it
+
+
+239
+00:10:06,706 --> 00:10:10,076 position:50%
+to tell the compiler
+that it’s a result builder.
+
+
+240
+00:10:10,076 --> 00:10:12,412 line:-1
+Now that Swift has located
+the result builder type,
+
+
+241
+00:10:12,412 --> 00:10:16,583 line:-1
+it starts applying it
+to the closure.
+
+
+242
+00:10:16,583 --> 00:10:18,651 line:-1
+The first thing it does
+is create variables
+
+
+243
+00:10:18,651 --> 00:10:23,156 line:-1
+for all of the statements
+that produce results.
+
+
+244
+00:10:23,156 --> 00:10:24,858 line:-1
+Once it’s created
+these variables,
+
+
+245
+00:10:24.858 --> 00:10:27.627 line:-1 position:50%
+it writes a call to the
+buildBlock method in ViewBuilder
+
+
+246
+00:10:27,627 --> 00:10:31,564 line:-1
+and passes all of those
+variables to it.
+
+
+247
+00:10:31,564 --> 00:10:34,334 line:-1
+buildBlock’s job is
+to process or combine
+
+
+248
+00:10:34,334 --> 00:10:36,202 line:-1
+all of its parameters
+into a single value,
+
+
+249
+00:10:36.202 --> 00:10:38.137 line:-1 position:50%
+which it returns.
+
+
+250
+00:10:38,137 --> 00:10:40,039 line:-1
+Then the compiler
+writes a return statement
+
+
+251
+00:10:40.039 --> 00:10:43.243 line:-1 position:50%
+that returns buildBlock’s result
+from the closure.
+
+
+252
+00:10:43.243 --> 00:10:45.712 line:-1 position:50%
+So basically,
+the compiler took your code
+
+
+253
+00:10:45,712 --> 00:10:48,248 line:-1
+and added the code in yellow
+so that the ViewBuilder
+
+
+254
+00:10:48,248 --> 00:10:51,851 line:-1
+could assemble all of the values
+you created into a single value
+
+
+255
+00:10:51.851 --> 00:10:54.854 line:-1 position:50%
+that VStack will use
+as its content.
+
+
+256
+00:10:54,854 --> 00:10:57,423 line:-1
+Now, I’d like to point out
+how modifier-style methods
+
+
+257
+00:10:57,423 --> 00:10:58,925 line:-1
+fit into this.
+
+
+258
+00:10:58,925 --> 00:11:02,462 line:-1
+A modifier-style method returns
+either a modified copy of self
+
+
+259
+00:11:02,462 --> 00:11:04,364 line:-1
+or a copy of self
+wrapped in a different type
+
+
+260
+00:11:04.364 --> 00:11:06.232 line:-1 position:50%
+that adds new behavior.
+
+
+261
+00:11:06.232 --> 00:11:08.234 line:-1 position:50%
+And it does this within
+the same statement
+
+
+262
+00:11:08.234 --> 00:11:10.537 line:-1 position:50%
+that created self
+in the first place.
+
+
+263
+00:11:10.537 --> 00:11:12.205 line:-1 position:50%
+So it ends up changing the value
+
+
+264
+00:11:12.205 --> 00:11:14.974 line:-1 position:50%
+before the result builder
+sees it.
+
+
+265
+00:11:14.974 --> 00:11:17.143 line:-1 position:50%
+And you can call other
+modifier-style methods
+
+
+266
+00:11:17,143 --> 00:11:18,645 line:-1
+on that method’s result,
+
+
+267
+00:11:18,645 --> 00:11:21,381 line:-1
+so you can apply several changes
+and compose them together,
+
+
+268
+00:11:21,381 --> 00:11:24,684 line:-1
+all before the result builder
+ever sees the value.
+
+
+269
+00:11:24,684 --> 00:11:25,818 line:-1
+Those two things --
+
+
+270
+00:11:25,818 --> 00:11:28,555 line:-1
+the ability to compose modifiers
+and the fact that
+
+
+271
+00:11:28,555 --> 00:11:31,291 line:-1
+they modify the value before
+the result builder sees it --
+
+
+272
+00:11:31,291 --> 00:11:34,427 line:-1
+are why Swift DSLs
+often use modifiers.
+
+
+273
+00:11:34,427 --> 00:11:36,930 line:-1
+The two just work nicely
+together.
+
+
+274
+00:11:36.930 --> 00:11:38.364 line:-1 position:50%
+Now, one thing
+we were worried about
+
+
+275
+00:11:38.364 --> 00:11:40.533 line:-1 position:50%
+when we designed
+result builders was that,
+
+
+276
+00:11:40,533 --> 00:11:43,202 line:-1
+if they let you change
+Swift’s behavior too radically,
+
+
+277
+00:11:43,202 --> 00:11:45,638 line:-1
+clients wouldn’t be able to
+trust that anything in the DSL
+
+
+278
+00:11:45.638 --> 00:11:48.107 line:-1 position:50%
+worked like normal Swift code.
+
+
+279
+00:11:48,107 --> 00:11:49,776 line:-1
+So when we designed
+result builders,
+
+
+280
+00:11:49,776 --> 00:11:51,611 line:-1
+we tried to strike a balance
+
+
+281
+00:11:51.611 --> 00:11:54.647 line:-1 position:50%
+between having enough power
+to make a useful DSL
+
+
+282
+00:11:54,647 --> 00:11:56,382 line:-1
+and making sure
+that Swift’s features
+
+
+283
+00:11:56.382 --> 00:12:00.420 line:-1 position:50%
+still work as clients
+expect them to.
+
+
+284
+00:12:00.420 --> 00:12:02.755 line:-1 position:50%
+Result builders
+don’t radically reinterpret
+
+
+285
+00:12:02,755 --> 00:12:04,657 line:-1
+the code a client writes.
+
+
+286
+00:12:04.657 --> 00:12:06.759 line:-1 position:50%
+Statements still end
+with newlines,
+
+
+287
+00:12:06,759 --> 00:12:08,795 line:-1
+calls still use parentheses,
+
+
+288
+00:12:08,795 --> 00:12:11,264 line:-1
+curly brackets
+still have to match up;
+
+
+289
+00:12:11,264 --> 00:12:13,166 line:-1
+all of the basics
+of Swift syntax
+
+
+290
+00:12:13,166 --> 00:12:16,970 line:-1
+work exactly the way
+your clients expect.
+
+
+291
+00:12:16,970 --> 00:12:19,405 line:-1
+They also don’t introduce new
+names that wouldn’t be visible
+
+
+292
+00:12:19.405 --> 00:12:23.276 line:-1 position:50%
+from normal code
+written in the same place.
+
+
+293
+00:12:23,276 --> 00:12:26,245 line:-1
+There are some language features
+that don’t make much sense
+
+
+294
+00:12:26.245 --> 00:12:28.114 line:-1 position:50%
+when you’re using
+a result builder --
+
+
+295
+00:12:28,114 --> 00:12:30,116 line:-1
+mostly things
+like catch or break
+
+
+296
+00:12:30.116 --> 00:12:33.453 line:-1 position:50%
+that interrupt control flow in
+ways that don’t really fit well
+
+
+297
+00:12:33.453 --> 00:12:37.090 line:-1 position:50%
+into the idea of capturing
+and using statement results.
+
+
+298
+00:12:37.090 --> 00:12:41.628 line:-1 position:50%
+Those features are disabled when
+you’re using a result builder.
+
+
+299
+00:12:41,628 --> 00:12:42,862 line:-1
+And there are some features --
+
+
+300
+00:12:42.862 --> 00:12:45.765 line:-1 position:50%
+like if, switch,
+and for-in statements --
+
+
+301
+00:12:45.765 --> 00:12:47.533 line:-1 position:50%
+that are disabled
+unless your result builder
+
+
+302
+00:12:47.533 --> 00:12:51.604 line:-1 position:50%
+provides extra methods
+that are used to implement them.
+
+
+303
+00:12:51.604 --> 00:12:53.873 line:-1 position:50%
+But if Swift allows you
+to use a keyword,
+
+
+304
+00:12:53.873 --> 00:12:56.075 line:-1 position:50%
+it will work the way
+it normally does.
+
+
+305
+00:12:56.075 --> 00:12:58.611 line:-1 position:50%
+You won’t end up with,
+like, if-else statements
+
+
+306
+00:12:58,611 --> 00:13:00,446 line:-1
+that run both
+the true and false blocks,
+
+
+307
+00:13:00,446 --> 00:13:03,716 line:-1
+or loops that skip
+some of the elements.
+
+
+308
+00:13:03,716 --> 00:13:05,818 line:-1
+Result builders just
+capture the statement results
+
+
+309
+00:13:05.818 --> 00:13:09.288 line:-1 position:50%
+that would otherwise have been
+thrown away, nothing more.
+
+
+310
+00:13:09.288 --> 00:13:12.759 line:-1 position:50%
+So clients can count on them,
+you know, making sense.
+
+
+311
+00:13:14.293 --> 00:13:17.764 line:-1 position:50%
+OK. So now that we have an idea
+of what result builders are
+
+
+312
+00:13:17,764 --> 00:13:19,499 line:-1
+and how they work,
+
+
+313
+00:13:19.499 --> 00:13:24.070 line:-1 position:50%
+we can start designing
+a DSL that will use them.
+
+
+314
+00:13:24.070 --> 00:13:26.139 line:-1 position:50%
+If you’ve never worked
+on a language before,
+
+
+315
+00:13:26,139 --> 00:13:28,541 line:-1
+you might find that thought
+intimidating,
+
+
+316
+00:13:28,541 --> 00:13:30,243 line:-1
+but designing a Swift DSL
+
+
+317
+00:13:30.243 --> 00:13:34.914 line:-1 position:50%
+is actually a lot like
+designing a Swift API.
+
+
+318
+00:13:34.914 --> 00:13:39.218 line:-1 position:50%
+Like a Swift API, a Swift DSL
+is not starting from scratch;
+
+
+319
+00:13:39.218 --> 00:13:41.854 line:-1 position:50%
+it uses Swift’s syntax
+and capabilities
+
+
+320
+00:13:41,854 --> 00:13:43,556 line:-1
+to express ideas and behavior
+
+
+321
+00:13:43,556 --> 00:13:46,192 line:-1
+relevant to the problem
+you’re trying to solve.
+
+
+322
+00:13:46,192 --> 00:13:48,728 line:-1
+A DSL is just using
+additional capabilities
+
+
+323
+00:13:48.728 --> 00:13:52.765 line:-1 position:50%
+that an API usually wouldn’t.
+
+
+324
+00:13:52,765 --> 00:13:55,902 line:-1
+Like a Swift API,
+a Swift DSL could be designed
+
+
+325
+00:13:55.902 --> 00:13:58.771 line:-1 position:50%
+in several different ways that
+would all solve the problem,
+
+
+326
+00:13:58,771 --> 00:14:01,107 line:-1
+so your job is
+to think of alternatives
+
+
+327
+00:14:01,107 --> 00:14:03,276 line:-1
+and select the one
+you think is best;
+
+
+328
+00:14:03.276 --> 00:14:08.848 line:-1 position:50%
+a DSL just has a much larger
+space of potential solutions.
+
+
+329
+00:14:08.848 --> 00:14:12.485 line:-1 position:50%
+And like a Swift API,
+a Swift DSL’s best rule of thumb
+
+
+330
+00:14:12,485 --> 00:14:14,253 line:-1
+is usually to choose the design
+
+
+331
+00:14:14,253 --> 00:14:16,823 line:-1
+that results in
+the clearest use sites.
+
+
+332
+00:14:16,823 --> 00:14:18,791 line:-1
+A DSL just assumes
+that clients will invest
+
+
+333
+00:14:18.791 --> 00:14:20.960 line:-1 position:50%
+a little time up front
+learning the language,
+
+
+334
+00:14:20,960 --> 00:14:23,362 line:-1
+so it puts less priority
+on being crystal clear
+
+
+335
+00:14:23.362 --> 00:14:27.233 line:-1 position:50%
+to people who’ve never
+seen it before.
+
+
+336
+00:14:27.233 --> 00:14:29.902 line:-1 position:50%
+So if you’ve designed APIs
+before,
+
+
+337
+00:14:29.902 --> 00:14:33.005 line:-1 position:50%
+you’ve got a good starting point
+to design DSLs.
+
+
+338
+00:14:33,005 --> 00:14:34,540 line:-1
+And for that matter,
+some of the suggestions
+
+
+339
+00:14:34,540 --> 00:14:36,809 line:-1
+and techniques
+I’ll be using for DSLs
+
+
+340
+00:14:36.809 --> 00:14:39.512 line:-1 position:50%
+transfer really well
+to API design.
+
+
+341
+00:14:39.512 --> 00:14:43.449 line:-1 position:50%
+In this talk, we’ll be designing
+a DSL for the app Fruta.
+
+
+342
+00:14:43.449 --> 00:14:45.651 line:-1 position:50%
+You’ll find a working
+implementation of this
+
+
+343
+00:14:45.651 --> 00:14:49.155 line:-1 position:50%
+in the Fruta sample code.
+
+
+344
+00:14:49.155 --> 00:14:52.492 line:-1 position:50%
+Fruta includes 15 smoothie
+recipes in its source code,
+
+
+345
+00:14:52.492 --> 00:14:55.294 line:-1 position:50%
+and before the DSL,
+we simply created each smoothie
+
+
+346
+00:14:55.294 --> 00:14:57.029 line:-1 position:50%
+by calling
+the memberwise initializer
+
+
+347
+00:14:57,029 --> 00:15:00,466 line:-1
+and assigning it
+to a static constant.
+
+
+348
+00:15:00,466 --> 00:15:02,368 line:-1
+And then we stored
+an array of all the smoothies
+
+
+349
+00:15:02,368 --> 00:15:04,370 line:-1
+into another static constant,
+
+
+350
+00:15:04.370 --> 00:15:06.372 line:-1 position:50%
+and depending on
+whether the particular view
+
+
+351
+00:15:06,372 --> 00:15:09,575 line:-1
+wants to include recipes that
+require an in-app purchase,
+
+
+352
+00:15:09.575 --> 00:15:13.980 line:-1 position:50%
+we either return the entire list
+or filter out the paid ones.
+
+
+353
+00:15:13,980 --> 00:15:15,548 line:-1
+Now, this is perfectly shippable
+
+
+354
+00:15:15.548 --> 00:15:17.917 line:-1 position:50%
+and you could stick with it
+if you wanted to.
+
+
+355
+00:15:17,917 --> 00:15:20,686 line:-1
+But the smoothie recipes
+get updated pretty often
+
+
+356
+00:15:20.686 --> 00:15:22.255 line:-1 position:50%
+and, unlike the rest
+of the app,
+
+
+357
+00:15:22.255 --> 00:15:24.724 line:-1 position:50%
+they’re updated by designers
+and marketing folks
+
+
+358
+00:15:24.724 --> 00:15:28.094 line:-1 position:50%
+and [GROANS] managers,
+so we might want a DSL
+
+
+359
+00:15:28,094 --> 00:15:31,097 line:-1
+to make that
+a little less complicated.
+
+
+360
+00:15:31,097 --> 00:15:33,166 line:-1
+And looking at
+the way we’re doing it now,
+
+
+361
+00:15:33,166 --> 00:15:36,502 line:-1
+I can’t help but notice
+a few drawbacks.
+
+
+362
+00:15:36,502 --> 00:15:38,938 line:-1
+The need to filter the paid
+smoothies out of the list
+
+
+363
+00:15:38,938 --> 00:15:41,440 line:-1
+has contorted this code.
+
+
+364
+00:15:41.440 --> 00:15:43.543 line:-1 position:50%
+allSmoothies and hasFreeRecipe
+
+
+365
+00:15:43,543 --> 00:15:45,778 line:-1
+are only ever used
+in this function;
+
+
+366
+00:15:45,778 --> 00:15:48,681 line:-1
+they otherwise
+don’t need to exist.
+
+
+367
+00:15:48.681 --> 00:15:51.951 line:-1 position:50%
+Yet if you try to imagine
+implementing this without them,
+
+
+368
+00:15:51.951 --> 00:15:54.220 line:-1 position:50%
+you can see
+why we didn’t do that.
+
+
+369
+00:15:54.220 --> 00:15:56.122 line:-1 position:50%
+The mechanics
+of creating the array
+
+
+370
+00:15:56.122 --> 00:15:57.890 line:-1 position:50%
+and appending elements to it
+
+
+371
+00:15:57.890 --> 00:16:00.159 line:-1 position:50%
+start to obscure the actual list
+of smoothies,
+
+
+372
+00:16:00,159 --> 00:16:03,863 line:-1
+which is sort of
+the point of this function.
+
+
+373
+00:16:03.863 --> 00:16:05.765 line:-1 position:50%
+Similarly, the fact that
+the list of smoothies
+
+
+374
+00:16:05,765 --> 00:16:09,468 line:-1
+is separate from the smoothie
+definitions is a little silly.
+
+
+375
+00:16:09.468 --> 00:16:11.437 line:-1 position:50%
+A few of these constants
+are used by previews,
+
+
+376
+00:16:11.437 --> 00:16:15.508 line:-1 position:50%
+but most of them appear
+only in this list.
+
+
+377
+00:16:15.508 --> 00:16:17.310 line:-1 position:50%
+And because you
+define a smoothie in one place
+
+
+378
+00:16:17,310 --> 00:16:19,145 line:-1
+and add it to the list
+in another,
+
+
+379
+00:16:19,145 --> 00:16:22,748 line:-1
+it creates an opportunity
+for mistakes.
+
+
+380
+00:16:22.748 --> 00:16:24.517 line:-1 position:50%
+What if you declare
+a new smoothie constant
+
+
+381
+00:16:24,517 --> 00:16:26,519 line:-1
+but forget to add it
+to the list?
+
+
+382
+00:16:26,519 --> 00:16:29,689 line:-1
+Or what if you add
+a smoothie twice?
+
+
+383
+00:16:29,689 --> 00:16:31,224 line:-1
+If we look back
+at the definitions
+
+
+384
+00:16:31,224 --> 00:16:32,725 line:-1
+of individual smoothies,
+
+
+385
+00:16:32,725 --> 00:16:36,662 line:-1
+I also see two other things
+that bother me.
+
+
+386
+00:16:36.662 --> 00:16:40.066 line:-1 position:50%
+One is that the ingredient list
+is just incredibly wordy.
+
+
+387
+00:16:40.066 --> 00:16:41.367 line:-1 position:50%
+Like, each entry repeats
+
+
+388
+00:16:41.367 --> 00:16:45.705 line:-1 position:50%
+some version of the word
+"measure" three times.
+
+
+389
+00:16:45,705 --> 00:16:47,974 line:-1
+In this line, the actual
+information we care about
+
+
+390
+00:16:47,974 --> 00:16:51,010 line:-1
+is 1.5 cups of oranges.
+
+
+391
+00:16:51,010 --> 00:16:53,646 line:-1
+The rest of the line
+isn’t saying anything useful;
+
+
+392
+00:16:53.646 --> 00:16:55.548 line:-1 position:50%
+it’s just visual clutter.
+
+
+393
+00:16:55,548 --> 00:16:57,617 line:-1
+There’s inevitably going to be
+some supporting syntax
+
+
+394
+00:16:57.617 --> 00:16:59.151 line:-1 position:50%
+around the information
+that matters,
+
+
+395
+00:16:59.151 --> 00:17:01.921 line:-1 position:50%
+but when there’s this much,
+the boilerplate around it
+
+
+396
+00:17:01.921 --> 00:17:06.325 line:-1 position:50%
+just overwhelms the information
+we’re trying to convey.
+
+
+397
+00:17:06.325 --> 00:17:09.061 line:-1 position:50%
+The other thing I notice
+is the sheer number of lines
+
+
+398
+00:17:09.061 --> 00:17:10.897 line:-1 position:50%
+devoted to each smoothie
+compared to
+
+
+399
+00:17:10,897 --> 00:17:13,933 line:-1
+the amount of information
+that’s actually present.
+
+
+400
+00:17:13.933 --> 00:17:15.001 line:-1 position:50%
+I think the culprit here
+
+
+401
+00:17:15.001 --> 00:17:18.271 line:-1 position:50%
+is the difference
+in the length of arguments.
+
+
+402
+00:17:18.271 --> 00:17:20.306 line:-1 position:50%
+Some of these arguments
+are very short
+
+
+403
+00:17:20,306 --> 00:17:23,776 line:-1
+and could fit together
+on a single line.
+
+
+404
+00:17:23,776 --> 00:17:27,313 line:-1
+Others are longer and really
+need a line of their own.
+
+
+405
+00:17:27.313 --> 00:17:29.382 line:-1 position:50%
+Now, you could combine
+the short arguments
+
+
+406
+00:17:29,382 --> 00:17:30,816 line:-1
+onto a single line
+
+
+407
+00:17:30,816 --> 00:17:33,119 line:-1
+and then use separate lines
+for the long ones,
+
+
+408
+00:17:33.119 --> 00:17:35.421 line:-1 position:50%
+but most style guides
+frown on that.
+
+
+409
+00:17:35,421 --> 00:17:36,422 line:-1
+We’d like a syntax
+
+
+410
+00:17:36,422 --> 00:17:40,026 line:-1
+where it’d be natural
+to style them differently.
+
+
+411
+00:17:40.026 --> 00:17:42.194 line:-1 position:50%
+Put these altogether
+and we’ve got a bunch of goals
+
+
+412
+00:17:42,194 --> 00:17:43,729 line:-1
+we want our DSL
+to accomplish
+
+
+413
+00:17:43,729 --> 00:17:47,633 line:-1
+to make it easier
+to maintain the smoothie list.
+
+
+414
+00:17:47,633 --> 00:17:50,202 line:-1
+Now, the next thing to do
+is to look at various ways
+
+
+415
+00:17:50,202 --> 00:17:53,239 line:-1
+we could design the DSL
+to achieve these goals.
+
+
+416
+00:17:53,239 --> 00:17:54,674 line:-1
+There are a ton
+of different designs
+
+
+417
+00:17:54,674 --> 00:17:57,410 line:-1
+that would address
+each of these points.
+
+
+418
+00:17:57.410 --> 00:18:00.212 line:-1 position:50%
+I’m going to quickly explain
+what I decided to do
+
+
+419
+00:18:00,212 --> 00:18:01,614 line:-1
+for the first three goals,
+
+
+420
+00:18:01.614 --> 00:18:05.217 line:-1 position:50%
+and then we can explore
+the last goal in more detail.
+
+
+421
+00:18:05.217 --> 00:18:08.387 line:-1 position:50%
+I decided we’d define the
+smoothie list in the all method.
+
+
+422
+00:18:08.387 --> 00:18:10.623 line:-1 position:50%
+The smoothies will be
+defined directly in the body
+
+
+423
+00:18:10.623 --> 00:18:12.558 line:-1 position:50%
+without using static variables,
+
+
+424
+00:18:12,558 --> 00:18:15,094 line:-1
+so we don’t have to worry about
+someone defining a smoothie
+
+
+425
+00:18:15.094 --> 00:18:17.396 line:-1 position:50%
+and forgetting to list it.
+
+
+426
+00:18:17,396 --> 00:18:19,732 line:-1
+We’ll use a result builder
+called "SmoothieArrayBuilder"
+
+
+427
+00:18:19,732 --> 00:18:21,334 line:-1
+to activate our DSL
+
+
+428
+00:18:21.334 --> 00:18:23.502 line:-1 position:50%
+and collect the smoothies
+into an array;
+
+
+429
+00:18:23,502 --> 00:18:25,638 line:-1
+that way we don’t need
+to use an array literal
+
+
+430
+00:18:25,638 --> 00:18:29,342 line:-1
+or collect things
+into a temporary variable.
+
+
+431
+00:18:29.342 --> 00:18:31.877 line:-1 position:50%
+And we’ll allow smoothies
+to be put in if statements
+
+
+432
+00:18:31.877 --> 00:18:35.514 line:-1 position:50%
+so we don’t need to filter
+the list like we did before.
+
+
+433
+00:18:35,514 --> 00:18:37,950 line:-1
+This is great because
+clients who already know Swift
+
+
+434
+00:18:37.950 --> 00:18:40.186 line:-1 position:50%
+will know how
+an if statement is used,
+
+
+435
+00:18:40.186 --> 00:18:42.288 line:-1 position:50%
+and clients who don’t
+will probably understand
+
+
+436
+00:18:42,288 --> 00:18:47,193 line:-1
+"if includingPaid"
+with little trouble.
+
+
+437
+00:18:47,193 --> 00:18:49,228 line:-1
+I decided to specify
+the ingredient amounts
+
+
+438
+00:18:49.228 --> 00:18:51.397 line:-1 position:50%
+by using modifier-style
+methods.
+
+
+439
+00:18:51,397 --> 00:18:54,066 line:-1
+Ingredient will have a method
+called, "measured(with: )"
+
+
+440
+00:18:54.066 --> 00:18:56.535 line:-1 position:50%
+which takes a unit and
+returns a measured ingredient
+
+
+441
+00:18:56,535 --> 00:18:59,739 line:-1
+with one of that unit.
+
+
+442
+00:18:59,739 --> 00:19:01,207 line:-1
+If you want a different
+amount of that unit,
+
+
+443
+00:19:01,207 --> 00:19:03,843 line:-1
+the scaled(by: ) modifier
+on a measured ingredient
+
+
+444
+00:19:03,843 --> 00:19:05,211 line:-1
+returns it with the quantity
+
+
+445
+00:19:05.211 --> 00:19:07.146 line:-1 position:50%
+multiplied by
+the number you pass.
+
+
+446
+00:19:07,146 --> 00:19:10,583 line:-1
+So one cup of oranges
+becomes 1.5 cups of oranges,
+
+
+447
+00:19:10.583 --> 00:19:14.854 line:-1 position:50%
+and one cup of avocado
+becomes 0.2 cups of avocado.
+
+
+448
+00:19:14.854 --> 00:19:19.258 line:-1 position:50%
+Now, why is scaled(by: )
+a separate modifier?
+
+
+449
+00:19:19,258 --> 00:19:21,627 line:-1
+One of the screens in Fruta
+has a control
+
+
+450
+00:19:21,627 --> 00:19:23,629 line:-1
+that can be used to scale
+the ingredient quantities
+
+
+451
+00:19:23,629 --> 00:19:25,831 line:-1
+in a smoothie recipe.
+
+
+452
+00:19:25,831 --> 00:19:27,600 line:-1
+We previously passed
+the multiplier down
+
+
+453
+00:19:27,600 --> 00:19:30,870 line:-1
+to each ingredient row,
+which multiplied its quantity.
+
+
+454
+00:19:30.870 --> 00:19:32.872 line:-1 position:50%
+But I realized
+that I could actually use
+
+
+455
+00:19:32,872 --> 00:19:35,841 line:-1
+the scaled(by: ) modifier
+to instead scale the ingredients
+
+
+456
+00:19:35.841 --> 00:19:37.576 line:-1 position:50%
+before they’re passed
+to the rows,
+
+
+457
+00:19:37,576 --> 00:19:41,213 line:-1
+which let me
+simplify the row views.
+
+
+458
+00:19:41,213 --> 00:19:43,549 line:-1
+So by tweaking
+my smoothie DSL design a bit,
+
+
+459
+00:19:43,549 --> 00:19:45,384 line:-1
+I was able to reuse
+a piece of it
+
+
+460
+00:19:45,384 --> 00:19:49,388 line:-1
+in another part of the project.
+
+
+461
+00:19:49,388 --> 00:19:51,791 line:-1
+So with the changes to achieve
+our first three goals,
+
+
+462
+00:19:51.791 --> 00:19:54.860 line:-1 position:50%
+we’re starting to see
+our new DSL take shape.
+
+
+463
+00:19:54,860 --> 00:19:57,963 line:-1
+Now let’s focus in
+on that last goal:
+
+
+464
+00:19:57.963 --> 00:19:59.965 line:-1 position:50%
+redesigning the individual
+smoothie entries
+
+
+465
+00:19:59.965 --> 00:20:02.735 line:-1 position:50%
+so they’re more compact,
+and hopefully so there’s also
+
+
+466
+00:20:02,735 --> 00:20:06,439 line:-1
+less confusing punctuation
+our clients could trip over.
+
+
+467
+00:20:06,439 --> 00:20:08,107 line:-1
+Let’s take a look
+at a few different ways
+
+
+468
+00:20:08,107 --> 00:20:11,777 line:-1
+we could arrange this
+information to help with that.
+
+
+469
+00:20:11,777 --> 00:20:14,847 line:-1
+One thing we could do
+is use modifier-style methods
+
+
+470
+00:20:14.847 --> 00:20:17.349 line:-1 position:50%
+to add the description
+and ingredients.
+
+
+471
+00:20:17,349 --> 00:20:19,385 line:-1
+This would work,
+but it’s kind of wordy
+
+
+472
+00:20:19,385 --> 00:20:22,088 line:-1
+and it’d be easy for someone
+to forget the description
+
+
+473
+00:20:22.088 --> 00:20:25.291 line:-1 position:50%
+or specify it twice
+or something.
+
+
+474
+00:20:25.291 --> 00:20:28.360 line:-1 position:50%
+Another thing we could do
+is give each field a marker type
+
+
+475
+00:20:28.360 --> 00:20:30.996 line:-1 position:50%
+and put them
+in a result builder closure.
+
+
+476
+00:20:30,996 --> 00:20:33,466 line:-1
+But this puts the ID and title
+on their own lines,
+
+
+477
+00:20:33,466 --> 00:20:36,569 line:-1
+which we’re trying to avoid.
+
+
+478
+00:20:36,569 --> 00:20:38,637 line:-1
+So maybe we could move
+the ID and title
+
+
+479
+00:20:38.637 --> 00:20:40.439 line:-1 position:50%
+back into the parameter list,
+
+
+480
+00:20:40.439 --> 00:20:43.142 line:-1 position:50%
+and use marker types
+for the other two fields.
+
+
+481
+00:20:43.142 --> 00:20:45.945 line:-1 position:50%
+But I feel like this is still
+maybe a little more ceremony
+
+
+482
+00:20:45,945 --> 00:20:48,881 line:-1
+than we really need.
+
+
+483
+00:20:48.881 --> 00:20:52.852 line:-1 position:50%
+I realized that when I looked at
+the user interface for recipes.
+
+
+484
+00:20:52.852 --> 00:20:56.021 line:-1 position:50%
+They’re always presented
+in a specific order:
+
+
+485
+00:20:56,021 --> 00:20:59,492 line:-1
+title at the top,
+description in the middle,
+
+
+486
+00:20:59.492 --> 00:21:02.895 line:-1 position:50%
+list of ingredients
+at the bottom.
+
+
+487
+00:21:02.895 --> 00:21:05.564 line:-1 position:50%
+And we don’t bother labeling
+the title or description.
+
+
+488
+00:21:05.564 --> 00:21:08.267 line:-1 position:50%
+We let their visual hierarchy --
+the fact that the title
+
+
+489
+00:21:08,267 --> 00:21:10,703 line:-1
+is presented more prominently
+than the description --
+
+
+490
+00:21:10.703 --> 00:21:13.372 line:-1 position:50%
+do the talking.
+
+
+491
+00:21:13.372 --> 00:21:15.508 line:-1 position:50%
+So I drew some inspiration
+from that and decided
+
+
+492
+00:21:15.508 --> 00:21:18.711 line:-1 position:50%
+that our smoothie DSL
+should do the same.
+
+
+493
+00:21:18,711 --> 00:21:22,915 line:-1
+It puts the title at the top,
+the description in the middle,
+
+
+494
+00:21:22,915 --> 00:21:25,684 line:-1
+and the list of ingredients
+at the bottom.
+
+
+495
+00:21:25.684 --> 00:21:28.320 line:-1 position:50%
+And it lets the fact that
+the description is below
+
+
+496
+00:21:28,320 --> 00:21:30,089 line:-1
+and more indented
+than the title --
+
+
+497
+00:21:30,089 --> 00:21:32,158 line:-1
+so it’s less
+visually prominent --
+
+
+498
+00:21:32.158 --> 00:21:34.226 line:-1 position:50%
+convey the meaning
+of the description string
+
+
+499
+00:21:34.226 --> 00:21:37.263 line:-1 position:50%
+so there’s no need to label it.
+
+
+500
+00:21:37.263 --> 00:21:39.231 line:-1 position:50%
+I think the result is
+immediately understandable
+
+
+501
+00:21:39.231 --> 00:21:42.067 line:-1 position:50%
+without unnecessary
+complications.
+
+
+502
+00:21:42.067 --> 00:21:45.204 line:-1 position:50%
+And when we put it into the
+context of the DSL as a whole,
+
+
+503
+00:21:45.204 --> 00:21:48.440 line:-1 position:50%
+I think we have
+a pretty comfortable fit.
+
+
+504
+00:21:48.440 --> 00:21:52.411 line:-1 position:50%
+But you might disagree,
+and that’s OK.
+
+
+505
+00:21:52,411 --> 00:21:54,446 line:-1
+DSLs are programming languages,
+
+
+506
+00:21:54,446 --> 00:21:56,415 line:-1
+and personal taste
+and subjective trade-offs
+
+
+507
+00:21:56.415 --> 00:22:00.686 line:-1 position:50%
+are a big part of designing
+any programming language.
+
+
+508
+00:22:00.686 --> 00:22:02.988 line:-1 position:50%
+That doesn’t mean
+you shouldn’t be rigorous.
+
+
+509
+00:22:02,988 --> 00:22:04,924 line:-1
+You should start with
+a clear idea of what you want
+
+
+510
+00:22:04.924 --> 00:22:07.326 line:-1 position:50%
+from the language.
+
+
+511
+00:22:07,326 --> 00:22:09,828 line:-1
+You should look into whether
+there’s an existing solution --
+
+
+512
+00:22:09,828 --> 00:22:12,398 line:-1
+like the if statement --
+that can solve your problem
+
+
+513
+00:22:12,398 --> 00:22:14,934 line:-1
+because if you can
+adopt a familiar solution,
+
+
+514
+00:22:14,934 --> 00:22:17,803 line:-1
+people won’t have to learn
+a new one.
+
+
+515
+00:22:17.803 --> 00:22:20.039 line:-1 position:50%
+You should think about
+how each part of the language
+
+
+516
+00:22:20,039 --> 00:22:22,541 line:-1
+interacts with the rest of it.
+
+
+517
+00:22:22.541 --> 00:22:24.944 line:-1 position:50%
+In a Swift DSL,
+that also means thinking about
+
+
+518
+00:22:24.944 --> 00:22:28.013 line:-1 position:50%
+how your DSL interacts with the
+ordinary Swift code around it,
+
+
+519
+00:22:28,013 --> 00:22:30,149 line:-1
+like when I picked
+the scaled-by modifier
+
+
+520
+00:22:30,149 --> 00:22:33,786 line:-1
+because I could use it
+somewhere else.
+
+
+521
+00:22:33.786 --> 00:22:35.688 line:-1 position:50%
+You should look for solutions
+that will make mistakes
+
+
+522
+00:22:35.688 --> 00:22:37.456 line:-1 position:50%
+either detectable
+at compile time
+
+
+523
+00:22:37.456 --> 00:22:39.758 line:-1 position:50%
+or totally impossible to write.
+
+
+524
+00:22:39,758 --> 00:22:40,626 line:-1
+If you recall,
+
+
+525
+00:22:40,626 --> 00:22:43,495 line:-1
+that’s why we didn’t
+make description a modifier;
+
+
+526
+00:22:43,495 --> 00:22:46,832 line:-1
+you could have left it out
+by accident.
+
+
+527
+00:22:46,832 --> 00:22:48,400 line:-1
+With all of that in mind,
+
+
+528
+00:22:48,400 --> 00:22:51,070 line:-1
+you should come up with
+several different possibilities.
+
+
+529
+00:22:51.070 --> 00:22:52.738 line:-1 position:50%
+Imagine how each of them
+would be used,
+
+
+530
+00:22:52,738 --> 00:22:53,639 line:-1
+write little mock-ups;
+
+
+531
+00:22:53.639 --> 00:22:56.742 line:-1 position:50%
+you know, weigh them
+against each other.
+
+
+532
+00:22:56,742 --> 00:22:57,676 position:50%
+But in the end,
+
+
+533
+00:22:57,676 --> 00:23:00,145 line:0
+you usually won’t find one
+that’s obviously right
+
+
+534
+00:23:00,145 --> 00:23:02,648 line:0
+where the others
+are obviously wrong.
+
+
+535
+00:23:02,648 --> 00:23:04,383 line:0
+All you can do
+is pick something
+
+
+536
+00:23:04,383 --> 00:23:08,120 position:50%
+you feel will be best for
+your language’s clients.
+
+
+537
+00:23:08,120 --> 00:23:09,622 position:50%
+If you’re not sure
+which is best,
+
+
+538
+00:23:09,622 --> 00:23:12,558 position:50%
+you should probably favor
+whichever is most readable.
+
+
+539
+00:23:12,558 --> 00:23:15,394 position:50%
+And if you’re still not sure
+after that...
+
+
+540
+00:23:15,394 --> 00:23:18,697 line:-1
+Well, personally,
+I like taking bolder options.
+
+
+541
+00:23:18,697 --> 00:23:21,533 line:-1
+I’d rather try something and
+walk it back if it doesn’t work
+
+
+542
+00:23:21.533 --> 00:23:24.236 line:-1 position:50%
+than never try it
+and be left wondering.
+
+
+543
+00:23:24,236 --> 00:23:26,572 line:-1
+Now that we’ve decided
+what our DSL will look like,
+
+
+544
+00:23:26,572 --> 00:23:30,175 line:-1
+let’s go ahead
+and add it to Fruta.
+
+
+545
+00:23:30,175 --> 00:23:32,211 line:-1
+I’ve replaced the previous
+smoothie definitions
+
+
+546
+00:23:32.211 --> 00:23:35.247 line:-1 position:50%
+with the final all method
+that uses our DSL,
+
+
+547
+00:23:35.247 --> 00:23:37.516 line:-1 position:50%
+but I haven’t actually
+implemented the DSL yet.
+
+
+548
+00:23:37.516 --> 00:23:41.120 line:-1 position:50%
+So unsurprisingly,
+we’ve got a ton of errors.
+
+
+549
+00:23:41.120 --> 00:23:42.921 line:-1 position:50%
+But that’s OK.
+
+
+550
+00:23:42,921 --> 00:23:45,291 line:-1
+As we work through this,
+I’ll let these errors guide me
+
+
+551
+00:23:45.291 --> 00:23:47.726 line:-1 position:50%
+to the problems I need to solve,
+and by the end
+
+
+552
+00:23:47,726 --> 00:23:50,396 line:-1
+we’ll have something
+that builds without any errors.
+
+
+553
+00:23:50.396 --> 00:23:52.231 line:-1 position:50%
+So let’s just start
+at the top of the function
+
+
+554
+00:23:52,231 --> 00:23:53,732 line:-1
+with this first error:
+
+
+555
+00:23:53,732 --> 00:23:56,101 line:-1
+"Unknown attribute
+‘SmoothieArrayBuilder’."
+
+
+556
+00:23:56,101 --> 00:23:57,770 line:-1
+The result builder
+doesn’t actually exist yet,
+
+
+557
+00:23:57,770 --> 00:23:59,672 line:-1
+so of course
+that's not going to work.
+
+
+558
+00:23:59,672 --> 00:24:01,874 line:-1
+Let’s go fix that.
+
+
+559
+00:24:01.874 --> 00:24:04.643 line:-1 position:50%
+I’ll start by making a type
+called "SmoothieArrayBuilder"
+
+
+560
+00:24:04,643 --> 00:24:08,113 line:-1
+that’s marked with
+the result builder attribute.
+
+
+561
+00:24:08.113 --> 00:24:10.883 line:-1 position:50%
+Now, Swift will never actually
+make an instance of this type;
+
+
+562
+00:24:10.883 --> 00:24:13.952 line:-1 position:50%
+it’s just a container
+for a bunch of static methods.
+
+
+563
+00:24:13.952 --> 00:24:17.890 line:-1 position:50%
+So I’ve made it an enum
+and I won’t define any cases.
+
+
+564
+00:24:17,890 --> 00:24:19,892 line:-1
+It’s impossible to create
+an instance of an enum
+
+
+565
+00:24:19,892 --> 00:24:21,026 line:-1
+which has no cases,
+
+
+566
+00:24:21,026 --> 00:24:24,430 line:-1
+so this keeps people
+from using it incorrectly.
+
+
+567
+00:24:24,430 --> 00:24:27,499 line:0
+If I build just this,
+I’ll get an error
+
+
+568
+00:24:27,499 --> 00:24:30,736 line:0
+saying that the result builder
+needs a buildBlock(_:) method.
+
+
+569
+00:24:30,736 --> 00:24:32,438 position:50%
+It has a fix-it
+which will insert one,
+
+
+570
+00:24:32,438 --> 00:24:34,973 line:0
+so I’ll accept that fix-it
+
+
+571
+00:24:34,973 --> 00:24:38,944 line:0
+and then we’ll figure out
+how to implement it.
+
+
+572
+00:24:38.944 --> 00:24:41.413 line:-1 position:50%
+Now, if you recall
+from earlier,
+
+
+573
+00:24:41,413 --> 00:24:44,616 line:-1
+the way buildBlock(_:) works is
+that if you have code like this
+
+
+574
+00:24:44.616 --> 00:24:46.785 line:-1 position:50%
+with a bunch of individual
+statements,
+
+
+575
+00:24:46,785 --> 00:24:49,655 line:-1
+each of those statements
+gets assigned to a variable,
+
+
+576
+00:24:49.655 --> 00:24:51.757 line:-1 position:50%
+the variables are all
+passed to buildBlock(_:),
+
+
+577
+00:24:51.757 --> 00:24:53.425 line:-1 position:50%
+and the value
+returned by buildBlock(_:)
+
+
+578
+00:24:53.425 --> 00:24:55.127 line:-1 position:50%
+gets returned by the closure.
+
+
+579
+00:24:55,127 --> 00:24:57,763 line:-1
+So it stands to reason
+that our buildBlock(_:) method
+
+
+580
+00:24:57,763 --> 00:25:00,366 line:-1
+needs to accept a bunch
+of smoothies as parameters
+
+
+581
+00:25:00,366 --> 00:25:03,302 line:-1
+and return
+an array of smoothies.
+
+
+582
+00:25:03.302 --> 00:25:05.938 line:-1 position:50%
+If we implement that using
+a variadic parameter
+
+
+583
+00:25:05,938 --> 00:25:07,172 line:-1
+so that any number
+of smoothies
+
+
+584
+00:25:07,172 --> 00:25:09,274 line:-1
+can be passed to the method...
+
+
+585
+00:25:09.274 --> 00:25:18.183 line:-1 position:50%
+[KEYSTROKES]
+
+
+586
+00:25:18.183 --> 00:25:23.222 line:-1 position:50%
+...and build...
+
+
+587
+00:25:23.222 --> 00:25:26.325 line:-1 position:50%
+...well, what we get
+is a bit better.
+
+
+588
+00:25:26.325 --> 00:25:27.593 line:-1 position:50%
+There are still
+plenty of errors,
+
+
+589
+00:25:27.593 --> 00:25:29.094 line:-1 position:50%
+but the one saying
+smoothie array builder
+
+
+590
+00:25:29,094 --> 00:25:32,564 line:-1
+was an invalid attribute
+is gone
+
+
+591
+00:25:32.564 --> 00:25:34.199 line:-1 position:50%
+and the attribute
+even changed color
+
+
+592
+00:25:34.199 --> 00:25:36.535 line:-1 position:50%
+to indicate
+that it’s a known type.
+
+
+593
+00:25:36.535 --> 00:25:38.704 line:-1 position:50%
+So let’s move on
+to the next errors,
+
+
+594
+00:25:38,704 --> 00:25:42,040 line:-1
+the ones for
+the smoothie initializer.
+
+
+595
+00:25:42,040 --> 00:25:44,009 line:-1
+One says that
+we’re passing a trailing closure
+
+
+596
+00:25:44,009 --> 00:25:47,479 line:-1
+to a string parameter.
+
+
+597
+00:25:47.479 --> 00:25:50.716 line:-1 position:50%
+The other says we’re missing the
+measuredIngredients argument.
+
+
+598
+00:25:50,716 --> 00:25:53,118 line:-1
+So clearly we’re using
+the old initializer,
+
+
+599
+00:25:53.118 --> 00:25:56.088 line:-1 position:50%
+which expects the description
+and ingredients as parameters.
+
+
+600
+00:25:56.088 --> 00:25:58.457 line:-1 position:50%
+We’ll need to make a new one.
+
+
+601
+00:25:58,457 --> 00:26:03,262 line:0
+So let’s implement
+that initializer
+
+
+602
+00:26:03,262 --> 00:26:08,333 position:50%
+with an ID, a title,
+and a trailing closure
+
+
+603
+00:26:08,333 --> 00:26:12,838 line:0
+that returns the description
+and ingredients.
+
+
+604
+00:26:12,838 --> 00:26:14,640 line:0
+I’m going to tell you
+right now,
+
+
+605
+00:26:14,640 --> 00:26:18,010 position:50%
+we’ll have to come back
+to this initializer later.
+
+
+606
+00:26:18,010 --> 00:26:22,581 position:50%
+If I build right now, it does
+clear away all of the errors
+
+
+607
+00:26:22,581 --> 00:26:24,082 line:0
+from the smoothie
+initializers,
+
+
+608
+00:26:24,082 --> 00:26:27,019 position:50%
+so you might think
+this is working perfectly.
+
+
+609
+00:26:27,019 --> 00:26:31,457 position:50%
+But that’s actually
+a little misleading.
+
+
+610
+00:26:31,457 --> 00:26:33,492 position:50%
+You see, there’s another
+error down here
+
+
+611
+00:26:33,492 --> 00:26:35,127 line:0
+on the if statement
+that’s caused by
+
+
+612
+00:26:35,127 --> 00:26:38,964 position:50%
+the smoothie array builder
+not being finished.
+
+
+613
+00:26:38,964 --> 00:26:40,566 position:50%
+And because that error is there,
+
+
+614
+00:26:40,566 --> 00:26:44,536 position:50%
+Swift isn’t checking the insides
+of the closures yet.
+
+
+615
+00:26:44,536 --> 00:26:47,172 line:0
+Like, if I go into this closure
+and I just write
+
+
+616
+00:26:47,172 --> 00:26:50,576 line:0
+some random variable name
+that I know doesn’t exist,
+
+
+617
+00:26:50,576 --> 00:26:55,747 position:50%
+and then build it,
+Swift doesn’t flag an error.
+
+
+618
+00:26:55,747 --> 00:26:58,617 line:-1
+What’s happening is that Swift
+sees that the result builder
+
+
+619
+00:26:58.617 --> 00:27:01.653 line:-1 position:50%
+didn’t apply correctly,
+so it doesn’t really trust
+
+
+620
+00:27:01,653 --> 00:27:03,689 line:-1
+that any errors
+it found in these closures
+
+
+621
+00:27:03,689 --> 00:27:05,624 line:-1
+would actually be accurate.
+
+
+622
+00:27:05,624 --> 00:27:09,394 line:-1
+So it’s just not looking
+for errors there yet.
+
+
+623
+00:27:09.394 --> 00:27:11.930 line:-1 position:50%
+Later on, when we finish
+the smoothie array builder,
+
+
+624
+00:27:11,930 --> 00:27:13,899 line:-1
+we’ll suddenly start
+seeing those errors
+
+
+625
+00:27:13,899 --> 00:27:15,834 line:-1
+and we can fix them
+at that point.
+
+
+626
+00:27:15,834 --> 00:27:17,736 line:-1
+But for now it’s easier
+to keep working
+
+
+627
+00:27:17.736 --> 00:27:19.338 line:-1 position:50%
+on the smoothie array builder,
+
+
+628
+00:27:19,338 --> 00:27:21,173 line:-1
+so let’s set
+those closures aside
+
+
+629
+00:27:21,173 --> 00:27:24,743 line:-1
+and move on
+to the next error.
+
+
+630
+00:27:24.743 --> 00:27:26.945 line:-1 position:50%
+If we look at this error,
+Swift tells us that
+
+
+631
+00:27:26,945 --> 00:27:29,815 line:-1
+we can’t use an if statement
+with smoothie array builder,
+
+
+632
+00:27:29,815 --> 00:27:32,317 line:-1
+but there’s a method
+we can add to support it.
+
+
+633
+00:27:32.317 --> 00:27:35.454 line:-1 position:50%
+If statements are one of
+a few Swift features like this;
+
+
+634
+00:27:35.454 --> 00:27:37.356 line:-1 position:50%
+they are disabled
+unless your result builder
+
+
+635
+00:27:37,356 --> 00:27:40,392 line:-1
+implements extra methods
+to support them.
+
+
+636
+00:27:40.392 --> 00:27:42.127 line:-1 position:50%
+So to get started
+implementing this,
+
+
+637
+00:27:42.127 --> 00:27:48.066 line:-1 position:50%
+let’s hit the fix-it here
+and see what it adds.
+
+
+638
+00:27:48,066 --> 00:27:49,968 line:-1
+So apparently we need
+to implement a method
+
+
+639
+00:27:49,968 --> 00:27:51,637 line:-1
+called buildOptional(_:),
+
+
+640
+00:27:51,637 --> 00:27:53,472 line:-1
+which takes an optional
+array of smoothies
+
+
+641
+00:27:53.472 --> 00:27:55.807 line:-1 position:50%
+and returns an array
+of smoothies.
+
+
+642
+00:27:55.807 --> 00:27:59.878 line:-1 position:50%
+So how does this method
+get used?
+
+
+643
+00:27:59.878 --> 00:28:03.081 line:-1 position:50%
+Well, take this simplified
+example of the all method,
+
+
+644
+00:28:03.081 --> 00:28:06.518 line:-1 position:50%
+which has an if statement
+with no else.
+
+
+645
+00:28:06,518 --> 00:28:08,887 line:-1
+Like our previous example
+without the if statement,
+
+
+646
+00:28:08,887 --> 00:28:11,089 line:-1
+this is going to capture
+the result of each statement
+
+
+647
+00:28:11,089 --> 00:28:14,426 line:-1
+into a variable, pass those
+variables to buildBlock(_:),
+
+
+648
+00:28:14,426 --> 00:28:17,629 line:-1
+and return the result
+of buildBlock(_:) from the closure.
+
+
+649
+00:28:17,629 --> 00:28:19,598 line:-1
+The only question is,
+how is it going to capture
+
+
+650
+00:28:19,598 --> 00:28:22,301 line:-1
+the result
+of the if statement?
+
+
+651
+00:28:22,301 --> 00:28:23,802 line:-1
+Well, the first thing
+it’s going to do
+
+
+652
+00:28:23,802 --> 00:28:27,139 line:-1
+is capture all of the statements
+in the if statement’s body
+
+
+653
+00:28:27,139 --> 00:28:28,540 line:-1
+into variables,
+
+
+654
+00:28:28,540 --> 00:28:31,843 line:-1
+and then combine those variables
+together using buildBlock(_:),
+
+
+655
+00:28:31,843 --> 00:28:34,346 line:-1
+just like it does
+at the top level.
+
+
+656
+00:28:34,346 --> 00:28:36,782 line:-1
+But this is where
+buildOptional(_:) comes in.
+
+
+657
+00:28:36.782 --> 00:28:39.718 line:-1 position:50%
+Instead of returning the result
+of that inner buildBlock(_:) call,
+
+
+658
+00:28:39.718 --> 00:28:41.853 line:-1 position:50%
+Swift will pass it
+to buildOptional(_:),
+
+
+659
+00:28:41.853 --> 00:28:43.555 line:-1 position:50%
+and the value
+returned by buildOptional(_:)
+
+
+660
+00:28:43,555 --> 00:28:46,725 line:-1
+becomes the value of
+the if statement as a whole.
+
+
+661
+00:28:46.725 --> 00:28:48.860 line:-1 position:50%
+But this leaves the
+variable uninitialized
+
+
+662
+00:28:48,860 --> 00:28:51,997 line:-1
+if the if condition is false.
+
+
+663
+00:28:51,997 --> 00:28:53,699 position:50%
+That’s why
+buildOptional’s parameter
+
+
+664
+00:28:53,699 --> 00:28:56,134 position:50%
+is an optional
+array of smoothies.
+
+
+665
+00:28:56,134 --> 00:28:57,736 line:0
+Swift will add an else branch
+
+
+666
+00:28:57,736 --> 00:28:59,838 position:50%
+which sets the value
+of the if statement’s result
+
+
+667
+00:28:59,838 --> 00:29:03,408 line:0
+to the return value
+from buildOptional(nil).
+
+
+668
+00:29:03.408 --> 00:29:05.911 line:-1 position:50%
+For SmoothieArrayBuilder,
+the upshot of this is that
+
+
+669
+00:29:05,911 --> 00:29:07,779 line:-1
+we want buildOptional(_:)
+to either return
+
+
+670
+00:29:07.779 --> 00:29:09.915 line:-1 position:50%
+the array that was passed to it
+from buildBlock(_:)
+
+
+671
+00:29:09,915 --> 00:29:14,252 line:-1
+or return an empty array
+if the parameter is nil.
+
+
+672
+00:29:14,252 --> 00:29:18,423 line:-1
+If we build it now,
+we get...
+
+
+673
+00:29:18,423 --> 00:29:22,027 line:-1
+...a really weird-looking error.
+
+
+674
+00:29:22.027 --> 00:29:26.164 line:-1 position:50%
+Can’t pass array of type
+smoothie as variadic arguments?
+
+
+675
+00:29:26.164 --> 00:29:27.866 line:-1 position:50%
+What?
+
+
+676
+00:29:27,866 --> 00:29:30,369 position:50%
+Well, let’s go back
+to our generated code.
+
+
+677
+00:29:30,369 --> 00:29:33,338 position:50%
+The if statement ends up
+producing an array of smoothies.
+
+
+678
+00:29:33,338 --> 00:29:36,575 line:0
+But actually, buildBlock(_:) doesn’t
+want arrays of smoothies;
+
+
+679
+00:29:36,575 --> 00:29:38,276 line:0
+it wants single smoothies.
+
+
+680
+00:29:38,276 --> 00:29:40,312 line:-1
+We’ll need to change that.
+
+
+681
+00:29:40,312 --> 00:29:42,014 line:-1
+So maybe we can make buildBlock(_:)
+
+
+682
+00:29:42,014 --> 00:29:45,517 line:-1
+take arrays of smoothies
+as its arguments,
+
+
+683
+00:29:45.517 --> 00:29:47.586 line:-1 position:50%
+and then use flatMap(_:)
+to concatenate
+
+
+684
+00:29:47,586 --> 00:29:49,821 line:-1
+those many arrays of smoothies
+together
+
+
+685
+00:29:49.821 --> 00:29:54.126 line:-1 position:50%
+into a single
+array of smoothies.
+
+
+686
+00:29:54,126 --> 00:29:57,896 line:-1
+Great!
+Build that, and...
+
+
+687
+00:29:57.896 --> 00:30:00.332 line:-1 position:50%
+...no.
+
+
+688
+00:30:00,332 --> 00:30:01,867 line:-1
+Now our if statement works,
+
+
+689
+00:30:01,867 --> 00:30:04,569 line:-1
+but all the smoothie lines
+broke.
+
+
+690
+00:30:04,569 --> 00:30:07,272 line:-1
+We kind of need those.
+
+
+691
+00:30:07,272 --> 00:30:11,209 line:-1
+Cannot convert value of type
+smoothie to array of smoothie.
+
+
+692
+00:30:11,209 --> 00:30:13,812 line:-1
+What happened?
+
+
+693
+00:30:13.812 --> 00:30:15.614 line:-1 position:50%
+Well, we changed buildBlock(_:)
+
+
+694
+00:30:15,614 --> 00:30:17,349 line:-1
+so that it matches
+the array of smoothies
+
+
+695
+00:30:17.349 --> 00:30:20.252 line:-1 position:50%
+returned by buildOptional(_:).
+
+
+696
+00:30:20,252 --> 00:30:22,654 line:-1
+But we forgot that it also needs
+to match the individual
+
+
+697
+00:30:22.654 --> 00:30:25.891 line:-1 position:50%
+smoothies returned
+by the normal statements.
+
+
+698
+00:30:25,891 --> 00:30:27,159 line:-1
+Oops.
+
+
+699
+00:30:27.159 --> 00:30:28.560 line:-1 position:50%
+Basically,
+if you’re going to allow
+
+
+700
+00:30:28.560 --> 00:30:30.929 line:-1 position:50%
+any sophisticated
+control flow,
+
+
+701
+00:30:30.929 --> 00:30:33.265 line:-1 position:50%
+buildBlock’s return type
+needs to be something
+
+
+702
+00:30:33,265 --> 00:30:36,535 line:-1
+that can be passed
+as a parameter to buildBlock(_:).
+
+
+703
+00:30:36,535 --> 00:30:39,371 line:-1
+There are two ways
+you can accomplish this.
+
+
+704
+00:30:39.371 --> 00:30:41.139 line:-1 position:50%
+One way is to make sure
+that buildBlock(_:)
+
+
+705
+00:30:41,139 --> 00:30:43,442 line:-1
+and the other result builder
+methods return types
+
+
+706
+00:30:43.442 --> 00:30:46.244 line:-1 position:50%
+compatible with the statements
+allowed in the result builder.
+
+
+707
+00:30:46,244 --> 00:30:49,314 line:-1
+For example, this is how
+SwiftUI’s ViewBuilder works.
+
+
+708
+00:30:49,314 --> 00:30:51,083 line:-1
+In the SwiftUI DSL,
+
+
+709
+00:30:51.083 --> 00:30:53.518 line:-1 position:50%
+everything conforms
+to the View protocol,
+
+
+710
+00:30:53,518 --> 00:30:55,420 line:-1
+including the types
+returned by buildBlock(_:)
+
+
+711
+00:30:55,420 --> 00:30:56,822 line:-1
+and other view builder methods.
+
+
+712
+00:30:56.822 --> 00:30:59.658 line:-1 position:50%
+But that’s not a great fit
+for our smoothie DSL
+
+
+713
+00:30:59.658 --> 00:31:01.793 line:-1 position:50%
+because unlike SwiftUI views,
+
+
+714
+00:31:01,793 --> 00:31:06,231 line:-1
+you don’t nest smoothies
+inside of other smoothies.
+
+
+715
+00:31:06.231 --> 00:31:08.233 line:-1 position:50%
+The other thing you can do
+is have the result builder
+
+
+716
+00:31:08.233 --> 00:31:10.068 line:-1 position:50%
+convert the values
+of normal statements
+
+
+717
+00:31:10,068 --> 00:31:13,405 line:-1
+into the same type
+returned by buildBlock(_:).
+
+
+718
+00:31:13,405 --> 00:31:16,074 line:-1
+That’s a better fit
+for this DSL.
+
+
+719
+00:31:16,074 --> 00:31:20,178 line:-1
+We can do that by adding a
+method called buildExpression(_:).
+
+
+720
+00:31:20,178 --> 00:31:22,080 line:-1
+When we add
+a buildExpression(_:) method,
+
+
+721
+00:31:22.080 --> 00:31:24.382 line:-1 position:50%
+Swift passes each bare
+expression to that method
+
+
+722
+00:31:24.382 --> 00:31:26.651 line:-1 position:50%
+before it captures it
+into a variable.
+
+
+723
+00:31:26.651 --> 00:31:30.522 line:-1 position:50%
+That will give us an opportunity
+to convert those into arrays.
+
+
+724
+00:31:30.522 --> 00:31:32.891 line:-1 position:50%
+But values that come from
+other result builder methods,
+
+
+725
+00:31:32.891 --> 00:31:35.560 line:-1 position:50%
+like the ones produced by
+buildOptional(_:) and buildBlock(_:),
+
+
+726
+00:31:35,560 --> 00:31:37,062 line:-1
+don’t get wrapped
+in these calls,
+
+
+727
+00:31:37,062 --> 00:31:39,998 line:-1
+so they won’t have this
+conversion applied to them --
+
+
+728
+00:31:39,998 --> 00:31:43,502 line:-1
+which is good because they’re
+already returning arrays.
+
+
+729
+00:31:43,502 --> 00:31:44,736 line:-1
+So what we’re going to do
+
+
+730
+00:31:44.736 --> 00:31:48.607 line:-1 position:50%
+is implement
+a buildExpression(_:) method.
+
+
+731
+00:31:48,607 --> 00:31:49,975 position:50%
+Xcode’s code completion
+
+
+732
+00:31:49,975 --> 00:31:52,110 position:50%
+knows all about
+result-builder methods,
+
+
+733
+00:31:52,110 --> 00:31:56,348 line:0
+so we can ask it to write
+the signature for one.
+
+
+734
+00:31:56,348 --> 00:32:00,285 line:0
+Then we change
+the parameter type to Smoothie
+
+
+735
+00:32:00,285 --> 00:32:02,220 position:50%
+and just return
+the expression parameter
+
+
+736
+00:32:02,220 --> 00:32:06,358 line:0
+wrapped in an array literal.
+
+
+737
+00:32:06,358 --> 00:32:08,193 line:-1
+So now our single smoothies
+will be turned into
+
+
+738
+00:32:08,193 --> 00:32:13,131 line:-1
+the arrays of smoothies
+that buildBlock(_:) needs.
+
+
+739
+00:32:13,131 --> 00:32:16,134 line:-1
+Build that, and...
+
+
+740
+00:32:16.134 --> 00:32:17.569 line:-1 position:50%
+...fantastic!
+
+
+741
+00:32:17,569 --> 00:32:18,837 line:-1
+Our if statement works
+
+
+742
+00:32:18,837 --> 00:32:21,840 line:-1
+and so do the smoothie
+initializers.
+
+
+743
+00:32:21,840 --> 00:32:24,576 line:-1
+However, if we look
+in the minimap,
+
+
+744
+00:32:24.576 --> 00:32:26.711 line:-1 position:50%
+we’ll see that there’s
+a second if statement down here
+
+
+745
+00:32:26,711 --> 00:32:28,680 line:-1
+that doesn’t work.
+
+
+746
+00:32:28,680 --> 00:32:32,217 line:-1
+That’s because this one
+has an else clause.
+
+
+747
+00:32:32.217 --> 00:32:36.988 line:-1 position:50%
+buildOptional(_:) actually only
+works for plain if statements.
+
+
+748
+00:32:36,988 --> 00:32:40,358 line:-1
+If you have an else statement,
+or an else-if, or a switch,
+
+
+749
+00:32:40,358 --> 00:32:42,160 line:-1
+you need to implement
+a pair of methods,
+
+
+750
+00:32:42,160 --> 00:32:45,297 line:-1
+called buildEither(first:)
+and buildEither(second:).
+
+
+751
+00:32:45.297 --> 00:32:49.000 line:-1 position:50%
+Let’s create these
+using the fix-it
+
+
+752
+00:32:49.000 --> 00:32:51.570 line:-1 position:50%
+and then talk about
+how they work.
+
+
+753
+00:32:51,570 --> 00:32:53,672 line:-1
+So let’s look
+at this simplified example
+
+
+754
+00:32:53.672 --> 00:32:55.640 line:-1 position:50%
+with an if-else statement.
+
+
+755
+00:32:55,640 --> 00:32:58,877 line:-1
+Most of the transform is just
+like the one for buildOptional(_:).
+
+
+756
+00:32:58,877 --> 00:33:01,513 line:-1
+Like buildOptional(_:),
+the whole if-else statement
+
+
+757
+00:33:01,513 --> 00:33:03,915 line:-1
+will end up filling
+a single variable.
+
+
+758
+00:33:03.915 --> 00:33:05.917 line:-1 position:50%
+And also like buildOptional(_:),
+
+
+759
+00:33:05,917 --> 00:33:07,819 line:-1
+each of the blocks
+in the if statement
+
+
+760
+00:33:07,819 --> 00:33:10,322 line:-1
+will have the statements inside
+it captured into variables
+
+
+761
+00:33:10,322 --> 00:33:11,590 line:-1
+and then buildBlock
+will be used
+
+
+762
+00:33:11,590 --> 00:33:14,693 line:-1
+to combine them together
+into one value.
+
+
+763
+00:33:14,693 --> 00:33:17,295 line:-1
+What’s different from
+a plain if statement is that
+
+
+764
+00:33:17.295 --> 00:33:20.131 line:-1 position:50%
+instead of using buildOptional(_:)
+to generate the final value,
+
+
+765
+00:33:20,131 --> 00:33:23,235 line:-1
+we use one
+of the buildEither methods.
+
+
+766
+00:33:23.235 --> 00:33:26.638 line:-1 position:50%
+If there are two branches,
+like an if and an else,
+
+
+767
+00:33:26.638 --> 00:33:28.807 line:-1 position:50%
+then the first one
+uses buildEither(first:)
+
+
+768
+00:33:28.807 --> 00:33:31.910 line:-1 position:50%
+and the second
+uses buildEither(second:).
+
+
+769
+00:33:31.910 --> 00:33:33.411 line:-1 position:50%
+That allows result builders
+which care about
+
+
+770
+00:33:33.411 --> 00:33:37.048 line:-1 position:50%
+which branch you took
+to distinguish between them.
+
+
+771
+00:33:37.048 --> 00:33:38.383 line:-1 position:50%
+Now, if you’re
+wondering what we do
+
+
+772
+00:33:38,383 --> 00:33:40,352 line:-1
+if there are
+three or more cases,
+
+
+773
+00:33:40,352 --> 00:33:45,123 line:-1
+the answer to that
+is actually pretty cool.
+
+
+774
+00:33:45,123 --> 00:33:46,992 line:-1
+We build a balanced binary tree
+
+
+775
+00:33:46.992 --> 00:33:49.427 line:-1 position:50%
+with each branch
+as one of the leaves,
+
+
+776
+00:33:49,427 --> 00:33:52,964 line:-1
+and then we treat the nonleaf
+nodes as calls we need to make,
+
+
+777
+00:33:52.964 --> 00:33:55.734 line:-1 position:50%
+with the edge telling us
+whether to use buildEither(first:)
+
+
+778
+00:33:55.734 --> 00:33:58.336 line:-1 position:50%
+or buildEither(second:).
+
+
+779
+00:33:58,336 --> 00:34:01,473 line:-1
+We note which sequence of
+calls each branch should use,
+
+
+780
+00:34:01,473 --> 00:34:03,775 line:-1
+then we generate code
+that assigns to the variable
+
+
+781
+00:34:03,775 --> 00:34:05,277 line:-1
+with that sequence of calls.
+
+
+782
+00:34:05,277 --> 00:34:07,445 line:-1
+So even though
+we only have two methods,
+
+
+783
+00:34:07.445 --> 00:34:09.014 line:-1 position:50%
+the result builder
+can still distinguish
+
+
+784
+00:34:09,014 --> 00:34:10,916 line:-1
+between the three branches.
+
+
+785
+00:34:10,916 --> 00:34:12,417 line:-1
+Not too bad.
+
+
+786
+00:34:12.417 --> 00:34:16.888 line:-1 position:50%
+Anyway, now that we know how
+the buildEither methods work,
+
+
+787
+00:34:16,888 --> 00:34:18,823 line:-1
+we can go ahead and write them.
+
+
+788
+00:34:18,823 --> 00:34:20,959 line:-1
+And since SmoothieArrayBuilder
+doesn’t actually care
+
+
+789
+00:34:20,959 --> 00:34:23,762 line:-1
+which branch you took,
+there’s not much we need to do;
+
+
+790
+00:34:23,762 --> 00:34:25,764 line:-1
+just return the array argument.
+
+
+791
+00:34:25,764 --> 00:34:30,402 line:-1
+[KEYSTROKES]
+
+
+792
+00:34:30,402 --> 00:34:34,372 line:-1
+So now we build
+this thing, and...
+
+
+793
+00:34:34.372 --> 00:34:36.841 line:-1 position:50%
+it still doesn’t quite work.
+
+
+794
+00:34:36,841 --> 00:34:38,576 line:-1
+But we’re close!
+
+
+795
+00:34:38,576 --> 00:34:40,412 line:-1
+You might remember
+this kind of error
+
+
+796
+00:34:40.412 --> 00:34:42.847 line:-1 position:50%
+from when we had
+the array-of-smoothie problem,
+
+
+797
+00:34:42.847 --> 00:34:45.684 line:-1 position:50%
+only now, it’s not complaining
+about type Smoothie,
+
+
+798
+00:34:45,684 --> 00:34:48,486 line:-1
+it’s type '()'.
+
+
+799
+00:34:48.486 --> 00:34:50.188 line:-1 position:50%
+That’s an empty tuple,
+
+
+800
+00:34:50,188 --> 00:34:52,991 line:-1
+the type you probably
+think of as Void.
+
+
+801
+00:34:52,991 --> 00:34:54,993 line:-1
+If we think about
+the generated code,
+
+
+802
+00:34:54.993 --> 00:34:57.462 line:-1 position:50%
+it makes sense
+why this is a problem.
+
+
+803
+00:34:57,462 --> 00:34:58,830 line:-1
+We’re calling buildExpression(_:),
+
+
+804
+00:34:58.830 --> 00:35:00.565 line:-1 position:50%
+but the expression
+that's being passed
+
+
+805
+00:35:00,565 --> 00:35:02,400 line:-1
+is calling logger.log,
+
+
+806
+00:35:02.400 --> 00:35:04.970 line:-1 position:50%
+which returns Void,
+not Smoothie.
+
+
+807
+00:35:04,970 --> 00:35:10,241 position:50%
+So we’ll write an overload
+of buildExpression(_:)
+
+
+808
+00:35:10,241 --> 00:35:17,582 line:0
+which takes a Void parameter
+and returns an empty array.
+
+
+809
+00:35:17,582 --> 00:35:19,684 line:0
+Then we rebuild,
+
+
+810
+00:35:19,684 --> 00:35:24,689 position:50%
+and now the log call
+works correctly!
+
+
+811
+00:35:24.689 --> 00:35:26.191 line:-1 position:50%
+We do have
+a zillion more errors,
+
+
+812
+00:35:26,191 --> 00:35:31,429 line:-1
+but this is actually good news.
+
+
+813
+00:35:31.429 --> 00:35:34.466 line:-1 position:50%
+See, the first of these errors
+is from that fake variable
+
+
+814
+00:35:34,466 --> 00:35:36,267 line:-1
+I added way back
+at the beginning
+
+
+815
+00:35:36.267 --> 00:35:38.370 line:-1 position:50%
+to show you
+that Swift wasn’t finding errors
+
+
+816
+00:35:38.370 --> 00:35:39.971 line:-1 position:50%
+in the trailing closures.
+
+
+817
+00:35:39,971 --> 00:35:42,273 line:-1
+Now it is, which means
+that we’ve finished
+
+
+818
+00:35:42.273 --> 00:35:43.375 line:-1 position:50%
+the smoothie array builder!
+
+
+819
+00:35:43,375 --> 00:35:46,378 line:-1
+So yay, errors!
+
+
+820
+00:35:46.378 --> 00:35:50.281 line:-1 position:50%
+Let’s delete that fake variable
+and look at what’s left.
+
+
+821
+00:35:50,281 --> 00:35:52,384 line:-1
+If we look closely,
+we’ll find that
+
+
+822
+00:35:52.384 --> 00:35:54.753 line:-1 position:50%
+there’s less to do here
+than it looks like.
+
+
+823
+00:35:54,753 --> 00:36:00,025 line:-1
+All of the description lines
+have the same warning,
+
+
+824
+00:36:00,025 --> 00:36:04,429 line:-1
+and all of the ingredient lines
+have the same two errors.
+
+
+825
+00:36:04,429 --> 00:36:06,731 line:-1
+So even though we have,
+like, a hundred errors
+
+
+826
+00:36:06.731 --> 00:36:08.066 line:-1 position:50%
+and a dozen warnings,
+
+
+827
+00:36:08.066 --> 00:36:10.268 line:-1 position:50%
+this is actually just
+the same couple of problems
+
+
+828
+00:36:10,268 --> 00:36:12,537 line:-1
+happening over and over.
+
+
+829
+00:36:12,537 --> 00:36:14,205 line:-1
+Let’s take a closer look
+at the errors
+
+
+830
+00:36:14,205 --> 00:36:16,641 line:-1
+on one of these
+ingredient lines.
+
+
+831
+00:36:16.641 --> 00:36:19.044 line:-1 position:50%
+The compiler has two complaints:
+
+
+832
+00:36:19,044 --> 00:36:22,347 line:-1
+it can’t figure out
+what type to look for cups in,
+
+
+833
+00:36:22.347 --> 00:36:26.918 line:-1 position:50%
+and it doesn’t think Ingredient
+has a member called "measured."
+
+
+834
+00:36:26,918 --> 00:36:29,487 line:-1
+Well, that makes sense;
+we haven’t implemented
+
+
+835
+00:36:29.487 --> 00:36:31.656 line:-1 position:50%
+the measured(with:)
+or scaled(by:) modifiers,
+
+
+836
+00:36:31,656 --> 00:36:34,793 line:-1
+so it can’t find anything
+called "measured."
+
+
+837
+00:36:34,793 --> 00:36:36,294 line:-1
+And it has no idea
+what cups are
+
+
+838
+00:36:36.294 --> 00:36:37.896 line:-1 position:50%
+because it doesn’t know
+that measured(with:)
+
+
+839
+00:36:37,896 --> 00:36:40,832 line:-1
+is supposed to take
+a volume unit.
+
+
+840
+00:36:40,832 --> 00:36:43,501 line:-1
+So let’s pop over to
+MeasuredIngredient.swift
+
+
+841
+00:36:43.501 --> 00:36:48.640 line:-1 position:50%
+and implement
+these two modifiers.
+
+
+842
+00:36:48,640 --> 00:36:50,942 line:0
+measured(with:)
+goes on an Ingredient
+
+
+843
+00:36:50,942 --> 00:36:52,777 position:50%
+and returns a measured ingredient
+
+
+844
+00:36:52,777 --> 00:36:56,181 line:0
+with one of the unit
+the caller passed.
+
+
+845
+00:36:56,181 --> 00:36:59,284 position:50%
+And scaled(by:) goes on
+a measured ingredient
+
+
+846
+00:36:59,284 --> 00:37:01,152 line:0
+and returns a new
+measured ingredient
+
+
+847
+00:37:01,152 --> 00:37:05,757 line:0
+with the measurement multiplied
+by the scale the caller passed.
+
+
+848
+00:37:05.757 --> 00:37:11.362 line:-1 position:50%
+Pop back over to
+Smoothie.swift and build...
+
+
+849
+00:37:11.362 --> 00:37:13.031 line:-1 position:50%
+...and, OK.
+
+
+850
+00:37:13.031 --> 00:37:16.267 line:-1 position:50%
+We’re seeing a lot more warnings
+and only a few errors.
+
+
+851
+00:37:16.267 --> 00:37:17.802 line:-1 position:50%
+And if we look closely,
+
+
+852
+00:37:17,802 --> 00:37:19,938 line:-1
+we’re seeing
+only one kind of warning --
+
+
+853
+00:37:19,938 --> 00:37:22,040 line:-1
+telling us that each
+expression in the closures
+
+
+854
+00:37:22.040 --> 00:37:24.476 line:-1 position:50%
+is being ignored --
+
+
+855
+00:37:24.476 --> 00:37:27.011 line:-1 position:50%
+and one kind of error --
+
+
+856
+00:37:27,011 --> 00:37:32,050 line:-1
+telling us that the closures
+don’t have return statements.
+
+
+857
+00:37:32,050 --> 00:37:33,785 line:-1
+To understand why,
+
+
+858
+00:37:33,785 --> 00:37:35,453 line:-1
+let’s talk about
+these trailing closures
+
+
+859
+00:37:35,453 --> 00:37:39,624 line:-1
+and how result builders
+interact with them.
+
+
+860
+00:37:39,624 --> 00:37:41,593 line:-1
+In this example,
+the SmoothieArrayBuilder
+
+
+861
+00:37:41,593 --> 00:37:43,428 line:-1
+is going to affect
+the outer statements
+
+
+862
+00:37:43,428 --> 00:37:45,130 line:-1
+just the way we’ve seen before.
+
+
+863
+00:37:45.130 --> 00:37:46.598 line:-1 position:50%
+They get passed
+to buildExpression(_:),
+
+
+864
+00:37:46,598 --> 00:37:47,899 line:-1
+saved to variables,
+
+
+865
+00:37:47,899 --> 00:37:50,935 line:-1
+and the variables get passed
+to buildBlock.
+
+
+866
+00:37:50.935 --> 00:37:53.104 line:-1 position:50%
+But what about these closures?
+
+
+867
+00:37:53.104 --> 00:37:56.007 line:-1 position:50%
+What will the result builder
+do to them?
+
+
+868
+00:37:56,007 --> 00:37:58,143 line:-1
+Well, it does...
+
+
+869
+00:37:58,143 --> 00:38:01,346 line:-1
+...absolutely nothing
+because the closures
+
+
+870
+00:38:01.346 --> 00:38:04.048 line:-1 position:50%
+are actually separate functions
+nested inside the function
+
+
+871
+00:38:04,048 --> 00:38:07,218 line:-1
+we’ve applied
+the result builder to.
+
+
+872
+00:38:07,218 --> 00:38:10,488 line:-1
+Result builders
+only apply to one function;
+
+
+873
+00:38:10.488 --> 00:38:14.826 line:-1 position:50%
+they don’t affect the functions
+or closures nested inside it.
+
+
+874
+00:38:14,826 --> 00:38:17,128 line:-1
+If you want them to be
+affected by the result builder,
+
+
+875
+00:38:17,128 --> 00:38:21,466 line:-1
+then you have to apply it
+to them in some other way.
+
+
+876
+00:38:21.466 --> 00:38:23.701 line:-1 position:50%
+There are three ways
+to apply a result builder
+
+
+877
+00:38:23,701 --> 00:38:25,370 line:-1
+to a function body.
+
+
+878
+00:38:25,370 --> 00:38:27,071 line:-1
+The first is
+to write the attribute
+
+
+879
+00:38:27.071 --> 00:38:29.174 line:-1 position:50%
+directly on
+the function or property,
+
+
+880
+00:38:29,174 --> 00:38:32,544 line:-1
+like we did for
+SmoothieArrayBuilder.
+
+
+881
+00:38:32.544 --> 00:38:34.279 line:-1 position:50%
+The second way
+to apply a result builder
+
+
+882
+00:38:34.279 --> 00:38:35.680 line:-1 position:50%
+is to write it on a function
+
+
+883
+00:38:35,680 --> 00:38:37,916 line:-1
+or property requirement
+in a protocol;
+
+
+884
+00:38:37,916 --> 00:38:39,651 line:-1
+then it will be
+automatically applied
+
+
+885
+00:38:39.651 --> 00:38:42.854 line:-1 position:50%
+to the implementations
+on all conforming types.
+
+
+886
+00:38:42,854 --> 00:38:45,990 line:-1
+That’s how the body property
+in SwiftUI Views works:
+
+
+887
+00:38:45.990 --> 00:38:47.859 line:-1 position:50%
+the ViewBuilder attribute
+is applied
+
+
+888
+00:38:47,859 --> 00:38:50,028 line:-1
+to the body requirement in View,
+
+
+889
+00:38:50.028 --> 00:38:55.200 line:-1 position:50%
+so it’s automatically applied
+to any View’s body property too.
+
+
+890
+00:38:55.200 --> 00:38:57.435 line:-1 position:50%
+The third way
+to apply a result builder
+
+
+891
+00:38:57,435 --> 00:39:00,471 line:-1
+is to write it
+before a closure parameter.
+
+
+892
+00:39:00.471 --> 00:39:03.007 line:-1 position:50%
+If you do that,
+Swift will then infer
+
+
+893
+00:39:03,007 --> 00:39:04,943 line:-1
+that any closure
+passed to that parameter
+
+
+894
+00:39:04,943 --> 00:39:08,813 line:-1
+should have the result builder
+applied to it.
+
+
+895
+00:39:08,813 --> 00:39:10,215 line:0
+If Swift has inferred
+a result builder
+
+
+896
+00:39:10,215 --> 00:39:11,616 position:50%
+from a protocol or parameter
+
+
+897
+00:39:11,616 --> 00:39:13,751 position:50%
+and you don’t actually
+want it to be applied,
+
+
+898
+00:39:13,751 --> 00:39:16,020 line:0
+you can disable it
+by explicitly returning a value
+
+
+899
+00:39:16,020 --> 00:39:18,790 line:0
+using a return statement.
+
+
+900
+00:39:18,790 --> 00:39:21,893 line:-1
+But in this case,
+since we’re using a closure,
+
+
+901
+00:39:21.893 --> 00:39:24.529 line:-1 position:50%
+we want the last
+of those three options:
+
+
+902
+00:39:24.529 --> 00:39:28.132 line:-1 position:50%
+infer the result builder
+from the closure parameter.
+
+
+903
+00:39:28,132 --> 00:39:29,767 line:0
+We do that by writing
+an attribute
+
+
+904
+00:39:29,767 --> 00:39:31,970 line:0
+before the argument label.
+
+
+905
+00:39:31,970 --> 00:39:35,607 position:50%
+Now, we could write
+SmoothieArrayBuilder here,
+
+
+906
+00:39:35,607 --> 00:39:39,377 position:50%
+but that’s probably not
+the best way to do this.
+
+
+907
+00:39:39,377 --> 00:39:42,313 position:50%
+SmoothieArrayBuilder
+produces an array of smoothies,
+
+
+908
+00:39:42,313 --> 00:39:45,250 position:50%
+but we don’t want this closure
+to produce smoothies;
+
+
+909
+00:39:45,250 --> 00:39:50,488 position:50%
+we want it to produce a string
+and an array of ingredients.
+
+
+910
+00:39:50,488 --> 00:39:52,023 position:50%
+And we don’t need if statements
+
+
+911
+00:39:52,023 --> 00:39:55,193 position:50%
+or Void-returning calls
+in this closure, either.
+
+
+912
+00:39:55,193 --> 00:39:57,095 position:50%
+So really, we’re applying
+a separate set
+
+
+913
+00:39:57,095 --> 00:39:59,297 position:50%
+of language rules
+to this closure,
+
+
+914
+00:39:59,297 --> 00:40:01,199 line:0
+and rather than
+mixing that second set of rules
+
+
+915
+00:40:01,199 --> 00:40:02,867 line:0
+into SmoothieArrayBuilder,
+
+
+916
+00:40:02,867 --> 00:40:05,103 position:50%
+it makes more sense
+to create a new result builder
+
+
+917
+00:40:05,103 --> 00:40:09,274 line:0
+that implements
+these new rules.
+
+
+918
+00:40:09,274 --> 00:40:18,249 line:0
+Let’s call it SmoothieBuilder
+and create a new type for it,
+
+
+919
+00:40:18,249 --> 00:40:23,054 line:0
+and start writing
+a buildBlock(_:) method.
+
+
+920
+00:40:23,054 --> 00:40:25,890 line:0
+Now, this one
+is a little special.
+
+
+921
+00:40:25,890 --> 00:40:29,894 line:0
+We want to accept any
+number of measured ingredients,
+
+
+922
+00:40:29,894 --> 00:40:32,797 line:0
+but we also want
+to take a string at the front.
+
+
+923
+00:40:32,797 --> 00:40:36,034 position:50%
+So how are we
+going to do that?
+
+
+924
+00:40:36.034 --> 00:40:38.102 line:-1 position:50%
+Well, if you think about
+how SmoothieBuilder --
+
+
+925
+00:40:38,102 --> 00:40:40,305 line:-1
+which, remember,
+is a simple result builder
+
+
+926
+00:40:40,305 --> 00:40:42,240 line:-1
+with only
+a buildBlock method --
+
+
+927
+00:40:42,240 --> 00:40:46,077 line:-1
+is going to be expanded out,
+
+
+928
+00:40:46.077 --> 00:40:47.578 line:-1 position:50%
+each of those lines
+is going to be passed
+
+
+929
+00:40:47.578 --> 00:40:49.781 line:-1 position:50%
+as a different parameter.
+
+
+930
+00:40:49.781 --> 00:40:52.784 line:-1 position:50%
+So it seems like maybe you could
+just write a string parameter
+
+
+931
+00:40:52.784 --> 00:40:54.552 line:-1 position:50%
+at the beginning
+of buildBlock,
+
+
+932
+00:40:54,552 --> 00:40:56,321 line:-1
+and then the first statement
+would have to produce
+
+
+933
+00:40:56,321 --> 00:40:59,891 line:-1
+a string instead of
+a MeasuredIngredient.
+
+
+934
+00:40:59.891 --> 00:41:02.493 line:-1 position:50%
+So let’s try doing that.
+
+
+935
+00:41:02,493 --> 00:41:05,330 line:-1
+Add a string parameter
+up front,
+
+
+936
+00:41:05,330 --> 00:41:07,165 line:-1
+and have it return
+a tuple of a string
+
+
+937
+00:41:07,165 --> 00:41:09,400 line:-1
+and an array of ingredients.
+
+
+938
+00:41:09,400 --> 00:41:14,572 line:-1
+[KEYSTROKES]
+
+
+939
+00:41:14.572 --> 00:41:18.943 line:-1 position:50%
+And if we build...
+
+
+940
+00:41:18,943 --> 00:41:22,413 line:-1
+Hey, look at that!
+Zero errors!
+
+
+941
+00:41:22,413 --> 00:41:24,048 line:-1
+Our DSL works!
+
+
+942
+00:41:24,048 --> 00:41:27,151 line:-1
+Now, result builders support
+a couple more features,
+
+
+943
+00:41:27,151 --> 00:41:30,888 line:-1
+like for-in loops and processing
+the final return result.
+
+
+944
+00:41:30,888 --> 00:41:32,090 line:-1
+If you want to use those,
+
+
+945
+00:41:32.090 --> 00:41:37.895 line:-1 position:50%
+they’re described in the
+Swift Programming Language book.
+
+
+946
+00:41:37,895 --> 00:41:40,198 line:-1
+But before we finish,
+I want to call attention
+
+
+947
+00:41:40.198 --> 00:41:43.034 line:-1 position:50%
+to one of the most important
+parts of language design:
+
+
+948
+00:41:43.034 --> 00:41:46.504 line:-1 position:50%
+good error messages.
+
+
+949
+00:41:46,504 --> 00:41:49,107 line:-1
+One of the things you learn
+when you’re designing a language
+
+
+950
+00:41:49,107 --> 00:41:51,542 line:-1
+is that there are many more ways
+to write invalid code
+
+
+951
+00:41:51.542 --> 00:41:54.679 line:-1 position:50%
+than valid code,
+so you should spend some time
+
+
+952
+00:41:54.679 --> 00:41:58.549 line:-1 position:50%
+thinking about the errors
+you’ll emit for invalid code.
+
+
+953
+00:41:58,549 --> 00:42:00,151 line:-1
+Your behavior
+when the code is wrong
+
+
+954
+00:42:00,151 --> 00:42:03,788 line:-1
+is just as important
+as when the code is right.
+
+
+955
+00:42:03,788 --> 00:42:06,023 line:-1
+Now, for a Swift DSL,
+
+
+956
+00:42:06,023 --> 00:42:09,260 line:-1
+you’ll get Swift’s
+error handling for free.
+
+
+957
+00:42:09,260 --> 00:42:11,062 line:-1
+But the error messages
+clients will get
+
+
+958
+00:42:11.062 --> 00:42:13.364 line:-1 position:50%
+are designed
+for general Swift code.
+
+
+959
+00:42:13.364 --> 00:42:16.100 line:-1 position:50%
+They aren’t phrased in terms of
+your language’s rules,
+
+
+960
+00:42:16,100 --> 00:42:20,238 line:-1
+so they may not communicate the
+problem clearly to your clients.
+
+
+961
+00:42:20,238 --> 00:42:22,006 line:-1
+For example,
+imagine someone forgot
+
+
+962
+00:42:22.006 --> 00:42:29.046 line:-1 position:50%
+to put a description
+in one of these smoothies.
+
+
+963
+00:42:29.046 --> 00:42:31.115 line:-1 position:50%
+Swift is going to emit
+an error message,
+
+
+964
+00:42:31,115 --> 00:42:33,684 line:-1
+but it’s a little unclear.
+
+
+965
+00:42:33,684 --> 00:42:35,286 line:-1
+It complains that
+the first ingredient
+
+
+966
+00:42:35.286 --> 00:42:39.023 line:-1 position:50%
+can’t be converted to a string.
+
+
+967
+00:42:39.023 --> 00:42:43.027 line:-1 position:50%
+So how does this code
+end up producing this error?
+
+
+968
+00:42:43,027 --> 00:42:45,296 line:-1
+Well, the Swift compiler
+doesn’t really understand
+
+
+969
+00:42:45,296 --> 00:42:47,899 line:-1
+the semantics
+of our Smoothie DSL,
+
+
+970
+00:42:47,899 --> 00:42:50,201 line:-1
+it only understands
+the semantics of the Swift code
+
+
+971
+00:42:50.201 --> 00:42:53.070 line:-1 position:50%
+generated to use
+the result builder.
+
+
+972
+00:42:53,070 --> 00:42:55,006 line:-1
+So when it tries
+to diagnose this error,
+
+
+973
+00:42:55,006 --> 00:42:57,475 line:-1
+it doesn’t think of this value
+as the description
+
+
+974
+00:42:57,475 --> 00:43:00,178 line:-1
+of the Smoothie
+or the first ingredient.
+
+
+975
+00:43:00,178 --> 00:43:04,782 line:-1
+It thinks of it as the first
+argument to buildBlock.
+
+
+976
+00:43:04,782 --> 00:43:07,652 line:-1
+v0, the first argument
+to buildBlock (_:),
+
+
+977
+00:43:07.652 --> 00:43:09.387 line:-1 position:50%
+is a MeasuredIngredient,
+
+
+978
+00:43:09.387 --> 00:43:14.258 line:-1 position:50%
+but it’s being passed
+to a string parameter.
+
+
+979
+00:43:14,258 --> 00:43:16,828 line:-1
+So Swift
+thinks of this error as,
+
+
+980
+00:43:16,828 --> 00:43:18,529 line:-1
+"You’re trying to pass
+a MeasuredIngredient
+
+
+981
+00:43:18.529 --> 00:43:19.764 line:-1 position:50%
+to a string parameter,
+
+
+982
+00:43:19.764 --> 00:43:23.835 line:-1 position:50%
+but I can’t convert
+MeasuredIngredient to a string."
+
+
+983
+00:43:23.835 --> 00:43:25.570 line:-1 position:50%
+The error message
+is not technically wrong
+
+
+984
+00:43:25.570 --> 00:43:28.973 line:-1 position:50%
+but it’s not really helpful,
+either.
+
+
+985
+00:43:28.973 --> 00:43:31.576 line:-1 position:50%
+Compiler engineers
+have a trick for this:
+
+
+986
+00:43:31,576 --> 00:43:34,545 line:-1
+we make the compiler
+support the invalid thing
+
+
+987
+00:43:34,545 --> 00:43:37,648 line:-1
+but produce an error
+when you do it.
+
+
+988
+00:43:37,648 --> 00:43:40,384 line:-1
+For example, there’s a slot
+in Swift’s function grammar
+
+
+989
+00:43:40.384 --> 00:43:44.655 line:-1 position:50%
+where you can write throws,
+rethrows, or nothing.
+
+
+990
+00:43:44,655 --> 00:43:46,757 line:-1
+If you write some other
+unsupported word,
+
+
+991
+00:43:46,757 --> 00:43:48,593 line:-1
+the compiler guesses that
+it was supposed to be
+
+
+992
+00:43:48.593 --> 00:43:50.895 line:-1 position:50%
+part of a different statement
+and gives you an error
+
+
+993
+00:43:50.895 --> 00:43:55.299 line:-1 position:50%
+telling you to either add
+a semicolon or use a new line.
+
+
+994
+00:43:55,299 --> 00:43:57,535 line:-1
+But, if you write
+"try" specifically,
+
+
+995
+00:43:57,535 --> 00:43:59,770 line:-1
+you get a different error.
+
+
+996
+00:43:59,770 --> 00:44:02,273 line:-1
+The compiler suggests
+replacing it with throws
+
+
+997
+00:44:02,273 --> 00:44:04,175 line:-1
+and then parses
+the rest of the file
+
+
+998
+00:44:04.175 --> 00:44:07.345 line:-1 position:50%
+as though you’d written throws
+there instead.
+
+
+999
+00:44:07,345 --> 00:44:11,015 line:-1
+This is a special case
+we added to the Swift parser.
+
+
+1000
+00:44:11,015 --> 00:44:12,450 line:-1
+We noticed that
+developers sometimes
+
+
+1001
+00:44:12,450 --> 00:44:14,418 line:-1
+type other error-handling
+keywords here
+
+
+1002
+00:44:14,418 --> 00:44:16,387 line:-1
+when they mean to write throws,
+
+
+1003
+00:44:16,387 --> 00:44:19,257 line:-1
+so we made a tiny,
+undocumented extension
+
+
+1004
+00:44:19,257 --> 00:44:21,726 line:-1
+to the formal grammar
+of the language.
+
+
+1005
+00:44:21.726 --> 00:44:23.494 line:-1 position:50%
+We parse those
+mistaken keywords here
+
+
+1006
+00:44:23,494 --> 00:44:25,830 line:-1
+and then diagnose
+a different error than usual,
+
+
+1007
+00:44:25,830 --> 00:44:29,400 line:-1
+tailored for
+that specific mistake.
+
+
+1008
+00:44:29,400 --> 00:44:31,536 position:50%
+I point this out because
+you can do something similar
+
+
+1009
+00:44:31,536 --> 00:44:35,740 position:50%
+in a result builder
+to improve its error behavior.
+
+
+1010
+00:44:35,740 --> 00:44:37,842 position:50%
+Specifically, if you make
+an overload
+
+
+1011
+00:44:37,842 --> 00:44:40,745 line:0
+of a result-builder method
+which matches the bad code,
+
+
+1012
+00:44:40.745 --> 00:44:43.381 line:-1 position:50%
+and then you mark
+that overload as unavailable,
+
+
+1013
+00:44:43.381 --> 00:44:47.151 line:-1 position:50%
+you can specify an error message
+to use when diagnosing it.
+
+
+1014
+00:44:47.151 --> 00:44:48.920 line:-1 position:50%
+And so instead of getting
+a generic error
+
+
+1015
+00:44:48,920 --> 00:44:51,289 line:-1
+that might not convey
+the problem very well,
+
+
+1016
+00:44:51,289 --> 00:44:53,224 line:-1
+clients will get a more specific
+error message
+
+
+1017
+00:44:53.224 --> 00:44:57.461 line:-1 position:50%
+tailored to that mistake.
+
+
+1018
+00:44:57,461 --> 00:45:01,098 line:0
+What we’ll do
+is copy buildBlock(_:),
+
+
+1019
+00:45:01,098 --> 00:45:03,968 line:0
+delete the description parameter
+so we’re matching blocks
+
+
+1020
+00:45:03,968 --> 00:45:08,739 line:0
+with only
+an ingredient list in them,
+
+
+1021
+00:45:08,739 --> 00:45:11,008 line:0
+and replace the body
+with fatalError()
+
+
+1022
+00:45:11,008 --> 00:45:16,180 position:50%
+so we don’t have
+to fake a return value.
+
+
+1023
+00:45:16,180 --> 00:45:18,049 position:50%
+The method will never
+be called successfully,
+
+
+1024
+00:45:18,049 --> 00:45:20,985 line:0
+so the body just has to be
+something that’s valid.
+
+
+1025
+00:45:20,985 --> 00:45:23,187 line:0
+Then we’ll mark this overload
+as unavailable
+
+
+1026
+00:45:23,187 --> 00:45:27,792 line:0
+and give it a message describing
+the problem more clearly.
+
+
+1027
+00:45:27,792 --> 00:45:30,461 line:0
+This unavailable annotation
+means that the method
+
+
+1028
+00:45:30,461 --> 00:45:33,197 position:50%
+can’t actually be used.
+
+
+1029
+00:45:33,197 --> 00:45:36,300 line:0
+If you write a call to it,
+that’s an error.
+
+
+1030
+00:45:36,300 --> 00:45:40,504 line:-1
+So now, if I pop back up
+to the top and rebuild,
+
+
+1031
+00:45:40,504 --> 00:45:42,873 line:-1
+I see that I get
+a much, much clearer description
+
+
+1032
+00:45:42,873 --> 00:45:44,709 line:-1
+of what’s wrong.
+
+
+1033
+00:45:44.709 --> 00:45:47.345 line:-1 position:50%
+Instead of saying that the first
+ingredient should be a string,
+
+
+1034
+00:45:47.345 --> 00:45:51.182 line:-1 position:50%
+it says that the
+description string is missing.
+
+
+1035
+00:45:51.182 --> 00:45:52.316 line:-1 position:50%
+So the client doesn’t start
+
+
+1036
+00:45:52.316 --> 00:45:54.118 line:-1 position:50%
+thinking that
+the ingredient is wrong
+
+
+1037
+00:45:54,118 --> 00:45:56,320 line:-1
+or have to wonder
+what the string is for;
+
+
+1038
+00:45:56,320 --> 00:45:58,756 line:-1
+the error tells them that
+right up front.
+
+
+1039
+00:45:58.756 --> 00:46:01.325 line:-1 position:50%
+That’s a much better
+experience.
+
+
+1040
+00:46:01,325 --> 00:46:03,160 line:-1
+And the most important
+thing to remember
+
+
+1041
+00:46:03.160 --> 00:46:04.962 line:-1 position:50%
+about implementing a DSL
+
+
+1042
+00:46:04,962 --> 00:46:08,699 line:-1
+is that it’s all about improving
+the client’s experience.
+
+
+1043
+00:46:08.699 --> 00:46:11.869 line:-1 position:50%
+A DSL can make some
+very complex, repetitive code
+
+
+1044
+00:46:11.869 --> 00:46:15.072 line:-1 position:50%
+much cleaner by allowing clients
+to define things
+
+
+1045
+00:46:15.072 --> 00:46:16.674 line:-1 position:50%
+without worrying
+about the mechanics
+
+
+1046
+00:46:16,674 --> 00:46:20,311 line:-1
+of assembling the definition.
+
+
+1047
+00:46:20.311 --> 00:46:22.480 line:-1 position:50%
+Result builders
+are a powerful tool
+
+
+1048
+00:46:22,480 --> 00:46:26,884 line:-1
+that allow your DSL to collect
+the values being defined.
+
+
+1049
+00:46:26,884 --> 00:46:28,686 line:-1
+And modifier-style methods
+
+
+1050
+00:46:28,686 --> 00:46:30,855 line:-1
+give you a composable way
+to change those values
+
+
+1051
+00:46:30,855 --> 00:46:34,992 line:-1
+before the result builder
+captures them.
+
+
+1052
+00:46:34,992 --> 00:46:36,961 position:50%
+But remember that
+if you write a DSL,
+
+
+1053
+00:46:36,961 --> 00:46:40,164 position:50%
+clients will have to learn
+how to use it.
+
+
+1054
+00:46:40,164 --> 00:46:42,133 position:50%
+Provide a DSL only when
+it’s going to be worth
+
+
+1055
+00:46:42,133 --> 00:46:44,635 line:0
+their time and effort.
+
+
+1056
+00:46:44.635 --> 00:46:46.270 line:-1 position:50%
+So thanks for your time,
+
+
+1057
+00:46:46,270 --> 00:46:49,106 line:-1
+and enjoy building
+some little languages.
+
+
+1058
+00:46:49,106 --> 00:46:52,109 line:0 align:right position:90%
+♪
+

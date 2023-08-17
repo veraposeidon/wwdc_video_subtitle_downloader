@@ -1,0 +1,3308 @@
+2
+00:00:01.768 --> 00:00:04.771 line:-1 align:center
+[upbeat music]
+
+
+3
+00:00:04,805 --> 00:00:09,009 line:-1
+♪ ♪
+
+
+4
+00:00:09.042 --> 00:00:10.811 line:-1 align:center
+[Kavon] Hi, I’m Kavon,
+
+
+5
+00:00:10.844 --> 00:00:13.280 line:-2 align:center
+and I’ll be joined by my colleague,
+Joe, later on.
+
+
+6
+00:00:13,313 --> 00:00:17,017 line:-2
+Swift 5.5 introduces a new way
+to write concurrent programs,
+
+
+7
+00:00:17,050 --> 00:00:19,720 line:-2
+using a concept
+called structured concurrency.
+
+
+8
+00:00:19.753 --> 00:00:22.155 line:-1 align:center
+The ideas behind structured concurrency
+
+
+9
+00:00:22,189 --> 00:00:24,358 line:-1
+are based on structured programming,
+
+
+10
+00:00:24.391 --> 00:00:27.027 line:-2 align:center
+which so intuitive
+that you rarely think about it,
+
+
+11
+00:00:27.060 --> 00:00:30.731 line:-2 align:center
+but thinking about it will help you
+understand structured concurrency.
+
+
+12
+00:00:30.764 --> 00:00:32.499 line:-1 align:center
+So let’s dive in.
+
+
+13
+00:00:34,334 --> 00:00:37,871 line:-2
+In the early days of computing,
+programs were hard to read
+
+
+14
+00:00:37,905 --> 00:00:40,274 line:-2
+because they were written
+as a sequence of instructions,
+
+
+15
+00:00:40.307 --> 00:00:43.577 line:-2 align:center
+where control-flow was allowed
+to jump all over the place.
+
+
+16
+00:00:43.610 --> 00:00:47.347 line:-2 align:center
+You don’t see that today, because
+languages use structured programming
+
+
+17
+00:00:47.381 --> 00:00:49.783 line:-1 align:center
+to make control-flow more uniform.
+
+
+18
+00:00:49.816 --> 00:00:52.319 line:-1 align:center
+For example, the if-then statement
+
+
+19
+00:00:52,352 --> 00:00:54,254 line:-1
+uses structured control-flow.
+
+
+20
+00:00:54.288 --> 00:00:56.857 line:-1 align:center
+It specifies that a nested block of code
+
+
+21
+00:00:56,890 --> 00:01:00,761 line:-2
+is only conditionally executed
+while moving from top to bottom.
+
+
+22
+00:01:00,794 --> 00:01:04,464 line:-2
+In Swift, that block also
+respects static scoping,
+
+
+23
+00:01:04,498 --> 00:01:06,500 line:-1
+meaning that names are only visible
+
+
+24
+00:01:06,533 --> 00:01:08,902 line:-1
+if they are defined in an enclosing block.
+
+
+25
+00:01:08,936 --> 00:01:11,071 line:-1
+This also means that the lifetime
+
+
+26
+00:01:11,104 --> 00:01:13,173 line:-1
+of any variables defined in a block
+
+
+27
+00:01:13.207 --> 00:01:15.609 line:-1 align:center
+will end when leaving the block.
+
+
+28
+00:01:15.642 --> 00:01:18.912 line:-2 align:center
+So, structured programming
+with static scope
+
+
+29
+00:01:18.946 --> 00:01:22.850 line:-2 align:center
+makes control-flow
+and variable lifetime easy to understand.
+
+
+30
+00:01:23.917 --> 00:01:27.387 line:-2 align:center
+More generally, structured control-flow
+can be sequenced
+
+
+31
+00:01:27.421 --> 00:01:29.423 line:-1 align:center
+and nested together naturally.
+
+
+32
+00:01:29,456 --> 00:01:33,293 line:-2
+This lets you read
+your entire program top to bottom.
+
+
+33
+00:01:33,327 --> 00:01:36,997 line:-2
+So, those are the fundamentals
+of structured programming.
+
+
+34
+00:01:37.030 --> 00:01:39.800 line:-2 align:center
+As you can imagine,
+it is easy to take for granted,
+
+
+35
+00:01:39,833 --> 00:01:42,603 line:-1
+because it is so intuitive for us today.
+
+
+36
+00:01:42.636 --> 00:01:46.340 line:-2 align:center
+But today’s programs feature asynchronous
+and concurrent code,
+
+
+37
+00:01:46.373 --> 00:01:48.942 line:-2 align:center
+and they have not been able
+to use structured programming
+
+
+38
+00:01:48,976 --> 00:01:51,745 line:-1
+to make that code easier to write.
+
+
+39
+00:01:51.778 --> 00:01:54.548 line:-2 align:center
+First, let’s consider
+how structured programming
+
+
+40
+00:01:54.581 --> 00:01:56.383 line:-1 align:center
+makes asynchronous code simpler.
+
+
+41
+00:01:56,416 --> 00:01:59,686 line:-2
+Say that you need to fetch
+a bunch of images from the internet
+
+
+42
+00:01:59.720 --> 00:02:03.023 line:-2 align:center
+and resize them
+to be thumbnails sequentially.
+
+
+43
+00:02:03.056 --> 00:02:05.859 line:-1 align:center
+This code does that work asynchronously,
+
+
+44
+00:02:05,893 --> 00:02:09,196 line:-2
+taking in a collection of strings
+that identify the images.
+
+
+45
+00:02:09,229 --> 00:02:13,000 line:-2
+You’ll notice this function
+does not return a value when called.
+
+
+46
+00:02:13,033 --> 00:02:16,470 line:-2
+That’s because the function
+passes its result, or an error,
+
+
+47
+00:02:16,503 --> 00:02:18,705 line:-1
+to a completion handler it was given.
+
+
+48
+00:02:18,739 --> 00:02:20,507 line:-1
+This pattern allows the caller
+
+
+49
+00:02:20,541 --> 00:02:23,010 line:-1
+to receive an answer at a later time.
+
+
+50
+00:02:23,043 --> 00:02:26,780 line:-2
+As a consequence of that pattern,
+this function cannot use
+
+
+51
+00:02:26,813 --> 00:02:29,116 line:-2
+structured control-flow
+for error handling.
+
+
+52
+00:02:29.149 --> 00:02:32.052 line:-2 align:center
+That’s because it only makes sense
+to handle errors thrown
+
+
+53
+00:02:32,085 --> 00:02:35,022 line:-1
+out of a function, not into one.
+
+
+54
+00:02:35,055 --> 00:02:37,090 line:-1
+Also, this pattern prevents you
+
+
+55
+00:02:37.124 --> 00:02:39.626 line:-2 align:center
+from using a loop
+to process each thumbnail.
+
+
+56
+00:02:39.660 --> 00:02:41.328 line:-1 align:center
+Recursion is required,
+
+
+57
+00:02:41.361 --> 00:02:44.231 line:-2 align:center
+because the code that runs
+after the function completes
+
+
+58
+00:02:44,264 --> 00:02:46,867 line:-1
+must be nested within the handler.
+
+
+59
+00:02:46.900 --> 00:02:49.803 line:-2 align:center
+Now, let’s take a look
+at the previous code
+
+
+60
+00:02:49,837 --> 00:02:53,507 line:-2
+but rewritten to use
+the new async/await syntax,
+
+
+61
+00:02:53,540 --> 00:02:55,542 line:-1
+which is based on structured programming.
+
+
+62
+00:02:55,576 --> 00:02:59,313 line:-2
+I’ve dropped the completion handler
+argument from the function.
+
+
+63
+00:02:59,346 --> 00:03:01,849 line:-1
+Instead, it is annotated with “async”
+
+
+64
+00:03:01.882 --> 00:03:04.318 line:-1 align:center
+and “throws” in its type signature.
+
+
+65
+00:03:04,351 --> 00:03:07,521 line:-2
+It also returns a value
+instead of nothing.
+
+
+66
+00:03:07,554 --> 00:03:10,691 line:-2
+In the body of the function,
+I use “await” to say
+
+
+67
+00:03:10.724 --> 00:03:14.595 line:-2 align:center
+that an asynchronous action happens,
+and no nesting is required
+
+
+68
+00:03:14,628 --> 00:03:17,064 line:-1
+for the code that runs after that action.
+
+
+69
+00:03:17.097 --> 00:03:19.700 line:-2 align:center
+This means that I can now loop
+over the thumbnails
+
+
+70
+00:03:19,733 --> 00:03:21,935 line:-1
+to process them sequentially.
+
+
+71
+00:03:21.969 --> 00:03:24.071 line:-1 align:center
+I can also throw and catch errors,
+
+
+72
+00:03:24,104 --> 00:03:27,174 line:-2
+and the compiler will check
+that I didn’t forget.
+
+
+73
+00:03:27.207 --> 00:03:29.676 line:-1 align:center
+For an in-depth look at async/await,
+
+
+74
+00:03:29.710 --> 00:03:32.713 line:-2 align:center
+check out the session
+“Meet async/await in Swift.”
+
+
+75
+00:03:34,548 --> 00:03:37,050 line:-1
+So, this code is great,
+
+
+76
+00:03:37.084 --> 00:03:40.487 line:-2 align:center
+but what if you’re producing thumbnails
+for thousands of images?
+
+
+77
+00:03:40,521 --> 00:03:44,491 line:-2
+Processing each thumbnail one
+at a time is no longer ideal.
+
+
+78
+00:03:44,525 --> 00:03:47,928 line:-2
+Plus, what if each thumbnail’s
+dimensions must be downloaded
+
+
+79
+00:03:47,961 --> 00:03:50,898 line:-2
+from another URL,
+instead of being a fixed size?
+
+
+80
+00:03:50,931 --> 00:03:53,867 line:-2
+Now there is an opportunity
+to add some concurrency,
+
+
+81
+00:03:53,901 --> 00:03:56,870 line:-2
+so multiple downloads
+can happen in parallel.
+
+
+82
+00:03:56.904 --> 00:04:00.474 line:-2 align:center
+You can create additional tasks
+to add concurrency to a program.
+
+
+83
+00:04:00.507 --> 00:04:02.976 line:-1 align:center
+Tasks are a new feature in Swift
+
+
+84
+00:04:03.010 --> 00:04:05.512 line:-2 align:center
+that work hand-in-hand
+with async functions.
+
+
+85
+00:04:05,546 --> 00:04:08,248 line:-1
+A task provides a fresh execution context
+
+
+86
+00:04:08,282 --> 00:04:09,983 line:-1
+to run asynchronous code.
+
+
+87
+00:04:10,017 --> 00:04:11,885 line:-1
+Each task runs concurrently
+
+
+88
+00:04:11.919 --> 00:04:14.388 line:-1 align:center
+with respect to other execution contexts.
+
+
+89
+00:04:14.421 --> 00:04:17.057 line:-2 align:center
+They will be automatically scheduled
+to run in parallel
+
+
+90
+00:04:17,090 --> 00:04:20,260 line:-1
+when it is safe and efficient to do so.
+
+
+91
+00:04:20,294 --> 00:04:23,030 line:-2
+Because tasks
+are deeply integrated into Swift,
+
+
+92
+00:04:23.063 --> 00:04:26.233 line:-2 align:center
+the compiler can help prevent
+some concurrency bugs.
+
+
+93
+00:04:26.266 --> 00:04:29.469 line:-2 align:center
+Also, keep in mind
+that calling an async function
+
+
+94
+00:04:29,503 --> 00:04:31,805 line:-1
+does not create a new task for the call.
+
+
+95
+00:04:31.839 --> 00:04:34.675 line:-1 align:center
+You create tasks explicitly.
+
+
+96
+00:04:34,708 --> 00:04:37,711 line:-2
+There are a few different flavors
+of tasks in Swift,
+
+
+97
+00:04:37,744 --> 00:04:40,380 line:-2
+because structured concurrency
+is about the balance
+
+
+98
+00:04:40.414 --> 00:04:43.250 line:-1 align:center
+between flexibility and simplicity.
+
+
+99
+00:04:43,283 --> 00:04:45,886 line:-1
+So, for the remainder of this session,
+
+
+100
+00:04:45.919 --> 00:04:49.122 line:-2 align:center
+Joe and I will introduce
+and discuss each kind of task
+
+
+101
+00:04:49.156 --> 00:04:51.425 line:-1 align:center
+to help you understand their trade-offs.
+
+
+102
+00:04:51,458 --> 00:04:53,827 line:-2
+Let’s start with the simplest
+of these tasks,
+
+
+103
+00:04:53,861 --> 00:04:56,330 line:-1
+which is created with a new syntactic form
+
+
+104
+00:04:56,363 --> 00:04:58,866 line:-1
+called an async-let binding.
+
+
+105
+00:04:58,899 --> 00:05:01,435 line:-2
+To help you understand
+this new syntactic form,
+
+
+106
+00:05:01,468 --> 00:05:03,737 line:-1
+I want to first break down the evaluation
+
+
+107
+00:05:03,770 --> 00:05:05,973 line:-1
+of an ordinary let binding.
+
+
+108
+00:05:06.006 --> 00:05:07.207 line:-1 align:center
+There are two parts:
+
+
+109
+00:05:07,241 --> 00:05:10,010 line:-2
+the initializer expression
+on the right side of the equals
+
+
+110
+00:05:10,043 --> 00:05:12,145 line:-1
+and the variable’s name on the left.
+
+
+111
+00:05:12,179 --> 00:05:15,649 line:-2
+There may be other statements
+before or after the let,
+
+
+112
+00:05:15,682 --> 00:05:18,118 line:-1
+so I’ll include those here too.
+
+
+113
+00:05:18,151 --> 00:05:20,821 line:-1
+Once Swift reaches a let binding,
+
+
+114
+00:05:20.854 --> 00:05:24.424 line:-2 align:center
+its initializer will be evaluated
+to produce a value.
+
+
+115
+00:05:24,458 --> 00:05:26,026 line:-1
+In this example,
+
+
+116
+00:05:26,059 --> 00:05:28,529 line:-1
+that means downloading data from a URL,
+
+
+117
+00:05:28,562 --> 00:05:30,864 line:-1
+which could take a while.
+
+
+118
+00:05:30.898 --> 00:05:33.233 line:-1 align:center
+After the data has been downloaded,
+
+
+119
+00:05:33.267 --> 00:05:36.003 line:-2 align:center
+Swift will bind that value
+to the variable name
+
+
+120
+00:05:36,036 --> 00:05:39,006 line:-2
+before proceeding
+to the statements that follow.
+
+
+121
+00:05:39,039 --> 00:05:42,276 line:-2
+Notice that there is only
+one flow of execution here,
+
+
+122
+00:05:42,309 --> 00:05:45,846 line:-1
+as traced by the arrows through each step.
+
+
+123
+00:05:45,879 --> 00:05:48,048 line:-1
+Since the download could take a while,
+
+
+124
+00:05:48,081 --> 00:05:50,651 line:-2
+you want the program
+to start downloading the data
+
+
+125
+00:05:50.684 --> 00:05:54.454 line:-2 align:center
+and keep doing other work
+until the data is actually needed.
+
+
+126
+00:05:54,488 --> 00:05:57,624 line:-2
+To achieve this,
+you can just add the word async
+
+
+127
+00:05:57.658 --> 00:05:59.526 line:-1 align:center
+in front of an existing let binding.
+
+
+128
+00:05:59.560 --> 00:06:02.129 line:-1 align:center
+This turns it into a concurrent binding
+
+
+129
+00:06:02,162 --> 00:06:04,264 line:-1
+called an async-let.
+
+
+130
+00:06:04.298 --> 00:06:08.168 line:-2 align:center
+The evaluation of a concurrent binding
+is quite different from a sequential one,
+
+
+131
+00:06:08,202 --> 00:06:10,304 line:-1
+so let’s learn how it works.
+
+
+132
+00:06:10.337 --> 00:06:13.974 line:-2 align:center
+I will start just at the point
+before encountering the binding.
+
+
+133
+00:06:14.007 --> 00:06:16.109 line:-1 align:center
+To evaluate a concurrent binding,
+
+
+134
+00:06:16.143 --> 00:06:18.745 line:-1 align:center
+Swift will first create a new child task,
+
+
+135
+00:06:18.779 --> 00:06:21.615 line:-2 align:center
+which is a subtask of the one
+that created it.
+
+
+136
+00:06:21,648 --> 00:06:23,450 line:-1
+Because every task represents
+
+
+137
+00:06:23,483 --> 00:06:25,853 line:-1
+an execution context for your program,
+
+
+138
+00:06:25,886 --> 00:06:29,323 line:-2
+two arrows will simultaneously
+come out of this step.
+
+
+139
+00:06:29.356 --> 00:06:31.925 line:-1 align:center
+This first arrow is for the child task,
+
+
+140
+00:06:31,959 --> 00:06:34,695 line:-2
+which will immediately
+begin downloading the data.
+
+
+141
+00:06:34,728 --> 00:06:36,997 line:-1
+The second arrow is for the parent task,
+
+
+142
+00:06:37.030 --> 00:06:39.566 line:-2 align:center
+which will immediately bind
+the variable result
+
+
+143
+00:06:39.600 --> 00:06:41.368 line:-1 align:center
+to a placeholder value.
+
+
+144
+00:06:41,401 --> 00:06:43,437 line:-1
+This parent task is the same one
+
+
+145
+00:06:43,470 --> 00:06:45,973 line:-2
+that was executing
+the preceding statements.
+
+
+146
+00:06:46,006 --> 00:06:49,309 line:-2
+While the data is being downloaded
+concurrently by the child,
+
+
+147
+00:06:49.343 --> 00:06:51.945 line:-2 align:center
+the parent task continues
+to execute the statements
+
+
+148
+00:06:51,979 --> 00:06:54,348 line:-1
+that follow the concurrent binding.
+
+
+149
+00:06:54,381 --> 00:06:56,884 line:-1
+But upon reaching an expression
+
+
+150
+00:06:56.917 --> 00:06:59.419 line:-1 align:center
+that needs the actual value of the result,
+
+
+151
+00:06:59,453 --> 00:07:02,556 line:-2
+the parent will await
+the completion of the child task,
+
+
+152
+00:07:02.589 --> 00:07:05.993 line:-2 align:center
+which will fulfill the placeholder
+for result.
+
+
+153
+00:07:06,026 --> 00:07:08,529 line:-1
+In this example, our call to URLSession
+
+
+154
+00:07:08,562 --> 00:07:10,230 line:-1
+could also throw an error.
+
+
+155
+00:07:10.264 --> 00:07:13.901 line:-2 align:center
+This means that awaiting
+the result might give us an error.
+
+
+156
+00:07:13,934 --> 00:07:17,237 line:-2
+So I need to write “try”
+to take care of it.
+
+
+157
+00:07:17,271 --> 00:07:18,472 line:-1
+And don’t worry.
+
+
+158
+00:07:18,505 --> 00:07:22,376 line:-2
+Reading the value of result again
+will not recompute its value.
+
+
+159
+00:07:22,409 --> 00:07:24,945 line:-1
+Now that you’ve seen how async-let works,
+
+
+160
+00:07:24.978 --> 00:07:28.148 line:-2 align:center
+you can use it to add concurrency
+to the thumbnail fetching code.
+
+
+161
+00:07:28.182 --> 00:07:30.484 line:-2 align:center
+I have factored a piece
+of the previous code
+
+
+162
+00:07:30,517 --> 00:07:33,720 line:-2
+that fetches a single image
+into its own function.
+
+
+163
+00:07:33.754 --> 00:07:36.523 line:-2 align:center
+This new function here
+is also downloading data
+
+
+164
+00:07:36,557 --> 00:07:40,360 line:-2
+from two different URLs:
+one for the full-sized image itself
+
+
+165
+00:07:40,394 --> 00:07:42,029 line:-1
+and the other for metadata,
+
+
+166
+00:07:42,062 --> 00:07:44,431 line:-1
+which contains the optimal thumbnail size.
+
+
+167
+00:07:44.464 --> 00:07:46.967 line:-1 align:center
+Notice that with a sequential binding,
+
+
+168
+00:07:47.000 --> 00:07:49.736 line:-2 align:center
+you write “try await”
+on the right side of the let,
+
+
+169
+00:07:49.770 --> 00:07:53.640 line:-2 align:center
+because that’s where an error
+or suspension would be observed.
+
+
+170
+00:07:53,674 --> 00:07:56,276 line:-2
+To make both downloads
+happen concurrently,
+
+
+171
+00:07:56.310 --> 00:07:59.346 line:-2 align:center
+you write “async”
+in front of both of these lets.
+
+
+172
+00:07:59,379 --> 00:08:02,382 line:-2
+Since the downloads
+are now happening in child tasks,
+
+
+173
+00:08:02,416 --> 00:08:05,152 line:-2
+you no longer write “try await”
+on the right side
+
+
+174
+00:08:05.185 --> 00:08:06.887 line:-1 align:center
+of the concurrent binding.
+
+
+175
+00:08:06.920 --> 00:08:09.990 line:-2 align:center
+Those effects are only observed
+by the parent task
+
+
+176
+00:08:10,023 --> 00:08:13,393 line:-2
+when using the variables
+that are concurrently bound.
+
+
+177
+00:08:13,427 --> 00:08:15,662 line:-1
+So you write “try await”
+
+
+178
+00:08:15.696 --> 00:08:19.666 line:-2 align:center
+before the expression’s reading
+the metadata and the image data.
+
+
+179
+00:08:19.700 --> 00:08:23.337 line:-2 align:center
+Also, notice that using
+these concurrently bound variables
+
+
+180
+00:08:23,370 --> 00:08:26,607 line:-2
+does not require a method call
+or any other changes.
+
+
+181
+00:08:26.640 --> 00:08:28.509 line:-1 align:center
+Those variables have the same type
+
+
+182
+00:08:28,542 --> 00:08:31,345 line:-1
+that they did in a sequential binding.
+
+
+183
+00:08:31.378 --> 00:08:34.214 line:-2 align:center
+Now, these child tasks
+I’ve been talking about
+
+
+184
+00:08:34,248 --> 00:08:37,451 line:-2
+are actually part of a hierarchy
+called a task tree.
+
+
+185
+00:08:37,484 --> 00:08:40,521 line:-2
+This tree is not just
+an implementation detail.
+
+
+186
+00:08:40.554 --> 00:08:43.357 line:-2 align:center
+It’s an important part
+of structured concurrency.
+
+
+187
+00:08:43,390 --> 00:08:46,193 line:-1
+It influences the attributes of your tasks
+
+
+188
+00:08:46.226 --> 00:08:48.295 line:-1 align:center
+like cancellation, priority,
+
+
+189
+00:08:48.328 --> 00:08:50.264 line:-1 align:center
+and task-local variables.
+
+
+190
+00:08:50,297 --> 00:08:53,433 line:-2
+Whenever you make a call
+from one async function to another,
+
+
+191
+00:08:53.467 --> 00:08:56.069 line:-1 align:center
+the same task is used to execute the call.
+
+
+192
+00:08:56.103 --> 00:08:59.139 line:-1 align:center
+So, the function fetchOneThumbnail
+
+
+193
+00:08:59,173 --> 00:09:01,575 line:-1
+inherits all attributes of that task.
+
+
+194
+00:09:01.608 --> 00:09:05.312 line:-2 align:center
+When creating a new structured task
+like with async-let,
+
+
+195
+00:09:05.345 --> 00:09:07.314 line:-1 align:center
+it becomes the child of the task
+
+
+196
+00:09:07.347 --> 00:09:09.416 line:-1 align:center
+that the current function is running on.
+
+
+197
+00:09:09,449 --> 00:09:12,019 line:-2
+Tasks are not the child
+of a specific function,
+
+
+198
+00:09:12,052 --> 00:09:15,289 line:-1
+but their lifetime may be scoped to it.
+
+
+199
+00:09:15,322 --> 00:09:16,857 line:-1
+The tree is made up of links
+
+
+200
+00:09:16,890 --> 00:09:19,593 line:-1
+between each parent and its child tasks.
+
+
+201
+00:09:19,626 --> 00:09:21,228 line:-1
+A link enforces a rule
+
+
+202
+00:09:21.261 --> 00:09:23.997 line:-2 align:center
+that says a parent task
+can only finish its work
+
+
+203
+00:09:24.031 --> 00:09:26.767 line:-1 align:center
+if all of its child tasks have finished.
+
+
+204
+00:09:26,800 --> 00:09:30,404 line:-2
+This rule holds even in the face
+of abnormal control-flow
+
+
+205
+00:09:30,437 --> 00:09:33,841 line:-2
+which would prevent a child task
+from being awaited.
+
+
+206
+00:09:33,874 --> 00:09:36,343 line:-1
+For example, in this code,
+
+
+207
+00:09:36,376 --> 00:09:38,212 line:-1
+I first await the metadata task
+
+
+208
+00:09:38,245 --> 00:09:40,514 line:-1
+before the image data task.
+
+
+209
+00:09:40.547 --> 00:09:44.351 line:-2 align:center
+If the first awaited task finishes
+by throwing an error,
+
+
+210
+00:09:44.384 --> 00:09:47.621 line:-2 align:center
+the fetchOneThumbnail function
+must immediately exit
+
+
+211
+00:09:47,654 --> 00:09:49,556 line:-1
+by throwing that error.
+
+
+212
+00:09:49,590 --> 00:09:51,792 line:-1
+But what will happen to the task
+
+
+213
+00:09:51.825 --> 00:09:53.760 line:-1 align:center
+performing the second download?
+
+
+214
+00:09:53.794 --> 00:09:55.662 line:-1 align:center
+During the abnormal exit,
+
+
+215
+00:09:55,696 --> 00:09:59,499 line:-2
+Swift will automatically mark
+the unawaited task as canceled
+
+
+216
+00:09:59,533 --> 00:10:01,668 line:-1
+and then await for it to finish
+
+
+217
+00:10:01.702 --> 00:10:03.904 line:-1 align:center
+before exiting the function.
+
+
+218
+00:10:03,937 --> 00:10:07,274 line:-2
+Marking a task as canceled
+does not stop the task.
+
+
+219
+00:10:07,307 --> 00:10:11,011 line:-2
+It simply informs the task
+that its results are no longer needed.
+
+
+220
+00:10:11,044 --> 00:10:13,247 line:-1
+In fact, when a task is canceled,
+
+
+221
+00:10:13,280 --> 00:10:15,782 line:-2
+all subtasks that are decedents
+of that task
+
+
+222
+00:10:15.816 --> 00:10:18.018 line:-1 align:center
+will be automatically canceled too.
+
+
+223
+00:10:18,051 --> 00:10:20,754 line:-1
+So if the implementation of URLSession
+
+
+224
+00:10:20.787 --> 00:10:23.991 line:-2 align:center
+created its own structured tasks
+to download the image,
+
+
+225
+00:10:24,024 --> 00:10:27,194 line:-2
+those tasks will be marked
+for cancellation.
+
+
+226
+00:10:27,227 --> 00:10:30,230 line:-2
+The function fetchOneThumbnail
+finally exits
+
+
+227
+00:10:30.264 --> 00:10:33.934 line:-2 align:center
+by throwing the error once
+all of the structured tasks it created
+
+
+228
+00:10:33,967 --> 00:10:37,504 line:-1
+directly or indirectly have finished.
+
+
+229
+00:10:37,538 --> 00:10:40,774 line:-2
+This guarantee is fundamental
+to structured concurrency.
+
+
+230
+00:10:40,807 --> 00:10:43,744 line:-2
+It prevents you
+from accidentally leaking tasks
+
+
+231
+00:10:43.777 --> 00:10:46.079 line:-1 align:center
+by helping you manage their lifetimes,
+
+
+232
+00:10:46.113 --> 00:10:48.582 line:-1 align:center
+much like how ARC automatically manages
+
+
+233
+00:10:48.615 --> 00:10:50.584 line:-1 align:center
+the lifetime of memory.
+
+
+234
+00:10:50,617 --> 00:10:52,486 line:-1
+So far, I have given you an overview
+
+
+235
+00:10:52.519 --> 00:10:54.454 line:-1 align:center
+of how cancellation propagates.
+
+
+236
+00:10:54,488 --> 00:10:57,357 line:-1
+But when does the task finally stop?
+
+
+237
+00:10:57.391 --> 00:11:00.394 line:-2 align:center
+If the task is in the middle
+of an important transaction
+
+
+238
+00:11:00,427 --> 00:11:02,462 line:-1
+or has open network connections,
+
+
+239
+00:11:02,496 --> 00:11:04,831 line:-2
+it would be incorrect
+to just halt the task.
+
+
+240
+00:11:04.865 --> 00:11:08.435 line:-2 align:center
+That’s why task cancellation
+in Swift is cooperative.
+
+
+241
+00:11:08,468 --> 00:11:11,538 line:-2
+Your code must check
+for cancellation explicitly
+
+
+242
+00:11:11,572 --> 00:11:15,375 line:-2
+and wind down execution
+in whatever way is appropriate.
+
+
+243
+00:11:15.409 --> 00:11:18.412 line:-2 align:center
+You can check the cancellation status
+of the current task
+
+
+244
+00:11:18,445 --> 00:11:21,748 line:-2
+from any function,
+whether it is async or not.
+
+
+245
+00:11:21.782 --> 00:11:24.184 line:-2 align:center
+This means that
+you should implement your APIs
+
+
+246
+00:11:24.218 --> 00:11:25.919 line:-1 align:center
+with cancellation in mind,
+
+
+247
+00:11:25.953 --> 00:11:29.423 line:-2 align:center
+especially if they involve
+long-running computations.
+
+
+248
+00:11:29.456 --> 00:11:33.293 line:-2 align:center
+Your users may call into your code
+from a task that can be canceled,
+
+
+249
+00:11:33,327 --> 00:11:35,863 line:-2
+and they will expect
+the computation to stop
+
+
+250
+00:11:35,896 --> 00:11:38,599 line:-1
+as soon as possible.
+
+
+251
+00:11:38.632 --> 00:11:42.002 line:-2 align:center
+To see how simple it is
+to use cooperative cancellation,
+
+
+252
+00:11:42.035 --> 00:11:44.705 line:-2 align:center
+let’s go back
+to the thumbnail fetching example.
+
+
+253
+00:11:45.739 --> 00:11:48.075 line:-2 align:center
+Here, I have rewritten
+the original function
+
+
+254
+00:11:48,108 --> 00:11:50,277 line:-2
+that was given all
+of the thumbnails to fetch
+
+
+255
+00:11:50.310 --> 00:11:53.914 line:-2 align:center
+so that it uses
+the fetchOneThumbnail function instead.
+
+
+256
+00:11:53,947 --> 00:11:57,551 line:-2
+If this function was called
+within a task that was canceled,
+
+
+257
+00:11:57,584 --> 00:11:59,686 line:-1
+we don’t want to hold up our application
+
+
+258
+00:11:59,720 --> 00:12:02,055 line:-1
+by creating useless thumbnails.
+
+
+259
+00:12:02,089 --> 00:12:05,392 line:-2
+So I can just add a call
+to checkCancellation
+
+
+260
+00:12:05.425 --> 00:12:07.394 line:-1 align:center
+at the start of each loop iteration.
+
+
+261
+00:12:07,427 --> 00:12:09,530 line:-1
+This call only throws an error
+
+
+262
+00:12:09.563 --> 00:12:12.232 line:-1 align:center
+if the current task has been canceled.
+
+
+263
+00:12:12,266 --> 00:12:15,936 line:-2
+You can also obtain the cancellation
+status of the current task
+
+
+264
+00:12:15,969 --> 00:12:19,907 line:-2
+as a Boolean value if that
+is more appropriate for your code.
+
+
+265
+00:12:19,940 --> 00:12:22,409 line:-2
+Notice that in this version
+of the function,
+
+
+266
+00:12:22.442 --> 00:12:24.411 line:-1 align:center
+I’m returning a partial result,
+
+
+267
+00:12:24,444 --> 00:12:27,814 line:-2
+a dictionary with only some
+of the thumbnails requested.
+
+
+268
+00:12:27,848 --> 00:12:30,884 line:-2
+When doing this,
+you must ensure that your API
+
+
+269
+00:12:30.918 --> 00:12:34.021 line:-2 align:center
+clearly states that a partial result
+may be returned.
+
+
+270
+00:12:34,054 --> 00:12:36,190 line:-1
+Otherwise, task cancellation
+
+
+271
+00:12:36.223 --> 00:12:38.592 line:-1 align:center
+could trigger a fatal error for your users
+
+
+272
+00:12:38.625 --> 00:12:41.562 line:-2 align:center
+because their code requires
+a complete result
+
+
+273
+00:12:41.595 --> 00:12:43.330 line:-1 align:center
+even during cancellation.
+
+
+274
+00:12:43.363 --> 00:12:45.899 line:-2 align:center
+So far, you’ve seen
+that async-let provides
+
+
+275
+00:12:45.933 --> 00:12:49.069 line:-2 align:center
+a lightweight syntax
+for adding concurrency to your program
+
+
+276
+00:12:49,102 --> 00:12:52,506 line:-2
+while capturing the essence
+of structured programming.
+
+
+277
+00:12:52.539 --> 00:12:56.376 line:-2 align:center
+The next kind of task I want
+to tell you about is called a group task.
+
+
+278
+00:12:56.410 --> 00:12:59.313 line:-1 align:center
+They offer more flexibility than async-let
+
+
+279
+00:12:59.346 --> 00:13:03.217 line:-2 align:center
+without giving up all of the nice
+properties of structured concurrency.
+
+
+280
+00:13:03.250 --> 00:13:05.853 line:-2 align:center
+As we saw earlier,
+async-let works well
+
+
+281
+00:13:05.886 --> 00:13:08.488 line:-2 align:center
+when there’s a fixed amount
+of concurrency available.
+
+
+282
+00:13:08.522 --> 00:13:11.692 line:-2 align:center
+Let’s consider both functions
+that I discussed earlier.
+
+
+283
+00:13:11.725 --> 00:13:14.161 line:-1 align:center
+For each thumbnail ID in the loop,
+
+
+284
+00:13:14,194 --> 00:13:16,730 line:-1
+we call fetchOneThumbnail to process it,
+
+
+285
+00:13:16,763 --> 00:13:19,533 line:-1
+which creates exactly two child tasks.
+
+
+286
+00:13:19.566 --> 00:13:22.870 line:-2 align:center
+Even if we in-lined the body
+of that function into this loop,
+
+
+287
+00:13:22.903 --> 00:13:25.973 line:-1 align:center
+the amount of concurrency will not change.
+
+
+288
+00:13:26.006 --> 00:13:28.775 line:-2 align:center
+Async-let is scoped
+like a variable binding.
+
+
+289
+00:13:28.809 --> 00:13:31.812 line:-2 align:center
+That means the two child tasks
+must complete
+
+
+290
+00:13:31.845 --> 00:13:34.581 line:-1 align:center
+before the next loop iteration begins.
+
+
+291
+00:13:34.615 --> 00:13:38.385 line:-2 align:center
+But what if we want this loop
+to kick off tasks to fetch
+
+
+292
+00:13:38,418 --> 00:13:41,188 line:-1
+all of the thumbnails concurrently?
+
+
+293
+00:13:41.221 --> 00:13:44.858 line:-2 align:center
+Then, the amount of concurrency
+is not known statically
+
+
+294
+00:13:44,892 --> 00:13:48,095 line:-2
+because it depends on the number
+of IDs in the array.
+
+
+295
+00:13:48,128 --> 00:13:51,064 line:-2
+The right tool for this situation
+is a task group.
+
+
+296
+00:13:51.098 --> 00:13:53.667 line:-2 align:center
+A task group is a form
+of structured concurrency
+
+
+297
+00:13:53.700 --> 00:13:56.637 line:-2 align:center
+that is designed to provide
+a dynamic amount of concurrency.
+
+
+298
+00:13:56.670 --> 00:13:58.839 line:-1 align:center
+You can introduce a task group
+
+
+299
+00:13:58.872 --> 00:14:01.875 line:-2 align:center
+by calling the withThrowingTaskGroup
+function.
+
+
+300
+00:14:01.909 --> 00:14:04.811 line:-2 align:center
+This function gives you
+a scoped group object
+
+
+301
+00:14:04,845 --> 00:14:08,448 line:-2
+to create child tasks
+that are allowed to throw errors.
+
+
+302
+00:14:08,482 --> 00:14:11,618 line:-2
+Tasks added to a group
+cannot outlive the scope
+
+
+303
+00:14:11,652 --> 00:14:14,521 line:-2
+of the block in which
+the group is defined.
+
+
+304
+00:14:14,555 --> 00:14:17,925 line:-2
+Since I have placed
+the entire for-loop inside of the block,
+
+
+305
+00:14:17,958 --> 00:14:21,328 line:-2
+I can now create a dynamic number
+of tasks using the group.
+
+
+306
+00:14:21.361 --> 00:14:23.330 line:-1 align:center
+You create child tasks in a group
+
+
+307
+00:14:23.363 --> 00:14:25.799 line:-1 align:center
+by invoking its async method.
+
+
+308
+00:14:25.832 --> 00:14:27.634 line:-1 align:center
+Once added to a group,
+
+
+309
+00:14:27,668 --> 00:14:30,037 line:-1
+child tasks begin executing immediately
+
+
+310
+00:14:30,070 --> 00:14:31,905 line:-1
+and in any order.
+
+
+311
+00:14:31.939 --> 00:14:33.974 line:-1 align:center
+When the group object goes out of scope,
+
+
+312
+00:14:34.007 --> 00:14:37.878 line:-2 align:center
+the completion of all tasks
+within it will be implicitly awaited.
+
+
+313
+00:14:37.911 --> 00:14:41.582 line:-2 align:center
+This is a consequence
+of the task tree rule I described earlier,
+
+
+314
+00:14:41,615 --> 00:14:44,952 line:-1
+because group tasks are structured too.
+
+
+315
+00:14:44,985 --> 00:14:48,488 line:-2
+At this point, we’ve already achieved
+the concurrency that we wanted:
+
+
+316
+00:14:48.522 --> 00:14:51.592 line:-2 align:center
+one task for each call
+to fetchOneThumbnail,
+
+
+317
+00:14:51,625 --> 00:14:55,596 line:-2
+which itself will create
+two more tasks using async-let.
+
+
+318
+00:14:55.629 --> 00:14:58.265 line:-2 align:center
+That’s another nice property
+of structured concurrency.
+
+
+319
+00:14:58,298 --> 00:15:01,335 line:-1
+You can use async-let within group tasks
+
+
+320
+00:15:01,368 --> 00:15:04,538 line:-2
+or create task groups
+within async-let tasks,
+
+
+321
+00:15:04.571 --> 00:15:08.208 line:-2 align:center
+and the levels of concurrency
+in the tree compose naturally.
+
+
+322
+00:15:08,242 --> 00:15:11,645 line:-1
+Now, this code is not quite ready to run.
+
+
+323
+00:15:11,678 --> 00:15:13,146 line:-1
+If we tried to run it,
+
+
+324
+00:15:13,180 --> 00:15:16,350 line:-2
+the compiler would helpfully alert us
+to a data race issue.
+
+
+325
+00:15:16,383 --> 00:15:18,852 line:-2
+The problem is that we’re trying
+to insert a thumbnail
+
+
+326
+00:15:18.886 --> 00:15:21.922 line:-2 align:center
+into a single dictionary
+from each child task.
+
+
+327
+00:15:21,955 --> 00:15:25,826 line:-2
+This is a common mistake when increasing
+the amount of concurrency in your program.
+
+
+328
+00:15:25,859 --> 00:15:28,695 line:-1
+Data races are accidentally created.
+
+
+329
+00:15:28.729 --> 00:15:32.566 line:-2 align:center
+This dictionary cannot handle
+more than one access at a time,
+
+
+330
+00:15:32.599 --> 00:15:36.436 line:-2 align:center
+and if two child tasks tried
+to insert thumbnails simultaneously,
+
+
+331
+00:15:36,470 --> 00:15:39,439 line:-2
+that could cause a crash
+or data corruption.
+
+
+332
+00:15:39.473 --> 00:15:42.876 line:-2 align:center
+In the past, you had to investigate
+those bugs yourself,
+
+
+333
+00:15:42,910 --> 00:15:44,945 line:-1
+but Swift provides static checking
+
+
+334
+00:15:44,978 --> 00:15:47,781 line:-2
+to prevent those bugs
+from happening in the first place.
+
+
+335
+00:15:47,814 --> 00:15:51,652 line:-2
+Whenever you create a new task,
+the work that the task performs
+
+
+336
+00:15:51,685 --> 00:15:55,088 line:-2
+is within a new closure type
+called a @Sendable closure.
+
+
+337
+00:15:55.122 --> 00:15:57.658 line:-2 align:center
+The body of a @Sendable closure
+is restricted
+
+
+338
+00:15:57.691 --> 00:16:00.861 line:-2 align:center
+from capturing mutable variables
+in its lexical context,
+
+
+339
+00:16:00,894 --> 00:16:03,130 line:-1
+because those variables could be modified
+
+
+340
+00:16:03.163 --> 00:16:05.132 line:-1 align:center
+after the task is launched.
+
+
+341
+00:16:05,165 --> 00:16:07,100 line:-1
+This means that the values you capture
+
+
+342
+00:16:07,134 --> 00:16:09,536 line:-1
+in a task must be safe to share.
+
+
+343
+00:16:09.570 --> 00:16:12.139 line:-1 align:center
+For example, because they are value types,
+
+
+344
+00:16:12.172 --> 00:16:13.674 line:-1 align:center
+like Int and String,
+
+
+345
+00:16:13,707 --> 00:16:17,544 line:-2
+or because they are objects designed
+to be accessed from multiple threads,
+
+
+346
+00:16:17,578 --> 00:16:19,680 line:-1
+like actors, and classes
+
+
+347
+00:16:19.713 --> 00:16:22.349 line:-1 align:center
+that implement their own synchronization.
+
+
+348
+00:16:22,382 --> 00:16:25,252 line:-2
+We have a whole session
+dedicated to this topic,
+
+
+349
+00:16:25.285 --> 00:16:27.855 line:-2 align:center
+called “Protect mutable state
+with Swift actors,”
+
+
+350
+00:16:27,888 --> 00:16:30,290 line:-1
+so I encourage you to check it out.
+
+
+351
+00:16:30,324 --> 00:16:32,993 line:-1
+To avoid the data race in our example,
+
+
+352
+00:16:33,026 --> 00:16:35,829 line:-2
+you can have each child task
+return a value.
+
+
+353
+00:16:35,863 --> 00:16:37,764 line:-1
+This design gives the parent task
+
+
+354
+00:16:37.798 --> 00:16:40.767 line:-2 align:center
+the sole responsibility
+of processing the results.
+
+
+355
+00:16:40.801 --> 00:16:43.871 line:-2 align:center
+In this case,
+I specified that each child task
+
+
+356
+00:16:43.904 --> 00:16:46.740 line:-2 align:center
+must return a tuple
+containing the String ID
+
+
+357
+00:16:46.773 --> 00:16:49.009 line:-1 align:center
+and UIImage for the thumbnail.
+
+
+358
+00:16:49.042 --> 00:16:51.445 line:-1 align:center
+Then, inside each child task,
+
+
+359
+00:16:51,478 --> 00:16:54,014 line:-2
+instead of writing
+to the dictionary directly,
+
+
+360
+00:16:54,047 --> 00:16:56,583 line:-1
+I have them return the key value tuple
+
+
+361
+00:16:56.617 --> 00:16:58.886 line:-1 align:center
+for the parent to process.
+
+
+362
+00:16:58.919 --> 00:17:01.355 line:-2 align:center
+The parent task can iterate
+through the results
+
+
+363
+00:17:01.388 --> 00:17:04.758 line:-2 align:center
+from each child task
+using the new for-await loop.
+
+
+364
+00:17:04.791 --> 00:17:07.961 line:-2 align:center
+The for-await loop obtains
+the results from the child tasks
+
+
+365
+00:17:07.995 --> 00:17:09.863 line:-1 align:center
+in order of completion.
+
+
+366
+00:17:09.897 --> 00:17:12.266 line:-1 align:center
+Because this loop runs sequentially,
+
+
+367
+00:17:12.299 --> 00:17:14.268 line:-1 align:center
+the parent task can safely add
+
+
+368
+00:17:14,301 --> 00:17:17,471 line:-1
+each key value pair to the dictionary.
+
+
+369
+00:17:17.504 --> 00:17:20.574 line:-2 align:center
+This is just one example
+of using the for-await loop
+
+
+370
+00:17:20.607 --> 00:17:23.577 line:-2 align:center
+to access
+an asynchronous sequence of values.
+
+
+371
+00:17:23,610 --> 00:17:27,114 line:-2
+If your own type conforms
+to the AsyncSequence protocol,
+
+
+372
+00:17:27.147 --> 00:17:30.484 line:-2 align:center
+then you can use for-await
+to iterate through them too.
+
+
+373
+00:17:30.517 --> 00:17:34.021 line:-2 align:center
+You can find out more
+in the “Meet AsyncSequence” session.
+
+
+374
+00:17:34,788 --> 00:17:37,491 line:-2
+While task groups are a form
+of structured concurrency,
+
+
+375
+00:17:37,524 --> 00:17:40,928 line:-2
+there is a small difference
+in how the task tree rule is implemented
+
+
+376
+00:17:40.961 --> 00:17:43.897 line:-1 align:center
+for group tasks versus async-let tasks.
+
+
+377
+00:17:43.931 --> 00:17:47.134 line:-2 align:center
+Suppose when iterating
+through the results of this group,
+
+
+378
+00:17:47,167 --> 00:17:50,437 line:-2
+I encounter a child task
+that completed with an error.
+
+
+379
+00:17:50.470 --> 00:17:53.240 line:-2 align:center
+Because that error is thrown
+out of the group’s block,
+
+
+380
+00:17:53.273 --> 00:17:56.310 line:-2 align:center
+all tasks in the group
+will then be implicitly canceled
+
+
+381
+00:17:56,343 --> 00:17:57,711 line:-1
+and then awaited.
+
+
+382
+00:17:57,744 --> 00:17:59,746 line:-1
+This works just like async-let.
+
+
+383
+00:17:59.780 --> 00:18:02.449 line:-2 align:center
+The difference comes
+when your group goes out of scope
+
+
+384
+00:18:02.482 --> 00:18:05.185 line:-1 align:center
+through a normal exit from the block.
+
+
+385
+00:18:05,219 --> 00:18:08,188 line:-1
+Then, cancellation is not implicit.
+
+
+386
+00:18:08,222 --> 00:18:10,724 line:-1
+This behavior makes it easier for you
+
+
+387
+00:18:10,757 --> 00:18:13,627 line:-2
+to express the fork-join pattern
+using a task group,
+
+
+388
+00:18:13.660 --> 00:18:15.863 line:-1 align:center
+because the jobs will only be awaited,
+
+
+389
+00:18:15,896 --> 00:18:17,831 line:-1
+not canceled.
+
+
+390
+00:18:17.865 --> 00:18:21.702 line:-2 align:center
+You can also manually cancel all tasks
+before exiting the block
+
+
+391
+00:18:21,735 --> 00:18:24,705 line:-1
+using the group’s cancelAll method.
+
+
+392
+00:18:24.738 --> 00:18:27.908 line:-2 align:center
+Keep in mind that no matter
+how you cancel a task,
+
+
+393
+00:18:27.941 --> 00:18:31.111 line:-2 align:center
+cancellation automatically
+propagates down the tree.
+
+
+394
+00:18:31.144 --> 00:18:34.448 line:-2 align:center
+Async-let and group tasks
+are the two kind of tasks
+
+
+395
+00:18:34,481 --> 00:18:37,518 line:-2
+that provide scoped structured tasks
+in Swift.
+
+
+396
+00:18:37.551 --> 00:18:39.786 line:-1 align:center
+Now, I’ll hand things off to Joe,
+
+
+397
+00:18:39,820 --> 00:18:42,055 line:-2
+who will tell you
+about unstructured tasks.
+
+
+398
+00:18:42.089 --> 00:18:43.724 line:-1 align:center
+[Joe] Thanks, Kavon.
+
+
+399
+00:18:43,757 --> 00:18:45,259 line:-2
+Hi.
+I’m Joe.
+
+
+400
+00:18:45.292 --> 00:18:48.896 line:-2 align:center
+Kavon showed you how structured
+concurrency simplifies error propagation,
+
+
+401
+00:18:48,929 --> 00:18:51,331 line:-1
+cancellation, and other bookkeeping
+
+
+402
+00:18:51,365 --> 00:18:53,100 line:-1
+when you add concurrency to a program
+
+
+403
+00:18:53,133 --> 00:18:55,435 line:-1
+with a clear hierarchy to the tasks.
+
+
+404
+00:18:55,469 --> 00:18:57,704 line:-2
+But we know that you
+don’t always have a hierarchy
+
+
+405
+00:18:57,738 --> 00:19:00,007 line:-1
+when you’re adding tasks to your program.
+
+
+406
+00:19:00.040 --> 00:19:03.277 line:-2 align:center
+Swift also provides
+unstructured task APIs,
+
+
+407
+00:19:03,310 --> 00:19:05,279 line:-1
+which give you a lot more flexibility
+
+
+408
+00:19:05,312 --> 00:19:08,282 line:-2
+at the expense of needing
+a lot more manual management.
+
+
+409
+00:19:08.315 --> 00:19:10.551 line:-1 align:center
+There are a lot of situations where a task
+
+
+410
+00:19:10,584 --> 00:19:13,487 line:-1
+might not fall into a clear hierarchy.
+
+
+411
+00:19:13,520 --> 00:19:16,690 line:-2
+Most obviously,
+you might not have a parent task at all
+
+
+412
+00:19:16,723 --> 00:19:19,459 line:-2
+if you’re trying to launch a task
+to do async computation
+
+
+413
+00:19:19,493 --> 00:19:21,728 line:-1
+from non-async code.
+
+
+414
+00:19:21.762 --> 00:19:24.398 line:-2 align:center
+Alternatively,
+the lifetime you want for a task
+
+
+415
+00:19:24.431 --> 00:19:26.700 line:-2 align:center
+might not fit the confines
+of a single scope
+
+
+416
+00:19:26,733 --> 00:19:28,836 line:-1
+or even a single function.
+
+
+417
+00:19:28.869 --> 00:19:30.804 line:-2 align:center
+You may, for instance,
+want to start a task
+
+
+418
+00:19:30,838 --> 00:19:34,575 line:-2
+in response to a method call
+that puts an object into an active state
+
+
+419
+00:19:34.608 --> 00:19:36.543 line:-1 align:center
+and then cancel its execution
+
+
+420
+00:19:36.577 --> 00:19:39.680 line:-2 align:center
+in response to a different method call
+that deactivates the object.
+
+
+421
+00:19:40,681 --> 00:19:43,483 line:-2
+This comes up a lot
+when implementing delegate objects
+
+
+422
+00:19:43.517 --> 00:19:45.452 line:-1 align:center
+in AppKit and UIKit.
+
+
+423
+00:19:45.485 --> 00:19:47.888 line:-1 align:center
+UI work has to happen on the main thread,
+
+
+424
+00:19:47,921 --> 00:19:50,524 line:-1
+and as the Swift actors session discusses,
+
+
+425
+00:19:50.557 --> 00:19:53.227 line:-1 align:center
+Swift ensures this by declaring UI classes
+
+
+426
+00:19:53,260 --> 00:19:55,262 line:-1
+that belong to the main actor.
+
+
+427
+00:19:57.064 --> 00:19:58.866 line:-1 align:center
+Let’s say we have a collection view,
+
+
+428
+00:19:58,899 --> 00:20:02,436 line:-2
+and we can’t yet use
+the collection view data source APIs.
+
+
+429
+00:20:02,469 --> 00:20:06,273 line:-2
+Instead, we want to use
+our fetchThumbnails function we just wrote
+
+
+430
+00:20:06,306 --> 00:20:07,975 line:-1
+to grab thumbnails from the network
+
+
+431
+00:20:08,008 --> 00:20:10,511 line:-2
+as the items in the collection view
+are displayed.
+
+
+432
+00:20:10,544 --> 00:20:13,280 line:-1
+However, the delegate method is not async,
+
+
+433
+00:20:13,313 --> 00:20:16,450 line:-2
+so we can’t just await a call
+to an async function.
+
+
+434
+00:20:16.483 --> 00:20:18.519 line:-1 align:center
+We need to start a task for that,
+
+
+435
+00:20:18.552 --> 00:20:21.388 line:-2 align:center
+but that task is really an extension
+of the work we started
+
+
+436
+00:20:21,421 --> 00:20:23,790 line:-1
+in response to the delegate action.
+
+
+437
+00:20:23,824 --> 00:20:25,859 line:-1
+We want this new task to still run
+
+
+438
+00:20:25,893 --> 00:20:28,695 line:-1
+on the main actor with UI priority.
+
+
+439
+00:20:28,729 --> 00:20:31,131 line:-2
+We just don’t want to bound
+the lifetime of the task
+
+
+440
+00:20:31.164 --> 00:20:33.400 line:-2 align:center
+to the scope
+of this single delegate method.
+
+
+441
+00:20:33,433 --> 00:20:35,269 line:-1
+For situations like this,
+
+
+442
+00:20:35,302 --> 00:20:38,739 line:-2
+Swift allows us to construct
+an unstructured task.
+
+
+443
+00:20:38,772 --> 00:20:42,075 line:-2
+Let’s move that asynchronous part
+of the code into a closure
+
+
+444
+00:20:42,109 --> 00:20:45,979 line:-2
+and pass that closure
+to construct an async task.
+
+
+445
+00:20:46,013 --> 00:20:48,415 line:-1
+Now here’s what happens at runtime.
+
+
+446
+00:20:48,448 --> 00:20:50,784 line:-2
+When we reach the point
+of creating the task,
+
+
+447
+00:20:50,817 --> 00:20:54,354 line:-2
+Swift will schedule it to run on the same
+actor as the originating scope,
+
+
+448
+00:20:54.388 --> 00:20:56.523 line:-1 align:center
+which is the main actor in this case.
+
+
+449
+00:20:56,557 --> 00:21:00,027 line:-2
+Meanwhile, control returns
+immediately to the caller.
+
+
+450
+00:21:00,060 --> 00:21:02,329 line:-2
+The thumbnail task will run
+on the main thread
+
+
+451
+00:21:02.362 --> 00:21:03.964 line:-1 align:center
+when there’s an opening to do so
+
+
+452
+00:21:03,997 --> 00:21:07,601 line:-2
+without immediately blocking
+the main thread on the delegate method.
+
+
+453
+00:21:07.634 --> 00:21:10.904 line:-2 align:center
+Constructing tasks this way
+gives us a halfway point
+
+
+454
+00:21:10,938 --> 00:21:13,507 line:-1
+between structured and unstructured code.
+
+
+455
+00:21:13.540 --> 00:21:16.810 line:-2 align:center
+A directly constructed task
+still inherits the actor,
+
+
+456
+00:21:16.844 --> 00:21:18.779 line:-1 align:center
+if any, of its launched context,
+
+
+457
+00:21:18,812 --> 00:21:22,282 line:-2
+and it also inherits the priority
+and other traits of the origin task,
+
+
+458
+00:21:22.316 --> 00:21:25.619 line:-2 align:center
+just like a group task
+or an async-let would.
+
+
+459
+00:21:25,652 --> 00:21:27,955 line:-1
+However, the new task is unscoped.
+
+
+460
+00:21:27.988 --> 00:21:31.458 line:-2 position:22% align:start
+Its lifetime is not bound by the scope
+of where it was launched.
+
+
+461
+00:21:31,491 --> 00:21:34,061 line:-1
+The origin doesn’t even need to be async.
+
+
+462
+00:21:34,094 --> 00:21:37,164 line:-1
+We can create an unscoped task anywhere.
+
+
+463
+00:21:37.197 --> 00:21:39.433 line:-1 align:center
+In trade for all of this flexibility,
+
+
+464
+00:21:39,466 --> 00:21:41,668 line:-1
+we must also manually manage the things
+
+
+465
+00:21:41,702 --> 00:21:44,738 position:24% line:-2
+that structured concurrency
+would have handled automatically.
+
+
+466
+00:21:44,771 --> 00:21:48,008 line:-2 position:27%
+Cancellation and errors
+won’t automatically propagate,
+
+
+467
+00:21:48,041 --> 00:21:50,878 line:-2 align:start
+and the task’s result
+will not be implicitly awaited
+
+
+468
+00:21:50,911 --> 00:21:53,914 line:-1
+unless we take explicit action to do so.
+
+
+469
+00:21:55.949 --> 00:21:58.218 line:-2 position:32% align:start
+So we kicked off a task
+to fetch thumbnails
+
+
+470
+00:21:58,252 --> 00:22:00,587 line:-1
+when a collection view item is displayed,
+
+
+471
+00:22:00.621 --> 00:22:04.324 line:-2 align:start position:23%
+and we should also cancel that task
+if the item is scrolled out of view
+
+
+472
+00:22:04.358 --> 00:22:06.260 line:-1 align:center
+before the thumbnails are ready.
+
+
+473
+00:22:06,293 --> 00:22:08,328 line:-1
+Since we’re working with an unscoped task,
+
+
+474
+00:22:08,362 --> 00:22:10,364 line:-1
+that cancellation isn’t automatic.
+
+
+475
+00:22:10,397 --> 00:22:12,432 line:-1
+Let’s implement it now.
+
+
+476
+00:22:12,466 --> 00:22:16,270 align:start line:-2
+After we construct the task,
+let’s save the value we get.
+
+
+477
+00:22:16,303 --> 00:22:18,505 line:-1
+We can put this value into a dictionary
+
+
+478
+00:22:18,539 --> 00:22:21,475 line:-2 align:start
+keyed by the row index
+when we create the task
+
+
+479
+00:22:21.508 --> 00:22:25.012 line:-2 align:start position:30%
+so that we can use it later
+to cancel that task.
+
+
+480
+00:22:25.045 --> 00:22:28.549 line:-2 position:19% align:start
+We should also remove it
+from the dictionary once the task finishes
+
+
+481
+00:22:28,582 --> 00:22:31,852 line:-2 position:26%
+so we don’t try to cancel a task
+if it’s already finished.
+
+
+482
+00:22:31,885 --> 00:22:34,788 line:-2 align:start
+Note here that we can access
+the same dictionary
+
+
+483
+00:22:34.821 --> 00:22:37.257 line:-1 align:center
+inside and outside of that async task
+
+
+484
+00:22:37.291 --> 00:22:39.960 line:-2 position:23% align:start
+without getting a data race flagged
+by the compiler.
+
+
+485
+00:22:39,993 --> 00:22:42,596 position:29% line:-2
+Our delegate class is bound
+to the main actor,
+
+
+486
+00:22:42,629 --> 00:22:44,531 line:-1
+and the new task inherits that,
+
+
+487
+00:22:44.565 --> 00:22:46.800 line:-1 align:center
+so they’ll never run together in parallel.
+
+
+488
+00:22:46,834 --> 00:22:50,404 position:17% line:-2
+We can safely access the stored properties
+of main actor-bound classes
+
+
+489
+00:22:50,437 --> 00:22:54,174 align:start line:-2
+inside this task without worrying
+about data races.
+
+
+490
+00:22:54.208 --> 00:22:57.911 line:-2 position:21% align:start
+Meanwhile, if our delegate is later told
+that the same table row
+
+
+491
+00:22:57.945 --> 00:23:01.415 line:-2 position:23% align:start
+has been removed from the display,
+then we can call the cancel method
+
+
+492
+00:23:01.448 --> 00:23:04.351 line:-1 align:center
+on the value to cancel the task.
+
+
+493
+00:23:04,384 --> 00:23:07,287 line:-2 align:start
+So now we’ve seen
+how we can create unstructured tasks
+
+
+494
+00:23:07.321 --> 00:23:09.156 line:-1 align:center
+that run independent of a scope
+
+
+495
+00:23:09.189 --> 00:23:12.559 line:-2 position:23% align:start
+while still inheriting traits
+from that task’s originating context.
+
+
+496
+00:23:12,593 --> 00:23:15,128 line:-2 align:start
+But sometimes you don’t want
+to inherit anything
+
+
+497
+00:23:15.162 --> 00:23:17.531 line:-1 align:center
+from your originating context.
+
+
+498
+00:23:17.564 --> 00:23:19.166 line:-1 align:center
+For maximum flexibility,
+
+
+499
+00:23:19.199 --> 00:23:22.169 line:-1 align:center
+Swift provides detached tasks.
+
+
+500
+00:23:22,202 --> 00:23:23,804 line:-1
+Like the name suggests,
+
+
+501
+00:23:23.837 --> 00:23:27.040 line:-2 align:start position:26%
+detached tasks are independent
+from their context.
+
+
+502
+00:23:27.074 --> 00:23:28.909 line:-1 align:center
+They're still unstructured tasks.
+
+
+503
+00:23:28.942 --> 00:23:32.045 line:-2 align:start position:28%
+Their lifetimes are not bound
+to their originating scope.
+
+
+504
+00:23:32.079 --> 00:23:34.615 line:-2 align:start position:30%
+But detached tasks
+don’t pick anything else up
+
+
+505
+00:23:34.648 --> 00:23:36.350 line:-1 align:center
+from their originating scope either.
+
+
+506
+00:23:36,383 --> 00:23:39,119 line:-2 align:start
+By default,
+they aren’t constrained to the same actor
+
+
+507
+00:23:39.152 --> 00:23:41.088 line:-1 align:center
+and don’t have to run at the same priority
+
+
+508
+00:23:41.121 --> 00:23:43.056 line:-1 align:center
+as where they were launched.
+
+
+509
+00:23:43,090 --> 00:23:45,292 line:-1
+Detached tasks run independently
+
+
+510
+00:23:45,325 --> 00:23:47,361 position:33% line:-2
+with generic defaults
+for things like priority,
+
+
+511
+00:23:47,394 --> 00:23:50,197 line:-2 align:start
+but they can also be launched
+with optional parameters
+
+
+512
+00:23:50,230 --> 00:23:53,433 position:20% line:-2
+to control how
+and where the new task gets executed.
+
+
+513
+00:23:55,335 --> 00:23:58,872 line:-2 position:29%
+Let’s say that after we fetch
+thumbnails from the server,
+
+
+514
+00:23:58,906 --> 00:24:01,175 align:start line:-2
+we want to write them
+to a local disk cache
+
+
+515
+00:24:01,208 --> 00:24:04,745 line:-2 position:25%
+so we don’t hit the network again
+if we try to fetch them later.
+
+
+516
+00:24:04.778 --> 00:24:07.648 line:-2 position:28% align:start
+The caching doesn’t need
+to happen on the main actor,
+
+
+517
+00:24:07.681 --> 00:24:10.751 line:-2 align:start position:27%
+and even if we cancel fetching
+all of the thumbnails,
+
+
+518
+00:24:10,784 --> 00:24:14,488 align:start line:-2
+it’s still helpful to cache
+any thumbnails we did fetch.
+
+
+519
+00:24:14,521 --> 00:24:17,925 position:30% line:-2
+So let’s kick off caching
+by using a detached task.
+
+
+520
+00:24:17,958 --> 00:24:21,061 line:-2 position:26%
+When we detach a task,
+we also get a lot more flexibility
+
+
+521
+00:24:21.094 --> 00:24:23.297 line:-1 align:center
+in setting up how that new task executes.
+
+
+522
+00:24:23,330 --> 00:24:25,599 line:-1
+Caching should happen at a lower priority
+
+
+523
+00:24:25,632 --> 00:24:28,001 line:-1
+that doesn’t interfere with the main UI,
+
+
+524
+00:24:28,035 --> 00:24:30,304 line:-1
+and we can specify background priority
+
+
+525
+00:24:30,337 --> 00:24:33,440 line:-1
+when we detach this new task.
+
+
+526
+00:24:33.473 --> 00:24:35.509 line:-1 align:center
+Let’s plan ahead for a moment now.
+
+
+527
+00:24:35,542 --> 00:24:38,812 position:22% line:-2
+What should we do in the future
+if we have multiple background tasks
+
+
+528
+00:24:38,846 --> 00:24:41,215 line:-1
+we want to perform on our thumbnails?
+
+
+529
+00:24:41.248 --> 00:24:44.184 line:-1 align:center
+We could detach more background tasks,
+
+
+530
+00:24:44,218 --> 00:24:46,753 position:32% line:-2
+but we could also utilize
+structured concurrency
+
+
+531
+00:24:46,787 --> 00:24:48,856 line:-1
+inside of our detached task.
+
+
+532
+00:24:48,889 --> 00:24:52,125 position:21% line:-2
+We can combine all
+of the different kinds of tasks together
+
+
+533
+00:24:52.159 --> 00:24:55.295 line:-1 align:center
+to exploit each of their strengths.
+
+
+534
+00:24:55,329 --> 00:24:59,099 position:18% line:-2
+Instead of detaching an independent task
+for every background job,
+
+
+535
+00:24:59,132 --> 00:25:02,469 line:-2 align:start
+we can set up a task group
+and spawn each background job
+
+
+536
+00:25:02.503 --> 00:25:05.405 line:-1 align:center
+as a child task into that group.
+
+
+537
+00:25:05.439 --> 00:25:08.342 line:-2 position:26% align:start
+There are a number of benefits
+of doing so.
+
+
+538
+00:25:08.375 --> 00:25:11.411 line:-2 position:24% align:start
+If we do need to cancel
+the background task in the future,
+
+
+539
+00:25:11.445 --> 00:25:14.515 line:-2 position:23% align:start
+using a task group means
+we can cancel all of the child tasks
+
+
+540
+00:25:14,548 --> 00:25:17,351 align:start line:-2
+just by canceling
+that top level detached task.
+
+
+541
+00:25:17,384 --> 00:25:20,921 line:-2 align:start
+That cancellation will then propagate
+to the child tasks automatically,
+
+
+542
+00:25:20,954 --> 00:25:23,824 position:25% line:-2
+and we don’t need to keep track
+of an array of handles.
+
+
+543
+00:25:23.857 --> 00:25:26.927 line:-2 align:start position:31%
+Furthermore, child tasks
+automatically inherit
+
+
+544
+00:25:26.960 --> 00:25:28.695 line:-1 align:center
+the priority of their parent.
+
+
+545
+00:25:28,729 --> 00:25:31,164 position:32% line:-2
+To keep all of this work
+in the background,
+
+
+546
+00:25:31.198 --> 00:25:33.901 line:-2 align:start position:29%
+we only need to background
+the detached task,
+
+
+547
+00:25:33.934 --> 00:25:37.471 line:-2 align:start position:22%
+and that will automatically propagate
+to all of its child tasks,
+
+
+548
+00:25:37,504 --> 00:25:39,139 line:-2 position:31%
+so we don’t need
+to worry about forgetting
+
+
+549
+00:25:39.173 --> 00:25:41.341 line:-1 align:center
+to transitively set background priority
+
+
+550
+00:25:41.375 --> 00:25:43.977 line:-1 align:center
+and accidentally starving UI work.
+
+
+551
+00:25:44,011 --> 00:25:46,180 align:start line:-2
+At this point,
+we’ve seen all of the primary forms
+
+
+552
+00:25:46.213 --> 00:25:48.815 line:-1 align:center
+of tasks there are in Swift.
+
+
+553
+00:25:48,849 --> 00:25:51,818 line:-2 position:25%
+Async-let allows
+for a fixed number of child tasks
+
+
+554
+00:25:51.852 --> 00:25:53.720 line:-1 align:center
+to be spawned as variable bindings,
+
+
+555
+00:25:53,754 --> 00:25:56,890 position:22% line:-2
+with automatic management
+of cancellation and error propagation
+
+
+556
+00:25:56,924 --> 00:25:59,459 line:-1
+if the binding goes out of scope.
+
+
+557
+00:25:59.493 --> 00:26:02.162 line:-2 align:start position:24%
+When we need a dynamic number
+of child tasks
+
+
+558
+00:26:02.196 --> 00:26:03.964 line:-1 align:center
+that are still bounded to a scope,
+
+
+559
+00:26:03,997 --> 00:26:07,434 line:-1
+we can move up to task groups.
+
+
+560
+00:26:07.467 --> 00:26:10.704 line:-2 align:start position:24%
+If we need to break off some work
+that isn’t well scoped
+
+
+561
+00:26:10,737 --> 00:26:13,473 align:start line:-2
+but which is still related
+to its originating task,
+
+
+562
+00:26:13,507 --> 00:26:16,076 line:-1
+we can construct unstructured tasks,
+
+
+563
+00:26:16,109 --> 00:26:18,846 line:-1
+but we need to manually manage those.
+
+
+564
+00:26:18.879 --> 00:26:22.816 line:-2 position:27% align:start
+And for maximum flexibility,
+we also have detached tasks,
+
+
+565
+00:26:22.850 --> 00:26:24.852 line:-1 align:center
+which are manually managed tasks
+
+
+566
+00:26:24.885 --> 00:26:28.055 line:-2 align:start position:31%
+that don’t inherit anything
+from their origin.
+
+
+567
+00:26:28,088 --> 00:26:30,524 align:start line:-2
+Tasks and structured concurrency
+are just one part
+
+
+568
+00:26:30,557 --> 00:26:33,126 position:23% line:-2
+of the suite of concurrency features
+Swift supports.
+
+
+569
+00:26:33,160 --> 00:26:35,028 line:-2 align:start
+Be sure to check out
+all these other great talks
+
+
+570
+00:26:35,062 --> 00:26:37,865 position:28% line:-2
+to see how it fits in
+with the rest of the language.
+
+
+571
+00:26:37,898 --> 00:26:39,733 line:-1
+“Meet async/await in Swift”
+
+
+572
+00:26:39,766 --> 00:26:42,336 position:33% line:-2
+gives you more details
+about async functions,
+
+
+573
+00:26:42.369 --> 00:26:44.438 line:-1 align:center
+which gives us the structured basis
+
+
+574
+00:26:44.471 --> 00:26:46.540 line:-1 align:center
+for writing concurrent code.
+
+
+575
+00:26:46,573 --> 00:26:50,344 line:-2 position:28%
+Actors provide data isolation
+to create concurrent systems
+
+
+576
+00:26:50.377 --> 00:26:52.312 line:-1 align:center
+that are safe from data races.
+
+
+577
+00:26:52.346 --> 00:26:55.349 line:-2 align:start position:27%
+See the “Protect mutable state
+with Swift actors” session
+
+
+578
+00:26:55.382 --> 00:26:57.651 line:-1 align:center
+to learn more about how.
+
+
+579
+00:26:57,684 --> 00:27:00,654 line:-1
+We saw “for await” loops on task groups,
+
+
+580
+00:27:00,687 --> 00:27:03,290 line:-2 align:start
+and those are just one example
+of AsyncSequence,
+
+
+581
+00:27:03.323 --> 00:27:04.925 line:-1 align:center
+which provides a standard interface
+
+
+582
+00:27:04,958 --> 00:27:07,194 line:-2 align:start
+for working
+with asynchronous streams of data.
+
+
+583
+00:27:07.227 --> 00:27:09.830 line:-2 align:start position:23%
+The “Meet AsyncSequence” session
+goes deeper
+
+
+584
+00:27:09,863 --> 00:27:13,667 align:start line:-2
+into the available APIs
+for working with sequences.
+
+
+585
+00:27:13,700 --> 00:27:16,103 line:-1
+Tasks integrate with the core OS
+
+
+586
+00:27:16,136 --> 00:27:19,206 position:31% line:-2
+to achieve low overhead
+and high scalability,
+
+
+587
+00:27:19.239 --> 00:27:21.775 line:-2 position:29% align:start
+and the “Swift concurrency:
+Behind the scenes” session
+
+
+588
+00:27:21,808 --> 00:27:25,412 position:26% line:-2
+gives more technical details
+about how that’s accomplished.
+
+
+589
+00:27:25,445 --> 00:27:27,814 line:-1
+All these features come together
+
+
+590
+00:27:27,848 --> 00:27:30,651 line:-2 align:start
+to make writing concurrent code
+in Swift easy and safe,
+
+
+591
+00:27:30,684 --> 00:27:33,687 line:-2 align:start
+letting you write code that gets the most
+out of your devices
+
+
+592
+00:27:33,720 --> 00:27:36,657 line:-2 align:start
+while still focusing
+on the interesting parts of your app,
+
+
+593
+00:27:36,690 --> 00:27:39,793 line:-2 align:start
+thinking less about the mechanics
+of managing concurrent tasks
+
+
+594
+00:27:39,826 --> 00:27:42,963 position:26% line:-2
+or the worries of potential bugs
+caused by multithreading.
+
+
+595
+00:27:42,996 --> 00:27:44,331 line:-1
+Thank you for watching.
+
+
+596
+00:27:44.364 --> 00:27:46.400 line:-2 position:31% align:start
+I hope you enjoy the rest
+of the conference.
+
+
+597
+00:27:46,433 --> 00:27:49,436 line:-1
+[upbeat music]
+

@@ -1,0 +1,2441 @@
+1
+00:00:03,904 --> 00:00:07,140 line:-1
+Hello and welcome to WWDC.
+
+
+2
+00:00:08,308 --> 00:00:12,713 line:0
+Hi, and welcome to ProRes Decoding
+with AV Foundation and Video Toolbox.
+
+
+3
+00:00:12,779 --> 00:00:16,517 line:-2
+Our goal today is optimizing the path
+from a ProRes movie file,
+
+
+4
+00:00:16,583 --> 00:00:19,152 line:-2
+or really any other video,
+into your application.
+
+
+5
+00:00:20,287 --> 00:00:24,191 line:-2
+So, you have an amazing video-editing app
+in a really cool Metal rendering engine.
+
+
+6
+00:00:24,258 --> 00:00:26,760 line:-2
+You want to ensure that users
+have the best possible experience
+
+
+7
+00:00:26,827 --> 00:00:29,296 line:-1
+working with ProRes content in your app.
+
+
+8
+00:00:30,797 --> 00:00:32,866 line:0
+Our goal is to make two things happen:
+
+
+9
+00:00:32,933 --> 00:00:36,770 line:0
+leverage available hardware decoders,
+like Afterburner,
+
+
+10
+00:00:36,837 --> 00:00:39,673 line:0
+and make sure that you have
+an optimized and efficient path
+
+
+11
+00:00:39,740 --> 00:00:41,208 line:0
+for the flow of compressed data,
+
+
+12
+00:00:41,275 --> 00:00:43,644 line:0
+as well as for the frames
+coming out of the decoder.
+
+
+13
+00:00:44,044 --> 00:00:46,513 line:-2
+So, first we're going to do an overview
+of some of the concepts
+
+
+14
+00:00:46,580 --> 00:00:49,449 line:-1
+around integrating video into an app.
+
+
+15
+00:00:49,516 --> 00:00:52,653 line:-2
+Then we're gonna discuss
+how AV Foundation can do it all for you.
+
+
+16
+00:00:54,421 --> 00:00:57,691 line:-2
+But doing it all at the AV Foundation
+level isn't right for everyone,
+
+
+17
+00:00:57,758 --> 00:00:58,926 line:-1
+so next we'll talk a little bit
+
+
+18
+00:00:58,992 --> 00:01:01,495 line:-2
+about how you can fetch or construct
+compressed samples
+
+
+19
+00:01:01,562 --> 00:01:04,565 line:-2
+if you choose to drive the decoder
+yourself with the Video Toolbox.
+
+
+20
+00:01:05,899 --> 00:01:09,837 line:-2
+Then we'll talk a little bit about
+how to use a VTDecompressionSession.
+
+
+21
+00:01:09,903 --> 00:01:11,939 line:-2
+And finally,
+we'll cover some best practices
+
+
+22
+00:01:12,005 --> 00:01:14,508 line:-2
+for integrating decoded video frames
+with Metal.
+
+
+23
+00:01:16,577 --> 00:01:20,614 line:-2
+All right, let's talk about some basics
+for working with video on our platforms.
+
+
+24
+00:01:20,681 --> 00:01:23,917 line:-2
+First, let's talk briefly
+about video decoders.
+
+
+25
+00:01:24,351 --> 00:01:26,987 line:-2
+Video decoders do a lot of parsing
+of bitstreams
+
+
+26
+00:01:27,054 --> 00:01:29,256 line:-1
+that can come from a wide range of sources
+
+
+27
+00:01:29,323 --> 00:01:31,925 line:-1
+not always fully controlled by users.
+
+
+28
+00:01:31,992 --> 00:01:34,862 line:-2
+This presents opportunities
+for malformed media
+
+
+29
+00:01:34,928 --> 00:01:36,797 line:-1
+to destabilize an application,
+
+
+30
+00:01:36,864 --> 00:01:40,334 line:-2
+or even exploit vulnerabilities
+and create security issues.
+
+
+31
+00:01:41,969 --> 00:01:43,203 line:-1
+To mitigate these concerns,
+
+
+32
+00:01:43,270 --> 00:01:47,307 line:-2
+the Video Toolbox runs decoders
+out-of-process in a sandboxed server.
+
+
+33
+00:01:48,575 --> 00:01:50,577 line:0
+This both provides security benefits
+
+
+34
+00:01:50,644 --> 00:01:53,981 line:0
+by running the decoder
+in a process with limited privileges,
+
+
+35
+00:01:54,047 --> 00:01:56,416 line:0
+but it also adds application stability.
+
+
+36
+00:01:56,817 --> 00:02:00,454 line:-2
+If there is a crash in the video decoder,
+the result is a decode error
+
+
+37
+00:02:00,521 --> 00:02:03,023 line:-2
+rather than crashing
+your entire application.
+
+
+38
+00:02:03,490 --> 00:02:06,660 line:-2
+All right, let's talk about
+the media stack on mac OS,
+
+
+39
+00:02:06,727 --> 00:02:09,096 line:-2
+and for this talk,
+we're going to be focused on video.
+
+
+40
+00:02:10,430 --> 00:02:12,866 line:-1
+At the top, we have AVKit.
+
+
+41
+00:02:12,933 --> 00:02:15,135 line:-1
+AVKit provides very high-level options
+
+
+42
+00:02:15,202 --> 00:02:17,971 line:-2
+for dropping media functionality
+into an app.
+
+
+43
+00:02:18,038 --> 00:02:20,807 line:-2
+Since we want to integrate
+with your existing render pipeline,
+
+
+44
+00:02:20,874 --> 00:02:22,843 line:-1
+we aren't going to be looking at AVKit.
+
+
+45
+00:02:23,977 --> 00:02:26,747 line:-2
+AV Foundation provides
+a powerful and flexible interface
+
+
+46
+00:02:26,813 --> 00:02:28,949 line:-1
+for working with all aspects of media.
+
+
+47
+00:02:29,016 --> 00:02:32,286 line:-2
+We will be looking at a few interfaces
+in the AV Foundation framework.
+
+
+48
+00:02:34,254 --> 00:02:37,424 line:-2
+We have already, and will continue to talk
+about Video Toolbox,
+
+
+49
+00:02:37,491 --> 00:02:42,162 line:-2
+which provides a low-level interface for
+working with video decoders and encoders.
+
+
+50
+00:02:43,897 --> 00:02:46,500 line:-2
+The Core Media framework
+provides many basic building blocks
+
+
+51
+00:02:46,567 --> 00:02:49,002 line:-1
+for any media operations on the platform.
+
+
+52
+00:02:49,937 --> 00:02:52,506 line:0
+And finally, Core Video provides
+basic building blocks
+
+
+53
+00:02:52,573 --> 00:02:54,875 line:0
+for working specifically with video.
+
+
+54
+00:02:54,942 --> 00:02:58,612 line:0
+So, we're going to be focusing
+on interfaces from these three frameworks:
+
+
+55
+00:02:58,679 --> 00:03:02,015 line:0
+AV Foundation, Video Toolbox,
+and Core Video.
+
+
+56
+00:03:02,850 --> 00:03:06,186 line:-2
+In AV Foundation, we'll take a closer look
+at AVAssetReader
+
+
+57
+00:03:06,253 --> 00:03:09,456 line:-1
+as well as AVSampleBufferGenerator.
+
+
+58
+00:03:09,523 --> 00:03:14,127 line:-2
+In Video Toolbox, we'll be looking
+more closely at VTDecompressionSession.
+
+
+59
+00:03:15,262 --> 00:03:16,663 line:0
+And finally, in Core Video,
+
+
+60
+00:03:16,730 --> 00:03:18,966 line:0
+we'll be looking at integrating
+CVPixelBuffers
+
+
+61
+00:03:19,032 --> 00:03:21,835 line:0
+and CVPixelBufferPools with Metal.
+
+
+62
+00:03:23,904 --> 00:03:26,373 line:-2
+Let's talk a little bit
+about some considerations
+
+
+63
+00:03:26,440 --> 00:03:28,742 line:-2
+when working
+at these different API levels.
+
+
+64
+00:03:29,910 --> 00:03:31,912 line:-1
+First, in current versions of the OS,
+
+
+65
+00:03:31,979 --> 00:03:36,350 line:-2
+all media interfaces will automatically
+enable hardware decode when available.
+
+
+66
+00:03:36,416 --> 00:03:38,952 line:-1
+This includes enabling Afterburner.
+
+
+67
+00:03:39,019 --> 00:03:42,756 line:-2
+We'll talk later about how to selectively
+enable and disable hardware decode,
+
+
+68
+00:03:42,823 --> 00:03:45,125 line:-1
+but by default, it will always be used.
+
+
+69
+00:03:47,561 --> 00:03:51,331 line:-2
+Earlier, we talked about how
+video decoders run in a separate process.
+
+
+70
+00:03:51,398 --> 00:03:54,234 line:-2
+If CMSampleBuffers
+are created by AV Foundation,
+
+
+71
+00:03:54,301 --> 00:03:56,570 line:-1
+they are automatically generated in a form
+
+
+72
+00:03:56,637 --> 00:03:59,873 line:-2
+which optimizes them for transfer
+over the RPC boundary.
+
+
+73
+00:04:01,008 --> 00:04:04,178 line:-2
+When working with
+VTDecompressionSession directly,
+
+
+74
+00:04:04,244 --> 00:04:06,380 line:-1
+whether or not you get this optimized RPC
+
+
+75
+00:04:06,446 --> 00:04:09,316 line:-2
+depends on how
+the CMSampleBuffers are generated.
+
+
+76
+00:04:09,383 --> 00:04:10,817 line:-1
+We'll talk more about this later on
+
+
+77
+00:04:10,884 --> 00:04:13,187 line:-2
+as we talk about generating
+CMSampleBuffers.
+
+
+78
+00:04:14,521 --> 00:04:16,790 line:-2
+Next, I want to dive into
+a little glossary.
+
+
+79
+00:04:17,757 --> 00:04:20,427 line:-1
+First, let's talk about CVPixelBuffers.
+
+
+80
+00:04:20,494 --> 00:04:22,629 line:-1
+CVPixelBuffers are essentially wrappers
+
+
+81
+00:04:22,696 --> 00:04:25,966 line:-2
+around blocks of uncompressed
+raster image data.
+
+
+82
+00:04:26,033 --> 00:04:29,636 line:-2
+They have inherent properties
+like pixel format, height, width,
+
+
+83
+00:04:29,703 --> 00:04:31,672 line:-1
+and row bytes or pitch,
+
+
+84
+00:04:31,738 --> 00:04:35,108 line:-2
+but they can also carry attachments
+which describe the image data,
+
+
+85
+00:04:35,175 --> 00:04:36,643 line:-1
+things like color tags.
+
+
+86
+00:04:38,178 --> 00:04:40,514 line:-1
+Next we have CMBlockBuffer.
+
+
+87
+00:04:40,581 --> 00:04:42,816 line:-2
+This type is defined
+in the Core Media framework
+
+
+88
+00:04:42,883 --> 00:04:46,286 line:-2
+and serves as a basic type
+for wrapping arbitrary blocks of data,
+
+
+89
+00:04:46,353 --> 00:04:48,422 line:-1
+usually compressed sample data.
+
+
+90
+00:04:50,224 --> 00:04:52,392 line:-1
+Then we have CMSampleBuffers.
+
+
+91
+00:04:52,459 --> 00:04:55,529 line:-2
+CMSampleBuffers
+come in three main flavors.
+
+
+92
+00:04:55,596 --> 00:04:58,632 line:-2
+First, a CMSampleBuffer
+can wrap a CMBlockBuffer
+
+
+93
+00:04:58,699 --> 00:05:00,901 line:-1
+containing compressed audio or video data.
+
+
+94
+00:05:02,669 --> 00:05:06,273 line:-2
+Second, a CMSampleBuffer
+can wrap a CVPixelBuffer
+
+
+95
+00:05:06,340 --> 00:05:08,976 line:-1
+containing uncompressed raster image data.
+
+
+96
+00:05:10,410 --> 00:05:12,913 line:-2
+As you can see,
+both types of CMSampleBuffers
+
+
+97
+00:05:12,980 --> 00:05:14,414 line:-1
+contain CMTime values
+
+
+98
+00:05:14,481 --> 00:05:18,151 line:-2
+which describe the sample's presentation
+and decode timestamps.
+
+
+99
+00:05:18,218 --> 00:05:20,487 line:-1
+They also contain a CMFormatDescription
+
+
+100
+00:05:20,554 --> 00:05:23,190 line:-2
+which carries information describing
+the format of the data
+
+
+101
+00:05:23,257 --> 00:05:24,358 line:-1
+in the SampleBuffer.
+
+
+102
+00:05:26,527 --> 00:05:28,896 line:-2
+CMSampleBuffers
+can also carry attachments,
+
+
+103
+00:05:28,962 --> 00:05:32,232 line:-2
+and this brings us to the third type
+of CMSampleBuffer,
+
+
+104
+00:05:32,299 --> 00:05:37,538 line:-2
+a marker CMSampleBuffer which has
+no CMBlockBuffer or CVPixelBuffer
+
+
+105
+00:05:37,604 --> 00:05:40,741 line:-2
+and exists entirely
+to carry timed attachments
+
+
+106
+00:05:40,807 --> 00:05:43,710 line:-2
+through a media pipeline
+signaling specific conditions.
+
+
+107
+00:05:46,180 --> 00:05:48,081 line:-1
+Next we have IOSurface.
+
+
+108
+00:05:48,148 --> 00:05:51,485 line:-2
+An IOSurface is a very clever abstraction
+around a piece of memory,
+
+
+109
+00:05:51,552 --> 00:05:54,288 line:-1
+often used for image data.
+
+
+110
+00:05:54,354 --> 00:05:57,391 line:-2
+We talked about the raster data
+in a CVPixelBuffer.
+
+
+111
+00:05:57,457 --> 00:06:00,527 line:-2
+That raster data is usually
+in the form of an IOSurface.
+
+
+112
+00:06:02,362 --> 00:06:05,299 line:-2
+IOSurfaces can also be used
+as the basis for the memory
+
+
+113
+00:06:05,365 --> 00:06:07,234 line:-1
+for a texture in Metal as well.
+
+
+114
+00:06:08,969 --> 00:06:12,606 line:-2
+IOSurface allows the memory
+to be efficiently moved between frameworks
+
+
+115
+00:06:12,673 --> 00:06:14,474 line:-1
+like Core Video and Metal,
+
+
+116
+00:06:14,541 --> 00:06:16,910 line:-2
+between processes
+like the sandboxed decoder
+
+
+117
+00:06:16,977 --> 00:06:17,978 line:-1
+and your application,
+
+
+118
+00:06:18,045 --> 00:06:20,480 line:-1
+or even between different memory regions,
+
+
+119
+00:06:20,547 --> 00:06:23,750 line:-2
+such as transfer between VRAM
+in different GPUs.
+
+
+120
+00:06:25,986 --> 00:06:29,356 line:-2
+And our final stop in our glossary
+is the CVPixelBufferPool.
+
+
+121
+00:06:30,657 --> 00:06:33,193 line:-2
+CVPixelBufferPools
+are objects from Core Video
+
+
+122
+00:06:33,260 --> 00:06:37,831 line:-2
+which allow video pipelines to efficiently
+recycle buffers used for image data.
+
+
+123
+00:06:39,533 --> 00:06:43,704 line:-2
+In most cases,
+CVPixelBuffers will wrap IOSurfaces.
+
+
+124
+00:06:43,770 --> 00:06:46,807 line:-2
+When a CVPixelBuffer
+allocated from a pool is released
+
+
+125
+00:06:46,874 --> 00:06:48,275 line:-1
+and no longer in use,
+
+
+126
+00:06:48,342 --> 00:06:51,645 line:-2
+the IOSurface will go back
+into the CVPixelBufferPool
+
+
+127
+00:06:51,712 --> 00:06:55,315 line:-2
+so that the next CVPixelBuffer
+allocated from the pool
+
+
+128
+00:06:55,382 --> 00:06:57,451 line:-1
+can reuse that memory.
+
+
+129
+00:06:57,518 --> 00:07:00,821 line:-2
+This means that CVPixelBufferPools
+have some fixed characteristics,
+
+
+130
+00:07:00,888 --> 00:07:02,923 line:-1
+just like CVPixelBuffers:
+
+
+131
+00:07:02,990 --> 00:07:06,627 line:-2
+the pixel format, height, width,
+and row bytes or pitch.
+
+
+132
+00:07:08,695 --> 00:07:12,399 line:-2
+All right, let's get straight into
+how AV Foundation can do it all for you.
+
+
+133
+00:07:12,466 --> 00:07:14,334 line:-1
+Let's go back to our original problem.
+
+
+134
+00:07:14,401 --> 00:07:16,403 line:-1
+You have a ProRes movie file,
+
+
+135
+00:07:16,470 --> 00:07:18,605 line:-2
+you have your awesome
+Metal rendering engine,
+
+
+136
+00:07:18,672 --> 00:07:21,542 line:-2
+and you want to get frames from that movie
+into your renderer.
+
+
+137
+00:07:22,809 --> 00:07:25,012 line:-1
+AVAssetReader can do it all for you.
+
+
+138
+00:07:25,078 --> 00:07:27,281 line:-1
+It reads samples from the source file,
+
+
+139
+00:07:27,347 --> 00:07:31,485 line:-2
+optimizing them for the RPC
+that will happen in the Video Toolbox.
+
+
+140
+00:07:31,552 --> 00:07:35,656 line:0
+It decodes the video data
+in the sandbox process,
+
+
+141
+00:07:35,722 --> 00:07:38,325 line:0
+and it provides
+the decoded CVPixelBuffers
+
+
+142
+00:07:38,392 --> 00:07:40,027 line:0
+in the requested output format.
+
+
+143
+00:07:41,795 --> 00:07:44,531 line:-2
+Creating an AVAssetReader
+is pretty easy.
+
+
+144
+00:07:44,598 --> 00:07:48,569 line:-2
+First we create an AVAsset
+with a URL to a local movie.
+
+
+145
+00:07:49,870 --> 00:07:53,273 line:-2
+Then we create an AVAssetReader
+with that AVAsset,
+
+
+146
+00:07:53,340 --> 00:07:55,876 line:-2
+but the AVAssetReader
+isn't ready to use yet.
+
+
+147
+00:07:57,144 --> 00:07:59,980 line:-2
+Requesting decoded data
+from the AVAssetReader
+
+
+148
+00:08:00,047 --> 00:08:02,916 line:-2
+involves configuring
+an AVAssetReaderTrackOutput.
+
+
+149
+00:08:04,017 --> 00:08:05,986 line:-1
+First we need to get the video track.
+
+
+150
+00:08:06,053 --> 00:08:09,323 line:-2
+Here we're getting an array
+of all of the video tracks in the movie,
+
+
+151
+00:08:09,389 --> 00:08:12,125 line:-2
+and then selecting the first track
+in that array.
+
+
+152
+00:08:12,192 --> 00:08:14,528 line:-1
+Your logic for selecting tracks may vary.
+
+
+153
+00:08:16,597 --> 00:08:19,333 line:-2
+Now we create
+an AVAssetReaderTrackOutput
+
+
+154
+00:08:19,399 --> 00:08:22,135 line:-1
+based on the video track we selected.
+
+
+155
+00:08:22,202 --> 00:08:24,872 line:-2
+In this case,
+I'm choosing to configure the output
+
+
+156
+00:08:24,938 --> 00:08:29,676 line:-1
+to return 16-bit 4:4:4:4 YCbCr with alpha,
+
+
+157
+00:08:29,743 --> 00:08:31,178 line:-1
+or Y416,
+
+
+158
+00:08:31,245 --> 00:08:36,116 line:-2
+which is a great native format to use
+when working with ProRes 4444 content.
+
+
+159
+00:08:36,183 --> 00:08:39,285 line:0
+Next, we're going to instruct
+the AVAssetReaderTrackOutput
+
+
+160
+00:08:39,352 --> 00:08:42,121 line:0
+to not copy samples when returning them.
+
+
+161
+00:08:42,188 --> 00:08:44,725 line:0
+When setting this,
+we will get optimal efficiency,
+
+
+162
+00:08:44,791 --> 00:08:47,561 line:0
+but it also indicates
+that the returned CMSampleBuffers
+
+
+163
+00:08:47,628 --> 00:08:51,765 line:0
+may be retained elsewhere,
+and we absolutely must not modify them.
+
+
+164
+00:08:53,133 --> 00:08:56,670 line:0
+And finally, we need to add this output
+to our AVAssetReader.
+
+
+165
+00:08:57,437 --> 00:08:59,573 line:-2
+Running an AVAssetReader
+is pretty simple.
+
+
+166
+00:08:59,640 --> 00:09:03,110 line:-2
+I'll show you it operating
+in its simplest possible mode here.
+
+
+167
+00:09:03,177 --> 00:09:05,112 line:-1
+First, we just start it reading.
+
+
+168
+00:09:06,780 --> 00:09:09,917 line:-2
+Then we can loop over calls
+to copyNextSampleBuffer,
+
+
+169
+00:09:09,983 --> 00:09:13,120 line:-2
+and since we've configured it
+to provide decoded output,
+
+
+170
+00:09:13,187 --> 00:09:17,424 line:-2
+we check each output CMSampleBuffer
+for a CVImageBuffer.
+
+
+171
+00:09:17,491 --> 00:09:22,496 line:-2
+We will get some marker CMSampleBuffers
+with no image buffers, but this is okay.
+
+
+172
+00:09:22,563 --> 00:09:25,165 line:-2
+Using an AVAssetReader,
+you can set time ranges
+
+
+173
+00:09:25,232 --> 00:09:27,568 line:-1
+or do other more advanced operations
+
+
+174
+00:09:27,634 --> 00:09:30,204 line:-2
+rather than this simple iteration
+through the track.
+
+
+175
+00:09:30,270 --> 00:09:32,506 line:-1
+Your video pipeline will be most efficient
+
+
+176
+00:09:32,573 --> 00:09:34,808 line:-2
+if your renderer
+is able to consume buffers
+
+
+177
+00:09:34,875 --> 00:09:37,444 line:-1
+in a format that is native to the decoder.
+
+
+178
+00:09:37,511 --> 00:09:40,581 line:-2
+AVAssetReader
+will convert the decoder output
+
+
+179
+00:09:40,647 --> 00:09:44,384 line:-2
+from the decoder's native format
+to your requested output format
+
+
+180
+00:09:44,451 --> 00:09:47,921 line:-2
+if you are requesting a format
+that the decoder does not support.
+
+
+181
+00:09:48,388 --> 00:09:49,857 line:-1
+But avoiding these buffer copies
+
+
+182
+00:09:49,923 --> 00:09:53,660 line:-2
+will improve
+your application efficiency immensely.
+
+
+183
+00:09:53,727 --> 00:09:56,530 line:-2
+Here are some guidelines
+on choosing an output pixel format
+
+
+184
+00:09:56,597 --> 00:09:58,866 line:-1
+that will not result in a conversion.
+
+
+185
+00:09:59,733 --> 00:10:03,370 line:-2
+In the previous example,
+we configured the AVAssetReaderOutput
+
+
+186
+00:10:03,437 --> 00:10:09,009 line:-2
+to return buffers in 16-bit 4:4:4:4 YCbCr
+with alpha,
+
+
+187
+00:10:09,309 --> 00:10:10,978 line:-1
+or Y416,
+
+
+188
+00:10:11,044 --> 00:10:15,082 line:-2
+which is the optimal format
+when using ProRes 4444.
+
+
+189
+00:10:16,083 --> 00:10:21,488 line:-2
+For ProRes 422, 16-bit 4:2:2 YCbCr,
+or v216,
+
+
+190
+00:10:21,555 --> 00:10:23,924 line:-2
+is the most native decoder format
+to request.
+
+
+191
+00:10:24,825 --> 00:10:30,497 line:-2
+For ProRes RAW, RGBA half-float, or RGhA,
+provides the most native output.
+
+
+192
+00:10:31,865 --> 00:10:32,966 line:-1
+Sometimes there's reasons
+
+
+193
+00:10:33,033 --> 00:10:36,803 line:-2
+why one doesn't want to rely
+on AVAssetReader to do everything.
+
+
+194
+00:10:36,870 --> 00:10:39,573 line:-2
+In these cases, you'll need to generate
+CMSampleBuffers
+
+
+195
+00:10:39,640 --> 00:10:42,509 line:-1
+to feed directly to the Video Toolbox.
+
+
+196
+00:10:42,576 --> 00:10:45,112 line:-1
+There are three main options here.
+
+
+197
+00:10:45,179 --> 00:10:49,082 line:0
+First, you can use AVAssetReader,
+much like we described a moment ago,
+
+
+198
+00:10:49,149 --> 00:10:51,752 line:0
+but you can request that it give you
+the compressed data
+
+
+199
+00:10:51,818 --> 00:10:53,787 line:0
+without decoding it first.
+
+
+200
+00:10:53,854 --> 00:10:55,923 line:0
+This provides track-level media access,
+
+
+201
+00:10:55,989 --> 00:10:58,525 line:0
+with awareness of edits
+and frame dependencies.
+
+
+202
+00:11:00,160 --> 00:11:02,896 line:0
+Second, there is
+AVSampleBufferGenerator.
+
+
+203
+00:11:02,963 --> 00:11:05,132 line:0
+This provides media-level access
+to samples,
+
+
+204
+00:11:05,199 --> 00:11:08,101 line:0
+with no awareness of edits
+and frame dependencies.
+
+
+205
+00:11:09,069 --> 00:11:12,206 line:0
+And finally, you can construct
+CMSampleBuffers yourself.
+
+
+206
+00:11:13,974 --> 00:11:15,876 line:-2
+Letting AVAssetReader
+generate your samples
+
+
+207
+00:11:15,943 --> 00:11:19,112 line:-2
+provides compressed data
+read directly from the AVAsset.
+
+
+208
+00:11:19,179 --> 00:11:21,415 line:-2
+AVAssetReader
+is doing track-level reading,
+
+
+209
+00:11:21,481 --> 00:11:23,650 line:-2
+which means it will provide
+all samples necessary
+
+
+210
+00:11:23,717 --> 00:11:25,919 line:-1
+to display frames at the target time,
+
+
+211
+00:11:25,986 --> 00:11:29,489 line:-2
+including handling edits
+and frame dependencies.
+
+
+212
+00:11:29,556 --> 00:11:31,158 line:-1
+Also, as noted earlier,
+
+
+213
+00:11:31,225 --> 00:11:35,195 line:-2
+AVAssetReader will provide samples
+which are optimized for RPC,
+
+
+214
+00:11:35,262 --> 00:11:39,066 line:-2
+reducing sandbox overhead when the frames
+are sent to the Video Toolbox.
+
+
+215
+00:11:40,968 --> 00:11:44,605 line:-2
+In order to get raw compressed output
+from the AVAssetReader,
+
+
+216
+00:11:44,671 --> 00:11:48,408 line:-2
+you simply need to construct
+the AVAssetReader as described earlier,
+
+
+217
+00:11:48,475 --> 00:11:51,645 line:-2
+but when creating
+the AVAssetReaderTrackOutput,
+
+
+218
+00:11:51,712 --> 00:11:53,814 line:-1
+you'll set the outputSettings to nil
+
+
+219
+00:11:53,881 --> 00:11:57,284 line:-2
+rather than providing a dictionary
+specifying a pixel format.
+
+
+220
+00:11:59,753 --> 00:12:03,357 line:-2
+AVSampleBufferGenerator provides
+samples read directly from the media
+
+
+221
+00:12:03,423 --> 00:12:05,192 line:-1
+in an AVAssetTrack.
+
+
+222
+00:12:05,259 --> 00:12:08,595 line:-2
+It uses an AVSampleBufferCursor
+to control the position in the track
+
+
+223
+00:12:08,662 --> 00:12:10,697 line:-1
+from which it will read media.
+
+
+224
+00:12:10,764 --> 00:12:13,600 line:-2
+It has no inherent awareness
+of frame dependencies,
+
+
+225
+00:12:13,667 --> 00:12:15,903 line:-2
+so this may be straightforward
+to use with ProRes,
+
+
+226
+00:12:15,969 --> 00:12:18,305 line:-2
+but care must be taken
+when using this interface
+
+
+227
+00:12:18,372 --> 00:12:20,641 line:-2
+with content
+with inter-frame dependencies,
+
+
+228
+00:12:20,707 --> 00:12:23,443 line:-1
+like HEVC and H.264.
+
+
+229
+00:12:23,510 --> 00:12:28,115 line:-2
+Here's a brief code snippet showing how
+an AVSampleBufferGenerator is created.
+
+
+230
+00:12:28,182 --> 00:12:30,384 line:-2
+First you need to create
+an AVSampleCursor
+
+
+231
+00:12:30,450 --> 00:12:32,486 line:-2
+which will be used
+for stepping through samples.
+
+
+232
+00:12:33,387 --> 00:12:36,223 line:-2
+You must also create
+an AVSampleBufferRequest
+
+
+233
+00:12:36,290 --> 00:12:39,359 line:-2
+which describes the actual sample requests
+you will be making.
+
+
+234
+00:12:40,827 --> 00:12:43,463 line:-2
+Now you can create
+the AVSampleBufferGenerator
+
+
+235
+00:12:43,530 --> 00:12:45,132 line:-1
+with your source AVAsset.
+
+
+236
+00:12:46,466 --> 00:12:48,635 line:-2
+Note that I'm setting
+the timebase to nil here,
+
+
+237
+00:12:48,702 --> 00:12:51,038 line:-2
+which will result
+in synchronous operation.
+
+
+238
+00:12:51,104 --> 00:12:54,007 line:-2
+For optimal performance
+with AVSampleBufferGenerator,
+
+
+239
+00:12:54,074 --> 00:12:57,878 line:-2
+you would provide a timebase
+and run your requests asynchronously.
+
+
+240
+00:12:59,012 --> 00:13:03,250 line:0
+Finally, I'm looping over calls
+to createSampleBufferForRequest
+
+
+241
+00:13:03,317 --> 00:13:06,019 line:0
+and stepping the cursor forward
+one frame at a time.
+
+
+242
+00:13:06,086 --> 00:13:10,023 line:-2
+Again, this shows the simplest possible
+synchronous operation.
+
+
+243
+00:13:10,090 --> 00:13:14,328 line:-2
+For optimal performance, one would use
+async versions of these requests.
+
+
+244
+00:13:14,828 --> 00:13:17,331 line:-2
+Finally, you can create
+CMSampleBuffers yourself
+
+
+245
+00:13:17,397 --> 00:13:19,233 line:-1
+if you're doing your own file reading
+
+
+246
+00:13:19,299 --> 00:13:22,870 line:-2
+or getting sample data
+from some other source, like the network.
+
+
+247
+00:13:22,936 --> 00:13:24,705 line:-2
+It's important to note
+that this sample data
+
+
+248
+00:13:24,771 --> 00:13:28,408 line:-2
+will not be optimized for transfer
+over the sandbox RPC.
+
+
+249
+00:13:29,176 --> 00:13:32,613 line:-2
+Earlier, we talked about the components
+of a CMSampleBuffer.
+
+
+250
+00:13:32,679 --> 00:13:35,883 line:-2
+Once again,
+there's the data in a CMBlockBuffer,
+
+
+251
+00:13:35,949 --> 00:13:39,052 line:-2
+a CMFormatDescription,
+and some timestamps.
+
+
+252
+00:13:39,987 --> 00:13:42,556 line:-2
+So, first you need to pack
+your sample data
+
+
+253
+00:13:42,623 --> 00:13:43,957 line:-1
+in a CMBlockBuffer.
+
+
+254
+00:13:45,325 --> 00:13:47,794 line:-2
+Then you need to create
+a CMVideoFormatDescription
+
+
+255
+00:13:47,861 --> 00:13:48,996 line:-1
+describing the data.
+
+
+256
+00:13:49,530 --> 00:13:51,932 line:-2
+Here it would be important to include
+the color tags
+
+
+257
+00:13:51,999 --> 00:13:53,700 line:-1
+in your extensionsDictionary
+
+
+258
+00:13:53,767 --> 00:13:56,270 line:-2
+to ensure proper color management
+for your video.
+
+
+259
+00:13:57,971 --> 00:14:03,277 line:-2
+Next you would create some timestamps
+in a CMSampleTimingInfo struct.
+
+
+260
+00:14:03,343 --> 00:14:07,147 line:-2
+And finally, create a CMSampleBuffer
+using the CMBlockBuffer,
+
+
+261
+00:14:07,214 --> 00:14:11,118 line:-2
+the CMVideoFormatDescription
+and the CMSampleTimingInfo.
+
+
+262
+00:14:12,452 --> 00:14:14,421 line:-1
+Okay, you've decided to do it yourself
+
+
+263
+00:14:14,488 --> 00:14:17,457 line:-2
+and you've created a source
+for CMSampleBuffers.
+
+
+264
+00:14:17,524 --> 00:14:18,992 line:-1
+On to the Video Toolbox.
+
+
+265
+00:14:19,693 --> 00:14:23,197 line:-2
+Let's take a look at the anatomy
+of a VTDecompressionSession.
+
+
+266
+00:14:24,031 --> 00:14:27,201 line:-2
+The VTDecompressionSession,
+of course, has a video decoder,
+
+
+267
+00:14:27,267 --> 00:14:28,368 line:-1
+and as described earlier,
+
+
+268
+00:14:28,435 --> 00:14:31,038 line:-2
+this will be running
+in a separate sandboxed process.
+
+
+269
+00:14:32,206 --> 00:14:34,308 line:0
+The session also has
+a CVPixelBufferPool
+
+
+270
+00:14:34,374 --> 00:14:36,743 line:0
+which is being used to create
+the output buffers
+
+
+271
+00:14:36,810 --> 00:14:38,445 line:0
+for decoded video frames.
+
+
+272
+00:14:39,746 --> 00:14:42,115 line:0
+And finally, if you have requested output
+
+
+273
+00:14:42,182 --> 00:14:45,285 line:0
+in a format which doesn't match
+what the decoder can provide,
+
+
+274
+00:14:45,352 --> 00:14:49,256 line:0
+there will be a VTPixelTransferSession
+to do the required conversion.
+
+
+275
+00:14:49,990 --> 00:14:52,793 line:-2
+Before you get started,
+if your application needs to access
+
+
+276
+00:14:52,860 --> 00:14:56,663 line:-2
+the set of specialized decoders
+distributed for Pro video workflows,
+
+
+277
+00:14:56,730 --> 00:14:58,498 line:-1
+your application can make a call
+
+
+278
+00:14:58,565 --> 00:15:03,637 line:-2
+to VTRegisterProfessional-
+VideoWorkflowVideoDecoders.
+
+
+279
+00:15:03,704 --> 00:15:06,807 line:-2
+This only needs to happen once
+in your application.
+
+
+280
+00:15:06,874 --> 00:15:09,009 line:-2
+The steps to use
+a VTDecompressionSession
+
+
+281
+00:15:09,076 --> 00:15:10,444 line:-1
+are pretty simple.
+
+
+282
+00:15:10,511 --> 00:15:13,013 line:-1
+First, create a VTDecompressionSession.
+
+
+283
+00:15:14,348 --> 00:15:18,652 line:-2
+Second, do any necessary configuration
+of the VTDecompressionSession
+
+
+284
+00:15:18,719 --> 00:15:21,688 line:-1
+via VTSessionSetProperty calls.
+
+
+285
+00:15:21,755 --> 00:15:23,190 line:-1
+This isn't always needed.
+
+
+286
+00:15:24,925 --> 00:15:27,227 line:-1
+Finally, begin sending frames using calls
+
+
+287
+00:15:27,294 --> 00:15:31,098 line:-2
+to VTDecompressionSession-
+DecodeFrameWithOutputHandler,
+
+
+288
+00:15:31,164 --> 00:15:34,001 line:-2
+or simply
+VTDecompressionSessionDecodeFrame.
+
+
+289
+00:15:35,636 --> 00:15:39,406 line:-2
+For optimal performance, it's recommended
+that asynchronous decode be enabled
+
+
+290
+00:15:39,473 --> 00:15:41,241 line:-1
+in your DecodeFrame calls.
+
+
+291
+00:15:41,308 --> 00:15:44,711 line:-2
+Let's look more closely at creating
+a VTDecompressionSession.
+
+
+292
+00:15:44,778 --> 00:15:47,447 line:-2
+There are three major options
+that need to be specified.
+
+
+293
+00:15:48,282 --> 00:15:50,584 line:-1
+First is the videoFormatDescription.
+
+
+294
+00:15:50,651 --> 00:15:53,687 line:-2
+This tells the VTDecompressionSession
+what codec will be used,
+
+
+295
+00:15:53,754 --> 00:15:56,356 line:-2
+and provides more details
+about the format of the data
+
+
+296
+00:15:56,423 --> 00:15:58,425 line:-1
+in the CMSampleBuffers.
+
+
+297
+00:15:58,492 --> 00:16:01,261 line:-2
+This should match
+the CMVideoFormatDescription
+
+
+298
+00:16:01,328 --> 00:16:04,932 line:-2
+of the CMSampleBuffers
+that you are about to send to the session.
+
+
+299
+00:16:06,867 --> 00:16:10,170 line:0
+Next is
+the destinationImageBufferAttributes.
+
+
+300
+00:16:10,237 --> 00:16:13,140 line:0
+This describes
+your output pixelBuffer requirements.
+
+
+301
+00:16:13,207 --> 00:16:14,641 line:0
+This can include dimensions
+
+
+302
+00:16:14,708 --> 00:16:17,878 line:0
+if you want the Video Toolbox
+to scale output to a certain size.
+
+
+303
+00:16:18,912 --> 00:16:23,050 line:0
+It can contain a specific pixelFormat
+if your rendering engine requires it.
+
+
+304
+00:16:23,116 --> 00:16:25,919 line:0
+If you only know
+how to consume 8-bit RGB samples,
+
+
+305
+00:16:25,986 --> 00:16:27,788 line:0
+this is where you would request that.
+
+
+306
+00:16:29,323 --> 00:16:31,525 line:0
+This can also be a high-level directive,
+
+
+307
+00:16:31,592 --> 00:16:35,229 line:0
+like a request to just provide
+Core Animation-compatible output.
+
+
+308
+00:16:37,464 --> 00:16:39,967 line:0
+Next is the videoDecoderSpecification,
+
+
+309
+00:16:40,033 --> 00:16:43,770 line:0
+which provides hints
+about factors for decoder selection.
+
+
+310
+00:16:43,837 --> 00:16:47,741 line:0
+This is where you specify
+non-default hardware decoder requests.
+
+
+311
+00:16:49,376 --> 00:16:51,478 line:-1
+Speaking of hardware decoder usage,
+
+
+312
+00:16:51,545 --> 00:16:54,047 line:-2
+as mentioned earlier,
+on current OS versions,
+
+
+313
+00:16:54,114 --> 00:16:56,450 line:-2
+hardware decoder usage
+is enabled by default
+
+
+314
+00:16:56,517 --> 00:16:58,952 line:-1
+for all formats where it's supported.
+
+
+315
+00:16:59,019 --> 00:17:03,123 line:-2
+This is a slight change from
+a few years ago when it was an opt-in.
+
+
+316
+00:17:03,524 --> 00:17:05,893 line:-2
+In current OSes,
+all hardware-accelerated codecs
+
+
+317
+00:17:05,959 --> 00:17:09,463 line:-2
+are available by default
+with no opt-ins required.
+
+
+318
+00:17:09,530 --> 00:17:12,398 line:-2
+If you want to guarantee
+that your VTDecompressionSession
+
+
+319
+00:17:12,465 --> 00:17:14,367 line:-1
+is created with a hardware decoder,
+
+
+320
+00:17:14,434 --> 00:17:17,704 line:-2
+and want session creation to fail
+if it isn't possible,
+
+
+321
+00:17:17,771 --> 00:17:21,275 line:-2
+you can pass in
+the RequireHardwareAcceleratedVideoDecoder
+
+
+322
+00:17:21,340 --> 00:17:23,977 line:-1
+specification option set to true.
+
+
+323
+00:17:25,378 --> 00:17:28,015 line:-2
+Similarly, if you want to disable
+hardware decode
+
+
+324
+00:17:28,080 --> 00:17:29,716 line:-1
+and use a software decoder,
+
+
+325
+00:17:29,783 --> 00:17:33,387 line:-2
+you can include
+EnableHardwareAcceleratedVideoDecoder
+
+
+326
+00:17:33,453 --> 00:17:36,256 line:-1
+specification option set to false.
+
+
+327
+00:17:36,323 --> 00:17:38,959 line:-2
+These two keys are awfully similar,
+so once more,
+
+
+328
+00:17:39,026 --> 00:17:42,596 line:-2
+the first key is
+RequireHardwareAcceleratedVideoDecoder
+
+
+329
+00:17:42,663 --> 00:17:46,300 line:-2
+and the second is
+EnableHardwareAcceleratedVideoDecoder.
+
+
+330
+00:17:46,366 --> 00:17:50,871 line:-2
+This sample shows the basics
+of VTDecompressionSession creation.
+
+
+331
+00:17:50,938 --> 00:17:53,440 line:-2
+The first thing that we need
+is a formatDescription
+
+
+332
+00:17:53,507 --> 00:17:56,109 line:-2
+to tell the session
+what type of data to expect.
+
+
+333
+00:17:56,176 --> 00:17:58,178 line:-2
+We pull this straight from
+a CMSampleBuffer
+
+
+334
+00:17:58,245 --> 00:18:00,647 line:-1
+that will be passed to the session later.
+
+
+335
+00:18:00,714 --> 00:18:03,050 line:-2
+If we want a specific pixelFormat
+for our output,
+
+
+336
+00:18:03,116 --> 00:18:05,452 line:-2
+we need to create
+a pixelBufferAttributes dictionary
+
+
+337
+00:18:05,519 --> 00:18:06,820 line:-1
+describing what we need.
+
+
+338
+00:18:07,254 --> 00:18:10,057 line:-2
+So, just like in the earlier
+AVAssetReader example,
+
+
+339
+00:18:10,123 --> 00:18:14,761 line:-2
+we're requesting 16-bit 4:4:4:4 YCbCr
+with alpha.
+
+
+340
+00:18:15,195 --> 00:18:18,065 line:-2
+Now we can create
+the VTDecompressionSession.
+
+
+341
+00:18:18,131 --> 00:18:21,301 line:0
+Note that we're passing in NULL
+for the third parameter,
+
+
+342
+00:18:21,368 --> 00:18:23,837 line:0
+the videoDecoderSpecification.
+
+
+343
+00:18:23,904 --> 00:18:25,639 line:0
+This NULL means that the Video Toolbox
+
+
+344
+00:18:25,706 --> 00:18:28,942 line:0
+will do its default
+hardware decoder selection.
+
+
+345
+00:18:30,310 --> 00:18:32,646 line:-2
+Once the VTDecompressionSession
+is created,
+
+
+346
+00:18:32,713 --> 00:18:36,183 line:-2
+the calls to DecodeFrame
+are fairly straightforward.
+
+
+347
+00:18:36,250 --> 00:18:38,852 line:-2
+As mentioned earlier,
+for optimal performance,
+
+
+348
+00:18:38,919 --> 00:18:42,990 line:-2
+the kVTDecodeFrame_Enable-
+AsynchronousDecompression flag
+
+
+349
+00:18:43,056 --> 00:18:45,092 line:-1
+should be set in the decodeFlags.
+
+
+350
+00:18:47,127 --> 00:18:51,565 line:0
+The block-based VTDecompressionSession-
+DecodeFrameWithOutputHandler
+
+
+351
+00:18:51,632 --> 00:18:54,334 line:0
+takes the compressed sampleBuffer,
+
+
+352
+00:18:54,401 --> 00:18:57,704 line:0
+the inFlags,
+which control decoder behavior,
+
+
+353
+00:18:57,771 --> 00:19:01,975 line:0
+and an output block which will be called
+with the results of the decode operation.
+
+
+354
+00:19:02,776 --> 00:19:07,014 line:-2
+As long as the VTDecompressionSession-
+DecodeFrameWithOutputHandler call
+
+
+355
+00:19:07,080 --> 00:19:08,582 line:-1
+doesn't return an error,
+
+
+356
+00:19:08,649 --> 00:19:12,252 line:-2
+your output block will be called
+with the results of the frame decode,
+
+
+357
+00:19:12,319 --> 00:19:15,222 line:-2
+either a CVImageBuffer
+or a decoder error.
+
+
+358
+00:19:15,923 --> 00:19:17,824 line:-1
+A quick note about decompression output.
+
+
+359
+00:19:18,258 --> 00:19:20,294 line:-1
+Decoder output is serialized.
+
+
+360
+00:19:20,360 --> 00:19:24,431 line:-2
+You should only see a single frame
+being returned from the decoder at a time.
+
+
+361
+00:19:24,498 --> 00:19:26,600 line:-1
+If you block inside of the decoder output,
+
+
+362
+00:19:26,667 --> 00:19:29,636 line:-2
+it will effectively block
+subsequent frame output
+
+
+363
+00:19:29,703 --> 00:19:32,806 line:-2
+and ultimately cause back pressure
+through the decoder.
+
+
+364
+00:19:34,341 --> 00:19:37,845 line:-2
+For best performance, you should make sure
+that processing and work is done
+
+
+365
+00:19:37,911 --> 00:19:40,547 line:-2
+outside of your session's output block
+or callback.
+
+
+366
+00:19:41,915 --> 00:19:46,753 line:-2
+Now let's talk a little bit about using
+decoded CVPixelBuffers with Metal.
+
+
+367
+00:19:46,820 --> 00:19:48,121 line:-1
+Before diving into this,
+
+
+368
+00:19:48,188 --> 00:19:51,725 line:-2
+it's important to review
+exactly how a CVPixelBufferPool works.
+
+
+369
+00:19:52,993 --> 00:19:54,161 line:-1
+As described before,
+
+
+370
+00:19:54,228 --> 00:19:59,233 line:-2
+when a CVPixelBuffer which was allocated
+from a CVPixelBufferPool is released,
+
+
+371
+00:19:59,299 --> 00:20:02,569 line:-2
+its IOSurface goes back
+into the CVPixelBufferPool,
+
+
+372
+00:20:02,636 --> 00:20:05,939 line:-2
+and the next time a CVPixelBuffer
+is allocated from the pool,
+
+
+373
+00:20:06,006 --> 00:20:09,943 line:-2
+the IOSurface will be recycled
+and used for the new CVPixelBuffer.
+
+
+374
+00:20:13,514 --> 00:20:15,716 line:-2
+With this in mind,
+it's easier to understand
+
+
+375
+00:20:15,782 --> 00:20:20,287 line:-2
+the pitfalls that one can encounter
+working with CVPixelBuffers and Metal.
+
+
+376
+00:20:20,354 --> 00:20:23,056 line:-2
+We need to ensure
+that IOSurfaces are not recycled
+
+
+377
+00:20:23,123 --> 00:20:24,925 line:-1
+while still being used by Metal.
+
+
+378
+00:20:27,060 --> 00:20:30,664 line:-2
+There are two main approaches
+to using CVPixelBuffers with Metal.
+
+
+379
+00:20:30,731 --> 00:20:33,433 line:-2
+One is the obvious bridge
+through IOSurface.
+
+
+380
+00:20:33,500 --> 00:20:35,736 line:-1
+The CVPixelBuffer contains an IOSurface
+
+
+381
+00:20:35,802 --> 00:20:39,006 line:-2
+and Metal knows how to use
+an IOSurface for texturing.
+
+
+382
+00:20:39,072 --> 00:20:41,408 line:-2
+But this path requires
+a bit of extra care.
+
+
+383
+00:20:43,243 --> 00:20:47,181 line:-2
+The second path is through
+Core Video's CVMetalTextureCache.
+
+
+384
+00:20:47,247 --> 00:20:50,817 line:-2
+This is less obvious, but generally
+simpler to use in a safe manner,
+
+
+385
+00:20:50,884 --> 00:20:53,420 line:-1
+and can provide some performance benefits.
+
+
+386
+00:20:54,688 --> 00:20:57,224 line:-2
+Using the IOSurface backing
+from a CVPixelBuffer
+
+
+387
+00:20:57,291 --> 00:20:59,259 line:-2
+directly with Metal
+appears straightforward,
+
+
+388
+00:20:59,326 --> 00:21:02,396 line:-2
+but there's a trick to ensuring
+that the IOSurface is not recycled
+
+
+389
+00:21:02,462 --> 00:21:06,166 line:-2
+by the CVPixelBufferPool
+while it's still in use by Metal.
+
+
+390
+00:21:07,534 --> 00:21:12,139 line:-2
+To go this route, you first need to get
+the IOSurface from the CVPixelBuffer,
+
+
+391
+00:21:12,206 --> 00:21:15,409 line:-2
+and you can then create a Metal texture
+with that IOSurface.
+
+
+392
+00:21:16,710 --> 00:21:18,612 line:-1
+But you need to ensure that the IOSurface
+
+
+393
+00:21:18,679 --> 00:21:21,148 line:-2
+is not recycled
+by the CVPixelBufferPool
+
+
+394
+00:21:21,215 --> 00:21:23,283 line:-1
+while it's still in use by Metal.
+
+
+395
+00:21:23,350 --> 00:21:26,620 line:-2
+So, we use
+the IOSurfaceIncrementUseCount call.
+
+
+396
+00:21:28,689 --> 00:21:30,757 line:-2
+To release the IOSurface
+back into the pool
+
+
+397
+00:21:30,824 --> 00:21:32,593 line:-1
+when Metal has finished with it,
+
+
+398
+00:21:32,659 --> 00:21:35,395 line:-2
+we set up a MTLCommandBuffer
+completion handler
+
+
+399
+00:21:35,462 --> 00:21:38,098 line:-1
+to run after our CommandBuffer completes,
+
+
+400
+00:21:38,165 --> 00:21:40,834 line:-2
+and we decrement
+the IOSurfaceUseCount here.
+
+
+401
+00:21:42,169 --> 00:21:44,972 line:-2
+Using CVMetalTextureCache
+to manage the interface
+
+
+402
+00:21:45,038 --> 00:21:48,542 line:-2
+between CVPixelBuffer and MetalTexture
+simplifies things,
+
+
+403
+00:21:48,609 --> 00:21:53,514 line:-2
+removing the need to manually track
+IOSurfaces and IOSurfaceUseCounts.
+
+
+404
+00:21:54,915 --> 00:21:59,353 line:-2
+To use this facility, you need to first
+create a CVMetalTextureCache.
+
+
+405
+00:21:59,419 --> 00:22:02,723 line:-2
+You can specify the Metal device
+you want to associate with here.
+
+
+406
+00:22:04,258 --> 00:22:08,295 line:0
+Now you can call
+CVMetalTextureCacheCreateTextureFromImage
+
+
+407
+00:22:08,362 --> 00:22:12,933 line:0
+to create a CVMetalTexture object
+associated with your CVPixelBuffer.
+
+
+408
+00:22:14,835 --> 00:22:18,639 line:0
+And getting the actual Metal texture
+from the CVMetalTextureCache
+
+
+409
+00:22:18,705 --> 00:22:22,743 line:0
+is a simple call
+to CVMetalTextureGetTexture.
+
+
+410
+00:22:24,545 --> 00:22:27,447 line:0
+And the last thing to keep in mind here
+is that once again,
+
+
+411
+00:22:27,514 --> 00:22:30,951 line:0
+you must set up a handler
+on your Metal command buffer completion,
+
+
+412
+00:22:31,018 --> 00:22:33,720 line:0
+or otherwise ensure
+that Metal is done with the texture
+
+
+413
+00:22:33,787 --> 00:22:36,190 line:0
+before you release the CVMetalTexture.
+
+
+414
+00:22:37,357 --> 00:22:42,029 line:-2
+CVMetalTextureCache also saves you from
+repeating the IOSurface texture binding
+
+
+415
+00:22:42,095 --> 00:22:45,332 line:-2
+when IOSurfaces
+which come from a CVPixelBufferPool
+
+
+416
+00:22:45,399 --> 00:22:49,169 line:-2
+are reused and are seen again,
+making it a little bit more efficient.
+
+
+417
+00:22:51,371 --> 00:22:54,174 line:-1
+Okay, so we covered a few topics here.
+
+
+418
+00:22:54,241 --> 00:22:58,812 line:-2
+We talked about when you will get
+hardware decode, and how to control it.
+
+
+419
+00:22:58,879 --> 00:23:01,748 line:-2
+We talked about how
+AV Foundation's AVAssetReader
+
+
+420
+00:23:01,815 --> 00:23:05,385 line:-2
+can simply and easily allow you
+to integrate accelerated video decoding
+
+
+421
+00:23:05,452 --> 00:23:07,521 line:-1
+with your custom rendering pipeline.
+
+
+422
+00:23:07,588 --> 00:23:10,090 line:-2
+We talked about how to construct
+CMSampleBuffers
+
+
+423
+00:23:10,157 --> 00:23:11,625 line:-1
+and use them with the Video Toolbox
+
+
+424
+00:23:11,692 --> 00:23:15,395 line:-2
+if using AVAssetReader on its own
+isn't a good fit for your use case.
+
+
+425
+00:23:16,897 --> 00:23:19,066 line:-2
+And finally,
+we talked about some best practices
+
+
+426
+00:23:19,132 --> 00:23:21,702 line:-1
+around using CVPixelBuffers with Metal.
+
+
+427
+00:23:22,102 --> 00:23:23,804 line:-1
+I hope that what we've discussed today
+
+
+428
+00:23:23,871 --> 00:23:27,441 line:-2
+helps you make your amazing video app
+a little bit more amazing.
+
+
+429
+00:23:27,508 --> 00:23:30,110 line:-1
+Thanks for watching and have a great WWDC.
+

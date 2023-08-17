@@ -1,0 +1,2522 @@
+1
+00:00:03,804 --> 00:00:06,773 line:-1
+Hello and welcome to WWDC.
+
+
+2
+00:00:08,074 --> 00:00:10,844 line:0
+Hello, I'm Kurt. Welcome to WWDC.
+
+
+3
+00:00:10,911 --> 00:00:13,413 line:0
+I'm here to talk about "Build for iPad."
+
+
+4
+00:00:13,480 --> 00:00:16,884 line:-2
+We're here to talk about
+making your app work great on the iPad
+
+
+5
+00:00:16,950 --> 00:00:20,521 line:-2
+using new features
+and a new look in iOS 14.
+
+
+6
+00:00:20,921 --> 00:00:23,924 line:-2
+We've redesigned our apps,
+like Mail, Notes and Home
+
+
+7
+00:00:23,991 --> 00:00:26,793 line:-2
+to take advantage
+of the power of the iPad.
+
+
+8
+00:00:26,860 --> 00:00:29,263 line:-2
+I'm going to point out
+some specific UI features
+
+
+9
+00:00:29,329 --> 00:00:31,231 line:-1
+that you can implement too.
+
+
+10
+00:00:31,298 --> 00:00:33,800 line:-1
+Mail has a new look with multiple columns.
+
+
+11
+00:00:33,867 --> 00:00:37,738 line:-2
+You can easily see just your e-mail
+or all of your mailboxes.
+
+
+12
+00:00:37,804 --> 00:00:41,909 line:-2
+With just a few simple gestures, you can
+hide or show exactly what you want.
+
+
+13
+00:00:42,342 --> 00:00:45,045 line:-2
+The sidebar list design
+is simple and clear.
+
+
+14
+00:00:45,112 --> 00:00:49,249 line:-2
+When I tap the edit button, now there
+are a lot more controls available.
+
+
+15
+00:00:49,316 --> 00:00:52,920 line:-2
+It's easy to build a simple list
+and then add accessories to it.
+
+
+16
+00:00:52,986 --> 00:00:56,790 line:-2
+In Notes, we've made it easier to get
+work done without all of the extra taps.
+
+
+17
+00:00:56,857 --> 00:01:00,494 line:-2
+For example, I brought up the color picker
+to choose a color for my marker.
+
+
+18
+00:01:00,561 --> 00:01:02,196 line:-1
+When I draw in the document,
+
+
+19
+00:01:02,262 --> 00:01:04,364 line:-2
+it automatically dismisses
+the color picker
+
+
+20
+00:01:04,431 --> 00:01:05,999 line:-1
+without needing a tap.
+
+
+21
+00:01:06,066 --> 00:01:07,267 line:-1
+Here's another example.
+
+
+22
+00:01:07,334 --> 00:01:11,405 line:-2
+The new design of Home on iPad
+has a sidebar with a list.
+
+
+23
+00:01:11,471 --> 00:01:14,208 line:-2
+When you use Catalyst
+to bring your app to the Mac,
+
+
+24
+00:01:14,274 --> 00:01:18,745 line:-2
+all of these features work there too,
+but they also use the new Mac design.
+
+
+25
+00:01:18,812 --> 00:01:21,181 line:-2
+We'll tell you how you can do the same
+with your app
+
+
+26
+00:01:21,248 --> 00:01:23,483 line:-1
+using new functionality in UIKit.
+
+
+27
+00:01:23,550 --> 00:01:27,454 line:-2
+Multi-column split view is now available.
+We'll give you an overview.
+
+
+28
+00:01:28,021 --> 00:01:30,858 line:-2
+We'll talk about how to implement lists
+in those columns
+
+
+29
+00:01:30,924 --> 00:01:32,926 line:-1
+and how to get the right look.
+
+
+30
+00:01:32,993 --> 00:01:36,296 line:-2
+We'll talk about reducing modality
+in your UI,
+
+
+31
+00:01:36,363 --> 00:01:40,234 line:-2
+and we'll give a case study
+how the Shortcut app did all those things.
+
+
+32
+00:01:40,300 --> 00:01:41,902 line:-1
+So, let's begin.
+
+
+33
+00:01:41,969 --> 00:01:45,839 line:-2
+The heart of a multi-column app
+is UISplitViewController.
+
+
+34
+00:01:45,906 --> 00:01:47,474 line:-1
+It's a container view controller
+
+
+35
+00:01:47,541 --> 00:01:49,843 line:-2
+that provides the structure
+around the content
+
+
+36
+00:01:49,910 --> 00:01:52,312 line:-1
+that you provide in your view controllers.
+
+
+37
+00:01:52,379 --> 00:01:56,416 line:-2
+In iOS 14, there's new API that makes it
+easy to set up and work with.
+
+
+38
+00:01:56,817 --> 00:01:59,920 line:-2
+Use this new initializer
+that specifies a style.
+
+
+39
+00:01:59,987 --> 00:02:04,491 line:-2
+Using this initializer enables
+new behavior and more new API.
+
+
+40
+00:02:04,958 --> 00:02:07,761 line:-2
+The style says up front
+how many columns you want.
+
+
+41
+00:02:07,828 --> 00:02:10,430 line:-2
+Use the double-column style
+for two columns.
+
+
+42
+00:02:10,497 --> 00:02:12,833 line:-1
+We call these primary and secondary.
+
+
+43
+00:02:13,433 --> 00:02:16,670 line:-2
+Then you specify
+which view controller goes in which column
+
+
+44
+00:02:16,737 --> 00:02:19,873 line:-2
+by calling setViewController
+for a specific column.
+
+
+45
+00:02:20,607 --> 00:02:25,179 line:-2
+For example, Home can provide
+one view controller for the primary column
+
+
+46
+00:02:25,245 --> 00:02:27,814 line:-2
+and another view controller
+for the secondary column.
+
+
+47
+00:02:28,315 --> 00:02:32,152 line:-2
+Three columns is just as easy.
+Use the triple-column style.
+
+
+48
+00:02:32,219 --> 00:02:35,022 line:-1
+What goes between primary and secondary?
+
+
+49
+00:02:35,088 --> 00:02:37,925 line:-2
+We call the new column in the middle
+"supplementary."
+
+
+50
+00:02:38,392 --> 00:02:41,528 line:-2
+Again, call setViewController
+to provide the view controller
+
+
+51
+00:02:41,595 --> 00:02:43,130 line:-1
+for the supplementary column.
+
+
+52
+00:02:43,197 --> 00:02:46,300 line:-2
+For instance, here's how Mail sets up
+their supplementary column.
+
+
+53
+00:02:46,366 --> 00:02:50,370 line:-2
+That's all you have to do
+to get double- and triple-column layouts.
+
+
+54
+00:02:50,437 --> 00:02:53,574 line:-1
+We've said this before, but to emphasize,
+
+
+55
+00:02:53,640 --> 00:02:57,044 line:-2
+we recommend you have one app
+for iPad and iPhone.
+
+
+56
+00:02:57,678 --> 00:02:59,446 line:-1
+If your app is structured into columns,
+
+
+57
+00:02:59,513 --> 00:03:03,717 line:-2
+use UISplitViewController
+as your window's root view controller.
+
+
+58
+00:03:04,651 --> 00:03:08,055 line:-2
+It handles the columns for you
+by showing the right view controllers
+
+
+59
+00:03:08,121 --> 00:03:10,424 line:-1
+in the right places at the right time.
+
+
+60
+00:03:11,024 --> 00:03:13,193 line:-1
+What happens is based on size classes.
+
+
+61
+00:03:13,861 --> 00:03:16,697 line:-2
+There are cases
+when there is a lot of horizontal space,
+
+
+62
+00:03:16,763 --> 00:03:20,467 line:-2
+like iPad full screen
+and large iPhones in landscape.
+
+
+63
+00:03:20,534 --> 00:03:23,370 line:-1
+We call this the regular width size class.
+
+
+64
+00:03:24,304 --> 00:03:26,106 line:-1
+Because there is so much room,
+
+
+65
+00:03:26,173 --> 00:03:29,543 line:-2
+UISplitViewController
+can show multiple columns side by side.
+
+
+66
+00:03:30,744 --> 00:03:33,547 line:-2
+In other cases,
+there's not so much horizontal space,
+
+
+67
+00:03:33,614 --> 00:03:37,217 line:-2
+like iPad apps in slide over
+and iPhones in portrait.
+
+
+68
+00:03:37,284 --> 00:03:39,987 line:-1
+We call that the compact width size class.
+
+
+69
+00:03:40,954 --> 00:03:43,390 line:-2
+There's clearly no room
+to show multiple columns,
+
+
+70
+00:03:43,457 --> 00:03:44,858 line:-1
+so what do we do?
+
+
+71
+00:03:45,492 --> 00:03:48,462 line:-2
+You can choose to specify
+a separate view controller
+
+
+72
+00:03:48,529 --> 00:03:50,531 line:-1
+that's used when the width is compact,
+
+
+73
+00:03:50,597 --> 00:03:53,000 line:-2
+and it can use
+a different navigation scheme
+
+
+74
+00:03:53,066 --> 00:03:55,002 line:-1
+that's tailored for the space available.
+
+
+75
+00:03:55,068 --> 00:03:57,271 line:-2
+You give us another view controller
+for that column
+
+
+76
+00:03:57,337 --> 00:03:59,740 line:-1
+by calling setViewControllerForCompact.
+
+
+77
+00:04:00,274 --> 00:04:02,075 line:-1
+That's all. We do the rest.
+
+
+78
+00:04:02,142 --> 00:04:04,178 line:-1
+For example, here's Shortcuts.
+
+
+79
+00:04:04,244 --> 00:04:05,712 line:-1
+They use a tab bar controller
+
+
+80
+00:04:05,779 --> 00:04:08,081 line:-2
+to implement a different method
+of navigation
+
+
+81
+00:04:08,148 --> 00:04:10,050 line:-1
+that works in that smaller area.
+
+
+82
+00:04:10,117 --> 00:04:14,688 line:-2
+To sum up, don't think of it as designing
+an iPad app and an iPhone app.
+
+
+83
+00:04:14,755 --> 00:04:17,324 line:-2
+Instead,
+you're designing two experiences--
+
+
+84
+00:04:17,391 --> 00:04:21,562 line:-2
+regular width, which has multiple columns,
+and compact width, which doesn't.
+
+
+85
+00:04:21,628 --> 00:04:24,431 line:-2
+Let's go back to talking
+about multiple columns.
+
+
+86
+00:04:24,498 --> 00:04:26,633 line:-2
+There are a lot of ways
+we can lay out those columns
+
+
+87
+00:04:26,700 --> 00:04:29,736 line:-2
+depending on how much space we have
+and how big they are.
+
+
+88
+00:04:29,803 --> 00:04:31,538 line:-1
+We call these display modes.
+
+
+89
+00:04:32,172 --> 00:04:34,274 line:-1
+We can show the secondary column only.
+
+
+90
+00:04:34,341 --> 00:04:36,076 line:-2
+That's when you're focusing
+on your content
+
+
+91
+00:04:36,143 --> 00:04:38,312 line:-2
+and you've hidden
+all of the other columns.
+
+
+92
+00:04:38,378 --> 00:04:41,248 line:-2
+You can show a single column
+beside your secondary
+
+
+93
+00:04:41,315 --> 00:04:43,517 line:-1
+or over, above the secondary.
+
+
+94
+00:04:44,184 --> 00:04:46,720 line:-2
+If there are three columns,
+there are even more choices.
+
+
+95
+00:04:46,787 --> 00:04:49,423 line:-2
+You can have two columns
+beside the secondary,
+
+
+96
+00:04:49,489 --> 00:04:53,493 line:-2
+or over it, or they can even displace it,
+pushing it aside.
+
+
+97
+00:04:54,528 --> 00:04:56,730 line:-1
+To move between these display modes,
+
+
+98
+00:04:56,797 --> 00:04:59,700 line:-2
+SplitViewController
+automatically creates appropriate buttons
+
+
+99
+00:04:59,766 --> 00:05:01,902 line:-1
+and makes them appear in the right places.
+
+
+100
+00:05:01,969 --> 00:05:04,905 line:-2
+For example, here we're showing
+and hiding the columns in Notes
+
+
+101
+00:05:04,972 --> 00:05:06,473 line:-1
+by pressing buttons.
+
+
+102
+00:05:06,540 --> 00:05:09,243 line:-2
+You can also swipe from the edge
+to show more columns
+
+
+103
+00:05:09,309 --> 00:05:11,512 line:-1
+and tap to hide all of the columns.
+
+
+104
+00:05:12,112 --> 00:05:16,049 line:-2
+The buttons and gestures are enabled
+by the property presentsWithGesture.
+
+
+105
+00:05:16,116 --> 00:05:18,185 line:-2
+By default, it's "true,"
+but set it to "false"
+
+
+106
+00:05:18,252 --> 00:05:20,354 line:-1
+and those buttons and gestures go away.
+
+
+107
+00:05:20,420 --> 00:05:24,358 line:-2
+The property showsSecondaryOnlyButton
+enables an additional button
+
+
+108
+00:05:24,424 --> 00:05:26,693 line:-1
+which hides all but the secondary column.
+
+
+109
+00:05:26,760 --> 00:05:28,529 line:-1
+You just saw that in Notes.
+
+
+110
+00:05:28,595 --> 00:05:31,265 line:-2
+The preferredSplitBehavior property
+can be set
+
+
+111
+00:05:31,331 --> 00:05:35,135 line:-2
+to determine what display modes
+the buttons and gestures will use.
+
+
+112
+00:05:35,202 --> 00:05:38,739 line:-2
+For example, if you prefer that
+the columns are side by side in your app,
+
+
+113
+00:05:38,805 --> 00:05:40,407 line:-1
+use the tile behavior.
+
+
+114
+00:05:40,474 --> 00:05:43,410 line:-2
+Pressing the button
+will move through these display modes.
+
+
+115
+00:05:43,477 --> 00:05:47,481 line:-2
+The displace behavior is similar,
+but when three columns are shown,
+
+
+116
+00:05:47,548 --> 00:05:50,184 line:-2
+we push the secondary column
+partially off-screen.
+
+
+117
+00:05:51,285 --> 00:05:54,821 line:-2
+The overlay behavior, of course,
+uses the overlay display modes.
+
+
+118
+00:05:55,889 --> 00:05:59,393 line:-2
+At any time, you can request
+that a column be hidden or shown.
+
+
+119
+00:05:59,459 --> 00:06:01,795 line:-1
+Just say which column you want to change.
+
+
+120
+00:06:01,862 --> 00:06:05,065 line:-2
+UISplitViewController
+will automatically do a smooth transition
+
+
+121
+00:06:05,132 --> 00:06:06,733 line:-1
+to fulfill your request.
+
+
+122
+00:06:07,601 --> 00:06:10,737 line:-2
+Finally, if you know your app
+always wants the same layout,
+
+
+123
+00:06:10,804 --> 00:06:13,140 line:-1
+specify that with preferredDisplayMode.
+
+
+124
+00:06:13,207 --> 00:06:14,808 line:-1
+For instance, an app like Reminders
+
+
+125
+00:06:14,875 --> 00:06:17,811 line:-2
+that always wants to have two columns
+side by side,
+
+
+126
+00:06:17,878 --> 00:06:21,281 line:-2
+would set preferredDisplayMode
+to oneBesideSecondary.
+
+
+127
+00:06:21,348 --> 00:06:24,518 line:-2
+I said the buttons get added
+automatically. How does that work?
+
+
+128
+00:06:25,252 --> 00:06:28,088 line:-2
+Because each column
+now has a navigation controller
+
+
+129
+00:06:28,155 --> 00:06:29,990 line:-1
+that's automatically created for you.
+
+
+130
+00:06:30,057 --> 00:06:33,360 line:-2
+And each navigation controller
+has a navigation bar at the top
+
+
+131
+00:06:33,427 --> 00:06:35,662 line:-1
+and an optional toolbar at the bottom.
+
+
+132
+00:06:35,729 --> 00:06:38,699 line:-2
+That means that UIKit
+can put buttons in those bars,
+
+
+133
+00:06:38,765 --> 00:06:41,235 line:-1
+and so can you using the standard methods.
+
+
+134
+00:06:41,802 --> 00:06:43,770 line:-1
+There are a lot more details.
+
+
+135
+00:06:43,837 --> 00:06:45,772 line:-2
+We recommend
+you check out the documentation
+
+
+136
+00:06:45,839 --> 00:06:49,977 line:-2
+to learn more about new delegate methods,
+ways of controlling the widths of columns
+
+
+137
+00:06:50,043 --> 00:06:53,080 line:-2
+and also how to animate
+alongside the transitions.
+
+
+138
+00:06:53,146 --> 00:06:55,382 line:-2
+The Human Interface Guidelines
+also explain
+
+
+139
+00:06:55,449 --> 00:06:57,784 line:-1
+how split views are intended to be used.
+
+
+140
+00:06:58,352 --> 00:07:00,954 line:-2
+Now let's talk about the contents
+of each column.
+
+
+141
+00:07:01,021 --> 00:07:05,726 line:-2
+Often, you want to show lists
+in your primary and supplementary columns.
+
+
+142
+00:07:05,792 --> 00:07:09,796 line:-2
+For instance, Mail shows
+a list of mailboxes in the primary view
+
+
+143
+00:07:09,863 --> 00:07:12,733 line:-2
+and a list of mail messages
+in the supplementary view.
+
+
+144
+00:07:13,200 --> 00:07:16,637 line:0
+The modern way to show lists
+is using UICollectionView.
+
+
+145
+00:07:16,703 --> 00:07:20,774 line:0
+It's very powerful and very flexible,
+and it's what we recommend going forward.
+
+
+146
+00:07:20,841 --> 00:07:24,044 line:0
+There's an overview video that explains
+all the new API--
+
+
+147
+00:07:24,111 --> 00:07:26,446 line:0
+"Advances in UICollectionView."
+
+
+148
+00:07:26,513 --> 00:07:29,249 line:-1
+I'm going to focus on a specific topic--
+
+
+149
+00:07:29,316 --> 00:07:33,687 line:-2
+getting the right appearance
+for the primary and supplementary columns,
+
+
+150
+00:07:33,754 --> 00:07:35,789 line:-1
+and I'll give you a recipe to follow.
+
+
+151
+00:07:35,856 --> 00:07:38,492 line:-2
+Let's dive into how to set up
+a collection view.
+
+
+152
+00:07:38,559 --> 00:07:40,394 line:-1
+This will be similar for all lists,
+
+
+153
+00:07:40,460 --> 00:07:43,864 line:-2
+but we'll work through an example
+that has items that are kinds of weather.
+
+
+154
+00:07:43,931 --> 00:07:46,466 line:-1
+Each item shows an image and a title.
+
+
+155
+00:07:46,533 --> 00:07:50,003 line:-2
+We do this setup once
+when we create the collection view.
+
+
+156
+00:07:50,070 --> 00:07:52,239 line:-2
+To make the collection view,
+we need a layout.
+
+
+157
+00:07:52,306 --> 00:07:56,443 line:-2
+That specifies the details about how
+the items are arranged in a vertical list.
+
+
+158
+00:07:56,510 --> 00:07:59,346 line:-2
+And we make a layout
+based on a list configuration.
+
+
+159
+00:07:59,413 --> 00:08:01,882 line:-2
+That specifies the default appearance
+of cells,
+
+
+160
+00:08:01,949 --> 00:08:05,619 line:-2
+whether there are headers and footers
+and other details.
+
+
+161
+00:08:05,686 --> 00:08:08,088 line:-2
+When we write the code,
+it's from the inside out.
+
+
+162
+00:08:08,155 --> 00:08:10,123 line:-1
+First we make a list configuration.
+
+
+163
+00:08:10,190 --> 00:08:13,227 line:-2
+That's
+a UICollectionLayoutListConfiguration
+
+
+164
+00:08:13,293 --> 00:08:15,229 line:-1
+using the sidebar appearance.
+
+
+165
+00:08:15,295 --> 00:08:17,998 line:-2
+There are other appearances
+and properties you can change,
+
+
+166
+00:08:18,065 --> 00:08:19,566 line:-1
+but start with the defaults.
+
+
+167
+00:08:20,167 --> 00:08:24,338 line:-2
+Then make the layout
+a UICollectionViewCompositionalLayout
+
+
+168
+00:08:24,404 --> 00:08:28,041 line:-2
+using the list method, which makes it
+a simple, vertically scrolling list,
+
+
+169
+00:08:28,108 --> 00:08:31,011 line:-2
+and it's based on that configuration
+you already created.
+
+
+170
+00:08:31,078 --> 00:08:33,780 line:-2
+Finally, create the collection view
+and give it the layout.
+
+
+171
+00:08:33,847 --> 00:08:36,683 line:-2
+We do all of this once,
+and we don't have to touch it again.
+
+
+172
+00:08:37,384 --> 00:08:40,953 line:-2
+Next, we connect your data
+to the contents of the cells in the list,
+
+
+173
+00:08:41,020 --> 00:08:43,457 line:-2
+and this is where the details
+of your app come in.
+
+
+174
+00:08:43,524 --> 00:08:46,193 line:-2
+In this example,
+I have a simple structure called MyItem.
+
+
+175
+00:08:46,260 --> 00:08:48,362 line:-1
+It contains a title and an image,
+
+
+176
+00:08:48,428 --> 00:08:51,164 line:-2
+and my data store
+is an array of these structures.
+
+
+177
+00:08:51,231 --> 00:08:53,867 line:-2
+Here's one instance of it
+where the title is "Sunny"
+
+
+178
+00:08:53,934 --> 00:08:56,637 line:-2
+and the image is a system image
+showing the sun.
+
+
+179
+00:08:56,703 --> 00:08:59,339 line:-2
+Now we need some code
+to take an instance of this structure
+
+
+180
+00:08:59,406 --> 00:09:01,175 line:-1
+and show it in a cell.
+
+
+181
+00:09:01,241 --> 00:09:03,810 line:-1
+There's a new simple method in iOS 14.
+
+
+182
+00:09:03,877 --> 00:09:06,046 line:-1
+You create a CellRegistration.
+
+
+183
+00:09:06,113 --> 00:09:10,717 line:-2
+That says that given a cell of a certain
+type and data of a certain type,
+
+
+184
+00:09:10,784 --> 00:09:13,887 line:-2
+here's the code to run
+to put the data in the cell.
+
+
+185
+00:09:13,954 --> 00:09:17,758 line:-2
+For a list, you want the cell type
+to be UICollectionViewListCell.
+
+
+186
+00:09:17,824 --> 00:09:20,761 line:-2
+There are a lot of possibilities
+for how this cell can look.
+
+
+187
+00:09:20,827 --> 00:09:23,931 line:-2
+It's very general.
+The way we're setting up the content,
+
+
+188
+00:09:23,997 --> 00:09:27,134 line:-2
+it will contain an image view
+and a label next to each other.
+
+
+189
+00:09:27,201 --> 00:09:30,637 line:-2
+I'm showing question marks right now
+because we haven't filled them in yet.
+
+
+190
+00:09:30,704 --> 00:09:34,107 line:-2
+The data type is up to you.
+In this example, it's MyItem.
+
+
+191
+00:09:34,174 --> 00:09:35,642 line:-1
+Now let's fill in the code.
+
+
+192
+00:09:36,243 --> 00:09:38,579 line:-2
+We make a cellRegistration
+with those types
+
+
+193
+00:09:38,645 --> 00:09:40,414 line:-1
+and give it a closure to run.
+
+
+194
+00:09:40,480 --> 00:09:45,052 line:-2
+The closure's given the cell, the index
+path on the collection view and the item.
+
+
+195
+00:09:45,118 --> 00:09:48,088 line:-2
+Next we use
+the new contentConfiguration API
+
+
+196
+00:09:48,155 --> 00:09:49,990 line:-1
+to specify the cell contents.
+
+
+197
+00:09:50,057 --> 00:09:52,226 line:-2
+There are several
+built-in content configurations
+
+
+198
+00:09:52,292 --> 00:09:53,861 line:-1
+for different looking cells,
+
+
+199
+00:09:53,927 --> 00:09:57,231 line:-2
+but usually you want to
+use the default for the cell.
+
+
+200
+00:09:57,297 --> 00:09:58,765 line:-1
+We just take our item's properties
+
+
+201
+00:09:58,832 --> 00:10:01,401 line:-2
+and transfer them
+into the content configuration
+
+
+202
+00:10:01,468 --> 00:10:04,171 line:-2
+and then, finally,
+apply that content to the cell.
+
+
+203
+00:10:04,738 --> 00:10:08,842 line:-2
+When your code is called, it fills in
+the cell, and you see the results.
+
+
+204
+00:10:11,578 --> 00:10:13,714 line:-1
+Finally, we'll connect the last piece--
+
+
+205
+00:10:13,780 --> 00:10:16,783 line:-1
+make a UICollectionViewDiffableDataSource.
+
+
+206
+00:10:16,850 --> 00:10:19,620 line:-2
+This tells the collection view
+what items to show,
+
+
+207
+00:10:19,686 --> 00:10:21,455 line:-1
+and it's based on your data store.
+
+
+208
+00:10:21,522 --> 00:10:24,358 line:-2
+You push items from your data store
+into it.
+
+
+209
+00:10:24,424 --> 00:10:28,128 line:-2
+Then the data source calls its closure
+to create cells to display.
+
+
+210
+00:10:28,729 --> 00:10:32,499 line:-2
+There's a lot going on here, but all
+lists will follow the same pattern.
+
+
+211
+00:10:32,566 --> 00:10:35,235 line:-2
+Create the data source
+providing a type for the section
+
+
+212
+00:10:35,302 --> 00:10:37,838 line:-2
+since collection views
+can contain multiple sections.
+
+
+213
+00:10:37,905 --> 00:10:40,674 line:-1
+Each section has items of type MyItem.
+
+
+214
+00:10:40,741 --> 00:10:44,511 line:-2
+This data source is initialized
+with a specific collectionView.
+
+
+215
+00:10:44,578 --> 00:10:46,280 line:-1
+When the data source wants a cell,
+
+
+216
+00:10:46,346 --> 00:10:49,249 line:-2
+this closure is called
+with an index path and an item.
+
+
+217
+00:10:49,316 --> 00:10:50,951 line:-1
+You need to return a cell.
+
+
+218
+00:10:51,418 --> 00:10:54,454 line:-1
+You call dequeueConfiguredReusableCell
+
+
+219
+00:10:54,521 --> 00:10:57,257 line:-2
+using the cell registration
+you created earlier,
+
+
+220
+00:10:57,324 --> 00:10:59,860 line:-2
+and it's responsible
+for setting up each cell.
+
+
+221
+00:10:59,927 --> 00:11:01,728 line:-1
+Everything else is handled for you,
+
+
+222
+00:11:01,795 --> 00:11:05,632 line:-2
+including all the details of reusing cells
+for good performance.
+
+
+223
+00:11:06,133 --> 00:11:08,435 line:-1
+This code will be the same for most lists.
+
+
+224
+00:11:08,502 --> 00:11:12,272 line:-2
+The interesting parts are the type
+of your item and the cell registration.
+
+
+225
+00:11:13,307 --> 00:11:14,641 line:-1
+Here are the results.
+
+
+226
+00:11:14,708 --> 00:11:17,377 line:-1
+Nice lists with the right appearance.
+
+
+227
+00:11:17,444 --> 00:11:21,048 line:-2
+Note that we automatically adjust
+the background color for selected cells
+
+
+228
+00:11:21,114 --> 00:11:23,116 line:-1
+to be different in each column.
+
+
+229
+00:11:23,183 --> 00:11:25,686 line:-1
+All of this appearance is customizable.
+
+
+230
+00:11:25,752 --> 00:11:27,921 line:-2
+Every one of those objects
+we created earlier
+
+
+231
+00:11:27,988 --> 00:11:30,190 line:-1
+has properties that you can change.
+
+
+232
+00:11:30,257 --> 00:11:33,994 line:-2
+For example, when you're showing
+a list of content, not navigation,
+
+
+233
+00:11:34,061 --> 00:11:37,631 line:-2
+you want to use a slightly different
+appearance in the supplementary column.
+
+
+234
+00:11:37,698 --> 00:11:41,401 line:-2
+Use the appearanceSidebarPlain
+when you set up the collection view.
+
+
+235
+00:11:41,468 --> 00:11:44,004 line:-2
+You see the different look.
+The background is white,
+
+
+236
+00:11:44,071 --> 00:11:46,640 line:-2
+there are separators
+and other subtle differences.
+
+
+237
+00:11:46,707 --> 00:11:50,944 line:-2
+The Human Interface Guidelines say
+that if you have a list of content,
+
+
+238
+00:11:51,011 --> 00:11:55,415 line:-2
+like items in a collection or folder,
+then use the sidebar plain appearance.
+
+
+239
+00:11:55,482 --> 00:11:58,085 line:-2
+This is very common
+in the supplementary column.
+
+
+240
+00:11:58,151 --> 00:12:00,521 line:-2
+With Collection View,
+you can do a lot more.
+
+
+241
+00:12:00,587 --> 00:12:02,890 line:-1
+Here are some examples in Mail and Files.
+
+
+242
+00:12:02,956 --> 00:12:05,359 line:-1
+You can add accessories like check marks.
+
+
+243
+00:12:05,425 --> 00:12:07,694 line:-1
+You can reorder items by dragging them.
+
+
+244
+00:12:07,761 --> 00:12:09,296 line:-1
+You can use the outline features
+
+
+245
+00:12:09,363 --> 00:12:12,165 line:-2
+to collapse and expand
+items in a hierarchy.
+
+
+246
+00:12:12,232 --> 00:12:16,637 line:-2
+And you can add swipe actions to rows,
+for example, to remove a folder.
+
+
+247
+00:12:17,271 --> 00:12:19,139 line:-1
+If you're still using UITableView,
+
+
+248
+00:12:19,206 --> 00:12:22,276 line:-2
+we highly recommend you switch
+to UICollectionView.
+
+
+249
+00:12:22,843 --> 00:12:24,778 line:-2
+That makes it easy to add
+all these features
+
+
+250
+00:12:24,845 --> 00:12:26,847 line:-2
+and get all the new styles
+and appearances.
+
+
+251
+00:12:27,447 --> 00:12:30,017 line:-2
+Last, let's talk briefly
+about reducing modality.
+
+
+252
+00:12:30,417 --> 00:12:33,720 line:-2
+In iOS 14, we tried to get
+the interface out of the way
+
+
+253
+00:12:33,787 --> 00:12:35,222 line:-1
+in some common scenarios.
+
+
+254
+00:12:35,756 --> 00:12:40,060 line:-2
+This reduces the amount of tapping around
+you need to do to get your tasks done.
+
+
+255
+00:12:41,028 --> 00:12:43,597 line:-2
+In Notes, we've made
+the interface more fluid.
+
+
+256
+00:12:43,664 --> 00:12:46,600 line:-2
+I'm bringing up the color picker
+to choose a color for my marker.
+
+
+257
+00:12:47,100 --> 00:12:49,002 line:-1
+And then I just draw in the document.
+
+
+258
+00:12:49,069 --> 00:12:51,071 line:-2
+It automatically dismisses
+the color picker.
+
+
+259
+00:12:51,605 --> 00:12:53,974 line:-2
+I didn't have to tap once
+to dismiss the popover
+
+
+260
+00:12:54,041 --> 00:12:55,742 line:-1
+and then touch again to start drawing.
+
+
+261
+00:12:56,310 --> 00:12:58,512 line:-1
+All of those extra taps used to add up.
+
+
+262
+00:12:58,979 --> 00:13:00,047 line:-1
+Here's another example.
+
+
+263
+00:13:00,113 --> 00:13:03,016 line:-2
+I'm in Contacts and I press
+a button to show a menu.
+
+
+264
+00:13:03,083 --> 00:13:05,986 line:-2
+Traditionally, at this point,
+we'd put up a dimming view.
+
+
+265
+00:13:06,053 --> 00:13:09,857 line:-2
+But then we would require you
+to tap outside the menu to dismiss it.
+
+
+266
+00:13:09,923 --> 00:13:13,293 line:-2
+Now, in iOS 14, touching outside
+the menu dismisses it
+
+
+267
+00:13:13,360 --> 00:13:15,662 line:-2
+and you can keep scrolling
+with that same touch.
+
+
+268
+00:13:16,330 --> 00:13:19,633 line:-2
+We implemented that in UIKit,
+so you get it automatically.
+
+
+269
+00:13:20,467 --> 00:13:23,003 line:-2
+We encourage you to do
+similar things in your app.
+
+
+270
+00:13:23,070 --> 00:13:26,139 line:-2
+Every app is different,
+so we don't have an exact recipe.
+
+
+271
+00:13:26,206 --> 00:13:30,878 line:-2
+But we do suggest, watch for user actions
+like incoming events or scrolling,
+
+
+272
+00:13:30,944 --> 00:13:35,048 line:-2
+and use them as a signal to dismiss
+any transient UI that might be in the way.
+
+
+273
+00:13:35,616 --> 00:13:38,452 line:-2
+Now you know how to use
+multiple columns and Lists,
+
+
+274
+00:13:38,519 --> 00:13:40,654 line:-2
+and you understand
+how we've reduced modality.
+
+
+275
+00:13:40,721 --> 00:13:44,324 line:-2
+The Shortcuts app adopted all of these,
+and we think it's a great example.
+
+
+276
+00:13:44,958 --> 00:13:48,629 line:-2
+With that I'll hand off to Natalia
+to explain how Shortcuts did it.
+
+
+277
+00:13:49,129 --> 00:13:51,965 line:-2
+I'm going to tell you
+about how the Shortcuts app
+
+
+278
+00:13:52,032 --> 00:13:54,101 line:-1
+was redesigned for the iPad.
+
+
+279
+00:13:54,168 --> 00:13:56,703 line:-1
+What you learn here today will help you
+
+
+280
+00:13:56,770 --> 00:14:00,040 line:-2
+build a great iPad experience
+for your users.
+
+
+281
+00:14:00,107 --> 00:14:01,308 line:-1
+Let's dive right in.
+
+
+282
+00:14:02,142 --> 00:14:04,144 line:-1
+This is Shortcuts on the iPad.
+
+
+283
+00:14:04,211 --> 00:14:09,016 line:-2
+We redesigned it to take full advantage
+of the large iPad display.
+
+
+284
+00:14:09,082 --> 00:14:13,253 line:-2
+For better navigation,
+we replaced the tab bar with a sidebar.
+
+
+285
+00:14:13,654 --> 00:14:17,191 line:-2
+This enabled us
+to provide more navigation options.
+
+
+286
+00:14:17,257 --> 00:14:22,829 line:-2
+And since the sidebar is collapsible,
+the display becomes customizable.
+
+
+287
+00:14:22,896 --> 00:14:25,332 line:-1
+Let me tell you more about how we did it.
+
+
+288
+00:14:25,799 --> 00:14:28,702 line:-2
+As Kurt said before,
+the Split View Controller
+
+
+289
+00:14:28,769 --> 00:14:32,172 line:-2
+is the driving force
+behind the multi-column layouts.
+
+
+290
+00:14:32,539 --> 00:14:36,643 line:-2
+So, first I'm going to tell you
+how we redesigned Shortcuts
+
+
+291
+00:14:36,710 --> 00:14:39,780 line:-1
+using the new Split View Controller API.
+
+
+292
+00:14:40,080 --> 00:14:43,550 line:-2
+Then I'm going to talk more
+about the sidebar.
+
+
+293
+00:14:43,617 --> 00:14:46,186 line:-2
+You will see all the parts
+that it's made of.
+
+
+294
+00:14:46,253 --> 00:14:49,189 line:-2
+By the end of this talk,
+you'll have a good idea
+
+
+295
+00:14:49,256 --> 00:14:51,859 line:-1
+of how these new UIKit APIs
+
+
+296
+00:14:51,925 --> 00:14:55,629 line:-2
+come together
+to create a great iPad experience.
+
+
+297
+00:14:55,996 --> 00:14:58,832 line:-2
+First, let's look
+at the Split View Controller.
+
+
+298
+00:14:59,466 --> 00:15:02,870 line:-2
+Split View Controller
+is the backbone of Shortcuts.
+
+
+299
+00:15:02,936 --> 00:15:05,172 line:-1
+It's the API that allows us
+
+
+300
+00:15:05,239 --> 00:15:08,575 line:-2
+to have these two different
+view controllers
+
+
+301
+00:15:08,642 --> 00:15:10,777 line:-1
+coexist side by side.
+
+
+302
+00:15:11,245 --> 00:15:16,316 line:-2
+On the left is what the Split View
+refers to as its primary column.
+
+
+303
+00:15:16,383 --> 00:15:20,654 line:-2
+In Shortcuts, that's the view controller
+driving the navigation.
+
+
+304
+00:15:20,721 --> 00:15:26,460 line:-2
+Whenever we tap on one of the cells there,
+the view controller on the right changes.
+
+
+305
+00:15:26,527 --> 00:15:31,365 line:-2
+And the view controller on the right
+is known as a secondary column.
+
+
+306
+00:15:31,431 --> 00:15:34,234 line:-2
+Let's see how to set up
+this layout in code.
+
+
+307
+00:15:34,801 --> 00:15:37,905 line:-2
+First, we initialize
+a Split View Controller.
+
+
+308
+00:15:38,539 --> 00:15:43,677 line:-2
+In iOS 14, we get access to this
+new initializer that takes in a style.
+
+
+309
+00:15:44,077 --> 00:15:49,349 line:-2
+That style describes how many columns
+we want to show in the Split View.
+
+
+310
+00:15:49,416 --> 00:15:52,186 line:-1
+We want our layout to have two columns,
+
+
+311
+00:15:52,252 --> 00:15:55,489 line:-2
+so we're passing doubleColumn
+into the initializer.
+
+
+312
+00:15:55,889 --> 00:15:58,659 line:-2
+If we wanted to have
+three columns instead,
+
+
+313
+00:15:58,725 --> 00:16:02,062 line:-2
+we would simply pass in
+a tripleColumn style.
+
+
+314
+00:16:02,629 --> 00:16:07,100 line:-2
+Next, we need to set view controllers
+that will show in each column.
+
+
+315
+00:16:07,534 --> 00:16:10,704 line:-2
+In the primary column,
+the one we saw on the left,
+
+
+316
+00:16:10,771 --> 00:16:12,606 line:-1
+we want to see a sidebar,
+
+
+317
+00:16:12,673 --> 00:16:17,244 line:-2
+and a sidebar is just a view controller
+with a few specific styles.
+
+
+318
+00:16:17,811 --> 00:16:20,547 line:-2
+That's what
+our Sidebar View Controller is,
+
+
+319
+00:16:20,614 --> 00:16:23,750 line:-2
+and we're going to use that
+in the primary column.
+
+
+320
+00:16:23,817 --> 00:16:27,921 line:-2
+We do that by calling
+setViewController for primary.
+
+
+321
+00:16:28,822 --> 00:16:31,391 line:-1
+Then the secondary column.
+
+
+322
+00:16:31,458 --> 00:16:35,162 line:-2
+And this one's a bit different
+since we want it to be dynamic.
+
+
+323
+00:16:35,229 --> 00:16:38,398 line:-2
+Whenever we tap
+on one of the cells in the sidebar,
+
+
+324
+00:16:38,465 --> 00:16:40,901 line:-1
+we want to update the secondary column.
+
+
+325
+00:16:41,368 --> 00:16:47,107 line:-2
+So, first we need to know when the cell
+is selected so we can react to it.
+
+
+326
+00:16:47,174 --> 00:16:51,178 line:-2
+And for that, we conform
+to UICollectionView delegate
+
+
+327
+00:16:51,245 --> 00:16:54,848 line:-1
+and implement didSelectItemAt indexPath.
+
+
+328
+00:16:54,915 --> 00:16:57,651 line:-1
+Then, we show the DetailViewController
+
+
+329
+00:16:57,718 --> 00:17:01,555 line:-2
+in the secondary column by calling
+showDetailViewController.
+
+
+330
+00:17:02,289 --> 00:17:06,326 line:-2
+So now we have the Sidebar View Controller
+in the primary column
+
+
+331
+00:17:06,393 --> 00:17:11,298 line:-2
+and the Detail View Controller
+showing on demand in the secondary column.
+
+
+332
+00:17:11,765 --> 00:17:14,134 line:-1
+Now, this is great for the iPad,
+
+
+333
+00:17:14,201 --> 00:17:17,704 line:-2
+but we also redesigned Shortcuts
+on the iPhone.
+
+
+334
+00:17:17,771 --> 00:17:20,807 line:-2
+There we didn't have space
+for two columns,
+
+
+335
+00:17:20,874 --> 00:17:23,743 line:-2
+so we implemented
+an entirely different layout.
+
+
+336
+00:17:24,178 --> 00:17:28,048 line:-2
+In compact width,
+we have a tab bar in the list view,
+
+
+337
+00:17:28,115 --> 00:17:32,653 line:-2
+so the navigation options that were
+in the sidebar in regular width
+
+
+338
+00:17:32,719 --> 00:17:37,758 line:-2
+are split between the tab bar
+and the list view in compact width.
+
+
+339
+00:17:37,824 --> 00:17:40,427 line:-1
+Now, this is a very different layout.
+
+
+340
+00:17:40,494 --> 00:17:42,396 line:-1
+But what we're looking at here
+
+
+341
+00:17:42,462 --> 00:17:47,768 line:-2
+is using the same UISplitViewController
+API that we just talked about.
+
+
+342
+00:17:47,835 --> 00:17:49,369 line:-1
+Let's see how that's possible.
+
+
+343
+00:17:50,204 --> 00:17:54,274 line:-2
+Aside from the primary column
+and the secondary column,
+
+
+344
+00:17:54,341 --> 00:17:59,313 line:-2
+UISplitViewController
+also has a notion of compact column,
+
+
+345
+00:17:59,379 --> 00:18:03,851 line:-2
+and that's the column that we see
+when the device is in compact width.
+
+
+346
+00:18:03,917 --> 00:18:06,486 line:-1
+And so, just like with the other columns,
+
+
+347
+00:18:06,553 --> 00:18:09,690 line:-2
+we simply call
+setViewController for compact,
+
+
+348
+00:18:09,756 --> 00:18:11,625 line:-1
+and the compact layout is done.
+
+
+349
+00:18:12,092 --> 00:18:15,429 line:-2
+This is really powerful
+because we're free to establish
+
+
+350
+00:18:15,495 --> 00:18:18,298 line:-1
+our own separate compact flow,
+
+
+351
+00:18:18,365 --> 00:18:21,902 line:-2
+but we don't need to worry
+about switching between layouts.
+
+
+352
+00:18:21,969 --> 00:18:25,205 line:-2
+All of that is done for us
+by the Split View Controller.
+
+
+353
+00:18:26,340 --> 00:18:29,543 line:-2
+The one thing to know
+about using this approach
+
+
+354
+00:18:29,610 --> 00:18:34,181 line:-2
+is the fact that we are working
+with two separate view hierarchies,
+
+
+355
+00:18:34,248 --> 00:18:38,185 line:-2
+the one in regular width
+and the one in compact width.
+
+
+356
+00:18:38,252 --> 00:18:43,123 line:-2
+So while the Split View Controller
+knows which hierarchy should be used
+
+
+357
+00:18:43,190 --> 00:18:45,359 line:-1
+based on the current trait collection,
+
+
+358
+00:18:45,425 --> 00:18:48,862 line:-2
+we need to make sure
+that the user is in the right place
+
+
+359
+00:18:48,929 --> 00:18:51,064 line:-1
+as the size classes change.
+
+
+360
+00:18:51,131 --> 00:18:52,533 line:-1
+Let's look at an example.
+
+
+361
+00:18:53,166 --> 00:18:57,905 line:-2
+Let's say we open the app
+and navigate to the Apple Watch folder.
+
+
+362
+00:18:57,971 --> 00:19:01,808 line:-2
+Then we decide to open another app
+in side by side.
+
+
+363
+00:19:02,376 --> 00:19:05,479 line:-1
+That causes the Shortcuts app to move
+
+
+364
+00:19:05,546 --> 00:19:08,549 line:-1
+from regular width to compact width.
+
+
+365
+00:19:08,615 --> 00:19:12,319 line:-2
+And without us doing anything,
+the Split View Controller
+
+
+366
+00:19:12,386 --> 00:19:15,455 line:-2
+displays the compact hierarchy,
+which is great.
+
+
+367
+00:19:15,522 --> 00:19:18,592 line:-2
+But that's not the hierarchy
+we just navigated.
+
+
+368
+00:19:18,659 --> 00:19:22,963 line:-2
+So by default, it will put us back
+at the beginning of the flow.
+
+
+369
+00:19:23,463 --> 00:19:27,201 line:-2
+So, we need to make sure
+that these transitions are smooth.
+
+
+370
+00:19:27,267 --> 00:19:28,635 line:-1
+Here's how we're doing it.
+
+
+371
+00:19:29,169 --> 00:19:33,140 line:-2
+The Root View Controller is the parent
+of the Split View Controller.
+
+
+372
+00:19:33,874 --> 00:19:36,643 line:-1
+That's where all the navigation happens.
+
+
+373
+00:19:36,710 --> 00:19:38,779 line:-1
+Each Detail View Controller
+
+
+374
+00:19:38,846 --> 00:19:42,015 line:-2
+that can be displayed
+in the secondary column
+
+
+375
+00:19:42,082 --> 00:19:43,650 line:-1
+conforms to a protocol,
+
+
+376
+00:19:44,051 --> 00:19:46,920 line:-2
+and that protocol
+requires the view controller
+
+
+377
+00:19:46,987 --> 00:19:50,357 line:-1
+to provide a method that re-creates it.
+
+
+378
+00:19:50,424 --> 00:19:53,427 line:-1
+When the size class is about to change,
+
+
+379
+00:19:53,493 --> 00:19:56,463 line:-2
+we look at
+the current Detail View Controller
+
+
+380
+00:19:56,530 --> 00:19:59,366 line:-2
+and re-create it
+using the protocol method.
+
+
+381
+00:19:59,967 --> 00:20:03,670 line:-2
+Once we do that, we plug it
+into the new view hierarchy,
+
+
+382
+00:20:03,737 --> 00:20:06,840 line:-2
+and that's how we make sure
+the state is restored.
+
+
+383
+00:20:06,907 --> 00:20:08,542 line:-1
+Let's talk more about the sidebar.
+
+
+384
+00:20:09,443 --> 00:20:12,946 line:-2
+Now we know that the sidebar
+is just a view controller
+
+
+385
+00:20:13,013 --> 00:20:15,082 line:-1
+with a few specific styles.
+
+
+386
+00:20:15,148 --> 00:20:17,050 line:-1
+But let's take a closer look.
+
+
+387
+00:20:17,117 --> 00:20:18,485 line:-1
+Here's the sidebar.
+
+
+388
+00:20:18,552 --> 00:20:20,921 line:-1
+You can clearly see there's a large title,
+
+
+389
+00:20:20,988 --> 00:20:24,424 line:-2
+a left bar button
+that let's us collapse the sidebar
+
+
+390
+00:20:24,491 --> 00:20:27,728 line:-2
+and a right bar button
+that toggles the editing mode.
+
+
+391
+00:20:27,794 --> 00:20:29,596 line:-1
+But what's inside of the sidebar?
+
+
+392
+00:20:30,097 --> 00:20:34,001 line:-2
+It's a collection view
+filled with new list cells.
+
+
+393
+00:20:34,067 --> 00:20:37,871 line:-2
+Let's look at the code,
+starting with the collection view layout.
+
+
+394
+00:20:38,805 --> 00:20:42,476 line:-2
+The Sidebar Collection View
+is using compositional layout
+
+
+395
+00:20:42,543 --> 00:20:44,678 line:-1
+with the default configuration.
+
+
+396
+00:20:44,745 --> 00:20:48,482 line:-2
+The one thing that stands out
+is the sectionProvider.
+
+
+397
+00:20:48,549 --> 00:20:51,118 line:-1
+The sectionProvider allows us to configure
+
+
+398
+00:20:51,185 --> 00:20:53,420 line:-1
+every section in the collection.
+
+
+399
+00:20:53,487 --> 00:20:55,289 line:-1
+The section we are providing
+
+
+400
+00:20:55,355 --> 00:20:59,393 line:-2
+is using the new ListConfiguration
+with the sidebar appearance.
+
+
+401
+00:20:59,459 --> 00:21:02,462 line:-2
+And that pretty much
+sets up the layout for us.
+
+
+402
+00:21:02,529 --> 00:21:05,799 line:-1
+The section itself is a new list section.
+
+
+403
+00:21:05,866 --> 00:21:08,769 line:0
+We pass in the configuration
+and we're done.
+
+
+404
+00:21:08,836 --> 00:21:10,404 line:0
+This is the entire layout.
+
+
+405
+00:21:10,470 --> 00:21:12,339 line:0
+Now let's look at the cells.
+
+
+406
+00:21:13,073 --> 00:21:15,475 line:-1
+First, we need to set up our cells.
+
+
+407
+00:21:15,542 --> 00:21:19,112 line:-2
+We're used to registering the cells
+for later dequeuing
+
+
+408
+00:21:19,179 --> 00:21:22,149 line:-1
+by calling Register on the collectionView.
+
+
+409
+00:21:22,216 --> 00:21:26,286 line:-2
+With the new cell registration API,
+there's a new way to do that.
+
+
+410
+00:21:26,820 --> 00:21:30,924 line:-2
+We can register and configure
+the cells in one place
+
+
+411
+00:21:30,991 --> 00:21:32,759 line:-1
+in a type safe way.
+
+
+412
+00:21:32,826 --> 00:21:37,431 line:-2
+We don't need to worry about keeping track
+of forUse identifiers anymore.
+
+
+413
+00:21:37,497 --> 00:21:42,736 line:-2
+We just set up cellRegistration
+and pass it directly into the data source.
+
+
+414
+00:21:43,303 --> 00:21:45,839 line:-1
+So this is how we register the cells.
+
+
+415
+00:21:45,906 --> 00:21:47,641 line:-1
+Let's see how we configure them.
+
+
+416
+00:21:48,375 --> 00:21:49,476 line:-1
+In the past,
+
+
+417
+00:21:49,543 --> 00:21:53,380 line:-2
+whenever we wanted to make
+collection view cells nice and custom,
+
+
+418
+00:21:53,447 --> 00:21:55,883 line:-1
+we would end up creating a subclass.
+
+
+419
+00:21:55,949 --> 00:21:57,818 line:-1
+We don't need to do that anymore.
+
+
+420
+00:21:57,885 --> 00:22:01,955 line:-2
+And that's thanks
+to the new UIContentConfiguration API.
+
+
+421
+00:22:02,022 --> 00:22:07,895 line:-2
+We can mix and match configurations
+to get the cells exactly as we want them.
+
+
+422
+00:22:07,961 --> 00:22:11,565 line:-2
+We can create
+completely custom configurations
+
+
+423
+00:22:11,632 --> 00:22:16,670 line:-2
+or we can take advantage
+of existing premade configurations.
+
+
+424
+00:22:16,737 --> 00:22:19,306 line:-1
+For example, here we're simply using
+
+
+425
+00:22:19,373 --> 00:22:23,343 line:-2
+the predefined
+defaultContentConfiguration.
+
+
+426
+00:22:23,410 --> 00:22:28,215 line:-2
+This returns the default configuration
+with sidebar cell styling
+
+
+427
+00:22:28,282 --> 00:22:32,586 line:-2
+as the cell is contained
+in a list with sidebar appearance.
+
+
+428
+00:22:32,653 --> 00:22:35,389 line:-2
+So we're just setting
+the title and the image,
+
+
+429
+00:22:35,455 --> 00:22:37,457 line:-1
+and everything else is taken care of.
+
+
+430
+00:22:38,192 --> 00:22:40,661 line:-1
+So that's it for Shortcuts on the iPad.
+
+
+431
+00:22:41,261 --> 00:22:43,764 line:-1
+Great iPad apps allow users
+
+
+432
+00:22:43,830 --> 00:22:48,001 line:-2
+to take full advantage
+of the beautiful, large display.
+
+
+433
+00:22:48,068 --> 00:22:52,606 line:-2
+So try adding a sidebar to your iPad app
+and be creative.
+
+
+434
+00:22:52,673 --> 00:22:55,409 line:-2
+If your content needs
+more than two columns,
+
+
+435
+00:22:55,475 --> 00:22:57,411 line:-1
+use a supplementary column.
+
+
+436
+00:22:58,345 --> 00:23:01,949 line:-2
+Use collection views
+with predefined configurations.
+
+
+437
+00:23:02,015 --> 00:23:05,919 line:-2
+Collection views
+are much more powerful than table views,
+
+
+438
+00:23:05,986 --> 00:23:08,021 line:-1
+and predefined configurations
+
+
+439
+00:23:08,088 --> 00:23:12,860 line:-2
+are an easy way to add functionality
+and polish to your app.
+
+
+440
+00:23:13,460 --> 00:23:17,164 line:-2
+And finally,
+get the interface out of the way.
+
+
+441
+00:23:17,231 --> 00:23:21,869 line:-2
+Lean on gestures and enable users
+to move within your app freely
+
+
+442
+00:23:21,935 --> 00:23:25,939 line:-2
+without the interruption of modals
+that take up all this space.
+
+
+443
+00:23:26,006 --> 00:23:29,376 line:-2
+And remember to check out
+the links attached to this video.
+
+
+444
+00:23:29,443 --> 00:23:32,412 line:-2
+There's so much more to learn
+about these new APIs.
+
+
+445
+00:23:33,080 --> 00:23:34,181 line:-1
+Thank you for watching.
+
+
+446
+00:23:34,248 --> 00:23:37,818 line:-2
+We can't wait to see your apps
+built for iPad.
+

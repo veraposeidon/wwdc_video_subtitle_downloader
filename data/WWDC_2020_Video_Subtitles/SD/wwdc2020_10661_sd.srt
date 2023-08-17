@@ -1,0 +1,4805 @@
+1
+00:00:03,836 --> 00:00:07,107 line:-1
+Hello and welcome to WWDC.
+
+
+2
+00:00:07,841 --> 00:00:10,711 line:0
+Hello and welcome to WWDC.
+
+
+3
+00:00:10,777 --> 00:00:13,914 line:0
+I'm Tori, and I'll also be presenting
+with my colleague, Ross,
+
+
+4
+00:00:13,981 --> 00:00:15,983 line:0
+who you'll hear from later today.
+
+
+5
+00:00:16,049 --> 00:00:20,554 line:0
+I'm so excited to share with you what
+we have new for you with in-app purchases.
+
+
+6
+00:00:20,621 --> 00:00:22,289 line:0
+And we have a lot to cover today.
+
+
+7
+00:00:23,023 --> 00:00:25,926 line:-2
+This session will be divided
+into two sections.
+
+
+8
+00:00:25,993 --> 00:00:28,529 line:-2
+I'll focus on covering
+what's new on the server side,
+
+
+9
+00:00:28,595 --> 00:00:31,765 line:-2
+and later I'll hand it off to Ross
+to cover StoreKit updates.
+
+
+10
+00:00:33,100 --> 00:00:35,235 line:-2
+So let's get started
+with our server updates.
+
+
+11
+00:00:35,302 --> 00:00:38,138 line:-2
+On the server side,
+first, we'll cover refunds
+
+
+12
+00:00:38,205 --> 00:00:40,641 line:-2
+and how you can handle transactions
+that are refunded.
+
+
+13
+00:00:41,441 --> 00:00:43,243 line:-1
+Next, we'll cover some new ways
+
+
+14
+00:00:43,310 --> 00:00:46,880 line:-2
+to help you manage the subscription status
+for your customers
+
+
+15
+00:00:46,947 --> 00:00:49,616 line:-2
+and how you can use
+App Store Server Notifications
+
+
+16
+00:00:49,683 --> 00:00:53,487 line:-2
+to get notified and respond
+to various subscription billing events.
+
+
+17
+00:00:54,655 --> 00:00:56,690 line:-1
+We'll also cover the different scenarios
+
+
+18
+00:00:56,757 --> 00:01:00,994 line:-2
+where you may still need to use
+verifyReceipt to get the latest status.
+
+
+19
+00:01:01,495 --> 00:01:04,631 line:-2
+And finally,
+we'll dive into Family Sharing.
+
+
+20
+00:01:04,697 --> 00:01:06,600 line:-1
+We have a lot to cover,
+
+
+21
+00:01:06,667 --> 00:01:11,004 line:-2
+so let's get dive right in with arguably
+what brought us all here today:
+
+
+22
+00:01:11,071 --> 00:01:12,172 line:-1
+an in-app purchase.
+
+
+23
+00:01:12,873 --> 00:01:15,709 line:0
+So this is an in-app purchase
+in one of my apps.
+
+
+24
+00:01:15,776 --> 00:01:19,980 line:0
+I'm so excited to use this,
+but what happens if I change my mind?
+
+
+25
+00:01:20,047 --> 00:01:24,718 line:-2
+If I have an issue with the content
+and call Apple to request a refund,
+
+
+26
+00:01:24,785 --> 00:01:27,621 line:-1
+what should you, as a developer, do?
+
+
+27
+00:01:28,522 --> 00:01:31,758 line:-2
+That's why handling refunds
+is so important,
+
+
+28
+00:01:31,825 --> 00:01:34,027 line:-2
+but keep in mind
+that while it's important,
+
+
+29
+00:01:34,094 --> 00:01:37,264 line:-2
+it only affects
+a small percentage of transactions.
+
+
+30
+00:01:37,831 --> 00:01:42,202 line:-2
+However, proper refund management
+could drive that percentage down.
+
+
+31
+00:01:42,903 --> 00:01:47,574 line:-2
+So let's dive into that now by walking
+through a typical refund scenario.
+
+
+32
+00:01:48,208 --> 00:01:52,880 line:-2
+First a customer purchases some content
+in an app, like 100 gems.
+
+
+33
+00:01:53,680 --> 00:01:58,352 line:-2
+However, the purchase was an accident,
+so they call Apple for support.
+
+
+34
+00:01:59,152 --> 00:02:02,623 line:-2
+After considering their case,
+we issue a refund.
+
+
+35
+00:02:04,291 --> 00:02:06,793 line:-2
+Later, the customer contacts you
+for support
+
+
+36
+00:02:06,860 --> 00:02:09,763 line:-2
+as they notice they still have
+the gems that were refunded.
+
+
+37
+00:02:10,631 --> 00:02:13,834 line:-2
+If you don't know that Apple
+has refunded the content,
+
+
+38
+00:02:13,901 --> 00:02:16,436 line:-2
+it's difficult to determine
+how to respond.
+
+
+39
+00:02:17,638 --> 00:02:20,541 line:-2
+It would be so much better
+if you could easily determine
+
+
+40
+00:02:20,607 --> 00:02:23,043 line:-1
+if we had already refunded that purchase
+
+
+41
+00:02:23,110 --> 00:02:25,479 line:-1
+so you could take action appropriately,
+
+
+42
+00:02:25,546 --> 00:02:29,516 line:-2
+such as acknowledging the refund
+but letting the customer keep their gems,
+
+
+43
+00:02:29,583 --> 00:02:31,084 line:-1
+or deducting their balance.
+
+
+44
+00:02:31,652 --> 00:02:34,121 line:-2
+That's why we're working
+to bring you new ways
+
+
+45
+00:02:34,188 --> 00:02:36,356 line:-1
+to manage refunds for your content.
+
+
+46
+00:02:37,157 --> 00:02:42,529 line:-2
+Having the ability to manage your refunded
+purchases is important for many reasons.
+
+
+47
+00:02:42,596 --> 00:02:46,967 line:-2
+Most importantly it gives you control
+to take action as you see fit,
+
+
+48
+00:02:47,434 --> 00:02:51,471 line:-2
+such as messaging the customer,
+or even taking back the content if needed.
+
+
+49
+00:02:52,472 --> 00:02:56,376 line:-2
+It also lets you handle
+any potential abuse of your content,
+
+
+50
+00:02:56,443 --> 00:02:58,712 line:-2
+such as customers trying
+to keep their content
+
+
+51
+00:02:58,779 --> 00:03:00,914 line:-1
+after receiving a refund from Apple,
+
+
+52
+00:03:01,582 --> 00:03:06,286 line:-2
+and you can resolve customer issues
+like the previous one swiftly.
+
+
+53
+00:03:07,721 --> 00:03:11,325 line:-2
+This will also allow you to manage
+your in-game economy,
+
+
+54
+00:03:11,391 --> 00:03:13,861 line:-1
+making gameplay more fair for all players
+
+
+55
+00:03:13,927 --> 00:03:16,029 line:-2
+as there will be repercussions
+for refunds.
+
+
+56
+00:03:16,830 --> 00:03:19,433 line:-2
+So for all of these reasons,
+and because we want you
+
+
+57
+00:03:19,499 --> 00:03:23,170 line:-2
+to be able to manage refunds
+for purchases in your app,
+
+
+58
+00:03:23,237 --> 00:03:26,440 line:-2
+we're bringing you
+a brand-new App Store Server Notification
+
+
+59
+00:03:26,507 --> 00:03:29,710 line:-2
+and our first ever notification
+for content types
+
+
+60
+00:03:29,776 --> 00:03:31,712 line:-1
+other than auto-renewable subscriptions,
+
+
+61
+00:03:32,179 --> 00:03:33,947 line:-1
+the refund notification.
+
+
+62
+00:03:36,917 --> 00:03:40,888 line:-2
+So why did we decide on
+an App Store Server Notification for this?
+
+
+63
+00:03:40,954 --> 00:03:44,525 line:-2
+Well, the primary reason is that
+you don't have to ask us for information.
+
+
+64
+00:03:44,591 --> 00:03:46,326 line:-1
+We'll just tell you.
+
+
+65
+00:03:46,393 --> 00:03:51,131 line:-2
+You're notified immediately with
+a JSON POST upon a status change,
+
+
+66
+00:03:51,198 --> 00:03:56,970 line:-2
+and we even retry up to three times
+if we don't get an HTTP OK back from you.
+
+
+67
+00:03:57,938 --> 00:04:00,908 line:-2
+If you're already receiving
+App Store Server Notifications
+
+
+68
+00:04:00,974 --> 00:04:02,976 line:-1
+for auto-renewing subscriptions,
+
+
+69
+00:04:03,043 --> 00:04:07,080 line:-2
+then you'll get the new refund
+notification for your other content types
+
+
+70
+00:04:07,147 --> 00:04:09,416 line:-1
+with little additional work on your end.
+
+
+71
+00:04:09,883 --> 00:04:12,986 line:-2
+We'll also send you
+an updated unified receipt
+
+
+72
+00:04:13,053 --> 00:04:16,890 line:-2
+with your canceled transactions included
+so you can update your records.
+
+
+73
+00:04:17,291 --> 00:04:22,329 line:-2
+And this solution is also scalable
+as you grow your business on our platform.
+
+
+74
+00:04:24,531 --> 00:04:28,168 line:-2
+So our goal for all content types is
+to allow you to obtain information
+
+
+75
+00:04:28,235 --> 00:04:32,005 line:-2
+about refunded purchases
+through App Store Server Notifications.
+
+
+76
+00:04:32,439 --> 00:04:36,743 line:-2
+For consumables, non-consumables
+and non-renewing subscriptions,
+
+
+77
+00:04:36,810 --> 00:04:39,980 line:-2
+you'll receive
+the brand-new refund notification.
+
+
+78
+00:04:40,047 --> 00:04:43,750 line:-2
+For subscriptions, you'll continue
+to receive the cancel notification.
+
+
+79
+00:04:43,817 --> 00:04:47,054 line:-2
+Enabling App Store Server Notifications
+is straightforward
+
+
+80
+00:04:47,120 --> 00:04:50,824 line:-2
+if you've never done it before
+and can be done in a few steps.
+
+
+81
+00:04:50,891 --> 00:04:55,796 line:-2
+First, set up your desired endpoint for
+your notifications in App Store Connect.
+
+
+82
+00:04:55,863 --> 00:05:00,434 line:-2
+Next, make sure your endpoint
+meets App Transport Security requirements
+
+
+83
+00:05:00,501 --> 00:05:03,337 line:-2
+as outlined
+in the developer documentation.
+
+
+84
+00:05:03,937 --> 00:05:06,940 line:-2
+Then you're all set
+to start receiving notifications.
+
+
+85
+00:05:08,475 --> 00:05:11,879 line:-2
+So in App Store Connect,
+just navigate to your app's page
+
+
+86
+00:05:11,945 --> 00:05:15,716 line:-2
+and find the URL for
+App Store Server Notifications section.
+
+
+87
+00:05:16,450 --> 00:05:20,721 line:-2
+Enter your desired endpoint here so
+we know where to send your notifications.
+
+
+88
+00:05:21,221 --> 00:05:24,725 line:-2
+Know that if your endpoint already
+meets security requirements,
+
+
+89
+00:05:24,791 --> 00:05:27,594 line:-2
+you'll immediately
+start receiving notifications.
+
+
+90
+00:05:27,661 --> 00:05:30,797 line:-2
+Now let's take a deeper look
+at the refund notification.
+
+
+91
+00:05:31,365 --> 00:05:35,869 line:-2
+We'll send you this notification
+when any consumable, non-consumable
+
+
+92
+00:05:35,936 --> 00:05:39,273 line:-2
+or non-renewing subscription
+is refunded for your app
+
+
+93
+00:05:39,339 --> 00:05:42,843 line:-2
+after we issue a refund to the customer
+for that purchase.
+
+
+94
+00:05:43,610 --> 00:05:46,580 line:-2
+Getting notified in this way
+makes it easy for you
+
+
+95
+00:05:46,647 --> 00:05:49,616 line:-2
+to take immediate action
+on your refunded content.
+
+
+96
+00:05:50,017 --> 00:05:54,388 line:-2
+This notification has also been
+implemented in a privacy-friendly way,
+
+
+97
+00:05:54,454 --> 00:05:57,991 line:-2
+as we're not giving you any information
+about the customer,
+
+
+98
+00:05:58,058 --> 00:06:01,628 line:-2
+only information you'd already have
+about the purchase.
+
+
+99
+00:06:02,129 --> 00:06:04,798 line:-1
+The refund notification is live today,
+
+
+100
+00:06:04,865 --> 00:06:08,302 line:-2
+so if you're already receiving
+App Store Server Notifications,
+
+
+101
+00:06:08,368 --> 00:06:09,837 line:-1
+make sure you're looking for it.
+
+
+102
+00:06:10,604 --> 00:06:14,408 line:-2
+With that in mind,
+when you receive this notification,
+
+
+103
+00:06:14,474 --> 00:06:17,845 line:-2
+there are a few things I want you
+to look out for in the payload.
+
+
+104
+00:06:18,579 --> 00:06:21,148 line:-2
+You should look for
+the original_transaction_id
+
+
+105
+00:06:21,215 --> 00:06:23,650 line:-2
+to tell you which transaction
+we've refunded,
+
+
+106
+00:06:24,251 --> 00:06:27,354 line:-2
+the cancellation_date
+to know when we refunded it,
+
+
+107
+00:06:27,421 --> 00:06:29,590 line:-1
+and the cancellation_reason.
+
+
+108
+00:06:29,656 --> 00:06:32,159 line:-1
+The reason can have values of 0 or 1,
+
+
+109
+00:06:32,226 --> 00:06:35,696 line:-2
+and a value of 1 can indicate
+the customer requested a refund
+
+
+110
+00:06:35,762 --> 00:06:39,666 line:-2
+due to an issue within the app,
+which you could then investigate.
+
+
+111
+00:06:40,534 --> 00:06:43,470 line:-1
+Also look for the bid and the product_id
+
+
+112
+00:06:43,537 --> 00:06:47,641 line:-2
+to verify the app and product
+you've received a notification for.
+
+
+113
+00:06:47,708 --> 00:06:51,144 line:-2
+All these fields can be found
+in the unified_receipt object
+
+
+114
+00:06:51,211 --> 00:06:53,680 line:-2
+in the App Store Server Notification
+payload
+
+
+115
+00:06:53,747 --> 00:06:55,883 line:-1
+in the latest_receipt_info section,
+
+
+116
+00:06:55,949 --> 00:06:59,820 line:-2
+except for the bid, which is found
+at the top level of the payload.
+
+
+117
+00:07:01,088 --> 00:07:04,024 line:-2
+So what does the App Store
+Server Notification look like?
+
+
+118
+00:07:04,091 --> 00:07:06,159 line:-1
+Well, it looks something like this.
+
+
+119
+00:07:06,226 --> 00:07:08,128 line:-1
+Not all the fields are listed here,
+
+
+120
+00:07:08,195 --> 00:07:12,733 line:-2
+but we have explanations for all possible
+fields in the developer documentation.
+
+
+121
+00:07:13,233 --> 00:07:17,771 line:-2
+Right now let's take a look at the ones
+we just discussed, plus a few others.
+
+
+122
+00:07:18,906 --> 00:07:22,209 line:-2
+In addition to
+those transaction identifying fields,
+
+
+123
+00:07:22,276 --> 00:07:24,278 line:-1
+look for the password in the payload.
+
+
+124
+00:07:24,845 --> 00:07:28,715 line:-2
+This is a shared secret for your app,
+which you can find in App Store Connect,
+
+
+125
+00:07:28,782 --> 00:07:32,853 line:-2
+and it allows you to verify the payload is
+from Apple and is trustworthy.
+
+
+126
+00:07:33,954 --> 00:07:37,958 line:-2
+At the same level as the password,
+you'll find the bundle identifier.
+
+
+127
+00:07:38,492 --> 00:07:43,063 line:-2
+You can verify this field to know
+which app you've received a refund for.
+
+
+128
+00:07:44,398 --> 00:07:46,967 line:-1
+Next, look in the unified_receipt object,
+
+
+129
+00:07:47,034 --> 00:07:49,570 line:-2
+specifically in
+the latest_receipt_info array,
+
+
+130
+00:07:49,636 --> 00:07:52,606 line:-2
+for information about
+your refunded transactions.
+
+
+131
+00:07:52,673 --> 00:07:56,710 line:-2
+This array contains
+the 100 latest transactions for your app
+
+
+132
+00:07:56,777 --> 00:07:59,146 line:-2
+and the four fields
+we told you to look for:
+
+
+133
+00:07:59,213 --> 00:08:02,115 line:-2
+the cancellation_date,
+the cancellation_reason,
+
+
+134
+00:08:02,182 --> 00:08:05,586 line:-2
+the original_transaction_id
+and the product_id.
+
+
+135
+00:08:07,054 --> 00:08:09,623 line:-2
+So let's revisit our refund scenario
+from earlier
+
+
+136
+00:08:09,690 --> 00:08:12,593 line:-2
+and look at how the refund notification
+can now help you
+
+
+137
+00:08:12,659 --> 00:08:14,628 line:-1
+in a slightly different situation.
+
+
+138
+00:08:15,095 --> 00:08:19,132 line:-2
+In this situation,
+the customer still buys 100 gems,
+
+
+139
+00:08:19,199 --> 00:08:24,171 line:-2
+but then consumes the gems and still asks
+Apple for support with their purchase.
+
+
+140
+00:08:24,872 --> 00:08:28,842 line:-2
+Once again, we make a decision to honor
+or deny the refund.
+
+
+141
+00:08:28,909 --> 00:08:32,679 line:-2
+Because we don't know
+if the customer has consumed the gems,
+
+
+142
+00:08:32,746 --> 00:08:34,681 line:-1
+we may still honor the refund,
+
+
+143
+00:08:34,748 --> 00:08:37,918 line:-2
+and if we do,
+we'll send you a refund notification.
+
+
+144
+00:08:37,985 --> 00:08:42,456 line:-2
+Then, if the customer reaches out to you
+asking for further support,
+
+
+145
+00:08:42,523 --> 00:08:44,391 line:-1
+such as in-game compensation,
+
+
+146
+00:08:44,458 --> 00:08:47,327 line:-2
+but now you'll know
+the purchase has been refunded
+
+
+147
+00:08:47,394 --> 00:08:50,197 line:-2
+and you can choose
+to take proactive action,
+
+
+148
+00:08:50,597 --> 00:08:53,534 line:-2
+such as providing an in-app message
+in your app.
+
+
+149
+00:08:53,600 --> 00:08:57,337 line:-2
+A message such as this is great
+as it notifies the customer
+
+
+150
+00:08:57,404 --> 00:09:00,240 line:-2
+that you've observed a refund
+for their purchase,
+
+
+151
+00:09:00,307 --> 00:09:01,842 line:-1
+the action you've taken,
+
+
+152
+00:09:01,909 --> 00:09:05,212 line:-2
+and what they can do
+to regain access to the content.
+
+
+153
+00:09:05,879 --> 00:09:08,415 line:-2
+In-app messaging is just
+one of many actions
+
+
+154
+00:09:08,482 --> 00:09:10,817 line:-1
+you can take upon observing a refund.
+
+
+155
+00:09:10,884 --> 00:09:12,920 line:-1
+Let's take a quick look at those now.
+
+
+156
+00:09:14,221 --> 00:09:18,158 line:0
+So there are many actions you can take
+depending on the content type,
+
+
+157
+00:09:18,225 --> 00:09:19,960 line:0
+ranging from moderate to severe.
+
+
+158
+00:09:20,527 --> 00:09:24,531 line:0
+For all content types, you can use this
+for refund monitoring,
+
+
+159
+00:09:24,598 --> 00:09:25,966 line:0
+for in-app messaging
+
+
+160
+00:09:26,033 --> 00:09:28,902 line:0
+and restricting access
+to the refunded purchase.
+
+
+161
+00:09:29,970 --> 00:09:33,073 line:0
+Because we're sending you
+a server-to-server notification,
+
+
+162
+00:09:33,140 --> 00:09:38,045 line:0
+this gives you the ability to restrict
+access cross-platform if needed.
+
+
+163
+00:09:39,012 --> 00:09:42,616 line:0
+In the case of consumables,
+there are additional actions you can take,
+
+
+164
+00:09:42,950 --> 00:09:45,385 line:0
+like deducting
+the in-app currency balance.
+
+
+165
+00:09:45,786 --> 00:09:50,123 line:-2
+You, as a developer, are responsible for
+making decisions on what measures to take
+
+
+166
+00:09:50,190 --> 00:09:51,625 line:-1
+and how to implement them.
+
+
+167
+00:09:51,692 --> 00:09:55,095 line:-2
+So think carefully about
+which action you decide to take
+
+
+168
+00:09:55,162 --> 00:09:58,298 line:-2
+in order to promote a healthy community
+within your app.
+
+
+169
+00:09:58,365 --> 00:10:02,970 line:-2
+So now we've covered a lot about refunds
+and how to handle them appropriately.
+
+
+170
+00:10:03,036 --> 00:10:04,238 line:-1
+So now let's switch gears
+
+
+171
+00:10:04,304 --> 00:10:08,575 line:-2
+and jump into how we are making it easier
+for you to manage subscriptions,
+
+
+172
+00:10:09,076 --> 00:10:13,380 line:-2
+first taking a look at some of the key
+events in the subscription life cycle.
+
+
+173
+00:10:14,815 --> 00:10:18,118 line:-2
+These include acquiring a subscriber
+for the first time,
+
+
+174
+00:10:18,185 --> 00:10:21,154 line:-2
+any auto-renew,
+successful or unsuccessful,
+
+
+175
+00:10:21,655 --> 00:10:27,594 line:-2
+disabling or enabling auto-renew,
+upgrades or downgrades and cancellations.
+
+
+176
+00:10:27,661 --> 00:10:31,532 line:-2
+So what do all these events look like
+for a customer and for you?
+
+
+177
+00:10:31,598 --> 00:10:36,103 line:-2
+So when the customer first subscribes,
+we establish the subscription period
+
+
+178
+00:10:36,170 --> 00:10:40,240 line:-2
+and a fixed auto-renew period
+to repeat renewal after renewal.
+
+
+179
+00:10:40,741 --> 00:10:42,843 line:-1
+Within the first subscription period,
+
+
+180
+00:10:42,910 --> 00:10:45,779 line:-2
+your customer decides
+to turn off auto-renew,
+
+
+181
+00:10:45,846 --> 00:10:48,448 line:-2
+thinking that they just aren't using
+the subscription enough,
+
+
+182
+00:10:49,116 --> 00:10:53,387 line:-2
+but later turns it back on after a little
+more time with their subscription.
+
+
+183
+00:10:54,087 --> 00:10:57,558 line:-2
+After that, we approach
+our first scheduled auto-renew,
+
+
+184
+00:10:58,225 --> 00:11:01,695 line:-2
+but there's an auto-renew failure
+due to a billing issue.
+
+
+185
+00:11:01,762 --> 00:11:03,797 line:-1
+At this point, we'll try to auto-renew
+
+
+186
+00:11:03,864 --> 00:11:06,667 line:-2
+for the duration
+of the billing retry period,
+
+
+187
+00:11:06,733 --> 00:11:08,769 line:-1
+also establishing a grace period.
+
+
+188
+00:11:09,436 --> 00:11:13,140 line:-2
+Luckily the subscription is recovered
+during our grace period,
+
+
+189
+00:11:13,207 --> 00:11:15,142 line:-1
+so the renewal cycle remains the same.
+
+
+190
+00:11:17,244 --> 00:11:21,982 line:-2
+Shortly thereafter, your customer decides
+they're enjoying the subscription so much
+
+
+191
+00:11:22,049 --> 00:11:23,684 line:-1
+that they want to upgrade.
+
+
+192
+00:11:23,750 --> 00:11:27,654 line:-2
+For an upgrade, we start the customer
+at the higher tier immediately,
+
+
+193
+00:11:27,721 --> 00:11:29,923 line:-1
+shifting our upcoming renewals.
+
+
+194
+00:11:30,791 --> 00:11:34,895 line:-2
+Later, after not using the higher tier
+as much as expected,
+
+
+195
+00:11:34,962 --> 00:11:38,398 line:-2
+your customer decides to downgrade
+back to a more basic tier.
+
+
+196
+00:11:39,066 --> 00:11:42,202 line:-2
+Downgrades take place at the end
+of the subscription period,
+
+
+197
+00:11:42,269 --> 00:11:45,372 line:-2
+so your customer will have access
+to the higher tier of service
+
+
+198
+00:11:45,439 --> 00:11:47,741 line:-1
+until their next scheduled auto-renew.
+
+
+199
+00:11:49,376 --> 00:11:54,014 line:-2
+So how can you keep track of all of these
+important events for your subscriptions?
+
+
+200
+00:11:54,882 --> 00:11:59,987 line:-2
+What we recommend is using App Store
+Server Notifications for status updates.
+
+
+201
+00:12:00,053 --> 00:12:03,624 line:-2
+This is a push approach,
+meaning you don't ask us for information,
+
+
+202
+00:12:03,690 --> 00:12:06,293 line:-2
+we'll just tell you
+when something happens,
+
+
+203
+00:12:06,360 --> 00:12:07,661 line:-1
+and we do.
+
+
+204
+00:12:07,728 --> 00:12:11,765 line:-2
+We notify you when the status
+of one of your subscriptions changes,
+
+
+205
+00:12:11,832 --> 00:12:15,235 line:-2
+providing you with a new receipt
+for your records at that time,
+
+
+206
+00:12:15,302 --> 00:12:17,337 line:-1
+but only when you need it.
+
+
+207
+00:12:17,404 --> 00:12:21,675 line:-2
+This solution is also more scalable
+as you acquire more subscribers.
+
+
+208
+00:12:22,209 --> 00:12:25,679 line:-2
+So let's dive into
+our App Store Server Notifications now
+
+
+209
+00:12:25,746 --> 00:12:29,516 line:-2
+to see what we offer
+and to learn a little more about them.
+
+
+210
+00:12:30,484 --> 00:12:34,855 line:-2
+When you start receiving App Store Server
+Notifications, or if you are already are,
+
+
+211
+00:12:34,922 --> 00:12:36,957 line:-1
+this is the payload you can expect to see.
+
+
+212
+00:12:37,457 --> 00:12:40,394 line:-1
+Note that this a subset of possible fields
+
+
+213
+00:12:40,460 --> 00:12:43,430 line:-2
+and not all of these may be present
+all the time.
+
+
+214
+00:12:43,931 --> 00:12:45,899 line:-1
+There's a lot of information here,
+
+
+215
+00:12:45,966 --> 00:12:48,802 line:-2
+so I want to focus on some of
+the key components.
+
+
+216
+00:12:50,270 --> 00:12:54,041 line:-2
+When you receive this payload,
+first look for the auto_renew_product_id
+
+
+217
+00:12:54,107 --> 00:12:57,644 line:-2
+to see exactly which product
+the notification applies to
+
+
+218
+00:12:57,978 --> 00:13:00,247 line:-2
+and the product we plan
+to auto-renew next.
+
+
+219
+00:13:01,849 --> 00:13:04,151 line:-1
+Then check the notification_type.
+
+
+220
+00:13:04,218 --> 00:13:06,820 line:-2
+This will tell you the type of event
+you are receiving.
+
+
+221
+00:13:08,522 --> 00:13:13,293 line:-2
+You should also verify the value in the
+password field matches your shared secret,
+
+
+222
+00:13:13,360 --> 00:13:17,331 line:-2
+so you know the content comes directly
+from Apple and is trustworthy.
+
+
+223
+00:13:18,498 --> 00:13:20,901 line:-2
+You should also look
+for the bundle identifier.
+
+
+224
+00:13:20,968 --> 00:13:24,605 line:-2
+This will tell you which of your apps
+you've received a notification for.
+
+
+225
+00:13:25,739 --> 00:13:28,041 line:-2
+Then you want to look for
+the unified_receipt.
+
+
+226
+00:13:28,108 --> 00:13:31,278 line:-2
+This object mimics the response
+from verifyReceipt,
+
+
+227
+00:13:31,345 --> 00:13:35,082 line:-2
+so if you're already using verifyReceipt,
+this should be familiar.
+
+
+228
+00:13:36,416 --> 00:13:39,319 line:-2
+The latest_receipt
+in the unified_receipt object
+
+
+229
+00:13:39,386 --> 00:13:43,257 line:-2
+gives you an updated app receipt
+for this customer for your app.
+
+
+230
+00:13:44,424 --> 00:13:48,996 line:-2
+The latest_receipt_info array contains
+the 100 latest transactions for your app.
+
+
+231
+00:13:49,329 --> 00:13:52,266 line:-2
+You can search here
+by the original_transaction id
+
+
+232
+00:13:52,332 --> 00:13:55,469 line:-2
+to know which subscriptions are active
+for this customer.
+
+
+233
+00:13:56,537 --> 00:13:59,206 line:-2
+Finally look at
+the pending_renewal_info array
+
+
+234
+00:13:59,273 --> 00:14:01,108 line:-1
+to find the upcoming renewal info
+
+
+235
+00:14:01,175 --> 00:14:04,211 line:-2
+for each subscription
+the customer uses in your app.
+
+
+236
+00:14:04,611 --> 00:14:08,015 line:-2
+Now let's quickly revisit
+the notification_type field.
+
+
+237
+00:14:08,782 --> 00:14:11,685 line:-2
+We'll send you notifications
+for several events,
+
+
+238
+00:14:11,752 --> 00:14:15,722 line:-2
+and the notification_type field can have
+the following possible values:
+
+
+239
+00:14:16,223 --> 00:14:18,926 line:-2
+INITIAL_BUY,
+when a customer first subscribes,
+
+
+240
+00:14:19,359 --> 00:14:23,263 line:-2
+INTERACTIVE_RENEWAL, when a customer
+upgrades or renews their subscription
+
+
+241
+00:14:23,330 --> 00:14:25,599 line:-2
+in your app
+or through Manage Subscriptions...
+
+
+242
+00:14:26,733 --> 00:14:30,571 line:-2
+DID_CHANGE_RENEWAL_STATUS, when
+a customer changes their renewal status,
+
+
+243
+00:14:30,637 --> 00:14:33,273 line:-1
+such as toggling auto-renew on or off,
+
+
+244
+00:14:34,141 --> 00:14:37,211 line:-2
+DID_CHANGE_RENEWAL_PREF,
+when a customer makes a change
+
+
+245
+00:14:37,277 --> 00:14:40,147 line:-2
+that takes place at the end
+of the subscription period,
+
+
+246
+00:14:40,214 --> 00:14:41,548 line:-1
+such as a downgrade,
+
+
+247
+00:14:42,516 --> 00:14:45,152 line:-2
+CANCEL,
+when a customer calls Apple Support,
+
+
+248
+00:14:45,219 --> 00:14:48,455 line:-2
+and we issue a refund to them
+for their subscription
+
+
+249
+00:14:48,522 --> 00:14:52,492 line:-2
+or for an upgrade as we cancel
+the previous lower-tier subscription,
+
+
+250
+00:14:53,293 --> 00:14:56,363 line:-2
+DID_FAIL_TO_RENEW,
+when we fail to auto-renew as scheduled
+
+
+251
+00:14:56,430 --> 00:14:58,365 line:-1
+due to a billing issue,
+
+
+252
+00:14:58,432 --> 00:15:01,435 line:-2
+and DID_RECOVER, when we recover billing
+of the subscription
+
+
+253
+00:15:01,502 --> 00:15:04,471 line:-2
+in the billing retry period
+or grace period.
+
+
+254
+00:15:05,105 --> 00:15:07,608 line:-2
+For more information
+on these notifications
+
+
+255
+00:15:07,674 --> 00:15:09,943 line:-1
+and when you can expect to observe them,
+
+
+256
+00:15:10,010 --> 00:15:12,513 line:0
+see our WWDC 2019 session,
+
+
+257
+00:15:12,579 --> 00:15:15,849 line:0
+"In-App Purchases
+and Using Server-to-Server Notifications."
+
+
+258
+00:15:16,383 --> 00:15:20,654 line:0
+To learn more about which notifications
+are available to you in SandBox,
+
+
+259
+00:15:20,721 --> 00:15:24,758 line:-2
+check out this year's session
+"Introducing StoreKit Testing in Xcode."
+
+
+260
+00:15:24,825 --> 00:15:27,327 line:-2
+So if we go back to our timeline
+from earlier,
+
+
+261
+00:15:27,394 --> 00:15:30,697 line:-2
+we have notifications to cover
+almost all of these events.
+
+
+262
+00:15:31,231 --> 00:15:34,334 line:-2
+INITIAL_BUY, for the purchase
+of the subscription,
+
+
+263
+00:15:34,401 --> 00:15:38,238 line:-2
+DID_CHANGE_RENEWAL_STATUS
+for disabling and enabling auto-renew,
+
+
+264
+00:15:38,539 --> 00:15:41,441 line:-1
+DID_FAIL_TO_RENEW for the renewal failure,
+
+
+265
+00:15:41,508 --> 00:15:44,144 line:-1
+DID_RECOVER for the billing recovery,
+
+
+266
+00:15:44,211 --> 00:15:46,079 line:-1
+INTERACTIVE_RENEWAL for the upgrade,
+
+
+267
+00:15:46,146 --> 00:15:49,616 line:-2
+plus a CANCEL
+for the previous lower-tier subscription,
+
+
+268
+00:15:49,683 --> 00:15:53,120 line:-2
+and DID_CHANGE_RENEWAL_PREF
+for the downgrade.
+
+
+269
+00:15:54,454 --> 00:15:56,657 line:-1
+So with App Store Server Notifications,
+
+
+270
+00:15:56,723 --> 00:15:59,860 line:-2
+you can easily monitor
+your subscription events.
+
+
+271
+00:15:59,927 --> 00:16:03,096 line:-2
+But we decided we could make this
+just a little bit better,
+
+
+272
+00:16:03,163 --> 00:16:07,668 line:-2
+which is why this year we're bringing you
+an App Store Server Notification
+
+
+273
+00:16:07,734 --> 00:16:10,337 line:-1
+for every successful auto-renew.
+
+
+274
+00:16:10,404 --> 00:16:14,041 line:-2
+This is a new notification type,
+which we're calling "DID_RENEW."
+
+
+275
+00:16:14,541 --> 00:16:17,811 line:-2
+Coming later this year,
+we'll send you this notification
+
+
+276
+00:16:17,878 --> 00:16:22,115 line:-2
+after every single successful auto-renew,
+every time.
+
+
+277
+00:16:22,482 --> 00:16:26,386 line:-2
+Like all the other notifications,
+it contains the unified receipt,
+
+
+278
+00:16:26,720 --> 00:16:29,223 line:-2
+which gives you
+all the information you need
+
+
+279
+00:16:29,289 --> 00:16:31,792 line:-2
+to identify the subscription
+that was renewed.
+
+
+280
+00:16:31,859 --> 00:16:35,028 line:-1
+This includes the original_transaction_id,
+
+
+281
+00:16:35,095 --> 00:16:37,965 line:-2
+which is a unique identifier
+for the subscription,
+
+
+282
+00:16:38,866 --> 00:16:43,837 line:-2
+the transaction_id, a unique identifier
+for the new subscription period,
+
+
+283
+00:16:44,805 --> 00:16:46,974 line:-1
+the expiration date of the new period,
+
+
+284
+00:16:47,474 --> 00:16:49,309 line:0
+and the auto_renew_product_id
+
+
+285
+00:16:49,376 --> 00:16:51,979 line:0
+to tell you exactly
+which product was auto-renewed.
+
+
+286
+00:16:52,579 --> 00:16:54,648 line:-1
+So jumping back to our timeline,
+
+
+287
+00:16:54,715 --> 00:16:59,653 line:-2
+notice that the addition of the DID_RENEW
+notification completes our events,
+
+
+288
+00:16:59,720 --> 00:17:02,723 line:-2
+bringing you everything you need
+to monitor your subscriptions
+
+
+289
+00:17:02,789 --> 00:17:05,291 line:-1
+in App Store Server Notifications.
+
+
+290
+00:17:05,358 --> 00:17:08,295 line:-2
+However, in addition
+to this new notification,
+
+
+291
+00:17:08,362 --> 00:17:11,464 line:-2
+we thought there was
+a little more information you might need
+
+
+292
+00:17:11,531 --> 00:17:13,000 line:-1
+concerning your subscriptions.
+
+
+293
+00:17:14,134 --> 00:17:16,770 line:-2
+We think you should know
+if one of your customers
+
+
+294
+00:17:16,837 --> 00:17:19,740 line:-1
+has decided to apply a subscription offer
+
+
+295
+00:17:19,806 --> 00:17:23,076 line:-2
+before we renew the subscription
+with that offer.
+
+
+296
+00:17:23,577 --> 00:17:26,079 line:-2
+That's why we've added
+the promotional_offer_id
+
+
+297
+00:17:26,146 --> 00:17:28,348 line:-1
+to the pending_renewal_info section.
+
+
+298
+00:17:28,916 --> 00:17:31,552 line:-2
+This will be available
+through verifyReceipt
+
+
+299
+00:17:31,618 --> 00:17:36,423 line:-2
+and in the App Store Server Notification
+in the pending renewal info array,
+
+
+300
+00:17:36,490 --> 00:17:40,160 line:-2
+so you'll know if there are
+any pending offers for that subscription.
+
+
+301
+00:17:41,495 --> 00:17:45,165 line:-2
+This feature is live
+in the pending_renewal_info section today,
+
+
+302
+00:17:45,232 --> 00:17:46,834 line:-1
+so be sure you're looking for it.
+
+
+303
+00:17:47,434 --> 00:17:50,437 line:-2
+For more information
+on using subscription offers,
+
+
+304
+00:17:50,838 --> 00:17:55,375 line:-2
+see our WWDC 2019 session,
+"Subscription Offers Best Practices."
+
+
+305
+00:17:55,442 --> 00:17:57,778 line:-2
+So now that we have
+a DID_RENEW notification
+
+
+306
+00:17:57,845 --> 00:18:00,681 line:-2
+and the promotional_offer_id
+in the pending_renewal_info,
+
+
+307
+00:18:00,747 --> 00:18:02,850 line:-2
+what should you do with
+this new information?
+
+
+308
+00:18:02,916 --> 00:18:04,718 line:-1
+Most importantly this allows you
+
+
+309
+00:18:04,785 --> 00:18:08,021 line:-2
+to rely on App Store Server Notifications
+for updates,
+
+
+310
+00:18:08,088 --> 00:18:11,158 line:-2
+eliminating the need
+to poll verifyReceipt.
+
+
+311
+00:18:11,225 --> 00:18:15,295 line:-2
+However, you should still use
+verifyReceipt for a few key use cases.
+
+
+312
+00:18:16,530 --> 00:18:19,032 line:-2
+If you experience
+an outage on your server,
+
+
+313
+00:18:19,099 --> 00:18:21,835 line:-2
+the next time one of
+your customers comes online
+
+
+314
+00:18:21,902 --> 00:18:24,872 line:-2
+you can call verifyReceipt
+to check their status,
+
+
+315
+00:18:24,938 --> 00:18:27,007 line:-1
+making up for any missed updates.
+
+
+316
+00:18:27,074 --> 00:18:30,477 line:-2
+In this way,
+verifyReceipt offers a recovery mode.
+
+
+317
+00:18:31,612 --> 00:18:33,747 line:-1
+Second, you can use verifyReceipt
+
+
+318
+00:18:33,814 --> 00:18:37,050 line:-2
+to immediately determine entitlements
+for a customer.
+
+
+319
+00:18:37,451 --> 00:18:40,320 line:-2
+To learn more about
+determining entitlements,
+
+
+320
+00:18:40,387 --> 00:18:44,124 line:-2
+tune into this year's
+"Architecting for Subscriptions" session.
+
+
+321
+00:18:44,191 --> 00:18:48,996 line:-2
+Finally, you can use verifyReceipt
+to verify a successful auto-renew.
+
+
+322
+00:18:49,530 --> 00:18:53,500 line:-2
+So what do we mean by using verifyReceipt
+to verify a successful auto-renew?
+
+
+323
+00:18:54,034 --> 00:18:56,436 line:-1
+Because auto-renew is so critical,
+
+
+324
+00:18:56,503 --> 00:18:59,173 line:-2
+you want to ensure
+that you get the update.
+
+
+325
+00:18:59,773 --> 00:19:04,011 line:-2
+For this reason, approach marking
+an auto-renew through a double check.
+
+
+326
+00:19:04,778 --> 00:19:08,382 line:-2
+First, subscribe to
+our App Store Server Notifications
+
+
+327
+00:19:08,448 --> 00:19:10,651 line:-1
+so you receive the DID_RENEW notification
+
+
+328
+00:19:10,717 --> 00:19:12,953 line:-2
+in addition
+to our other notification types.
+
+
+329
+00:19:13,587 --> 00:19:17,424 line:-2
+Second, schedule a call to verifyReceipt
+for your subscription
+
+
+330
+00:19:17,491 --> 00:19:19,826 line:-2
+shortly after its scheduled
+expiration date.
+
+
+331
+00:19:20,694 --> 00:19:23,830 line:-2
+When you receive
+the DID_RENEW notification as expected,
+
+
+332
+00:19:23,897 --> 00:19:27,367 line:-2
+you can cancel this job,
+but if there is a delay,
+
+
+333
+00:19:27,434 --> 00:19:31,238 line:-2
+you can fallback to verifyReceipt
+to verify a successful auto-renew.
+
+
+334
+00:19:31,805 --> 00:19:35,943 line:-2
+So we just covered a lot about App Store
+Server Notifications and subscriptions.
+
+
+335
+00:19:36,476 --> 00:19:39,947 line:-2
+Now I'd like to discuss a new feature
+for App Store subscriptions.
+
+
+336
+00:19:40,347 --> 00:19:43,650 line:-2
+One of the things customers love most
+about subscriptions
+
+
+337
+00:19:43,717 --> 00:19:46,086 line:-1
+like News+ or Apple Arcade
+
+
+338
+00:19:46,486 --> 00:19:48,822 line:-2
+is that they can be shared
+with their family members.
+
+
+339
+00:19:50,190 --> 00:19:53,227 line:-2
+Well, we're very excited to announce
+that this year
+
+
+340
+00:19:53,293 --> 00:19:56,964 line:-2
+the App Store will support Family Sharing
+for in-app purchases,
+
+
+341
+00:19:57,030 --> 00:20:00,300 line:-2
+which will allow up to
+five additional family members
+
+
+342
+00:20:00,367 --> 00:20:02,035 line:-1
+to share a single purchase.
+
+
+343
+00:20:02,469 --> 00:20:05,806 line:-2
+Family Sharing works for both
+auto-renewable subscriptions
+
+
+344
+00:20:05,873 --> 00:20:08,108 line:-1
+and non-consumable in-app purchases
+
+
+345
+00:20:08,175 --> 00:20:11,411 line:-2
+like those that are used to offer
+a full-feature unlock.
+
+
+346
+00:20:11,945 --> 00:20:14,281 line:-2
+Customers will choose
+which in-app purchases
+
+
+347
+00:20:14,348 --> 00:20:16,116 line:-1
+they'd like to share with their family.
+
+
+348
+00:20:16,583 --> 00:20:19,520 line:-2
+We're so excited about
+what this means for developers
+
+
+349
+00:20:19,586 --> 00:20:23,857 line:-2
+and your ability to engage millions
+of family members that are already set up.
+
+
+350
+00:20:24,324 --> 00:20:27,561 line:-2
+Because the use of family
+is so widely adopted,
+
+
+351
+00:20:27,628 --> 00:20:31,665 line:-2
+Family Sharing for in-app purchases
+can help increase customer engagement
+
+
+352
+00:20:31,732 --> 00:20:33,667 line:-1
+and improve retention for your app.
+
+
+353
+00:20:34,301 --> 00:20:36,603 line:-1
+To begin, you can visit App Store Connect
+
+
+354
+00:20:36,670 --> 00:20:39,773 line:-2
+to turn on Family Sharing
+for a specific product.
+
+
+355
+00:20:39,840 --> 00:20:42,342 line:-1
+You can navigate to your app's page,
+
+
+356
+00:20:42,409 --> 00:20:45,445 line:-2
+and select "Turn On"
+in the Family Sharing section.
+
+
+357
+00:20:45,512 --> 00:20:49,650 line:-2
+Note that once you turn on Family Sharing
+for a product, you cannot turn it off.
+
+
+358
+00:20:51,351 --> 00:20:54,888 line:-2
+Let's review how customers will manage
+their shared purchases.
+
+
+359
+00:20:54,955 --> 00:20:56,590 line:-1
+When new customers subscribe,
+
+
+360
+00:20:56,657 --> 00:20:59,193 line:-2
+the subscription will be shared
+by default.
+
+
+361
+00:20:59,693 --> 00:21:02,429 line:-2
+Subscribers can turn off sharing later
+for their family
+
+
+362
+00:21:02,496 --> 00:21:04,665 line:-1
+on the Manage Subscriptions page.
+
+
+363
+00:21:04,731 --> 00:21:06,400 line:-1
+For existing purchasers,
+
+
+364
+00:21:06,466 --> 00:21:10,037 line:-2
+they'll be notified if one of
+their subscriptions becomes shareable.
+
+
+365
+00:21:10,103 --> 00:21:12,372 line:-2
+Then, they can manage
+their sharing preference
+
+
+366
+00:21:12,439 --> 00:21:14,842 line:-1
+from the same Manage Subscriptions page.
+
+
+367
+00:21:16,343 --> 00:21:20,314 line:-2
+For non-consumables, all purchases
+will be shared with the family
+
+
+368
+00:21:20,380 --> 00:21:24,651 line:-2
+if the customer has turned on
+"Share Purchases with Family" in Settings.
+
+
+369
+00:21:24,718 --> 00:21:26,820 line:-1
+So what do you need to do in your app
+
+
+370
+00:21:26,887 --> 00:21:30,524 line:-2
+so family members can enjoy access
+to the shared purchase?
+
+
+371
+00:21:30,591 --> 00:21:33,427 line:-2
+With this feature,
+not only are we creating
+
+
+372
+00:21:33,493 --> 00:21:35,529 line:-1
+a transaction for the purchaser,
+
+
+373
+00:21:35,596 --> 00:21:39,266 line:-2
+we're also creating a transaction
+for each family member.
+
+
+374
+00:21:39,333 --> 00:21:42,069 line:-1
+So when a family member opens the app,
+
+
+375
+00:21:42,135 --> 00:21:45,806 line:-2
+they will have a transaction available
+in the transaction queue,
+
+
+376
+00:21:45,873 --> 00:21:47,674 line:-1
+for each of their devices.
+
+
+377
+00:21:47,741 --> 00:21:51,645 line:-2
+And there will be a unique receipt
+for each family member
+
+
+378
+00:21:51,712 --> 00:21:55,649 line:-2
+that will contain shared transactions
+in the latest receipt info array.
+
+
+379
+00:21:56,984 --> 00:22:01,188 line:-2
+You should keep track of the original_
+transaction_id for each family member
+
+
+380
+00:22:01,255 --> 00:22:03,790 line:-2
+as you already would
+for your subscriptions.
+
+
+381
+00:22:03,857 --> 00:22:06,527 line:-2
+Note that this only applies
+to new purchases
+
+
+382
+00:22:06,593 --> 00:22:08,896 line:-1
+made after sharing is enabled.
+
+
+383
+00:22:09,363 --> 00:22:12,766 line:-2
+For non-consumable purchases
+made before sharing was enabled,
+
+
+384
+00:22:12,833 --> 00:22:15,068 line:-1
+you'll still have to restore purchases
+
+
+385
+00:22:15,135 --> 00:22:18,038 line:-2
+for these to be available
+to all family members.
+
+
+386
+00:22:18,872 --> 00:22:22,543 line:-2
+So let's get an idea of
+what this looks like for new purchasers.
+
+
+387
+00:22:23,043 --> 00:22:26,180 line:-2
+After you've enabled Family Sharing
+in App Store Connect,
+
+
+388
+00:22:26,246 --> 00:22:28,849 line:-2
+when a family member makes
+a shareable purchase,
+
+
+389
+00:22:28,916 --> 00:22:33,487 line:-2
+not only do we put a transaction in
+the transaction queue for their devices,
+
+
+390
+00:22:33,554 --> 00:22:36,223 line:-2
+we also put a transaction
+in the transaction queue
+
+
+391
+00:22:36,290 --> 00:22:40,060 line:-2
+for every member of their family
+for all of their devices.
+
+
+392
+00:22:40,661 --> 00:22:43,497 line:0
+So when their family members
+open up your app later,
+
+
+393
+00:22:43,564 --> 00:22:48,202 line:0
+you can unlock access to the subscription
+or non-consumable instantly.
+
+
+394
+00:22:48,268 --> 00:22:49,570 line:-1
+It's like magic,
+
+
+395
+00:22:49,636 --> 00:22:54,107 line:-2
+and it makes it so easy for you
+to reach more developers than ever before.
+
+
+396
+00:22:55,776 --> 00:22:56,910 line:-1
+Before moving on,
+
+
+397
+00:22:56,977 --> 00:23:01,548 line:-2
+let's quickly review what this looks like
+for both new and existing subscribers
+
+
+398
+00:23:01,615 --> 00:23:03,951 line:-2
+for both subscriptions
+and non-consumables.
+
+
+399
+00:23:04,418 --> 00:23:06,987 line:-1
+So, for new purchasers,
+
+
+400
+00:23:07,054 --> 00:23:11,124 line:-2
+any shareable subscription they purchase
+is shared with their family by default.
+
+
+401
+00:23:11,892 --> 00:23:15,562 line:-2
+Any sharable non-consumable
+they purchase is shared with their family,
+
+
+402
+00:23:15,629 --> 00:23:18,465 line:-2
+if they have purchase sharing enabled
+in iCloud
+
+
+403
+00:23:18,532 --> 00:23:20,467 line:-1
+if the family is sharing payment,
+
+
+404
+00:23:20,767 --> 00:23:23,737 line:-2
+and if the app is not hidden
+from their purchase history.
+
+
+405
+00:23:24,972 --> 00:23:26,573 line:-1
+For existing purchasers,
+
+
+406
+00:23:26,773 --> 00:23:29,710 line:-2
+for a sharable subscription
+to be shared with their family,
+
+
+407
+00:23:29,776 --> 00:23:32,846 line:-2
+they must opt-in
+from the managed subscriptions page.
+
+
+408
+00:23:33,347 --> 00:23:36,083 line:-1
+For existing non-consumables to be shared,
+
+
+409
+00:23:36,149 --> 00:23:40,153 line:-2
+the same three conditions must be met,
+and you have to restore purchases
+
+
+410
+00:23:40,220 --> 00:23:42,589 line:-2
+to unlock the content
+for the family member.
+
+
+411
+00:23:43,957 --> 00:23:48,228 line:-2
+To manage access for all family members,
+you'll need to use the receipt.
+
+
+412
+00:23:48,295 --> 00:23:51,265 line:-2
+You can get an updated receipt
+from verifyReceipt
+
+
+413
+00:23:51,331 --> 00:23:53,300 line:-1
+or from App Store Server Notifications.
+
+
+414
+00:23:53,867 --> 00:23:57,037 line:-2
+Additionally, whenever the customer opens
+the app,
+
+
+415
+00:23:57,104 --> 00:24:01,608 line:-2
+you can refresh the receipt on device
+to verify access for each customer.
+
+
+416
+00:24:02,209 --> 00:24:04,044 line:-1
+But I'm getting ahead of myself here.
+
+
+417
+00:24:04,111 --> 00:24:06,547 line:-2
+So with that, I'll hand off
+to my colleague Ross
+
+
+418
+00:24:06,613 --> 00:24:09,550 line:-2
+who will talk to you more
+about Family Sharing within StoreKit.
+
+
+419
+00:24:10,584 --> 00:24:11,618 line:-1
+Thanks, Tori.
+
+
+420
+00:24:11,985 --> 00:24:15,656 line:-2
+So let's take a look at how Family Sharing
+and App Purchases works within your app.
+
+
+421
+00:24:16,123 --> 00:24:19,593 line:-2
+First off, how can your app tell
+if a product supports Family Sharing?
+
+
+422
+00:24:20,093 --> 00:24:24,865 line:-2
+Well, we've added a handy new property
+on SKProduct called isFamilyShareable.
+
+
+423
+00:24:25,732 --> 00:24:28,202 line:-2
+It's as easy to use
+as requesting a product information
+
+
+424
+00:24:28,268 --> 00:24:29,303 line:-1
+from the app store,
+
+
+425
+00:24:29,369 --> 00:24:31,672 line:-2
+and then checking the isFamilyShareable
+Boolean.
+
+
+426
+00:24:32,606 --> 00:24:35,275 line:-2
+You can use this
+to programmatically display to customers
+
+
+427
+00:24:35,542 --> 00:24:37,411 line:-2
+that one of your products
+is Family Sharable,
+
+
+428
+00:24:37,477 --> 00:24:39,179 line:-1
+and not have to hard code any logic.
+
+
+429
+00:24:41,415 --> 00:24:44,384 line:-2
+So now one of your customers has seen
+this Family Sharable product,
+
+
+430
+00:24:44,551 --> 00:24:45,786 line:-1
+and taps to purchase it.
+
+
+431
+00:24:46,053 --> 00:24:47,120 line:-1
+What happens next?
+
+
+432
+00:24:48,689 --> 00:24:52,025 line:-2
+Well, when a customer purchases
+a Family Sharable in-app purchase,
+
+
+433
+00:24:52,292 --> 00:24:53,694 line:-1
+everything begins as normal.
+
+
+434
+00:24:54,661 --> 00:24:57,531 line:-2
+Your app uses StoreKit
+to send the purchase to the app store,
+
+
+435
+00:24:57,764 --> 00:25:00,267 line:-2
+and then you get a transaction back
+in the purchase state.
+
+
+436
+00:25:01,735 --> 00:25:04,037 line:-2
+The next time their family members
+open your app...
+
+
+437
+00:25:05,072 --> 00:25:07,007 line:-2
+each of the family members
+will get a transaction
+
+
+438
+00:25:07,074 --> 00:25:08,909 line:-1
+that looks just like a restored purchase.
+
+
+439
+00:25:08,976 --> 00:25:12,880 line:-2
+So your existing app logic should be able
+to handle it with no additional coding.
+
+
+440
+00:25:14,615 --> 00:25:17,618 line:-2
+Now, Tori mentioned that customers
+can also enable and disable sharing
+
+
+441
+00:25:17,684 --> 00:25:18,886 line:-1
+for specific products.
+
+
+442
+00:25:19,286 --> 00:25:21,922 line:-2
+When a customer enables Family Sharing
+for a product,
+
+
+443
+00:25:21,989 --> 00:25:23,991 line:-1
+something similar to a purchase happens.
+
+
+444
+00:25:24,424 --> 00:25:26,393 line:-2
+Their family's devices
+will all get a transaction
+
+
+445
+00:25:26,460 --> 00:25:28,495 line:-1
+that looks just like a restored purchase.
+
+
+446
+00:25:28,562 --> 00:25:31,999 line:-2
+So again, your app should be able
+to handle it with no additional coding.
+
+
+447
+00:25:32,065 --> 00:25:33,734 line:-1
+But what about the opposite case?
+
+
+448
+00:25:33,967 --> 00:25:36,203 line:-2
+What about when a customer disables
+Family Sharing?
+
+
+449
+00:25:36,803 --> 00:25:39,339 line:-2
+Well, normally non-consumables
+are permanent,
+
+
+450
+00:25:39,406 --> 00:25:42,910 line:-2
+and auto-renewable subscriptions
+only end when they expire.
+
+
+451
+00:25:43,377 --> 00:25:45,145 line:-2
+But when a customer
+disables Family Sharing,
+
+
+452
+00:25:45,212 --> 00:25:47,581 line:-2
+they expect access
+to be halted immediately.
+
+
+453
+00:25:48,582 --> 00:25:51,118 line:-1
+So for this case, we've added a new API.
+
+
+454
+00:25:53,020 --> 00:25:56,456 line:-2
+It's a new method on
+the SKPaymentTransactionReserver protocol
+
+
+455
+00:25:56,790 --> 00:26:00,894 line:-2
+called paymentQueue didRevoke
+EntitlementsForProductIdentifiers.
+
+
+456
+00:26:01,595 --> 00:26:03,564 line:-1
+When a customer disables Family Sharing,
+
+
+457
+00:26:03,897 --> 00:26:07,568 line:-2
+StoreKit will automatically update
+your receipt, and then call this method.
+
+
+458
+00:26:09,102 --> 00:26:13,640 line:-2
+Inside the method, you should be prepared
+to verify the receipt, whether locally,
+
+
+459
+00:26:13,707 --> 00:26:17,144 line:-2
+or by uploading it to your server
+and using the verifyReceipt endpoint.
+
+
+460
+00:26:19,112 --> 00:26:22,649 line:-2
+Products that have been revoked
+will no longer be present in the receipt.
+
+
+461
+00:26:24,184 --> 00:26:27,688 line:-2
+Now, you should make sure that you're not
+simply looking at the product identifiers
+
+
+462
+00:26:27,754 --> 00:26:30,023 line:-2
+in the array and revoking access
+based on that.
+
+
+463
+00:26:30,691 --> 00:26:32,793 line:-1
+Depending on the set up of your products,
+
+
+464
+00:26:32,860 --> 00:26:35,195 line:-2
+and other products the customer
+may have purchased,
+
+
+465
+00:26:35,262 --> 00:26:38,732 line:-2
+they may still be entitled to some access
+that overlapped the revoked purchase.
+
+
+466
+00:26:38,799 --> 00:26:41,502 line:-2
+So we added this API to handle
+a couple of new situations
+
+
+467
+00:26:41,568 --> 00:26:42,970 line:-1
+that occur due to Family Sharing.
+
+
+468
+00:26:43,470 --> 00:26:44,671 line:-1
+As I mentioned,
+
+
+469
+00:26:44,738 --> 00:26:48,308 line:-2
+it will be called when a purchaser
+disables Family Sharing for a product.
+
+
+470
+00:26:48,842 --> 00:26:51,411 line:-2
+It will also be called
+if a customer leaves a family group
+
+
+471
+00:26:51,478 --> 00:26:52,980 line:-1
+that was sharing a purchase.
+
+
+472
+00:26:55,015 --> 00:26:58,151 line:-2
+And we've also taken this opportunity
+to add support for refunds.
+
+
+473
+00:26:58,886 --> 00:27:01,522 line:-2
+If a customer receives a refund
+for a non-consumable,
+
+
+474
+00:27:01,588 --> 00:27:03,457 line:-1
+or an auto-renewable subscription,
+
+
+475
+00:27:03,891 --> 00:27:07,394 line:-2
+StoreKit will call this method,
+and you may revoke access immediately.
+
+
+476
+00:27:07,461 --> 00:27:10,597 line:-2
+And that wraps up Family Sharing,
+which we think users will love,
+
+
+477
+00:27:10,664 --> 00:27:13,467 line:-2
+and will give you new opportunities
+to increase value to your customers,
+
+
+478
+00:27:13,534 --> 00:27:15,235 line:-1
+and improve engagement and retention.
+
+
+479
+00:27:15,302 --> 00:27:17,971 line:-2
+Now, I'm going to give you a tour
+of some of the other improvements
+
+
+480
+00:27:18,038 --> 00:27:19,706 line:-1
+and features we've added to StoreKit,
+
+
+481
+00:27:19,773 --> 00:27:22,075 line:-2
+and what to look forward to
+in the latest releases.
+
+
+482
+00:27:22,409 --> 00:27:26,380 line:-2
+First, I'll start with a couple things
+we already shipped since WWDC last year.
+
+
+483
+00:27:27,080 --> 00:27:29,049 line:-1
+We have in-app purchase on Apple Watch,
+
+
+484
+00:27:29,683 --> 00:27:32,419 line:-2
+and improvements
+to our subscription price increase flow.
+
+
+485
+00:27:32,920 --> 00:27:34,588 line:-1
+Then, I'll move on to what's new,
+
+
+486
+00:27:34,655 --> 00:27:38,559 line:-2
+including SKOverlay,
+and improvements to SKAdNetwork.
+
+
+487
+00:27:39,193 --> 00:27:42,596 line:-2
+So this first one is especially for
+all you Apple Watch developers out there.
+
+
+488
+00:27:42,896 --> 00:27:45,332 line:-1
+As of watchOS 6.2 earlier this year,
+
+
+489
+00:27:45,399 --> 00:27:48,635 line:-2
+we've added StoreKit and in-app purchases
+to watchOS.
+
+
+490
+00:27:49,102 --> 00:27:52,139 line:-2
+This means that for apps
+your customers use mostly on the watch,
+
+
+491
+00:27:52,439 --> 00:27:55,108 line:-2
+you can offer in-app purchases directly
+in the watchOS interface,
+
+
+492
+00:27:55,175 --> 00:27:56,810 line:-1
+your customers are already using.
+
+
+493
+00:27:58,512 --> 00:28:00,247 line:-1
+Using StoreKit on watchOS
+
+
+494
+00:28:00,881 --> 00:28:03,851 line:-2
+is almost exactly the same as using it
+on any other platform.
+
+
+495
+00:28:04,551 --> 00:28:07,354 line:-2
+You can observe the payment queue,
+request products,
+
+
+496
+00:28:07,588 --> 00:28:11,124 line:-2
+and add them to the payment queue
+the same as you do in other platforms.
+
+
+497
+00:28:11,191 --> 00:28:12,893 line:-1
+When it comes to verifying the receipt,
+
+
+498
+00:28:12,960 --> 00:28:16,063 line:-2
+you can, of course, continue to use
+server-to-server validation.
+
+
+499
+00:28:17,331 --> 00:28:19,566 line:-2
+However, if you prefer
+to do local validation,
+
+
+500
+00:28:19,633 --> 00:28:22,102 line:-2
+there's just one difference
+you should be aware of.
+
+
+501
+00:28:23,103 --> 00:28:25,239 line:-2
+When you're retrieving
+the deviceIdentifier,
+
+
+502
+00:28:25,305 --> 00:28:29,576 line:-2
+instead of UIDevice, you need to use
+the WKInterfaceDevice API.
+
+
+503
+00:28:30,544 --> 00:28:33,981 line:-2
+Here's an example of some code
+that runs on both iOS and watchOS.
+
+
+504
+00:28:35,516 --> 00:28:37,317 line:-2
+Once you've retrieved
+the deviceIdentifier,
+
+
+505
+00:28:37,384 --> 00:28:38,886 line:-1
+everything else is the same.
+
+
+506
+00:28:39,319 --> 00:28:42,356 line:-2
+Use that deviceIdentifier along
+with the opaque value in the receipt,
+
+
+507
+00:28:42,422 --> 00:28:43,824 line:-1
+to create a hash.
+
+
+508
+00:28:43,991 --> 00:28:46,760 line:-2
+Then make sure that hash
+matches the one in the receipt.
+
+
+509
+00:28:47,794 --> 00:28:50,931 line:-2
+And that's all you need to know to add
+in-app purchases to your watchOS app.
+
+
+510
+00:28:50,998 --> 00:28:53,600 line:-1
+Another feature we rolled out in iOS 13.3
+
+
+511
+00:28:53,667 --> 00:28:56,503 line:-2
+is an improvement to handling
+subscription price increases.
+
+
+512
+00:28:56,570 --> 00:29:00,207 line:-2
+A subscription price increase occurs when
+you have an existing subscription product
+
+
+513
+00:29:00,274 --> 00:29:01,775 line:-1
+you want to charge more for.
+
+
+514
+00:29:02,743 --> 00:29:04,645 line:-1
+Setting up a price increase is easy.
+
+
+515
+00:29:04,878 --> 00:29:07,581 line:-2
+You just go into app store connect
+and change the price.
+
+
+516
+00:29:07,648 --> 00:29:11,051 line:-2
+But you can't just bump up the price
+of an auto-renewable subscription
+
+
+517
+00:29:11,118 --> 00:29:12,653 line:-1
+without telling your customers.
+
+
+518
+00:29:12,719 --> 00:29:16,290 line:-2
+That's why the app store requires
+each customer to agree to the new price.
+
+
+519
+00:29:16,823 --> 00:29:19,693 line:-2
+You should note that if you decrease
+the price of a subscription,
+
+
+520
+00:29:19,760 --> 00:29:21,395 line:-1
+customers don't have to take any action,
+
+
+521
+00:29:21,461 --> 00:29:23,463 line:-2
+and they'll get
+the new price automatically.
+
+
+522
+00:29:23,530 --> 00:29:26,366 line:-2
+Now, unfortunately, this process
+of informing the customer,
+
+
+523
+00:29:26,433 --> 00:29:29,736 line:-2
+and asking them to agree to the new price
+can result in churn.
+
+
+524
+00:29:30,470 --> 00:29:32,706 line:-2
+Churn is when customers
+stop using your product,
+
+
+525
+00:29:32,773 --> 00:29:34,408 line:-1
+and are no longer paying for it.
+
+
+526
+00:29:34,474 --> 00:29:35,576 line:-1
+And I know you're thinking,
+
+
+527
+00:29:35,642 --> 00:29:38,145 line:-2
+"Well, of course,
+customers don't want to pay more."
+
+
+528
+00:29:38,679 --> 00:29:41,715 line:-2
+But actually we've found,
+in a lot of cases, that's not the issue.
+
+
+529
+00:29:43,050 --> 00:29:46,220 line:-2
+Customers can sometimes miss the e-mails
+that the app store sends...
+
+
+530
+00:29:47,354 --> 00:29:51,091 line:-2
+or perhaps they don't want to engage
+in the price increase flow at that time.
+
+
+531
+00:29:51,758 --> 00:29:54,728 line:-2
+And sometimes they put it off until later
+and simply forget.
+
+
+532
+00:29:54,795 --> 00:29:57,064 line:-2
+Additionally, customers might not
+be informed
+
+
+533
+00:29:57,130 --> 00:29:59,199 line:-1
+of additional value that you're providing.
+
+
+534
+00:29:59,366 --> 00:30:02,269 line:-2
+For example, if you run a video service,
+and you've added new content.
+
+
+535
+00:30:02,636 --> 00:30:05,973 line:-2
+So for users experiencing a price increase
+who are using your app,
+
+
+536
+00:30:06,039 --> 00:30:09,676 line:-2
+we've implemented an automatic in-app
+price increase consent sheet.
+
+
+537
+00:30:10,477 --> 00:30:13,213 line:-2
+After you initiate a price increase
+in app store connect,
+
+
+538
+00:30:13,280 --> 00:30:16,917 line:-2
+any affected customers will see
+this app store UI when opening your app.
+
+
+539
+00:30:17,484 --> 00:30:19,353 line:-1
+This way, customers are informed,
+
+
+540
+00:30:19,419 --> 00:30:21,154 line:-2
+and can agree
+to continue their subscription
+
+
+541
+00:30:21,221 --> 00:30:22,890 line:-1
+at the time they're using the app,
+
+
+542
+00:30:22,956 --> 00:30:25,959 line:-2
+which presumably means
+they're finding value in your products.
+
+
+543
+00:30:26,627 --> 00:30:28,529 line:-1
+Once they agree, or dismiss the sheet,
+
+
+544
+00:30:28,729 --> 00:30:31,265 line:-2
+your app's UI's underneath it
+and continues as normal.
+
+
+545
+00:30:31,899 --> 00:30:34,568 line:-2
+Now, we realize that not all apps
+will want to display the sheet
+
+
+546
+00:30:34,635 --> 00:30:35,936 line:-1
+immediately upon opening.
+
+
+547
+00:30:36,470 --> 00:30:39,306 line:-2
+So we've added some tools
+to allow you to control the flow.
+
+
+548
+00:30:39,373 --> 00:30:43,410 line:-2
+First, you'll want to implement
+this new SKPaymentQueue delegate method.
+
+
+549
+00:30:44,811 --> 00:30:48,849 line:-2
+StoreKit will always call this method
+before presenting the price consent sheet.
+
+
+550
+00:30:49,750 --> 00:30:50,951 line:-1
+Inside the method,
+
+
+551
+00:30:51,018 --> 00:30:54,021 line:-2
+it's up to you to determine
+if you want to show a sheet now,
+
+
+552
+00:30:54,087 --> 00:30:56,924 line:-2
+and then return "True" if you do,
+and "False" if you don't.
+
+
+553
+00:30:57,758 --> 00:30:59,326 line:-1
+Now, if you return "False" here,
+
+
+554
+00:30:59,393 --> 00:31:01,428 line:-2
+you're going to want a way
+to show the sheet later
+
+
+555
+00:31:01,495 --> 00:31:02,930 line:-1
+at a time that's more opportune,
+
+
+556
+00:31:03,530 --> 00:31:07,534 line:-2
+perhaps after you've educated the customer
+about additional value you're providing.
+
+
+557
+00:31:08,735 --> 00:31:12,105 line:-2
+To do that, simply call this other
+new StoreKit API.
+
+
+558
+00:31:12,172 --> 00:31:14,808 line:-2
+SKPaymentQueue
+.showPriceConsentIfNeeded.
+
+
+559
+00:31:15,876 --> 00:31:18,912 line:-2
+Now, you should only call this
+if you previously returned "False"
+
+
+560
+00:31:18,979 --> 00:31:20,080 line:-1
+to the method above.
+
+
+561
+00:31:20,948 --> 00:31:24,318 line:-2
+However, if you do call it, and there's
+no pending price increase, don't worry.
+
+
+562
+00:31:24,618 --> 00:31:27,855 line:-2
+StoreKit will always check to make sure
+there is a pending price increase
+
+
+563
+00:31:27,921 --> 00:31:29,656 line:-1
+for the customer before showing the sheet.
+
+
+564
+00:31:29,723 --> 00:31:31,425 line:-2
+And it won't show it at all
+if there isn't.
+
+
+565
+00:31:32,025 --> 00:31:34,461 line:-2
+Next, I'm happy to introduce
+an entirely new API
+
+
+566
+00:31:34,528 --> 00:31:35,829 line:-1
+in the latest iOS release.
+
+
+567
+00:31:36,697 --> 00:31:38,198 line:-1
+It's called SKOverlay,
+
+
+568
+00:31:38,265 --> 00:31:41,201 line:-2
+and it's a sleek new UI element
+for displaying and promoting apps.
+
+
+569
+00:31:42,202 --> 00:31:43,270 line:0
+Take a look.
+
+
+570
+00:31:44,204 --> 00:31:47,040 line:0
+SKOverlay presents a floating view
+at the bottom of your UI
+
+
+571
+00:31:47,107 --> 00:31:49,042 line:0
+that displays information about an app.
+
+
+572
+00:31:50,277 --> 00:31:52,813 line:-2
+It's similar to
+the SKStoreProductViewController class
+
+
+573
+00:31:53,013 --> 00:31:54,548 line:-1
+that exists in StoreKit today,
+
+
+574
+00:31:54,882 --> 00:31:58,252 line:-2
+except SKOverlay was designed
+to work seamlessly with your app's UI.
+
+
+575
+00:31:59,152 --> 00:32:02,155 line:-2
+Additionally,
+unlike SKStoreProductViewController,
+
+
+576
+00:32:02,322 --> 00:32:04,992 line:-1
+SKOverlay is only used to display apps.
+
+
+577
+00:32:05,926 --> 00:32:09,229 line:-2
+SKOverlay was also designed
+to work seamlessly with your app clips
+
+
+578
+00:32:09,296 --> 00:32:12,933 line:-2
+in order to help you transition users
+from your app clip to your full app.
+
+
+579
+00:32:14,268 --> 00:32:16,103 line:-1
+But that's not all it's used for.
+
+
+580
+00:32:16,537 --> 00:32:19,306 line:-2
+You're entirely able to use it
+within your full apps as well.
+
+
+581
+00:32:19,840 --> 00:32:22,376 line:-2
+Simply enter the app ID
+of the app you want to display,
+
+
+582
+00:32:22,442 --> 00:32:25,078 line:-2
+and customers can install it directly
+from the overlay.
+
+
+583
+00:32:25,312 --> 00:32:28,515 line:-2
+If you're interested in learning more
+about our new app clips feature,
+
+
+584
+00:32:28,815 --> 00:32:31,952 line:0
+I highly recommend checking out
+the "Exploring App Clips" session
+
+
+585
+00:32:32,019 --> 00:32:34,021 line:0
+as well as the "Streamline Your App Clips"
+session,
+
+
+586
+00:32:34,087 --> 00:32:35,856 line:0
+both in this year's WWDC.
+
+
+587
+00:32:36,456 --> 00:32:38,725 line:-1
+So now, let's dive into the SKOverlay APIs
+
+
+588
+00:32:38,792 --> 00:32:41,228 line:-2
+and see how you can best integrate
+SKOverlay into your app.
+
+
+589
+00:32:41,295 --> 00:32:44,398 line:-2
+Creating and presenting an SKOverlay
+is fairly straightforward.
+
+
+590
+00:32:44,464 --> 00:32:48,202 line:-2
+First, you initialize it
+using an SKOverlay configuration object.
+
+
+591
+00:32:48,535 --> 00:32:50,571 line:-2
+We'll get back
+into that configuration object later,
+
+
+592
+00:32:50,637 --> 00:32:53,707 line:-2
+but it essentially allows you
+to set up the details of the overlay.
+
+
+593
+00:32:54,541 --> 00:32:56,210 line:-1
+Then, you call the present method,
+
+
+594
+00:32:56,276 --> 00:32:59,112 line:-2
+passing in the WindowScene
+where you want the overlay to appear.
+
+
+595
+00:32:59,179 --> 00:33:02,149 line:-2
+That's all you need to do
+to create and present an SKOverlay.
+
+
+596
+00:33:02,216 --> 00:33:04,318 line:-2
+Of course, we've also added lots
+of other tools
+
+
+597
+00:33:04,384 --> 00:33:06,486 line:-2
+to allow you to customize
+the overlay flow.
+
+
+598
+00:33:07,955 --> 00:33:09,656 line:-1
+First, there's a dismiss function
+
+
+599
+00:33:09,723 --> 00:33:11,959 line:-2
+that allows you to manually dismiss
+the overlay.
+
+
+600
+00:33:12,759 --> 00:33:15,863 line:-2
+You'll notice that this dismiss function
+is a class function,
+
+
+601
+00:33:16,330 --> 00:33:18,165 line:-2
+and it doesn't take an overlay
+as an argument,
+
+
+602
+00:33:18,232 --> 00:33:19,967 line:-1
+but rather another UIWindowScene.
+
+
+603
+00:33:20,934 --> 00:33:24,705 line:-2
+That's because only one overlay
+can be displayed in a scene at a time.
+
+
+604
+00:33:25,105 --> 00:33:26,273 line:-1
+And doing it this way,
+
+
+605
+00:33:26,340 --> 00:33:28,709 line:-2
+allows you to remove any overlays
+that may be on a scene
+
+
+606
+00:33:28,876 --> 00:33:31,211 line:-2
+even if your current code context
+doesn't have access
+
+
+607
+00:33:31,278 --> 00:33:32,813 line:-1
+to the specific overlay object.
+
+
+608
+00:33:35,082 --> 00:33:36,884 line:-1
+SKOverlay also has a delegate.
+
+
+609
+00:33:37,618 --> 00:33:38,619 line:-1
+As you'd expect,
+
+
+610
+00:33:38,852 --> 00:33:42,189 line:-2
+this delegate allows you to react
+to changes in the overlay's status.
+
+
+611
+00:33:42,489 --> 00:33:44,258 line:-1
+We'll see the details of that later.
+
+
+612
+00:33:46,260 --> 00:33:49,463 line:-2
+And finally,
+SKOverlay has a configuration object.
+
+
+613
+00:33:49,530 --> 00:33:52,866 line:-2
+This allows you to see the configuration
+that was used to set it up.
+
+
+614
+00:33:54,735 --> 00:33:57,104 line:-2
+Now that we've come back around
+to the configuration,
+
+
+615
+00:33:57,171 --> 00:33:58,839 line:-1
+let's take a look at those two objects.
+
+
+616
+00:33:59,706 --> 00:34:01,909 line:-2
+SKOverlay's actually comprised
+of two classes.
+
+
+617
+00:34:03,010 --> 00:34:05,045 line:-2
+The first
+is called AppClipConfiguration.
+
+
+618
+00:34:05,846 --> 00:34:08,148 line:-2
+This configuration is used
+to transition users
+
+
+619
+00:34:08,215 --> 00:34:09,983 line:-1
+from your app clip to your full app.
+
+
+620
+00:34:10,250 --> 00:34:13,320 line:-2
+The app clip configuration
+can only display the full app
+
+
+621
+00:34:13,387 --> 00:34:15,956 line:-2
+for the current app clip the overlay
+is displayed in.
+
+
+622
+00:34:16,023 --> 00:34:17,958 line:-1
+The next class is the AppConfiguration.
+
+
+623
+00:34:18,025 --> 00:34:20,360 line:-2
+And this configuration can be used
+to display any app that--
+
+
+624
+00:34:20,793 --> 00:34:23,697 line:-2
+Much of these two classes is the same,
+so let's start there.
+
+
+625
+00:34:23,764 --> 00:34:26,600 line:-2
+Both classes have a campaign token
+and a provider token
+
+
+626
+00:34:26,833 --> 00:34:29,268 line:-2
+so that you can use SKOverlay
+with the app analytics.
+
+
+627
+00:34:30,237 --> 00:34:34,474 line:-2
+They also have functions that allow you
+to set and get arbitrary key values.
+
+
+628
+00:34:35,342 --> 00:34:37,077 line:-2
+Now, most developers won't need
+to use these,
+
+
+629
+00:34:37,143 --> 00:34:39,279 line:-2
+but they're there so that you can
+integrate SKOverlay
+
+
+630
+00:34:39,346 --> 00:34:41,681 line:-2
+with other StoreKit APIs,
+such as SKAdNetwork.
+
+
+631
+00:34:44,618 --> 00:34:47,020 line:-2
+Both classes also have
+the position property.
+
+
+632
+00:34:47,788 --> 00:34:50,690 line:-2
+While SKOverlay always appears
+at the bottom of your screen,
+
+
+633
+00:34:50,991 --> 00:34:54,328 line:-2
+apps that use tab bars will want
+to choose the bottomRaised property,
+
+
+634
+00:34:54,761 --> 00:34:56,864 line:-2
+so that the overlay appears
+just above the tab bar,
+
+
+635
+00:34:56,929 --> 00:34:58,298 line:-1
+rather than on top of it.
+
+
+636
+00:34:58,365 --> 00:35:00,467 line:-2
+In addition to these properties
+and functions,
+
+
+637
+00:35:00,534 --> 00:35:04,071 line:-2
+the app configuration also offers
+two additional properties on top of these.
+
+
+638
+00:35:05,539 --> 00:35:07,107 line:-1
+The first is the appIdentifier.
+
+
+639
+00:35:07,441 --> 00:35:09,910 line:-2
+You can use this to enter
+the iTunes identifier
+
+
+640
+00:35:09,977 --> 00:35:11,545 line:-1
+of the app you wish to display.
+
+
+641
+00:35:13,080 --> 00:35:15,349 line:-2
+The app clip configuration
+doesn't have this property
+
+
+642
+00:35:15,415 --> 00:35:16,783 line:-1
+because, as I mentioned before,
+
+
+643
+00:35:16,850 --> 00:35:19,586 line:-2
+that configuration is only used
+for displaying the full app
+
+
+644
+00:35:19,653 --> 00:35:21,722 line:-1
+of the current app clip the overlay is in.
+
+
+645
+00:35:23,657 --> 00:35:27,294 line:-2
+And the app configuration also has
+a userDismissable Boolean.
+
+
+646
+00:35:28,295 --> 00:35:29,930 line:-1
+This is set to "True" by default,
+
+
+647
+00:35:30,163 --> 00:35:32,766 line:-2
+which means that the user will be able
+to swipe down in the overlay
+
+
+648
+00:35:32,833 --> 00:35:34,301 line:-1
+to dismiss it from the screen.
+
+
+649
+00:35:34,835 --> 00:35:36,170 line:-1
+If you set this to "False",
+
+
+650
+00:35:36,403 --> 00:35:38,472 line:-2
+the user will not be able
+to swipe down on it,
+
+
+651
+00:35:38,539 --> 00:35:42,442 line:-2
+and the overlay will only go away when
+you call the dismiss function manually.
+
+
+652
+00:35:42,509 --> 00:35:44,211 line:-1
+That's it for the configuration.
+
+
+653
+00:35:44,378 --> 00:35:45,879 line:-1
+So let's move on to the delegate.
+
+
+654
+00:35:46,613 --> 00:35:49,183 line:-2
+The first delegate method is simply
+an error handler.
+
+
+655
+00:35:49,950 --> 00:35:53,053 line:-2
+If you try to present an overlay
+and an unexpected error occurs,
+
+
+656
+00:35:53,620 --> 00:35:56,423 line:-2
+it will call this delegate method,
+passing in the overlay,
+
+
+657
+00:35:56,490 --> 00:35:58,525 line:-1
+and a specific error as an argument.
+
+
+658
+00:36:00,928 --> 00:36:02,563 line:-1
+The rest of the delegate methods
+
+
+659
+00:36:03,096 --> 00:36:06,366 line:-2
+are all revolving around animating
+of the overlay.
+
+
+660
+00:36:07,334 --> 00:36:10,771 line:-2
+You can see there's a method
+for the start and end of the presentation,
+
+
+661
+00:36:11,004 --> 00:36:13,240 line:-2
+as well as the start and end
+of the dismissal.
+
+
+662
+00:36:14,441 --> 00:36:16,577 line:-2
+You can also see
+that each of these methods
+
+
+663
+00:36:16,844 --> 00:36:19,513 line:-2
+includes an SKOverlay.TransitionContext
+object.
+
+
+664
+00:36:21,281 --> 00:36:24,651 line:-2
+That's because these methods are used
+to help you coordinate
+
+
+665
+00:36:24,718 --> 00:36:27,287 line:-1
+your UI animations alongside the overlay.
+
+
+666
+00:36:28,488 --> 00:36:30,557 line:-2
+Let's walk through how you might present
+an overlay,
+
+
+667
+00:36:30,624 --> 00:36:32,860 line:-2
+and use these APIs
+to coordinate animations.
+
+
+668
+00:36:33,260 --> 00:36:36,763 line:-2
+Here, we're creating and presenting
+an SKOverlay inside our app clip.
+
+
+669
+00:36:37,598 --> 00:36:39,566 line:-1
+First, we grab the current WindowScene.
+
+
+670
+00:36:39,867 --> 00:36:42,035 line:-2
+And then,
+we create an app clip configuration
+
+
+671
+00:36:42,102 --> 00:36:43,604 line:-1
+using the bottom position.
+
+
+672
+00:36:45,506 --> 00:36:48,642 line:-2
+We'll then initialize an overlay
+using that configuration object.
+
+
+673
+00:36:48,709 --> 00:36:50,043 line:-1
+And we'll set it to delegate.
+
+
+674
+00:36:50,844 --> 00:36:53,347 line:-2
+Finally, we present the overlay
+in that scene.
+
+
+675
+00:36:54,114 --> 00:36:57,684 line:-2
+And this is all you need to do
+to use SKOverlay in your app or app clip.
+
+
+676
+00:36:58,986 --> 00:37:01,822 line:-2
+If we want to animate our own UI
+alongside the overlay,
+
+
+677
+00:37:01,889 --> 00:37:03,891 line:-1
+we can do so using the delegate methods.
+
+
+678
+00:37:04,958 --> 00:37:07,794 line:-2
+First, we can set up any initial state
+for our UI elements
+
+
+679
+00:37:07,861 --> 00:37:09,663 line:-1
+directly inside the delegate method.
+
+
+680
+00:37:10,631 --> 00:37:13,667 line:-2
+And these delegate methods are always
+called in the main queue,
+
+
+681
+00:37:13,734 --> 00:37:15,802 line:-2
+so you can manipulate UI
+right inside them.
+
+
+682
+00:37:16,236 --> 00:37:18,672 line:-1
+Then, we add any animations we want
+
+
+683
+00:37:18,739 --> 00:37:21,241 line:-2
+inside an animation block
+on the transition context.
+
+
+684
+00:37:22,042 --> 00:37:25,412 line:-2
+Again, simply declare any changes
+in animatable properties here.
+
+
+685
+00:37:25,746 --> 00:37:28,182 line:-2
+There's no need to use a UIView
+animate block
+
+
+686
+00:37:28,715 --> 00:37:32,252 line:-2
+since any code inside this block
+will be animated for you by the overlay.
+
+
+687
+00:37:32,452 --> 00:37:34,188 line:-1
+Whether you're optimizing your app clip
+
+
+688
+00:37:34,254 --> 00:37:36,490 line:-2
+or promoting other apps
+inside your own app,
+
+
+689
+00:37:36,857 --> 00:37:40,661 line:-2
+SKOverlay's a great option for
+a seamless integration and a beautiful UI.
+
+
+690
+00:37:40,994 --> 00:37:44,765 line:-2
+Finally, I'd like to share with you
+some updates about our SKAdNetwork API.
+
+
+691
+00:37:45,032 --> 00:37:47,100 line:-1
+Introduced in iOS 11.3,
+
+
+692
+00:37:47,301 --> 00:37:50,771 line:-2
+SKAdNetwork allows ad networks
+to measure the effectiveness of their ads
+
+
+693
+00:37:50,838 --> 00:37:52,973 line:-1
+while still respecting customer privacy.
+
+
+694
+00:37:53,941 --> 00:37:57,344 line:-2
+In the latest iOS release,
+we've made it even more powerful,
+
+
+695
+00:37:57,411 --> 00:37:59,580 line:-2
+while still not compromising
+the customer privacy.
+
+
+696
+00:37:59,913 --> 00:38:02,149 line:-2
+Let's start with an overview
+of SKAdNetwork.
+
+
+697
+00:38:03,283 --> 00:38:05,319 line:-1
+SKAdNetwork involves three stakeholders,
+
+
+698
+00:38:05,853 --> 00:38:08,722 line:-2
+ad networks, source apps,
+and advertising apps.
+
+
+699
+00:38:10,290 --> 00:38:12,926 line:-2
+Each stakeholder has a role
+in making the feature work.
+
+
+700
+00:38:15,295 --> 00:38:17,164 line:0
+Ad Networks places ads within apps,
+
+
+701
+00:38:17,431 --> 00:38:20,234 line:0
+and receive postbacks when the ads
+results in conversions.
+
+
+702
+00:38:22,035 --> 00:38:25,405 line:0
+Source Apps display the ads
+that are sent to them by the ad networks.
+
+
+703
+00:38:28,041 --> 00:38:30,777 line:0
+And advertising apps are the ones
+that appear in the ads,
+
+
+704
+00:38:30,844 --> 00:38:33,947 line:0
+and then submit the postback
+to SKAdNetwork once they're opened.
+
+
+705
+00:38:34,381 --> 00:38:37,217 line:-2
+Let's take a closer look at this flow
+from start to finish.
+
+
+706
+00:38:37,985 --> 00:38:41,455 line:-2
+First, the ad network
+places the SKAdNetwork data
+
+
+707
+00:38:41,522 --> 00:38:44,958 line:-2
+inside an ad for the advertising app,
+which we'll call app B.
+
+
+708
+00:38:46,393 --> 00:38:48,362 line:-2
+Then, it displays this ad
+in the source app,
+
+
+709
+00:38:48,428 --> 00:38:49,897 line:-1
+which we can call app A.
+
+
+710
+00:38:50,631 --> 00:38:52,332 line:-1
+Once the user taps the ad,
+
+
+711
+00:38:52,966 --> 00:38:55,402 line:-1
+installs app B, and then opens it,
+
+
+712
+00:38:56,336 --> 00:39:01,108 line:-2
+app B should call another SKAdNetwork API
+in order to initialize the postback.
+
+
+713
+00:39:02,910 --> 00:39:04,912 line:-1
+Calling this API will set a timer...
+
+
+714
+00:39:06,213 --> 00:39:07,681 line:-1
+and once that timer expires,
+
+
+715
+00:39:07,948 --> 00:39:11,251 line:-2
+the user's device will send a postback
+back to the ad network's URL.
+
+
+716
+00:39:13,620 --> 00:39:15,789 line:-1
+Ad networks should use Apple's public key
+
+
+717
+00:39:15,856 --> 00:39:19,092 line:-2
+to verify the data in the postback
+and make sure it's legitimate.
+
+
+718
+00:39:19,526 --> 00:39:21,929 line:-2
+So that first bundle of data
+that the ad network sends up
+
+
+719
+00:39:21,995 --> 00:39:23,897 line:-1
+when displaying an ad looks like this.
+
+
+720
+00:39:24,965 --> 00:39:28,335 line:-2
+It contains the ad network ID,
+which has been registered with Apple,
+
+
+721
+00:39:29,136 --> 00:39:31,338 line:-1
+and a campaign ID from 1 to 100,
+
+
+722
+00:39:31,805 --> 00:39:35,008 line:-2
+which ad networks can use
+to measure their campaign effectiveness.
+
+
+723
+00:39:36,276 --> 00:39:40,180 line:-2
+It contains the ID of the advertising app,
+the one that's displayed in the ad.
+
+
+724
+00:39:41,315 --> 00:39:42,482 line:-1
+And has a timestamp.
+
+
+725
+00:39:42,916 --> 00:39:46,153 line:-2
+This timestamp should be generated
+at the time the ad is displayed,
+
+
+726
+00:39:46,787 --> 00:39:50,390 line:-2
+because timestamps that are too old
+will cause the ad data to be rejected.
+
+
+727
+00:39:50,691 --> 00:39:53,327 line:-1
+The nonce is just a random view ID,
+
+
+728
+00:39:53,393 --> 00:39:57,264 line:-2
+used to ensure that each ad impression
+is unique, and to prevent double counting.
+
+
+729
+00:39:57,331 --> 00:40:00,267 line:-1
+And finally, the signature is generated
+
+
+730
+00:40:00,334 --> 00:40:02,870 line:-2
+using all of the other pieces of data
+in this bundle
+
+
+731
+00:40:03,437 --> 00:40:08,876 line:-2
+to ensure that only your ad network
+can start ads using your ad network ID.
+
+
+732
+00:40:10,410 --> 00:40:14,515 line:-2
+In the latest iOS release,
+we're requiring two new pieces of data.
+
+
+733
+00:40:15,516 --> 00:40:17,818 line:-2
+The first is the version,
+which is now 2.0.
+
+
+734
+00:40:18,986 --> 00:40:20,888 line:-1
+And the second is the Source App ID.
+
+
+735
+00:40:20,954 --> 00:40:23,790 line:-2
+This is the ID of the app
+that's displaying the ad.
+
+
+736
+00:40:26,293 --> 00:40:29,630 line:-2
+Next, the postback API should be called
+by the advertising app,
+
+
+737
+00:40:29,696 --> 00:40:32,299 line:-1
+app B, upon the first launch of their app.
+
+
+738
+00:40:32,366 --> 00:40:37,337 line:-2
+This method generates a postback,
+which is the cryptographically signed data
+
+
+739
+00:40:37,404 --> 00:40:39,873 line:-2
+validating that a user installed
+and launched this app
+
+
+740
+00:40:39,940 --> 00:40:40,974 line:-1
+after seeing the ad.
+
+
+741
+00:40:41,608 --> 00:40:44,378 line:-2
+The first call to this API
+starts the postback process
+
+
+742
+00:40:44,444 --> 00:40:46,780 line:-2
+if the device has attribution data
+for the app.
+
+
+743
+00:40:47,247 --> 00:40:49,016 line:-1
+And subsequent calls have no effect.
+
+
+744
+00:40:50,150 --> 00:40:51,552 line:-1
+Starting in the latest iOS,
+
+
+745
+00:40:52,052 --> 00:40:55,022 line:-2
+advertising apps will be able to call
+the updateConversionValue API
+
+
+746
+00:40:55,088 --> 00:40:56,089 line:-1
+if they choose.
+
+
+747
+00:40:57,090 --> 00:41:00,093 line:-2
+This allows the app to add
+an additional six-bit value
+
+
+748
+00:41:00,160 --> 00:41:02,796 line:-2
+that represents some action
+that took place in the app.
+
+
+749
+00:41:04,565 --> 00:41:06,633 line:-1
+For example, let's say you wanted to know
+
+
+750
+00:41:06,700 --> 00:41:08,602 line:-2
+whether a user purchased an item
+in your app
+
+
+751
+00:41:08,669 --> 00:41:10,337 line:-1
+before you count the conversion.
+
+
+752
+00:41:11,038 --> 00:41:13,774 line:-2
+In this case,
+you can call updateConversionValue
+
+
+753
+00:41:13,841 --> 00:41:16,476 line:-2
+and include a value that you mapped
+purchasing an item.
+
+
+754
+00:41:17,811 --> 00:41:20,280 line:-2
+Since the conversion value
+is chosen at runtime,
+
+
+755
+00:41:20,547 --> 00:41:22,549 line:-1
+we can't sign it on the app store server,
+
+
+756
+00:41:22,816 --> 00:41:26,587 line:-2
+so it's the only piece of the postback
+that isn't protected with cryptography.
+
+
+757
+00:41:28,222 --> 00:41:31,291 line:-2
+The value itself is an integer
+between zero and 63,
+
+
+758
+00:41:31,358 --> 00:41:33,961 line:-2
+which may represent actions such as
+making a purchase,
+
+
+759
+00:41:34,027 --> 00:41:36,496 line:-2
+signing up for a free trial,
+or completing a level.
+
+
+760
+00:41:39,399 --> 00:41:44,238 line:-2
+Apps can call this API multiple times
+to update the conversion value.
+
+
+761
+00:41:45,506 --> 00:41:49,009 line:-2
+However, only values that are higher
+than the previous value
+
+
+762
+00:41:49,076 --> 00:41:50,244 line:-1
+will be accepted.
+
+
+763
+00:41:51,311 --> 00:41:53,480 line:-2
+Values that are lower than
+the currently stored value
+
+
+764
+00:41:53,547 --> 00:41:54,848 line:-1
+will simply be ignored.
+
+
+765
+00:41:55,282 --> 00:41:56,884 line:-1
+This means you don't have to worry about
+
+
+766
+00:41:56,950 --> 00:42:00,254 line:-2
+accidentally overwriting
+your conversion value with a lower value.
+
+
+767
+00:42:00,754 --> 00:42:03,891 line:-2
+Now, let's see the details of the postback
+that StoreKit sends to the ad network
+
+
+768
+00:42:03,957 --> 00:42:05,559 line:-1
+once the process is complete.
+
+
+769
+00:42:07,094 --> 00:42:08,795 line:-1
+We'll send up the ad network ID
+
+
+770
+00:42:08,862 --> 00:42:11,031 line:-2
+and the campaign ID
+that were used in the ad,
+
+
+771
+00:42:11,698 --> 00:42:14,468 line:-2
+as well as the ID of the advertising app,
+app B.
+
+
+772
+00:42:15,802 --> 00:42:18,472 line:-2
+A transaction ID
+is another unique identifier
+
+
+773
+00:42:18,539 --> 00:42:21,642 line:-2
+you can use to make sure
+you aren't double counting conversions.
+
+
+774
+00:42:22,242 --> 00:42:24,978 line:-2
+And you can use Apple's public key
+to verify the signature
+
+
+775
+00:42:25,045 --> 00:42:26,713 line:-1
+to know that it's all legitimate.
+
+
+776
+00:42:29,082 --> 00:42:30,417 line:-1
+In the latest iOS,
+
+
+777
+00:42:30,484 --> 00:42:32,819 line:-2
+we've added new information
+to the postback too.
+
+
+778
+00:42:34,021 --> 00:42:35,556 line:-1
+First, we've added the version.
+
+
+779
+00:42:36,857 --> 00:42:39,092 line:-2
+We've also added a key
+called "redownload,"
+
+
+780
+00:42:39,159 --> 00:42:41,195 line:-2
+which will indicate whether
+this was the first time
+
+
+781
+00:42:41,261 --> 00:42:42,829 line:-1
+the customer purchased the app,
+
+
+782
+00:42:42,996 --> 00:42:46,066 line:-2
+or if they previously purchased it
+and are installing it again.
+
+
+783
+00:42:47,935 --> 00:42:51,505 line:-2
+Prior to this, SKAdNetwork only worked
+for the first purchase of an app.
+
+
+784
+00:42:52,072 --> 00:42:54,208 line:-2
+So adding redownloads will give you
+a lot more insight
+
+
+785
+00:42:54,274 --> 00:42:55,909 line:-1
+into the effectiveness of your ads.
+
+
+786
+00:42:57,144 --> 00:42:58,779 line:-1
+Furthermore, in the latest iOS,
+
+
+787
+00:42:58,846 --> 00:43:01,648 line:-2
+we've added two new optional items
+in the postback.
+
+
+788
+00:43:02,950 --> 00:43:04,651 line:-1
+The first is the ID of the source app,
+
+
+789
+00:43:05,018 --> 00:43:08,722 line:-2
+so that you can know which app displayed
+the ad that resulted in the conversion.
+
+
+790
+00:43:09,590 --> 00:43:13,360 line:-2
+And the second is the conversion value
+that was chosen by the advertising app.
+
+
+791
+00:43:15,162 --> 00:43:17,898 line:-2
+It's important to note
+that these last two pieces of data
+
+
+792
+00:43:17,965 --> 00:43:19,833 line:-1
+won't always show up in the postback.
+
+
+793
+00:43:20,734 --> 00:43:22,903 line:-1
+In order to preserve customer privacy,
+
+
+794
+00:43:23,136 --> 00:43:26,406 line:-2
+the app store servers do calculations
+to make sure that sharing these values
+
+
+795
+00:43:26,473 --> 00:43:29,743 line:-2
+won't allow the postback to be linked
+to the customer that generated it.
+
+
+796
+00:43:29,810 --> 00:43:31,411 line:-1
+So we'll share them when we can,
+
+
+797
+00:43:31,478 --> 00:43:33,614 line:-2
+but your server should be ready
+to handle the postbacks
+
+
+798
+00:43:33,680 --> 00:43:34,848 line:-1
+both with and without them.
+
+
+799
+00:43:35,215 --> 00:43:36,583 line:-1
+So how do you get started?
+
+
+800
+00:43:37,885 --> 00:43:40,754 line:-2
+If you're interested in using SKAdNetwork
+as an ad network,
+
+
+801
+00:43:40,954 --> 00:43:44,324 line:-2
+you'll need to sign up with Apple
+so we can register your information.
+
+
+802
+00:43:44,791 --> 00:43:47,794 line:-2
+You should enroll in the developer program
+as an organization,
+
+
+803
+00:43:48,161 --> 00:43:51,331 line:-2
+and then fill out the form
+to request access to SKAdNetwork.
+
+
+804
+00:43:52,966 --> 00:43:56,737 line:-2
+We'll then send you instructions on how
+to generate a public-private key pair,
+
+
+805
+00:43:56,803 --> 00:43:59,439 line:-2
+and you'll send us the URL
+you want postbacks to be sent to
+
+
+806
+00:43:59,506 --> 00:44:00,974 line:-1
+along with your public key.
+
+
+807
+00:44:01,408 --> 00:44:03,477 line:-1
+Remember, never send your private key.
+
+
+808
+00:44:03,810 --> 00:44:05,112 line:-1
+Always keep that secure.
+
+
+809
+00:44:06,480 --> 00:44:09,850 line:-2
+Then, you're registered and ready
+to begin using SKAdNetwork.
+
+
+810
+00:44:10,817 --> 00:44:13,954 line:-2
+If you're a source app,
+and you want to work with an ad network,
+
+
+811
+00:44:14,188 --> 00:44:18,025 line:-2
+ask them for their ad network ID,
+and put it into your Info.plist file.
+
+
+812
+00:44:18,525 --> 00:44:20,827 line:-2
+This will make sure StoreKit knows
+to accept the ad data
+
+
+813
+00:44:20,894 --> 00:44:22,629 line:-1
+when you display an ad in your app.
+
+
+814
+00:44:24,565 --> 00:44:27,267 line:-1
+And finally, if you're an advertising app,
+
+
+815
+00:44:27,334 --> 00:44:29,503 line:-2
+and you want to measure
+the conversion of your ads,
+
+
+816
+00:44:29,570 --> 00:44:31,004 line:-1
+make sure to configure your app
+
+
+817
+00:44:31,071 --> 00:44:33,640 line:-2
+so that it initializes the postback
+when it first launches.
+
+
+818
+00:44:33,707 --> 00:44:37,544 line:-2
+Today we've covered lots of information
+on best practices and new features,
+
+
+819
+00:44:37,611 --> 00:44:40,414 line:-2
+in both server-to-server
+and customer device environments.
+
+
+820
+00:44:42,216 --> 00:44:45,219 line:-2
+You can now take advantage
+of new server-to-server notifications
+
+
+821
+00:44:45,285 --> 00:44:46,553 line:-1
+for refunded purchases.
+
+
+822
+00:44:47,955 --> 00:44:50,891 line:-2
+And we saw how you can use
+subscription notifications
+
+
+823
+00:44:50,958 --> 00:44:52,659 line:-1
+to get the latest information
+
+
+824
+00:44:52,726 --> 00:44:55,262 line:-2
+without needing to poll
+the verifyReceipt endpoint.
+
+
+825
+00:44:57,097 --> 00:44:59,466 line:-2
+We introduced our brand-new way
+to share in-app purchases
+
+
+826
+00:44:59,533 --> 00:45:00,801 line:-1
+among family members,
+
+
+827
+00:45:01,168 --> 00:45:04,805 line:-2
+giving you a new tool to increase value
+and engagement with your customers.
+
+
+828
+00:45:06,406 --> 00:45:07,574 line:-1
+On the client side,
+
+
+829
+00:45:07,641 --> 00:45:11,011 line:-2
+you can now offer in-app purchases
+directly inside your watchOS apps.
+
+
+830
+00:45:12,479 --> 00:45:14,581 line:-1
+And subscription developers will benefit
+
+
+831
+00:45:14,648 --> 00:45:17,384 line:-2
+from our new, improved
+subscription price increase flow.
+
+
+832
+00:45:19,686 --> 00:45:22,256 line:-2
+We got into the details
+of our new SKOverlay API
+
+
+833
+00:45:22,322 --> 00:45:23,390 line:-1
+for promoting apps,
+
+
+834
+00:45:23,824 --> 00:45:25,759 line:-1
+including using inside app clips.
+
+
+835
+00:45:27,394 --> 00:45:30,597 line:-2
+And finally, we explained
+how our SKAdNetwork API
+
+
+836
+00:45:30,664 --> 00:45:33,267 line:-2
+can help advertisers gather
+and use conversion data
+
+
+837
+00:45:33,333 --> 00:45:35,536 line:-1
+without compromising on customer privacy.
+
+
+838
+00:45:35,869 --> 00:45:38,505 line:-2
+We think these tools will help you
+continue to grow your business
+
+
+839
+00:45:38,572 --> 00:45:39,706 line:-1
+with in-app purchases.
+
+
+840
+00:45:40,407 --> 00:45:41,575 line:-1
+For more information,
+
+
+841
+00:45:41,642 --> 00:45:43,677 line:-2
+please join us on the forums
+and in the labs.
+
+
+842
+00:45:43,744 --> 00:45:44,745 line:-1
+Thank you.
+

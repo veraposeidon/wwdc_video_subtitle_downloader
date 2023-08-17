@@ -1,0 +1,1803 @@
+1
+00:00:03,703 --> 00:00:07,407 line:-1
+Hello and welcome to WWDC.
+
+
+2
+00:00:09,042 --> 00:00:12,446 line:0
+Hello, everyone.
+I hope you're having a great conference.
+
+
+3
+00:00:12,946 --> 00:00:16,950 line:-2
+Now, if you're looking to improve
+the data efficiency,
+
+
+4
+00:00:17,017 --> 00:00:22,623 line:-2
+and at the same time,
+the fidelity of your HLS audio streams,
+
+
+5
+00:00:22,689 --> 00:00:24,591 line:-1
+you've found the right session.
+
+
+6
+00:00:24,658 --> 00:00:28,662 line:-2
+I'm Simon, and I'm a media streaming
+engineer here at Apple.
+
+
+7
+00:00:28,729 --> 00:00:30,297 line:-1
+Together, in this session,
+
+
+8
+00:00:30,364 --> 00:00:34,501 line:-2
+we're going to discover how to deliver
+a better HLS audio experience.
+
+
+9
+00:00:35,002 --> 00:00:38,272 line:-2
+Before we begin, I want to say
+that I'm going to provide to you
+
+
+10
+00:00:38,338 --> 00:00:43,410 line:-1
+some additional guidance that supplements
+
+
+11
+00:00:43,477 --> 00:00:47,681 line:-2
+the existing HLS authoring specification
+for Apple devices,
+
+
+12
+00:00:47,748 --> 00:00:51,752 line:-2
+a document that is available
+at developer.apple.com.
+
+
+13
+00:00:51,818 --> 00:00:55,222 line:-2
+I encourage you to become familiar
+with the contents of that document
+
+
+14
+00:00:55,289 --> 00:00:57,491 line:-1
+before we get into this session.
+
+
+15
+00:00:57,558 --> 00:01:00,794 line:-2
+So, if you need to,
+by all means, pause me.
+
+
+16
+00:01:00,861 --> 00:01:02,596 line:-1
+I'm a video on demand.
+
+
+17
+00:01:02,663 --> 00:01:06,366 line:-2
+Go check that out, get familiar
+with the recommendations there,
+
+
+18
+00:01:06,433 --> 00:01:07,968 line:-1
+and come right back in here.
+
+
+19
+00:01:08,035 --> 00:01:10,838 line:-1
+Without further ado, let's get into it.
+
+
+20
+00:01:11,471 --> 00:01:14,041 line:-1
+Today we're going to cover two topics.
+
+
+21
+00:01:14,107 --> 00:01:16,577 line:-2
+The first topic,
+I'm going to introduce to you
+
+
+22
+00:01:16,643 --> 00:01:21,682 line:-2
+three new audio codecs that are new to HLS
+in the 2020 OS releases,
+
+
+23
+00:01:21,748 --> 00:01:24,985 line:-2
+and then I'm going to have
+a conversation with you
+
+
+24
+00:01:25,052 --> 00:01:28,789 line:-2
+about using two of these audio codecs
+in a multichannel setting.
+
+
+25
+00:01:28,856 --> 00:01:33,227 line:-2
+Let's discover the new audio codecs
+for the 2020 OS releases.
+
+
+26
+00:01:33,293 --> 00:01:36,530 line:-1
+The first one is xHE-AAC.
+
+
+27
+00:01:36,597 --> 00:01:40,868 line:-2
+That stands for Extended High-Efficiency
+Advanced Audio Codec.
+
+
+28
+00:01:40,934 --> 00:01:45,472 line:-2
+And all of those adjectives
+are there to remind you
+
+
+29
+00:01:45,539 --> 00:01:52,279 line:-2
+that this audio codec is a very efficient
+audio codec at low to medium bit rates.
+
+
+30
+00:01:52,346 --> 00:01:55,048 line:-2
+Bit rates below, say,
+200 kilobits per second.
+
+
+31
+00:01:56,617 --> 00:02:00,754 line:-2
+The other two audio codecs
+that are new to the 2020 OS releases
+
+
+32
+00:02:00,821 --> 00:02:02,723 line:-1
+are Lossless Audio Codecs.
+
+
+33
+00:02:02,789 --> 00:02:06,159 line:-2
+They are FLAC, which stands for
+the Free Lossless Audio Codec,
+
+
+34
+00:02:06,226 --> 00:02:07,361 line:-1
+and Apple Lossless.
+
+
+35
+00:02:07,427 --> 00:02:12,533 line:-2
+xHE-AAC is new to HLS
+in the 2020 releases,
+
+
+36
+00:02:12,599 --> 00:02:17,804 line:-2
+but it was available for file-based
+playback in the 2019-based releases.
+
+
+37
+00:02:17,871 --> 00:02:21,608 line:-1
+That's iOS 13 and macOS Catalina.
+
+
+38
+00:02:21,675 --> 00:02:24,044 line:-2
+FLAC and Apple Lossless
+have been available
+
+
+39
+00:02:24,111 --> 00:02:26,780 line:-2
+for file-based playback
+for quite some time.
+
+
+40
+00:02:26,847 --> 00:02:30,017 line:-1
+Let's chat about the first one, xHE-AAC.
+
+
+41
+00:02:30,083 --> 00:02:34,788 line:-2
+xHE-AAC also has another name
+in the MPEG-D standard,
+
+
+42
+00:02:34,855 --> 00:02:39,893 line:-2
+and that's USAC, and that stands for
+Unified Speech and Audio Coding.
+
+
+43
+00:02:40,827 --> 00:02:45,132 line:-2
+That name is there to remind you
+that this is also a codec
+
+
+44
+00:02:45,199 --> 00:02:49,002 line:-2
+that is specifically tuned
+to speech reproduction.
+
+
+45
+00:02:49,069 --> 00:02:52,940 line:-2
+It's also very good
+as a general-purpose audio codec.
+
+
+46
+00:02:53,006 --> 00:02:57,144 line:-2
+Specifically, like I said before,
+those low to medium data rates.
+
+
+47
+00:02:57,211 --> 00:03:00,914 line:-2
+Let's have a look now
+at how xHE-AAC compares
+
+
+48
+00:03:00,981 --> 00:03:03,550 line:-1
+with the AAC family at large.
+
+
+49
+00:03:03,617 --> 00:03:04,885 line:-1
+It's a little bit different.
+
+
+50
+00:03:04,952 --> 00:03:10,991 line:0
+The AAC family starts with a codec that
+you're all familiar with, which is AAC-LC.
+
+
+51
+00:03:11,058 --> 00:03:13,493 line:0
+That stands for AAC Low Complexity.
+
+
+52
+00:03:13,560 --> 00:03:15,896 line:0
+We recommended the use of this codec
+
+
+53
+00:03:15,963 --> 00:03:18,699 line:0
+to data rates as low
+as 96 kilobits per second.
+
+
+54
+00:03:19,933 --> 00:03:24,505 line:0
+We identify this codec using
+the ISO syntax for the codec attribute,
+
+
+55
+00:03:24,571 --> 00:03:27,107 line:0
+which is mp4a.40.2.
+
+
+56
+00:03:28,175 --> 00:03:33,981 line:0
+This codec evolved into another codec,
+which is HE-AAC.
+
+
+57
+00:03:34,047 --> 00:03:37,718 line:0
+That's the High-Efficiency
+Advanced Audio Codec.
+
+
+58
+00:03:37,784 --> 00:03:42,256 line:0
+It does so with the addition
+of an additional coding tool called SBR.
+
+
+59
+00:03:42,322 --> 00:03:45,025 line:0
+That stands for Spectral Band Replication,
+
+
+60
+00:03:45,092 --> 00:03:49,930 line:0
+where high frequencies are reconstructed
+from lower frequencies
+
+
+61
+00:03:49,997 --> 00:03:52,966 line:0
+that are present
+in the core AAC media encoding.
+
+
+62
+00:03:53,567 --> 00:03:56,203 line:0
+We recommended the use of HE-AAC
+
+
+63
+00:03:56,270 --> 00:03:59,506 line:0
+to data rates as low
+as 48 kilobits per second.
+
+
+64
+00:04:00,774 --> 00:04:07,481 line:0
+You identify HE-AAC
+with the codec string mp4a.40.5.
+
+
+65
+00:04:08,515 --> 00:04:10,117 line:0
+But it doesn't stop there.
+
+
+66
+00:04:10,184 --> 00:04:14,421 line:0
+This evolved into a version two,
+HE-AAC v2,
+
+
+67
+00:04:14,488 --> 00:04:18,225 line:0
+with another coding tool
+called Parametric Stereo.
+
+
+68
+00:04:18,291 --> 00:04:22,296 line:0
+Parametric Stereo
+reconstructs a second audio channel
+
+
+69
+00:04:22,362 --> 00:04:25,566 line:0
+from a single audio channel--
+a mono audio channel--
+
+
+70
+00:04:25,632 --> 00:04:27,734 line:0
+with some additional parametric data.
+
+
+71
+00:04:27,801 --> 00:04:30,971 line:0
+And we recommended the use of HE-AAC v2
+
+
+72
+00:04:31,038 --> 00:04:33,740 line:0
+to data rates as low
+as 32 kilobits per second.
+
+
+73
+00:04:34,141 --> 00:04:37,945 line:-2
+Now, that's where
+the interoperability ends.
+
+
+74
+00:04:38,011 --> 00:04:41,982 line:-2
+All three of these audio codecs
+have a level of interoperability.
+
+
+75
+00:04:42,049 --> 00:04:45,853 line:0
+You can decode a HE-AAC v2
+
+
+76
+00:04:45,919 --> 00:04:49,790 line:0
+with a HE-AAC decoder.
+
+
+77
+00:04:49,857 --> 00:04:51,825 line:0
+There is a caveat to this, of course,
+
+
+78
+00:04:51,892 --> 00:04:55,028 line:0
+which is that
+you'll only get one channel of audio,
+
+
+79
+00:04:55,095 --> 00:04:59,333 line:0
+because the earlier codecs don't know
+how to deal with Parametric Stereo.
+
+
+80
+00:05:00,501 --> 00:05:03,637 line:-1
+So let's take a look at what xHE-AAC does.
+
+
+81
+00:05:04,471 --> 00:05:08,742 line:0
+The backwards compatibility
+isn't there in xHE-AAC.
+
+
+82
+00:05:08,809 --> 00:05:11,778 line:0
+The coding tools remain,
+or are quite similar,
+
+
+83
+00:05:11,845 --> 00:05:13,580 line:0
+but they're even more advanced.
+
+
+84
+00:05:13,647 --> 00:05:15,983 line:0
+They've been refined.
+They're more efficient.
+
+
+85
+00:05:16,049 --> 00:05:18,118 line:0
+It's very important, therefore,
+
+
+86
+00:05:18,185 --> 00:05:22,756 line:0
+to identify xHE-AAC correctly
+in your master playlists,
+
+
+87
+00:05:22,823 --> 00:05:28,462 line:0
+with the ISO syntax for
+the codec attribute being mp4a.40.42.
+
+
+88
+00:05:29,730 --> 00:05:32,866 line:0
+This is such an advanced codec,
+and so efficient,
+
+
+89
+00:05:32,933 --> 00:05:37,304 line:0
+that we recommend
+it's used down to 24 kilobits per second.
+
+
+90
+00:05:37,371 --> 00:05:41,508 line:-2
+Another way that xHE-AAC differs
+from the rest of the AAC family
+
+
+91
+00:05:41,575 --> 00:05:44,711 line:-2
+is how the standardization bodies
+have approached it.
+
+
+92
+00:05:44,778 --> 00:05:49,416 line:-2
+Now, we've always recommended
+in the HLS authoring guideline
+
+
+93
+00:05:49,483 --> 00:05:55,122 line:-2
+to include loudness and DRC,
+or Dynamic Range Control, metadata.
+
+
+94
+00:05:55,189 --> 00:05:57,024 line:-1
+What is Dynamic Range Control?
+
+
+95
+00:05:57,090 --> 00:06:00,093 line:-2
+Well, it's extra metadata
+that allows the media system
+
+
+96
+00:06:00,160 --> 00:06:02,829 line:-2
+to continuously adjust
+the audio signal levels
+
+
+97
+00:06:02,896 --> 00:06:06,867 line:-2
+to reduce the level difference
+between loud and soft passages.
+
+
+98
+00:06:08,035 --> 00:06:10,504 line:-2
+We've recommended you include
+this metadata,
+
+
+99
+00:06:10,571 --> 00:06:15,542 line:-2
+or to ensure that your program content
+and any interstitials within it
+
+
+100
+00:06:15,609 --> 00:06:18,545 line:-2
+are all normalized
+to the same volume level.
+
+
+101
+00:06:19,112 --> 00:06:24,518 line:-2
+Our recommendations are consistent with
+the new standard from ANSI/CTA-2075,
+
+
+102
+00:06:24,585 --> 00:06:27,054 line:-1
+which also has some informative text
+
+
+103
+00:06:27,120 --> 00:06:29,456 line:-2
+recommending the inclusion
+of this metadata.
+
+
+104
+00:06:30,924 --> 00:06:34,695 line:-1
+Another standard that differs from this
+
+
+105
+00:06:34,761 --> 00:06:37,364 line:-2
+and, in fact, goes a little bit further,
+is CMAF.
+
+
+106
+00:06:37,931 --> 00:06:41,902 line:-2
+CMAF stands for
+the Common Media Application Format.
+
+
+107
+00:06:41,969 --> 00:06:45,873 line:-1
+It's a format that seeks to unify
+
+
+108
+00:06:45,939 --> 00:06:50,911 line:-1
+media encodings between MPEG-DASH and HLS.
+
+
+109
+00:06:50,978 --> 00:06:53,013 line:-1
+It goes a step further in this regard
+
+
+110
+00:06:53,080 --> 00:06:58,085 line:-2
+in that it mandates the inclusion
+of this metadata in your media encodings.
+
+
+111
+00:06:59,586 --> 00:07:01,388 line:-1
+For the rest of the AAC family,
+
+
+112
+00:07:01,455 --> 00:07:06,527 line:-2
+CMAF merely recommends
+that you include this metadata.
+
+
+113
+00:07:06,593 --> 00:07:11,932 line:-2
+So the takeaway is that DRC is becoming
+more relevant throughout our industry,
+
+
+114
+00:07:11,999 --> 00:07:16,069 line:-2
+and your inclusion of this metadata
+is the way forward.
+
+
+115
+00:07:16,570 --> 00:07:22,809 line:-2
+Let's take a look now at how HLS intends
+to support xHE-AAC on Apple devices.
+
+
+116
+00:07:22,876 --> 00:07:26,914 line:-2
+So, as I mentioned before,
+it's really important for xHE-AAC
+
+
+117
+00:07:26,980 --> 00:07:30,217 line:-2
+that we advertise its use
+through the codecs attribute,
+
+
+118
+00:07:30,284 --> 00:07:34,454 line:-1
+again, with the syntax mp4a.40.42.
+
+
+119
+00:07:34,988 --> 00:07:37,858 line:-1
+AVPlayer, from the AVFoundation framework,
+
+
+120
+00:07:37,925 --> 00:07:41,662 line:-2
+supports mono and stereo
+channel configurations.
+
+
+121
+00:07:41,728 --> 00:07:44,264 line:-2
+There is no multichannel support
+at this time.
+
+
+122
+00:07:45,065 --> 00:07:49,203 line:-2
+Carriage is restricted
+to the fragmented MP4 container type,
+
+
+123
+00:07:49,269 --> 00:07:52,973 line:-2
+and the only encryption mechanism
+supported is common encryption.
+
+
+124
+00:07:53,774 --> 00:07:59,947 line:-2
+So, how can you leverage xHE-AAC
+in your software and services?
+
+
+125
+00:08:00,681 --> 00:08:03,417 line:0
+Well, first of all, let me reiterate,
+
+
+126
+00:08:03,483 --> 00:08:06,587 line:0
+it is a well-suited codec for use
+
+
+127
+00:08:06,653 --> 00:08:09,456 line:0
+for data rates as low
+as 24 kilobits per second,
+
+
+128
+00:08:09,523 --> 00:08:13,527 line:0
+all the way up to the maximum
+that we have recommended, AAC,
+
+
+129
+00:08:13,594 --> 00:08:16,730 line:0
+at 160 kilobits per second for stereo.
+
+
+130
+00:08:17,865 --> 00:08:22,769 line:0
+And the simplest way to leverage xHE-AAC
+in your software and services
+
+
+131
+00:08:22,836 --> 00:08:28,108 line:0
+is to add additional low bit rate
+audio variants to your master playlist.
+
+
+132
+00:08:28,175 --> 00:08:31,812 line:-2
+The motivations for doing this
+are twofold.
+
+
+133
+00:08:31,879 --> 00:08:36,049 line:-2
+One, you want to reach customers
+on low data rate networks.
+
+
+134
+00:08:36,116 --> 00:08:40,988 line:-2
+Data rate networks, and in scenarios
+where they would otherwise stall.
+
+
+135
+00:08:41,054 --> 00:08:44,091 line:-2
+The second motivation
+is to reach customers
+
+
+136
+00:08:44,157 --> 00:08:46,627 line:-1
+on data rate constricted devices--
+
+
+137
+00:08:46,693 --> 00:08:50,797 line:-2
+devices that have multiple different paths
+of network connectivity.
+
+
+138
+00:08:50,864 --> 00:08:53,967 line:0
+An example of such a device
+is Apple Watch.
+
+
+139
+00:08:54,034 --> 00:08:56,236 line:0
+And we have another session entitled
+
+
+140
+00:08:56,303 --> 00:08:58,872 line:0
+"What's New in Streaming Audio
+on Apple Watch,"
+
+
+141
+00:08:58,939 --> 00:09:00,974 line:0
+and I encourage you to check it out.
+
+
+142
+00:09:01,041 --> 00:09:03,477 line:-1
+But I've got an example right here.
+
+
+143
+00:09:03,544 --> 00:09:05,946 line:-2
+Suppose you've got
+an existing master playlist
+
+
+144
+00:09:06,013 --> 00:09:10,050 line:-2
+in your content library
+that advertises two audio variants.
+
+
+145
+00:09:10,117 --> 00:09:14,188 line:-2
+The first audio variant
+is leveraging HE-AAC
+
+
+146
+00:09:14,254 --> 00:09:17,291 line:-1
+and uses 48 kilobits per second.
+
+
+147
+00:09:17,357 --> 00:09:22,129 line:-2
+The second audio variant in this playlist
+uses AAC-LC
+
+
+148
+00:09:22,196 --> 00:09:25,265 line:-1
+and is at 64 kilobits per second.
+
+
+149
+00:09:25,332 --> 00:09:27,868 line:-2
+To reach customers
+on low data rate networks
+
+
+150
+00:09:27,935 --> 00:09:30,671 line:-2
+and prevent them
+from stalling during playback,
+
+
+151
+00:09:30,737 --> 00:09:35,642 line:-2
+and to reach customers
+on data rate constricted devices,
+
+
+152
+00:09:35,709 --> 00:09:40,948 line:-2
+you need only introduce a new variant
+leveraging xHE-AAC
+
+
+153
+00:09:41,014 --> 00:09:44,651 line:-1
+advertising its codec string correctly.
+
+
+154
+00:09:44,718 --> 00:09:48,155 line:-2
+And now you've got a variant
+at 24 kilobits per second.
+
+
+155
+00:09:50,324 --> 00:09:54,061 line:-2
+There are some additional ways
+that you can leverage xHE-AAC
+
+
+156
+00:09:54,127 --> 00:09:55,863 line:-1
+in your software and services.
+
+
+157
+00:09:55,929 --> 00:10:01,301 line:0
+The first way is you can parallel
+some or all of your AAC codecs
+
+
+158
+00:10:01,368 --> 00:10:04,838 line:0
+or your AAC variants with xHE-AAC.
+
+
+159
+00:10:04,905 --> 00:10:09,710 line:0
+And your motivation here
+is to provide high-fidelity variants
+
+
+160
+00:10:09,776 --> 00:10:11,478 line:0
+for the same given bit budget.
+
+
+161
+00:10:12,646 --> 00:10:15,015 line:0
+Another way
+that you can leverage this codec
+
+
+162
+00:10:15,082 --> 00:10:21,021 line:0
+is you could see it as an opportunity to
+introduce DRC support to your playlists,
+
+
+163
+00:10:21,088 --> 00:10:23,891 line:0
+migrating your library to a future
+
+
+164
+00:10:23,957 --> 00:10:28,028 line:0
+where DRC is becoming
+increasingly relevant.
+
+
+165
+00:10:28,095 --> 00:10:32,132 line:0
+So, you may be wondering,
+how can you coerce an AVPlayer
+
+
+166
+00:10:32,199 --> 00:10:35,402 line:0
+into choosing
+this high-fidelity audio variant
+
+
+167
+00:10:35,469 --> 00:10:39,106 line:0
+over your existing set of audio variants?
+
+
+168
+00:10:39,173 --> 00:10:43,377 line:0
+Well, the answer is, we've introduced
+a new attribute to the string tag.
+
+
+169
+00:10:43,443 --> 00:10:45,379 line:0
+It's called the SCORE attribute.
+
+
+170
+00:10:45,445 --> 00:10:50,284 line:0
+We detail the SCORE attribute
+with more detail in the session entitled
+
+
+171
+00:10:50,350 --> 00:10:52,819 line:0
+"Improved Stream Authoring
+with HLS Tools."
+
+
+172
+00:10:53,187 --> 00:10:57,191 line:-2
+I encourage you to check it out.
+However, I've got an example right here.
+
+
+173
+00:10:57,257 --> 00:11:01,461 line:-2
+In this example,
+I've got two audio variants.
+
+
+174
+00:11:01,828 --> 00:11:06,500 line:-2
+The first audio variant
+is advertised as xHE-AAC.
+
+
+175
+00:11:07,034 --> 00:11:10,938 line:-2
+Its bit rate is advertised
+at 94 kilobits per second.
+
+
+176
+00:11:11,371 --> 00:11:18,011 line:-2
+I've got a second audio variant at AAC-LC
+at 96 kilobits per second.
+
+
+177
+00:11:18,378 --> 00:11:24,751 line:-2
+And I've scored the xHE-AAC higher
+than the AAC-LC variant.
+
+
+178
+00:11:25,352 --> 00:11:29,289 line:-2
+And you might also note that the bandwidth
+of the xHE-AAC variant
+
+
+179
+00:11:29,356 --> 00:11:33,327 line:-1
+is lower than the AAC-LC variant.
+
+
+180
+00:11:33,794 --> 00:11:35,295 line:-1
+Using the SCORE attribute,
+
+
+181
+00:11:35,362 --> 00:11:42,236 line:-2
+the AVPlayer will prefer
+the xHE-AAC variant where support exists.
+
+
+182
+00:11:44,004 --> 00:11:46,840 line:-2
+Let's switch gears now
+and talk about lossless audio.
+
+
+183
+00:11:46,907 --> 00:11:49,376 line:-2
+The new audio codecs,
+as I've already mentioned,
+
+
+184
+00:11:49,443 --> 00:11:51,411 line:-1
+are FLAC and Apple Lossless.
+
+
+185
+00:11:51,478 --> 00:11:53,547 line:-1
+Both of these are open source,
+
+
+186
+00:11:53,614 --> 00:11:55,749 line:-2
+but they've got an advantage
+over the other.
+
+
+187
+00:11:55,816 --> 00:11:58,752 line:-2
+FLAC is in wider general use
+throughout the industry,
+
+
+188
+00:11:58,819 --> 00:12:03,123 line:-2
+whereas Apple Lossless has
+more established carriage in MPEG-4.
+
+
+189
+00:12:03,190 --> 00:12:06,827 line:-2
+How does HLS intend
+to support lossless audio
+
+
+190
+00:12:06,894 --> 00:12:10,631 line:-1
+in the 2020 OS releases on Apple devices?
+
+
+191
+00:12:10,697 --> 00:12:13,367 line:-2
+Well,
+we have to advertise its use correctly.
+
+
+192
+00:12:14,034 --> 00:12:16,937 line:-2
+Again, it's very important
+that we advertise its use
+
+
+193
+00:12:17,004 --> 00:12:23,143 line:-2
+using the codec strings "fLaC"
+where the "L" and the "C" are capitalized,
+
+
+194
+00:12:23,210 --> 00:12:25,312 line:-1
+no matter how strange that looks.
+
+
+195
+00:12:25,379 --> 00:12:28,615 line:-1
+And for Apple Lossless, it's "alac."
+
+
+196
+00:12:28,682 --> 00:12:33,520 line:-2
+AVPlayer in the AVFoundation framework
+supports all the channel configurations
+
+
+197
+00:12:33,587 --> 00:12:36,190 line:-2
+from these two audio codecs,
+up to eight channels.
+
+
+198
+00:12:36,256 --> 00:12:38,358 line:-1
+More about that in just a minute.
+
+
+199
+00:12:38,759 --> 00:12:42,396 line:-2
+Carriage is restricted
+to the fragmented MP4 container type.
+
+
+200
+00:12:43,230 --> 00:12:47,568 line:-2
+And the only encryption mechanism
+supported is common encryption.
+
+
+201
+00:12:47,968 --> 00:12:53,006 line:-2
+So, how can you leverage lossless audio
+in your software and services?
+
+
+202
+00:12:54,508 --> 00:12:59,580 line:-2
+Well, the first one is you can add
+additional high bit rate audio variants
+
+
+203
+00:12:59,646 --> 00:13:01,281 line:-1
+to your playlists.
+
+
+204
+00:13:01,348 --> 00:13:02,816 line:-1
+And you would only do this
+
+
+205
+00:13:02,883 --> 00:13:06,987 line:-2
+if you know that your customers
+have plentiful bandwidth.
+
+
+206
+00:13:07,588 --> 00:13:10,257 line:-1
+You would only also consider this
+
+
+207
+00:13:10,324 --> 00:13:15,429 line:-2
+when your customers expect
+exceptionally high audio fidelity.
+
+
+208
+00:13:15,996 --> 00:13:19,900 line:-2
+Let's now move to our second topic
+for this session
+
+
+209
+00:13:19,967 --> 00:13:23,370 line:-2
+and have a look at how we're going to use
+these lossless audio channels
+
+
+210
+00:13:23,437 --> 00:13:25,439 line:-1
+in a multichannel usage.
+
+
+211
+00:13:25,506 --> 00:13:27,975 line:-1
+So, as I alluded to earlier,
+
+
+212
+00:13:28,041 --> 00:13:31,411 line:-2
+FLAC and Apple Lossless
+support up to eight channels.
+
+
+213
+00:13:31,478 --> 00:13:35,449 line:-2
+That's in channel configurations
+of 5.1 and 7.1.
+
+
+214
+00:13:36,049 --> 00:13:37,618 line:-1
+Now one thing to note is that
+
+
+215
+00:13:37,684 --> 00:13:40,787 line:-2
+the channel layouts of the two audio
+codecs are slightly different.
+
+
+216
+00:13:40,854 --> 00:13:44,491 line:-2
+And you must follow these if you want
+the audio to come out the right speakers.
+
+
+217
+00:13:44,558 --> 00:13:47,060 line:-2
+Apple Lossless requires
+the center channel first,
+
+
+218
+00:13:47,127 --> 00:13:48,962 line:-1
+then left and right.
+
+
+219
+00:13:49,029 --> 00:13:53,600 line:-2
+Whereas FLAC requires
+left and right channel first,
+
+
+220
+00:13:53,667 --> 00:13:55,669 line:-1
+and then the center channel.
+
+
+221
+00:13:55,736 --> 00:13:57,571 line:-1
+By now you'll hopefully understand
+
+
+222
+00:13:57,638 --> 00:14:00,941 line:-2
+that lossless audio requires
+a much higher data rate
+
+
+223
+00:14:01,008 --> 00:14:04,811 line:-2
+than we're used to with lossy audio codecs
+such as AAC.
+
+
+224
+00:14:04,878 --> 00:14:06,547 line:-1
+But how much more?
+
+
+225
+00:14:06,613 --> 00:14:10,918 line:-2
+If I'm going to show you
+how much more FLAC requires
+
+
+226
+00:14:10,984 --> 00:14:13,487 line:-1
+when compared to AAC-LC,
+
+
+227
+00:14:13,554 --> 00:14:16,623 line:-2
+I'm going to need to make
+a lot more space in my graph.
+
+
+228
+00:14:16,690 --> 00:14:19,626 line:-1
+I'm going to have to change the y-axis.
+
+
+229
+00:14:19,693 --> 00:14:22,062 line:-2
+Hang on a second.
+I'm going to do that right here.
+
+
+230
+00:14:23,130 --> 00:14:26,099 line:0
+And there we go. Okay.
+
+
+231
+00:14:26,166 --> 00:14:31,772 line:0
+AAC-LC at 48 kilohertz
+is still 160 kilobits per second.
+
+
+232
+00:14:31,839 --> 00:14:36,877 line:0
+But now that I've changed my graph around
+a little bit, it's really, really small.
+
+
+233
+00:14:36,944 --> 00:14:41,882 line:0
+That gives me lots of space
+to introduce lossless audio.
+
+
+234
+00:14:41,949 --> 00:14:44,918 line:0
+The lossless audio
+is nearly four times more.
+
+
+235
+00:14:44,985 --> 00:14:50,324 line:0
+At 16 bits per sample, 48 kilohertz,
+we're nearly one megabit.
+
+
+236
+00:14:50,390 --> 00:14:53,260 line:0
+On the high end,
+where we've got 24 bits per sample
+
+
+237
+00:14:53,327 --> 00:14:58,432 line:0
+and 96 kilohertz sampling rate,
+we're pushing nearly three megabits.
+
+
+238
+00:14:58,498 --> 00:14:59,967 line:0
+But it doesn't stop there.
+
+
+239
+00:15:00,033 --> 00:15:03,470 line:0
+You see, lossless audio codecs like AAC,
+
+
+240
+00:15:03,537 --> 00:15:08,642 line:0
+you're able to configure the encoder
+to deliver a specific target bit rate.
+
+
+241
+00:15:08,709 --> 00:15:11,845 line:-2
+You can't do that
+with lossless audio codecs.
+
+
+242
+00:15:11,912 --> 00:15:14,147 line:-2
+They will consume
+as much data as they need
+
+
+243
+00:15:14,214 --> 00:15:17,784 line:-2
+in order to deliver the audio fidelity
+that you have requested.
+
+
+244
+00:15:18,185 --> 00:15:19,953 line:-1
+So these are average data rates.
+
+
+245
+00:15:20,020 --> 00:15:24,157 line:0
+The full picture is when I add
+the peak data rates.
+
+
+246
+00:15:24,224 --> 00:15:28,061 line:0
+Now, at the closest audio fidelity
+to our AAC--
+
+
+247
+00:15:28,128 --> 00:15:31,365 line:0
+that's 16 bits per sample,
+48 kilohertz sampling rate--
+
+
+248
+00:15:31,431 --> 00:15:33,333 line:0
+we are over one megabit.
+
+
+249
+00:15:33,400 --> 00:15:37,304 line:0
+A similar story
+is present in multichannel.
+
+
+250
+00:15:37,371 --> 00:15:40,207 line:0
+Note that the y-axis now changed,
+
+
+251
+00:15:40,274 --> 00:15:45,045 line:0
+and AAC-LC is 400 kilobits per second.
+
+
+252
+00:15:45,112 --> 00:15:50,317 line:0
+The next closest in lossless
+is in excess of two megabits per second,
+
+
+253
+00:15:50,384 --> 00:15:53,654 line:0
+and on the high end,
+it's eight megabits per second
+
+
+254
+00:15:53,720 --> 00:15:57,824 line:0
+for 24 bits per sample,
+96 kilohertz sampling rate,
+
+
+255
+00:15:57,891 --> 00:15:59,693 line:0
+and six channels of audio.
+
+
+256
+00:16:00,160 --> 00:16:03,363 line:-1
+So it's very important that we consider
+
+
+257
+00:16:03,430 --> 00:16:07,734 line:-2
+how to scale up adaptively
+to these very high bit rates.
+
+
+258
+00:16:08,936 --> 00:16:10,737 line:-1
+And the way that we recommend you do that
+
+
+259
+00:16:10,804 --> 00:16:16,376 line:-2
+is include multichannel AAC
+in your master playlists.
+
+
+260
+00:16:16,443 --> 00:16:19,713 line:-2
+Apple's software package compressor
+can encode it.
+
+
+261
+00:16:20,347 --> 00:16:22,449 line:-2
+But one thing to note
+about multichannel AAC
+
+
+262
+00:16:22,516 --> 00:16:26,854 line:-2
+is it doesn't enjoy uniform support
+across Apple devices.
+
+
+263
+00:16:26,920 --> 00:16:30,190 line:-2
+It can't be decoded
+to its full channel complement.
+
+
+264
+00:16:30,257 --> 00:16:33,794 line:-2
+On devices where it can't be decoded
+to its full channel complement,
+
+
+265
+00:16:33,861 --> 00:16:36,330 line:-1
+you'll get two channels, or stereo.
+
+
+266
+00:16:36,396 --> 00:16:39,933 line:-2
+But do note, this does not preclude us
+from the requirement
+
+
+267
+00:16:40,000 --> 00:16:43,770 line:-2
+of including stereo AAC
+for backwards compatibility.
+
+
+268
+00:16:43,837 --> 00:16:45,906 line:-1
+Let me demonstrate with an example.
+
+
+269
+00:16:45,973 --> 00:16:51,778 line:-2
+Here we've got a playlist
+with the media tags up top.
+
+
+270
+00:16:51,845 --> 00:16:53,680 line:-1
+They declare the number of channels.
+
+
+271
+00:16:53,747 --> 00:16:55,182 line:-1
+Let's move that out of the way
+
+
+272
+00:16:55,249 --> 00:16:58,151 line:-2
+because it's not really relevant
+to our discussion here.
+
+
+273
+00:16:58,218 --> 00:17:01,989 line:-2
+The highlighted variants are the variants
+that are eligible for playback
+
+
+274
+00:17:02,055 --> 00:17:05,791 line:-2
+on a device that is able to decode
+multichannel AAC
+
+
+275
+00:17:05,858 --> 00:17:08,028 line:-1
+to its full channel complement.
+
+
+276
+00:17:08,095 --> 00:17:10,364 line:-1
+Assuming we're on such a device,
+
+
+277
+00:17:10,430 --> 00:17:14,167 line:-2
+and the device has an audio route
+that can render multichannel audio,
+
+
+278
+00:17:14,233 --> 00:17:18,204 line:-2
+we can scale adaptively
+from HE-AAC multichannel
+
+
+279
+00:17:18,271 --> 00:17:20,807 line:-1
+up to AAC-LC multichannel,
+
+
+280
+00:17:20,874 --> 00:17:25,979 line:-2
+all the way up to two megabits per second,
+lossless multichannel.
+
+
+281
+00:17:26,046 --> 00:17:29,783 line:-1
+The same story is true of stereo.
+
+
+282
+00:17:30,117 --> 00:17:35,355 line:-2
+We can scale adaptively from an AAC stereo
+in a low bit rate
+
+
+283
+00:17:35,422 --> 00:17:38,759 line:-1
+to a high stereo AAC bit rate,
+
+
+284
+00:17:38,825 --> 00:17:44,298 line:-2
+and then scale adaptively
+up to a full megabit for stereo lossless.
+
+
+285
+00:17:44,998 --> 00:17:50,504 line:-2
+Now, suppose we omit the multichannel AAC
+from our playlist.
+
+
+286
+00:17:50,571 --> 00:17:53,373 line:-2
+I don't recommend this,
+so don't try this at home.
+
+
+287
+00:17:53,440 --> 00:17:57,778 line:-2
+Here's the same playlist
+with the multichannel AAC omitted.
+
+
+288
+00:17:57,845 --> 00:18:02,983 line:-2
+Again, I've got my media tags at the top,
+and I'm just going to remove them.
+
+
+289
+00:18:05,085 --> 00:18:10,490 line:-2
+Now, if we're on a device
+that supports a multichannel output--
+
+
+290
+00:18:10,557 --> 00:18:13,393 line:-2
+its current audio route
+supports multichannel rendering--
+
+
+291
+00:18:13,460 --> 00:18:16,997 line:-2
+there's a single audio variant
+that is eligible for playback.
+
+
+292
+00:18:17,064 --> 00:18:21,835 line:-2
+It's the lossless audio variant,
+and it requires two megabits per second.
+
+
+293
+00:18:21,902 --> 00:18:25,706 line:-2
+If your customer cannot sustain
+two megabits per second,
+
+
+294
+00:18:25,772 --> 00:18:29,476 line:-2
+your playback or their playback
+will stall.
+
+
+295
+00:18:30,477 --> 00:18:36,683 line:-2
+Now, because we mandate the inclusion
+of stereo AAC in all playlists,
+
+
+296
+00:18:37,117 --> 00:18:40,487 line:-2
+the playback of the stereo
+will still adaptively scale
+
+
+297
+00:18:40,554 --> 00:18:43,724 line:-2
+from a low bit rate AAC
+to a high bit rate AAC,
+
+
+298
+00:18:43,790 --> 00:18:46,560 line:-1
+all the way up to lossless stereo.
+
+
+299
+00:18:47,094 --> 00:18:48,495 line:-1
+So we've learned a lot here.
+
+
+300
+00:18:48,562 --> 00:18:50,631 line:-2
+Let's summarize everything
+that we've learned.
+
+
+301
+00:18:51,164 --> 00:18:54,401 line:-1
+I've introduced three new audio codecs.
+
+
+302
+00:18:54,468 --> 00:18:59,139 line:-2
+And we've talked about the need
+for including DRC metadata
+
+
+303
+00:18:59,206 --> 00:19:00,641 line:-1
+in your media encodings.
+
+
+304
+00:19:00,707 --> 00:19:03,043 line:-2
+And it's important in the industry
+going forward.
+
+
+305
+00:19:03,110 --> 00:19:07,714 line:-2
+We've also talked about the considerations
+for using multichannel lossless
+
+
+306
+00:19:07,781 --> 00:19:09,950 line:-1
+and utilizing multichannel AAC
+
+
+307
+00:19:10,017 --> 00:19:13,720 line:-2
+as a means to scale up
+to those very high data rates.
+
+
+308
+00:19:13,787 --> 00:19:16,523 line:-1
+So, what should you do when you get home?
+
+
+309
+00:19:16,590 --> 00:19:18,358 line:-1
+Well, maybe you are already home.
+
+
+310
+00:19:18,425 --> 00:19:21,695 line:-1
+Well, consider how to employ xHE-AAC
+
+
+311
+00:19:21,762 --> 00:19:24,731 line:-2
+to target customers
+on low throughput networks.
+
+
+312
+00:19:25,499 --> 00:19:30,204 line:-2
+And then, how you can use this codec to
+better utilize their existing throughput
+
+
+313
+00:19:30,270 --> 00:19:32,306 line:-1
+to deliver better audio fidelity.
+
+
+314
+00:19:33,440 --> 00:19:36,543 line:-2
+And do consider
+how to use lossless audio codecs
+
+
+315
+00:19:36,610 --> 00:19:39,246 line:-2
+if it's applicable
+to your software or service.
+
+
+316
+00:19:39,313 --> 00:19:43,283 line:-2
+I hope you've learnt lots
+and have a great rest of conference.
+
+
+317
+00:19:43,350 --> 00:19:46,753 line:-2
+And as always,
+we wish you safe travels home,
+
+
+318
+00:19:46,820 --> 00:19:48,488 line:-1
+even if that's to the adjacent room.
+

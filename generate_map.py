@@ -15,8 +15,9 @@ def get_wwdc_video_title(year, session):
     return ''
 
 # iterate all video links
-file_path = 'data/wwdc2023_hd_video_links.txt'
-subtitle_dir = 'data/WWDC_2023_Video_Subtitles/HD/'
+year_id = 2020
+file_path = f'data/wwdc{year_id}_hd_video_links.txt'
+subtitle_dir = f'data/WWDC_{year_id}_Video_Subtitles/HD/'
 session_dict = {}
 with open(file_path, 'r') as f:
     lines = f.readlines()
@@ -24,20 +25,33 @@ with open(file_path, 'r') as f:
         line = line.strip()
         if not line:
             continue
-        # https://devstreaming-cdn.apple.com/videos/wwdc/2023/10309/4/21D925C8-2EE0-4C96-9C68-96174159990A/downloads/wwdc2023-10309_hd.mp4
-        year = line.split('/')[-1].split('.')[0].split('-')[0].removeprefix('wwdc')
-        print(year)
-        session = line.split('/')[-1].split('.')[0].split('-')[-1].removesuffix('_hd')
-        print(session)
-        title = get_wwdc_video_title(year=year, session=session)
+        if year_id >= 2021:
+            # https://devstreaming-cdn.apple.com/videos/wwdc/2023/10309/4/21D925C8-2EE0-4C96-9C68-96174159990A/downloads/wwdc2023-10309_hd.mp4
+            session = line.split('/')[-1].split('.')[0].split('-')[-1].removesuffix('_hd')
+            print(session)
+        elif year_id == 2020:
+            # https://devstreaming-cdn.apple.com/videos/wwdc/2020/10004/5/7436A537-996F-4CD6-B553-9303BFB99348/wwdc2020_10004_hd.mp4
+            session = line.split('/')[-1].split('.')[0].split('_')[1]
+            print(session)
+        else:
+            #https://devstreaming-cdn.apple.com/videos/wwdc/2019/103bax22h2udxu0n/103/103_hd_platforms_state_of_the_union.mp4
+            session = line.split('/')[-1].split('.')[0].split('_')[0]
+            print(session)
+        title = get_wwdc_video_title(year=year_id, session=session)
         print(title)
         # find the subtitle file
-        subtitle_path  = subtitle_dir + 'wwdc' + year + '-' + session + '_hd.srt'
+        if year_id >= 2021:
+            subtitle_path  = subtitle_dir + 'wwdc' + str(year_id) + '-' + session + '_hd.srt'
+        elif year_id == 2020:
+            subtitle_path  = subtitle_dir + 'wwdc' + str(year_id) + '_' + session + '_hd.srt'
+        else:
+            filename = line.split('/')[-1].split('.')[0] + '.srt'
+            subtitle_path  = subtitle_dir + filename
         if os.path.exists(subtitle_path):
             pass
         else:
             print('subtitle file not exists')
-        session_dict[year+'_'+session] = {
+        session_dict[f'{year_id}_{session}'] = {
             'title': title,
             'video_url': line.strip(),
             'subtitle_path': subtitle_path
@@ -45,5 +59,5 @@ with open(file_path, 'r') as f:
 
 
 # save to json file
-with open('data/wwdc_session.json', 'w') as f:
+with open(f'data/wwdc{year_id}_session.json', 'w') as f:
     f.write(json.dumps(session_dict, indent=4))

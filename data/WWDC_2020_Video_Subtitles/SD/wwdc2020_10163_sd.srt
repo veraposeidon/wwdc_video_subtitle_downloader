@@ -1,0 +1,2371 @@
+1
+00:00:03,836 --> 00:00:06,173 line:-1
+Hello and welcome to WWDC.
+
+
+2
+00:00:08,108 --> 00:00:11,245 line:0
+Hi everyone, I’m Ben.
+I’m in the Languages and Runtimes team,
+
+
+3
+00:00:11,311 --> 00:00:13,847 line:0
+and I’m going to talk to you
+about changes we’ve made this year
+
+
+4
+00:00:13,914 --> 00:00:17,050 line:0
+in the Objective-C runtime
+in iOS and mac OS
+
+
+5
+00:00:17,117 --> 00:00:19,186 line:0
+that significantly improve memory use.
+
+
+6
+00:00:19,620 --> 00:00:21,588 line:-2
+This talk
+is a little bit different to most.
+
+
+7
+00:00:21,655 --> 00:00:23,690 line:-2
+You shouldn’t need to change
+any of your code.
+
+
+8
+00:00:23,757 --> 00:00:26,226 line:-2
+I’m not going to talk about
+any new APIs to learn this year
+
+
+9
+00:00:26,293 --> 00:00:28,061 line:-1
+or deprecation warnings to squash.
+
+
+10
+00:00:28,128 --> 00:00:29,897 line:-2
+With any luck,
+you won’t need to do anything
+
+
+11
+00:00:29,963 --> 00:00:31,765 line:-1
+and your apps will just get faster.
+
+
+12
+00:00:32,399 --> 00:00:34,301 line:-2
+Why are we telling you
+about these improvements?
+
+
+13
+00:00:34,368 --> 00:00:37,104 line:-2
+Well, partly because we think
+they’re cool and interesting,
+
+
+14
+00:00:37,171 --> 00:00:39,706 line:-2
+but also because
+these kind of improvements in the runtime
+
+
+15
+00:00:39,773 --> 00:00:44,077 line:-2
+are only possible because our internal
+data structures are hidden behind APIs.
+
+
+16
+00:00:44,711 --> 00:00:48,515 line:-2
+When apps access these data structures
+directly, things get a little crashy.
+
+
+17
+00:00:49,449 --> 00:00:51,718 line:-2
+In this talk you’ll learn
+a few things to watch out for
+
+
+18
+00:00:51,785 --> 00:00:54,855 line:-2
+that might happen when someone else
+working on your codebase,
+
+
+19
+00:00:54,922 --> 00:00:57,791 line:-2
+not you obviously,
+access things that they shouldn’t.
+
+
+20
+00:00:58,292 --> 00:01:00,661 line:-2
+We’re gonna cover three changes
+in this session.
+
+
+21
+00:01:01,094 --> 00:01:03,230 line:-2
+First, there’s a change
+in the data structures
+
+
+22
+00:01:03,297 --> 00:01:06,066 line:-2
+that the Objective-C runtime uses
+to track classes.
+
+
+23
+00:01:07,234 --> 00:01:10,304 line:-2
+Then we’ll take a look at changes
+to Objective-C method lists.
+
+
+24
+00:01:11,271 --> 00:01:14,775 line:-2
+Finally, we’ll look at a change
+in how tagged pointers are represented.
+
+
+25
+00:01:16,243 --> 00:01:19,847 line:-2
+So, let’s start off with changes
+to the runtime data for classes.
+
+
+26
+00:01:20,347 --> 00:01:23,951 line:-2
+On disk, in your application binary,
+classes look like this.
+
+
+27
+00:01:25,052 --> 00:01:27,187 line:-1
+First, there’s the class object itself,
+
+
+28
+00:01:27,254 --> 00:01:30,290 line:-2
+which contains the information
+that's most frequently accessed:
+
+
+29
+00:01:30,357 --> 00:01:33,861 line:-2
+pointers to the metaclass,
+superclass, and the method cache.
+
+
+30
+00:01:35,095 --> 00:01:36,797 line:-1
+It also has a pointer to more data
+
+
+31
+00:01:37,431 --> 00:01:41,535 line:-2
+where additional information is stored,
+called the class_ro_t.
+
+
+32
+00:01:41,602 --> 00:01:43,237 line:-1
+"Ro" stands for read only.
+
+
+33
+00:01:43,704 --> 00:01:45,973 line:-2
+And this includes things
+like the class's name
+
+
+34
+00:01:46,039 --> 00:01:50,043 line:-2
+and information about methods,
+protocols, and instance variables.
+
+
+35
+00:01:51,478 --> 00:01:54,715 line:-2
+Swift classes and Objective-C classes
+share this infrastructure,
+
+
+36
+00:01:54,781 --> 00:01:57,584 line:-2
+so each Swift class
+has these data structures as well.
+
+
+37
+00:01:58,552 --> 00:02:00,988 line:-2
+When classes are first loaded
+from disk into memory,
+
+
+38
+00:02:01,054 --> 00:02:04,358 line:-2
+they start off like this too,
+but they change once they're used.
+
+
+39
+00:02:04,992 --> 00:02:06,894 line:-1
+Now, to understand what happens then,
+
+
+40
+00:02:06,960 --> 00:02:11,431 line:-2
+it’s useful to know about the difference
+between clean memory and dirty memory.
+
+
+41
+00:02:12,633 --> 00:02:15,969 line:-2
+Clean memory is memory
+that isn’t changed once it’s loaded.
+
+
+42
+00:02:16,904 --> 00:02:20,474 line:-2
+The class_ro_t is clean
+because it’s read only.
+
+
+43
+00:02:21,642 --> 00:02:25,345 line:-2
+Dirty memory is memory that’s changed
+while the process is running.
+
+
+44
+00:02:26,780 --> 00:02:29,149 line:-2
+The class structure is dirtied
+once the class gets used
+
+
+45
+00:02:29,216 --> 00:02:31,385 line:-2
+because the runtime
+writes new data into it.
+
+
+46
+00:02:31,718 --> 00:02:35,522 line:-2
+For example, it creates a fresh method
+cache and points to it from the class.
+
+
+47
+00:02:36,690 --> 00:02:39,660 line:-2
+Dirty memory is much more expensive
+than clean memory.
+
+
+48
+00:02:40,260 --> 00:02:43,230 line:-2
+It has to be kept around
+for as long as the process is running.
+
+
+49
+00:02:44,331 --> 00:02:48,268 line:-2
+Clean memory, on the other hand, can be
+evicted to make room for other things
+
+
+50
+00:02:48,335 --> 00:02:52,072 line:-2
+because you if you need it, the system
+can always just reload it from disk.
+
+
+51
+00:02:53,240 --> 00:02:55,642 line:-2
+macOS has the option
+to swap out dirty memory,
+
+
+52
+00:02:55,709 --> 00:03:00,380 line:-2
+but dirty memory is especially costly
+in iOS because it doesn’t use swap.
+
+
+53
+00:03:01,882 --> 00:03:06,386 line:-2
+Dirty memory is the reason why
+this class data is split into two pieces.
+
+
+54
+00:03:07,621 --> 00:03:10,023 line:-2
+The more data that can be kept clean,
+the better.
+
+
+55
+00:03:10,357 --> 00:03:12,693 line:-1
+By separating out data that never changes,
+
+
+56
+00:03:12,759 --> 00:03:16,763 line:-2
+that allows for most of the class data
+to be kept as clean memory.
+
+
+57
+00:03:17,865 --> 00:03:19,433 line:-1
+This data is enough to get us started,
+
+
+58
+00:03:19,499 --> 00:03:22,536 line:-2
+but the runtime needs to track
+more information about each class.
+
+
+59
+00:03:22,603 --> 00:03:24,505 line:-1
+So, when a class first gets used,
+
+
+60
+00:03:24,972 --> 00:03:27,341 line:-2
+the runtime allocates
+additional storage for it.
+
+
+61
+00:03:29,142 --> 00:03:33,981 line:-2
+This runtime allocated storage is
+the class_rw_t, for read/write data.
+
+
+62
+00:03:34,548 --> 00:03:38,452 line:-2
+In this data structure, we store
+new information only generated at runtime.
+
+
+63
+00:03:39,353 --> 00:03:42,122 line:-2
+For example, all classes
+get linked into a tree structure
+
+
+64
+00:03:42,189 --> 00:03:45,893 line:-2
+using these First Subclass
+and Next Sibling Class pointers,
+
+
+65
+00:03:45,959 --> 00:03:49,329 line:-2
+and this allows the runtime to traverse
+all the classes currently in use,
+
+
+66
+00:03:49,396 --> 00:03:51,899 line:-2
+which is useful
+for invalidating method caches.
+
+
+67
+00:03:53,233 --> 00:03:56,103 line:-2
+But why do we have methods
+and properties here
+
+
+68
+00:03:56,170 --> 00:03:58,138 line:-1
+when they're in the read only data too?
+
+
+69
+00:03:58,906 --> 00:04:01,108 line:-2
+Well, because they can be changed
+at runtime.
+
+
+70
+00:04:01,508 --> 00:04:05,078 line:-2
+When a category is loaded,
+it can add new methods to the class,
+
+
+71
+00:04:05,646 --> 00:04:08,749 line:-2
+and the programmer can add them
+dynamically using runtime APIs.
+
+
+72
+00:04:10,083 --> 00:04:12,653 line:-1
+Since the class_ro_t is read only,
+
+
+73
+00:04:13,153 --> 00:04:15,656 line:-2
+we need to track these things
+in the class_rw_t.
+
+
+74
+00:04:17,291 --> 00:04:20,060 line:-2
+Now, it turns out that this takes up
+quite a bit of memory.
+
+
+75
+00:04:20,127 --> 00:04:23,297 line:-2
+There are a lot of classes in use
+in any given device.
+
+
+76
+00:04:23,830 --> 00:04:27,100 line:-2
+We measured about 30 megabytes
+of these class_rw_t structures
+
+
+77
+00:04:27,167 --> 00:04:29,136 line:-1
+across the system on an iPhone.
+
+
+78
+00:04:30,003 --> 00:04:32,005 line:-1
+So, how could we shrink these down?
+
+
+79
+00:04:32,606 --> 00:04:35,542 line:-2
+Remember we need these things
+in the read/write part
+
+
+80
+00:04:35,609 --> 00:04:37,578 line:-1
+because they can be changed at runtime.
+
+
+81
+00:04:39,012 --> 00:04:40,747 line:-1
+But examining usage on real devices,
+
+
+82
+00:04:40,814 --> 00:04:45,686 line:-2
+we found that only around 10% of classes
+ever actually have their methods changed.
+
+
+83
+00:04:47,120 --> 00:04:50,490 line:-2
+And this demangled name field
+is only used by Swift classes,
+
+
+84
+00:04:50,557 --> 00:04:52,526 line:-1
+and isn't even needed for Swift classes
+
+
+85
+00:04:52,593 --> 00:04:55,162 line:-2
+unless something asks
+for their Objective-C name.
+
+
+86
+00:04:56,630 --> 00:04:59,399 line:0
+So, we can split off the parts
+that aren't usually used,
+
+
+87
+00:04:59,700 --> 00:05:02,936 line:0
+and this cuts the size
+of the class_rw_t in half.
+
+
+88
+00:05:03,971 --> 00:05:06,640 line:0
+For the classes that do need
+the additional information,
+
+
+89
+00:05:06,707 --> 00:05:08,909 line:0
+we can allocate one of these
+extended records
+
+
+90
+00:05:08,976 --> 00:05:11,512 line:0
+and slide it in for the class to use.
+
+
+91
+00:05:12,846 --> 00:05:16,283 line:-2
+Approximately 90% of classes
+never need this extended data,
+
+
+92
+00:05:16,350 --> 00:05:18,719 line:-1
+saving around 14 megabytes system wide.
+
+
+93
+00:05:19,386 --> 00:05:22,322 line:-2
+This is memory that’s now available
+for more productive uses,
+
+
+94
+00:05:22,389 --> 00:05:24,091 line:-1
+like storing your app’s data.
+
+
+95
+00:05:24,491 --> 00:05:28,328 line:-2
+So, you can actually see the impact
+of this change yourself on your Mac
+
+
+96
+00:05:28,395 --> 00:05:30,631 line:-2
+by running some simple commands
+in the terminal.
+
+
+97
+00:05:30,697 --> 00:05:32,199 line:-1
+Let’s take a look at that now.
+
+
+98
+00:05:32,666 --> 00:05:34,635 line:-2
+I'm gonna go into the terminal
+on my MacBook here,
+
+
+99
+00:05:34,701 --> 00:05:38,238 line:-2
+and I'm gonna run a command
+that's available on any Mac, called heap.
+
+
+100
+00:05:38,605 --> 00:05:42,342 line:-2
+And it lets you inspect the heap memory
+in use by a running process.
+
+
+101
+00:05:43,010 --> 00:05:45,979 line:-2
+So, I'm gonna run it against
+the Mail app on my Mac.
+
+
+102
+00:05:46,413 --> 00:05:49,816 line:-2
+Now, if I just ran this,
+it would output thousands of lines
+
+
+103
+00:05:49,883 --> 00:05:52,386 line:-2
+showing every heap allocation
+made by Mail.
+
+
+104
+00:05:52,452 --> 00:05:54,688 line:-1
+So, instead I'm just gonna grep it
+
+
+105
+00:05:55,389 --> 00:05:57,424 line:-2
+for the types
+we've been talking about today.
+
+
+106
+00:05:58,292 --> 00:05:59,826 line:-1
+The class_rw_t types.
+
+
+107
+00:06:00,661 --> 00:06:02,529 line:-1
+And I'm also gonna search for the header.
+
+
+108
+00:06:07,067 --> 00:06:08,735 line:-1
+And from the results that come back,
+
+
+109
+00:06:08,802 --> 00:06:15,409 line:-2
+we can see that we're using about 9000
+of these class_rw_t types in the Mail app,
+
+
+110
+00:06:15,876 --> 00:06:18,345 line:-2
+but only about a tenth of them,
+a little over 900,
+
+
+111
+00:06:18,412 --> 00:06:21,148 line:-1
+actually needed this extended information.
+
+
+112
+00:06:21,882 --> 00:06:25,152 line:-2
+So, we can easily calculate the savings
+we've made by this change.
+
+
+113
+00:06:26,153 --> 00:06:28,188 line:-1
+This is the type that's halved in size.
+
+
+114
+00:06:28,755 --> 00:06:30,557 line:-1
+So, if we subtract from this number
+
+
+115
+00:06:31,058 --> 00:06:34,061 line:-2
+the amount of memory we've had to allocate
+to the extended types,
+
+
+116
+00:06:34,595 --> 00:06:38,432 line:-2
+we can see that we've saved
+about a quarter of a meg of data
+
+
+117
+00:06:38,498 --> 00:06:39,600 line:-1
+just for the Mail app.
+
+
+118
+00:06:40,434 --> 00:06:42,369 line:-1
+If we extend that system wide,
+
+
+119
+00:06:42,436 --> 00:06:44,972 line:-2
+that's a real savings
+in terms of dirty memory.
+
+
+120
+00:06:46,073 --> 00:06:48,342 line:0
+Now, a lot of code
+that fetches data out of the class
+
+
+121
+00:06:48,408 --> 00:06:52,646 line:0
+now has to deal with classes that both do
+and don't have this extended data.
+
+
+122
+00:06:53,413 --> 00:06:55,782 line:0
+Of course,
+the runtime handles all of that for you,
+
+
+123
+00:06:55,849 --> 00:06:58,652 line:0
+and from the outside, everything
+just keeps working like it always did,
+
+
+124
+00:06:58,719 --> 00:07:00,187 line:0
+just using less memory.
+
+
+125
+00:07:01,121 --> 00:07:04,091 line:-2
+This works because the code
+that reads these structures
+
+
+126
+00:07:04,157 --> 00:07:08,295 line:-2
+is all within the runtime,
+and it's updated at the same time.
+
+
+127
+00:07:09,162 --> 00:07:11,465 line:0
+Sticking to these APIs is really important
+
+
+128
+00:07:11,532 --> 00:07:15,302 line:0
+because any code that tried to access
+these data structures directly
+
+
+129
+00:07:15,369 --> 00:07:17,871 line:0
+is going to stop working
+in this year's OS release
+
+
+130
+00:07:17,938 --> 00:07:21,808 line:0
+since things have moved around, and that
+code won't know about the new layout.
+
+
+131
+00:07:22,442 --> 00:07:25,112 line:-2
+We saw some real code that broke
+due to these changes,
+
+
+132
+00:07:25,179 --> 00:07:27,047 line:-1
+and, in addition to your own code,
+
+
+133
+00:07:27,114 --> 00:07:30,651 line:-2
+watch out for external dependencies
+you might be bringing into your app
+
+
+134
+00:07:30,717 --> 00:07:33,787 line:-2
+that might be digging into these
+data structures without you realizing.
+
+
+135
+00:07:35,122 --> 00:07:38,992 line:-2
+All of the information in these structures
+is available through official APIs.
+
+
+136
+00:07:39,359 --> 00:07:42,963 line:-2
+There are functions like class_getName
+and class_getSuperclass.
+
+
+137
+00:07:43,030 --> 00:07:45,899 line:-2
+When you use these APIs
+to access this information,
+
+
+138
+00:07:45,966 --> 00:07:49,570 line:-2
+you know they'll keep working no matter
+what we change behind the scenes.
+
+
+139
+00:07:50,304 --> 00:07:53,974 line:-2
+All of these APIs can be found
+in the Objective-C runtime documentation
+
+
+140
+00:07:54,041 --> 00:07:55,776 line:-1
+on developer.apple.com.
+
+
+141
+00:07:56,677 --> 00:07:59,913 line:-2
+Next, let's dive a little deeper
+into these class data structures
+
+
+142
+00:07:59,980 --> 00:08:03,016 line:-2
+and take a look at another change,
+relative method lists.
+
+
+143
+00:08:04,351 --> 00:08:06,854 line:0
+Every class has a list of methods
+attached to it.
+
+
+144
+00:08:07,421 --> 00:08:10,591 line:0
+When you write a new method on a class,
+it gets added to the list.
+
+
+145
+00:08:10,657 --> 00:08:13,694 line:0
+The runtime uses these lists
+to resolve message sends.
+
+
+146
+00:08:14,995 --> 00:08:17,831 line:0
+Each method contains
+three pieces of information.
+
+
+147
+00:08:18,832 --> 00:08:21,301 line:0
+First is the method's name or selector.
+
+
+148
+00:08:21,368 --> 00:08:22,369 line:0
+Selectors are strings,
+
+
+149
+00:08:22,436 --> 00:08:25,506 line:0
+but they're unique so they can be
+compared using pointer equality.
+
+
+150
+00:08:26,707 --> 00:08:28,809 line:0
+Next is the method's type encoding.
+
+
+151
+00:08:28,876 --> 00:08:31,745 line:0
+This is a string that represents
+the parameter and return types,
+
+
+152
+00:08:31,812 --> 00:08:33,580 line:0
+and it isn't used for sending messages,
+
+
+153
+00:08:33,647 --> 00:08:37,251 line:0
+but it's needed for things like runtime
+introspection and message forwarding.
+
+
+154
+00:08:38,352 --> 00:08:41,054 line:-2
+Finally, there's a pointer
+to the method's implementation.
+
+
+155
+00:08:41,121 --> 00:08:42,890 line:-1
+The actual code for the method.
+
+
+156
+00:08:42,956 --> 00:08:45,859 line:-2
+When you write a method,
+it gets compiled into a C function
+
+
+157
+00:08:45,926 --> 00:08:47,494 line:-1
+with your implementation in it,
+
+
+158
+00:08:47,828 --> 00:08:50,898 line:-2
+and then the entry in the method list
+points to that function.
+
+
+159
+00:08:51,465 --> 00:08:53,100 line:-1
+Let's look at a single method.
+
+
+160
+00:08:53,634 --> 00:08:55,269 line:-1
+I've chosen the init method.
+
+
+161
+00:08:55,335 --> 00:08:59,606 line:-2
+It contains entries for the method name,
+types, and implementation.
+
+
+162
+00:09:01,175 --> 00:09:03,977 line:-2
+Each piece of data in the method list
+is a pointer.
+
+
+163
+00:09:04,611 --> 00:09:06,180 line:-1
+On our 64-bit systems,
+
+
+164
+00:09:06,246 --> 00:09:09,750 line:-2
+that means that each method table entry
+occupies 24 bytes.
+
+
+165
+00:09:10,884 --> 00:09:14,388 line:-2
+Now this is clean memory,
+but clean memory isn't free.
+
+
+166
+00:09:14,454 --> 00:09:18,091 line:-2
+It still has to be loaded from disk
+and occupies memory when it's in use.
+
+
+167
+00:09:19,626 --> 00:09:22,996 line:-2
+Now here's a zoomed out view
+of the memory within a process.
+
+
+168
+00:09:23,530 --> 00:09:24,932 line:-1
+Note that it's not to scale.
+
+
+169
+00:09:25,532 --> 00:09:29,369 line:-2
+There's this big address space
+that requires 64 bits to address.
+
+
+170
+00:09:30,103 --> 00:09:31,405 line:-1
+Within that address space,
+
+
+171
+00:09:31,471 --> 00:09:34,541 line:-2
+various pieces are carved out
+for the stack, the heap,
+
+
+172
+00:09:34,608 --> 00:09:37,811 line:-2
+and the executables and libraries
+or binary images
+
+
+173
+00:09:37,878 --> 00:09:39,446 line:-1
+loaded into the process,
+
+
+174
+00:09:39,513 --> 00:09:40,514 line:-1
+shown here in blue.
+
+
+175
+00:09:41,915 --> 00:09:45,118 line:-2
+Let's zoom in
+and look at one of these binary images.
+
+
+176
+00:09:46,253 --> 00:09:48,322 line:-2
+Here, we show
+the three method table entries
+
+
+177
+00:09:48,388 --> 00:09:50,424 line:-1
+pointing into locations in their binary.
+
+
+178
+00:09:51,124 --> 00:09:52,593 line:-1
+This shows us another cost.
+
+
+179
+00:09:53,093 --> 00:09:55,963 line:-2
+A binary image can be loaded
+anywhere in memory
+
+
+180
+00:09:56,029 --> 00:09:58,832 line:-2
+depending on where the dynamic linker
+decides to place it.
+
+
+181
+00:09:59,933 --> 00:10:04,371 line:-2
+That means that the linker needs to
+resolve the pointers into the image
+
+
+182
+00:10:04,438 --> 00:10:08,942 line:-2
+and fix them up to point to their
+actual location in memory at load time,
+
+
+183
+00:10:09,009 --> 00:10:10,811 line:-1
+and that also has a cost.
+
+
+184
+00:10:11,211 --> 00:10:14,014 line:-2
+Now note
+that a class method entry from a binary
+
+
+185
+00:10:14,081 --> 00:10:17,484 line:-2
+only ever points to method implementations
+within that binary.
+
+
+186
+00:10:18,285 --> 00:10:21,788 line:-2
+There's no way to make a method
+that has its metadata in one binary
+
+
+187
+00:10:22,189 --> 00:10:24,291 line:-1
+and the code implementing it in another.
+
+
+188
+00:10:25,292 --> 00:10:27,394 line:-1
+That means that method list entries
+
+
+189
+00:10:27,461 --> 00:10:31,765 line:-2
+don't actually need to be able to refer
+to the entire 64-bit address space.
+
+
+190
+00:10:33,000 --> 00:10:36,904 line:-2
+They only ever need to be able to refer
+to functions within their own binary,
+
+
+191
+00:10:36,970 --> 00:10:39,139 line:-1
+and those will always be nearby.
+
+
+192
+00:10:40,541 --> 00:10:43,377 line:-1
+So, instead of an absolute 64-bit address,
+
+
+193
+00:10:43,443 --> 00:10:47,714 line:-2
+they can use a 32-bit relative offset
+within the binary.
+
+
+194
+00:10:48,148 --> 00:10:50,417 line:-2
+And that's a change
+that we've made this year.
+
+
+195
+00:10:51,051 --> 00:10:52,586 line:-1
+This has several advantages.
+
+
+196
+00:10:53,487 --> 00:10:55,856 line:-1
+Firstly, the offsets are always the same
+
+
+197
+00:10:55,923 --> 00:10:58,325 line:-2
+no matter where the image
+is loaded into memory,
+
+
+198
+00:10:58,392 --> 00:11:01,695 line:-2
+so they don't have to be fixed up
+after they're loaded from disk.
+
+
+199
+00:11:02,596 --> 00:11:04,698 line:-2
+And because they don't need
+to be fixed up,
+
+
+200
+00:11:05,032 --> 00:11:08,468 line:-2
+they can be held in true read only memory,
+which is more secure.
+
+
+201
+00:11:09,336 --> 00:11:11,338 line:-1
+And, of course, 32-bit offsets
+
+
+202
+00:11:11,405 --> 00:11:15,309 line:0
+mean that we've halved the amount
+of memory needed on 64-bit platforms.
+
+
+203
+00:11:15,976 --> 00:11:20,480 line:0
+We've measured about 80MB of these methods
+system wide on a typical iPhone.
+
+
+204
+00:11:20,881 --> 00:11:24,051 line:0
+Since they're half the size,
+we save 40 megabytes.
+
+
+205
+00:11:24,618 --> 00:11:28,121 line:0
+That's more memory your app can use
+to delight your users.
+
+
+206
+00:11:30,057 --> 00:11:31,325 line:-1
+But what about swizzling?
+
+
+207
+00:11:31,758 --> 00:11:35,662 line:-2
+The method lists in a binary
+can't now refer to the full address space,
+
+
+208
+00:11:36,296 --> 00:11:39,433 line:-2
+but if you swizzle a method,
+that can be implemented anywhere.
+
+
+209
+00:11:39,867 --> 00:11:43,770 line:-2
+And besides, we just said that we want
+to keep these method lists read only.
+
+
+210
+00:11:44,771 --> 00:11:47,674 line:-2
+To handle this,
+we also have a global table
+
+
+211
+00:11:47,741 --> 00:11:50,444 line:-2
+mapping methods
+to their swizzled implementations.
+
+
+212
+00:11:51,545 --> 00:11:52,613 line:-1
+Swizzling is rare.
+
+
+213
+00:11:52,679 --> 00:11:55,516 line:-2
+The vast majority of methods
+never actually get swizzled,
+
+
+214
+00:11:55,582 --> 00:11:57,885 line:-2
+so this table doesn't end up
+getting very big.
+
+
+215
+00:11:58,752 --> 00:12:00,821 line:-1
+Even better, the table is compact.
+
+
+216
+00:12:00,888 --> 00:12:03,023 line:-1
+Memory is dirtied a page at a time.
+
+
+217
+00:12:03,490 --> 00:12:05,359 line:-1
+With the old style of method lists,
+
+
+218
+00:12:05,425 --> 00:12:08,595 line:-2
+swizzling a method
+would dirty the entire page it was on,
+
+
+219
+00:12:08,662 --> 00:12:12,232 line:-2
+resulting in many kilobytes
+of dirty memory for a single swizzle.
+
+
+220
+00:12:13,433 --> 00:12:16,503 line:-2
+With the table, we just pay the cost
+for an extra table entry.
+
+
+221
+00:12:17,304 --> 00:12:19,973 line:-2
+As always,
+these changes are invisible to you,
+
+
+222
+00:12:20,040 --> 00:12:22,643 line:-2
+and everything keeps working
+just like it always has.
+
+
+223
+00:12:23,343 --> 00:12:26,647 line:-2
+These relative method lists
+are supported on the new OS versions
+
+
+224
+00:12:26,713 --> 00:12:28,182 line:-1
+coming out later this year.
+
+
+225
+00:12:29,049 --> 00:12:32,219 line:-2
+When you build with the corresponding
+minimum deployment target,
+
+
+226
+00:12:32,286 --> 00:12:36,323 line:-2
+the tools will automatically generate
+relative method lists in your binaries.
+
+
+227
+00:12:37,491 --> 00:12:40,561 line:-2
+If you need to target
+older OS versions still, not to worry.
+
+
+228
+00:12:41,128 --> 00:12:44,598 line:-2
+Xcode will generate
+the old style method list format as well,
+
+
+229
+00:12:44,665 --> 00:12:46,333 line:-1
+which is still fully supported.
+
+
+230
+00:12:46,967 --> 00:12:49,102 line:-2
+You still get the benefit
+from the OS itself
+
+
+231
+00:12:49,169 --> 00:12:51,605 line:-2
+being built with the new
+relative method lists,
+
+
+232
+00:12:51,672 --> 00:12:54,274 line:-2
+and the system has no problem
+with both formats in use
+
+
+233
+00:12:54,341 --> 00:12:56,143 line:-1
+in the same app at the same time.
+
+
+234
+00:12:57,177 --> 00:12:59,847 line:-2
+If you can target
+this year's OS releases though,
+
+
+235
+00:12:59,913 --> 00:13:02,716 line:-2
+you'll get smaller binaries
+and less memory usage.
+
+
+236
+00:13:03,717 --> 00:13:06,720 line:-2
+This is a generally good tip
+in Objective-C or Swift.
+
+
+237
+00:13:07,588 --> 00:13:09,056 line:-1
+Minimum deployment targets
+
+
+238
+00:13:09,122 --> 00:13:12,693 line:-2
+aren't just about which SDK APIs
+are available to you.
+
+
+239
+00:13:13,260 --> 00:13:17,130 line:-2
+When Xcode knows that it doesn't need
+to support older OS versions,
+
+
+240
+00:13:17,197 --> 00:13:20,767 line:-2
+it can often emit
+better optimized code or data.
+
+
+241
+00:13:21,802 --> 00:13:25,138 line:-2
+We understand that many of you
+need to support older OS versions,
+
+
+242
+00:13:25,205 --> 00:13:28,976 line:-2
+but this is a reason why it's a good idea
+to increase your deployment target
+
+
+243
+00:13:29,042 --> 00:13:30,043 line:-1
+whenever you can.
+
+
+244
+00:13:31,445 --> 00:13:34,681 line:-2
+Now, one thing to watch out for
+is building with a deployment target
+
+
+245
+00:13:34,748 --> 00:13:37,384 line:-2
+that's newer
+than the one you intend it to target
+
+
+246
+00:13:38,418 --> 00:13:40,888 line:-2
+Xcode usually prevents this,
+but it can slip through,
+
+
+247
+00:13:40,954 --> 00:13:44,091 line:-2
+especially if you're building
+your own libraries or frameworks elsewhere
+
+
+248
+00:13:44,157 --> 00:13:45,559 line:-1
+and then bringing them in.
+
+
+249
+00:13:46,593 --> 00:13:48,262 line:-1
+When running on an older OS,
+
+
+250
+00:13:48,328 --> 00:13:50,964 line:-2
+that older runtime
+will see these relative methods,
+
+
+251
+00:13:51,398 --> 00:13:53,400 line:-1
+but it doesn't know anything about them,
+
+
+252
+00:13:53,467 --> 00:13:57,404 line:-2
+so it will try to interpret them
+like the old style pointer-based methods.
+
+
+253
+00:13:58,805 --> 00:14:02,442 line:-2
+That means it will try to read
+a pair of 32-bit fields
+
+
+254
+00:14:02,509 --> 00:14:04,144 line:-1
+as a 64-bit pointer.
+
+
+255
+00:14:05,179 --> 00:14:08,549 line:-2
+The result is two integers
+being glued together as a pointer,
+
+
+256
+00:14:08,615 --> 00:14:12,352 line:-2
+which is a nonsense value that is certain
+to crash if it's actually used.
+
+
+257
+00:14:13,353 --> 00:14:14,922 line:-1
+You can recognize when this happens
+
+
+258
+00:14:14,988 --> 00:14:18,258 line:-2
+by a crash in the runtime
+reading method information,
+
+
+259
+00:14:18,325 --> 00:14:22,229 line:-2
+where the bad pointer looks like
+two 32-bit values smooshed together
+
+
+260
+00:14:22,296 --> 00:14:23,530 line:-1
+as in this example.
+
+
+261
+00:14:24,665 --> 00:14:27,301 line:-2
+And if you're running code
+that digs through these structures
+
+
+262
+00:14:27,367 --> 00:14:28,535 line:-1
+to read out the values,
+
+
+263
+00:14:28,602 --> 00:14:32,673 line:-2
+that code will have the same problem
+as these older runtimes,
+
+
+264
+00:14:32,739 --> 00:14:35,609 line:-2
+and the app would crash
+when users upgraded their devices.
+
+
+265
+00:14:36,944 --> 00:14:39,880 line:-1
+So again, don't do that. Use the APIs.
+
+
+266
+00:14:40,681 --> 00:14:43,984 line:-2
+Those APIs keep working regardless
+of how things change underneath.
+
+
+267
+00:14:44,618 --> 00:14:47,588 line:-2
+For example, there are functions that,
+given a method pointer,
+
+
+268
+00:14:47,654 --> 00:14:49,389 line:-1
+return the values for its fields.
+
+
+269
+00:14:51,291 --> 00:14:53,694 line:-2
+Let's explore one more change
+coming this year.
+
+
+270
+00:14:53,760 --> 00:14:56,763 line:-2
+A change to the tagged pointer format
+on arm64.
+
+
+271
+00:14:57,831 --> 00:15:00,601 line:-2
+First, we need to know
+what tagged pointers are.
+
+
+272
+00:15:01,268 --> 00:15:03,871 line:-2
+We're gonna get really low-level here,
+but don't worry.
+
+
+273
+00:15:03,937 --> 00:15:06,907 line:-2
+Like everything else we've talked about,
+you don't need to know this.
+
+
+274
+00:15:06,974 --> 00:15:08,108 line:-1
+It's just interesting,
+
+
+275
+00:15:08,175 --> 00:15:11,378 line:-2
+and maybe helps you understand
+your memory usage a little better.
+
+
+276
+00:15:12,246 --> 00:15:15,549 line:-2
+Let's start by looking at the structure
+of a normal object pointer.
+
+
+277
+00:15:15,949 --> 00:15:17,351 line:-1
+Typically when we see these,
+
+
+278
+00:15:17,417 --> 00:15:19,920 line:-2
+they're printed
+as these big hexadecimal numbers.
+
+
+279
+00:15:19,987 --> 00:15:21,455 line:-1
+We saw some of these earlier.
+
+
+280
+00:15:22,723 --> 00:15:25,459 line:-2
+Let's break it out
+into the binary representation.
+
+
+281
+00:15:26,426 --> 00:15:30,330 line:-2
+We have 64 bits, however,
+we don't really use all of these bits.
+
+
+282
+00:15:31,465 --> 00:15:35,802 line:-2
+only these bits here in the middle
+are ever set in a real object pointer.
+
+
+283
+00:15:37,037 --> 00:15:40,240 line:-2
+The low bits are always zero
+because of alignment requirements.
+
+
+284
+00:15:40,307 --> 00:15:42,943 line:-2
+objects must always be located
+at an address
+
+
+285
+00:15:43,010 --> 00:15:44,945 line:-1
+that's a multiple of the pointer size.
+
+
+286
+00:15:46,580 --> 00:15:49,917 line:-2
+The high bits are always zero
+because the address space is limited.
+
+
+287
+00:15:49,983 --> 00:15:52,920 line:-2
+we don't actually go
+all the way up to two to the 64.
+
+
+288
+00:15:54,188 --> 00:15:56,623 line:-1
+These high and low bits are always zero.
+
+
+289
+00:15:57,558 --> 00:16:01,428 line:-2
+So, let's pick one of these bits
+that's always zero and make it a one.
+
+
+290
+00:16:02,496 --> 00:16:06,099 line:-2
+That can immediately tell us
+that this is not a real object pointer,
+
+
+291
+00:16:06,633 --> 00:16:10,103 line:-2
+and then we can assign some other meaning
+to all of the other bits.
+
+
+292
+00:16:10,838 --> 00:16:12,739 line:-1
+We call this a tagged pointer.
+
+
+293
+00:16:14,274 --> 00:16:17,644 line:-2
+For example, we might stuff
+a numeric value into the other bits.
+
+
+294
+00:16:18,445 --> 00:16:22,049 line:0
+As long as we were to teach NSNumber
+how to read those bits,
+
+
+295
+00:16:22,115 --> 00:16:25,385 line:0
+and teach the runtime to handle
+the tagged pointers appropriately,
+
+
+296
+00:16:25,819 --> 00:16:29,423 line:0
+the rest of the system can treat
+these things like object pointers
+
+
+297
+00:16:29,489 --> 00:16:30,991 line:0
+and never know the difference.
+
+
+298
+00:16:32,092 --> 00:16:36,396 line:-2
+And this saves us the overhead
+of allocating a tiny number object
+
+
+299
+00:16:36,463 --> 00:16:38,265 line:-1
+for every case like this,
+
+
+300
+00:16:38,332 --> 00:16:39,900 line:-1
+which can be a significant win.
+
+
+301
+00:16:41,535 --> 00:16:42,603 line:0
+Just a quick aside,
+
+
+302
+00:16:42,669 --> 00:16:46,039 line:0
+these values are actually obfuscated
+by combining them
+
+
+303
+00:16:46,106 --> 00:16:49,176 line:0
+with a randomized value
+that's initialized at process startup.
+
+
+304
+00:16:50,177 --> 00:16:53,981 line:-2
+This is a security measure that makes it
+difficult to forge a tagged pointer.
+
+
+305
+00:16:54,882 --> 00:16:56,817 line:-2
+We'll ignore this
+for the rest of the discussion,
+
+
+306
+00:16:56,884 --> 00:16:58,452 line:-1
+since it's just an extra layer on top.
+
+
+307
+00:16:58,519 --> 00:17:01,555 line:-2
+Just be aware that if you actually
+try and look at these values in memory,
+
+
+308
+00:17:01,622 --> 00:17:02,756 line:-1
+they'll be scrambled.
+
+
+309
+00:17:03,423 --> 00:17:06,492 line:-2
+So, this is the full format
+of a tagged pointer on Intel
+
+
+310
+00:17:07,694 --> 00:17:11,164 line:-2
+The low bit is set to one
+to indicate that this is a tagged pointer.
+
+
+311
+00:17:11,898 --> 00:17:15,368 line:-2
+As we discussed, this bit
+must always be zero for a real pointer,
+
+
+312
+00:17:15,435 --> 00:17:17,304 line:-1
+so this allows us to tell them apart.
+
+
+313
+00:17:18,906 --> 00:17:21,608 line:-1
+The next three bits are the tag number.
+
+
+314
+00:17:21,974 --> 00:17:23,977 line:-2
+This indicates the type
+of the tagged pointer.
+
+
+315
+00:17:24,044 --> 00:17:26,380 line:-2
+For example,
+a three means it's an NSNumber,
+
+
+316
+00:17:26,445 --> 00:17:28,115 line:-1
+a six, that it's an NSDate.
+
+
+317
+00:17:29,283 --> 00:17:32,853 line:-2
+Since we have three tag bits,
+there are eight possible tag types.
+
+
+318
+00:17:34,321 --> 00:17:35,956 line:-1
+The rest of the bits are the payload.
+
+
+319
+00:17:36,023 --> 00:17:39,159 line:-2
+This is data that the particular type
+can use however it likes.
+
+
+320
+00:17:40,661 --> 00:17:43,530 line:-2
+For a tagged NSNumber,
+this is the actual number.
+
+
+321
+00:17:45,165 --> 00:17:47,434 line:-1
+Now, there's a special case for tag seven.
+
+
+322
+00:17:47,835 --> 00:17:50,137 line:-1
+This indicates an extended tag.
+
+
+323
+00:17:50,671 --> 00:17:54,241 line:-2
+An extended tag uses the next eight bits
+to encode the type,
+
+
+324
+00:17:54,308 --> 00:17:57,044 line:-1
+allowing for 256 more tag types
+
+
+325
+00:17:57,110 --> 00:17:58,812 line:-1
+at the cost of a smaller payload.
+
+
+326
+00:18:00,113 --> 00:18:03,483 line:-2
+This allows us to use tagged pointers
+for more types,
+
+
+327
+00:18:03,550 --> 00:18:06,420 line:-2
+as long as they can fit their data
+into a smaller space.
+
+
+328
+00:18:07,788 --> 00:18:11,825 line:-2
+This gets used for things like
+tagged UI colors or NSIndexSets.
+
+
+329
+00:18:13,293 --> 00:18:15,262 line:-1
+Now, if this seems really handy to you,
+
+
+330
+00:18:15,329 --> 00:18:17,998 line:-2
+you might be disappointed to hear
+that only the runtime maintainer,
+
+
+331
+00:18:18,065 --> 00:18:19,066 line:-1
+that is Apple,
+
+
+332
+00:18:19,132 --> 00:18:20,667 line:-1
+can add tagged pointer types.
+
+
+333
+00:18:21,301 --> 00:18:22,970 line:-1
+But if you're a Swift programmer,
+
+
+334
+00:18:23,370 --> 00:18:27,140 line:-2
+you'll be happy to know that you can
+create your own kinds of tagged pointers.
+
+
+335
+00:18:27,508 --> 00:18:31,545 line:-2
+If you've ever used an enum
+with an associated value that's a class,
+
+
+336
+00:18:31,612 --> 00:18:33,080 line:-1
+that's like a tagged pointer.
+
+
+337
+00:18:33,914 --> 00:18:36,483 line:-2
+The Swift runtime stores
+the enum discriminator
+
+
+338
+00:18:36,550 --> 00:18:39,386 line:-2
+in the spare bits
+of the associated value payload.
+
+
+339
+00:18:40,287 --> 00:18:42,623 line:-1
+What's more, Swift's use of value types
+
+
+340
+00:18:42,689 --> 00:18:45,158 line:-2
+actually makes tagged pointers
+less important,
+
+
+341
+00:18:45,559 --> 00:18:48,795 line:-2
+because values no longer
+need to be exactly pointer sized.
+
+
+342
+00:18:49,696 --> 00:18:54,835 line:-2
+For example, a Swift UUID type
+can be two words and held inline
+
+
+343
+00:18:54,902 --> 00:18:58,805 line:-2
+instead of allocating a separate object
+because it doesn't fit inside a pointer.
+
+
+344
+00:18:59,540 --> 00:19:02,609 line:-2
+Now that's tagged pointers on Intel.
+Let's have a look at ARM.
+
+
+345
+00:19:03,677 --> 00:19:05,946 line:-1
+On arm64, we've flipped things around.
+
+
+346
+00:19:06,747 --> 00:19:09,783 line:-2
+Instead of the bottom bit,
+the top bit is set to one
+
+
+347
+00:19:09,850 --> 00:19:11,351 line:-1
+to indicate a tagged pointer.
+
+
+348
+00:19:12,653 --> 00:19:15,055 line:-2
+Then the tag number comes
+in the next three bits,
+
+
+349
+00:19:15,622 --> 00:19:17,824 line:-2
+and then the payload uses
+the remaining bits.
+
+
+350
+00:19:18,659 --> 00:19:21,361 line:-2
+Why do we use the top bit
+to indicate a tagged pointer on ARM,
+
+
+351
+00:19:21,428 --> 00:19:23,664 line:-2
+instead of the bottom bit
+like we do on Intel?
+
+
+352
+00:19:24,298 --> 00:19:28,068 line:-2
+Well, it's actually a tiny optimization
+for objc_msgSend.
+
+
+353
+00:19:28,936 --> 00:19:32,706 line:-2
+We want the most common path in msgSend
+to be as fast as possible,
+
+
+354
+00:19:32,773 --> 00:19:35,509 line:-2
+and the most common path
+is for a normal pointer.
+
+
+355
+00:19:36,276 --> 00:19:37,945 line:-1
+We have two less common cases:
+
+
+356
+00:19:38,979 --> 00:19:40,714 line:-1
+tagged pointers and nil.
+
+
+357
+00:19:42,416 --> 00:19:44,718 line:-1
+It turns out that when we use the top bit,
+
+
+358
+00:19:44,785 --> 00:19:47,821 line:-2
+we can check for both of those
+with a single comparison,
+
+
+359
+00:19:47,888 --> 00:19:51,625 line:-2
+and this saves a conditional branch
+for the common case in msgSend
+
+
+360
+00:19:51,692 --> 00:19:54,661 line:-2
+compared to checking for nil
+and tagged pointers separately.
+
+
+361
+00:19:55,796 --> 00:19:58,498 line:-2
+Just like in Intel,
+we have a special case for tag seven,
+
+
+362
+00:19:58,565 --> 00:20:01,301 line:-2
+where the next eight bits are used
+as an extended tag,
+
+
+363
+00:20:01,702 --> 00:20:04,037 line:-2
+and then the remaining bits
+are used for the payload.
+
+
+364
+00:20:05,138 --> 00:20:08,175 line:-2
+Or that was actually the old format
+used in iOS 13.
+
+
+365
+00:20:08,242 --> 00:20:10,677 line:-2
+In this year's release,
+we're moving things around a bit.
+
+
+366
+00:20:11,178 --> 00:20:12,813 line:-1
+The tag bit stays at the top,
+
+
+367
+00:20:12,880 --> 00:20:16,283 line:-2
+because that msgSend optimization
+is still really useful.
+
+
+368
+00:20:17,184 --> 00:20:20,020 line:-2
+The tag number now moves
+to the bottom three bits.
+
+
+369
+00:20:20,721 --> 00:20:25,259 line:-2
+The extended tag, if in use, occupies
+the high eight bits following the tag bit.
+
+
+370
+00:20:26,493 --> 00:20:27,561 line:-1
+Why did we do this?
+
+
+371
+00:20:27,628 --> 00:20:29,930 line:-2
+Well, let's consider
+a normal pointer again.
+
+
+372
+00:20:31,932 --> 00:20:34,701 line:-2
+Our existing tools,
+like the dynamic linker,
+
+
+373
+00:20:34,768 --> 00:20:39,473 line:-2
+ignore the top eight bits of a pointer due
+to an ARM feature called Top Byte Ignore,
+
+
+374
+00:20:40,674 --> 00:20:43,744 line:-2
+and we'll put the extended tag
+in the Top Byte Ignore bits.
+
+
+375
+00:20:44,945 --> 00:20:48,849 line:-2
+For an aligned pointer,
+the bottom three bits are always zero,
+
+
+376
+00:20:49,583 --> 00:20:53,120 line:-2
+but we can fiddle with that just by
+adding a small number to the pointer.
+
+
+377
+00:20:53,820 --> 00:20:56,390 line:-2
+We'll add seven
+to set the low bits to one.
+
+
+378
+00:20:56,456 --> 00:20:59,826 line:-2
+Remember, seven is the indication
+that this is an extended tag.
+
+
+379
+00:21:00,894 --> 00:21:03,997 line:-2
+And that means
+we can actually fit this pointer above
+
+
+380
+00:21:04,398 --> 00:21:07,134 line:-1
+into an extended tag pointer payload.
+
+
+381
+00:21:08,068 --> 00:21:12,406 line:-2
+The result is a tagged pointer
+with a normal pointer in its payload.
+
+
+382
+00:21:13,240 --> 00:21:14,241 line:-1
+Why is that useful?
+
+
+383
+00:21:14,741 --> 00:21:17,377 line:-2
+Well, it opens up the ability
+for a tagged pointer
+
+
+384
+00:21:17,444 --> 00:21:21,448 line:-2
+to refer to constant data in your binary
+such as strings or other data structures
+
+
+385
+00:21:21,515 --> 00:21:23,984 line:-2
+that would otherwise
+have to occupy dirty memory.
+
+
+386
+00:21:24,918 --> 00:21:28,922 line:-2
+Now, of course, these changes mean that
+code, which accesses these bits directly,
+
+
+387
+00:21:28,989 --> 00:21:32,159 line:-2
+will no longer work
+when iOS 14 is released later this year.
+
+
+388
+00:21:33,026 --> 00:21:36,163 line:-2
+A bitwise check like this
+would've worked in the past,
+
+
+389
+00:21:37,030 --> 00:21:39,566 line:-2
+but it'll give you the wrong answer
+on future OSs,
+
+
+390
+00:21:39,633 --> 00:21:42,503 line:-2
+and your app will start
+mysteriously corrupting user data.
+
+
+391
+00:21:43,437 --> 00:21:47,174 line:-2
+So, don't use code that relies
+on anything we've just talked about.
+
+
+392
+00:21:47,241 --> 00:21:49,610 line:-2
+Instead, you can probably guess
+what I'm gonna say,
+
+
+393
+00:21:49,676 --> 00:21:51,311 line:-1
+which is use the APIs.
+
+
+394
+00:21:52,246 --> 00:21:55,582 line:0
+Type checks like isKindOfClass
+worked on the old tagged pointer format,
+
+
+395
+00:21:55,649 --> 00:21:58,318 line:0
+and they'll continue to work
+on the new tagged pointer format.
+
+
+396
+00:21:58,819 --> 00:22:02,356 line:0
+All NSString or NSNumber methods
+just keep on working.
+
+
+397
+00:22:02,422 --> 00:22:05,292 line:0
+All of the information
+in these tagged pointers
+
+
+398
+00:22:05,359 --> 00:22:07,861 line:0
+can be retrieved
+through the standard APIs.
+
+
+399
+00:22:09,129 --> 00:22:11,932 line:0
+It's worth noting
+this also applies to CF types as well.
+
+
+400
+00:22:12,833 --> 00:22:14,034 line:0
+We don't want to hide anything
+
+
+401
+00:22:14,101 --> 00:22:16,303 line:0
+and we definitely don't want
+to break anybody's apps.
+
+
+402
+00:22:16,370 --> 00:22:17,871 line:0
+When these details aren't exposed,
+
+
+403
+00:22:17,938 --> 00:22:21,542 line:0
+it's just because we need to maintain
+the flexibility to make changes like this,
+
+
+404
+00:22:21,608 --> 00:22:23,911 line:0
+and your apps will keep working just fine,
+
+
+405
+00:22:23,977 --> 00:22:26,780 line:0
+as long as they don't rely
+on these internal details.
+
+
+406
+00:22:27,948 --> 00:22:28,949 line:-1
+So, let's wrap up.
+
+
+407
+00:22:29,483 --> 00:22:32,653 line:-2
+In this talk, we've seen a few
+of the behind-the-scenes improvements
+
+
+408
+00:22:32,719 --> 00:22:34,888 line:-2
+that have shrunk
+the overhead of our runtime,
+
+
+409
+00:22:34,955 --> 00:22:37,824 line:-2
+leaving more memory
+available to you and your users.
+
+
+410
+00:22:38,859 --> 00:22:41,862 line:-2
+You get these improvements
+without having to do anything
+
+
+411
+00:22:41,929 --> 00:22:44,631 line:-2
+except, maybe,
+consider raising your deployment target.
+
+
+412
+00:22:45,632 --> 00:22:47,568 line:-2
+To help us
+make these improvements each year,
+
+
+413
+00:22:47,634 --> 00:22:49,169 line:-1
+just follow a simple rule.
+
+
+414
+00:22:49,903 --> 00:22:53,140 line:-2
+Don't read internal bits directly.
+Use the APIs.
+
+
+415
+00:22:53,941 --> 00:22:56,443 line:-2
+Thanks for watching,
+and enjoy your faster devices.
+

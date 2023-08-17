@@ -1,0 +1,753 @@
+1
+00:00:03,971 --> 00:00:06,673 line:-1
+Hello and welcome to WWDC.
+
+
+2
+00:00:08,175 --> 00:00:11,945 line:0
+Hi, I'm Izzy. I'm an engineer
+on the iOS System Experience team.
+
+
+3
+00:00:12,012 --> 00:00:14,381 line:-2
+This is the last in our series
+of widget code-alongs.
+
+
+4
+00:00:14,882 --> 00:00:17,751 line:-2
+We'll cover using URL sessions
+from a widget extension.
+
+
+5
+00:00:17,818 --> 00:00:20,888 line:-2
+It should be familiar,
+but there's some new API just for widgets.
+
+
+6
+00:00:21,588 --> 00:00:25,392 line:-2
+We'll use SwiftUI's Link API
+to make regions of a widget tappable.
+
+
+7
+00:00:26,093 --> 00:00:27,261 line:-1
+We'll add a widget bundle.
+
+
+8
+00:00:27,327 --> 00:00:30,030 line:-2
+We can provide multiple kinds of widget
+from the same extension,
+
+
+9
+00:00:30,097 --> 00:00:31,598 line:-1
+which is super convenient.
+
+
+10
+00:00:32,232 --> 00:00:34,535 line:-2
+And we'll look at how to provide
+a dynamic set of options
+
+
+11
+00:00:34,601 --> 00:00:36,270 line:-1
+for a widget configuration.
+
+
+12
+00:00:37,171 --> 00:00:38,572 line:-1
+This session's a code-along.
+
+
+13
+00:00:38,639 --> 00:00:41,875 line:-2
+We're picking up from where we left off
+in the widgets code-along session,
+
+
+14
+00:00:41,942 --> 00:00:44,912 line:-2
+so if you've been following along so far,
+you're in the right spot.
+
+
+15
+00:00:45,279 --> 00:00:46,513 line:-1
+If not, don't worry.
+
+
+16
+00:00:46,580 --> 00:00:50,350 line:-2
+You can pick from the part-three target
+in the sample project.
+
+
+17
+00:00:51,185 --> 00:00:53,253 line:-2
+Since we're covering a lot of subjects
+in this session,
+
+
+18
+00:00:53,320 --> 00:00:54,821 line:-1
+I made a checklist for us.
+
+
+19
+00:00:55,856 --> 00:00:58,358 line:-2
+We're starting at part three,
+so let's jump in.
+
+
+20
+00:01:03,397 --> 00:01:06,834 line:-2
+I've actually gone ahead and added
+another widget to this project:
+
+
+21
+00:01:06,900 --> 00:01:08,268 line:-1
+the Leaderboard widget.
+
+
+22
+00:01:08,335 --> 00:01:09,636 line:-1
+Let's take a look.
+
+
+23
+00:01:22,149 --> 00:01:25,619 line:-2
+We can see that it gives us
+a list of characters sorted by health.
+
+
+24
+00:01:25,686 --> 00:01:27,888 line:-2
+Let's talk about how it's doing that
+for a minute.
+
+
+25
+00:01:28,422 --> 00:01:29,656 line:-1
+Making network requests
+
+
+26
+00:01:29,723 --> 00:01:33,026 line:-2
+is one of the fundamental ways
+that a widget can get data.
+
+
+27
+00:01:33,093 --> 00:01:35,796 line:-2
+You may have already noticed,
+but the timeline provider API
+
+
+28
+00:01:35,863 --> 00:01:39,132 line:-2
+is built with completion handlers
+instead of return values
+
+
+29
+00:01:39,199 --> 00:01:41,602 line:-2
+specifically to make doing
+asynchronous tasks,
+
+
+30
+00:01:41,668 --> 00:01:43,637 line:-1
+like network fetches, easy.
+
+
+31
+00:01:44,338 --> 00:01:48,742 line:-2
+Here we have a loadLeaderboardData
+asynchronous request
+
+
+32
+00:01:48,809 --> 00:01:50,511 line:-1
+on our CharacterDetail object.
+
+
+33
+00:01:50,577 --> 00:01:52,412 line:-1
+Let's take a look at the implementation.
+
+
+34
+00:01:57,518 --> 00:02:00,821 line:-2
+You'll notice that
+this is a normal URL session
+
+
+35
+00:02:01,455 --> 00:02:04,858 line:-1
+making a normal data task request.
+
+
+36
+00:02:06,360 --> 00:02:09,062 line:-2
+We're simulating a remote fetch
+with a local file,
+
+
+37
+00:02:09,128 --> 00:02:11,798 line:-2
+but you'd typically call
+a remote Web service here.
+
+
+38
+00:02:12,332 --> 00:02:17,171 line:-2
+The key thing to note is that this is
+the normal in-process URL session API,
+
+
+39
+00:02:17,237 --> 00:02:19,473 line:-2
+and it works just the same
+as you would expect.
+
+
+40
+00:02:20,174 --> 00:02:21,842 line:-1
+But what about background sessions?
+
+
+41
+00:02:23,844 --> 00:02:26,046 line:-2
+You may be familiar with
+other extension types
+
+
+42
+00:02:26,113 --> 00:02:29,683 line:-2
+where a background URL session will launch
+the extension's hosting app
+
+
+43
+00:02:29,750 --> 00:02:30,918 line:-1
+when it completes.
+
+
+44
+00:02:30,984 --> 00:02:32,920 line:-1
+That's not true for widgets.
+
+
+45
+00:02:32,986 --> 00:02:35,956 line:-2
+The widget responds to
+all the URL sessions it creates,
+
+
+46
+00:02:36,023 --> 00:02:37,958 line:-1
+including background session.
+
+
+47
+00:02:38,792 --> 00:02:42,362 line:-2
+But there's no app delegate.
+So how does a widget know what to do?
+
+
+48
+00:02:44,231 --> 00:02:50,437 line:-2
+There's a modifier on widget configuration
+called onbackgroundURLSessionEvents,
+
+
+49
+00:02:50,504 --> 00:02:53,307 line:-2
+and that's analogous to
+the application delegate method.
+
+
+50
+00:02:56,009 --> 00:02:58,946 line:-1
+You're provided the sessionIdentifier...
+
+
+51
+00:03:03,116 --> 00:03:04,585 line:-1
+and a completion block.
+
+
+52
+00:03:06,787 --> 00:03:11,124 line:-2
+And you'd manage those just the same
+as you'd manage them in an app.
+
+
+53
+00:03:11,792 --> 00:03:13,160 line:-1
+That's URL sessions.
+
+
+54
+00:03:14,595 --> 00:03:17,231 line:-2
+Let's add our Leaderboard widget
+to the Home Screen.
+
+
+55
+00:03:20,067 --> 00:03:23,003 line:-2
+So this is nice,
+but like the Character Detail widget,
+
+
+56
+00:03:23,070 --> 00:03:28,108 line:-2
+I want to be able to tap each character
+to launch to their specific detail screen.
+
+
+57
+00:03:28,742 --> 00:03:31,245 line:-1
+Like widget URL, this is super simple.
+
+
+58
+00:03:31,812 --> 00:03:35,148 line:-2
+All we have to do
+is use the SwiftUI Link API.
+
+
+59
+00:03:36,283 --> 00:03:39,019 line:-2
+Our leaderboard widget uses
+this AllCharactersView.
+
+
+60
+00:03:40,087 --> 00:03:41,922 line:-1
+So let's jump to the definition of that.
+
+
+61
+00:03:43,891 --> 00:03:47,261 line:-1
+I can see by clicking this HStack
+
+
+62
+00:03:47,327 --> 00:03:51,298 line:-2
+and the blue outlines that are reflected
+in the SwiftUI preview
+
+
+63
+00:03:51,365 --> 00:03:53,700 line:-1
+that my rows are this HStack.
+
+
+64
+00:03:53,767 --> 00:03:57,571 line:-2
+And all we have to do
+is embed this in a link...
+
+
+65
+00:03:59,673 --> 00:04:04,444 line:-1
+with a destination of our character's URL.
+
+
+66
+00:04:08,649 --> 00:04:09,950 line:-1
+Now let's build and run.
+
+
+67
+00:04:16,790 --> 00:04:19,660 line:-1
+And now when I click my widget...
+
+
+68
+00:04:20,994 --> 00:04:23,630 line:-2
+you can see that it highlights
+that specific row,
+
+
+69
+00:04:23,697 --> 00:04:26,967 line:-2
+and when I tap, I go directly
+to that character's information.
+
+
+70
+00:04:27,768 --> 00:04:30,237 line:-1
+That was Spouty, and now Egghead.
+
+
+71
+00:04:33,473 --> 00:04:35,209 line:-1
+So that's using Link.
+
+
+72
+00:04:36,343 --> 00:04:40,547 line:-2
+One thing you may have noticed is that
+when I pulled up the widget gallery,
+
+
+73
+00:04:40,614 --> 00:04:42,716 line:-1
+I only have a Leaderboard widget.
+
+
+74
+00:04:43,317 --> 00:04:45,953 line:-2
+And that's because
+I moved the main attribute
+
+
+75
+00:04:46,019 --> 00:04:48,822 line:-2
+from the Ranger Detail widget
+onto the Leaderboard widget.
+
+
+76
+00:04:49,890 --> 00:04:53,493 line:-2
+By definition,
+there can only be one main per process,
+
+
+77
+00:04:53,560 --> 00:04:56,163 line:-1
+so we can't just add it in both places.
+
+
+78
+00:04:56,230 --> 00:04:58,632 line:-2
+But what we can do
+is make a widget bundle.
+
+
+79
+00:04:59,833 --> 00:05:03,971 line:-2
+So all we have to do is add
+both of our widgets to the widget bundle
+
+
+80
+00:05:04,037 --> 00:05:06,740 line:-2
+and move our main attribute
+from the Leaderboard widget...
+
+
+81
+00:05:08,842 --> 00:05:10,110 line:-1
+onto the bundle.
+
+
+82
+00:05:10,944 --> 00:05:13,380 line:-1
+Now, when I build and run...
+
+
+83
+00:05:17,050 --> 00:05:18,519 line:-1
+and go the widget gallery...
+
+
+84
+00:05:20,420 --> 00:05:24,324 line:-2
+I have my Leaderboard widget
+and my Ranger Detail widget.
+
+
+85
+00:05:25,225 --> 00:05:26,226 line:-1
+Great.
+
+
+86
+00:05:28,896 --> 00:05:30,130 line:-1
+That's widget bundles.
+
+
+87
+00:05:31,131 --> 00:05:36,069 line:-2
+In our previous session, we made a widget
+configurable using a hard-coded list.
+
+
+88
+00:05:36,136 --> 00:05:39,773 line:-2
+But what if we don't know
+all of the options up front?
+
+
+89
+00:05:39,840 --> 00:05:42,209 line:-2
+Because our configuration is
+a SiriKit intent,
+
+
+90
+00:05:42,276 --> 00:05:45,479 line:-2
+we can provide a dynamic list of options
+with an Intent Extension
+
+
+91
+00:05:45,546 --> 00:05:48,048 line:-2
+the same way we would
+for other intent-based features.
+
+
+92
+00:05:50,250 --> 00:05:53,754 line:-2
+I've already added the extension
+to this project, but here's how you do it.
+
+
+93
+00:05:54,254 --> 00:05:56,456 line:-1
+First you go to File, New, Target...
+
+
+94
+00:05:57,624 --> 00:05:58,859 line:-1
+search for "Intent"...
+
+
+95
+00:06:00,327 --> 00:06:01,862 line:-1
+and add an Intents Extension.
+
+
+96
+00:06:03,964 --> 00:06:07,701 line:-2
+Pick Swift as a language.
+Make sure your starting point is "none."
+
+
+97
+00:06:08,569 --> 00:06:10,337 line:-1
+And that's all you need to do.
+
+
+98
+00:06:11,672 --> 00:06:13,807 line:-1
+Now let's look at our Intent Definition.
+
+
+99
+00:06:13,874 --> 00:06:17,044 line:-2
+It looks very similar
+to our previous static Intent,
+
+
+100
+00:06:17,444 --> 00:06:20,814 line:-2
+but "type" is now a custom type
+instead of an enum.
+
+
+101
+00:06:21,381 --> 00:06:24,117 line:-2
+Let's take a look
+at what properties it comes with.
+
+
+102
+00:06:25,352 --> 00:06:28,488 line:-2
+It has two properties:
+identifier and displayString.
+
+
+103
+00:06:28,555 --> 00:06:31,458 line:-2
+These are the default properties
+a custom Intent type has,
+
+
+104
+00:06:31,792 --> 00:06:34,294 line:-1
+but now, where do these values come from?
+
+
+105
+00:06:35,295 --> 00:06:37,164 line:-1
+They come from the IntentHandler.
+
+
+106
+00:06:37,564 --> 00:06:40,267 line:-2
+Here is where we provide
+our dynamic set of options.
+
+
+107
+00:06:40,334 --> 00:06:43,604 line:-2
+Note that this is an asynchronous call
+like our timeline method.
+
+
+108
+00:06:44,071 --> 00:06:46,306 line:-2
+We're already returning
+a default set of characters,
+
+
+109
+00:06:46,373 --> 00:06:49,376 line:-2
+but CharacterDetail has
+a remoteCharacters list as well,
+
+
+110
+00:06:49,443 --> 00:06:50,878 line:-1
+so let's add that here.
+
+
+111
+00:07:04,157 --> 00:07:07,227 line:-2
+This would be like fetching
+more information from the network.
+
+
+112
+00:07:07,294 --> 00:07:10,097 line:-2
+Now let's update our widget
+to use the dynamic Intent.
+
+
+113
+00:07:11,365 --> 00:07:15,102 line:-2
+We can Edit All in Scope
+our character selection Intent.
+
+
+114
+00:07:20,073 --> 00:07:23,744 line:-2
+Because we no longer have an enum value,
+we don't need this method anymore.
+
+
+115
+00:07:26,113 --> 00:07:29,917 line:-2
+And our selected character
+is the characterFromName.
+
+
+116
+00:07:32,853 --> 00:07:36,123 line:-1
+And the name is the Intent identifier.
+
+
+117
+00:07:43,497 --> 00:07:45,032 line:-1
+Let's see what this looks like.
+
+
+118
+00:08:01,348 --> 00:08:06,220 line:-2
+Now, when I go to configure
+my Character Detail widget...
+
+
+119
+00:08:07,654 --> 00:08:10,858 line:-2
+I have our original options
+of Power Panda, Egghead and Spouty,
+
+
+120
+00:08:11,291 --> 00:08:14,561 line:-2
+but you can see we also have Mr. Spook,
+Cake and Octo.
+
+
+121
+00:08:15,128 --> 00:08:16,230 line:-1
+So Cake...
+
+
+122
+00:08:17,264 --> 00:08:18,265 line:-1
+Okay.
+
+
+123
+00:08:19,066 --> 00:08:22,302 line:-1
+But I want to keep an eye on Mr. Spook.
+
+
+124
+00:08:22,369 --> 00:08:24,571 line:-1
+So I'm gonna put him on my Home Screen.
+
+
+125
+00:08:26,773 --> 00:08:29,643 line:-2
+So now we have a widget
+that uses URL sessions,
+
+
+126
+00:08:30,210 --> 00:08:32,980 line:-1
+uses the new SwiftUI Link API,
+
+
+127
+00:08:33,046 --> 00:08:35,682 line:-2
+has a bundle
+with two kinds of widgets in it,
+
+
+128
+00:08:35,749 --> 00:08:37,784 line:-1
+and we support dynamic configuration.
+
+
+129
+00:08:37,851 --> 00:08:41,087 line:0
+For a design perspective
+on how to build great widgets,
+
+
+130
+00:08:41,154 --> 00:08:42,789 line:0
+see the "Design Great Widgets" talk,
+
+
+131
+00:08:42,856 --> 00:08:46,026 line:0
+and for applying those design guidelines
+in SwiftUI,
+
+
+132
+00:08:46,093 --> 00:08:50,697 line:0
+see the "Build SwiftUI Views for Widgets,"
+both talks from this year's WWDC.
+
+
+133
+00:08:51,465 --> 00:08:52,633 line:-1
+Thanks so much for joining me.
+
+
+134
+00:08:52,699 --> 00:08:55,202 line:-2
+You now have all the tools you need
+to build amazing widgets.
+
+
+135
+00:08:55,269 --> 00:08:57,237 line:-1
+I can't wait to see what you come up with.
+

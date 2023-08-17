@@ -1,0 +1,2754 @@
+2
+00:00:00,000 --> 00:00:03,003 line:-1
+♪ Mellow instrumental
+hip-hop music ♪
+
+
+3
+00:00:03,003 --> 00:00:09,610 align:right size:2% position:90%
+♪
+
+
+4
+00:00:09,610 --> 00:00:11,445 line:-1
+Hi, my name is Ben,
+
+
+5
+00:00:11,445 --> 00:00:13,947 line:-1
+and I'm an engineer
+on the Core ML team.
+
+
+6
+00:00:13.947 --> 00:00:16.283 line:-1 position:50%
+Today I'm going to show some
+of the exciting new features
+
+
+7
+00:00:16.283 --> 00:00:18.218 line:-1 position:50%
+being added to Core ML.
+
+
+8
+00:00:18,218 --> 00:00:20,287 line:-1
+The focus of these features
+is to help you
+
+
+9
+00:00:20.287 --> 00:00:23.257 line:-1 position:50%
+optimize your Core ML usage.
+
+
+10
+00:00:23,257 --> 00:00:25,893 line:-1
+In this session,
+I'll go over performance tools
+
+
+11
+00:00:25.893 --> 00:00:28.629 line:-1 position:50%
+that are now available to give
+you the information you need
+
+
+12
+00:00:28.629 --> 00:00:31.565 line:-1 position:50%
+to understand and optimize
+your model's performance
+
+
+13
+00:00:31.565 --> 00:00:34.668 line:-1 position:50%
+when using Core ML.
+
+
+14
+00:00:34,668 --> 00:00:36,803 line:-1
+Then I'll go over
+some enhanced APIs
+
+
+15
+00:00:36.803 --> 00:00:40.540 line:-1 position:50%
+which will enable you
+to make those optimizations.
+
+
+16
+00:00:40.540 --> 00:00:42.376 line:-1 position:50%
+And lastly,
+I'll give an overview
+
+
+17
+00:00:42.376 --> 00:00:44.611 line:-1 position:50%
+of some additional
+Core ML capabilities
+
+
+18
+00:00:44.611 --> 00:00:47.581 line:-1 position:50%
+and integration options.
+
+
+19
+00:00:47.581 --> 00:00:50.484 line:-1 position:50%
+Let me begin with
+the performance tools.
+
+
+20
+00:00:50,484 --> 00:00:51,752 line:-1
+To give some background,
+
+
+21
+00:00:51.752 --> 00:00:53.887 line:-1 position:50%
+I'll start by summarizing
+the standard workflow
+
+
+22
+00:00:53,887 --> 00:00:56,723 line:-1
+when using Core ML
+within your app.
+
+
+23
+00:00:56,723 --> 00:00:59,526 line:-1
+The first step
+is to choose your model.
+
+
+24
+00:00:59,526 --> 00:01:01,561 line:1
+This may be done
+in a variety of ways,
+
+
+25
+00:01:01,561 --> 00:01:04,197 position:50%
+such as using Core ML tools
+to convert a PyTorch
+
+
+26
+00:01:04,197 --> 00:01:06,900 line:1
+or TensorFlow model
+to Core ML format,
+
+
+27
+00:01:06,900 --> 00:01:09,603 position:50%
+using an already-existing
+Core ML model,
+
+
+28
+00:01:09,603 --> 00:01:13,140 line:1
+or using Create ML
+to train and export your model.
+
+
+29
+00:01:13,140 --> 00:01:15,008 position:50%
+For more details
+on model conversion
+
+
+30
+00:01:15,008 --> 00:01:16,610 line:1
+or to learn about Create ML,
+
+
+31
+00:01:16,610 --> 00:01:20,280 line:1
+I recommend checking out
+these sessions.
+
+
+32
+00:01:20.280 --> 00:01:23.951 line:-1 position:50%
+The next step is to integrate
+that model into your app.
+
+
+33
+00:01:23,951 --> 00:01:26,586 line:-1
+This involves bundling the model
+with your application
+
+
+34
+00:01:26.586 --> 00:01:29.890 line:-1 position:50%
+and using the Core ML APIs
+to load and run inference
+
+
+35
+00:01:29.890 --> 00:01:33.660 line:-1 position:50%
+on that model
+during your app's execution.
+
+
+36
+00:01:33,660 --> 00:01:39,032 line:-1
+The last step is to optimize
+the way you use Core ML.
+
+
+37
+00:01:39,032 --> 00:01:41,435 line:-1
+First, I'll go over
+choosing a model.
+
+
+38
+00:01:41.435 --> 00:01:42.736 line:-1 position:50%
+There are many aspects
+of a model
+
+
+39
+00:01:42,736 --> 00:01:44,137 line:-1
+that you may want to consider
+
+
+40
+00:01:44,137 --> 00:01:47,407 line:-1
+when deciding if you should use
+that model within your app.
+
+
+41
+00:01:47.407 --> 00:01:49.343 line:-1 position:50%
+You also may have multiple
+candidates of models
+
+
+42
+00:01:49,343 --> 00:01:50,777 line:-1
+you'd like to select from,
+
+
+43
+00:01:50.777 --> 00:01:53.347 line:-1 position:50%
+but how do you decide
+which one to use?
+
+
+44
+00:01:53,347 --> 00:01:55,415 line:-1
+You need to have a model
+whose functionality
+
+
+45
+00:01:55,415 --> 00:01:58,919 line:-1
+will match the requirements of
+the feature you wish to enable.
+
+
+46
+00:01:58.919 --> 00:02:01.321 line:-1 position:50%
+This includes understanding
+the model's accuracy
+
+
+47
+00:02:01.321 --> 00:02:03.790 line:-1 position:50%
+as well as its performance.
+
+
+48
+00:02:03,790 --> 00:02:05,625 line:-1
+A great way to learn about
+a Core ML model
+
+
+49
+00:02:05.625 --> 00:02:07.728 line:-1 position:50%
+is by opening it in Xcode.
+
+
+50
+00:02:07,728 --> 00:02:09,262 line:-1
+Just double-click on any model,
+
+
+51
+00:02:09.262 --> 00:02:12.432 line:-1 position:50%
+and it will bring up
+the following.
+
+
+52
+00:02:12.432 --> 00:02:15.102 line:-1 position:50%
+At the top,
+you'll find the model type,
+
+
+53
+00:02:15,102 --> 00:02:19,806 line:-1
+its size, and the operating
+system requirements.
+
+
+54
+00:02:19.806 --> 00:02:22.542 line:-1 position:50%
+In the General tab,
+it shows additional details
+
+
+55
+00:02:22.542 --> 00:02:24.611 line:-1 position:50%
+captured in
+the model's metadata,
+
+
+56
+00:02:24.611 --> 00:02:26.546 line:-1 position:50%
+its compute
+and storage precision,
+
+
+57
+00:02:26.546 --> 00:02:30.784 line:-1 position:50%
+and info, such as class labels
+that it can predict.
+
+
+58
+00:02:30.784 --> 00:02:33.153 line:-1 position:50%
+The Preview tab
+is for testing out your model
+
+
+59
+00:02:33.153 --> 00:02:37.624 line:-1 position:50%
+by providing example inputs
+and seeing what it predicts.
+
+
+60
+00:02:37,624 --> 00:02:40,660 line:-1
+The Predictions tab displays
+the model's inputs and outputs,
+
+
+61
+00:02:40.660 --> 00:02:42.262 line:-1 position:50%
+as well as the types and sizes
+
+
+62
+00:02:42,262 --> 00:02:45,532 line:-1
+that Core ML
+will expect at runtime.
+
+
+63
+00:02:45,532 --> 00:02:48,935 line:-1
+And finally, the Utilities tab
+can help with model encryption
+
+
+64
+00:02:48,935 --> 00:02:52,572 line:-1
+and deployment tasks.
+
+
+65
+00:02:52,572 --> 00:02:55,308 line:-1
+Overall, these views give you
+a quick overview
+
+
+66
+00:02:55.308 --> 00:02:58.879 line:-1 position:50%
+of your model's functionality
+and preview of its accuracy.
+
+
+67
+00:02:58.879 --> 00:03:02.416 line:-1 position:50%
+But what about
+your model's performance?
+
+
+68
+00:03:02.416 --> 00:03:04.518 line:-1 position:50%
+The cost of loading a model,
+
+
+69
+00:03:04.518 --> 00:03:07.220 line:-1 position:50%
+the amount of time
+a single prediction takes,
+
+
+70
+00:03:07,220 --> 00:03:09,489 line:-1
+or what hardware it utilizes,
+
+
+71
+00:03:09,489 --> 00:03:12,426 line:-1
+may be critical factors
+for your use case.
+
+
+72
+00:03:12,426 --> 00:03:13,660 line:-1
+You may have hard targets
+
+
+73
+00:03:13,660 --> 00:03:16,430 line:-1
+related to real-time
+streaming data constraints
+
+
+74
+00:03:16.430 --> 00:03:19.733 line:-1 position:50%
+or need to make key design
+decisions around user interface
+
+
+75
+00:03:19.733 --> 00:03:22.869 line:-1 position:50%
+depending
+on perceived latency.
+
+
+76
+00:03:22,869 --> 00:03:25,372 line:-1
+One way to get insight
+into the model's performance
+
+
+77
+00:03:25.372 --> 00:03:27.841 line:-1 position:50%
+is to do an initial integration
+into your app
+
+
+78
+00:03:27,841 --> 00:03:29,743 line:-1
+or by creating a small prototype
+
+
+79
+00:03:29.743 --> 00:03:32.045 line:-1 position:50%
+which you can instrument
+and measure.
+
+
+80
+00:03:32,045 --> 00:03:34,281 line:-1
+And since performance
+is hardware dependent,
+
+
+81
+00:03:34,281 --> 00:03:35,849 line:-1
+you would likely want
+to do these measurements
+
+
+82
+00:03:35.849 --> 00:03:39.052 line:-1 position:50%
+on a variety
+of supported hardware.
+
+
+83
+00:03:39,052 --> 00:03:41,721 line:-1
+Xcode and Core ML
+can now help you with this task
+
+
+84
+00:03:41,721 --> 00:03:45,058 line:-1
+even before writing
+a single line of code.
+
+
+85
+00:03:45.058 --> 00:03:47.961 line:-1 position:50%
+Core ML now allows you
+to create performance reports.
+
+
+86
+00:03:47,961 --> 00:03:49,930 line:-1
+Let me show you.
+
+
+87
+00:03:52.566 --> 00:03:53.967 line:-1 position:50%
+[CLICK]
+
+
+88
+00:03:53.967 --> 00:03:56.036 line:-1 position:50%
+I now have
+the Xcode model viewer open
+
+
+89
+00:03:56.036 --> 00:03:59.272 line:-1 position:50%
+for the YOLOv3
+object detection model.
+
+
+90
+00:03:59.272 --> 00:04:01.708 line:-1 position:50%
+Between the Predictions
+and Utilities tabs,
+
+
+91
+00:04:01,708 --> 00:04:04,211 line:-1
+there is now a Performance tab.
+
+
+92
+00:04:04.211 --> 00:04:06.012 line:-1 position:50%
+To generate
+a performance report,
+
+
+93
+00:04:06,012 --> 00:04:10,317 line:-1
+I'll select the plus icon
+at the bottom left,
+
+
+94
+00:04:10,317 --> 00:04:12,252 line:-1
+select the device
+I'd like to run on --
+
+
+95
+00:04:12.252 --> 00:04:16.756 line:-1 position:50%
+which is my iPhone --
+click next,
+
+
+96
+00:04:16,756 --> 00:04:20,293 line:-1
+then select which compute units
+I'd like Core ML to use.
+
+
+97
+00:04:20,293 --> 00:04:21,695 line:-1
+I'm going to leave it on All,
+
+
+98
+00:04:21,695 --> 00:04:23,830 line:-1
+to allow Core ML
+to optimize for latency
+
+
+99
+00:04:23.830 --> 00:04:26.833 line:-1 position:50%
+with all available
+compute units.
+
+
+100
+00:04:26,833 --> 00:04:31,138 line:-1
+Now I'll finish
+by pressing Run Test.
+
+
+101
+00:04:31,138 --> 00:04:32,606 line:-1
+To ensure the test can run,
+
+
+102
+00:04:32.606 --> 00:04:36.776 line:-1 position:50%
+make sure the selected device
+is unlocked.
+
+
+103
+00:04:36,776 --> 00:04:38,979 line:-1
+It shows a spinning icon
+while the performance report
+
+
+104
+00:04:38,979 --> 00:04:40,847 line:-1
+is being generated.
+
+
+105
+00:04:40.847 --> 00:04:42.215 line:-1 position:50%
+To create the report,
+
+
+106
+00:04:42.215 --> 00:04:44.451 line:-1 position:50%
+the model is sent over
+to the device,
+
+
+107
+00:04:44.451 --> 00:04:46.820 line:-1 position:50%
+then there are several
+iterations of compile,
+
+
+108
+00:04:46,820 --> 00:04:50,490 line:-1
+load, and predictions
+which are run with the model.
+
+
+109
+00:04:50.490 --> 00:04:51.791 line:-1 position:50%
+Once those are complete,
+
+
+110
+00:04:51.791 --> 00:04:55.562 line:-1 position:50%
+the metrics in the performance
+report are calculated.
+
+
+111
+00:04:55,562 --> 00:04:57,130 line:-1
+Now it's run the model
+on my iPhone,
+
+
+112
+00:04:57.130 --> 00:05:00.767 line:-1 position:50%
+and it displays
+the performance report.
+
+
+113
+00:05:00.767 --> 00:05:02.636 line:-1 position:50%
+At the top,
+it shows some details
+
+
+114
+00:05:02,636 --> 00:05:04,838 line:-1
+about the device
+where the test was run
+
+
+115
+00:05:04,838 --> 00:05:09,342 line:-1
+as well as which compute units
+were selected.
+
+
+116
+00:05:09.342 --> 00:05:12.145 line:-1 position:50%
+Next it shows statistics
+about the run.
+
+
+117
+00:05:12.145 --> 00:05:16.116 line:-1 position:50%
+The median prediction time
+was 22.19 milliseconds
+
+
+118
+00:05:16,116 --> 00:05:20,153 line:-1
+and the median load time
+was about 400 ms.
+
+
+119
+00:05:20,153 --> 00:05:23,390 line:-1
+Also, if you plan to compile
+your model on-device,
+
+
+120
+00:05:23,390 --> 00:05:28,795 line:-1
+this shows the compilation time
+was about 940 ms.
+
+
+121
+00:05:28.795 --> 00:05:32.399 line:-1 position:50%
+A prediction time of around
+22 ms tells me that this model
+
+
+122
+00:05:32,399 --> 00:05:34,668 line:-1
+can support about
+45 frames per second
+
+
+123
+00:05:34,668 --> 00:05:36,670 line:-1
+if I want to run it
+in real time.
+
+
+124
+00:05:39.773 --> 00:05:41.775 line:-1 position:50%
+Since this model contains
+a neural network,
+
+
+125
+00:05:41,775 --> 00:05:43,643 line:-1
+there's a layer view
+displayed towards the bottom
+
+
+126
+00:05:43.643 --> 00:05:45.812 line:-1 position:50%
+of the performance report.
+
+
+127
+00:05:45,812 --> 00:05:49,015 line:-1
+This shows the name
+and type of all of the layers,
+
+
+128
+00:05:49.015 --> 00:05:53.853 line:-1 position:50%
+as well as which compute unit
+each layer ran on.
+
+
+129
+00:05:53.853 --> 00:05:56.423 line:-1 position:50%
+A filled-in checkmark means
+that the layer was executed
+
+
+130
+00:05:56.423 --> 00:05:59.492 line:-1 position:50%
+on that compute unit.
+
+
+131
+00:05:59.492 --> 00:06:02.062 line:-1 position:50%
+An unfilled checkmark means
+that the layer is supported
+
+
+132
+00:06:02,062 --> 00:06:03,330 line:-1
+on that compute unit,
+
+
+133
+00:06:03.330 --> 00:06:06.866 line:-1 position:50%
+but Core ML did not choose
+to run it there.
+
+
+134
+00:06:06,866 --> 00:06:09,502 line:-1
+And an empty diamond means
+that the layer is not supported
+
+
+135
+00:06:09,502 --> 00:06:12,272 line:-1
+on that compute unit.
+
+
+136
+00:06:12.272 --> 00:06:16.009 line:-1 position:50%
+In this case,
+54 layers were run on the GPU,
+
+
+137
+00:06:16,009 --> 00:06:19,312 line:-1
+and 32 layers
+were run on the Neural Engine.
+
+
+138
+00:06:19.312 --> 00:06:20.614 line:-1 position:50%
+You can also filter the layers
+
+
+139
+00:06:20.614 --> 00:06:23.917 line:-1 position:50%
+by a compute unit
+by clicking on it.
+
+
+140
+00:06:29.923 --> 00:06:31.958 line:-1 position:50%
+That was how
+you can use Xcode 14
+
+
+141
+00:06:31,958 --> 00:06:35,428 line:-1
+to generate performance reports
+for your Core ML models.
+
+
+142
+00:06:35,428 --> 00:06:37,464 line:-1
+This was shown for running
+on an iPhone,
+
+
+143
+00:06:37.464 --> 00:06:40.367 line:-1 position:50%
+but it will allow you to test
+on multiple operating system
+
+
+144
+00:06:40,367 --> 00:06:42,235 line:-1
+and hardware combinations,
+
+
+145
+00:06:42,235 --> 00:06:45,505 line:-1
+without having to write
+a single line of code.
+
+
+146
+00:06:45,505 --> 00:06:47,274 line:-1
+Now that you've chosen
+your model,
+
+
+147
+00:06:47.274 --> 00:06:50.944 line:-1 position:50%
+the next step is to integrate
+this model into your app.
+
+
+148
+00:06:50.944 --> 00:06:53.280 line:-1 position:50%
+This involves bundling
+the model with your app
+
+
+149
+00:06:53.280 --> 00:06:56.316 line:-1 position:50%
+and making use of Core ML APIs
+to load the model
+
+
+150
+00:06:56.316 --> 00:06:59.252 line:-1 position:50%
+and make predictions with it.
+
+
+151
+00:06:59.252 --> 00:07:01.521 line:-1 position:50%
+In this case, I've built an app
+
+
+152
+00:07:01.521 --> 00:07:05.325 line:-1 position:50%
+that uses Core ML style transfer
+models to perform style transfer
+
+
+153
+00:07:05.325 --> 00:07:08.061 line:-1 position:50%
+on frames from
+a live camera session.
+
+
+154
+00:07:08.061 --> 00:07:10.764 line:-1 position:50%
+It's working properly;
+however, the frame rate
+
+
+155
+00:07:10.764 --> 00:07:15.101 line:-1 position:50%
+is slower than I'd expect,
+and I'd like to understand why.
+
+
+156
+00:07:15,101 --> 00:07:17,237 line:-1
+This is where you'd move on
+to step three,
+
+
+157
+00:07:17.237 --> 00:07:20.674 line:-1 position:50%
+which is to optimize
+your Core ML usage.
+
+
+158
+00:07:20,674 --> 00:07:23,109 line:-1
+Generating a performance report
+can show the performance
+
+
+159
+00:07:23.109 --> 00:07:26.846 line:-1 position:50%
+a model is capable of achieving
+in a stand-alone environment;
+
+
+160
+00:07:26,846 --> 00:07:29,816 line:-1
+however, you also need a way
+to profile the performance
+
+
+161
+00:07:29.816 --> 00:07:32.952 line:-1 position:50%
+of a model that's running
+live in your app.
+
+
+162
+00:07:32,952 --> 00:07:35,522 line:-1
+For this, you can now use
+the Core ML Instrument
+
+
+163
+00:07:35,522 --> 00:07:38,858 line:-1
+found in the Instruments app
+in Xcode 14.
+
+
+164
+00:07:38.858 --> 00:07:41.294 line:-1 position:50%
+This Instrument allows you
+to visualize the performance
+
+
+165
+00:07:41.294 --> 00:07:43.563 line:-1 position:50%
+of your model when it runs
+live in your app,
+
+
+166
+00:07:43,563 --> 00:07:46,933 line:-1
+and helps you identify
+potential performance issues.
+
+
+167
+00:07:46.933 --> 00:07:50.837 line:-1 position:50%
+Let me show
+how it can be used.
+
+
+168
+00:07:50,837 --> 00:07:52,005 line:-1
+So I'm in Xcode
+
+
+169
+00:07:52,005 --> 00:07:54,240 line:-1
+with my style transfer app
+workspace open,
+
+
+170
+00:07:54,240 --> 00:07:56,543 line:-1
+and I'm ready
+to profile the app.
+
+
+171
+00:07:56,543 --> 00:07:57,944 line:-1
+I'll force-click
+on the Run button
+
+
+172
+00:07:57,944 --> 00:07:59,946 line:-1
+and select Profile.
+
+
+173
+00:08:02.482 --> 00:08:04.517 line:-1 position:50%
+This will install
+the latest version of the code
+
+
+174
+00:08:04.517 --> 00:08:06.820 line:-1 position:50%
+on my device
+and open Instruments for me
+
+
+175
+00:08:06,820 --> 00:08:10,290 line:-1
+with my targeted device
+and app selected.
+
+
+176
+00:08:10,290 --> 00:08:12,659 line:-1
+Since I want to profile
+my Core ML usage,
+
+
+177
+00:08:12,659 --> 00:08:17,163 line:-1
+I'm going to select
+the Core ML template.
+
+
+178
+00:08:17,163 --> 00:08:19,366 line:-1
+This template includes
+the Core ML Instrument,
+
+
+179
+00:08:19,366 --> 00:08:21,501 line:-1
+as well as several
+other useful Instruments
+
+
+180
+00:08:21,501 --> 00:08:24,771 line:-1
+which will help you profile
+your Core ML usage.
+
+
+181
+00:08:24.771 --> 00:08:28.575 line:-1 position:50%
+To capture a trace,
+I'll simply press Record.
+
+
+182
+00:08:32,579 --> 00:08:35,081 line:-1
+The app is now running
+on my iPhone.
+
+
+183
+00:08:35,081 --> 00:08:36,916 line:-1
+I will let it run
+for a few seconds
+
+
+184
+00:08:36.916 --> 00:08:39.285 line:-1 position:50%
+and use a few different styles.
+
+
+185
+00:08:39,285 --> 00:08:42,922 line:-1
+And now I'll end the trace
+by pressing the Stop button.
+
+
+186
+00:08:42,922 --> 00:08:44,891 line:-1
+Now I have my Instruments trace.
+
+
+187
+00:08:44,891 --> 00:08:48,328 line:-1
+I'm going to focus on
+the Core ML Instrument.
+
+
+188
+00:08:48.328 --> 00:08:50.830 line:-1 position:50%
+The Core ML Instrument
+shows all of the Core ML events
+
+
+189
+00:08:50.830 --> 00:08:53.032 line:-1 position:50%
+that were captured in the trace.
+
+
+190
+00:08:53.032 --> 00:08:56.636 line:-1 position:50%
+The initial view groups all
+of the events into three lanes:
+
+
+191
+00:08:56,636 --> 00:09:01,674 line:-1
+Activity, Data, and Compute.
+
+
+192
+00:09:01.674 --> 00:09:04.577 line:-1 position:50%
+The Activity lane shows
+top-level Core ML events
+
+
+193
+00:09:04.577 --> 00:09:06.312 line:-1 position:50%
+which have a one-to-one
+relationship
+
+
+194
+00:09:06,312 --> 00:09:09,849 line:-1
+with the actual Core ML APIs
+that you would call directly,
+
+
+195
+00:09:09,849 --> 00:09:14,387 line:-1
+such as loads and predictions.
+
+
+196
+00:09:14,387 --> 00:09:16,589 line:-1
+The Data lane shows events
+in which Core ML
+
+
+197
+00:09:16,589 --> 00:09:19,426 line:-1
+is performing data checks
+or data transformations
+
+
+198
+00:09:19.426 --> 00:09:20.960 line:-1 position:50%
+to make sure that
+it can safely work
+
+
+199
+00:09:20,960 --> 00:09:25,165 line:-1
+with the model's inputs
+and outputs.
+
+
+200
+00:09:25,165 --> 00:09:27,267 line:-1
+The Compute lane shows
+when Core ML sends
+
+
+201
+00:09:27.267 --> 00:09:30.069 line:-1 position:50%
+compute requests
+to specific compute units,
+
+
+202
+00:09:30.069 --> 00:09:33.807 line:-1 position:50%
+such as the Neural Engine,
+or the GPU.
+
+
+203
+00:09:33,807 --> 00:09:36,910 line:-1
+You can also select
+the Ungrouped view
+
+
+204
+00:09:36.910 --> 00:09:42.148 line:-1 position:50%
+where there is an individual
+lane for each event type.
+
+
+205
+00:09:42,148 --> 00:09:46,386 line:-1
+At the bottom, there's the
+Model Activity Aggregation view.
+
+
+206
+00:09:46.386 --> 00:09:49.489 line:-1 position:50%
+This view provides aggregate
+statistics for all of the events
+
+
+207
+00:09:49.489 --> 00:09:51.524 line:-1 position:50%
+displayed in the trace.
+
+
+208
+00:09:51.524 --> 00:09:53.159 line:-1 position:50%
+For example, in this trace,
+
+
+209
+00:09:53,159 --> 00:09:57,063 line:-1
+the average model load
+took 17.17 ms,
+
+
+210
+00:09:57,063 --> 00:10:02,101 line:-1
+and the average prediction
+took 7.2 ms.
+
+
+211
+00:10:02,101 --> 00:10:05,772 line:-1
+Another note is that it can sort
+the events by duration.
+
+
+212
+00:10:05,772 --> 00:10:08,608 line:-1
+Here, the list is telling me
+that more time is being spent
+
+
+213
+00:10:08,608 --> 00:10:12,078 line:-1
+loading the model than actually
+making predictions with it,
+
+
+214
+00:10:12,078 --> 00:10:15,114 line:-1
+at a total of 6.41 seconds
+of loads,
+
+
+215
+00:10:15.114 --> 00:10:19.352 line:-1 position:50%
+compared to only 2.69 seconds
+of predictions.
+
+
+216
+00:10:19.352 --> 00:10:22.689 line:-1 position:50%
+Perhaps this has something
+to with the low frame rate.
+
+
+217
+00:10:22,689 --> 00:10:26,025 line:-1
+Let me try to find where all
+of these loads are coming from.
+
+
+218
+00:10:28.027 --> 00:10:30.630 line:-1 position:50%
+I am noticing that
+I am reloading my Core ML model
+
+
+219
+00:10:30,630 --> 00:10:33,099 line:-1
+prior to calling
+each prediction.
+
+
+220
+00:10:33.099 --> 00:10:35.134 line:-1 position:50%
+This is generally
+not good practice
+
+
+221
+00:10:35,134 --> 00:10:38,638 line:-1
+as I can just load the model
+once and hold it in memory.
+
+
+222
+00:10:38,638 --> 00:10:42,442 line:-1
+I'm going to jump back into
+my code and try to fix this.
+
+
+223
+00:10:47.080 --> 00:10:50.083 line:-1 position:50%
+I found the area of code
+where I load my model.
+
+
+224
+00:10:50,083 --> 00:10:52,886 line:-1
+The issue here is that
+this is a computed properly,
+
+
+225
+00:10:52,886 --> 00:10:54,654 line:-1
+which means that each time
+I reference the
+
+
+226
+00:10:54,654 --> 00:10:58,625 line:-1
+styleTransferModel variable,
+it will recompute the property,
+
+
+227
+00:10:58.625 --> 00:11:01.594 line:-1 position:50%
+which means reloading the model,
+in this case.
+
+
+228
+00:11:01,594 --> 00:11:02,762 line:-1
+I can quickly fix this
+
+
+229
+00:11:02,762 --> 00:11:05,932 line:-1
+by changing this
+to be a lazy variable.
+
+
+230
+00:11:14.340 --> 00:11:17.010 line:-1 position:50%
+Now I'll reprofile the app
+to check if this has fixed
+
+
+231
+00:11:17,010 --> 00:11:19,178 line:-1
+the repeated loads issue.
+
+
+232
+00:11:27.186 --> 00:11:30.890 line:-1 position:50%
+I'll once again select
+the Core ML template
+
+
+233
+00:11:30.890 --> 00:11:34.227 line:-1 position:50%
+and capture a trace.
+
+
+234
+00:11:34.227 --> 00:11:36.996 line:-1 position:50%
+This is much more in line
+with what I'd expect.
+
+
+235
+00:11:36.996 --> 00:11:38.164 line:-1 position:50%
+The count column tells me
+
+
+236
+00:11:38,164 --> 00:11:40,233 line:-1
+that there are
+five load events total,
+
+
+237
+00:11:40,233 --> 00:11:42,969 line:-1
+which matches the number
+of styles I used in the app,
+
+
+238
+00:11:42.969 --> 00:11:45.605 line:-1 position:50%
+and the total duration of loads
+is much smaller
+
+
+239
+00:11:45.605 --> 00:11:49.509 line:-1 position:50%
+than the total duration
+of predictions.
+
+
+240
+00:11:49,509 --> 00:11:54,747 line:-1
+Also, as I scroll through...
+
+
+241
+00:11:54.747 --> 00:11:57.250 line:-1 position:50%
+...it correctly shows repeated
+prediction events
+
+
+242
+00:11:57,250 --> 00:11:59,252 line:-1
+without loads
+in between each one.
+
+
+243
+00:12:02,088 --> 00:12:04,824 line:-1
+Another note is that so far,
+I've only looked at the views
+
+
+244
+00:12:04.824 --> 00:12:07.827 line:-1 position:50%
+that show all
+Core ML model activity.
+
+
+245
+00:12:07,827 --> 00:12:11,097 line:-1
+In this app, there is one
+Core ML model per style,
+
+
+246
+00:12:11,097 --> 00:12:14,734 line:-1
+so I may want to breakdown
+the Core ML activity by model.
+
+
+247
+00:12:14,734 --> 00:12:17,270 line:-1
+The Instrument
+makes this easy to do.
+
+
+248
+00:12:17.270 --> 00:12:23.409 line:-1 position:50%
+In the main graph, you can click
+the arrow at the top left,
+
+
+249
+00:12:23,409 --> 00:12:24,978 line:-1
+and it will make one subtrack
+
+
+250
+00:12:24.978 --> 00:12:27.580 line:-1 position:50%
+for each model used
+in the trace.
+
+
+251
+00:12:27.580 --> 00:12:29.782 line:-1 position:50%
+Here it displays all of the
+different style transfer models
+
+
+252
+00:12:29,782 --> 00:12:32,352 line:-1
+that were used.
+
+
+253
+00:12:32,352 --> 00:12:35,822 line:1
+The Aggregation view also offers
+similar functionality
+
+
+254
+00:12:35,822 --> 00:12:39,726 line:1
+by allowing you to break down
+the statistics by model.
+
+
+255
+00:12:43.730 --> 00:12:47.133 line:-1 position:50%
+Next I'd like to dive into
+a prediction on one of my models
+
+
+256
+00:12:47,133 --> 00:12:50,303 line:-1
+to get a better idea
+of how it's being run.
+
+
+257
+00:12:50,303 --> 00:12:53,139 line:-1
+I'll look deeper into
+the Watercolor model.
+
+
+258
+00:12:54.874 --> 00:12:57.410 line:-1 position:50%
+In this prediction,
+the Compute lane is telling me
+
+
+259
+00:12:57.410 --> 00:12:59.312 line:-1 position:50%
+that my model was run
+on a combination
+
+
+260
+00:12:59,312 --> 00:13:03,016 line:-1
+of the Neural Engine
+and the GPU.
+
+
+261
+00:13:03,016 --> 00:13:06,219 line:-1
+Core ML is sending these compute
+requests asynchronously,
+
+
+262
+00:13:06.219 --> 00:13:08.821 line:-1 position:50%
+so if I'm interested
+to see when these compute units
+
+
+263
+00:13:08,821 --> 00:13:10,657 line:-1
+are actively running
+the model,
+
+
+264
+00:13:10,657 --> 00:13:12,759 line:-1
+I can combine
+the Core ML Instrument
+
+
+265
+00:13:12.759 --> 00:13:16.462 line:-1 position:50%
+with the GPU Instrument and the
+new Neural Engine Instrument.
+
+
+266
+00:13:16.462 --> 00:13:19.465 line:-1 position:50%
+To do this, I have the three
+Instruments pinned here.
+
+
+267
+00:13:23.202 --> 00:13:25.705 line:-1 position:50%
+The Core ML Instrument shows me
+the entire region
+
+
+268
+00:13:25,705 --> 00:13:28,641 line:-1
+where the model ran.
+
+
+269
+00:13:33,646 --> 00:13:36,249 line:-1
+And within this region,
+the Neural Engine Instrument
+
+
+270
+00:13:36,249 --> 00:13:41,421 line:-1
+shows the compute first running
+on the Neural Engine,
+
+
+271
+00:13:41,421 --> 00:13:43,456 line:-1
+then the GPU Instrument
+shows the model
+
+
+272
+00:13:43.456 --> 00:13:45.291 line:-1 position:50%
+was handed off
+from the Neural Engine
+
+
+273
+00:13:45.291 --> 00:13:47.994 line:-1 position:50%
+to finish running on the GPU.
+
+
+274
+00:13:47.994 --> 00:13:50.096 line:-1 position:50%
+This gives me a better idea
+of how my model
+
+
+275
+00:13:50,096 --> 00:13:54,167 line:-1
+is actually being executed
+on the hardware.
+
+
+276
+00:13:54,167 --> 00:13:58,671 line:-1
+To recap, I used the Core ML
+Instrument in Xcode 14
+
+
+277
+00:13:58,671 --> 00:14:00,406 line:-1
+to learn about my model's
+performance
+
+
+278
+00:14:00,406 --> 00:14:02,742 line:-1
+when running live in my app.
+
+
+279
+00:14:02,742 --> 00:14:04,143 line:-1
+I then identified an issue
+
+
+280
+00:14:04.143 --> 00:14:07.246 line:-1 position:50%
+in which I was too frequently
+reloading my model.
+
+
+281
+00:14:07,246 --> 00:14:10,917 line:-1
+I fixed the issue in my code,
+reprofiled the application,
+
+
+282
+00:14:10.917 --> 00:14:14.153 line:-1 position:50%
+and verified that the issue
+had been fixed.
+
+
+283
+00:14:14.153 --> 00:14:17.423 line:-1 position:50%
+I was also able to combine
+the Core ML, GPU,
+
+
+284
+00:14:17,423 --> 00:14:20,226 line:-1
+and new Neural Engine Instrument
+to get more details
+
+
+285
+00:14:20,226 --> 00:14:24,931 line:-1
+on how my model was actually
+run on different compute units.
+
+
+286
+00:14:24.931 --> 00:14:26.532 line:-1 position:50%
+That was an overview
+of the new tools
+
+
+287
+00:14:26,532 --> 00:14:29,135 line:-1
+to help you understand
+performance.
+
+
+288
+00:14:29,135 --> 00:14:31,337 line:-1
+Next, I'll go over
+some enhanced APIs
+
+
+289
+00:14:31.337 --> 00:14:34.307 line:-1 position:50%
+that can help optimize
+that performance.
+
+
+290
+00:14:34.307 --> 00:14:36.375 line:-1 position:50%
+Let me start by going over
+how Core ML
+
+
+291
+00:14:36.375 --> 00:14:39.679 line:-1 position:50%
+handles model inputs
+and outputs.
+
+
+292
+00:14:39,679 --> 00:14:41,748 line:-1
+When you create a Core ML model,
+
+
+293
+00:14:41,748 --> 00:14:44,617 line:-1
+that model has a set
+of input and output features,
+
+
+294
+00:14:44,617 --> 00:14:47,220 line:-1
+each with a type and size.
+
+
+295
+00:14:47,220 --> 00:14:50,590 line:-1
+At runtime, you use Core ML APIs
+to provide inputs
+
+
+296
+00:14:50,590 --> 00:14:52,792 line:-1
+that conform with
+the model's interface
+
+
+297
+00:14:52.792 --> 00:14:55.862 line:-1 position:50%
+and get outputs
+after running inference.
+
+
+298
+00:14:55,862 --> 00:14:57,730 line:-1
+Let me focus on images
+and MultiArrays
+
+
+299
+00:14:57,730 --> 00:15:00,933 line:-1
+in a bit more detail.
+
+
+300
+00:15:00,933 --> 00:15:04,203 line:-1
+For images, Core ML supports
+8-bit grayscale
+
+
+301
+00:15:04,203 --> 00:15:08,207 line:-1
+and 32-bit color images
+with 8 bits per component.
+
+
+302
+00:15:08.207 --> 00:15:10.143 line:-1 position:50%
+And for multidimensional arrays,
+
+
+303
+00:15:10,143 --> 00:15:13,880 line:-1
+Core ML supports Int32,
+Double, and Float32
+
+
+304
+00:15:13,880 --> 00:15:16,082 line:-1
+as the scalar types.
+
+
+305
+00:15:16.082 --> 00:15:18.317 line:-1 position:50%
+If your app is already working
+with these types,
+
+
+306
+00:15:18.317 --> 00:15:21.354 line:-1 position:50%
+it's simply a matter of
+connecting them to the model.
+
+
+307
+00:15:21.354 --> 00:15:24.056 line:-1 position:50%
+However, sometimes
+your types may differ.
+
+
+308
+00:15:24,056 --> 00:15:26,325 line:-1
+Let me show an example.
+
+
+309
+00:15:26,325 --> 00:15:28,661 line:-1
+I'd like to add a new filter
+to my image processing
+
+
+310
+00:15:28,661 --> 00:15:30,329 line:-1
+and style app.
+
+
+311
+00:15:30.329 --> 00:15:31.998 line:-1 position:50%
+This filter works
+to sharpen images
+
+
+312
+00:15:31.998 --> 00:15:35.134 line:-1 position:50%
+by operating on
+a single-channel image.
+
+
+313
+00:15:35,134 --> 00:15:37,603 line:-1
+My app has some pre-
+and post-processing operations
+
+
+314
+00:15:37.603 --> 00:15:40.439 line:-1 position:50%
+on the GPU and represents
+this single channel
+
+
+315
+00:15:40,439 --> 00:15:43,376 line:-1
+in Float16 precision.
+
+
+316
+00:15:43,376 --> 00:15:46,312 line:-1
+To do this,
+I used coremltools to convert
+
+
+317
+00:15:46,312 --> 00:15:51,083 line:-1
+an image-sharpening torch model
+to Core ML format as shown here.
+
+
+318
+00:15:51.083 --> 00:15:54.954 line:-1 position:50%
+The model was set up to use
+Float16 precision computation.
+
+
+319
+00:15:54.954 --> 00:15:59.525 line:-1 position:50%
+Also, it takes image inputs
+and produces image outputs.
+
+
+320
+00:15:59.525 --> 00:16:02.628 line:-1 position:50%
+I got a model
+that looks like this.
+
+
+321
+00:16:02,628 --> 00:16:04,831 line:-1
+Note that it takes
+grayscale images
+
+
+322
+00:16:04.831 --> 00:16:07.433 line:-1 position:50%
+which are 8-bit for Core ML.
+
+
+323
+00:16:07,433 --> 00:16:09,802 position:50%
+To make this work,
+I had to write some code
+
+
+324
+00:16:09,802 --> 00:16:12,972 line:1
+to downcast my input
+from OneComponent16Half
+
+
+325
+00:16:12,972 --> 00:16:16,042 line:1
+to OneComponent8
+and then upcast the output
+
+
+326
+00:16:16,042 --> 00:16:19,946 position:50%
+from OneComponent8
+to OneComponent16Half.
+
+
+327
+00:16:19,946 --> 00:16:22,815 position:50%
+However,
+this isn't the whole story.
+
+
+328
+00:16:22,815 --> 00:16:25,451 line:1
+Since the model was set up
+to perform computation
+
+
+329
+00:16:25,451 --> 00:16:28,321 line:1
+in Float16 precision,
+at some point,
+
+
+330
+00:16:28,321 --> 00:16:33,359 line:1
+Core ML needs to convert
+these 8-bit inputs to Float16.
+
+
+331
+00:16:33.359 --> 00:16:35.127 line:-1 position:50%
+It does the conversion
+efficiently,
+
+
+332
+00:16:35.127 --> 00:16:36.729 line:-1 position:50%
+but when looking
+at an Instruments trace
+
+
+333
+00:16:36.729 --> 00:16:39.999 line:-1 position:50%
+with the app running,
+it shows this.
+
+
+334
+00:16:39,999 --> 00:16:42,201 line:-1
+Notice the data steps
+Core ML is performing
+
+
+335
+00:16:42,201 --> 00:16:47,506 line:-1
+before and after
+Neural Engine computation.
+
+
+336
+00:16:47.506 --> 00:16:49.408 line:-1 position:50%
+When zooming in
+on the Data lane,
+
+
+337
+00:16:49.408 --> 00:16:51.377 line:-1 position:50%
+it shows Core ML is copying data
+
+
+338
+00:16:51.377 --> 00:16:54.280 line:-1 position:50%
+to prepare it for computation
+on the Neural Engine,
+
+
+339
+00:16:54,280 --> 00:16:57,817 line:-1
+which means converting it
+to Float16, in this case.
+
+
+340
+00:16:57,817 --> 00:16:59,952 line:-1
+This seems unfortunate
+since the original data
+
+
+341
+00:16:59.952 --> 00:17:02.555 line:-1 position:50%
+was already Float16.
+
+
+342
+00:17:02,555 --> 00:17:05,892 line:-1
+Ideally, these data
+transformations can be avoided
+
+
+343
+00:17:05,892 --> 00:17:09,562 line:-1
+both in-app and inside Core ML
+by making the model work
+
+
+344
+00:17:09,562 --> 00:17:12,832 line:-1
+directly with Float16
+inputs and outputs.
+
+
+345
+00:17:12.832 --> 00:17:16.002 line:-1 position:50%
+Starting in iOS 16
+and macOS Ventura,
+
+
+346
+00:17:16,002 --> 00:17:17,770 line:-1
+Core ML will have native support
+
+
+347
+00:17:17.770 --> 00:17:20.573 line:-1 position:50%
+for one OneComponent16Half
+grayscale images,
+
+
+348
+00:17:20.573 --> 00:17:24.543 line:-1 position:50%
+and Float16 MultiArrays.
+
+
+349
+00:17:24.543 --> 00:17:27.179 line:-1 position:50%
+You can create a model
+that accepts Float16 inputs
+
+
+350
+00:17:27,179 --> 00:17:30,650 line:-1
+and outputs by specifying
+a new color layout for images
+
+
+351
+00:17:30.650 --> 00:17:32.685 line:-1 position:50%
+or a new data type
+for MultiArrays,
+
+
+352
+00:17:32,685 --> 00:17:36,088 line:-1
+while invoking the coremltools
+convert method.
+
+
+353
+00:17:36,088 --> 00:17:38,991 line:1
+In this case, I'm specifying
+the input and output
+
+
+354
+00:17:38,991 --> 00:17:43,729 line:1
+of my model to be grayscale
+Float16 images.
+
+
+355
+00:17:43,729 --> 00:17:45,798 position:50%
+Since Float16 support
+is available
+
+
+356
+00:17:45,798 --> 00:17:49,101 position:50%
+starting in iOS 16
+and macOS Ventura,
+
+
+357
+00:17:49,101 --> 00:17:50,569 line:1
+these features
+are only available
+
+
+358
+00:17:50,569 --> 00:17:56,375 position:50%
+when the minimum deployment
+target is specified as iOS 16.
+
+
+359
+00:17:56,375 --> 00:17:59,412 position:50%
+This is how the reconverted
+version of the model looks.
+
+
+360
+00:17:59,412 --> 00:18:04,183 line:-1
+Note that the inputs and outputs
+are marked as Grayscale16Half.
+
+
+361
+00:18:04,183 --> 00:18:05,918 line:-1
+With this Float16 support,
+
+
+362
+00:18:05,918 --> 00:18:09,288 line:-1
+my app can directly feed
+Float16 images to Core ML,
+
+
+363
+00:18:09,288 --> 00:18:11,891 line:-1
+which will avoid the need
+for downcasting the inputs
+
+
+364
+00:18:11,891 --> 00:18:16,295 line:-1
+and upcasting the outputs
+in the app.
+
+
+365
+00:18:16,295 --> 00:18:18,798 line:-1
+This is how it looks
+in the code.
+
+
+366
+00:18:18,798 --> 00:18:20,800 line:-1
+Since I have my input data
+in the form
+
+
+367
+00:18:20,800 --> 00:18:24,103 line:-1
+of a OneComponent16Half
+CVPixelBuffer,
+
+
+368
+00:18:24.103 --> 00:18:25.771 line:-1 position:50%
+I can simply send
+the pixel buffer
+
+
+369
+00:18:25.771 --> 00:18:27.773 line:-1 position:50%
+directly to Core ML.
+
+
+370
+00:18:27.773 --> 00:18:31.877 line:-1 position:50%
+This does not incur any
+data copy or transformation.
+
+
+371
+00:18:31.877 --> 00:18:36.782 line:-1 position:50%
+I then get a OneComponent16Half
+CVPixelBuffer as the output.
+
+
+372
+00:18:36,782 --> 00:18:38,384 line:-1
+This results in simpler code,
+
+
+373
+00:18:38,384 --> 00:18:42,188 line:-1
+and no data transformations
+required.
+
+
+374
+00:18:42,188 --> 00:18:44,190 line:-1
+There's also another cool thing
+you can do,
+
+
+375
+00:18:44,190 --> 00:18:47,259 line:-1
+and that's to ask Core ML to
+fill your preallocated buffers
+
+
+376
+00:18:47.259 --> 00:18:50.062 line:-1 position:50%
+for outputs instead of having
+Core ML allocate
+
+
+377
+00:18:50,062 --> 00:18:53,299 line:-1
+a new buffer
+for each prediction.
+
+
+378
+00:18:53.299 --> 00:18:56.302 line:-1 position:50%
+You can do this by allocating
+an output backing buffer
+
+
+379
+00:18:56,302 --> 00:18:59,138 line:-1
+and setting it
+on the prediction options.
+
+
+380
+00:18:59,138 --> 00:19:02,675 line:-1
+For my app, I wrote a function
+called outputBackingBuffer
+
+
+381
+00:19:02,675 --> 00:19:06,679 line:-1
+which returns a OneComponent1
+HalfCVPixelBuffer.
+
+
+382
+00:19:06,679 --> 00:19:08,714 line:-1
+I then set this on
+the prediction options,
+
+
+383
+00:19:08.714 --> 00:19:11.317 line:-1 position:50%
+and finally call the prediction
+method on my model
+
+
+384
+00:19:11.317 --> 00:19:14.220 line:-1 position:50%
+with those prediction options.
+
+
+385
+00:19:14.220 --> 00:19:16.022 line:-1 position:50%
+By specifying output backings,
+
+
+386
+00:19:16.022 --> 00:19:18.524 line:-1 position:50%
+you can gain better control
+over the buffer management
+
+
+387
+00:19:18,524 --> 00:19:21,427 line:-1
+for model outputs.
+
+
+388
+00:19:21,427 --> 00:19:24,230 line:-1
+So with those changes made,
+to recap,
+
+
+389
+00:19:24,230 --> 00:19:26,198 line:-1
+here's what was shown
+in the Instruments trace
+
+
+390
+00:19:26.198 --> 00:19:28.334 line:-1 position:50%
+when using the original version
+of the model
+
+
+391
+00:19:28.334 --> 00:19:31.837 line:-1 position:50%
+that had 8-bit inputs
+and outputs.
+
+
+392
+00:19:31.837 --> 00:19:34.340 line:-1 position:50%
+And here's how the
+final Instruments trace looks
+
+
+393
+00:19:34.340 --> 00:19:35.741 line:-1 position:50%
+after modifying the code
+
+
+394
+00:19:35,741 --> 00:19:38,844 line:-1
+to provide IOSurface-backed
+Float16 buffers
+
+
+395
+00:19:38.844 --> 00:19:42.415 line:-1 position:50%
+to the new Float16 version
+of the model.
+
+
+396
+00:19:42.415 --> 00:19:44.617 line:-1 position:50%
+The data transformations
+that were previously shown
+
+
+397
+00:19:44,617 --> 00:19:46,385 line:-1
+in the Data lane are now gone,
+
+
+398
+00:19:46.385 --> 00:19:49.655 line:-1 position:50%
+since Core ML no longer
+needs to perform them.
+
+
+399
+00:19:49.655 --> 00:19:53.659 line:-1 position:50%
+To summarize, Core ML now has
+end-to-end native support
+
+
+400
+00:19:53,659 --> 00:19:55,828 line:-1
+for Float16 data.
+
+
+401
+00:19:55,828 --> 00:19:59,365 line:-1
+This means you can provide
+Float16 inputs to Core ML
+
+
+402
+00:19:59,365 --> 00:20:03,135 line:-1
+and have Core ML
+give you back Float16 outputs.
+
+
+403
+00:20:03,135 --> 00:20:05,838 line:-1
+You can also use the new
+output backing API
+
+
+404
+00:20:05,838 --> 00:20:09,175 line:-1
+to have Core ML fill up
+your preallocated output buffers
+
+
+405
+00:20:09,175 --> 00:20:11,644 line:-1
+instead of making new ones.
+
+
+406
+00:20:11,644 --> 00:20:13,212 line:-1
+And lastly, we recommend
+
+
+407
+00:20:13,212 --> 00:20:16,415 line:-1
+using IOSurface-backed buffers
+whenever possible,
+
+
+408
+00:20:16,415 --> 00:20:18,818 line:-1
+as this allows Core ML
+to transfer the data
+
+
+409
+00:20:18.818 --> 00:20:21.654 line:-1 position:50%
+between different compute units
+without data copies
+
+
+410
+00:20:21,654 --> 00:20:25,357 line:-1
+by taking advantage
+of the unified memory.
+
+
+411
+00:20:25,357 --> 00:20:26,826 line:-1
+Next, I'll go through
+a quick tour
+
+
+412
+00:20:26,826 --> 00:20:28,661 line:-1
+of some of the additional
+capabilities
+
+
+413
+00:20:28,661 --> 00:20:31,430 line:-1
+being added to Core ML.
+
+
+414
+00:20:31,430 --> 00:20:33,732 line:-1
+First is weight compression.
+
+
+415
+00:20:33.732 --> 00:20:35.768 line:-1 position:50%
+Compressing the weights
+of your model may allow you
+
+
+416
+00:20:35,768 --> 00:20:39,939 line:-1
+to achieve similar accuracy
+while having a smaller model.
+
+
+417
+00:20:39,939 --> 00:20:43,976 line:-1
+In iOS 12, Core ML introduced
+post-training weight compression
+
+
+418
+00:20:43.976 --> 00:20:45.778 line:-1 position:50%
+which allows you
+to reduce the size
+
+
+419
+00:20:45.778 --> 00:20:48.681 line:-1 position:50%
+of Core ML
+neural network models.
+
+
+420
+00:20:48,681 --> 00:20:51,650 line:-1
+We are now extending
+16- and 8-bit support
+
+
+421
+00:20:51.650 --> 00:20:54.720 line:-1 position:50%
+to the ML Program model type,
+and additionally,
+
+
+422
+00:20:54.720 --> 00:20:56.689 line:-1 position:50%
+introducing a new option
+to store weights
+
+
+423
+00:20:56,689 --> 00:20:59,625 line:-1
+in a sparse representation.
+
+
+424
+00:20:59,625 --> 00:21:01,527 line:1
+With coremltools utilities,
+
+
+425
+00:21:01,527 --> 00:21:04,396 line:1
+you will now be able
+to quantize, palettize,
+
+
+426
+00:21:04,396 --> 00:21:09,535 position:50%
+and sparsify the weights
+for your ML Program models.
+
+
+427
+00:21:09,535 --> 00:21:12,905 line:1
+Next is a new
+compute unit option.
+
+
+428
+00:21:12,905 --> 00:21:15,741 position:50%
+Core ML always aims to minimize
+inference latency
+
+
+429
+00:21:15,741 --> 00:21:18,110 line:1
+for the given
+compute unit preference.
+
+
+430
+00:21:18,110 --> 00:21:20,346 position:50%
+Apps can specify
+this preference by setting
+
+
+431
+00:21:20,346 --> 00:21:24,450 line:1
+the MLModelConfiguration
+computeUnits property.
+
+
+432
+00:21:24,450 --> 00:21:27,353 line:1
+In addition to the three
+existing compute unit options,
+
+
+433
+00:21:27,353 --> 00:21:31,357 line:1
+there is now a new one
+called cpuAndNeuralEngine.
+
+
+434
+00:21:31,357 --> 00:21:34,994 position:50%
+This tells Core ML to not
+dispatch computation on the GPU,
+
+
+435
+00:21:34,994 --> 00:21:37,363 position:50%
+which can be helpful
+when the app uses the GPU
+
+
+436
+00:21:37,363 --> 00:21:40,332 position:50%
+for other computation
+and, hence, prefers Core ML
+
+
+437
+00:21:40,332 --> 00:21:44,937 position:50%
+to limit its focus to
+the CPU and the Neural Engine.
+
+
+438
+00:21:44,937 --> 00:21:47,540 line:-1
+Next, we are adding
+a new way to initialize
+
+
+439
+00:21:47,540 --> 00:21:51,310 line:-1
+your Core ML model instance that
+provides additional flexibility
+
+
+440
+00:21:51,310 --> 00:21:54,780 line:-1
+in terms of model serialization.
+
+
+441
+00:21:54.780 --> 00:21:56.982 line:-1 position:50%
+This allows you to encrypt
+your model data
+
+
+442
+00:21:56.982 --> 00:21:58.617 line:-1 position:50%
+with custom encryption schemes
+
+
+443
+00:21:58.617 --> 00:22:01.387 line:-1 position:50%
+and decrypt it
+just before loading.
+
+
+444
+00:22:01,387 --> 00:22:04,089 line:-1
+With these new APIs,
+you can compile and load
+
+
+445
+00:22:04,089 --> 00:22:06,792 line:-1
+an in-memory
+Core ML model specification
+
+
+446
+00:22:06.792 --> 00:22:11.931 line:-1 position:50%
+without requiring the compiled
+model to be on disk.
+
+
+447
+00:22:11,931 --> 00:22:14,066 line:-1
+The last update
+is about Swift packages
+
+
+448
+00:22:14.066 --> 00:22:16.502 line:-1 position:50%
+and how they work with Core ML.
+
+
+449
+00:22:16,502 --> 00:22:18,704 line:-1
+Packages are a great way
+to bundle and distribute
+
+
+450
+00:22:18,704 --> 00:22:20,573 line:-1
+reusable code.
+
+
+451
+00:22:20,573 --> 00:22:23,342 line:-1
+With Xcode 14,
+you can include Core ML models
+
+
+452
+00:22:23,342 --> 00:22:24,877 line:-1
+in your Swift packages,
+
+
+453
+00:22:24,877 --> 00:22:27,012 line:-1
+and now when someone
+imports your package,
+
+
+454
+00:22:27,012 --> 00:22:28,881 line:-1
+your model will just work.
+
+
+455
+00:22:28.881 --> 00:22:32.351 line:-1 position:50%
+Xcode will compile and bundle
+your Core ML model automatically
+
+
+456
+00:22:32,351 --> 00:22:34,620 line:-1
+and create the same
+code-generation interface
+
+
+457
+00:22:34.620 --> 00:22:36.822 line:-1 position:50%
+you're used to working with.
+
+
+458
+00:22:36,822 --> 00:22:38,324 line:-1
+We're excited about this change,
+
+
+459
+00:22:38,324 --> 00:22:40,693 line:-1
+as it'll make it a lot easier
+to distribute your models
+
+
+460
+00:22:40.693 --> 00:22:43.429 line:-1 position:50%
+in the Swift ecosystem.
+
+
+461
+00:22:43,429 --> 00:22:46,465 line:-1
+That brings us to the end
+of this session.
+
+
+462
+00:22:46.465 --> 00:22:49.868 line:-1 position:50%
+Core ML performance reports
+and Instrument in Xcode 14
+
+
+463
+00:22:49,868 --> 00:22:51,971 line:-1
+are here to help you
+analyze and optimize
+
+
+464
+00:22:51,971 --> 00:22:53,939 line:-1
+the performance
+of the ML-powered features
+
+
+465
+00:22:53,939 --> 00:22:56,175 line:-1
+in your apps.
+
+
+466
+00:22:56.175 --> 00:22:59.111 line:-1 position:50%
+New Float16 support
+and output backing APIs
+
+
+467
+00:22:59,111 --> 00:23:01,714 line:-1
+gives you more control
+of how data flows in and out
+
+
+468
+00:23:01.714 --> 00:23:03.949 line:-1 position:50%
+of Core ML.
+
+
+469
+00:23:03.949 --> 00:23:05.918 line:-1 position:50%
+Extended support
+for weight compression
+
+
+470
+00:23:05,918 --> 00:23:09,288 line:-1
+can help you minimize
+the size of your models.
+
+
+471
+00:23:09,288 --> 00:23:12,024 line:-1
+And with in-memory models
+and Swift package support,
+
+
+472
+00:23:12,024 --> 00:23:13,993 line:-1
+you have even more options
+when it comes
+
+
+473
+00:23:13,993 --> 00:23:18,664 line:-1
+to how you represent, integrate,
+and share Core ML models.
+
+
+474
+00:23:18.664 --> 00:23:20.499 line:-1 position:50%
+This was Ben
+from the Core ML team,
+
+
+475
+00:23:20,499 --> 00:23:22,334 line:-1
+and have a great
+rest of WWDC.
+
+
+476
+00:23:22,334 --> 00:23:26,405 align:right line:1 position:90%
+♪
+

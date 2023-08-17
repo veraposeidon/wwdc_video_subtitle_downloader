@@ -1,0 +1,3828 @@
+2
+00:00:00,000 --> 00:00:02,269 line:-1
+[MAC STARTUP CHIME]
+
+
+3
+00:00:02,269 --> 00:00:05,839 line:-1
+♪ Bass music playing ♪
+
+
+4
+00:00:05,839 --> 00:00:08,008 line:-1
+[KEYSTROKES]
+
+
+5
+00:00:08,008 --> 00:00:09,176 line:0 size:2% position:90%
+♪
+
+
+6
+00:00:09,176 --> 00:00:12,312 line:-1
+Ali de Jong:
+Welcome to WWDC 2021.
+
+
+7
+00:00:12.312 --> 00:00:13.947 line:-1 position:50%
+My name is Ali de Jong,
+
+
+8
+00:00:13.947 --> 00:00:16.717 line:-1 position:50%
+and I'm a GPU software engineer
+at Apple.
+
+
+9
+00:00:16,717 --> 00:00:20,153 line:-1
+And today, along with
+my colleague David Núñez Rubio,
+
+
+10
+00:00:20.153 --> 00:00:21.521 line:-1 position:50%
+we'll explore
+hybrid rendering
+
+
+11
+00:00:21.521 --> 00:00:23.924 line:-1 position:50%
+with Metal ray tracing.
+
+
+12
+00:00:23.924 --> 00:00:25.759 line:-1 position:50%
+We'll start by showing you
+some improvements
+
+
+13
+00:00:25.759 --> 00:00:29.529 line:-1 position:50%
+that ray tracing
+can bring to your visuals;
+
+
+14
+00:00:29.529 --> 00:00:31.865 line:-1 position:50%
+then discuss how to incorporate
+a ray tracing pass
+
+
+15
+00:00:31,865 --> 00:00:33,467 line:-1
+into rasterization,
+
+
+16
+00:00:33.467 --> 00:00:36.904 line:-1 position:50%
+using a technique called
+"hybrid rendering;"
+
+
+17
+00:00:36.904 --> 00:00:39.306 line:-1 position:50%
+then David will walk us through
+the new tools
+
+
+18
+00:00:39.306 --> 00:00:43.176 line:-1 position:50%
+to help you implement
+ray tracing.
+
+
+19
+00:00:43.176 --> 00:00:44.678 line:-1 position:50%
+Let's start by taking a look
+
+
+20
+00:00:44.678 --> 00:00:48.482 line:-1 position:50%
+at some great use cases
+for ray tracing.
+
+
+21
+00:00:48,482 --> 00:00:51,084 position:50%
+Games and movies
+are in the constant pursuit
+
+
+22
+00:00:51,084 --> 00:00:52,819 position:50%
+of ever-increasing realism,
+
+
+23
+00:00:52,819 --> 00:00:53,854 line:0
+and for many years,
+
+
+24
+00:00:53,854 --> 00:00:57,291 position:50%
+the approach to graphics has
+been by means of rasterization.
+
+
+25
+00:00:57.291 --> 00:00:59.826 line:-1 position:50%
+Rasterization is great
+at producing beautiful images
+
+
+26
+00:00:59.826 --> 00:01:01.561 line:-1 position:50%
+at real-time rates.
+
+
+27
+00:01:01,561 --> 00:01:04,831 line:-1
+However, there are limitations
+to what we can achieve.
+
+
+28
+00:01:04,831 --> 00:01:06,300 line:-1
+Ray tracing is a mechanism
+
+
+29
+00:01:06.300 --> 00:01:08.735 line:-1 position:50%
+that allows us to query
+the world from shaders,
+
+
+30
+00:01:08.735 --> 00:01:11.538 line:-1 position:50%
+opening the door
+to new, exciting techniques.
+
+
+31
+00:01:11.538 --> 00:01:13.640 line:-1 position:50%
+And by combining it
+with rasterization,
+
+
+32
+00:01:13.640 --> 00:01:16.076 line:-1 position:50%
+we can greatly improve
+our visuals.
+
+
+33
+00:01:16,076 --> 00:01:19,012 line:-1
+Let's take a look
+at a few examples.
+
+
+34
+00:01:19.012 --> 00:01:22.316 line:-1 position:50%
+One area that's always been
+problematic for rasterization
+
+
+35
+00:01:22.316 --> 00:01:23.784 line:-1 position:50%
+is reflections.
+
+
+36
+00:01:23.784 --> 00:01:26.453 line:-1 position:50%
+This is because when we're
+shading a rasterized pixel,
+
+
+37
+00:01:26.453 --> 00:01:28.655 line:-1 position:50%
+we have no context
+of the rest of the scene
+
+
+38
+00:01:28,655 --> 00:01:30,324 line:-1
+for accurate reflections
+
+
+39
+00:01:30.324 --> 00:01:34.061 line:-1 position:50%
+and we have to do extra work
+to generate that information.
+
+
+40
+00:01:34,061 --> 00:01:36,163 line:-1
+Ray tracing allows us
+to trace array
+
+
+41
+00:01:36.163 --> 00:01:37.798 line:-1 position:50%
+from the pixel being shaded
+
+
+42
+00:01:37,798 --> 00:01:39,999 line:-1
+and discover what's out there
+in the world.
+
+
+43
+00:01:39.999 --> 00:01:42.703 line:-1 position:50%
+Even better, we can apply
+this process recursively
+
+
+44
+00:01:42.703 --> 00:01:43.937 line:-1 position:50%
+to apply correct shadows
+
+
+45
+00:01:43,937 --> 00:01:48,008 line:-1
+and even reflections
+in reflections.
+
+
+46
+00:01:48.008 --> 00:01:51.511 line:-1 position:50%
+Another area where ray tracing
+excels is shadows.
+
+
+47
+00:01:51.511 --> 00:01:54.448 line:-1 position:50%
+Notice with rasterization,
+the shadows' general blurriness
+
+
+48
+00:01:54,448 --> 00:01:57,150 line:-1
+and the aliasing caused
+by a shadow map resolution
+
+
+49
+00:01:57.150 --> 00:02:00.821 line:-1 position:50%
+on the curved surfaces
+of the moped.
+
+
+50
+00:02:00.821 --> 00:02:04.191 line:-1 position:50%
+Ray-traced shadows are sharper
+and address aliasing issues
+
+
+51
+00:02:04.191 --> 00:02:05.959 line:-1 position:50%
+without the need
+of artificial parameters
+
+
+52
+00:02:05,959 --> 00:02:07,894 line:-1
+such as a shadow bias.
+
+
+53
+00:02:07,894 --> 00:02:11,531 line:-1
+Soft shadows can also be
+approximated more accurately.
+
+
+54
+00:02:11.531 --> 00:02:14.434 line:-1 position:50%
+We can naturally produce shadows
+that are harder or softer,
+
+
+55
+00:02:14.434 --> 00:02:16.937 line:-1 position:50%
+depending on the proximity
+of the occluding object
+
+
+56
+00:02:16,937 --> 00:02:18,472 line:-1
+to the shaded point.
+
+
+57
+00:02:18,472 --> 00:02:19,639 line:-1
+With rasterization,
+
+
+58
+00:02:19,639 --> 00:02:21,641 line:-1
+we would need to rely
+on filtering the shadow map
+
+
+59
+00:02:21,641 --> 00:02:23,043 line:-1
+at sampling time.
+
+
+60
+00:02:23.043 --> 00:02:24.077 line:-1 position:50%
+But with ray tracing,
+
+
+61
+00:02:24,077 --> 00:02:27,614 line:-1
+we can simply trace rays
+in a cone to get this result.
+
+
+62
+00:02:27.614 --> 00:02:28.882 line:-1 position:50%
+Lastly, another area
+
+
+63
+00:02:28,882 --> 00:02:32,185 line:-1
+where ray tracing can elevate
+our visuals is transparency.
+
+
+64
+00:02:32,185 --> 00:02:34,688 line:-1
+This is traditionally very hard
+to handle accurately
+
+
+65
+00:02:34.688 --> 00:02:36.623 line:-1 position:50%
+for rasterization techniques.
+
+
+66
+00:02:36,623 --> 00:02:37,424 line:-1
+In this image,
+
+
+67
+00:02:37,424 --> 00:02:39,659 line:-1
+note how the sunlight
+is coming through the window,
+
+
+68
+00:02:39,659 --> 00:02:42,863 line:-1
+yet the opaque letters
+on the glass produce no shadow.
+
+
+69
+00:02:42.863 --> 00:02:44.531 line:-1 position:50%
+Traditional shadow-mapping
+techniques
+
+
+70
+00:02:44,531 --> 00:02:48,001 line:-1
+often have problems
+with transparent objects.
+
+
+71
+00:02:48.001 --> 00:02:49.102 line:-1 position:50%
+With ray tracing,
+
+
+72
+00:02:49.102 --> 00:02:51.104 line:-1 position:50%
+we can create a custom
+intersection function
+
+
+73
+00:02:51.104 --> 00:02:52.873 line:-1 position:50%
+for transparent materials.
+
+
+74
+00:02:52.873 --> 00:02:54.107 line:-1 position:50%
+With this, we can define
+
+
+75
+00:02:54.107 --> 00:02:56.276 line:-1 position:50%
+which rays are able
+to pass through the material
+
+
+76
+00:02:56,276 --> 00:02:57,677 line:-1
+and which ones don't,
+
+
+77
+00:02:57.677 --> 00:02:59.646 line:-1 position:50%
+naturally producing
+projected shadows
+
+
+78
+00:02:59,646 --> 00:03:01,882 line:-1
+like the letters
+on the head of the bust.
+
+
+79
+00:03:01,882 --> 00:03:05,819 line:-1
+And of course, all the shadows
+look sharper overall.
+
+
+80
+00:03:05.819 --> 00:03:08.622 line:-1 position:50%
+So why is it that ray tracing
+is able to improve our visuals
+
+
+81
+00:03:08,622 --> 00:03:10,157 line:-1
+so dramatically?
+
+
+82
+00:03:10,157 --> 00:03:11,992 line:-1
+To understand this,
+let's take a look
+
+
+83
+00:03:11,992 --> 00:03:15,729 line:-1
+at how the traditional
+rasterization process works.
+
+
+84
+00:03:15.729 --> 00:03:17.464 line:-1 position:50%
+In the rasterization process,
+
+
+85
+00:03:17,464 --> 00:03:20,167 line:-1
+meshes are sent down to Metal
+to be rendered.
+
+
+86
+00:03:20,167 --> 00:03:22,736 line:-1
+They are placed in the world
+and in front of the camera
+
+
+87
+00:03:22.736 --> 00:03:24.137 line:-1 position:50%
+by a vertex shader,
+
+
+88
+00:03:24,137 --> 00:03:26,206 line:-1
+and those primitives
+are placed onto pixels --
+
+
+89
+00:03:26.206 --> 00:03:28.842 line:-1 position:50%
+or fragments --
+by the rasterizer.
+
+
+90
+00:03:28.842 --> 00:03:31.111 line:-1 position:50%
+These pixels are then shaded
+by a fragment shader,
+
+
+91
+00:03:31,111 --> 00:03:35,415 line:-1
+and the result is blended
+onto the output image.
+
+
+92
+00:03:35.415 --> 00:03:38.085 line:-1 position:50%
+As you know, each pixel
+can be shaded independently,
+
+
+93
+00:03:38.085 --> 00:03:39.453 line:-1 position:50%
+operating in parallel,
+
+
+94
+00:03:39,453 --> 00:03:43,056 line:-1
+which is what makes GPUs so good
+at the rasterization process.
+
+
+95
+00:03:43,056 --> 00:03:44,224 line:-1
+The tradeoff, however,
+
+
+96
+00:03:44.224 --> 00:03:46.159 line:-1 position:50%
+is at the time
+we're applying our shading,
+
+
+97
+00:03:46.159 --> 00:03:47.594 line:-1 position:50%
+we've completely lost
+the context
+
+
+98
+00:03:47.594 --> 00:03:48.962 line:-1 position:50%
+of the rest of our scene
+
+
+99
+00:03:48.962 --> 00:03:50.997 line:-1 position:50%
+and we don't know what objects
+might be surrounding
+
+
+100
+00:03:50,997 --> 00:03:54,401 line:-1
+the point associated
+with this pixel.
+
+
+101
+00:03:54,401 --> 00:03:56,870 line:0
+Advanced game engines
+make up for this situation
+
+
+102
+00:03:56,870 --> 00:03:58,738 position:50%
+by adding extra render passes
+
+
+103
+00:03:58,738 --> 00:04:01,241 line:0
+that generate
+intermediate information.
+
+
+104
+00:04:01,241 --> 00:04:03,677 line:0
+The fragment shader can then
+leverage that data
+
+
+105
+00:04:03,677 --> 00:04:06,446 line:0
+to approximate the details
+of the geometric context
+
+
+106
+00:04:06,446 --> 00:04:08,014 line:0
+the point is in.
+
+
+107
+00:04:08,014 --> 00:04:11,751 line:-1
+Let's take a look at how
+this works in a bit more detail.
+
+
+108
+00:04:11,751 --> 00:04:13,153 line:-1
+For this technique,
+
+
+109
+00:04:13.153 --> 00:04:15.722 line:-1 position:50%
+you rasterize geometric
+information about the scene
+
+
+110
+00:04:15.722 --> 00:04:19.392 line:-1 position:50%
+to intermediate textures instead
+of directly to the screen.
+
+
+111
+00:04:19.392 --> 00:04:23.230 line:-1 position:50%
+This can be things like albedo,
+depth, or normals.
+
+
+112
+00:04:23.230 --> 00:04:26.133 line:-1 position:50%
+This is commonly referred to
+as a Geometry Buffer pass
+
+
+113
+00:04:26,133 --> 00:04:29,369 line:-1
+or G-Buffer pass for short.
+
+
+114
+00:04:29,369 --> 00:04:31,571 line:-1
+The intermediate textures
+are used as input
+
+
+115
+00:04:31.571 --> 00:04:34.541 line:-1 position:50%
+for light approximation passes
+that use smart tricks
+
+
+116
+00:04:34.541 --> 00:04:37.043 line:-1 position:50%
+to approximate how the light
+would interact with the objects
+
+
+117
+00:04:37.043 --> 00:04:38.311 line:-1 position:50%
+in the scene.
+
+
+118
+00:04:38,311 --> 00:04:40,814 line:-1
+Some examples are
+screen-space ambient occlusion
+
+
+119
+00:04:40.814 --> 00:04:43.617 line:-1 position:50%
+and screen-space reflection.
+
+
+120
+00:04:43,617 --> 00:04:45,685 position:50%
+In the last step,
+our intermediate attachments
+
+
+121
+00:04:45,685 --> 00:04:47,888 line:0
+are often denoised
+or blurred slightly
+
+
+122
+00:04:47,888 --> 00:04:49,756 line:0
+to make for a smoother image,
+
+
+123
+00:04:49,756 --> 00:04:51,124 line:0
+and everything
+is combined together
+
+
+124
+00:04:51,124 --> 00:04:53,293 position:50%
+to produce the final image.
+
+
+125
+00:04:53,293 --> 00:04:55,428 position:50%
+While these sometimes
+elaborate techniques
+
+
+126
+00:04:55,428 --> 00:04:56,863 line:0
+can help improve the image,
+
+
+127
+00:04:56,863 --> 00:04:59,366 position:50%
+they're still
+just approximations.
+
+
+128
+00:04:59,366 --> 00:05:00,367 position:50%
+On the other hand,
+
+
+129
+00:05:00,367 --> 00:05:02,702 position:50%
+ray tracing takes
+a completely different approach
+
+
+130
+00:05:02,702 --> 00:05:04,404 position:50%
+that enables
+more accurate visuals
+
+
+131
+00:05:04,404 --> 00:05:06,840 line:0
+and simplified
+visual techniques.
+
+
+132
+00:05:06,840 --> 00:05:09,209 position:50%
+Instead of processing meshes
+one at a time,
+
+
+133
+00:05:09,209 --> 00:05:12,112 line:0
+in ray tracing, we build
+an acceleration structure
+
+
+134
+00:05:12,112 --> 00:05:14,648 position:50%
+that encompasses
+the whole scene.
+
+
+135
+00:05:14.648 --> 00:05:15.582 line:-1 position:50%
+Once we have that,
+
+
+136
+00:05:15,582 --> 00:05:17,751 line:-1
+we can have the GPU
+trace rays from a point
+
+
+137
+00:05:17.751 --> 00:05:20.887 line:-1 position:50%
+toward a given direction
+and find intersections.
+
+
+138
+00:05:20,887 --> 00:05:21,955 line:-1
+This gives us access
+
+
+139
+00:05:21,955 --> 00:05:25,258 line:-1
+to all the contextual
+scene information.
+
+
+140
+00:05:25,258 --> 00:05:27,894 line:-1
+Since ray tracing
+models ray interactions,
+
+
+141
+00:05:27,894 --> 00:05:30,597 line:-1
+it has applications
+beyond rendering, too.
+
+
+142
+00:05:30.597 --> 00:05:33.466 line:-1 position:50%
+It can be used for audio
+and physics simulation,
+
+
+143
+00:05:33,466 --> 00:05:37,571 line:-1
+collision detection,
+or AI and pathfinding.
+
+
+144
+00:05:37,571 --> 00:05:40,006 line:-1
+Since ray tracing
+is such a powerful technique,
+
+
+145
+00:05:40.006 --> 00:05:42.776 line:-1 position:50%
+we'd like to bring together
+ray tracing and rasterization
+
+
+146
+00:05:42,776 --> 00:05:45,111 line:-1
+to get the unique benefits
+of each,
+
+
+147
+00:05:45,111 --> 00:05:46,746 line:-1
+and we can do so
+through a technique
+
+
+148
+00:05:46.746 --> 00:05:49.015 line:-1 position:50%
+called "hybrid rendering."
+
+
+149
+00:05:49.015 --> 00:05:51.718 line:-1 position:50%
+Now let's look at how to create
+a hybrid rendered frame
+
+
+150
+00:05:51.718 --> 00:05:55.455 line:-1 position:50%
+and some use cases
+for this technique.
+
+
+151
+00:05:55,455 --> 00:05:57,757 line:-1
+If we start from
+our rasterized frame diagram,
+
+
+152
+00:05:57,757 --> 00:06:00,660 line:-1
+we can use ray tracing
+to replace some or all
+
+
+153
+00:06:00.660 --> 00:06:04.231 line:-1 position:50%
+of our light approximation
+passes.
+
+
+154
+00:06:04.231 --> 00:06:06.166 line:-1 position:50%
+We still rasterize
+our G-Buffer --
+
+
+155
+00:06:06,166 --> 00:06:08,368 line:-1
+it plays the role
+of our primary rays --
+
+
+156
+00:06:08.368 --> 00:06:09.836 line:-1 position:50%
+and then we use ray tracing
+
+
+157
+00:06:09,836 --> 00:06:12,472 line:-1
+to more realistically simulate
+the properties of light
+
+
+158
+00:06:12.472 --> 00:06:14.874 line:-1 position:50%
+by querying
+into the rest of the scene.
+
+
+159
+00:06:14.874 --> 00:06:17.611 line:-1 position:50%
+We still denoise and do
+a light composition pass,
+
+
+160
+00:06:17,611 --> 00:06:21,748 line:-1
+but our results are much more
+accurate to the scene data.
+
+
+161
+00:06:21.748 --> 00:06:24.084 line:-1 position:50%
+This frame architecture
+provides a good foundation
+
+
+162
+00:06:24.084 --> 00:06:27.087 line:-1 position:50%
+to explore a number
+of hybrid rendering techniques.
+
+
+163
+00:06:27,087 --> 00:06:29,656 line:-1
+Let's take a look at how we can
+encode a frame like this
+
+
+164
+00:06:29,656 --> 00:06:32,158 line:-1
+using Metal.
+
+
+165
+00:06:32.158 --> 00:06:36.496 line:-1 position:50%
+We start with filling out
+our G-Buffer.
+
+
+166
+00:06:36,496 --> 00:06:38,298 line:-1
+To do so,
+we create a render pass
+
+
+167
+00:06:38.298 --> 00:06:39.833 line:-1 position:50%
+and fill out a G-Buffer
+
+
+168
+00:06:39.833 --> 00:06:44.004 line:-1 position:50%
+and set its textures
+as the attachments for our pass.
+
+
+169
+00:06:44,004 --> 00:06:46,239 line:-1
+We make sure our images
+are stored to memory
+
+
+170
+00:06:46.239 --> 00:06:50.710 line:-1 position:50%
+so the rendered contents are
+available to subsequent passes.
+
+
+171
+00:06:50,710 --> 00:06:54,180 line:-1
+We start our pass,
+encode our rendering,
+
+
+172
+00:06:54.180 --> 00:06:56.349 line:-1 position:50%
+and end the render pass.
+
+
+173
+00:06:56.349 --> 00:07:00.487 line:-1 position:50%
+Next, we'll add a ray-tracing
+compute dispatch to this.
+
+
+174
+00:07:00.487 --> 00:07:03.757 line:-1 position:50%
+So after we create
+the intermediate textures,
+
+
+175
+00:07:03,757 --> 00:07:07,060 line:-1
+let's encode
+our ray-tracing pass.
+
+
+176
+00:07:07.060 --> 00:07:09.996 line:-1 position:50%
+We create the compute pass
+from the same command buffer
+
+
+177
+00:07:09.996 --> 00:07:13.700 line:-1 position:50%
+and make sure to set
+the G-Buffer textures as inputs.
+
+
+178
+00:07:13,700 --> 00:07:17,470 line:-1
+By default, Metal will track
+write-read dependencies for you,
+
+
+179
+00:07:17.470 --> 00:07:19.205 line:-1 position:50%
+so you're free to focus
+on your algorithm
+
+
+180
+00:07:19.205 --> 00:07:22.976 line:-1 position:50%
+without being too concerned
+by synchronization.
+
+
+181
+00:07:22.976 --> 00:07:25.612 line:-1 position:50%
+Since this is compute,
+we set our output textures
+
+
+182
+00:07:25,612 --> 00:07:29,716 line:-1
+to write the results
+of our ray-tracing work.
+
+
+183
+00:07:29,716 --> 00:07:33,253 line:-1
+We set the PipelineState object
+for our ray-tracing technique.
+
+
+184
+00:07:33,253 --> 00:07:34,854 line:-1
+Each thread
+in the compute shader
+
+
+185
+00:07:34.854 --> 00:07:39.793 line:-1 position:50%
+will calculate the ray-tracing
+result for a pixel or region.
+
+
+186
+00:07:39,793 --> 00:07:45,598 line:0
+Finally, we dispatch our 2D grid
+and end this pass.
+
+
+187
+00:07:45,598 --> 00:07:47,167 position:50%
+After this pass is encoded,
+
+
+188
+00:07:47,167 --> 00:07:49,369 position:50%
+we can now continue to encode
+more work
+
+
+189
+00:07:49,369 --> 00:07:51,371 position:50%
+such as
+the light accumulation pass,
+
+
+190
+00:07:51,371 --> 00:07:53,473 line:0
+or we can submit
+the command buffer now
+
+
+191
+00:07:53,473 --> 00:07:55,041 position:50%
+so the GPU starts working on it
+
+
+192
+00:07:55,041 --> 00:07:57,744 line:0
+while we encode
+the rest of the frame.
+
+
+193
+00:07:57.744 --> 00:08:00.080 line:-1 position:50%
+Since we encoded our work
+in two passes,
+
+
+194
+00:08:00.080 --> 00:08:02.882 line:-1 position:50%
+this requires saving our
+intermediate render attachments
+
+
+195
+00:08:02.882 --> 00:08:06.953 line:-1 position:50%
+to system memory for the passes
+to communicate with each other.
+
+
+196
+00:08:06,953 --> 00:08:10,290 position:50%
+This works, but on Apple Silicon
+and iOS devices
+
+
+197
+00:08:10,290 --> 00:08:14,728 position:50%
+there's an opportunity
+to make this even better.
+
+
+198
+00:08:14,728 --> 00:08:17,664 line:0
+On Apple GPUs, the hardware
+utilizes tile memory
+
+
+199
+00:08:17,664 --> 00:08:20,266 line:0
+to hold our pixel data
+as we work on it.
+
+
+200
+00:08:20,266 --> 00:08:21,634 line:0
+At the end of the pass,
+
+
+201
+00:08:21,634 --> 00:08:23,803 position:50%
+this tile memory is fleshed out
+to system memory
+
+
+202
+00:08:23,803 --> 00:08:27,006 position:50%
+and must be reloaded at
+the beginning of the next pass.
+
+
+203
+00:08:27,006 --> 00:08:29,342 position:50%
+Ideally, though, we would have
+the compute passes
+
+
+204
+00:08:29,342 --> 00:08:31,378 line:0
+work directly on tile memory,
+
+
+205
+00:08:31,378 --> 00:08:35,315 line:0
+avoiding the round trips
+to system memory.
+
+
+206
+00:08:35,315 --> 00:08:36,316 position:50%
+I'm excited to share
+
+
+207
+00:08:36,316 --> 00:08:38,451 position:50%
+this year we've added
+the ability to do that
+
+
+208
+00:08:38,451 --> 00:08:41,654 position:50%
+by dispatching ray-tracing work
+from render pipelines.
+
+
+209
+00:08:41,654 --> 00:08:44,958 position:50%
+This allows mixing render
+and compute via tile shaders
+
+
+210
+00:08:44,958 --> 00:08:49,295 position:50%
+in a single pass to leverage
+on-tile memory for ray tracing.
+
+
+211
+00:08:49,295 --> 00:08:52,465 position:50%
+This will reduce bandwidth use,
+memory consumption,
+
+
+212
+00:08:52,465 --> 00:08:56,369 position:50%
+and help your users' devices
+run cooler.
+
+
+213
+00:08:56,369 --> 00:08:57,537 position:50%
+Please make sure to review
+
+
+214
+00:08:57,537 --> 00:09:00,206 line:0
+our 2019 "Modern rendering
+with Metal" session
+
+
+215
+00:09:00,206 --> 00:09:02,842 line:0
+to learn how to efficiently mix
+render and compute,
+
+
+216
+00:09:02,842 --> 00:09:05,779 line:0
+so you can apply that
+for ray tracing from render;
+
+
+217
+00:09:05,779 --> 00:09:07,113 line:0
+as well as this year's
+
+
+218
+00:09:07,113 --> 00:09:09,282 line:0
+"Enhance your app
+with Metal ray-tracing" session
+
+
+219
+00:09:09,282 --> 00:09:10,617 line:0
+to learn about
+other improvements
+
+
+220
+00:09:10,617 --> 00:09:13,787 position:50%
+coming to Metal ray tracing
+this year.
+
+
+221
+00:09:13,787 --> 00:09:16,956 line:-1
+Now that we know how to encode
+a hybrid rendering workload,
+
+
+222
+00:09:16,956 --> 00:09:18,124 line:-1
+let's review some techniques
+
+
+223
+00:09:18.124 --> 00:09:20.493 line:-1 position:50%
+that can be improved
+with ray tracing.
+
+
+224
+00:09:20,493 --> 00:09:23,329 line:-1
+We'll focus on shadows,
+ambient occlusion,
+
+
+225
+00:09:23.329 --> 00:09:25.698 line:-1 position:50%
+and reflections.
+
+
+226
+00:09:25.698 --> 00:09:28.535 line:-1 position:50%
+Let's start with shadows.
+
+
+227
+00:09:28.535 --> 00:09:30.737 line:-1 position:50%
+Shadows help convey
+the proximity of objects
+
+
+228
+00:09:30.737 --> 00:09:32.639 line:-1 position:50%
+to each other within the scene.
+
+
+229
+00:09:32.639 --> 00:09:34.741 line:-1 position:50%
+This is a challenge
+for rasterization, though,
+
+
+230
+00:09:34,741 --> 00:09:36,576 line:-1
+because we lose the context
+of the scene
+
+
+231
+00:09:36.576 --> 00:09:38.645 line:-1 position:50%
+at the time of shading.
+
+
+232
+00:09:38.645 --> 00:09:40.046 line:-1 position:50%
+Shadow mapping
+can help supplement
+
+
+233
+00:09:40.046 --> 00:09:41.514 line:-1 position:50%
+this lack of information
+
+
+234
+00:09:41,514 --> 00:09:46,286 line:-1
+but requires extra rendering
+from each light's point of view.
+
+
+235
+00:09:46,286 --> 00:09:49,022 line:-1
+This rasterization technique
+starts by rendering the scene
+
+
+236
+00:09:49.022 --> 00:09:51.391 line:-1 position:50%
+from every light's perspective.
+
+
+237
+00:09:51,391 --> 00:09:53,460 line:-1
+This produces a series
+of depth maps
+
+
+238
+00:09:53.460 --> 00:09:54.727 line:-1 position:50%
+that need to be stored
+
+
+239
+00:09:54,727 --> 00:09:57,997 line:-1
+alongside each light's
+transformation matrix.
+
+
+240
+00:09:57.997 --> 00:10:01.434 line:-1 position:50%
+Then we render from
+the main camera's perspective.
+
+
+241
+00:10:01.434 --> 00:10:04.170 line:-1 position:50%
+To shade each pixel,
+we need to convert the point
+
+
+242
+00:10:04,170 --> 00:10:05,872 line:-1
+to the light's coordinates.
+
+
+243
+00:10:05.872 --> 00:10:08.408 line:-1 position:50%
+We sample the depth coming
+from the depth map
+
+
+244
+00:10:08.408 --> 00:10:10.510 line:-1 position:50%
+and ultimately compare
+these depth values
+
+
+245
+00:10:10,510 --> 00:10:12,779 line:-1
+to determine if we're in light
+or shadow
+
+
+246
+00:10:12,779 --> 00:10:14,814 line:-1
+for each light source.
+
+
+247
+00:10:14.814 --> 00:10:17.283 line:-1 position:50%
+There's a couple of drawbacks
+with this technique.
+
+
+248
+00:10:17,283 --> 00:10:18,918 line:-1
+First, we'll have
+to render the scene
+
+
+249
+00:10:18.918 --> 00:10:21.654 line:-1 position:50%
+from the light's perspective
+for each light.
+
+
+250
+00:10:21.654 --> 00:10:24.958 line:-1 position:50%
+This means processing the scene
+multiple times.
+
+
+251
+00:10:24.958 --> 00:10:28.495 line:-1 position:50%
+Second, the shadow maps
+have a predetermined resolution,
+
+
+252
+00:10:28.495 --> 00:10:31.464 line:-1 position:50%
+which means our shadows
+will be subject to aliasing;
+
+
+253
+00:10:31,464 --> 00:10:33,333 line:-1
+and worse,
+we won't have information
+
+
+254
+00:10:33.333 --> 00:10:36.202 line:-1 position:50%
+for pixels that didn't fit
+in the image.
+
+
+255
+00:10:36.202 --> 00:10:39.372 line:-1 position:50%
+Let's compare this
+to ray-traced shadows.
+
+
+256
+00:10:39,372 --> 00:10:41,207 position:50%
+To compute shadows
+with ray tracing,
+
+
+257
+00:10:41,207 --> 00:10:43,243 line:0
+we can simply trace a ray
+from a point
+
+
+258
+00:10:43,243 --> 00:10:45,078 line:0
+toward the direction
+of the light source
+
+
+259
+00:10:45,078 --> 00:10:48,181 position:50%
+and determine if any object
+is blocking its path.
+
+
+260
+00:10:48,181 --> 00:10:49,616 line:0
+If we don't find anything,
+
+
+261
+00:10:49,616 --> 00:10:51,417 line:0
+that means the point
+should take this light source
+
+
+262
+00:10:51,417 --> 00:10:54,287 line:0
+into consideration for shading.
+
+
+263
+00:10:54,287 --> 00:10:56,890 position:50%
+In the case an object
+is blocking the path,
+
+
+264
+00:10:56,890 --> 00:10:59,259 position:50%
+we just exclude that
+light source's contribution
+
+
+265
+00:10:59,259 --> 00:11:01,160 position:50%
+in the lighting equation.
+
+
+266
+00:11:01,160 --> 00:11:03,429 position:50%
+Notice how this produces
+a natural shadow
+
+
+267
+00:11:03,429 --> 00:11:07,300 line:0
+corresponding to the silhouette
+of the occluding object.
+
+
+268
+00:11:07,300 --> 00:11:09,802 position:50%
+Even better, we're no longer
+limited to the information
+
+
+269
+00:11:09,802 --> 00:11:11,237 position:50%
+stored in a depth map.
+
+
+270
+00:11:11,237 --> 00:11:12,338 line:0
+We can determine shadows
+
+
+271
+00:11:12,338 --> 00:11:17,377 position:50%
+for points outside the light's
+frustum or camera's view.
+
+
+272
+00:11:17,377 --> 00:11:19,512 line:-1
+Let's see how our shadow
+technique is simplified
+
+
+273
+00:11:19.512 --> 00:11:21.514 line:-1 position:50%
+with ray tracing.
+
+
+274
+00:11:21,514 --> 00:11:24,751 line:-1
+We start by rendering
+from the main camera.
+
+
+275
+00:11:24.751 --> 00:11:27.220 line:-1 position:50%
+Next, we take
+the acceleration structure
+
+
+276
+00:11:27,220 --> 00:11:30,089 line:-1
+and the depth map rendered
+from the camera's position
+
+
+277
+00:11:30.089 --> 00:11:33.059 line:-1 position:50%
+and feed it into
+our ray-tracing kernel.
+
+
+278
+00:11:33.059 --> 00:11:34.928 line:-1 position:50%
+Calculate the pixel position,
+
+
+279
+00:11:34.928 --> 00:11:38.865 line:-1 position:50%
+and then we simply trace a ray
+in the light's direction
+
+
+280
+00:11:38,865 --> 00:11:41,534 position:50%
+From this, we determine if
+the point is lit or in shadow,
+
+
+281
+00:11:41,534 --> 00:11:43,469 line:0
+depending on whether
+an intersection was found
+
+
+282
+00:11:43,469 --> 00:11:45,672 position:50%
+with an occluding object.
+
+
+283
+00:11:45,672 --> 00:11:47,840 position:50%
+This process produces
+a shadow texture
+
+
+284
+00:11:47,840 --> 00:11:50,109 line:0
+that we can then combine
+with our render pass results
+
+
+285
+00:11:50,109 --> 00:11:52,211 position:50%
+to get the final image.
+
+
+286
+00:11:52.211 --> 00:11:56.149 line:-1 position:50%
+Let's look at how to code
+a Metal shader to do this.
+
+
+287
+00:11:56.149 --> 00:11:57.617 line:-1 position:50%
+In our shader code,
+
+
+288
+00:11:57.617 --> 00:11:59.185 line:-1 position:50%
+we start by calculating
+the position
+
+
+289
+00:11:59.185 --> 00:12:03.122 line:-1 position:50%
+each thread will process from
+the depth and the thread_id.
+
+
+290
+00:12:03.122 --> 00:12:06.292 line:-1 position:50%
+We create our shadow ray
+from the calculated position
+
+
+291
+00:12:06,292 --> 00:12:09,395 line:-1
+and set it up to trace
+in the light's direction.
+
+
+292
+00:12:09.395 --> 00:12:11.531 line:-1 position:50%
+For most light types,
+like point lights,
+
+
+293
+00:12:11.531 --> 00:12:13.166 line:-1 position:50%
+spotlights, and area lights,
+
+
+294
+00:12:13,166 --> 00:12:16,035 line:-1
+we set the min and max to trace
+all the way from the point
+
+
+295
+00:12:16.035 --> 00:12:18.237 line:-1 position:50%
+to the light source.
+
+
+296
+00:12:18.237 --> 00:12:19.739 line:-1 position:50%
+For directional shadows,
+
+
+297
+00:12:19.739 --> 00:12:22.208 line:-1 position:50%
+we may want to set
+the max to infinity.
+
+
+298
+00:12:22,208 --> 00:12:24,711 line:-1
+Additionally, if we decide
+to implement cone ray tracing
+
+
+299
+00:12:24.711 --> 00:12:26.179 line:-1 position:50%
+for softer shadows,
+
+
+300
+00:12:26,179 --> 00:12:30,683 line:-1
+this is a great place to add
+jitter to our shadowRay.
+
+
+301
+00:12:30,683 --> 00:12:33,186 line:-1
+We then create
+an intersector object.
+
+
+302
+00:12:33,186 --> 00:12:36,823 line:0
+If we find any one intersection,
+that means we're in shadow,
+
+
+303
+00:12:36,823 --> 00:12:40,593 line:0
+so we configure the intersector
+to accept any intersection.
+
+
+304
+00:12:40,593 --> 00:12:45,431 line:0
+Finally, we intersect against
+the acceleration structure.
+
+
+305
+00:12:45,431 --> 00:12:47,600 position:50%
+Based on that
+intersection result,
+
+
+306
+00:12:47,600 --> 00:12:49,702 line:0
+we write whether
+the point is lit or not,
+
+
+307
+00:12:49,702 --> 00:12:51,137 line:0
+which creates a shadow texture
+
+
+308
+00:12:51,137 --> 00:12:54,707 line:0
+that's more accurate
+to the scene.
+
+
+309
+00:12:54,707 --> 00:12:56,576 position:50%
+When that shadow texture
+is applied,
+
+
+310
+00:12:56,576 --> 00:12:58,978 position:50%
+you can see we get
+much more realistic shadows
+
+
+311
+00:12:58,978 --> 00:13:02,749 position:50%
+and get rid of the aliasing.
+
+
+312
+00:13:02,749 --> 00:13:04,150 position:50%
+With ray tracing,
+
+
+313
+00:13:04,150 --> 00:13:07,053 line:0
+determining shadows becomes
+a very natural technique.
+
+
+314
+00:13:07,053 --> 00:13:08,888 line:0
+We just trace a ray
+to find if something
+
+
+315
+00:13:08,888 --> 00:13:11,791 position:50%
+occludes the light source
+for that point or not.
+
+
+316
+00:13:11,791 --> 00:13:14,661 position:50%
+There is no longer a need
+to have intermediate depth maps,
+
+
+317
+00:13:14,661 --> 00:13:16,996 position:50%
+and we can avoid having
+multiple extra render passes
+
+
+318
+00:13:16,996 --> 00:13:18,931 position:50%
+for each light.
+
+
+319
+00:13:18,931 --> 00:13:21,267 position:50%
+This technique is easy
+to implement into a deferred
+
+
+320
+00:13:21,267 --> 00:13:24,237 position:50%
+or forward renderer,
+as it only depends on depth.
+
+
+321
+00:13:24,237 --> 00:13:26,739 position:50%
+And finally, it allows for
+custom intersection functions
+
+
+322
+00:13:26,739 --> 00:13:29,676 line:0
+for translucent materials.
+
+
+323
+00:13:29.676 --> 00:13:33.212 line:-1 position:50%
+Next, let's take a look
+at ambient occlusion.
+
+
+324
+00:13:33.212 --> 00:13:37.016 line:-1 position:50%
+Conceptually, a point surrounded
+by geometry is less likely
+
+
+325
+00:13:37,016 --> 00:13:39,619 line:-1
+to receive a large amount
+of ambient light.
+
+
+326
+00:13:39.619 --> 00:13:42.422 line:-1 position:50%
+Ambient occlusion consists
+in muting the ambient light
+
+
+327
+00:13:42,422 --> 00:13:45,925 line:-1
+received at a point based
+on how busy its neighborhood is,
+
+
+328
+00:13:45.925 --> 00:13:47.727 line:-1 position:50%
+which naturally
+darkens crevices,
+
+
+329
+00:13:47.727 --> 00:13:51.497 line:-1 position:50%
+giving the final image
+more depth.
+
+
+330
+00:13:51.497 --> 00:13:53.566 line:-1 position:50%
+Rasterization techniques
+to achieve this
+
+
+331
+00:13:53.566 --> 00:13:55.835 line:-1 position:50%
+depend on sampling the depth
+and normals
+
+
+332
+00:13:55,835 --> 00:13:57,170 line:-1
+in the neighborhood
+of the point,
+
+
+333
+00:13:57,170 --> 00:13:58,871 line:-1
+to determine if there are
+objects surrounding
+
+
+334
+00:13:58,871 --> 00:14:01,240 line:-1
+and potentially occluding it.
+
+
+335
+00:14:01.240 --> 00:14:03.476 line:-1 position:50%
+Based on how many
+nearby objects are found,
+
+
+336
+00:14:03.476 --> 00:14:05.511 line:-1 position:50%
+we calculate
+an attenuation factor
+
+
+337
+00:14:05.511 --> 00:14:07.346 line:-1 position:50%
+to mute the ambient light
+
+
+338
+00:14:07,346 --> 00:14:10,216 line:-1
+and create a texture
+to apply to our image.
+
+
+339
+00:14:10.216 --> 00:14:13.152 line:-1 position:50%
+Relying on screen-space
+information like depth buffer
+
+
+340
+00:14:13.152 --> 00:14:15.822 line:-1 position:50%
+and surface normals, however,
+is missing information
+
+
+341
+00:14:15.822 --> 00:14:17.356 line:-1 position:50%
+for nonvisible occluders
+
+
+342
+00:14:17,356 --> 00:14:20,326 line:-1
+and objects outside
+the border of the image.
+
+
+343
+00:14:20,326 --> 00:14:21,828 line:0
+With ray tracing,
+
+
+344
+00:14:21,828 --> 00:14:24,230 position:50%
+instead of relying
+on screen-space information,
+
+
+345
+00:14:24,230 --> 00:14:27,800 position:50%
+we can rely on actual
+geometric data of our scene.
+
+
+346
+00:14:27,800 --> 00:14:30,169 line:0
+The idea is
+for every pixel to shade,
+
+
+347
+00:14:30,169 --> 00:14:32,472 line:0
+we generate random rays
+in a hemisphere
+
+
+348
+00:14:32,472 --> 00:14:35,742 position:50%
+and search for intersections
+against objects.
+
+
+349
+00:14:35,742 --> 00:14:38,711 line:0
+If any intersections are found,
+we take it into consideration
+
+
+350
+00:14:38,711 --> 00:14:42,215 position:50%
+for our ambient occlusion
+factor.
+
+
+351
+00:14:42.215 --> 00:14:44.884 line:-1 position:50%
+We start again
+with the acceleration structure.
+
+
+352
+00:14:44.884 --> 00:14:48.154 line:-1 position:50%
+For this technique, we require
+normal data as well as depth,
+
+
+353
+00:14:48.154 --> 00:14:51.023 line:-1 position:50%
+so we collect those
+in our G-Buffer pass.
+
+
+354
+00:14:51,023 --> 00:14:52,592 line:-1
+The depth and normals are used
+
+
+355
+00:14:52.592 --> 00:14:55.495 line:-1 position:50%
+to generate the random rays
+in the hemisphere.
+
+
+356
+00:14:55,495 --> 00:14:56,729 line:0
+Next, we trace rays
+
+
+357
+00:14:56,729 --> 00:14:59,365 position:50%
+and calculate
+the attenuation factor.
+
+
+358
+00:14:59,365 --> 00:15:02,268 line:0
+This produces an image where
+crevices are naturally darkened,
+
+
+359
+00:15:02,268 --> 00:15:04,070 position:50%
+creating the effect.
+
+
+360
+00:15:04,070 --> 00:15:05,972 position:50%
+Let's take a look
+at a Metal shader
+
+
+361
+00:15:05,972 --> 00:15:08,708 position:50%
+for ambient occlusion.
+
+
+362
+00:15:08.708 --> 00:15:11.377 line:-1 position:50%
+First, we generate
+the random rays.
+
+
+363
+00:15:11.377 --> 00:15:13.946 line:-1 position:50%
+In this case, we take
+a cosineWeightedRay
+
+
+364
+00:15:13.946 --> 00:15:16.282 line:-1 position:50%
+along the normal in each thread.
+
+
+365
+00:15:16,282 --> 00:15:18,551 line:-1
+We set the max_distance
+to a small number,
+
+
+366
+00:15:18,551 --> 00:15:22,321 line:-1
+as we're only interested
+in a small neighborhood.
+
+
+367
+00:15:22,321 --> 00:15:24,824 line:-1
+Next, we create our intersector
+
+
+368
+00:15:24,824 --> 00:15:27,894 line:-1
+and intersect
+the acceleration structure.
+
+
+369
+00:15:27.894 --> 00:15:28.928 line:-1 position:50%
+Depending on the result,
+
+
+370
+00:15:28.928 --> 00:15:33.733 line:-1 position:50%
+we accumulate
+into our attenuation factor.
+
+
+371
+00:15:33,733 --> 00:15:35,701 position:50%
+Here's a side-by-side
+comparison.
+
+
+372
+00:15:35,701 --> 00:15:36,969 position:50%
+And we can immediately see
+
+
+373
+00:15:36,969 --> 00:15:39,438 position:50%
+how much better
+the ray-traced approach looks.
+
+
+374
+00:15:39,438 --> 00:15:42,108 position:50%
+I want to highlight a few places
+that really show the limitations
+
+
+375
+00:15:42,108 --> 00:15:44,944 position:50%
+of a screen-space effect.
+
+
+376
+00:15:44,944 --> 00:15:46,579 line:0
+Here is an example
+where the neighborhood
+
+
+377
+00:15:46,579 --> 00:15:50,316 position:50%
+is misrepresented due to limited
+screen-space information.
+
+
+378
+00:15:50,316 --> 00:15:52,051 position:50%
+This is because
+the actual geometry
+
+
+379
+00:15:52,051 --> 00:15:54,887 position:50%
+is almost perpendicular
+to the camera and, therefore,
+
+
+380
+00:15:54,887 --> 00:15:57,523 position:50%
+not in the depth buffer
+at this angle.
+
+
+381
+00:15:57,523 --> 00:15:59,725 line:0
+The same problem occurs
+across the image,
+
+
+382
+00:15:59,725 --> 00:16:02,428 line:0
+in particular,
+under the moped.
+
+
+383
+00:16:02,428 --> 00:16:04,330 position:50%
+From this angle,
+the bottom of the moped
+
+
+384
+00:16:04,330 --> 00:16:06,098 position:50%
+is missing
+from the depth buffer.
+
+
+385
+00:16:06,098 --> 00:16:07,400 position:50%
+So the screen-space technique
+
+
+386
+00:16:07,400 --> 00:16:09,635 line:0
+completely misses
+the attenuation.
+
+
+387
+00:16:09,635 --> 00:16:11,370 line:0
+The ray-traced version,
+on the other hand,
+
+
+388
+00:16:11,370 --> 00:16:13,072 line:0
+correctly discovers
+the intersections
+
+
+389
+00:16:13,072 --> 00:16:16,709 line:0
+against the bottom of the moped
+for the floor pixels.
+
+
+390
+00:16:16,709 --> 00:16:18,010 line:0
+And here's a great example
+
+
+391
+00:16:18,010 --> 00:16:21,347 line:0
+of the limitations around
+the screen border.
+
+
+392
+00:16:21,347 --> 00:16:23,816 line:0
+The occluding geometry
+is offscreen,
+
+
+393
+00:16:23,816 --> 00:16:26,786 line:0
+so its contribution is lost
+in the screen-space technique,
+
+
+394
+00:16:26,786 --> 00:16:30,223 position:50%
+but accounted for
+in ray tracing.
+
+
+395
+00:16:30,223 --> 00:16:32,225 position:50%
+As we can see,
+hybrid rendering provides
+
+
+396
+00:16:32,225 --> 00:16:34,126 position:50%
+a significant quality
+improvement
+
+
+397
+00:16:34,126 --> 00:16:36,562 position:50%
+by using the actual geometry
+of the scene,
+
+
+398
+00:16:36,562 --> 00:16:38,264 position:50%
+freeing the technique
+from limitations
+
+
+399
+00:16:38,264 --> 00:16:40,867 line:0
+in screen-space information.
+
+
+400
+00:16:40.867 --> 00:16:44.537 line:-1 position:50%
+And finally, let's take a look
+at reflections.
+
+
+401
+00:16:44.537 --> 00:16:46.038 line:-1 position:50%
+Reflections
+have traditionally been
+
+
+402
+00:16:46.038 --> 00:16:48.274 line:-1 position:50%
+very difficult
+for rasterization.
+
+
+403
+00:16:48.274 --> 00:16:50.977 line:-1 position:50%
+Reflection probes
+is a technique that works well
+
+
+404
+00:16:50.977 --> 00:16:54.247 line:-1 position:50%
+but is limited in resolution,
+requires filtering,
+
+
+405
+00:16:54.247 --> 00:16:57.049 line:-1 position:50%
+and struggles
+with dynamic geometry.
+
+
+406
+00:16:57.049 --> 00:16:58.718 line:-1 position:50%
+Screen-space
+reflection techniques
+
+
+407
+00:16:58.718 --> 00:17:01.687 line:-1 position:50%
+are limited by
+screen-space information.
+
+
+408
+00:17:01,687 --> 00:17:04,056 line:-1
+Reflection probes
+are a solution that requires
+
+
+409
+00:17:04.056 --> 00:17:06.893 line:-1 position:50%
+strategically placing cameras
+along the entire scene
+
+
+410
+00:17:06,893 --> 00:17:09,762 line:-1
+to capture surrounding
+color information.
+
+
+411
+00:17:09.762 --> 00:17:12.531 line:-1 position:50%
+To use reflection probes,
+cube maps are captured
+
+
+412
+00:17:12.531 --> 00:17:15.334 line:-1 position:50%
+from different locations
+in the scene.
+
+
+413
+00:17:15.334 --> 00:17:18.404 line:-1 position:50%
+This is essentially a rendering
+of the scene in six directions
+
+
+414
+00:17:18,404 --> 00:17:20,406 line:-1
+from the same point.
+
+
+415
+00:17:20,406 --> 00:17:22,742 line:-1
+When a pixel is shaded,
+you calculate the relation
+
+
+416
+00:17:22.742 --> 00:17:25.244 line:-1 position:50%
+to the probes
+and sample the cube maps
+
+
+417
+00:17:25.244 --> 00:17:28.447 line:-1 position:50%
+to produce
+the reflected shading.
+
+
+418
+00:17:28.447 --> 00:17:30.149 line:-1 position:50%
+For realistic results,
+
+
+419
+00:17:30.149 --> 00:17:33.252 line:-1 position:50%
+usually many probes need to be
+scattered across the scene.
+
+
+420
+00:17:33.252 --> 00:17:35.755 line:-1 position:50%
+And as dynamic objects
+move across the scene,
+
+
+421
+00:17:35,755 --> 00:17:38,090 line:-1
+shaders need to sample
+from more than one cube map
+
+
+422
+00:17:38,090 --> 00:17:41,861 line:-1
+and manually interpolate
+reflected colors.
+
+
+423
+00:17:41.861 --> 00:17:44.096 line:-1 position:50%
+The cube maps also need
+to be prefiltered
+
+
+424
+00:17:44.096 --> 00:17:46.232 line:-1 position:50%
+to accurately
+represent irradiance
+
+
+425
+00:17:46,232 --> 00:17:49,602 line:-1
+and are limited in resolution.
+
+
+426
+00:17:49,602 --> 00:17:53,005 line:-1
+Another rasterization technique,
+screen-space reflection,
+
+
+427
+00:17:53.005 --> 00:17:55.942 line:-1 position:50%
+avoids some of these problems
+by basing its reflections
+
+
+428
+00:17:55.942 --> 00:17:59.578 line:-1 position:50%
+on pixels already
+on the framebuffer.
+
+
+429
+00:17:59,578 --> 00:18:01,314 line:-1
+The fragment shader
+uses the normals
+
+
+430
+00:18:01.314 --> 00:18:03.215 line:-1 position:50%
+to incrementally march outwards
+
+
+431
+00:18:03,215 --> 00:18:06,652 line:-1
+and check the depth map
+for potential nearby objects.
+
+
+432
+00:18:06.652 --> 00:18:07.853 line:-1 position:50%
+If we find something,
+
+
+433
+00:18:07.853 --> 00:18:10.189 line:-1 position:50%
+we sample the color
+directly from the frame buffer
+
+
+434
+00:18:10,189 --> 00:18:12,425 line:-1
+and shade it onto
+the output image.
+
+
+435
+00:18:12.425 --> 00:18:15.494 line:-1 position:50%
+It does suffer, however, from
+the screen-space limitations
+
+
+436
+00:18:15,494 --> 00:18:18,564 line:-1
+we discussed earlier.
+
+
+437
+00:18:18,564 --> 00:18:19,999 position:50%
+Notice in this moped example
+
+
+438
+00:18:19,999 --> 00:18:23,002 position:50%
+how only part of the surface
+can get an accurate reflection,
+
+
+439
+00:18:23,002 --> 00:18:26,305 line:0
+corresponding to the floor tiles
+present in the framebuffer.
+
+
+440
+00:18:26,305 --> 00:18:28,341 position:50%
+The rest of the scene
+is missing.
+
+
+441
+00:18:28,341 --> 00:18:31,944 line:0
+Worse, the lower portion behind
+the fender, marked in yellow,
+
+
+442
+00:18:31,944 --> 00:18:34,313 position:50%
+is missing information;
+we have no way of knowing
+
+
+443
+00:18:34,313 --> 00:18:39,485 line:0
+what the surface facing away
+from the camera would look like.
+
+
+444
+00:18:39.485 --> 00:18:43.155 line:-1 position:50%
+The ray marching can also get
+computationally expensive.
+
+
+445
+00:18:43,155 --> 00:18:44,924 line:-1
+Ray-traced reflections, however,
+
+
+446
+00:18:44.924 --> 00:18:47.226 line:-1 position:50%
+helps us overcome
+both sets of problems,
+
+
+447
+00:18:47,226 --> 00:18:49,628 line:-1
+as we can rely on
+the true scene information
+
+
+448
+00:18:49.628 --> 00:18:52.698 line:-1 position:50%
+in the acceleration structure.
+
+
+449
+00:18:52,698 --> 00:18:56,502 position:50%
+Let's take a look at how
+a perfect mirror would work.
+
+
+450
+00:18:56,502 --> 00:18:59,238 position:50%
+First, we take the incident ray
+from the camera's position
+
+
+451
+00:18:59,238 --> 00:19:00,439 line:0
+to the point.
+
+
+452
+00:19:00,439 --> 00:19:01,707 line:0
+Then, we reflect this point
+
+
+453
+00:19:01,707 --> 00:19:04,110 line:0
+on the normal
+associated with the point.
+
+
+454
+00:19:04,110 --> 00:19:05,511 position:50%
+This provides us
+with a direction
+
+
+455
+00:19:05,511 --> 00:19:06,912 position:50%
+we can trace a ray towards,
+
+
+456
+00:19:06,912 --> 00:19:09,949 position:50%
+and find any
+reflected objects.
+
+
+457
+00:19:09,949 --> 00:19:12,852 line:0
+For this, we provide our
+reflection ray-tracing kernel
+
+
+458
+00:19:12,852 --> 00:19:16,088 line:0
+with the normals and depth
+of the G-Buffer.
+
+
+459
+00:19:16,088 --> 00:19:18,624 line:0
+This ray-tracing kernel
+calculates the view vector,
+
+
+460
+00:19:18,624 --> 00:19:20,860 position:50%
+from the camera to each point,
+
+
+461
+00:19:20,860 --> 00:19:22,428 position:50%
+reflects this vector,
+
+
+462
+00:19:22,428 --> 00:19:25,564 line:0
+and traces a ray in
+that direction from the point.
+
+
+463
+00:19:25,564 --> 00:19:27,933 position:50%
+Finally,
+for accurate reflections,
+
+
+464
+00:19:27,933 --> 00:19:29,235 position:50%
+we can shade the intersection
+
+
+465
+00:19:29,235 --> 00:19:32,238 position:50%
+found directly
+in the ray-tracing kernel.
+
+
+466
+00:19:32,238 --> 00:19:35,741 line:0
+Let's take a look at coding
+this shader.
+
+
+467
+00:19:35,741 --> 00:19:37,843 line:-1
+Once again, we start
+from the point's depth,
+
+
+468
+00:19:37,843 --> 00:19:39,945 line:-1
+and reconstruct its position.
+
+
+469
+00:19:39,945 --> 00:19:43,582 line:-1
+This time, we want the position
+to be in world space.
+
+
+470
+00:19:43.582 --> 00:19:45.584 line:-1 position:50%
+So in our calculatePosition
+function,
+
+
+471
+00:19:45,584 --> 00:19:49,989 line:-1
+we'll need to multiply
+the inverse of the view matrix.
+
+
+472
+00:19:49,989 --> 00:19:53,559 line:-1
+Then, we calculate our reflected
+incident vector over the normal
+
+
+473
+00:19:53,559 --> 00:19:56,962 line:-1
+and create a ray
+in that direction.
+
+
+474
+00:19:56,962 --> 00:20:02,835 line:-1
+Next, we create our intersector
+and trace our reflectedRay.
+
+
+475
+00:20:02.835 --> 00:20:04.036 line:-1 position:50%
+If we hit an object,
+
+
+476
+00:20:04,036 --> 00:20:07,239 line:-1
+we now shade that point
+to produce the reflection.
+
+
+477
+00:20:07,239 --> 00:20:09,608 line:-1
+If the intersection
+missed all objects,
+
+
+478
+00:20:09.608 --> 00:20:12.545 line:-1 position:50%
+we can just sample a skybox
+and return its color
+
+
+479
+00:20:12.545 --> 00:20:15.247 line:-1 position:50%
+to simulate a reflection
+that's showing the sky.
+
+
+480
+00:20:15.247 --> 00:20:16.782 line:-1 position:50%
+Note that the shading
+is performed
+
+
+481
+00:20:16,782 --> 00:20:21,821 line:-1
+directly in the compute kernel
+for this technique.
+
+
+482
+00:20:21,821 --> 00:20:25,591 line:-1
+Let's compare reflection probes
+to ray-traced reflections.
+
+
+483
+00:20:25.591 --> 00:20:27.726 line:-1 position:50%
+The image on the right
+used hybrid rendering,
+
+
+484
+00:20:27,726 --> 00:20:29,695 line:-1
+and we can see the details
+of the floor tiles
+
+
+485
+00:20:29,695 --> 00:20:31,464 line:-1
+much more clearly.
+
+
+486
+00:20:31.464 --> 00:20:33.833 line:-1 position:50%
+The buildings are present,
+and we can even see shadows
+
+
+487
+00:20:33,833 --> 00:20:37,636 line:-1
+reflected on the front panel
+of the moped.
+
+
+488
+00:20:37.636 --> 00:20:40.372 line:-1 position:50%
+Reflections are a natural fit
+for ray tracing.
+
+
+489
+00:20:40,372 --> 00:20:42,508 line:-1
+It nicely handles
+mirror-like reflections
+
+
+490
+00:20:42,508 --> 00:20:44,410 line:-1
+and rough reflections.
+
+
+491
+00:20:44,410 --> 00:20:46,545 line:-1
+Those can be achieved
+by tracing multiple rays
+
+
+492
+00:20:46.545 --> 00:20:49.682 line:-1 position:50%
+along a cone
+and filtering the results.
+
+
+493
+00:20:49.682 --> 00:20:51.784 line:-1 position:50%
+Because they rely
+on perfect information
+
+
+494
+00:20:51,784 --> 00:20:54,019 line:-1
+coming from
+the acceleration structure,
+
+
+495
+00:20:54,019 --> 00:20:57,423 line:-1
+ray-traced reflections are free
+from screen-space artifacts
+
+
+496
+00:20:57.423 --> 00:20:59.892 line:-1 position:50%
+and can handle both static
+and dynamic geometry
+
+
+497
+00:20:59.892 --> 00:21:01.760 line:-1 position:50%
+in the scene.
+
+
+498
+00:21:01.760 --> 00:21:03.629 line:-1 position:50%
+Now, one important detail:
+
+
+499
+00:21:03.629 --> 00:21:05.264 line:-1 position:50%
+we mentioned
+that for reflections,
+
+
+500
+00:21:05.264 --> 00:21:08.601 line:-1 position:50%
+we need to shade the point
+directly in the compute kernel.
+
+
+501
+00:21:08,601 --> 00:21:11,737 line:0
+Some techniques like this one
+or global illumination
+
+
+502
+00:21:11,737 --> 00:21:15,174 position:50%
+require accessing vertex data
+and Metal resources
+
+
+503
+00:21:15,174 --> 00:21:17,910 line:0
+from the compute kernel
+directly.
+
+
+504
+00:21:17,910 --> 00:21:19,912 position:50%
+For these cases
+we need to make sure
+
+
+505
+00:21:19,912 --> 00:21:22,314 position:50%
+the GPU has access to the data
+that it needs
+
+
+506
+00:21:22,314 --> 00:21:24,717 position:50%
+to apply our shading equations.
+
+
+507
+00:21:24,717 --> 00:21:27,286 position:50%
+This is achieved
+with a bindless binding model
+
+
+508
+00:21:27,286 --> 00:21:30,489 position:50%
+which in Metal is represented
+as argument buffers.
+
+
+509
+00:21:30,489 --> 00:21:32,591 position:50%
+Please make sure to check out
+this year's
+
+
+510
+00:21:32,591 --> 00:21:36,595 position:50%
+"Bindless rendering in Metal"
+talk for more detail.
+
+
+511
+00:21:36,595 --> 00:21:39,665 line:-1
+We just saw how hybrid rendering
+can be put into practice
+
+
+512
+00:21:39,665 --> 00:21:41,867 line:-1
+with several
+different techniques.
+
+
+513
+00:21:41,867 --> 00:21:43,802 line:-1
+This leads
+to more natural algorithms
+
+
+514
+00:21:43,802 --> 00:21:48,774 line:-1
+that also have the advantage of
+producing more accurate results.
+
+
+515
+00:21:48,774 --> 00:21:50,676 line:-1
+In some cases,
+when we compare
+
+
+516
+00:21:50.676 --> 00:21:53.112 line:-1 position:50%
+to the traditional
+rasterization techniques,
+
+
+517
+00:21:53,112 --> 00:21:55,281 line:-1
+we see that we can
+remove render passes
+
+
+518
+00:21:55.281 --> 00:21:58.551 line:-1 position:50%
+and save memory and bandwidth
+in some cases.
+
+
+519
+00:21:58,551 --> 00:22:00,786 line:-1
+With the addition
+of ray tracing from render,
+
+
+520
+00:22:00,786 --> 00:22:04,590 line:-1
+we can even keep
+our entire work on chip.
+
+
+521
+00:22:04.590 --> 00:22:06.859 line:-1 position:50%
+Ray-tracing adoption
+is a big task,
+
+
+522
+00:22:06,859 --> 00:22:08,360 line:-1
+and we have
+excellent new tooling
+
+
+523
+00:22:08.360 --> 00:22:09.595 line:-1 position:50%
+to assist you in the process
+
+
+524
+00:22:09,595 --> 00:22:12,331 line:-1
+of bringing these techniques
+to your engine.
+
+
+525
+00:22:12.331 --> 00:22:14.066 line:-1 position:50%
+This year,
+we're introducing tools
+
+
+526
+00:22:14.066 --> 00:22:16.535 line:-1 position:50%
+that enable you to capture
+ray-tracing work,
+
+
+527
+00:22:16,535 --> 00:22:18,704 line:-1
+inspect acceleration structures,
+
+
+528
+00:22:18,704 --> 00:22:21,807 line:-1
+and inspect visible
+and intersection functions.
+
+
+529
+00:22:21.807 --> 00:22:25.211 line:-1 position:50%
+Now David will give us a tour
+of these new tools.
+
+
+530
+00:22:25.211 --> 00:22:28.480 line:-1 position:50%
+David Núñez Rubio: Thanks, Ali.
+My name is David Núñez Rubio,
+
+
+531
+00:22:28,480 --> 00:22:30,849 line:-1
+and I am a GPU
+software engineer.
+
+
+532
+00:22:30.849 --> 00:22:34.620 line:-1 position:50%
+Last year, we introduced
+ray-tracing support in Metal.
+
+
+533
+00:22:34.620 --> 00:22:38.791 line:-1 position:50%
+However, developing complex
+application can be challenging.
+
+
+534
+00:22:38,791 --> 00:22:42,561 line:-1
+Fortunately, Metal Debugger
+is here to help you.
+
+
+535
+00:22:42,561 --> 00:22:45,231 line:-1
+This year, we introduced
+ray-tracing support
+
+
+536
+00:22:45.231 --> 00:22:47.132 line:-1 position:50%
+in Metal Debugger.
+
+
+537
+00:22:47.132 --> 00:22:49.535 line:-1 position:50%
+Thanks to the adoption
+of hybrid rendering,
+
+
+538
+00:22:49.535 --> 00:22:52.371 line:-1 position:50%
+our demo is looking
+better than ever.
+
+
+539
+00:22:52.371 --> 00:22:56.041 line:-1 position:50%
+Ray-traced soft shadows,
+reflections, ambient occlusion;
+
+
+540
+00:22:56,041 --> 00:22:58,944 line:-1
+the results are amazing.
+
+
+541
+00:22:58,944 --> 00:23:02,514 line:-1
+During development of the demo,
+we hit some issues.
+
+
+542
+00:23:02.514 --> 00:23:07.386 line:-1 position:50%
+This is how tools can help you
+resolving these problems.
+
+
+543
+00:23:07,386 --> 00:23:09,288 line:-1
+In this early version
+of the demo,
+
+
+544
+00:23:09.288 --> 00:23:12.391 line:-1 position:50%
+ray-traced shadows have
+already been implemented.
+
+
+545
+00:23:12.391 --> 00:23:15.828 line:-1 position:50%
+But if you look carefully,
+you'll notice missing shadows
+
+
+546
+00:23:15,828 --> 00:23:18,030 line:-1
+from the tree leaves
+on the ground.
+
+
+547
+00:23:18.030 --> 00:23:21.800 line:-1 position:50%
+It is more obvious if we compare
+with the reference version.
+
+
+548
+00:23:21,800 --> 00:23:26,772 line:-1
+See reference versus ray traced.
+
+
+549
+00:23:26,772 --> 00:23:29,375 line:-1
+Let's jump into Xcode
+and take a capture
+
+
+550
+00:23:29,375 --> 00:23:34,313 line:-1
+to see how the tools can help us
+debugging this issue.
+
+
+551
+00:23:34,313 --> 00:23:36,248 line:0
+We need to press
+the Metal button
+
+
+552
+00:23:36,248 --> 00:23:39,685 position:50%
+and click on Capture.
+
+
+553
+00:23:39,685 --> 00:23:45,591 position:50%
+Since this is a static problem,
+we just need a single frame.
+
+
+554
+00:23:45.591 --> 00:23:49.495 line:-1 position:50%
+In the debugger, API calls
+are organized in the left side
+
+
+555
+00:23:49,495 --> 00:23:51,530 line:-1
+on the debug navigator.
+
+
+556
+00:23:51.530 --> 00:23:53.932 line:-1 position:50%
+Let's unfold
+the offscreen command buffer
+
+
+557
+00:23:53.932 --> 00:23:57.636 line:-1 position:50%
+to look for our shadow encoding.
+
+
+558
+00:23:57,636 --> 00:24:00,005 line:-1
+I have labeled
+my compute command encoder
+
+
+559
+00:24:00.005 --> 00:24:02.007 line:-1 position:50%
+as "Raytrace Shadows."
+
+
+560
+00:24:02.007 --> 00:24:04.643 line:-1 position:50%
+It is a good practice to label
+your Metal objects
+
+
+561
+00:24:04.643 --> 00:24:08.113 line:-1 position:50%
+so you can easily find them
+in the Metal Debugger.
+
+
+562
+00:24:08.113 --> 00:24:10.649 line:-1 position:50%
+The thumbnail
+also gives us a hint that,
+
+
+563
+00:24:10.649 --> 00:24:13.819 line:-1 position:50%
+indeed, this is the encoder
+we are looking for.
+
+
+564
+00:24:13,819 --> 00:24:16,989 line:-1
+We can now click on the dispatch
+Threadgroups API call
+
+
+565
+00:24:16.989 --> 00:24:19.558 line:-1 position:50%
+to show band resources.
+
+
+566
+00:24:19,558 --> 00:24:21,660 line:-1
+This is a list
+of all the objects
+
+
+567
+00:24:21.660 --> 00:24:25.130 line:-1 position:50%
+associated with
+our current kernel dispatch.
+
+
+568
+00:24:25,130 --> 00:24:28,434 line:-1
+And here, we can see
+an acceleration of structure,
+
+
+569
+00:24:28.434 --> 00:24:31.503 line:-1 position:50%
+which we have
+conveniently labeled as well.
+
+
+570
+00:24:31,503 --> 00:24:34,273 line:-1
+Our kernel uses
+an acceleration structure
+
+
+571
+00:24:34.273 --> 00:24:35.507 line:-1 position:50%
+to cast rays.
+
+
+572
+00:24:35,507 --> 00:24:39,678 line:-1
+This is commonly implemented
+as a bounding volume hierarchy
+
+
+573
+00:24:39.678 --> 00:24:43.549 line:-1 position:50%
+or BVH, which is a tree-like
+data structure
+
+
+574
+00:24:43.549 --> 00:24:47.953 line:-1 position:50%
+representing the 3D world
+that rays will intersect.
+
+
+575
+00:24:47.953 --> 00:24:52.524 line:-1 position:50%
+Now, double-click to open the
+acceleration structure viewer.
+
+
+576
+00:24:56,929 --> 00:25:00,399 line:-1
+This is a great new tool
+built into the Metal Debugger.
+
+
+577
+00:25:00.399 --> 00:25:04.403 line:-1 position:50%
+Let me give you an overview
+of how it is organized.
+
+
+578
+00:25:04,403 --> 00:25:06,772 line:-1
+On the right side,
+we have the 3D view
+
+
+579
+00:25:06.772 --> 00:25:10.776 line:-1 position:50%
+where we have a ray traced
+visualization of our 3D scene,
+
+
+580
+00:25:10,776 --> 00:25:14,880 line:-1
+including any custom geometry
+or intersection functions.
+
+
+581
+00:25:14.880 --> 00:25:18.250 line:-1 position:50%
+This works great with custom
+geometry such as hair
+
+
+582
+00:25:18.250 --> 00:25:20.619 line:-1 position:50%
+or when using alpha testing.
+
+
+583
+00:25:20.619 --> 00:25:22.254 line:-1 position:50%
+You can use familiar controls
+
+
+584
+00:25:22.254 --> 00:25:25.991 line:-1 position:50%
+to move the camera
+and look around.
+
+
+585
+00:25:25,991 --> 00:25:27,126 line:-1
+And here's a tip:
+
+
+586
+00:25:27.126 --> 00:25:31.330 line:-1 position:50%
+press Option key while scrolling
+to zoom in and out.
+
+
+587
+00:25:31,330 --> 00:25:34,266 line:-1
+We have built some
+great visualization tools
+
+
+588
+00:25:34.266 --> 00:25:36.735 line:-1 position:50%
+to better understand our scene.
+
+
+589
+00:25:36,735 --> 00:25:38,704 line:0
+Let's click on
+the highlighted menu
+
+
+590
+00:25:38,704 --> 00:25:42,408 position:50%
+to see the different modes
+available.
+
+
+591
+00:25:42,408 --> 00:25:46,612 line:0
+For instance, we can visualize
+bounding volume traversals.
+
+
+592
+00:25:46,612 --> 00:25:48,647 position:50%
+This is a heat map showing
+
+
+593
+00:25:48,647 --> 00:25:52,017 line:0
+how many nodes a single ray
+will need to traverse
+
+
+594
+00:25:52,017 --> 00:25:54,253 line:0
+before hitting a surface.
+
+
+595
+00:25:54,253 --> 00:25:57,890 line:0
+Darker colors mean more nodes
+need to be traversed
+
+
+596
+00:25:57,890 --> 00:26:02,528 position:50%
+and a slower intersection test.
+
+
+597
+00:26:02,528 --> 00:26:04,530 position:50%
+We can also color-code our scene
+
+
+598
+00:26:04,530 --> 00:26:11,670 position:50%
+based on
+acceleration structures...
+
+
+599
+00:26:11,670 --> 00:26:15,541 position:50%
+geometries...
+
+
+600
+00:26:15,541 --> 00:26:19,378 position:50%
+instances...
+
+
+601
+00:26:19,378 --> 00:26:23,048 position:50%
+or intersection functions.
+
+
+602
+00:26:26.251 --> 00:26:28.720 line:-1 position:50%
+Now that we are a bit
+more familiar with the tool,
+
+
+603
+00:26:28.720 --> 00:26:31.890 line:-1 position:50%
+we can go back
+to our original problem.
+
+
+604
+00:26:31.890 --> 00:26:33.325 line:-1 position:50%
+Thanks to the 3D view,
+
+
+605
+00:26:33.325 --> 00:26:36.762 line:-1 position:50%
+we have confirmed
+that our geometry is there.
+
+
+606
+00:26:36,762 --> 00:26:39,331 line:-1
+So there must be something else.
+
+
+607
+00:26:39.331 --> 00:26:42.968 line:-1 position:50%
+On the left side,
+there is the navigator area.
+
+
+608
+00:26:42,968 --> 00:26:44,203 line:-1
+Here we can see
+
+
+609
+00:26:44,203 --> 00:26:47,773 line:-1
+our top- and bottom-level
+acceleration structures.
+
+
+610
+00:26:47,773 --> 00:26:50,242 line:-1
+We can unfold
+any acceleration structures
+
+
+611
+00:26:50,242 --> 00:26:53,979 line:-1
+to see the list of geometries
+it is built from.
+
+
+612
+00:26:53.979 --> 00:26:57.749 line:-1 position:50%
+We can unfold again
+to see their properties
+
+
+613
+00:26:57,749 --> 00:27:03,355 line:-1
+such as opacity
+or primitive count.
+
+
+614
+00:27:03.355 --> 00:27:05.390 line:-1 position:50%
+We can also see
+the list of instances
+
+
+615
+00:27:05,390 --> 00:27:07,993 line:-1
+of this acceleration structure.
+
+
+616
+00:27:07,993 --> 00:27:11,430 line:-1
+Let's click on the tree leaves
+to reveal their instance
+
+
+617
+00:27:11.430 --> 00:27:15.267 line:-1 position:50%
+on the navigator
+and inspect its properties.
+
+
+618
+00:27:15.267 --> 00:27:20.806 line:-1 position:50%
+The matrix looks correct,
+and there are no flags set,
+
+
+619
+00:27:20.806 --> 00:27:24.343 line:-1 position:50%
+but it seems that the mask
+is missing something.
+
+
+620
+00:27:24,343 --> 00:27:27,412 line:-1
+In this demo, we are using
+intersection masks.
+
+
+621
+00:27:27.412 --> 00:27:29.181 line:-1 position:50%
+We use the lowest bit
+of the mask
+
+
+622
+00:27:29.181 --> 00:27:32.117 line:-1 position:50%
+to flag objects casting shadows.
+
+
+623
+00:27:32.117 --> 00:27:34.853 line:-1 position:50%
+Our intersector then
+will test this mask
+
+
+624
+00:27:34.853 --> 00:27:37.055 line:-1 position:50%
+using a bitwise and operation
+
+
+625
+00:27:37,055 --> 00:27:40,692 line:-1
+and reject the intersection
+if it fails.
+
+
+626
+00:27:40.692 --> 00:27:44.496 line:-1 position:50%
+We can visualize this behavior
+directly in the 3D view.
+
+
+627
+00:27:44.496 --> 00:27:49.635 line:-1 position:50%
+We need to open
+the intersector hints menu.
+
+
+628
+00:27:49,635 --> 00:27:52,337 line:0
+Here we can configure
+ray traversal options
+
+
+629
+00:27:52,337 --> 00:27:54,072 line:0
+for visualization.
+
+
+630
+00:27:54,072 --> 00:27:57,042 line:0
+We can change
+culling operations,
+
+
+631
+00:27:57,042 --> 00:27:59,711 position:50%
+disable custom intersections,
+
+
+632
+00:27:59,711 --> 00:28:02,214 position:50%
+or change
+the intersector’s mask.
+
+
+633
+00:28:02,214 --> 00:28:05,384 line:0
+By default,
+it will intersect everything.
+
+
+634
+00:28:05,384 --> 00:28:11,223 line:0
+Let's change it to the value
+that we are using for shadows.
+
+
+635
+00:28:11,223 --> 00:28:15,494 line:0
+This will show us an exact
+visualization of our scene
+
+
+636
+00:28:15,494 --> 00:28:19,364 position:50%
+when using our shadow mask.
+
+
+637
+00:28:19,364 --> 00:28:21,400 line:0
+And indeed, we have confirmed
+
+
+638
+00:28:21,400 --> 00:28:24,503 position:50%
+that our tree leaves
+are now missing.
+
+
+639
+00:28:24.503 --> 00:28:26.538 line:-1 position:50%
+Once we have identified
+the problem,
+
+
+640
+00:28:26,538 --> 00:28:28,674 line:-1
+we need to go back to our source
+
+
+641
+00:28:28.674 --> 00:28:33.445 line:-1 position:50%
+and make sure we are setting
+the right mask value.
+
+
+642
+00:28:33,445 --> 00:28:37,282 line:-1
+This is how shadows
+looked before.
+
+
+643
+00:28:37,282 --> 00:28:41,286 line:-1
+And this is how they look
+after fixing the mask value.
+
+
+644
+00:28:41,286 --> 00:28:43,589 position:50%
+This is an example
+of the workflows
+
+
+645
+00:28:43,589 --> 00:28:47,559 line:0
+that can help you debug
+your ray-tracing applications.
+
+
+646
+00:28:47,559 --> 00:28:49,561 position:50%
+If you want to learn more
+about tools,
+
+
+647
+00:28:49,561 --> 00:28:51,496 position:50%
+make sure you check out
+this year's
+
+
+648
+00:28:51,496 --> 00:28:53,966 position:50%
+"Discover Metal debugging,
+profiling,
+
+
+649
+00:28:53,966 --> 00:28:58,170 line:0
+and asset creation tools"
+WWDC session.
+
+
+650
+00:28:58.170 --> 00:28:59.938 line:-1 position:50%
+In this session,
+we have reviewed
+
+
+651
+00:28:59,938 --> 00:29:03,208 line:-1
+how ray tracing
+can elevate your visuals.
+
+
+652
+00:29:03.208 --> 00:29:05.611 line:-1 position:50%
+Hybrid rendering
+is the combination
+
+
+653
+00:29:05.611 --> 00:29:08.513 line:-1 position:50%
+of rasterization
+and ray tracing.
+
+
+654
+00:29:08,513 --> 00:29:11,984 line:-1
+This allows replacing
+light approximation techniques
+
+
+655
+00:29:11.984 --> 00:29:16.622 line:-1 position:50%
+with more accurate ones
+that also happen to be simpler.
+
+
+656
+00:29:16.622 --> 00:29:19.791 line:-1 position:50%
+We also saw the new tools
+to aid you in the process
+
+
+657
+00:29:19.791 --> 00:29:22.327 line:-1 position:50%
+of adopting ray tracing
+in your engine.
+
+
+658
+00:29:22,327 --> 00:29:24,429 line:-1
+We have only scratched
+the surface
+
+
+659
+00:29:24.429 --> 00:29:27.666 line:-1 position:50%
+on what new possibilities
+are available to you
+
+
+660
+00:29:27.666 --> 00:29:31.436 line:-1 position:50%
+by combining rasterization
+and ray tracing.
+
+
+661
+00:29:31.436 --> 00:29:32.771 line:-1 position:50%
+We can't wait to see
+
+
+662
+00:29:32,771 --> 00:29:34,973 line:-1
+how you put these technologies
+in practice
+
+
+663
+00:29:34.973 --> 00:29:38.176 line:-1 position:50%
+to develop the new
+innovative graphics techniques
+
+
+664
+00:29:38,176 --> 00:29:39,711 line:-1
+of the future.
+
+
+665
+00:29:39.711 --> 00:29:43.248 line:-1 position:50%
+Thank you
+and enjoy the rest of WWDC.
+
+
+666
+00:29:43,248 --> 00:29:46,218 line:0 position:90% size:2%
+♪
+

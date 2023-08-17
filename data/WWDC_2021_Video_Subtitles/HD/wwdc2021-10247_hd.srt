@@ -1,0 +1,2008 @@
+2
+00:00:02,002 --> 00:00:05,005 line:-1
+[percussive music]
+
+
+3
+00:00:05.005 --> 00:00:09.042 line:-1 align:center
+♪ ♪
+
+
+4
+00:00:09.042 --> 00:00:11.144 line:-1 align:center
+[Roy] Hi, my name is Roy.
+
+
+5
+00:00:11.144 --> 00:00:13.447 line:-2 align:center
+I'm an engineer
+on the Camera Software team.
+
+
+6
+00:00:13,447 --> 00:00:15,516 line:-2
+Today I will be walking you
+through some exciting
+
+
+7
+00:00:15,516 --> 00:00:16,783 line:-1
+photo quality improvements
+
+
+8
+00:00:16.783 --> 00:00:19.620 line:-2 align:center
+we made with our most
+popular video formats,
+
+
+9
+00:00:19.620 --> 00:00:21.755 line:-2 align:center
+and how your applications
+can make use of them
+
+
+10
+00:00:21.755 --> 00:00:24.124 line:-2 align:center
+to deliver
+an even better experience.
+
+
+11
+00:00:24,124 --> 00:00:26,760 line:-2
+iPhone is the most popular
+camera in the world,
+
+
+12
+00:00:26,760 --> 00:00:28,595 line:-2
+and for many years,
+developers have been
+
+
+13
+00:00:28.595 --> 00:00:31.431 line:-2 align:center
+taking advantage of its
+powerful camera systems
+
+
+14
+00:00:31.431 --> 00:00:34.301 line:-2 align:center
+to provide a diverse set
+of world-class experiences,
+
+
+15
+00:00:34.301 --> 00:00:38.505 line:-2 align:center
+from professional photography
+apps to video streaming tools.
+
+
+16
+00:00:38.505 --> 00:00:40.474 line:-2 align:center
+Different scenarios call for
+different levels
+
+
+17
+00:00:40.474 --> 00:00:41.875 line:-1 align:center
+of photo quality.
+
+
+18
+00:00:41.875 --> 00:00:45.145 line:-2 align:center
+For example, apps dedicated
+to taking still photos
+
+
+19
+00:00:45,145 --> 00:00:46,914 line:-2
+will demand
+the absolute best quality
+
+
+20
+00:00:46.914 --> 00:00:48.582 line:-1 align:center
+that the cameras can provide.
+
+
+21
+00:00:48.582 --> 00:00:50.184 line:-1 align:center
+A social app, on the other hand,
+
+
+22
+00:00:50.184 --> 00:00:52.019 line:-2 align:center
+might need to apply face effect
+overlays
+
+
+23
+00:00:52,019 --> 00:00:54,721 line:-2
+on top of the video
+frames being streamed.
+
+
+24
+00:00:54,721 --> 00:00:58,225 line:-2
+And this custom rendering might
+be computationally expensive.
+
+
+25
+00:00:58.225 --> 00:00:59.726 line:-1 align:center
+In order to avoid frame drops,
+
+
+26
+00:00:59,726 --> 00:01:02,196 line:-2
+the developer might
+prefer lower resolution frames
+
+
+27
+00:01:02.196 --> 00:01:05.132 line:-2 align:center
+so there are fewer pixels
+to process per frame.
+
+
+28
+00:01:05.132 --> 00:01:08.402 line:-2 align:center
+This diversity in use cases
+calls for an easy way
+
+
+29
+00:01:08,402 --> 00:01:10,204 line:-2
+to specify where you want
+to land
+
+
+30
+00:01:10,204 --> 00:01:13,040 line:-2
+on the scale of quality
+versus performance.
+
+
+31
+00:01:13,040 --> 00:01:15,409 line:-2
+Before we dive into photo
+quality, however,
+
+
+32
+00:01:15.409 --> 00:01:16.844 line:-1 align:center
+let's have a brief refresher
+
+
+33
+00:01:16.844 --> 00:01:19.513 line:-2 align:center
+on how photos are taken
+on iOS in general.
+
+
+34
+00:01:19,513 --> 00:01:22,549 line:-2
+We will start
+with an AVCaptureSession object,
+
+
+35
+00:01:22,549 --> 00:01:25,085 line:-2
+around which we can build
+our object graph.
+
+
+36
+00:01:25.085 --> 00:01:27.454 line:-2 align:center
+Since we are taking photos,
+we will use a camera
+
+
+37
+00:01:27.454 --> 00:01:29.623 line:-1 align:center
+as our AVCaptureDevice.
+
+
+38
+00:01:29.890 --> 00:01:33.327 line:-2 align:center
+Then, an AVCaptureDeviceInput
+is instantiated
+
+
+39
+00:01:33.360 --> 00:01:34.728 line:-1 align:center
+based on that device,
+
+
+40
+00:01:34,761 --> 00:01:37,130 line:-2
+and it will provide input data
+to the session.
+
+
+41
+00:01:38,031 --> 00:01:41,101 line:-2
+An AVCapturePhotoOutput
+will then be added to the graph
+
+
+42
+00:01:41.101 --> 00:01:42.736 line:-1 align:center
+as the recipients of the photos.
+
+
+43
+00:01:44,037 --> 00:01:46,573 line:0
+And all these elements
+are then connected together
+
+
+44
+00:01:46,573 --> 00:01:49,343 line:0
+using an AVCaptureConnection.
+
+
+45
+00:01:49,877 --> 00:01:51,979 align:center
+After the session
+started running,
+
+
+46
+00:01:51,979 --> 00:01:54,848 line:-2
+we can capture photos by calling
+the capturePhoto method
+
+
+47
+00:01:54,848 --> 00:01:57,718 line:-2
+on the AVCapturePhotoOutput
+instance.
+
+
+48
+00:01:57,718 --> 00:01:59,453 line:-2
+Further customization
+can be done
+
+
+49
+00:01:59,453 --> 00:02:01,955 line:-2
+using the AVCapturePhotoSettings
+object
+
+
+50
+00:02:01,955 --> 00:02:04,525 line:-2
+passed to the capturePhoto
+method.
+
+
+51
+00:02:04.525 --> 00:02:06.593 line:-2 align:center
+The captured photo will be
+represented
+
+
+52
+00:02:06,593 --> 00:02:08,662 line:-1
+as an AVCapturePhoto object
+
+
+53
+00:02:08,662 --> 00:02:11,431 line:-2
+that you will receive
+in your delegate method.
+
+
+54
+00:02:11,431 --> 00:02:14,401 align:center
+We had a very detailed
+discussion on these APIs
+
+
+55
+00:02:14,401 --> 00:02:18,639 line:0
+in the 2016 session,
+Advances in iOS Photography.
+
+
+56
+00:02:18,639 --> 00:02:21,108 line:0
+Please check it out if
+you haven't already.
+
+
+57
+00:02:21.175 --> 00:02:24.511 line:-2 align:center
+Now that we know how to take
+photos on iOS in general,
+
+
+58
+00:02:24.511 --> 00:02:27.247 line:-2 align:center
+let's see how high quality
+photos can be taken.
+
+
+59
+00:02:27.247 --> 00:02:29.750 line:-2 align:center
+Historically,
+if you wanted to capture photos
+
+
+60
+00:02:29.750 --> 00:02:32.085 line:-2 align:center
+of the best possible quality,
+you would set the
+
+
+61
+00:02:32.085 --> 00:02:34.922 line:-2 align:center
+isAutoStillImageStabilization
+Enabled property
+
+
+62
+00:02:34,922 --> 00:02:37,424 line:-2
+on your
+AVCapturePhotoSettings to true,
+
+
+63
+00:02:37,491 --> 00:02:40,294 line:-2
+and that's because still
+image stabilization
+
+
+64
+00:02:40,294 --> 00:02:42,663 line:-2
+was the main method for getting
+higher quality photos.
+
+
+65
+00:02:42,729 --> 00:02:45,365 line:-2
+But over the years,
+we have been continuously
+
+
+66
+00:02:45.365 --> 00:02:48.235 line:-2 align:center
+evolving our photo
+quality-enhancing algorithms.
+
+
+67
+00:02:48,235 --> 00:02:50,571 line:-2
+In addition to still
+image stabilization,
+
+
+68
+00:02:50,571 --> 00:02:53,607 line:-2
+we now have a far richer set
+of techniques to draw from,
+
+
+69
+00:02:53,607 --> 00:02:56,677 line:-2
+such as a variety of multi-image
+fusion technologies,
+
+
+70
+00:02:56.677 --> 00:02:59.313 line:-2 align:center
+including
+Smart HDR and Deep Fusion.
+
+
+71
+00:02:59,379 --> 00:03:01,148 line:-1
+Consequently, the name
+
+
+72
+00:03:01,148 --> 00:03:03,584 line:-2
+isAutoStillImageStabilization
+Enabled
+
+
+73
+00:03:03,584 --> 00:03:07,387 line:-2
+has become quite obsolete as
+a proxy for high photo quality.
+
+
+74
+00:03:07,921 --> 00:03:11,024 line:-2
+To solve this problem,
+in iOS 13, we introduced
+
+
+75
+00:03:11,024 --> 00:03:14,127 line:-2
+AVCapturePhotoOutput.QualityPrio
+ritization.
+
+
+76
+00:03:14.127 --> 00:03:16.697 line:-2 align:center
+It's a very easy way
+to tell AVCapturePhotoOutput
+
+
+77
+00:03:16.697 --> 00:03:20.400 line:-2 align:center
+how to prioritize quality
+in your photo captures.
+
+
+78
+00:03:20.400 --> 00:03:23.237 line:-2 align:center
+We haven't had a chance
+to talk about this important API
+
+
+79
+00:03:23.237 --> 00:03:25.572 line:-1 align:center
+at previous WWDCs,
+
+
+80
+00:03:25.572 --> 00:03:27.841 line:-2 align:center
+so let's now take a moment
+to see how it works.
+
+
+81
+00:03:28,509 --> 00:03:30,744 line:-2
+There are three quality
+prioritization levels
+
+
+82
+00:03:30,744 --> 00:03:32,145 line:-1
+to choose from:
+
+
+83
+00:03:32.145 --> 00:03:34.381 line:-1 align:center
+speed, balanced, and quality.
+
+
+84
+00:03:34.381 --> 00:03:36.350 line:-2 align:center
+With speed,
+you are telling the framework
+
+
+85
+00:03:36,350 --> 00:03:39,653 line:-2
+that the speed of the capture is
+what you care about the most,
+
+
+86
+00:03:39,653 --> 00:03:42,322 line:-2
+even at the expense
+of photo quality.
+
+
+87
+00:03:42.322 --> 00:03:44.291 line:-2 align:center
+If a balance needs
+to be struck between
+
+
+88
+00:03:44,291 --> 00:03:46,426 line:-2
+photo quality
+and delivery speed,
+
+
+89
+00:03:46,426 --> 00:03:48,362 line:-1
+balanced should be used.
+
+
+90
+00:03:48.362 --> 00:03:50.597 line:-2 align:center
+Quality does the opposite
+of speed.
+
+
+91
+00:03:50,597 --> 00:03:52,900 line:-2
+It says image quality
+should be prioritized
+
+
+92
+00:03:52,900 --> 00:03:54,301 line:-1
+first and foremost,
+
+
+93
+00:03:54,301 --> 00:03:56,603 line:-2
+while the potential
+slowness of the capture process
+
+
+94
+00:03:56,603 --> 00:03:58,572 line:-1
+can be tolerated.
+
+
+95
+00:03:58,572 --> 00:04:01,642 line:-2
+Please note that the quality
+prioritization specified
+
+
+96
+00:04:01,642 --> 00:04:04,811 line:-2
+only serves as a hint
+to the AVCapturePhotoOutput,
+
+
+97
+00:04:04,811 --> 00:04:07,548 line:-2
+and it doesn't dictate
+what algorithms to use.
+
+
+98
+00:04:08.348 --> 00:04:10.517 line:-2 align:center
+Ultimately,
+the AVCapturePhotoOutput
+
+
+99
+00:04:10.517 --> 00:04:12.486 line:-2 align:center
+will consider a variety
+of constraints
+
+
+100
+00:04:12,586 --> 00:04:16,323 line:-2
+and choose the most appropriate
+algorithm for the current scene.
+
+
+101
+00:04:16,323 --> 00:04:18,792 line:-2
+For instance, it might choose
+a different method
+
+
+102
+00:04:18,792 --> 00:04:21,428 line:-2
+for a low-light situation
+than in a well-lit space.
+
+
+103
+00:04:22,362 --> 00:04:24,431 line:-2
+That being said,
+we understand that
+
+
+104
+00:04:24.431 --> 00:04:26.200 line:-2 align:center
+based on different capture
+durations,
+
+
+105
+00:04:26.200 --> 00:04:28.769 line:-2 align:center
+you might want to plan your
+user experience differently.
+
+
+106
+00:04:29.803 --> 00:04:32.039 line:-2 align:center
+So on the
+AVCaptureResolvedPhotoSettings
+
+
+107
+00:04:32.039 --> 00:04:35.342 line:-2 align:center
+object passed to some of
+the AVCapturePhotoOutputDelegate
+
+
+108
+00:04:35.342 --> 00:04:37.477 line:-2 align:center
+methods, we give you
+a property called
+
+
+109
+00:04:37.477 --> 00:04:40.380 line:-2 align:center
+photoProcessingTimeRange
+that indicates how long
+
+
+110
+00:04:40,380 --> 00:04:42,983 line:-2
+it will take to deliver
+the photo to your delegate.
+
+
+111
+00:04:43.951 --> 00:04:46.486 line:-2 align:center
+This, for instance,
+can help you decide whether
+
+
+112
+00:04:46.486 --> 00:04:49.223 line:-2 align:center
+you want to put out a spinner if
+the capture will take a while.
+
+
+113
+00:04:49.256 --> 00:04:51.225 line:-1 align:center
+Let's see how it works in code.
+
+
+114
+00:04:51,225 --> 00:04:53,894 line:-2
+When you are setting up your
+AVCapturePhotoOutput,
+
+
+115
+00:04:53,894 --> 00:04:56,763 line:-2
+you can specify a max
+quality prioritization
+
+
+116
+00:04:56.763 --> 00:04:59.166 line:-2 align:center
+that the particular capture
+session will require.
+
+
+117
+00:04:59,166 --> 00:05:02,636 line:-2
+If you choose not to do so,
+the default value is balanced.
+
+
+118
+00:05:02.636 --> 00:05:04.705 line:-1 align:center
+This only has to be set once.
+
+
+119
+00:05:04.705 --> 00:05:07.474 line:-2 align:center
+The importance of doing so
+is that depending on
+
+
+120
+00:05:07.474 --> 00:05:09.243 line:-2 align:center
+different settings,
+we will configure
+
+
+121
+00:05:09,243 --> 00:05:11,211 line:-2
+our capture
+pipelines differently.
+
+
+122
+00:05:11.211 --> 00:05:13.347 line:-2 align:center
+For instance,
+if we know you will not go
+
+
+123
+00:05:13,347 --> 00:05:15,148 line:-1
+beyond speed prioritization,
+
+
+124
+00:05:15.148 --> 00:05:16.950 line:-2 align:center
+we can construct
+a capture pipeline
+
+
+125
+00:05:16.950 --> 00:05:19.086 line:-2 align:center
+that consumes
+much less memory and power
+
+
+126
+00:05:19,086 --> 00:05:21,889 line:-2
+than the one for, say,
+balanced prioritization.
+
+
+127
+00:05:21,889 --> 00:05:24,124 line:-2
+So we encourage you
+to choose responsibly
+
+
+128
+00:05:24,124 --> 00:05:25,592 line:-1
+and only take what you need.
+
+
+129
+00:05:26,226 --> 00:05:28,228 line:-2
+Before you
+call the capturePhoto method,
+
+
+130
+00:05:28,228 --> 00:05:30,564 line:-2
+you can customize
+the quality prioritization
+
+
+131
+00:05:30.564 --> 00:05:31.932 line:-1 align:center
+for this particular capture
+
+
+132
+00:05:31,932 --> 00:05:34,268 line:-2
+by setting the
+photoQualityPrioritization
+
+
+133
+00:05:34.268 --> 00:05:37.437 line:-2 align:center
+property on your
+AVCapturePhotoSettings object.
+
+
+134
+00:05:37.437 --> 00:05:39.273 line:-1 align:center
+The default value is balanced.
+
+
+135
+00:05:39.306 --> 00:05:41.775 line:-2 align:center
+As demonstrated here,
+we are using
+
+
+136
+00:05:41.775 --> 00:05:43.844 line:-2 align:center
+two different levels
+in two different situations.
+
+
+137
+00:05:44.945 --> 00:05:48.015 line:-2 align:center
+Please note that the per-capture
+quality prioritization
+
+
+138
+00:05:48,015 --> 00:05:50,317 line:-2
+cannot go beyond your
+AVCapturePhotoOutput's
+
+
+139
+00:05:50,317 --> 00:05:52,586 line:-1
+max quality prioritization,
+
+
+140
+00:05:52.586 --> 00:05:54.521 line:-2 align:center
+otherwise
+you will get an exception.
+
+
+141
+00:05:54,555 --> 00:05:57,624 line:-2
+The performance characteristics
+of the three levels
+
+
+142
+00:05:57.624 --> 00:06:00.127 line:-2 align:center
+are determined by the underlying
+algorithms we use.
+
+
+143
+00:06:00.160 --> 00:06:03.463 line:-2 align:center
+The mappings differ based
+on the kinds of format you use,
+
+
+144
+00:06:03.463 --> 00:06:05.199 line:-2 align:center
+and we will talk some
+more on the difference
+
+
+145
+00:06:05,199 --> 00:06:08,235 line:-2
+between photo and video
+formats momentarily.
+
+
+146
+00:06:08,235 --> 00:06:11,638 line:-2
+With photo formats, Speed
+will get you WYSIWYG photos--
+
+
+147
+00:06:11,638 --> 00:06:14,174 line:-2
+that is What You See is
+What You Get photos--
+
+
+148
+00:06:14,174 --> 00:06:15,676 line:-1
+which are lightly processed
+
+
+149
+00:06:15.676 --> 00:06:18.445 line:-2 align:center
+only with some noise reduction
+applied.
+
+
+150
+00:06:18.445 --> 00:06:21.548 line:-2 align:center
+If Balanced is specified,
+we will choose from a collection
+
+
+151
+00:06:21,548 --> 00:06:24,184 line:-2
+of fast fusion algorithms
+that produce much better
+
+
+152
+00:06:24,184 --> 00:06:26,220 line:-2
+photo quality
+than WYSIWYG photos
+
+
+153
+00:06:26.220 --> 00:06:28.288 line:-2 align:center
+at a somewhat slower
+capture rate.
+
+
+154
+00:06:28,288 --> 00:06:30,691 align:center
+For Quality, depending
+on the current device
+
+
+155
+00:06:30,691 --> 00:06:32,893 line:0
+and lux level,
+the framework will use
+
+
+156
+00:06:32,893 --> 00:06:35,395 align:center
+some heavy machineries
+such as Deep Fusion
+
+
+157
+00:06:35,395 --> 00:06:38,198 line:0
+in order to provide the best
+possible photo quality.
+
+
+158
+00:06:38,232 --> 00:06:39,900 line:-1
+The photos will look great,
+
+
+159
+00:06:39,900 --> 00:06:41,134 line:-1
+but there is no free lunch.
+
+
+160
+00:06:41,134 --> 00:06:42,836 line:-2
+You pay
+for it by using more time.
+
+
+161
+00:06:43,504 --> 00:06:45,372 align:center
+For video formats,
+on the other hand,
+
+
+162
+00:06:45,372 --> 00:06:47,574 line:0
+all levels will use
+the lightest processing
+
+
+163
+00:06:47,574 --> 00:06:50,010 line:0
+to deliver photos
+as fast as possible.
+
+
+164
+00:06:50,010 --> 00:06:52,312 line:-2
+We have been talking
+about photo and video formats
+
+
+165
+00:06:52,312 --> 00:06:53,313 line:-1
+for a while now.
+
+
+166
+00:06:53.313 --> 00:06:54.381 line:-1 align:center
+Let's take a closer look
+
+
+167
+00:06:54.381 --> 00:06:56.483 line:-1 align:center
+at the differences between them.
+
+
+168
+00:06:56,483 --> 00:06:59,486 line:-2
+By using photo formats, you are
+signaling to the framework
+
+
+169
+00:06:59.486 --> 00:07:02.089 line:-2 align:center
+that taking still photos is what
+you care about the most.
+
+
+170
+00:07:02,122 --> 00:07:06,326 line:-2
+For example, if you are using
+an AVCaptureVideoDataOutput
+
+
+171
+00:07:06.326 --> 00:07:07.561 line:-1 align:center
+with a photo format,
+
+
+172
+00:07:07.561 --> 00:07:09.463 line:-2 align:center
+the sample buffers you get
+by default
+
+
+173
+00:07:09,463 --> 00:07:12,099 line:-2
+will only be
+of preview resolutions,
+
+
+174
+00:07:12,099 --> 00:07:14,434 line:-2
+and that's because knowing
+that taking photos
+
+
+175
+00:07:14,434 --> 00:07:17,204 line:-2
+is your top priority,
+we can assume that these frames
+
+
+176
+00:07:17.204 --> 00:07:20.507 line:-2 align:center
+will be used for preview
+rather than video recordings.
+
+
+177
+00:07:20,507 --> 00:07:23,010 line:-2
+A good reason to choose photo
+formats is that
+
+
+178
+00:07:23.010 --> 00:07:26.346 line:-2 align:center
+some photo-centric features
+are exclusive for photo formats,
+
+
+179
+00:07:26.346 --> 00:07:30.017 line:-2 align:center
+such as Live Photo and ProRAW,
+et cetera.
+
+
+180
+00:07:30.017 --> 00:07:31.618 line:-2 align:center
+If that's
+something you want to do,
+
+
+181
+00:07:31.618 --> 00:07:34.121 line:-2 align:center
+then photo format
+is the way to go.
+
+
+182
+00:07:34.121 --> 00:07:37.257 line:-2 align:center
+Photo formats come with the
+highest resolutions available,
+
+
+183
+00:07:37,257 --> 00:07:39,760 line:-2
+but the frame rates are limited
+to 30 frames per second.
+
+
+184
+00:07:41.228 --> 00:07:43.096 line:-2 align:center
+To choose photo formats,
+you can set
+
+
+185
+00:07:43,096 --> 00:07:44,765 line:-1
+your session preset to photo.
+
+
+186
+00:07:44,765 --> 00:07:46,567 line:-1
+Or you can pick a format where
+
+
+187
+00:07:46.567 --> 00:07:49.770 line:-2 align:center
+isHighestPhotoQualitySupported
+is true.
+
+
+188
+00:07:49.770 --> 00:07:52.172 line:-2 align:center
+The usage of video formats,
+on the other hand,
+
+
+189
+00:07:52,172 --> 00:07:55,442 line:-2
+indicates that the experiences
+will now center around videos.
+
+
+190
+00:07:55,475 --> 00:07:57,544 line:-2
+You will get resolutions
+more suitable
+
+
+191
+00:07:57.544 --> 00:07:59.847 line:-2 align:center
+for recording and streaming,
+and you will be able
+
+
+192
+00:07:59.847 --> 00:08:02.916 line:-2 align:center
+to use high frame
+rates such as 60 fps.
+
+
+193
+00:08:02.916 --> 00:08:05.118 line:-2 align:center
+If a format
+is not a photo format,
+
+
+194
+00:08:05,118 --> 00:08:07,254 line:-2
+then it's
+considered a video format.
+
+
+195
+00:08:07,254 --> 00:08:10,257 line:-2
+So you can select one by using
+a non-photo session preset
+
+
+196
+00:08:10,257 --> 00:08:11,625 line:-1
+or choosing a format where
+
+
+197
+00:08:11.625 --> 00:08:14.261 line:-2 align:center
+isHighestPhotoQualitySupported
+is false.
+
+
+198
+00:08:14.261 --> 00:08:16.363 line:-2 align:center
+You might be wondering
+why we are not applying
+
+
+199
+00:08:16.363 --> 00:08:19.233 line:-2 align:center
+some of the powerful
+algorithms to video formats.
+
+
+200
+00:08:19,233 --> 00:08:20,667 line:-1
+It's not because we're lazy.
+
+
+201
+00:08:20.667 --> 00:08:22.603 line:-1 align:center
+We have good reasons for that.
+
+
+202
+00:08:22,603 --> 00:08:25,639 line:-2
+Many apps choose to use video
+formats because they need to do
+
+
+203
+00:08:25.639 --> 00:08:27.875 line:-1 align:center
+heavy custom processing,
+
+
+204
+00:08:27,875 --> 00:08:30,477 line:-2
+and video formats are
+well-suited for this purpose
+
+
+205
+00:08:30.477 --> 00:08:32.713 line:-1 align:center
+because of their low overhead.
+
+
+206
+00:08:32.713 --> 00:08:34.615 line:-2 align:center
+If we leverage some
+of the aforementioned
+
+
+207
+00:08:34,615 --> 00:08:36,149 line:-1
+photo enhancing techniques,
+
+
+208
+00:08:36,149 --> 00:08:39,853 line:-2
+we might introduce degradations
+in these apps' experiences.
+
+
+209
+00:08:39,853 --> 00:08:42,523 line:-2
+For instance,
+an AR app might allow users
+
+
+210
+00:08:42,523 --> 00:08:46,026 line:-2
+to snap a photo of the 3D scene
+that they are interacting with.
+
+
+211
+00:08:46.026 --> 00:08:48.562 line:-2 align:center
+Running the existing
+fusion algorithms at this point
+
+
+212
+00:08:48.562 --> 00:08:50.664 line:-2 align:center
+is likely
+to introduce frame drops
+
+
+213
+00:08:50.664 --> 00:08:52.466 line:-1 align:center
+in the app's camera feed,
+
+
+214
+00:08:52,466 --> 00:08:54,601 line:-1
+interrupting its core feature.
+
+
+215
+00:08:54.601 --> 00:08:57.871 line:-2 align:center
+So we have been very conscious
+of this delicate balance between
+
+
+216
+00:08:57.871 --> 00:09:00.974 line:-2 align:center
+quality and speed, and we
+designed our video formats
+
+
+217
+00:09:00.974 --> 00:09:05.045 line:-2 align:center
+to work responsively even under
+the most demanding conditions.
+
+
+218
+00:09:05.045 --> 00:09:08.715 line:-2 align:center
+But those compromises
+stop today with iOS 15.
+
+
+219
+00:09:08.715 --> 00:09:11.084 line:-2 align:center
+We are taking a major
+leap in photo quality
+
+
+220
+00:09:11.084 --> 00:09:13.320 line:-2 align:center
+with our most popular
+video formats.
+
+
+221
+00:09:13.353 --> 00:09:16.823 line:-2 align:center
+With some improved algorithms,
+we are now able to radically
+
+
+222
+00:09:16.823 --> 00:09:19.927 line:-2 align:center
+improve photo quality
+without impacting other aspects
+
+
+223
+00:09:19.927 --> 00:09:21.662 line:-1 align:center
+of your apps' experiences.
+
+
+224
+00:09:21.662 --> 00:09:25.032 line:-2 align:center
+With this new feature, your apps
+can now take amazing photos,
+
+
+225
+00:09:25,032 --> 00:09:26,733 line:-2
+while retaining
+the same flexibility
+
+
+226
+00:09:26,733 --> 00:09:29,603 line:-2
+to perform sophisticated
+custom computation.
+
+
+227
+00:09:31,004 --> 00:09:34,174 line:-2
+So how big of a quality leap are
+we talking about here?
+
+
+228
+00:09:34.174 --> 00:09:36.543 line:-2 align:center
+Let's take a look at some
+before-and-after comparisons.
+
+
+229
+00:09:39.313 --> 00:09:41.815 line:-2 align:center
+The improvement is quite
+substantial.
+
+
+230
+00:09:41,815 --> 00:09:43,283 line:-2
+The little boy's face
+on the right
+
+
+231
+00:09:43.283 --> 00:09:44.718 line:-1 align:center
+has much less noise,
+
+
+232
+00:09:44.718 --> 00:09:46.486 line:-2 align:center
+and thus
+looks much more natural.
+
+
+233
+00:09:46.486 --> 00:09:49.289 line:-2 align:center
+And we can better perceive
+the light coming off his hair.
+
+
+234
+00:09:52,526 --> 00:09:54,561 line:-2
+The catch lights
+in your subjects' eyes
+
+
+235
+00:09:54.561 --> 00:09:56.363 line:-2 align:center
+are simply
+more vibrant and lively.
+
+
+236
+00:09:59,466 --> 00:10:01,602 line:-2
+In this outdoor low-light
+situation,
+
+
+237
+00:10:01,602 --> 00:10:05,906 line:-2
+there is superior de-noising
+on her face and clothes.
+
+
+238
+00:10:05,906 --> 00:10:08,408 line:-2
+Lastly, the environment
+also looks better.
+
+
+239
+00:10:08,408 --> 00:10:11,144 line:-2
+The leather texture on the chair
+is much better preserved.
+
+
+240
+00:10:13,180 --> 00:10:15,315 line:-2
+Now that you're enticed,
+let's take a look
+
+
+241
+00:10:15,315 --> 00:10:18,151 line:-2
+at the algorithm mappings
+for the supported video formats.
+
+
+242
+00:10:19.786 --> 00:10:21.922 line:-2 align:center
+Speed will still get you
+the lightly processed
+
+
+243
+00:10:21.922 --> 00:10:23.290 line:-1 align:center
+WYSIWYG photos.
+
+
+244
+00:10:23,290 --> 00:10:25,792 line:-2
+They are still the fastest
+way of getting a photo,
+
+
+245
+00:10:25.792 --> 00:10:28.262 line:-2 align:center
+and since speed is now
+your top priority,
+
+
+246
+00:10:28,262 --> 00:10:30,797 line:-2
+this fits the bill perfectly,
+so we didn't change it.
+
+
+247
+00:10:30.831 --> 00:10:32.733 line:-2 align:center
+You will not be getting
+any frame drops
+
+
+248
+00:10:32.733 --> 00:10:34.201 line:-1 align:center
+in your video recordings
+
+
+249
+00:10:34.201 --> 00:10:37.070 line:-2 align:center
+or any disruptions
+in your preview feed.
+
+
+250
+00:10:37.070 --> 00:10:39.206 line:-2 align:center
+With Balanced, however,
+you are now getting
+
+
+251
+00:10:39,206 --> 00:10:41,642 line:-2
+a significant bump in quality,
+while only getting
+
+
+252
+00:10:41,642 --> 00:10:44,244 line:-2
+a very slight increase
+in the photo's processing time.
+
+
+253
+00:10:45,312 --> 00:10:47,447 line:-2
+And just like in Speed,
+your video recording
+
+
+254
+00:10:47.447 --> 00:10:49.216 line:-1 align:center
+will not have any frame drops.
+
+
+255
+00:10:49.216 --> 00:10:51.285 line:-2 align:center
+Your preview feed will not
+get interrupted,
+
+
+256
+00:10:51,285 --> 00:10:52,719 line:-2
+even when
+those great-looking photos
+
+
+257
+00:10:52.719 --> 00:10:54.454 line:-1 align:center
+are taken and processed.
+
+
+258
+00:10:54,454 --> 00:10:55,756 align:center
+Finally, for Quality,
+
+
+259
+00:10:55,756 --> 00:10:57,658 align:center
+we are running more
+expensive algorithms
+
+
+260
+00:10:57,658 --> 00:10:59,693 align:center
+to get even better qualities.
+
+
+261
+00:10:59,693 --> 00:11:02,696 align:center
+This might drop frames or cause
+preview feed interruptions,
+
+
+262
+00:11:02,696 --> 00:11:04,998 line:-2
+depending on how recent
+your devices are.
+
+
+263
+00:11:04,998 --> 00:11:07,601 line:-2
+This feature will be
+available on all iPhones
+
+
+264
+00:11:07,601 --> 00:11:10,204 line:-2
+with support all the way
+back to iPhone XS.
+
+
+265
+00:11:10,270 --> 00:11:12,773 line:-2
+The video formats
+that are getting this upgrade
+
+
+266
+00:11:12.773 --> 00:11:14.908 line:-2 align:center
+are the most
+popular ones:
+
+
+267
+00:11:14.908 --> 00:11:16.410 line:-1 align:center
+1280x720
+
+
+268
+00:11:16.410 --> 00:11:19.079 line:-2 align:center
+with support for both 30
+and 60 frames per second.
+
+
+269
+00:11:20,581 --> 00:11:23,851 line:-2
+1920x1080,
+also for both 30 and 60 fps.
+
+
+270
+00:11:24,985 --> 00:11:28,622 align:center
+1920x1440, for 30 fps.
+
+
+271
+00:11:28,622 --> 00:11:31,291 align:center
+And we even added support
+for 4K, with 30 fps.
+
+
+272
+00:11:32,326 --> 00:11:34,394 line:-2
+So how can you make sure
+you are using
+
+
+273
+00:11:34,394 --> 00:11:35,829 line:-1
+the right formats in your code?
+
+
+274
+00:11:35,829 --> 00:11:37,431 line:-1
+It's very simple.
+
+
+275
+00:11:37,431 --> 00:11:40,467 line:-2
+In iOS 15, we are introducing
+a new property called
+
+
+276
+00:11:40.467 --> 00:11:42.336 line:-1 align:center
+isHighPhotoQualitySupported
+
+
+277
+00:11:42,336 --> 00:11:44,872 line:-2
+on the AVCaptureDevice.Format
+type.
+
+
+278
+00:11:44.872 --> 00:11:46.773 line:-2 align:center
+For formats
+that support this feature,
+
+
+279
+00:11:46,773 --> 00:11:48,642 line:-1
+this property will be true.
+
+
+280
+00:11:48,642 --> 00:11:50,777 line:-2
+Any format with this
+property being true
+
+
+281
+00:11:50,777 --> 00:11:53,146 line:-2
+is guaranteed to be a video
+format,
+
+
+282
+00:11:53,146 --> 00:11:54,381 line:-1
+so you don't have to worry
+
+
+283
+00:11:54,381 --> 00:11:56,316 line:-2
+about accidentally
+picking a photo format.
+
+
+284
+00:11:57.751 --> 00:12:00.454 line:-2 align:center
+Let's say you want
+to get any such format.
+
+
+285
+00:12:00.454 --> 00:12:02.556 line:-2 align:center
+You just need to get
+the formats available
+
+
+286
+00:12:02.556 --> 00:12:04.691 line:-2 align:center
+on your
+AVCaptureDevice instance.
+
+
+287
+00:12:04.691 --> 00:12:05.893 line:-1 align:center
+Then just select the one
+
+
+288
+00:12:05.893 --> 00:12:09.096 line:-2 align:center
+with isHighPhotoQualitySupported
+being true.
+
+
+289
+00:12:09.096 --> 00:12:12.900 line:-2 align:center
+We updated our sample code AVCam
+to use this feature.
+
+
+290
+00:12:12.900 --> 00:12:16.103 line:-2 align:center
+Please check it out if you want
+to see a working example.
+
+
+291
+00:12:16.103 --> 00:12:18.639 line:-2 align:center
+It's possible to confuse
+the new property
+
+
+292
+00:12:18.639 --> 00:12:20.541 line:-1 align:center
+isHighPhotoQualitySupported
+
+
+293
+00:12:20.541 --> 00:12:24.077 line:-2 align:center
+with the existing
+isHighestPhotoQualitySupported.
+
+
+294
+00:12:24.077 --> 00:12:26.580 line:-2 align:center
+Like we mentioned earlier,
+the latter tells you
+
+
+295
+00:12:26.580 --> 00:12:28.982 line:-2 align:center
+whether a format
+is a photo format,
+
+
+296
+00:12:28.982 --> 00:12:30.884 line:-2 align:center
+and it doesn't tell you
+whether a video format
+
+
+297
+00:12:30.884 --> 00:12:32.953 line:-1 align:center
+supports high photo quality.
+
+
+298
+00:12:32,953 --> 00:12:35,122 line:-2
+Now, do you need to put
+in any work at all
+
+
+299
+00:12:35.122 --> 00:12:36.590 line:-1 align:center
+to get this new feature?
+
+
+300
+00:12:36,590 --> 00:12:38,125 line:-1
+The answer is maybe.
+
+
+301
+00:12:38.125 --> 00:12:40.594 line:-2 align:center
+If you are already using
+AVCapturePhotoOutput,
+
+
+302
+00:12:40,594 --> 00:12:42,596 line:-2
+and the .balanced
+prioritization,
+
+
+303
+00:12:42,596 --> 00:12:44,598 line:-2
+then congratulations,
+you will automatically
+
+
+304
+00:12:44.598 --> 00:12:47.034 line:-2 align:center
+get better-looking photos
+on iOS 15.
+
+
+305
+00:12:48,368 --> 00:12:50,771 line:-2
+If your app is using
+speed prioritization,
+
+
+306
+00:12:50,771 --> 00:12:52,806 line:-2
+by simply updating it
+to balanced,
+
+
+307
+00:12:52,806 --> 00:12:54,308 line:-1
+you will receive better photos
+
+
+308
+00:12:54.308 --> 00:12:56.376 line:-2 align:center
+without having to worry
+about any frame drops.
+
+
+309
+00:12:57.444 --> 00:12:59.146 line:-2 align:center
+If you're
+still using the deprecated
+
+
+310
+00:12:59.146 --> 00:13:01.448 line:-1 align:center
+AVCaptureStillImageOutput,
+
+
+311
+00:13:01,448 --> 00:13:02,816 line:-2
+then hopefully this
+will give you
+
+
+312
+00:13:02,816 --> 00:13:04,685 line:-1
+a big incentive to switch over.
+
+
+313
+00:13:05.385 --> 00:13:07.721 line:-2 align:center
+Since now using
+the quality prioritization
+
+
+314
+00:13:07,721 --> 00:13:10,090 line:-2
+might introduce
+frame drops in your videos,
+
+
+315
+00:13:10.090 --> 00:13:12.492 line:-2 align:center
+we don't want to impose
+that new behavior on your apps
+
+
+316
+00:13:12.492 --> 00:13:14.194 line:-1 align:center
+without you opting in.
+
+
+317
+00:13:14.194 --> 00:13:16.396 line:-2 align:center
+So we put in a link time
+check to make sure that
+
+
+318
+00:13:16,396 --> 00:13:18,966 line:-2
+if your app is using
+quality prioritization
+
+
+319
+00:13:18,966 --> 00:13:23,036 line:-2
+with a video format and was
+compiled prior to iOS 15,
+
+
+320
+00:13:23.036 --> 00:13:25.939 line:-2 align:center
+then we will automatically
+change it to balanced.
+
+
+321
+00:13:25.939 --> 00:13:28.375 line:-2 align:center
+If you indeed would like
+to get the best quality,
+
+
+322
+00:13:28.375 --> 00:13:33.013 line:-2 align:center
+all you need to do is re-compile
+your app with the iOS 15 SDK.
+
+
+323
+00:13:33.013 --> 00:13:35.082 line:-2 align:center
+There are a few caveats
+to be aware of.
+
+
+324
+00:13:36.250 --> 00:13:37.684 line:-2 align:center
+This feature currently
+only works
+
+
+325
+00:13:37.684 --> 00:13:39.152 line:-1 align:center
+with AVCaptureSession,
+
+
+326
+00:13:39,152 --> 00:13:41,388 line:-2
+and not
+with AVCaptureMultiCamSession.
+
+
+327
+00:13:43.190 --> 00:13:45.826 line:-2 align:center
+The deprecated
+AVCaptureStillImageOutput
+
+
+328
+00:13:45.826 --> 00:13:48.095 line:-1 align:center
+will not support this feature.
+
+
+329
+00:13:48.095 --> 00:13:51.331 line:-2 align:center
+If you are using .balanced
+or .quality prioritization,
+
+
+330
+00:13:51.331 --> 00:13:52.966 line:-1 align:center
+some of the algorithms we use
+
+
+331
+00:13:52.966 --> 00:13:55.569 line:-2 align:center
+might fuse several
+differently exposed images
+
+
+332
+00:13:55,569 --> 00:13:57,371 line:-1
+to improve dynamic range.
+
+
+333
+00:13:57.371 --> 00:13:59.173 line:-1 align:center
+Photos will have great quality,
+
+
+334
+00:13:59.173 --> 00:14:00.774 line:-2 align:center
+but they might look
+different from video
+
+
+335
+00:14:00.774 --> 00:14:03.076 line:-1 align:center
+being recorded at the same time.
+
+
+336
+00:14:03,076 --> 00:14:06,180 line:-2
+If you need your video and photo
+to look exactly the same,
+
+
+337
+00:14:06.180 --> 00:14:07.981 line:-1 align:center
+please use .speed instead.
+
+
+338
+00:14:07,981 --> 00:14:10,651 line:-2
+Lastly, let's summarize
+what we just covered.
+
+
+339
+00:14:11.919 --> 00:14:13.820 line:-2 align:center
+When designing your app's
+experience,
+
+
+340
+00:14:13.820 --> 00:14:15.689 line:-2 align:center
+be aware
+of the decision to choose
+
+
+341
+00:14:15,689 --> 00:14:18,091 line:-1
+between quality and speed.
+
+
+342
+00:14:18.091 --> 00:14:20.460 line:-2 align:center
+Once you figured out the role
+photo quality will play
+
+
+343
+00:14:20,460 --> 00:14:22,663 line:-2
+in your use cases,
+use the appropriate
+
+
+344
+00:14:22.663 --> 00:14:24.898 line:-2 align:center
+prioritization levels
+to accomplish that.
+
+
+345
+00:14:24,898 --> 00:14:26,333 line:-2
+And with a minimal amount
+of work
+
+
+346
+00:14:26.333 --> 00:14:28.235 line:-2 align:center
+and sometimes
+no work at all,
+
+
+347
+00:14:28,235 --> 00:14:31,705 line:-2
+you will now be getting amazing
+photos with video formats.
+
+
+348
+00:14:31,705 --> 00:14:32,806 line:-1
+Thank you very much.
+
+
+349
+00:14:32,806 --> 00:14:35,275 line:-1
+[percussive music]
+

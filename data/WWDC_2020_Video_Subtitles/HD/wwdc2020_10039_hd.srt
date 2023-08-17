@@ -1,0 +1,952 @@
+1
+00:00:00,167 --> 00:00:02,102 line:-1
+[chimes]
+
+
+2
+00:00:03,670 --> 00:00:06,974 line:-1
+Hello and welcome to WWDC.
+
+
+3
+00:00:08,575 --> 00:00:10,677 line:0
+Hi, everyone. My name's Tina.
+
+
+4
+00:00:10,744 --> 00:00:12,479 line:0
+I work on SwiftUI.
+
+
+5
+00:00:12,546 --> 00:00:17,451 line:0
+Today I'm going to talk about building
+apps supporting documents with SwiftUI.
+
+
+6
+00:00:17,518 --> 00:00:19,786 line:-1
+First off, what is a document?
+
+
+7
+00:00:19,853 --> 00:00:23,156 line:-2
+People have been managing their files
+with the Finder and Files app
+
+
+8
+00:00:23,223 --> 00:00:26,126 line:-1
+on macOS, iPadOS and iOS.
+
+
+9
+00:00:26,193 --> 00:00:29,530 line:-2
+They can use features like tags,
+cloud file providers
+
+
+10
+00:00:29,596 --> 00:00:31,298 line:-1
+and external storage devices
+
+
+11
+00:00:31,365 --> 00:00:33,767 line:-1
+to organize their projects as they need.
+
+
+12
+00:00:33,834 --> 00:00:35,969 line:-1
+They expect to be able to use apps
+
+
+13
+00:00:36,036 --> 00:00:41,608 line:-2
+that allow them to seamlessly open
+these files in place, view and edit them.
+
+
+14
+00:00:41,675 --> 00:00:45,646 line:-2
+This includes being able to make changes
+on the original document,
+
+
+15
+00:00:45,712 --> 00:00:50,450 line:-2
+where the change is accessible to all apps
+that support opening files in place.
+
+
+16
+00:00:50,517 --> 00:00:54,821 line:-2
+This is in contrast to apps
+that import those files into some database
+
+
+17
+00:00:54,888 --> 00:00:56,690 line:-1
+that is then managed by the app.
+
+
+18
+00:00:56,757 --> 00:00:59,092 line:-1
+When you edit an imported document,
+
+
+19
+00:00:59,159 --> 00:01:02,162 line:-2
+you're editing a copy
+of the original document,
+
+
+20
+00:01:02,229 --> 00:01:04,131 line:-1
+and the original is unchanged.
+
+
+21
+00:01:04,197 --> 00:01:06,366 line:-1
+Professional apps like Pixelmator
+
+
+22
+00:01:06,433 --> 00:01:10,571 line:-2
+not only allows users
+to do openInPlace file management,
+
+
+23
+00:01:10,637 --> 00:01:13,907 line:-2
+but also enable powerful
+editing capabilities,
+
+
+24
+00:01:13,974 --> 00:01:16,710 line:-1
+including opening multiple files at once.
+
+
+25
+00:01:16,777 --> 00:01:20,614 line:-2
+Almost all of the functionality in apps
+like Pixelmator,
+
+
+26
+00:01:20,681 --> 00:01:22,616 line:-1
+Keynote and Final Cut Pro
+
+
+27
+00:01:22,683 --> 00:01:26,987 line:-2
+is focused on allowing users
+to do this management of documents.
+
+
+28
+00:01:27,054 --> 00:01:32,159 line:-2
+We often call these "document-based apps"
+as an indication of that behavior.
+
+
+29
+00:01:32,226 --> 00:01:35,362 line:-2
+But opening documents
+is a feature your app can support
+
+
+30
+00:01:35,429 --> 00:01:37,497 line:-1
+without being entirely document-based.
+
+
+31
+00:01:37,564 --> 00:01:40,834 line:-2
+Apps like Xcode
+have additional UI and features
+
+
+32
+00:01:40,901 --> 00:01:43,036 line:-1
+outside of its document support.
+
+
+33
+00:01:43,103 --> 00:01:45,105 line:-1
+And apps like Mail and Console
+
+
+34
+00:01:45,172 --> 00:01:48,609 line:-2
+primarily present
+a non-document-based appearance,
+
+
+35
+00:01:48,675 --> 00:01:53,647 line:-2
+but support opening additional documents,
+like EML files or crash reports.
+
+
+36
+00:01:54,948 --> 00:02:00,087 line:-2
+A SwiftUI application
+is composed of apps, scenes and views.
+
+
+37
+00:02:00,153 --> 00:02:03,423 line:-2
+Adding support for documents
+is done compositionally
+
+
+38
+00:02:03,490 --> 00:02:06,260 line:-2
+using another scene type,
+called DocumentGroup.
+
+
+39
+00:02:06,660 --> 00:02:09,896 line:-1
+A simple text-editing app looks like this.
+
+
+40
+00:02:09,963 --> 00:02:14,134 line:-2
+When you use DocumentGroup in your app,
+you're declaring that your app supports
+
+
+41
+00:02:14,201 --> 00:02:17,337 line:-2
+opening and managing
+this type of document in place.
+
+
+42
+00:02:18,472 --> 00:02:21,808 line:-2
+As shown in
+the "App Essentials in SwiftUI" talk,
+
+
+43
+00:02:21,875 --> 00:02:26,613 line:-2
+the structure of our code matches
+the hierarchy of ownership of an app.
+
+
+44
+00:02:26,680 --> 00:02:30,684 line:-2
+In this case, our app contains
+a single DocumentGroup scene,
+
+
+45
+00:02:30,751 --> 00:02:34,521 line:-2
+able to open multiple windows
+of that document content.
+
+
+46
+00:02:34,588 --> 00:02:37,691 line:0
+And of course, as a compositional element,
+
+
+47
+00:02:37,758 --> 00:02:41,261 line:0
+it could support multiple DocumentGroups
+for different types,
+
+
+48
+00:02:42,162 --> 00:02:44,898 line:-1
+or a WindowGroup and a DocumentGroup.
+
+
+49
+00:02:44,965 --> 00:02:47,734 line:-2
+You can compose these scenes
+into your app,
+
+
+50
+00:02:47,801 --> 00:02:50,637 line:-1
+and SwiftUI automatically gives your app
+
+
+51
+00:02:50,704 --> 00:02:54,141 line:-2
+the expected platform behaviors
+for those scenes.
+
+
+52
+00:02:54,908 --> 00:02:59,112 line:-2
+That includes standard UI elements
+specific to document apps.
+
+
+53
+00:02:59,179 --> 00:03:02,249 line:-1
+State Tracking and Handoff on Mac,
+
+
+54
+00:03:02,316 --> 00:03:04,785 line:-2
+and Document Browser
+and the Navigation Bar
+
+
+55
+00:03:04,852 --> 00:03:08,622 line:-2
+with search field
+and sharing functionality on iOS.
+
+
+56
+00:03:08,689 --> 00:03:11,325 line:-1
+You get all these with very minimal code.
+
+
+57
+00:03:11,391 --> 00:03:14,361 line:-2
+Now let's build something
+using DocumentGroup API.
+
+
+58
+00:03:14,428 --> 00:03:19,499 line:-2
+So I was prototyping a drawing app
+with SwiftUI on my iPad Playground.
+
+
+59
+00:03:19,566 --> 00:03:23,704 line:-2
+I currently have a canvas
+where I can add shapes of different colors
+
+
+60
+00:03:23,770 --> 00:03:25,772 line:-1
+and change their shapes.
+
+
+61
+00:03:25,839 --> 00:03:27,574 line:-1
+I think it's working quite well,
+
+
+62
+00:03:27,641 --> 00:03:31,778 line:-2
+so I want to make it into an app
+where I can save and manage my drawings.
+
+
+63
+00:03:32,446 --> 00:03:34,314 line:-1
+Let's see how to do this.
+
+
+64
+00:03:34,381 --> 00:03:37,851 line:-2
+Let's open Xcode
+and create a document-based app.
+
+
+65
+00:03:38,619 --> 00:03:41,788 line:-2
+I want to have it run on both macOS
+and iOS,
+
+
+66
+00:03:41,855 --> 00:03:44,858 line:-2
+so I'm going to choose
+the multi-platform template.
+
+
+67
+00:03:47,528 --> 00:03:49,897 line:-1
+I'm going to call it "ShapeEdit."
+
+
+68
+00:03:58,839 --> 00:04:00,941 line:-1
+This already comes with some templates.
+
+
+69
+00:04:01,008 --> 00:04:02,976 line:-1
+Let's try building and running this.
+
+
+70
+00:04:14,888 --> 00:04:16,757 line:-1
+We now have a text-editing app
+
+
+71
+00:04:16,822 --> 00:04:18,992 line:-2
+that has all
+the document-supporting features
+
+
+72
+00:04:19,059 --> 00:04:20,060 line:-1
+we mentioned before.
+
+
+73
+00:04:20,127 --> 00:04:24,231 line:-2
+Now, before we dive in,
+let's have a look at the project settings.
+
+
+74
+00:04:26,733 --> 00:04:29,837 line:-2
+I'm going to focus on
+the macOS target for now,
+
+
+75
+00:04:29,903 --> 00:04:34,741 line:-2
+but the configuration we're going to use
+applies to both the iOS and macOS targets.
+
+
+76
+00:04:36,109 --> 00:04:38,612 line:-1
+Let's take a look at the Info.plist.
+
+
+77
+00:04:43,317 --> 00:04:47,287 line:-2
+Xcode adds the "Document Type" section
+for document-based apps.
+
+
+78
+00:04:52,759 --> 00:04:57,397 line:-2
+The value in this identifier field
+is a uniform type identifier.
+
+
+79
+00:04:57,464 --> 00:05:01,902 line:-2
+The system uses this identifier
+to associate files with your app,
+
+
+80
+00:05:01,969 --> 00:05:05,205 line:-2
+so it knows to open this type of document
+in your app
+
+
+81
+00:05:05,272 --> 00:05:07,875 line:-1
+when it sees one on the system.
+
+
+82
+00:05:07,941 --> 00:05:12,579 line:-2
+This identifier is declared
+as an imported type down here.
+
+
+83
+00:05:18,318 --> 00:05:23,457 line:-2
+It's imported because the plain text type
+was declared by another party,
+
+
+84
+00:05:23,524 --> 00:05:25,659 line:-1
+and we import this type declaration
+
+
+85
+00:05:25,726 --> 00:05:28,795 line:-2
+to tell the system
+that the app knows about it.
+
+
+86
+00:05:28,862 --> 00:05:32,466 line:-2
+For our app,
+we're going to declare a type of our own,
+
+
+87
+00:05:32,533 --> 00:05:34,001 line:-1
+so let's come back here...
+
+
+88
+00:05:37,204 --> 00:05:38,639 line:-1
+and create one.
+
+
+89
+00:05:40,140 --> 00:05:43,143 line:-1
+[typing]
+
+
+90
+00:05:44,444 --> 00:05:48,682 line:-2
+Since it's a type we invented,
+we need to export the type declaration
+
+
+91
+00:05:48,749 --> 00:05:53,320 line:-2
+to tell the system that we are
+the authoritative owner of this type.
+
+
+92
+00:05:53,387 --> 00:05:56,957 line:-2
+We do this by filling out
+the "Exported Type Identifier" section.
+
+
+93
+00:05:59,760 --> 00:06:01,461 line:-1
+Let's give it a description.
+
+
+94
+00:06:07,201 --> 00:06:10,604 line:-2
+We're going to store
+the drawing app's binary data,
+
+
+95
+00:06:10,671 --> 00:06:12,873 line:-1
+so make it conform to public data...
+
+
+96
+00:06:14,141 --> 00:06:15,576 line:-1
+and public content.
+
+
+97
+00:06:18,345 --> 00:06:21,114 line:-1
+I'm also going to assign it an extension.
+
+
+98
+00:06:25,319 --> 00:06:27,621 line:-1
+So this is all we need to change here.
+
+
+99
+00:06:27,688 --> 00:06:29,690 line:-1
+Let's have a look at the main function.
+
+
+100
+00:06:35,162 --> 00:06:40,033 line:-2
+Our document type ShapeEditDocument
+is declared for us already.
+
+
+101
+00:06:41,034 --> 00:06:42,903 line:-1
+Both the type of document
+
+
+102
+00:06:42,970 --> 00:06:46,139 line:-2
+and the base document to use
+when creating new documents
+
+
+103
+00:06:46,206 --> 00:06:47,941 line:-1
+are passed to DocumentGroup.
+
+
+104
+00:06:49,409 --> 00:06:53,413 line:-2
+The document property
+of the closure's argument is a binding
+
+
+105
+00:06:53,480 --> 00:06:57,718 line:-2
+that provides us with read-write access
+to the underlying data model,
+
+
+106
+00:06:57,784 --> 00:07:00,521 line:-2
+which is the text
+in this text-editing app.
+
+
+107
+00:07:00,587 --> 00:07:03,223 line:-1
+DocumentGroup supports opening place,
+
+
+108
+00:07:03,290 --> 00:07:07,461 line:-2
+and the binding lets SwiftUI know
+when the text is updated
+
+
+109
+00:07:07,528 --> 00:07:12,132 line:-2
+so it takes care of registering undo
+and dirtying the document state.
+
+
+110
+00:07:12,866 --> 00:07:15,068 line:-1
+Let's take a look at ContentView,
+
+
+111
+00:07:15,135 --> 00:07:17,938 line:-2
+which is the default view
+for presenting the document.
+
+
+112
+00:07:22,476 --> 00:07:25,512 line:-1
+It consists of a TextEditor.
+
+
+113
+00:07:25,579 --> 00:07:28,515 line:-2
+Since we're going to do
+a shape-drawing app,
+
+
+114
+00:07:28,582 --> 00:07:32,019 line:-2
+we're going to replace it with a canvas
+where users can draw.
+
+
+115
+00:07:32,085 --> 00:07:34,454 line:-1
+But we'll come back to that later.
+
+
+116
+00:07:34,521 --> 00:07:37,424 line:-1
+Let's have a look at a ShapeEditDocument.
+
+
+117
+00:07:41,395 --> 00:07:45,232 line:-2
+It is a value type that conforms
+to the file document protocol,
+
+
+118
+00:07:45,299 --> 00:07:49,236 line:-2
+which is the representation
+of a document on disk.
+
+
+119
+00:07:49,303 --> 00:07:52,673 line:-2
+First, we are going to define
+readableContentTypes.
+
+
+120
+00:07:52,739 --> 00:07:56,877 line:-2
+It's an array of UTType,
+the uniform type identifier.
+
+
+121
+00:07:57,277 --> 00:08:00,948 line:-2
+SwiftUI uses this to identify
+the type of a document
+
+
+122
+00:08:01,014 --> 00:08:03,250 line:-1
+that your user wants to open,
+
+
+123
+00:08:03,317 --> 00:08:06,453 line:-1
+and only those defined here are allowed.
+
+
+124
+00:08:06,520 --> 00:08:08,622 line:-1
+exampleText is defined here.
+
+
+125
+00:08:11,391 --> 00:08:14,528 line:-2
+This should match what we put
+in the "Document Types" section
+
+
+126
+00:08:14,595 --> 00:08:19,032 line:-2
+of the target's Info.plist earlier,
+so let's change this.
+
+
+127
+00:08:24,171 --> 00:08:27,508 line:-2
+Notice the difference
+between the two declarations.
+
+
+128
+00:08:27,574 --> 00:08:31,178 line:-2
+Here, we're using
+the exportedAs constructor,
+
+
+129
+00:08:31,245 --> 00:08:35,448 line:-2
+while previously we were using
+the importedAs constructor.
+
+
+130
+00:08:35,515 --> 00:08:38,184 line:-1
+The imported type is a computed variable
+
+
+131
+00:08:38,251 --> 00:08:39,886 line:-1
+because it's imported.
+
+
+132
+00:08:39,953 --> 00:08:45,759 line:-2
+That means its value can change over time
+as apps are installed or uninstalled.
+
+
+133
+00:08:45,826 --> 00:08:51,398 line:-2
+Here, we're using an exported type,
+so it can be declared a constant.
+
+
+134
+00:08:51,465 --> 00:08:53,467 line:-1
+For more information,
+
+
+135
+00:08:53,534 --> 00:08:57,838 line:-2
+see the documentation for UTType
+on the Developer website.
+
+
+136
+00:08:58,272 --> 00:08:59,673 line:-1
+Now let's change this...
+
+
+137
+00:09:05,179 --> 00:09:06,613 line:-1
+to our own type.
+
+
+138
+00:09:11,552 --> 00:09:14,421 line:-2
+Next, let's implement
+initializing our document,
+
+
+139
+00:09:14,488 --> 00:09:17,124 line:-2
+giving the FileWrapper
+and the contentType.
+
+
+140
+00:09:17,191 --> 00:09:20,327 line:-2
+We don't need this code,
+so I'm going to remove them.
+
+
+141
+00:09:21,695 --> 00:09:25,632 line:-2
+The contentType argument
+is always the type supported by the app.
+
+
+142
+00:09:25,699 --> 00:09:28,468 line:-1
+And there are a few ways to do this.
+
+
+143
+00:09:28,535 --> 00:09:31,138 line:-1
+Here, we're going to use a JSONDecoder.
+
+
+144
+00:09:35,175 --> 00:09:39,580 line:-2
+And to use a JSONDecoder,
+the type needs to conform to "Codable."
+
+
+145
+00:09:43,817 --> 00:09:47,321 line:-2
+We also need to implement
+writing out the document to a file
+
+
+146
+00:09:47,387 --> 00:09:49,389 line:-1
+for our specified type.
+
+
+147
+00:09:49,456 --> 00:09:52,860 line:-2
+We don't need these either,
+so I'm also going to remove them.
+
+
+148
+00:09:54,428 --> 00:09:58,565 line:-2
+FileWrapper is the destination
+of the serialization.
+
+
+149
+00:09:58,632 --> 00:10:00,267 line:-1
+It's an inout argument,
+
+
+150
+00:10:00,334 --> 00:10:04,171 line:-2
+and we can either create
+the new FileWrapper or update it.
+
+
+151
+00:10:04,238 --> 00:10:09,176 line:-2
+Again, there are a few ways to do this,
+and we'll use a JSONEncoder.
+
+
+152
+00:10:12,279 --> 00:10:16,083 line:-2
+So that's all we need to do
+to conform to the file document protocol.
+
+
+153
+00:10:16,149 --> 00:10:18,886 line:-2
+Notice that we are working with
+a value type here.
+
+
+154
+00:10:21,955 --> 00:10:25,626 line:-2
+This means that you get all the benefits
+of working with this struct,
+
+
+155
+00:10:25,692 --> 00:10:27,828 line:-1
+including copy-on-write behavior,
+
+
+156
+00:10:27,895 --> 00:10:31,832 line:-2
+and that the app can start saving
+while the user is still drawing.
+
+
+157
+00:10:32,866 --> 00:10:35,602 line:-1
+Now, with document support in place,
+
+
+158
+00:10:35,669 --> 00:10:38,238 line:-2
+let's add our prototype canvas code
+into the project.
+
+
+159
+00:10:47,681 --> 00:10:51,852 line:-2
+We have a graphic type
+that defines the attributes of the shapes
+
+
+160
+00:10:51,919 --> 00:10:55,222 line:-1
+and a Canvas View to display the shapes.
+
+
+161
+00:10:56,223 --> 00:10:58,392 line:-1
+Let's change the data type in the document
+
+
+162
+00:10:58,458 --> 00:11:00,093 line:-1
+from text to our graphic type.
+
+
+163
+00:11:10,470 --> 00:11:12,539 line:-1
+Let's also add some initial shapes.
+
+
+164
+00:11:23,717 --> 00:11:26,887 line:0
+Let's also swap out the TextEditor
+with our canvas.
+
+
+165
+00:11:33,260 --> 00:11:35,295 line:-1
+And we're all set. Let's run it.
+
+
+166
+00:11:41,335 --> 00:11:44,204 line:-2
+We have a drawing app
+that supports documents.
+
+
+167
+00:11:44,271 --> 00:11:47,474 line:-2
+I can save the drawings
+and revisit them later.
+
+
+168
+00:11:47,541 --> 00:11:50,210 line:-1
+So, this is how easy it is
+
+
+169
+00:11:50,277 --> 00:11:53,080 line:-2
+to add document support
+to your app in SwiftUI.
+
+
+170
+00:11:53,146 --> 00:11:54,147 line:-1
+Thank you.
+
+
+171
+00:11:54,214 --> 00:11:56,149 line:-1
+[chimes]
+

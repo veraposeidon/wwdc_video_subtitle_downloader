@@ -1,0 +1,3751 @@
+2
+00:00:00,334 --> 00:00:07,341 line:-1
+[upbeat music]
+
+
+3
+00:00:09,042 --> 00:00:11,478 line:-2
+[Kacper] Welcome!
+My name is Kacper.
+
+
+4
+00:00:11,512 --> 00:00:14,248 line:-2
+I'm a Performance Tools Engineer
+at Apple, and today,
+
+
+5
+00:00:14,281 --> 00:00:16,884 line:-2
+together with Sergio,
+we'll be talking about the new
+
+
+6
+00:00:16,917 --> 00:00:21,288 line:-2
+HTTP Traffic Instrument
+available in Instruments 13.
+
+
+7
+00:00:22,089 --> 00:00:25,092 line:-2
+This Instrument, contained
+in the Network template,
+
+
+8
+00:00:25.125 --> 00:00:27.394 line:-2 align:center
+allows you to inspect
+HTTP traffic
+
+
+9
+00:00:27,427 --> 00:00:28,896 line:-1
+coming from your application
+
+
+10
+00:00:28.929 --> 00:00:30.764 line:-2 align:center
+through the Apple Networking
+stack.
+
+
+11
+00:00:32.232 --> 00:00:35.002 line:-2 align:center
+This approach comes
+with multiple benefits.
+
+
+12
+00:00:35.035 --> 00:00:38.338 line:-2 align:center
+It just works
+on all Apple devices.
+
+
+13
+00:00:38,372 --> 00:00:41,041 line:-2
+The entire traffic going through
+the URL loading system
+
+
+14
+00:00:41.074 --> 00:00:43.410 line:-1 align:center
+is exposed, even the ones sent
+
+
+15
+00:00:43,443 --> 00:00:48,182 line:-2
+with the new HTTP/3 protocol
+or over VPN.
+
+
+16
+00:00:48,215 --> 00:00:49,816 align:center
+Because
+of the system integration,
+
+
+17
+00:00:49,850 --> 00:00:53,020 align:center
+it attributes traffic
+to processes running on it,
+
+
+18
+00:00:53,053 --> 00:00:54,454 line:0
+and since it's instrumenting
+
+
+19
+00:00:54,488 --> 00:00:57,524 align:center
+Apple Networking frameworks,
+it even reveals requests
+
+
+20
+00:00:57,558 --> 00:01:00,928 line:0
+hitting the on-disk cache
+or networking errors.
+
+
+21
+00:01:00,961 --> 00:01:02,696 line:0
+All of this exposed
+in the context
+
+
+22
+00:01:02,729 --> 00:01:06,133 line:0
+of higher-level API concepts
+that you are familiar with,
+
+
+23
+00:01:06,166 --> 00:01:10,037 line:0
+such as URLSessions
+and URLSessionTasks.
+
+
+24
+00:01:10,070 --> 00:01:11,905 align:center
+This tool
+will help you understand
+
+
+25
+00:01:11,939 --> 00:01:13,707 align:center
+how your usage of the API
+
+
+26
+00:01:13,740 --> 00:01:17,044 line:0
+translates to the lifetime
+of network requests.
+
+
+27
+00:01:17.044 --> 00:01:20.113 line:-2 align:center
+In this hands-on session,
+we will first get you familiar
+
+
+28
+00:01:20.147 --> 00:01:22.282 line:-2 align:center
+with how
+the Instruments UI reflects
+
+
+29
+00:01:22.316 --> 00:01:24.384 line:-1 align:center
+the API concepts you are using.
+
+
+30
+00:01:25,686 --> 00:01:29,223 line:-2
+After this quick introduction,
+we will transition to four demos
+
+
+31
+00:01:29.256 --> 00:01:31.725 line:-2 align:center
+that will illustrate
+how you can use the tool
+
+
+32
+00:01:31.758 --> 00:01:35.929 line:-2 align:center
+to detect both performance
+and correctness problems.
+
+
+33
+00:01:35.963 --> 00:01:38.498 line:-2 align:center
+And even if your app
+seems to work flawlessly,
+
+
+34
+00:01:38,532 --> 00:01:41,068 line:-2
+you will learn how
+to verify that it does
+
+
+35
+00:01:41.101 --> 00:01:45.439 line:-2 align:center
+what you think by auditing
+the traffic coming from it.
+
+
+36
+00:01:45.472 --> 00:01:48.642 line:-2 align:center
+Let's get started with how
+the Networking API maps
+
+
+37
+00:01:48,675 --> 00:01:50,878 line:-2
+to the Instruments
+visualization.
+
+
+38
+00:01:50.911 --> 00:01:52.880 line:-2 align:center
+This is how
+the HTTP Traffic trace
+
+
+39
+00:01:52,913 --> 00:01:55,148 line:-2
+is displayed in Instruments
+when I recorded
+
+
+40
+00:01:55.182 --> 00:01:58.585 line:-2 align:center
+my system traffic using
+the Network template.
+
+
+41
+00:01:58,619 --> 00:02:01,488 line:-2
+Navigation is structured
+around the track hierarchy,
+
+
+42
+00:02:01,522 --> 00:02:04,057 line:-2
+and that's what we will cover
+in detail first.
+
+
+43
+00:02:04,091 --> 00:02:07,661 line:-2
+The HTTP Traffic Instrument
+located at the top level
+
+
+44
+00:02:07.694 --> 00:02:09.429 line:-2 align:center
+shows you an overview
+of how many
+
+
+45
+00:02:09.463 --> 00:02:11.999 line:-2 align:center
+URLSession tasks were running
+in your trace
+
+
+46
+00:02:12.032 --> 00:02:15.269 line:-2 align:center
+at any given time,
+ideal for detecting spots
+
+
+47
+00:02:15,302 --> 00:02:19,773 line:-2
+with increased HTTP Traffic
+activity in your app's lifetime.
+
+
+48
+00:02:19,806 --> 00:02:21,909 line:-2
+The next hierarchy level
+shows a breakdown
+
+
+49
+00:02:21.942 --> 00:02:24.211 line:-1 align:center
+of activity by process.
+
+
+50
+00:02:24,244 --> 00:02:27,414 line:-2
+In addition to traffic from
+all of the debuggable processes,
+
+
+51
+00:02:27,447 --> 00:02:28,482 line:-1
+it allows you to inspect
+
+
+52
+00:02:28.515 --> 00:02:31.051 line:-2 align:center
+background traffic
+initiated by them.
+
+
+53
+00:02:31,084 --> 00:02:35,355 line:-2
+Contained below each process
+are all URLSessions used by it.
+
+
+54
+00:02:35.389 --> 00:02:36.690 line:-1 align:center
+And these correspond
+
+
+55
+00:02:36,723 --> 00:02:40,360 line:-2
+to the URLSession objects
+you create in code.
+
+
+56
+00:02:40,394 --> 00:02:42,996 line:-2
+The graph at this level
+allows you to inspect
+
+
+57
+00:02:43.030 --> 00:02:46.200 line:-1 align:center
+all individual task intervals.
+
+
+58
+00:02:46,233 --> 00:02:48,735 line:0
+To get a better mapping
+between your session objects
+
+
+59
+00:02:48,769 --> 00:02:52,239 align:center
+and the visualization, you can
+name them in code by setting
+
+
+60
+00:02:52,272 --> 00:02:55,609 line:0
+the sessionDescription property
+on a session instance.
+
+
+61
+00:02:57,511 --> 00:02:59,980 align:center
+On the last level,
+the traffic is broken down
+
+
+62
+00:03:00,013 --> 00:03:02,316 align:center
+by requested domains.
+
+
+63
+00:03:02,349 --> 00:03:05,586 align:center
+Graphs on this level show
+more details about tasks,
+
+
+64
+00:03:05,619 --> 00:03:07,988 align:center
+including individual
+transactions that make up
+
+
+65
+00:03:08,021 --> 00:03:10,691 align:center
+the tasks and their states.
+
+
+66
+00:03:12,125 --> 00:03:14,561 line:0
+To get a better understanding
+of what tasks
+
+
+67
+00:03:14,595 --> 00:03:17,931 align:center
+and transactions are,
+let's analyze an example.
+
+
+68
+00:03:21.435 --> 00:03:23.704 line:-2 align:center
+Here are a few tasks
+that are loading data
+
+
+69
+00:03:23,737 --> 00:03:25,606 line:-1
+from the selected domain.
+
+
+70
+00:03:25,639 --> 00:03:26,874 line:-1
+Let's focus on one of them
+
+
+71
+00:03:26,907 --> 00:03:28,909 line:-2
+to analyze the structure
+of a task.
+
+
+72
+00:03:32.145 --> 00:03:35.816 line:-2 align:center
+This single task interval
+has a lot of information.
+
+
+73
+00:03:35.849 --> 00:03:38.986 line:-2 align:center
+We can represent this in a more
+abstract manner to understand
+
+
+74
+00:03:39,019 --> 00:03:42,689 line:-2
+how Instruments visualization
+maps to the API being used.
+
+
+75
+00:03:45,292 --> 00:03:49,029 line:-2
+At the top level,
+we have a task object.
+
+
+76
+00:03:49,062 --> 00:03:52,900 line:-2
+A task is made up of one
+or more transactions.
+
+
+77
+00:03:54,535 --> 00:03:57,804 align:center
+A transaction is a pair
+of an HTTP request
+
+
+78
+00:03:57,838 --> 00:03:59,840 align:center
+and the corresponding response.
+
+
+79
+00:04:02,009 --> 00:04:04,378 line:0
+The task level is
+the representation of how
+
+
+80
+00:04:04.411 --> 00:04:08.916 line:-2 align:center
+your code interacts with the API
+of the URL Loading System.
+
+
+81
+00:04:08,949 --> 00:04:11,785 line:-2
+When you create a task
+and call resume on it,
+
+
+82
+00:04:11,818 --> 00:04:14,354 line:-1
+the task interval starts.
+
+
+83
+00:04:14.388 --> 00:04:15.455 line:-1 align:center
+And it ends
+
+
+84
+00:04:15,489 --> 00:04:17,824 line:-2
+right before
+your completion block is called.
+
+
+85
+00:04:20.661 --> 00:04:23.764 line:-2 align:center
+Each task can be given
+a semantic name using
+
+
+86
+00:04:23,797 --> 00:04:27,000 line:-2
+the taskDescription property,
+which will be used
+
+
+87
+00:04:27.034 --> 00:04:30.571 line:-2 align:center
+to label
+the interval in Instruments.
+
+
+88
+00:04:30,604 --> 00:04:34,975 line:-2
+We also show the task identifier
+as part of the task label.
+
+
+89
+00:04:35.008 --> 00:04:36.510 line:-2 align:center
+You can use it
+to cross-reference
+
+
+90
+00:04:36.543 --> 00:04:39.847 line:-1 align:center
+the task with other data.
+
+
+91
+00:04:39.880 --> 00:04:42.149 line:-2 align:center
+If your task
+finishes with an error,
+
+
+92
+00:04:42.182 --> 00:04:43.750 line:-2 align:center
+its description will be
+presented
+
+
+93
+00:04:43.784 --> 00:04:47.721 line:-2 align:center
+on the interval label
+for easier debugging.
+
+
+94
+00:04:47.754 --> 00:04:50.524 line:-2 align:center
+As we mentioned before,
+a task can be made up
+
+
+95
+00:04:50,557 --> 00:04:52,292 line:-1
+of multiple transactions.
+
+
+96
+00:04:52.326 --> 00:04:54.528 line:-1 align:center
+Let's talk about these now.
+
+
+97
+00:04:54,561 --> 00:04:59,166 line:-2
+Here we have a task to load
+the start page of apple.com.
+
+
+98
+00:04:59,199 --> 00:05:03,070 line:-2
+However, this URL is
+not the canonical URL.
+
+
+99
+00:05:03.103 --> 00:05:05.372 line:-1 align:center
+The task requests apple.com,
+
+
+100
+00:05:05,405 --> 00:05:10,177 line:-2
+but the preferred domain
+is www.apple.com.
+
+
+101
+00:05:10,210 --> 00:05:12,946 line:-2
+When we create this task,
+the URL loading system
+
+
+102
+00:05:12.980 --> 00:05:17.050 line:-2 align:center
+initially creates a request
+to apple.com.
+
+
+103
+00:05:17,084 --> 00:05:19,820 line:-2
+Shortly after, it receives
+a redirect response
+
+
+104
+00:05:19,853 --> 00:05:21,655 line:-1
+from the server,
+
+
+105
+00:05:21.655 --> 00:05:26.159 line:-2 align:center
+stating that the preferred URL
+is actually www.apple.com.
+
+
+106
+00:05:27.227 --> 00:05:30.364 line:-2 align:center
+By default, we follow redirects,
+so instead of returning
+
+
+107
+00:05:30,397 --> 00:05:33,200 line:-2
+the 301 response,
+the URL loading system
+
+
+108
+00:05:33,233 --> 00:05:38,438 line:-2
+will create a new transaction
+to now load the preferred URL.
+
+
+109
+00:05:38.472 --> 00:05:41.241 line:-2 align:center
+The response from this second,
+successful transaction
+
+
+110
+00:05:41.275 --> 00:05:43.610 line:-2 align:center
+is what is returned
+back to the task.
+
+
+111
+00:05:46,446 --> 00:05:49,149 line:0
+As mentioned before,
+a transaction represents
+
+
+112
+00:05:49,183 --> 00:05:53,387 align:center
+the combination of the HTTP
+request and response.
+
+
+113
+00:05:53,420 --> 00:05:56,423 line:0
+It aligns with what URLSession
+does under the hood
+
+
+114
+00:05:56,456 --> 00:05:58,025 line:0
+to handle your task
+
+
+115
+00:05:58,058 --> 00:06:01,562 align:center
+and contains all of the
+information of the HTTP layer,
+
+
+116
+00:06:02,029 --> 00:06:03,230 line:0
+like the requested URL,
+
+
+117
+00:06:03,263 --> 00:06:05,399 align:center
+information about
+the transferred data,
+
+
+118
+00:06:05,432 --> 00:06:06,900 line:0
+and much more.
+
+
+119
+00:06:08,936 --> 00:06:11,471 align:center
+Just like for the task,
+the transaction label
+
+
+120
+00:06:11,505 --> 00:06:14,107 line:0
+gives you an overview
+of the transaction.
+
+
+121
+00:06:14,141 --> 00:06:16,076 align:center
+Mainly,
+you get information about
+
+
+122
+00:06:16,109 --> 00:06:18,445 align:center
+the request and the response.
+
+
+123
+00:06:20,147 --> 00:06:22,216 line:0
+The track hierarchy
+tells you the domain
+
+
+124
+00:06:22,249 --> 00:06:24,318 align:center
+that is requested,
+while you can find
+
+
+125
+00:06:24,351 --> 00:06:27,187 line:0
+the path and query
+on the label itself.
+
+
+126
+00:06:28,989 --> 00:06:31,325 line:0
+In addition to that,
+the interval label
+
+
+127
+00:06:31,358 --> 00:06:34,094 line:0
+displays the HTTP version,
+
+
+128
+00:06:34,127 --> 00:06:36,263 align:center
+the HTTP Method,
+
+
+129
+00:06:36.296 --> 00:06:39.066 line:-2 align:center
+and whether the request
+sent an Authorization
+
+
+130
+00:06:39.099 --> 00:06:41.201 line:-1 align:center
+or a Cookie header.
+
+
+131
+00:06:41.235 --> 00:06:43.070 line:-2 align:center
+These are often useful
+to understand
+
+
+132
+00:06:43.103 --> 00:06:45.439 line:-2 align:center
+authentication flows
+at a glance.
+
+
+133
+00:06:47,374 --> 00:06:50,777 line:-2
+For the response,
+you get the status code,
+
+
+134
+00:06:50.811 --> 00:06:53.747 line:-2 align:center
+whether the response
+contained a cookie,
+
+
+135
+00:06:53.780 --> 00:06:57.117 line:-2 align:center
+and the content type
+of the response.
+
+
+136
+00:06:57.150 --> 00:06:59.953 line:-2 align:center
+How long the request
+and the response took,
+
+
+137
+00:06:59.987 --> 00:07:02.256 line:-2 align:center
+as well as more detailed
+timing information
+
+
+138
+00:07:02.289 --> 00:07:05.025 line:-2 align:center
+about other work that is part
+of the transaction
+
+
+139
+00:07:05.058 --> 00:07:08.095 line:-2 align:center
+is captured
+by the transaction states.
+
+
+140
+00:07:08,128 --> 00:07:09,863 line:-2
+Let's analyze them
+in the context
+
+
+141
+00:07:09.897 --> 00:07:12.232 line:-1 align:center
+of a containing task.
+
+
+142
+00:07:12.266 --> 00:07:15.435 line:-2 align:center
+The start of the transaction
+is the point in time
+
+
+143
+00:07:15,469 --> 00:07:17,070 line:-1
+when the URL Loading System
+
+
+144
+00:07:17.104 --> 00:07:21.141 line:-2 align:center
+creates the transaction
+for making this request.
+
+
+145
+00:07:21,175 --> 00:07:25,078 line:-2
+It first checks whether we have
+a valid cached response already.
+
+
+146
+00:07:25.112 --> 00:07:27.514 line:-2 align:center
+And if that's not the case,
+it will try to schedule
+
+
+147
+00:07:27.548 --> 00:07:29.716 line:-1 align:center
+the request on a connection.
+
+
+148
+00:07:32,085 --> 00:07:34,655 align:center
+Next, the transaction
+may have to wait a bit
+
+
+149
+00:07:34,688 --> 00:07:38,025 align:center
+in the Blocked state, waiting
+for an available connection.
+
+
+150
+00:07:40,427 --> 00:07:43,363 line:0
+The Sending Request state starts
+when the transaction
+
+
+151
+00:07:43,397 --> 00:07:46,600 align:center
+is finally handled
+by a connection.
+
+
+152
+00:07:46,633 --> 00:07:48,702 line:0
+It ends
+once we send the last byte
+
+
+153
+00:07:48,735 --> 00:07:51,538 align:center
+of the request onto the network.
+
+
+154
+00:07:51,572 --> 00:07:54,274 align:center
+Next, the transaction
+goes into an idle
+
+
+155
+00:07:54,308 --> 00:07:56,543 align:center
+Waiting for Response state,
+
+
+156
+00:07:56,577 --> 00:07:59,780 align:center
+followed by Receiving Response,
+which will track the span
+
+
+157
+00:07:59,813 --> 00:08:03,383 line:0
+from the first to the last byte
+received from the server.
+
+
+158
+00:08:04,618 --> 00:08:06,987 align:center
+The whole transaction
+will complete shortly
+
+
+159
+00:08:06,987 --> 00:08:10,524 line:0
+after the last byte is received,
+once the URL Loading system
+
+
+160
+00:08:10,557 --> 00:08:14,628 line:0
+has determined whether this was
+a successful response.
+
+
+161
+00:08:14.661 --> 00:08:17.664 line:-2 align:center
+In practice, the cache lookup
+and sending state
+
+
+162
+00:08:17,698 --> 00:08:20,467 line:-2
+for a GET request
+are usually much shorter,
+
+
+163
+00:08:20.501 --> 00:08:23.170 line:-2 align:center
+so it's more likely
+to appear like this.
+
+
+164
+00:08:25.672 --> 00:08:27.608 line:-2 align:center
+To show you
+some practical examples,
+
+
+165
+00:08:27.608 --> 00:08:30.310 line:-2 align:center
+I would like to hand over
+to my colleague, Sergio.
+
+
+166
+00:08:30,344 --> 00:08:33,247 line:-2
+He will walk you through an app
+he recently started developing
+
+
+167
+00:08:33,280 --> 00:08:36,416 line:-2
+to illustrate how the HTTP
+Instrument can help you
+
+
+168
+00:08:36,450 --> 00:08:39,553 line:-2
+with fixing performance
+and correctness issues.
+
+
+169
+00:08:40.020 --> 00:08:41.822 line:-2 align:center
+[Sergio] Thanks, Kacper.
+Hello, everyone.
+
+
+170
+00:08:42.189 --> 00:08:43.757 line:-2 align:center
+My name is Sergio Lopez,
+and I've been working
+
+
+171
+00:08:44.157 --> 00:08:45.826 line:-1 align:center
+on this app for dog lovers.
+
+
+172
+00:08:46,159 --> 00:08:50,397 line:-2
+Think of it like a social media
+platform but for dog pictures...
+
+
+173
+00:08:50.430 --> 00:08:51.665 line:-1 align:center
+only!
+
+
+174
+00:08:51.698 --> 00:08:53.567 line:-2 align:center
+People can post images
+of dogs and you get
+
+
+175
+00:08:53.600 --> 00:08:55.903 line:-2 align:center
+a stream
+of the most recent uploads!
+
+
+176
+00:08:55.903 --> 00:08:57.938 line:-1 align:center
+So when I open the app, it loads
+
+
+177
+00:08:57.971 --> 00:09:00.908 line:-2 align:center
+several new dog images,
+but I noticed that it takes
+
+
+178
+00:09:00.941 --> 00:09:03.277 line:-2 align:center
+quite some time for them
+to finish loading.
+
+
+179
+00:09:05.045 --> 00:09:08.315 line:-2 align:center
+Let's profile the app
+with the new HTTP Traffic
+
+
+180
+00:09:08.348 --> 00:09:11.985 line:-2 align:center
+instrument to help us
+improve this situation.
+
+
+181
+00:09:12,019 --> 00:09:14,922 line:-2
+In the "Product" menu,
+I'll choose
+
+
+182
+00:09:14.955 --> 00:09:18.192 line:-2 align:center
+the "Profile" option to profile
+my app in Instruments.
+
+
+183
+00:09:19.960 --> 00:09:22.496 line:-2 align:center
+This will build my app
+in the release configuration,
+
+
+184
+00:09:22.529 --> 00:09:25.966 line:-2 align:center
+to ensure I'm profiling my app
+as it would run for my users,
+
+
+185
+00:09:25.999 --> 00:09:28.569 line:-2 align:center
+with all optimizations
+turned on.
+
+
+186
+00:09:29.002 --> 00:09:30.270 line:-1 align:center
+Once the build is finished,
+
+
+187
+00:09:30.304 --> 00:09:32.639 line:-2 align:center
+Instruments will
+launch automatically.
+
+
+188
+00:09:32.673 --> 00:09:34.975 line:-2 align:center
+Upon starting,
+the standard template chooser
+
+
+189
+00:09:35.008 --> 00:09:37.044 line:-1 align:center
+of Instruments is displayed.
+
+
+190
+00:09:39,079 --> 00:09:41,014 line:-2
+In our case,
+I wanna choose the Network
+
+
+191
+00:09:41.048 --> 00:09:44.017 line:-2 align:center
+template on the bottom left,
+which gives us more information
+
+
+192
+00:09:44,051 --> 00:09:46,787 line:-2
+about general network
+connections my app makes,
+
+
+193
+00:09:46.820 --> 00:09:50.824 line:-2 align:center
+but also contains the new
+HTTP Tracing functionality.
+
+
+194
+00:09:58,565 --> 00:10:02,970 line:-2
+The track area now contains two
+tracks, one for each instrument.
+
+
+195
+00:10:03,003 --> 00:10:06,840 line:-2
+The bottom track is the existing
+Network Connections instrument,
+
+
+196
+00:10:06,874 --> 00:10:10,677 line:-2
+and the top track is
+the new HTTP Traffic instrument.
+
+
+197
+00:10:10,677 --> 00:10:13,280 line:-2
+We'll focus on this
+new instrument today.
+
+
+198
+00:10:13.280 --> 00:10:15.415 line:-2 align:center
+All I need to do now
+is hit "record."
+
+
+199
+00:10:15.449 --> 00:10:18.418 line:-2 align:center
+Instruments will then start
+my app and start recording.
+
+
+200
+00:10:21.989 --> 00:10:23.457 line:-1 align:center
+Before you can use this tool,
+
+
+201
+00:10:23.490 --> 00:10:24.992 line:-2 align:center
+you need to confirm
+that you understand
+
+
+202
+00:10:25,025 --> 00:10:27,594 line:-2
+the implications of capturing
+the networking traffic.
+
+
+203
+00:10:27,628 --> 00:10:31,131 line:-2
+It's very powerful, especially
+if you record all processes.
+
+
+204
+00:10:31,164 --> 00:10:33,400 line:-2
+The data captured includes
+everything that is sent,
+
+
+205
+00:10:33,433 --> 00:10:36,103 line:-2
+which may be personal
+and sensitive information,
+
+
+206
+00:10:36.136 --> 00:10:38.272 line:-1 align:center
+even up to user credentials.
+
+
+207
+00:10:38.305 --> 00:10:41.108 line:-2 align:center
+So, you should be very careful
+with the resulting trace files,
+
+
+208
+00:10:41.141 --> 00:10:42.576 line:-1 align:center
+and we want you to be aware.
+
+
+209
+00:10:42.609 --> 00:10:44.111 line:-1 align:center
+So let me confirm this.
+
+
+210
+00:10:47,214 --> 00:10:48,916 line:-1
+The app was launched
+
+
+211
+00:10:48.949 --> 00:10:51.118 line:-2 align:center
+and the images were slow
+to load.
+
+
+212
+00:10:53,987 --> 00:10:55,856 line:-1
+I will now stop the recording.
+
+
+213
+00:10:58,091 --> 00:10:59,960 line:-2
+Let's zoom in to the data
+we recorded
+
+
+214
+00:10:59.960 --> 00:11:01.828 line:-2 align:center
+by using Option-click
+and dragging
+
+
+215
+00:11:01,828 --> 00:11:04,164 line:-2
+over the area covering
+our HTTP traffic.
+
+
+216
+00:11:08.836 --> 00:11:10.704 line:-2 align:center
+Clicking on
+the disclosure indicator
+
+
+217
+00:11:10,704 --> 00:11:13,173 line:-2
+in the "HTTP Traffic" track
+on the top left
+
+
+218
+00:11:13,207 --> 00:11:15,375 line:-2
+will reveal
+the full track hierarchy
+
+
+219
+00:11:15.375 --> 00:11:16.743 line:-1 align:center
+that Kacper described earlier.
+
+
+220
+00:11:20,314 --> 00:11:22,816 line:-2
+I'll also increase the track
+height to show all intervals.
+
+
+221
+00:11:32,459 --> 00:11:34,194 line:-2
+At the top,
+there's the first task
+
+
+222
+00:11:34.761 --> 00:11:36.697 line:-2 align:center
+that queries the server
+for the list of images,
+
+
+223
+00:11:36.697 --> 00:11:38.932 line:-2 align:center
+which appear on the "Latest"
+section of the app.
+
+
+224
+00:11:41.368 --> 00:11:44.204 line:-2 align:center
+When this task completes,
+we create a new task to load
+
+
+225
+00:11:44,204 --> 00:11:46,640 line:-2
+a thumbnail for every image
+on the list that we received.
+
+
+226
+00:11:49,743 --> 00:11:52,713 line:-2
+I will now click-drag over
+the area covering the time frame
+
+
+227
+00:11:52,746 --> 00:11:55,048 line:-2
+it took to fetch
+the list of images,
+
+
+228
+00:11:55,082 --> 00:11:56,416 line:-1
+followed by the many requests
+
+
+229
+00:11:56.450 --> 00:11:58.452 line:-2 align:center
+to retrieve
+each individual image.
+
+
+230
+00:12:04.191 --> 00:12:06.126 line:-2 align:center
+By click-dragging
+over this area,
+
+
+231
+00:12:06.159 --> 00:12:07.694 line:-1 align:center
+a tool tip will be displayed,
+
+
+232
+00:12:07.728 --> 00:12:10.264 line:-2 align:center
+showing the duration
+of the selected time range.
+
+
+233
+00:12:10,297 --> 00:12:12,232 line:-2
+Overall,
+it took more than 7 seconds
+
+
+234
+00:12:12,266 --> 00:12:14,234 line:-2
+to finish
+loading the initial screen.
+
+
+235
+00:12:16.003 --> 00:12:18.505 line:-2 align:center
+The first few images
+load fairly quick.
+
+
+236
+00:12:18.539 --> 00:12:21.141 line:-2 align:center
+But as I scroll down,
+tasks that were started later
+
+
+237
+00:12:21,175 --> 00:12:22,643 line:-1
+took longer to complete,
+
+
+238
+00:12:22.676 --> 00:12:26.046 line:-2 align:center
+as noted by the increasing
+blocked states in purple.
+
+
+239
+00:12:26,079 --> 00:12:28,682 line:-2
+Seems like a congestion issue,
+where we have too many
+
+
+240
+00:12:28.715 --> 00:12:30.284 line:-1 align:center
+requests in parallel.
+
+
+241
+00:12:30,317 --> 00:12:32,986 line:-2
+Let's investigate
+one of the later tasks.
+
+
+242
+00:12:37,491 --> 00:12:39,693 line:-2
+By hovering over the task,
+the tool tip shows us
+
+
+243
+00:12:39.726 --> 00:12:41.195 line:-1 align:center
+the duration of the task
+
+
+244
+00:12:41,228 --> 00:12:44,565 line:-2
+and any of the child intervals
+we are hovering over.
+
+
+245
+00:12:44.598 --> 00:12:48.502 line:-2 align:center
+This task was blocked
+for the majority of the time.
+
+
+246
+00:12:49.970 --> 00:12:51.271 line:-2 align:center
+To understand
+why it was blocked,
+
+
+247
+00:12:51,305 --> 00:12:53,507 line:-1
+let's switch the track display
+
+
+248
+00:12:53.540 --> 00:12:56.877 line:-2 align:center
+to the "HTTP Transactions
+by Connection" view.
+
+
+249
+00:12:58,278 --> 00:12:59,913 line:-2
+In the track sidebar
+on the left,
+
+
+250
+00:12:59.947 --> 00:13:02.850 line:-2 align:center
+under the domain name,
+there's a downwards arrow
+
+
+251
+00:13:02,883 --> 00:13:05,886 line:-2
+we can click
+to switch the track display.
+
+
+252
+00:13:07,554 --> 00:13:10,057 line:-2
+Currently, we are
+drawing "Tasks."
+
+
+253
+00:13:10,090 --> 00:13:14,094 line:-2
+Let's switch to displaying "HTTP
+Transactions by Connection."
+
+
+254
+00:13:18.832 --> 00:13:21.335 line:-2 align:center
+This view will only
+display the transactions,
+
+
+255
+00:13:21.368 --> 00:13:24.137 line:-2 align:center
+and instead of grouping
+them by task, we can now
+
+
+256
+00:13:24,171 --> 00:13:26,940 line:-2
+find out which connection
+they got scheduled on.
+
+
+257
+00:13:28,342 --> 00:13:32,312 line:-2
+The transactions are grouped
+by the connection they used.
+
+
+258
+00:13:32.346 --> 00:13:35.249 line:-2 align:center
+Overall,
+there were six connections
+
+
+259
+00:13:35.282 --> 00:13:37.317 line:-2 align:center
+available to handle
+these transactions.
+
+
+260
+00:13:37.851 --> 00:13:39.520 line:-1 align:center
+Let's analyze the transactions
+
+
+261
+00:13:39,553 --> 00:13:41,922 line:-2
+issued on Connection 1
+and investigate
+
+
+262
+00:13:41.955 --> 00:13:44.658 line:-2 align:center
+some of the thumbnail loading
+transactions further.
+
+
+263
+00:13:45,526 --> 00:13:47,160 line:-2
+From the top down,
+it's noticeable
+
+
+264
+00:13:47,160 --> 00:13:49,930 line:-2
+that each transaction is
+taking longer to complete.
+
+
+265
+00:13:49.963 --> 00:13:51.532 line:-2 align:center
+The purple blocked state
+for each
+
+
+266
+00:13:51,565 --> 00:13:54,401 line:-2
+successive transaction
+is increasing.
+
+
+267
+00:13:54.434 --> 00:13:57.938 line:-2 align:center
+In fact, there's a pretty clear
+staircase pattern here.
+
+
+268
+00:13:59.640 --> 00:14:03.010 line:-2 align:center
+Each transaction is blocked,
+until the previous transaction
+
+
+269
+00:14:03,043 --> 00:14:05,045 line:-2
+on the same connection
+has finished.
+
+
+270
+00:14:05.078 --> 00:14:07.347 line:-2 align:center
+Only then
+can it send its request.
+
+
+271
+00:14:07,381 --> 00:14:10,684 line:-2
+This pattern repeats
+for each subsequent transaction.
+
+
+272
+00:14:11,885 --> 00:14:14,254 line:-2
+This is called
+"Head of Line Blocking"
+
+
+273
+00:14:14.288 --> 00:14:17.391 line:-2 align:center
+and is one of the problems
+of using HTTP/1.
+
+
+274
+00:14:18,559 --> 00:14:21,061 line:-2
+The frustrating part
+is that these transactions
+
+
+275
+00:14:21,094 --> 00:14:23,730 line:-2
+aren't doing anything
+for the majority of the time.
+
+
+276
+00:14:23,764 --> 00:14:26,800 line:-2
+Instead, they spend most
+of their time blocked or waiting
+
+
+277
+00:14:26.834 --> 00:14:28.435 line:-2 align:center
+for the response
+from the server.
+
+
+278
+00:14:28,468 --> 00:14:30,337 line:-2
+We could be sending
+another request
+
+
+279
+00:14:30,370 --> 00:14:33,473 line:-2
+for the next transaction in line
+while waiting for the response
+
+
+280
+00:14:33,507 --> 00:14:36,577 line:-2
+of a previous transaction
+on the same connection,
+
+
+281
+00:14:36,610 --> 00:14:39,713 line:-2
+but that's not supported
+by HTTP/1.
+
+
+282
+00:14:39.746 --> 00:14:42.249 line:-2 align:center
+Head-of-line blocking
+is one of the main limitations
+
+
+283
+00:14:42,282 --> 00:14:45,152 line:-2
+of HTTP/1,
+and one of the main improvements
+
+
+284
+00:14:45.185 --> 00:14:48.822 line:-2 align:center
+of HTTP/2 is to avoid
+that effect by multiplexing
+
+
+285
+00:14:48.856 --> 00:14:52.693 line:-2 align:center
+several requests to the same
+server onto a single connection.
+
+
+286
+00:14:54,361 --> 00:14:56,864 line:-2
+In HTTP/2,
+we can actually start sending
+
+
+287
+00:14:56.897 --> 00:15:00.601 line:-2 align:center
+a second request while the first
+one is waiting for its response.
+
+
+288
+00:15:00.634 --> 00:15:03.437 line:-2 align:center
+Your app does not need to do
+anything to support it.
+
+
+289
+00:15:03.470 --> 00:15:06.607 line:-2 align:center
+All Apple platforms
+support HTTP/2,
+
+
+290
+00:15:06.640 --> 00:15:09.209 line:-1 align:center
+and starting in iOS 15
+
+
+291
+00:15:09,243 --> 00:15:13,447 line:-2
+and macOS Monterey,
+HTTP/3 is supported as well.
+
+
+292
+00:15:13,480 --> 00:15:15,949 line:-2
+The client will pick
+the most modern HTTP version
+
+
+293
+00:15:15,983 --> 00:15:17,618 align:center
+the server supports.
+
+
+294
+00:15:17,651 --> 00:15:21,522 align:center
+If you wanna learn more about
+the differences between HTTP/1
+
+
+295
+00:15:21,555 --> 00:15:23,457 align:center
+and HTTP/2,
+
+
+296
+00:15:23,490 --> 00:15:27,294 align:center
+and the additional benefits
+HTTP/3 provides,
+
+
+297
+00:15:27,327 --> 00:15:29,830 align:center
+please watch
+the "Accelerate networking
+
+
+298
+00:15:29,863 --> 00:15:33,433 align:center
+with HTTP/3 and QUIC" session.
+
+
+299
+00:15:33.467 --> 00:15:36.670 line:-2 align:center
+I've taken this trace,
+showed it to our server folks,
+
+
+300
+00:15:36.703 --> 00:15:38.839 line:-2 align:center
+and managed to convince them
+that we should
+
+
+301
+00:15:38.872 --> 00:15:40.741 line:-1 align:center
+really support HTTP/2.
+
+
+302
+00:15:40,741 --> 00:15:42,943 line:-2
+Now, let's run
+my app with the new
+
+
+303
+00:15:42,976 --> 00:15:44,645 line:-1
+server enhancements.
+
+
+304
+00:15:45,746 --> 00:15:48,282 line:-1
+Wow, this already feels faster!
+
+
+305
+00:15:48.282 --> 00:15:50.184 line:-2 align:center
+Let's confirm this
+with Instruments.
+
+
+306
+00:15:50.184 --> 00:15:51.919 line:-1 align:center
+So here's a trace I recorded
+
+
+307
+00:15:51,919 --> 00:15:55,422 line:-2
+after we turned on
+server support for HTTP/2.
+
+
+308
+00:15:55.422 --> 00:15:58.458 line:-2 align:center
+In the domain-specific track,
+none of our thumbnail-loading
+
+
+309
+00:15:58,492 --> 00:16:01,461 line:-2
+tasks seem to be blocked anymore
+for an extended amount of time.
+
+
+310
+00:16:01,495 --> 00:16:02,763 line:-1
+That's good!
+
+
+311
+00:16:02,763 --> 00:16:05,499 line:-2
+Let's switch
+to the "HTTP Transactions
+
+
+312
+00:16:05,532 --> 00:16:06,967 line:-1
+by Connection" view again.
+
+
+313
+00:16:15,475 --> 00:16:17,044 line:-2
+The first thing
+we notice is that there is
+
+
+314
+00:16:17.077 --> 00:16:18.545 line:-1 align:center
+only one connection.
+
+
+315
+00:16:18,579 --> 00:16:21,181 line:-2
+This is because we no longer
+need multiple connections
+
+
+316
+00:16:21,215 --> 00:16:24,484 line:-2
+to send concurrent requests,
+which also means we only need
+
+
+317
+00:16:24,518 --> 00:16:28,989 line:-2
+to pay the connection setup
+cost once.
+
+
+318
+00:16:29.022 --> 00:16:32.192 line:-2 align:center
+Focusing on the individual
+thumbnail-loading transactions,
+
+
+319
+00:16:32,226 --> 00:16:33,794 line:-2
+we notice
+that they basically spend
+
+
+320
+00:16:33.827 --> 00:16:35.529 line:-1 align:center
+no time in the "blocked" state.
+
+
+321
+00:16:35,562 --> 00:16:37,698 line:-2
+In fact,
+the amount of time is so small
+
+
+322
+00:16:37,731 --> 00:16:40,367 line:-2
+that it's not visible
+at this zoom level.
+
+
+323
+00:16:40,400 --> 00:16:43,070 line:-2
+Eventually
+all transactions finish sending
+
+
+324
+00:16:43,103 --> 00:16:47,140 line:-2
+their requests and are left
+waiting for a response.
+
+
+325
+00:16:47.174 --> 00:16:50.110 line:-2 align:center
+As I scroll down,
+we can notice that responses
+
+
+326
+00:16:50,143 --> 00:16:52,479 line:-2
+are making progress
+at the same time.
+
+
+327
+00:16:54.882 --> 00:16:57.351 line:-1 align:center
+All in all,
+
+
+328
+00:16:57.384 --> 00:17:00.120 line:-2 align:center
+we are done with all requests
+in under 3 seconds.
+
+
+329
+00:17:00.153 --> 00:17:02.189 line:-1 align:center
+This is twice as fast as before.
+
+
+330
+00:17:02.189 --> 00:17:03.991 line:-2 align:center
+Now that I've talked
+to the server folks
+
+
+331
+00:17:04.024 --> 00:17:07.694 line:-2 align:center
+and switched from HTTP/1.1
+to HTTP/2,
+
+
+332
+00:17:07.728 --> 00:17:10.330 line:-2 align:center
+our images
+are loading much faster.
+
+
+333
+00:17:10,364 --> 00:17:14,334 line:-2
+Let me relaunch the app and show
+you what else we can do.
+
+
+334
+00:17:14,368 --> 00:17:17,905 line:-2
+When I tap on an image, the app
+loads the full-resolution
+
+
+335
+00:17:17.938 --> 00:17:21.441 line:-2 align:center
+picture and shows how far away
+this photo was taken from me.
+
+
+336
+00:17:21,475 --> 00:17:23,677 line:-2
+There's also a heart icon
+at the top right
+
+
+337
+00:17:23,710 --> 00:17:26,446 line:-2
+that allows you to favorite
+that specific picture.
+
+
+338
+00:17:26,446 --> 00:17:28,282 line:-1
+To do so, I need an account.
+
+
+339
+00:17:28.282 --> 00:17:30.817 line:-2 align:center
+I allow people to use the app
+and browse the pictures
+
+
+340
+00:17:30.851 --> 00:17:33.921 line:-2 align:center
+without an account,
+but to save favorited images,
+
+
+341
+00:17:33.954 --> 00:17:35.389 line:-1 align:center
+sync them between devices,
+
+
+342
+00:17:35,789 --> 00:17:38,158 line:-2
+and to upload new pictures,
+you need an account.
+
+
+343
+00:17:38.559 --> 00:17:40.928 line:-1 align:center
+So let me log in here.
+
+
+344
+00:17:44,464 --> 00:17:46,600 line:-2
+Great.
+Let me favorite another picture.
+
+
+345
+00:17:47,401 --> 00:17:50,304 line:-2
+Oh, this dog looks cute!
+Let me add it to my favorites.
+
+
+346
+00:17:50,938 --> 00:17:53,240 line:-2
+Wait, why do I have
+to log in again if I just did?
+
+
+347
+00:17:53,240 --> 00:17:54,274 line:-1
+This isn't right.
+
+
+348
+00:17:54.274 --> 00:17:56.243 line:-2 align:center
+My app should remember
+my log-in.
+
+
+349
+00:17:56.243 --> 00:17:57.711 line:-1 align:center
+This worked before.
+
+
+350
+00:17:57.711 --> 00:17:59.479 line:-2 align:center
+I'm gonna dismiss
+the log-in screen,
+
+
+351
+00:17:59.479 --> 00:18:00.948 line:-1 align:center
+as I don't want to log in again.
+
+
+352
+00:18:03.483 --> 00:18:05.419 line:-2 align:center
+I previously recorded
+a trace file
+
+
+353
+00:18:05.419 --> 00:18:07.054 line:-1 align:center
+after reproducing the issue.
+
+
+354
+00:18:07.087 --> 00:18:09.790 line:-2 align:center
+Let me open it with instruments
+to analyze the recording.
+
+
+355
+00:18:09,790 --> 00:18:12,626 line:-2
+On the left, there's the task
+that corresponds
+
+
+356
+00:18:12,659 --> 00:18:15,229 line:-2
+to when I pressed the favorite
+button for the first time.
+
+
+357
+00:18:16,930 --> 00:18:18,732 line:-2
+To the right of it,
+there's the task that was
+
+
+358
+00:18:18.765 --> 00:18:21.268 line:-2 align:center
+issued after I returned
+to the latest tab,
+
+
+359
+00:18:21,301 --> 00:18:23,370 line:-2
+and the stream of images
+were refreshed.
+
+
+360
+00:18:24,872 --> 00:18:27,508 line:-2
+Then, there's the task to load
+the full-resolution image
+
+
+361
+00:18:27,541 --> 00:18:30,210 line:-2
+after I tapped
+on another dog picture.
+
+
+362
+00:18:31.478 --> 00:18:34.081 line:-2 align:center
+And to the far right,
+there's the task corresponding
+
+
+363
+00:18:34.114 --> 00:18:36.416 line:-2 align:center
+to the second time I tapped
+the favorite button.
+
+
+364
+00:18:37.651 --> 00:18:41.154 line:-2 align:center
+The first task interval actually
+contains two transactions.
+
+
+365
+00:18:47.294 --> 00:18:50.797 line:-2 align:center
+The first transaction
+received a 401-status code.
+
+
+366
+00:18:50.831 --> 00:18:53.867 line:-2 align:center
+This was expected
+since we were not logged in.
+
+
+367
+00:18:53.901 --> 00:18:56.537 line:-2 align:center
+The transaction is drawn
+in orange to indicate
+
+
+368
+00:18:56.570 --> 00:18:59.740 line:-2 align:center
+that this is not a success
+on the HTTP level.
+
+
+369
+00:19:02,776 --> 00:19:05,479 line:-2
+Then, there's a large,
+empty area in the task,
+
+
+370
+00:19:05,512 --> 00:19:07,247 line:-2
+which represents
+the time I spent
+
+
+371
+00:19:07.281 --> 00:19:09.283 line:-2 align:center
+entering the user name
+and password.
+
+
+372
+00:19:15.522 --> 00:19:17.925 line:-2 align:center
+As soon as I'm done
+entering these credentials,
+
+
+373
+00:19:17.958 --> 00:19:20.227 line:-1 align:center
+we retry the transaction.
+
+
+374
+00:19:20.260 --> 00:19:23.530 line:-2 align:center
+The green color of the interval
+and the 201-status code
+
+
+375
+00:19:23.564 --> 00:19:25.866 line:-2 align:center
+indicates it succeeded
+this time.
+
+
+376
+00:19:25,866 --> 00:19:28,435 line:-2
+This interaction
+of an authentication challenge,
+
+
+377
+00:19:28.468 --> 00:19:31.505 line:-2 align:center
+entering a password,
+and retrying the transaction
+
+
+378
+00:19:31.538 --> 00:19:35.375 line:-2 align:center
+is another case the URL Loading
+system handles for us,
+
+
+379
+00:19:35.409 --> 00:19:39.079 line:-2 align:center
+so these two transactions belong
+to the same task object.
+
+
+380
+00:19:41,415 --> 00:19:44,218 line:-2
+Zooming out,
+we find the second attempt
+
+
+381
+00:19:44.251 --> 00:19:46.453 line:-2 align:center
+at favoriting
+an image on the right.
+
+
+382
+00:19:46.486 --> 00:19:49.723 line:-2 align:center
+The task object is displayed
+in gray, as my dismissing
+
+
+383
+00:19:49.756 --> 00:19:53.126 line:-2 align:center
+of the log-in screen caused
+the task to be canceled,
+
+
+384
+00:19:53.160 --> 00:19:55.696 line:-2 align:center
+which is also visible
+in its label.
+
+
+385
+00:19:55.729 --> 00:19:58.065 line:-2 align:center
+The transaction interval is
+displayed in orange,
+
+
+386
+00:19:58,098 --> 00:20:01,101 line:-2
+as we got a 401 response
+from the server again.
+
+
+387
+00:20:01,134 --> 00:20:03,203 line:-2
+This task occurred
+after I attempted to like
+
+
+388
+00:20:03,237 --> 00:20:05,072 line:-1
+another dog picture and was
+
+
+389
+00:20:05,105 --> 00:20:08,141 line:-2
+prompted with the log-in
+for a second time.
+
+
+390
+00:20:08,175 --> 00:20:11,144 line:-2
+We use a very basic log-in
+system, where the user sends
+
+
+391
+00:20:11,178 --> 00:20:13,814 line:-2
+their credentials the first
+time, but once the server
+
+
+392
+00:20:13,847 --> 00:20:16,216 line:-2
+verified the user credentials,
+it sets a cookie,
+
+
+393
+00:20:16,250 --> 00:20:18,852 line:-2
+identifying the user,
+such that no credentials
+
+
+394
+00:20:18,886 --> 00:20:21,922 line:-2
+need to be provided
+on following requests.
+
+
+395
+00:20:21.955 --> 00:20:26.093 line:-2 align:center
+So I would've expected this task
+to have sent the proper cookie.
+
+
+396
+00:20:26,126 --> 00:20:27,995 line:-2
+Let's determine
+whether that happened.
+
+
+397
+00:20:27.995 --> 00:20:30.731 line:-2 align:center
+As Kacper explained earlier,
+there should be a small
+
+
+398
+00:20:30,764 --> 00:20:33,700 line:-2
+cookie icon here
+next to the HTTP method,
+
+
+399
+00:20:33,734 --> 00:20:36,503 line:-2
+had this transaction
+sent a Cookie header.
+
+
+400
+00:20:36,537 --> 00:20:40,140 line:-2
+But there's no such icon here,
+which means no cookie was sent.
+
+
+401
+00:20:40,174 --> 00:20:41,575 line:-1
+So that part isn't working.
+
+
+402
+00:20:41.608 --> 00:20:43.644 line:-2 align:center
+Now the question is,
+did the server not
+
+
+403
+00:20:43,677 --> 00:20:45,812 line:-2
+provide us with a cookie,
+or is the client not
+
+
+404
+00:20:45.846 --> 00:20:47.748 line:-2 align:center
+sending one,
+even though it got one?
+
+
+405
+00:20:47,748 --> 00:20:49,616 line:-2
+To find out, we need
+to investigate
+
+
+406
+00:20:49,650 --> 00:20:51,451 line:-2
+the previous transaction,
+and check
+
+
+407
+00:20:51.485 --> 00:20:53.220 line:-2 align:center
+whether we got a cookie
+from the server.
+
+
+408
+00:20:53.220 --> 00:20:55.055 line:-2 align:center
+Here is
+the previous transaction,
+
+
+409
+00:20:55.088 --> 00:20:58.659 line:-2 align:center
+the successful one from
+the first log-in request.
+
+
+410
+00:20:58,692 --> 00:21:01,828 line:-2
+This one does have a cookie icon
+in the response portion
+
+
+411
+00:21:01,862 --> 00:21:05,732 line:-2
+of the transaction label,
+so the server did send a cookie.
+
+
+412
+00:21:05,732 --> 00:21:07,100 line:-1
+That's interesting.
+
+
+413
+00:21:07.134 --> 00:21:09.970 line:-2 align:center
+So why didn't we send the cookie
+in the next transaction?
+
+
+414
+00:21:10,003 --> 00:21:12,706 line:-2
+To get more information
+about this transaction
+
+
+415
+00:21:12.739 --> 00:21:14.541 line:-2 align:center
+and investigate the cookie
+in detail,
+
+
+416
+00:21:14.575 --> 00:21:16.543 line:-2 align:center
+I will switch
+to the "Transactions" list
+
+
+417
+00:21:16,577 --> 00:21:17,978 line:-2
+in the detail view
+at the bottom.
+
+
+418
+00:21:25,452 --> 00:21:27,521 line:-2
+The transaction is
+already selected here,
+
+
+419
+00:21:27.554 --> 00:21:31.191 line:-2 align:center
+since the time cursor is placed
+inside of it in the track view.
+
+
+420
+00:21:32,426 --> 00:21:34,661 line:0
+The extended detail view
+in the bottom right
+
+
+421
+00:21:34,695 --> 00:21:36,496 align:center
+shows all request
+and response headers
+
+
+422
+00:21:36,530 --> 00:21:38,532 line:0
+of the currently-selected
+transaction.
+
+
+423
+00:21:40,934 --> 00:21:43,637 line:0
+And here is the Set-Cookie
+header that we expect.
+
+
+424
+00:21:43,670 --> 00:21:47,374 align:center
+At first glance,
+this cookie seems fine.
+
+
+425
+00:21:47,407 --> 00:21:49,810 line:0
+But oh, wait,
+do you see the expiry date?
+
+
+426
+00:21:49,843 --> 00:21:52,813 align:center
+It's March 2020.
+That's in the past!
+
+
+427
+00:21:52.813 --> 00:21:54.681 line:-1 align:center
+So the server did send a cookie,
+
+
+428
+00:21:54.715 --> 00:21:56.316 line:-1 align:center
+but it's an expired cookie.
+
+
+429
+00:21:56,350 --> 00:21:59,019 line:-1
+No one likes expired cookies!
+
+
+430
+00:21:59,052 --> 00:22:01,588 line:-2
+This will lead the URLSession
+to not send the cookie,
+
+
+431
+00:22:01,622 --> 00:22:04,157 line:-2
+as it will only send cookies
+that are still valid.
+
+
+432
+00:22:05,425 --> 00:22:07,027 line:-1
+This is a server-side bug.
+
+
+433
+00:22:07.060 --> 00:22:09.696 line:-2 align:center
+I could send the trace file
+over to our server folks
+
+
+434
+00:22:09.730 --> 00:22:12.866 line:-2 align:center
+for them to investigate
+the issue and have it resolved.
+
+
+435
+00:22:12.900 --> 00:22:15.235 line:-2 align:center
+Now that we fixed
+the cookie issue, I can favorite
+
+
+436
+00:22:15,269 --> 00:22:18,438 line:-2
+a couple more pictures without
+being prompted to log in.
+
+
+437
+00:22:18.472 --> 00:22:20.240 line:-1 align:center
+In addition to the "Latest" tab,
+
+
+438
+00:22:20.274 --> 00:22:22.743 line:-2 align:center
+there's also a "Favorite" tab,
+where we display a list
+
+
+439
+00:22:22,776 --> 00:22:25,812 line:-2
+of all the dog images
+that the user has favorited.
+
+
+440
+00:22:25,846 --> 00:22:27,247 line:-1
+Let's switch to that tab.
+
+
+441
+00:22:28.949 --> 00:22:31.718 line:-2 align:center
+Great, there are a few favorites
+here that I added yesterday,
+
+
+442
+00:22:31.752 --> 00:22:34.621 line:-2 align:center
+but for some reason, my recent
+favorites aren't showing up.
+
+
+443
+00:22:34,621 --> 00:22:36,023 line:-1
+Let's try again.
+
+
+444
+00:22:36.056 --> 00:22:38.692 line:-2 align:center
+Let's pick this dog,
+who seems to be enjoying a bath,
+
+
+445
+00:22:38,725 --> 00:22:40,561 line:-1
+and let me favorite it.
+
+
+446
+00:22:40,594 --> 00:22:43,597 line:-2
+Let's go back to my favorites
+and check if it appears.
+
+
+447
+00:22:45,132 --> 00:22:46,800 line:-1
+Hm, it's still not there.
+
+
+448
+00:22:46,800 --> 00:22:50,170 line:-2
+Let's use Instruments again
+to figure out what's going on.
+
+
+449
+00:22:50.204 --> 00:22:52.940 line:-2 align:center
+I prepared a trace file
+for this already.
+
+
+450
+00:22:52.973 --> 00:22:55.709 line:-2 align:center
+I expect to find a task loading
+the list of favorites
+
+
+451
+00:22:55.742 --> 00:22:59.313 line:-2 align:center
+in the track view, but it's not
+visible at first glance.
+
+
+452
+00:22:59,346 --> 00:23:02,916 line:-2
+Let me choose the track
+for my server domain,
+
+
+453
+00:23:02.950 --> 00:23:06.486 line:-2 align:center
+to display only the requests
+issued to that domain.
+
+
+454
+00:23:06.520 --> 00:23:09.022 line:-2 align:center
+We could then go to the detail
+view at the bottom,
+
+
+455
+00:23:09,056 --> 00:23:11,859 line:-2
+which contains a list
+of all tasks for this domain.
+
+
+456
+00:23:12,926 --> 00:23:14,828 line:-2
+There's quite a few
+requests here.
+
+
+457
+00:23:14.862 --> 00:23:17.364 line:-2 align:center
+Let me use the detail filter
+at the bottom left
+
+
+458
+00:23:17,397 --> 00:23:20,267 line:-2
+to search for all requests
+related to "Favorites,"
+
+
+459
+00:23:20.300 --> 00:23:23.136 line:-2 align:center
+so I can verify whether
+we even made a request.
+
+
+460
+00:23:27.241 --> 00:23:29.309 line:-2 align:center
+Upon filtering,
+the results show we sent
+
+
+461
+00:23:29,343 --> 00:23:32,446 line:-2
+several requests to load
+the list of favorites here.
+
+
+462
+00:23:32.479 --> 00:23:34.147 line:-1 align:center
+Let's focus on the track view.
+
+
+463
+00:23:36,850 --> 00:23:39,620 line:-2
+The cursor got positioned at
+the start of the task I selected
+
+
+464
+00:23:39.653 --> 00:23:42.589 line:-2 align:center
+down in the detail view,
+so that makes it fairly easy
+
+
+465
+00:23:42.623 --> 00:23:44.992 line:-2 align:center
+to find it
+in the track view above.
+
+
+466
+00:23:45,025 --> 00:23:47,027 line:-1
+Let's zoom in to double-check.
+
+
+467
+00:23:55.235 --> 00:23:56.737 line:-2 align:center
+So this was the first time
+we loaded
+
+
+468
+00:23:56,770 --> 00:23:59,840 line:-2
+the list of favorites
+on the initial app launch.
+
+
+469
+00:23:59.873 --> 00:24:01.208 line:-1 align:center
+This is fine.
+
+
+470
+00:24:06,446 --> 00:24:10,484 line:-2
+Here, I favorited a new image,
+and after that,
+
+
+471
+00:24:10,517 --> 00:24:12,686 line:-1
+we loaded the favorites again.
+
+
+472
+00:24:15.289 --> 00:24:18.458 line:-2 align:center
+Well, there's a task interval
+here, but it's very short.
+
+
+473
+00:24:25.032 --> 00:24:27.868 line:-2 align:center
+Yeah, this GET request only took
+a couple of milliseconds.
+
+
+474
+00:24:27.901 --> 00:24:30.537 line:-2 align:center
+That's too fast to get
+a server response.
+
+
+475
+00:24:30.537 --> 00:24:33.040 line:-2 align:center
+Let's switch to the "HTTP
+transactions
+
+
+476
+00:24:33.073 --> 00:24:36.076 line:-2 align:center
+by connection" view again
+to get more details.
+
+
+477
+00:24:40,214 --> 00:24:42,349 line:-2
+The first thing we notice
+is that this transaction
+
+
+478
+00:24:42.382 --> 00:24:45.819 line:-2 align:center
+is not executed on a Connection,
+but on "Local Cache."
+
+
+479
+00:24:45,853 --> 00:24:48,922 line:-2
+This shows us that the request
+was never sent on the network,
+
+
+480
+00:24:48,956 --> 00:24:51,425 line:-2
+but rather loaded
+from the local cache.
+
+
+481
+00:24:51.458 --> 00:24:54.828 line:-2 align:center
+This also explains why there is
+no "Waiting for Response" state,
+
+
+482
+00:24:54.862 --> 00:24:57.531 line:-2 align:center
+since the transaction did
+not wait for a server.
+
+
+483
+00:24:59.233 --> 00:25:02.135 line:-2 align:center
+So that's the problem:
+our request is cached,
+
+
+484
+00:25:02.169 --> 00:25:03.804 line:-2 align:center
+so we don't actually ask
+the server,
+
+
+485
+00:25:03.837 --> 00:25:05.739 line:-2 align:center
+and always get
+the cached response back.
+
+
+486
+00:25:05,772 --> 00:25:07,875 line:-2
+One way to fix this would be
+to tell the server to set
+
+
+487
+00:25:07.908 --> 00:25:10.911 line:-2 align:center
+a cache-control header,
+to never cache this response.
+
+
+488
+00:25:10.911 --> 00:25:13.614 line:-2 align:center
+What we want is to reload
+the images every time the user
+
+
+489
+00:25:13.647 --> 00:25:17.518 line:-2 align:center
+goes to the favorites tab
+and new images have been added.
+
+
+490
+00:25:17,551 --> 00:25:19,853 line:-2
+What we don't want is
+to load the whole list
+
+
+491
+00:25:19,887 --> 00:25:22,923 line:-2
+of images if there was
+no such change.
+
+
+492
+00:25:22.956 --> 00:25:24.992 line:-2 align:center
+A good trade-off would be
+if we could ask the server,
+
+
+493
+00:25:25.025 --> 00:25:27.261 line:-1 align:center
+"Hey, did anything change?
+
+
+494
+00:25:27,294 --> 00:25:29,997 line:-1
+If so, please let me know."
+
+
+495
+00:25:30.030 --> 00:25:31.265 line:-2 align:center
+That's actually something
+we can do
+
+
+496
+00:25:31.298 --> 00:25:33.800 line:-2 align:center
+by setting a cache-policy
+on the request.
+
+
+497
+00:25:35,402 --> 00:25:38,438 line:-2
+To update the code,
+let me go back to the task view
+
+
+498
+00:25:38,472 --> 00:25:40,240 line:-1
+and select the task in question.
+
+
+499
+00:25:48,382 --> 00:25:51,885 line:-2
+For each URLSession Task
+that got executed here...
+
+
+500
+00:25:54.421 --> 00:25:56.156 line:-2 align:center
+We display
+the backtrace on the right,
+
+
+501
+00:25:56.190 --> 00:25:58.192 line:-2 align:center
+where "resume" was
+called on the task.
+
+
+502
+00:26:01,228 --> 00:26:02,963 line:-2
+It was resumed
+in the method sync,
+
+
+503
+00:26:02.996 --> 00:26:04.965 line:-1 align:center
+in the ImageCollection type.
+
+
+504
+00:26:04.998 --> 00:26:07.701 line:-2 align:center
+Let me open this in Xcode
+to make the change here.
+
+
+505
+00:26:09,436 --> 00:26:10,838 line:-1
+Here, I have my URLRequest,
+
+
+506
+00:26:10.871 --> 00:26:13.040 line:-2 align:center
+and now I wanna set
+my cache policy.
+
+
+507
+00:26:15.742 --> 00:26:19.880 line:-2 align:center
+The cache policy I want is
+reloadRevalidatingCacheData,
+
+
+508
+00:26:19.913 --> 00:26:21.748 line:-2 align:center
+which means that we ignore
+the local cache
+
+
+509
+00:26:21.782 --> 00:26:23.784 line:-2 align:center
+and will make a request
+to the server to check
+
+
+510
+00:26:23,817 --> 00:26:25,886 line:-2
+whether our cache
+is still valid.
+
+
+511
+00:26:25.886 --> 00:26:28.522 line:-2 align:center
+If so, the server
+will send a 304 response code
+
+
+512
+00:26:28.555 --> 00:26:31.124 line:-2 align:center
+to let us know
+to use the local cache.
+
+
+513
+00:26:31,158 --> 00:26:33,994 line:-2
+If not, it will send
+the new data back.
+
+
+514
+00:26:34.027 --> 00:26:35.128 line:-1 align:center
+Let's give it a try.
+
+
+515
+00:26:47.007 --> 00:26:48.942 line:-2 align:center
+So these are my current
+favorited images,
+
+
+516
+00:26:48.976 --> 00:26:51.345 line:-2 align:center
+and the dog taking
+a bath has been added.
+
+
+517
+00:26:51.378 --> 00:26:52.713 line:-1 align:center
+Let's add another one.
+
+
+518
+00:26:55.682 --> 00:26:58.085 line:-2 align:center
+Now, let's check
+the "Favorite" tab.
+
+
+519
+00:26:58.085 --> 00:27:01.321 line:-2 align:center
+The image I just favorited
+now properly appears.
+
+
+520
+00:27:01,321 --> 00:27:04,858 line:-2
+OK, great!
+That's fixed now as well.
+
+
+521
+00:27:04.892 --> 00:27:07.227 line:-2 align:center
+Back to my colleague
+Kacper to cover checking
+
+
+522
+00:27:07.261 --> 00:27:09.997 line:-2 align:center
+that your app and dependencies
+behave like you'd expect.
+
+
+523
+00:27:09,997 --> 00:27:11,932 line:-2
+[Kacper] Just like Sergio
+showed before,
+
+
+524
+00:27:11.965 --> 00:27:13.767 line:-2 align:center
+when I click
+on the "Favorite" tab
+
+
+525
+00:27:13.800 --> 00:27:17.671 line:-2 align:center
+without being logged in,
+the log-in view is presented.
+
+
+526
+00:27:17,704 --> 00:27:19,907 line:0
+We already added
+Sign In with Apple
+
+
+527
+00:27:19,940 --> 00:27:22,543 align:center
+to make the log-in
+experience seamless.
+
+
+528
+00:27:22,576 --> 00:27:26,113 align:center
+However, our company has
+several pet-themed apps,
+
+
+529
+00:27:26.113 --> 00:27:29.883 line:-2 align:center
+and another team is working
+on a shared log-in SDK to allow
+
+
+530
+00:27:29,917 --> 00:27:33,820 line:-2
+users to reuse their account
+between the applications.
+
+
+531
+00:27:33,854 --> 00:27:36,557 line:-2
+This SDK
+is currently in development,
+
+
+532
+00:27:36,590 --> 00:27:38,926 line:-2
+and the other team has
+asked us whether it could
+
+
+533
+00:27:38.959 --> 00:27:41.495 line:-2 align:center
+replace our classic
+log-in screen.
+
+
+534
+00:27:41.495 --> 00:27:44.932 line:-2 align:center
+I got the SDK binary,
+called Pets,
+
+
+535
+00:27:44.965 --> 00:27:47.301 line:-2 align:center
+which is distributed
+as an xcframework
+
+
+536
+00:27:47.334 --> 00:27:51.238 line:-2 align:center
+so that it can be used
+on all platforms.
+
+
+537
+00:27:51.271 --> 00:27:55.275 line:-2 align:center
+Integrating it into my Xcode
+project is as easy as dragging
+
+
+538
+00:27:55,309 --> 00:27:58,846 line:-2
+and dropping it in the embedded
+frameworks section.
+
+
+539
+00:27:58,846 --> 00:28:03,584 line:-2
+Now, all that is left is to add
+a button to our existing view.
+
+
+540
+00:28:03.617 --> 00:28:06.753 line:-2 align:center
+I will navigate to the source
+code of our Log-inView.
+
+
+541
+00:28:09.122 --> 00:28:12.226 line:-2 align:center
+I will first import
+the framework,
+
+
+542
+00:28:12.259 --> 00:28:15.429 line:-2 align:center
+and then add the button
+to our SwiftUI VStack,
+
+
+543
+00:28:15.462 --> 00:28:17.631 line:-2 align:center
+just below
+the Sign In with Apple.
+
+
+544
+00:28:20,901 --> 00:28:23,237 line:-2
+Let's refresh
+our Swift UI Preview.
+
+
+545
+00:28:25.372 --> 00:28:26.540 line:-1 align:center
+Here it is.
+
+
+546
+00:28:26.573 --> 00:28:27.774 line:-1 align:center
+"Sign In with Pets" button
+
+
+547
+00:28:27,808 --> 00:28:31,044 line:-2
+appeared on the preview,
+exactly where I want it.
+
+
+548
+00:28:31,078 --> 00:28:34,481 line:-2
+That was, indeed,
+a really easy integration.
+
+
+549
+00:28:34,515 --> 00:28:37,885 line:-2
+I am curious to check how quick
+this new log-in method will be.
+
+
+550
+00:28:37.918 --> 00:28:40.554 line:-2 align:center
+And to measure this,
+I'll profile my application
+
+
+551
+00:28:40,587 --> 00:28:44,424 line:-2
+with Instruments by using
+Product Profile Action.
+
+
+552
+00:28:50.964 --> 00:28:53.500 line:-1 align:center
+I am choosing Network template.
+
+
+553
+00:28:53.534 --> 00:28:55.169 line:-1 align:center
+And clicking "record" button
+
+
+554
+00:28:55.202 --> 00:28:57.671 line:-2 align:center
+in the toolbar to launch
+the app.
+
+
+555
+00:29:03.744 --> 00:29:05.579 line:-1 align:center
+My app has now launched.
+
+
+556
+00:29:05.612 --> 00:29:08.482 line:-2 align:center
+I can now switch
+to the Log-in View.
+
+
+557
+00:29:08,515 --> 00:29:11,218 line:-2
+Instruments is showing
+all of the networking traffic
+
+
+558
+00:29:11,251 --> 00:29:13,787 line:-1
+occurring in the meantime.
+
+
+559
+00:29:13.820 --> 00:29:17.157 line:-2 align:center
+I will expand it to inspect
+my app's URL session.
+
+
+560
+00:29:19.359 --> 00:29:20.827 line:-1 align:center
+Here it is.
+
+
+561
+00:29:20,861 --> 00:29:22,429 line:-1
+But wait.
+
+
+562
+00:29:22,462 --> 00:29:25,933 line:-2
+I would expect only my main app
+URLSession to be here,
+
+
+563
+00:29:25,966 --> 00:29:28,902 line:-2
+but seems that the Pets
+framework we just integrated
+
+
+564
+00:29:28.936 --> 00:29:31.171 line:-2 align:center
+is making requests
+from its own session,
+
+
+565
+00:29:31,205 --> 00:29:33,740 line:-2
+without me even clicking
+on the log-in button.
+
+
+566
+00:29:33,774 --> 00:29:35,242 line:-1
+That's unexpected.
+
+
+567
+00:29:35,275 --> 00:29:38,612 line:-2
+Let's stop the recording right
+now to investigate it further.
+
+
+568
+00:29:42.482 --> 00:29:44.952 line:-2 align:center
+I will zoom in
+to a few first requests,
+
+
+569
+00:29:44,985 --> 00:29:47,154 line:-1
+using option-click and drag.
+
+
+570
+00:29:50.357 --> 00:29:53.227 line:-2 align:center
+There's many requests
+to some analytics endpoint,
+
+
+571
+00:29:53,260 --> 00:29:55,696 line:-2
+and to get more details,
+I can click on this
+
+
+572
+00:29:55.729 --> 00:29:57.598 line:-1 align:center
+"Pets Sign On Network" session
+
+
+573
+00:29:57.631 --> 00:30:00.133 line:-2 align:center
+and list all of them
+in the detail view.
+
+
+574
+00:30:03,237 --> 00:30:07,307 line:-2
+All of them are POST requests,
+and when I click on one,
+
+
+575
+00:30:07,341 --> 00:30:10,310 line:-2
+I can see the backtrace
+on the right that tells us
+
+
+576
+00:30:10,344 --> 00:30:13,347 line:-2
+which part of the code
+the request originated from.
+
+
+577
+00:30:16.250 --> 00:30:19.186 line:-2 align:center
+So seems that request is
+going through CFNetwork,
+
+
+578
+00:30:19,219 --> 00:30:22,489 line:-2
+invoked by Pets,
+just as expected.
+
+
+579
+00:30:22.523 --> 00:30:24.558 line:-1 align:center
+But when we navigate deeper,
+
+
+580
+00:30:24.591 --> 00:30:27.895 line:-2 align:center
+it seems like CoreLocation
+is being involved.
+
+
+581
+00:30:27,928 --> 00:30:30,330 line:-2
+That's really suspicious,
+especially because
+
+
+582
+00:30:30,364 --> 00:30:33,166 line:-2
+I didn't perform
+any action to trigger it.
+
+
+583
+00:30:33.200 --> 00:30:35.669 line:-2 align:center
+I wonder if my location
+is being sent back
+
+
+584
+00:30:35.702 --> 00:30:38.639 line:-2 align:center
+to the server
+and that's why CoreLocation
+
+
+585
+00:30:38.672 --> 00:30:41.008 line:-2 align:center
+and CFNetwork
+are in the same backtrace.
+
+
+586
+00:30:42.676 --> 00:30:44.378 line:-1 align:center
+I will verify that by inspecting
+
+
+587
+00:30:44.411 --> 00:30:48.248 line:-2 align:center
+the corresponding HTTP
+transactions for these tasks.
+
+
+588
+00:30:48.282 --> 00:30:50.184 line:-1 align:center
+To do this, I will switch detail
+
+
+589
+00:30:50.217 --> 00:30:54.154 line:-2 align:center
+from the list of tasks
+to the list of transactions.
+
+
+590
+00:30:54,188 --> 00:30:55,822 line:-1
+And select one of them.
+
+
+591
+00:30:58.425 --> 00:31:00.594 line:-2 align:center
+In the extended detail
+on the bottom right,
+
+
+592
+00:31:00.627 --> 00:31:02.963 line:-2 align:center
+it's visible that this request
+contains some
+
+
+593
+00:31:02.996 --> 00:31:06.200 line:-2 align:center
+pretty standard headers,
+nothing to worry about.
+
+
+594
+00:31:06.233 --> 00:31:09.169 line:-2 align:center
+But wait,
+look at the request body.
+
+
+595
+00:31:09,169 --> 00:31:11,672 align:center
+It's including
+my location coordinates,
+
+
+596
+00:31:11,705 --> 00:31:13,373 align:center
+and that's really bad.
+
+
+597
+00:31:13,373 --> 00:31:17,077 line:-2
+Sending this information
+violates users' privacy.
+
+
+598
+00:31:17.110 --> 00:31:18.946 line:-2 align:center
+We don't want
+to gather their location
+
+
+599
+00:31:18.979 --> 00:31:22.449 line:-2 align:center
+without their consent
+and without a good reason.
+
+
+600
+00:31:22.482 --> 00:31:26.053 line:-2 align:center
+So far, our app only requests
+this permission for legitimate
+
+
+601
+00:31:26.086 --> 00:31:29.489 line:-2 align:center
+purposes that make
+the user experience better.
+
+
+602
+00:31:29.523 --> 00:31:31.825 line:-2 align:center
+At this point,
+I will not go any further
+
+
+603
+00:31:31,859 --> 00:31:34,194 line:-1
+with this SDK integration.
+
+
+604
+00:31:34.228 --> 00:31:36.330 line:-2 align:center
+Instead, I will file
+a bug report
+
+
+605
+00:31:36,363 --> 00:31:38,232 line:-1
+on the other team to inform them
+
+
+606
+00:31:38.265 --> 00:31:41.168 line:-2 align:center
+about this unacceptable
+behavior that I detected.
+
+
+607
+00:31:41.168 --> 00:31:43.837 line:-2 align:center
+And I can even use
+this Instruments trace
+
+
+608
+00:31:43.871 --> 00:31:47.541 line:-2 align:center
+to generate necessary
+information for the bug report.
+
+
+609
+00:31:47,574 --> 00:31:49,743 line:-2
+Let's save it
+on my desktop first.
+
+
+610
+00:31:51.879 --> 00:31:55.048 line:-2 align:center
+I will name it
+"PrivacyViolation"
+
+
+611
+00:31:55.082 --> 00:31:56.250 line:-1 align:center
+and hit "save."
+
+
+612
+00:31:58.018 --> 00:32:01.388 line:-2 align:center
+xctrace, command line tool
+bundled with Instruments,
+
+
+613
+00:32:01.421 --> 00:32:03.457 line:-1 align:center
+can be used to export this trace
+
+
+614
+00:32:03.490 --> 00:32:06.927 line:-2 align:center
+to the HTTP Archive format,
+which is an industry standard
+
+
+615
+00:32:06.960 --> 00:32:11.064 line:-2 align:center
+for exchange of information
+about HTTP Traffic.
+
+
+616
+00:32:11,098 --> 00:32:15,536 line:-2
+To do this, I can simply run
+xctrace export command,
+
+
+617
+00:32:15,569 --> 00:32:19,740 line:-2
+with input of my trace,
+and HAR export flag.
+
+
+618
+00:32:20,741 --> 00:32:22,075 line:-1
+Let's run it now.
+
+
+619
+00:32:24,077 --> 00:32:26,980 line:-2
+This command generates
+a file that I can now attach
+
+
+620
+00:32:27.014 --> 00:32:28.582 line:-1 align:center
+in the bug report.
+
+
+621
+00:32:28.615 --> 00:32:31.718 line:-2 align:center
+Someone receiving it can inspect
+the recorded information
+
+
+622
+00:32:31,752 --> 00:32:34,988 line:-2
+in any tool that supports HAR,
+even if they don't have
+
+
+623
+00:32:35,022 --> 00:32:37,024 line:-2
+Instruments installed
+on their machine.
+
+
+624
+00:32:38.325 --> 00:32:41.228 line:-2 align:center
+HAR itself is
+a JSON-based format,
+
+
+625
+00:32:41.261 --> 00:32:42.596 line:-1 align:center
+so it can also be opened
+
+
+626
+00:32:42,629 --> 00:32:46,567 line:-2
+in the text editor or easily
+processed using scripts.
+
+
+627
+00:32:46.600 --> 00:32:48.468 line:-2 align:center
+And even though
+it doesn't contain
+
+
+628
+00:32:48.502 --> 00:32:50.103 line:-1 align:center
+instruments-specific details,
+
+
+629
+00:32:50,137 --> 00:32:54,041 line:-2
+like URLSessions or backtraces,
+that still should be enough
+
+
+630
+00:32:54.074 --> 00:32:56.743 line:-2 align:center
+for the other team
+to investigate this issue.
+
+
+631
+00:32:58,579 --> 00:33:01,748 line:-2
+And that's how you can use
+HTTP Traffic Instrument
+
+
+632
+00:33:01.782 --> 00:33:04.718 line:-2 align:center
+to diagnose source and content
+of traffic coming from
+
+
+633
+00:33:04.751 --> 00:33:08.322 line:-2 align:center
+your application to make sure
+that you are in control
+
+
+634
+00:33:08,355 --> 00:33:10,490 line:-2
+of what your app does
+at runtime.
+
+
+635
+00:33:10,524 --> 00:33:12,993 line:-2
+Now that you're familiar
+with using the new
+
+
+636
+00:33:13.026 --> 00:33:16.763 line:-2 align:center
+HTTP Traffic Instrument,
+go ahead and target your apps
+
+
+637
+00:33:16.797 --> 00:33:21.068 line:-2 align:center
+to detect problems just like
+the ones we showed you today.
+
+
+638
+00:33:21.101 --> 00:33:24.738 line:-2 align:center
+For easier debugging and having
+more context while doing so,
+
+
+639
+00:33:24,771 --> 00:33:27,774 line:-2
+name your URLSession
+and task objects.
+
+
+640
+00:33:29,510 --> 00:33:33,881 line:-2
+Always aim for adopting
+latest networking protocols.
+
+
+641
+00:33:33,914 --> 00:33:37,184 line:-2
+And even if you don't find
+any performance or correctness
+
+
+642
+00:33:37.217 --> 00:33:40.287 line:-2 align:center
+issues with your app,
+go ahead and verify
+
+
+643
+00:33:40,320 --> 00:33:42,122 line:-1
+by how much data you're sending
+
+
+644
+00:33:42,155 --> 00:33:44,424 line:-2
+to get rid of any
+unnecessary traffic.
+
+
+645
+00:33:44.424 --> 00:33:47.427 line:-2 align:center
+Thank you for watching today,
+and we hope you have
+
+
+646
+00:33:47,461 --> 00:33:50,631 line:-2
+a great time tracing
+your app's HTTP traffic.
+
+
+647
+00:33:50,631 --> 00:33:52,633 line:-1
+[upbeat music]
+

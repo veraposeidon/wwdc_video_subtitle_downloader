@@ -1,0 +1,1524 @@
+1
+00:00:03,904 --> 00:00:07,207 line:-1
+Hello and welcome to WWDC.
+
+
+2
+00:00:08,909 --> 00:00:11,879 line:0
+Hello everyone.
+I'm Jiewen from the WebKit Team.
+
+
+3
+00:00:11,945 --> 00:00:15,582 line:0
+Today I'm going to talk about Face ID
+and Touch ID for the Web.
+
+
+4
+00:00:15,649 --> 00:00:17,618 line:0
+This session is tailored
+for Web developers
+
+
+5
+00:00:17,684 --> 00:00:21,188 line:0
+looking to add this cool new feature
+to their websites.
+
+
+6
+00:00:21,255 --> 00:00:22,823 line:0
+Let's get started.
+
+
+7
+00:00:22,890 --> 00:00:26,793 line:-2
+There's a user experience in
+a few apps on my phone that I really like,
+
+
+8
+00:00:26,860 --> 00:00:29,663 line:-2
+which is the experience of using
+Face ID or Touch ID
+
+
+9
+00:00:29,730 --> 00:00:31,932 line:-1
+for re-signing into an app.
+
+
+10
+00:00:31,999 --> 00:00:35,669 line:-2
+Let me show you
+with my favorite demo application, Shiny.
+
+
+11
+00:00:35,736 --> 00:00:38,472 line:-2
+Shiny is an app
+that you can use every day,
+
+
+12
+00:00:38,539 --> 00:00:41,208 line:-2
+and it shows you
+a picture of something nice.
+
+
+13
+00:00:41,775 --> 00:00:43,810 line:-1
+The first time I sign in to Shiny,
+
+
+14
+00:00:43,877 --> 00:00:46,847 line:-2
+I will need to enter
+my user name and password,
+
+
+15
+00:00:46,914 --> 00:00:49,416 line:-1
+and since I care deeply about security,
+
+
+16
+00:00:49,483 --> 00:00:52,886 line:-2
+I have enabled
+two-factor authentication for Shiny.
+
+
+17
+00:00:52,953 --> 00:00:57,658 line:-2
+In this case, I need to wait
+for an SMS second-factor code to continue.
+
+
+18
+00:00:58,258 --> 00:01:02,162 line:-2
+And once I've submitted the SMS 2FA code,
+I'm signed in,
+
+
+19
+00:01:02,229 --> 00:01:04,730 line:-1
+and I can see this adorable dog.
+
+
+20
+00:01:04,798 --> 00:01:08,335 line:-2
+iOS makes signing in a better process
+with AutoFill,
+
+
+21
+00:01:08,402 --> 00:01:12,472 line:-2
+but even then, there are several steps
+and a lot of thinking for me to do.
+
+
+22
+00:01:12,873 --> 00:01:15,442 line:-2
+Shiny has a policy
+of wanting me to re-sign in
+
+
+23
+00:01:15,509 --> 00:01:18,078 line:-1
+after being inactive for a few hours.
+
+
+24
+00:01:18,145 --> 00:01:21,748 line:-2
+You will see a policy like that
+in lots of high-security contexts,
+
+
+25
+00:01:21,815 --> 00:01:23,517 line:-1
+like signing into a bank.
+
+
+26
+00:01:23,584 --> 00:01:25,052 line:-1
+But this time, when I sign in,
+
+
+27
+00:01:25,118 --> 00:01:28,455 line:-2
+rather than go through a password
+and SMS 2FA flow,
+
+
+28
+00:01:28,522 --> 00:01:31,859 line:-1
+instead I just Face ID, like that.
+
+
+29
+00:01:31,925 --> 00:01:33,260 line:-1
+Boom. I'm signed in.
+
+
+30
+00:01:33,560 --> 00:01:36,430 line:-1
+It is both much faster and more secure.
+
+
+31
+00:01:37,030 --> 00:01:40,767 line:-2
+This session is about bringing
+the same user experience to your website.
+
+
+32
+00:01:40,834 --> 00:01:42,603 line:-1
+Here is a quick overview.
+
+
+33
+00:01:42,970 --> 00:01:45,906 line:-2
+I click the "sign in" button,
+Safari prompts me for confirmation,
+
+
+34
+00:01:45,973 --> 00:01:48,542 line:-1
+then, boom, Face ID, I'm signed in.
+
+
+35
+00:01:48,942 --> 00:01:52,045 line:-2
+Now, let's dive into
+how to add this to your website.
+
+
+36
+00:01:52,112 --> 00:01:53,914 line:-1
+Face ID and Touch ID on the Web
+
+
+37
+00:01:53,981 --> 00:01:57,217 line:-2
+is powered by a standard
+called Web Authentication.
+
+
+38
+00:01:57,284 --> 00:01:59,653 line:-2
+I'll start by talking a little
+about that standard,
+
+
+39
+00:01:59,720 --> 00:02:03,991 line:-2
+then Apple's implementation
+of what's called a platform authenticator.
+
+
+40
+00:02:05,259 --> 00:02:06,560 line:-1
+Next, I'll cover the basics
+
+
+41
+00:02:06,627 --> 00:02:09,830 line:-2
+of what it takes
+to adopt this awesome new feature.
+
+
+42
+00:02:09,896 --> 00:02:12,933 line:-2
+Finally,
+end on some important best practices.
+
+
+43
+00:02:14,034 --> 00:02:17,004 line:-2
+Now, let's talk about
+the Web Authentication standard.
+
+
+44
+00:02:17,070 --> 00:02:21,208 line:-2
+Web Authentication is a JavaScript API
+to allow you, Web developers,
+
+
+45
+00:02:21,275 --> 00:02:24,244 line:-2
+to use public key-based authentication
+on the Web.
+
+
+46
+00:02:24,778 --> 00:02:28,081 line:-2
+This API is built
+on top of public key cryptography
+
+
+47
+00:02:28,148 --> 00:02:31,118 line:-2
+and brings many unique features
+along with it.
+
+
+48
+00:02:32,119 --> 00:02:34,588 line:-1
+Let's start with some high-level concepts.
+
+
+49
+00:02:35,289 --> 00:02:38,825 line:-2
+First, you need to get used to
+this strange yet familiar concept
+
+
+50
+00:02:38,892 --> 00:02:42,896 line:-2
+called relying party,
+which essentially means your website.
+
+
+51
+00:02:43,664 --> 00:02:47,301 line:-2
+Second, the API generates
+and makes use of a JavaScript object
+
+
+52
+00:02:47,367 --> 00:02:49,570 line:-1
+called public key credentials,
+
+
+53
+00:02:49,636 --> 00:02:52,105 line:-2
+which contains
+all the necessary information
+
+
+54
+00:02:52,172 --> 00:02:53,707 line:-1
+to perform your authentication.
+
+
+55
+00:02:55,175 --> 00:02:59,613 line:-2
+Third, all private keys are managed
+by devices called authenticators
+
+
+56
+00:02:59,680 --> 00:03:01,782 line:-1
+instead of the user's directory.
+
+
+57
+00:03:01,849 --> 00:03:05,686 line:-2
+An authenticator could be a security key,
+which you might have heard about,
+
+
+58
+00:03:05,752 --> 00:03:07,921 line:-1
+or the iPhone we just saw.
+
+
+59
+00:03:07,988 --> 00:03:12,359 line:-2
+Web browsers manage the interface for
+users to interact with an authenticator
+
+
+60
+00:03:12,426 --> 00:03:15,929 line:-2
+and bridge the responses
+from the authenticator to the website.
+
+
+61
+00:03:16,864 --> 00:03:20,000 line:-1
+Fourth, authenticators can, if necessary,
+
+
+62
+00:03:20,067 --> 00:03:24,972 line:-2
+prove their properties cryptographically
+via a process called attestation.
+
+
+63
+00:03:26,106 --> 00:03:28,642 line:-1
+These concepts may be new to many of you,
+
+
+64
+00:03:28,709 --> 00:03:31,144 line:-2
+but this session should explain
+everything you need to know
+
+
+65
+00:03:31,211 --> 00:03:34,047 line:-2
+to get started
+using them on your websites.
+
+
+66
+00:03:34,114 --> 00:03:36,450 line:-2
+Let's take a look
+at why you want to do that.
+
+
+67
+00:03:38,118 --> 00:03:41,622 line:-2
+First, Web Authentication provides
+strong authentication
+
+
+68
+00:03:41,688 --> 00:03:43,824 line:-1
+through public key cryptography,
+
+
+69
+00:03:43,891 --> 00:03:47,995 line:-2
+which is much stronger than passwords
+and can't be reused or breached.
+
+
+70
+00:03:49,029 --> 00:03:52,065 line:-2
+But more importantly,
+it is phishing-resistant.
+
+
+71
+00:03:52,966 --> 00:03:57,004 line:-2
+Safari will only allow
+public key credentials created by this API
+
+
+72
+00:03:57,070 --> 00:04:00,073 line:-2
+to be used
+within the website they were created,
+
+
+73
+00:04:00,607 --> 00:04:03,944 line:-2
+and the credentials can never be exported
+out from the authenticator
+
+
+74
+00:04:04,011 --> 00:04:06,079 line:-1
+they were created as well.
+
+
+75
+00:04:06,146 --> 00:04:08,282 line:-2
+This means that
+once a public key credential
+
+
+76
+00:04:08,348 --> 00:04:09,683 line:-1
+has been provisioned,
+
+
+77
+00:04:09,750 --> 00:04:14,121 line:-2
+there is no way for a user to
+accidentally divulge it to another party.
+
+
+78
+00:04:14,188 --> 00:04:18,024 line:-2
+Cool, right? This is the overview
+of Web Authentication standard.
+
+
+79
+00:04:18,091 --> 00:04:20,761 line:-1
+I will talk about the actual API later.
+
+
+80
+00:04:20,827 --> 00:04:23,864 line:-2
+Now let's talk about
+some unique features Apple does
+
+
+81
+00:04:23,931 --> 00:04:28,302 line:-2
+to enable Face ID and Touch ID
+under the Web Authentication standard.
+
+
+82
+00:04:29,536 --> 00:04:33,440 line:-2
+An authenticator like the iPhone
+is called a platform authenticator,
+
+
+83
+00:04:33,507 --> 00:04:36,944 line:-2
+because the authenticator is a feature
+built into the platform.
+
+
+84
+00:04:37,311 --> 00:04:41,448 line:-2
+There are two important properties
+that Apple builds into the authenticator.
+
+
+85
+00:04:41,515 --> 00:04:44,852 line:-2
+The first one, as we saw,
+is the Face ID and Touch ID,
+
+
+86
+00:04:44,918 --> 00:04:47,788 line:-1
+which is used to verify users' identity.
+
+
+87
+00:04:49,957 --> 00:04:52,159 line:-1
+The second one is Secure Enclave,
+
+
+88
+00:04:52,226 --> 00:04:55,429 line:-2
+which is a processor that manages
+all the private keys
+
+
+89
+00:04:55,495 --> 00:04:57,965 line:-2
+and guarantees
+that they cannot leave the device.
+
+
+90
+00:04:58,799 --> 00:05:03,871 line:-2
+By combining both, each sign-in performed
+with the Face ID or Touch ID
+
+
+91
+00:05:03,937 --> 00:05:07,641 line:-2
+is essentially
+a multi-factor authentication.
+
+
+92
+00:05:07,708 --> 00:05:12,412 line:-2
+The response the device sends back
+to the websites encapsulates two factors:
+
+
+93
+00:05:12,479 --> 00:05:17,117 line:-2
+something you have, the iPhone,
+and something you are, the biometrics.
+
+
+94
+00:05:17,184 --> 00:05:21,788 line:-2
+And the sign-in only takes a single tap.
+This is amazing.
+
+
+95
+00:05:22,189 --> 00:05:24,091 line:-1
+However, websites like a bank
+
+
+96
+00:05:24,157 --> 00:05:28,428 line:-2
+could be regulated to enforce
+multi-factor authentication.
+
+
+97
+00:05:28,495 --> 00:05:31,932 line:-2
+Information stored in the response
+might not be sufficient.
+
+
+98
+00:05:31,999 --> 00:05:34,635 line:-2
+They want some extra proof
+from the manufacturer
+
+
+99
+00:05:34,701 --> 00:05:39,072 line:-2
+that the device really,
+really preserves those nice properties.
+
+
+100
+00:05:39,406 --> 00:05:43,977 line:-2
+You do this with an optional
+security feature called attestation.
+
+
+101
+00:05:45,012 --> 00:05:49,483 line:-2
+Attestation is basically a secure way
+for you to ask a device manufacturer
+
+
+102
+00:05:49,550 --> 00:05:54,688 line:-2
+that the device is real and really has
+the capabilities it says it does.
+
+
+103
+00:05:54,755 --> 00:05:58,659 line:-2
+This is great for the specific-use cases
+like the one that I just mentioned.
+
+
+104
+00:06:00,494 --> 00:06:05,032 line:-2
+However, it can be implemented
+in a way to violate user privacy.
+
+
+105
+00:06:05,098 --> 00:06:07,134 line:-1
+For example, a device can be instructed
+
+
+106
+00:06:07,201 --> 00:06:10,704 line:-2
+to use a single,
+unique attestation certificate.
+
+
+107
+00:06:11,572 --> 00:06:14,942 line:-2
+Then the unique certificate
+becomes an easy tracking vector
+
+
+108
+00:06:15,008 --> 00:06:18,645 line:-2
+to link all of a user's attested accounts
+across the Web.
+
+
+109
+00:06:19,513 --> 00:06:22,282 line:-1
+Apple cares about users' privacy.
+
+
+110
+00:06:22,349 --> 00:06:26,053 line:-2
+Therefore, Apple has built
+its own attestation service.
+
+
+111
+00:06:26,119 --> 00:06:29,156 line:-2
+It generates unique certificates
+for every credential,
+
+
+112
+00:06:29,223 --> 00:06:33,160 line:-2
+and therefore websites can no longer
+use them to track users.
+
+
+113
+00:06:33,527 --> 00:06:36,697 line:-2
+That is called
+Apple Anonymous Attestation,
+
+
+114
+00:06:36,763 --> 00:06:38,365 line:-1
+which is coming soon.
+
+
+115
+00:06:39,099 --> 00:06:41,935 line:-1
+With this rich set of features,
+
+
+116
+00:06:42,002 --> 00:06:45,639 line:-2
+Apple's platform authenticator
+is truly amazing.
+
+
+117
+00:06:46,373 --> 00:06:49,610 line:-2
+Now let's walk through
+how to adopt it in your website.
+
+
+118
+00:06:49,676 --> 00:06:53,013 line:-2
+There are three different methods
+your website will need to use.
+
+
+119
+00:06:53,080 --> 00:06:55,916 line:-1
+All of them are promise-based API.
+
+
+120
+00:06:55,983 --> 00:06:59,620 line:-2
+First, you should check if
+the current device supports this feature.
+
+
+121
+00:06:59,686 --> 00:07:01,321 line:-1
+You can do this by calling
+
+
+122
+00:07:01,388 --> 00:07:06,460 line:-2
+PublicKeyCredential.isUserVerifying-
+PlatformAuthenticatorAvailable.
+
+
+123
+00:07:07,060 --> 00:07:09,630 line:-2
+Then,
+when getting a user set up to use it,
+
+
+124
+00:07:09,696 --> 00:07:13,033 line:-2
+you will need to call
+navigator.credentials.create
+
+
+125
+00:07:13,100 --> 00:07:15,335 line:-1
+to create a PublicKeyCredential object
+
+
+126
+00:07:15,402 --> 00:07:19,206 line:-2
+that contains
+the necessary authentication information.
+
+
+127
+00:07:19,873 --> 00:07:23,076 line:-2
+Finally,
+when a user wants to sign in to your site,
+
+
+128
+00:07:23,143 --> 00:07:27,548 line:-2
+call navigator.credentials.get,
+which returns a credential object
+
+
+129
+00:07:27,614 --> 00:07:31,084 line:-2
+that you can verify on your server
+to authenticate the user.
+
+
+130
+00:07:32,219 --> 00:07:35,789 line:-2
+These are the entry points
+to the Web Authentication API.
+
+
+131
+00:07:35,856 --> 00:07:37,991 line:-1
+Now let's take a look at how to use them
+
+
+132
+00:07:38,058 --> 00:07:41,094 line:-2
+to get Face ID and Touch ID
+on your website.
+
+
+133
+00:07:41,929 --> 00:07:45,365 line:-1
+To do feature detection, it is super easy.
+
+
+134
+00:07:45,432 --> 00:07:51,038 line:-2
+Just call PublicKeyCredential.isUser-
+VerifyingPlatformAuthenticatorAvailable,
+
+
+135
+00:07:51,104 --> 00:07:52,739 line:-1
+which will simply return a Boolean
+
+
+136
+00:07:52,806 --> 00:07:55,442 line:-2
+to tell you whether or not
+the feature can be used.
+
+
+137
+00:07:56,143 --> 00:07:58,612 line:-1
+Now it's time to onboard the user.
+
+
+138
+00:07:58,679 --> 00:08:01,481 line:-2
+To do that, you might need to
+first let your users sign in
+
+
+139
+00:08:01,548 --> 00:08:04,151 line:-1
+with their old-school password credential.
+
+
+140
+00:08:04,218 --> 00:08:06,854 line:-2
+Then you could show a notification
+to the user, saying,
+
+
+141
+00:08:07,287 --> 00:08:10,824 line:-2
+"Hey, we got this cool new feature
+to let you use Face ID or Touch ID
+
+
+142
+00:08:10,891 --> 00:08:14,261 line:-2
+to bypass the user name and password
+next time when you sign in.
+
+
+143
+00:08:14,328 --> 00:08:15,929 line:-1
+Would you like to enable that?"
+
+
+144
+00:08:16,396 --> 00:08:20,667 line:-2
+The notification could be a full Web page,
+a banner or a floating pop-up,
+
+
+145
+00:08:20,734 --> 00:08:23,136 line:-1
+depending on the style of your website.
+
+
+146
+00:08:23,203 --> 00:08:28,075 line:-2
+In this Shiny website that I built,
+I decided to use a full-page notification.
+
+
+147
+00:08:28,909 --> 00:08:30,644 line:-1
+Here is the notification.
+
+
+148
+00:08:30,711 --> 00:08:33,947 line:-2
+Most users at this point
+will probably press "OK."
+
+
+149
+00:08:34,014 --> 00:08:36,450 line:-2
+Then you should prepare your website
+with the following script
+
+
+150
+00:08:36,517 --> 00:08:39,720 line:-2
+to enable Touch ID
+with Web Authentication API.
+
+
+151
+00:08:40,654 --> 00:08:44,858 line:-2
+First things first, let's construct
+the options to pass to the method.
+
+
+152
+00:08:44,925 --> 00:08:46,093 line:-1
+It looks scary.
+
+
+153
+00:08:46,159 --> 00:08:50,531 line:-2
+However, after I break it down for you,
+you'll see that it's actually pretty easy.
+
+
+154
+00:08:50,597 --> 00:08:53,800 line:-2
+First, you need to tell the browser
+what website you are.
+
+
+155
+00:08:53,867 --> 00:08:56,503 line:-1
+Then, some information about the user.
+
+
+156
+00:08:56,570 --> 00:08:59,907 line:-2
+And then you get to specify
+what crypto you want to use.
+
+
+157
+00:08:59,973 --> 00:09:03,577 line:-2
+Now, good old-school challenge
+for our beloved crypto.
+
+
+158
+00:09:03,644 --> 00:09:07,147 line:-2
+And then tell the browser you want to use
+the platform authenticator.
+
+
+159
+00:09:07,214 --> 00:09:09,349 line:-1
+This is the key option here.
+
+
+160
+00:09:10,150 --> 00:09:13,053 line:-1
+Finally, this is completely optional.
+
+
+161
+00:09:13,120 --> 00:09:16,323 line:-2
+Since Shiny has
+some special security requirements,
+
+
+162
+00:09:16,390 --> 00:09:19,259 line:-1
+it decides to opt in for attestation.
+
+
+163
+00:09:19,326 --> 00:09:21,161 line:-1
+You see? That's simple.
+
+
+164
+00:09:21,228 --> 00:09:25,365 line:0
+Now, you pass these options
+to navigator.credentials.create,
+
+
+165
+00:09:25,432 --> 00:09:30,137 line:0
+and then Safari will handle the UI
+and give you back a PublicKeyCredential.
+
+
+166
+00:09:30,204 --> 00:09:34,241 line:0
+It's important to call this method
+within user-activated events, though.
+
+
+167
+00:09:35,409 --> 00:09:38,612 line:-2
+Let's see a demo
+of how everything comes together.
+
+
+168
+00:09:39,413 --> 00:09:43,050 line:-2
+First, let me sign in to Shiny
+with my primary credential.
+
+
+169
+00:09:43,116 --> 00:09:45,752 line:-2
+Then I get the notification.
+I mean, why not?
+
+
+170
+00:09:46,887 --> 00:09:49,890 line:-1
+Safari will then show a confirmation UI.
+
+
+171
+00:09:49,957 --> 00:09:54,027 line:-1
+Click "OK" and then Touch ID. I'm done.
+
+
+172
+00:09:54,094 --> 00:09:57,731 line:-2
+So that's the full user
+onboarding experience.
+
+
+173
+00:09:57,798 --> 00:10:00,767 line:-1
+Beautiful. But we are just halfway done.
+
+
+174
+00:10:00,834 --> 00:10:03,737 line:-2
+What you just saw
+is the front-end user experience.
+
+
+175
+00:10:03,804 --> 00:10:07,407 line:-2
+We still need to do something
+in the back end to process the response.
+
+
+176
+00:10:08,442 --> 00:10:10,944 line:-2
+Let's take a look
+at an overview of the response.
+
+
+177
+00:10:11,745 --> 00:10:14,081 line:-1
+To begin with, it contains an ID
+
+
+178
+00:10:14,147 --> 00:10:18,051 line:-2
+that you should save to refer to
+this particular credential in the future.
+
+
+179
+00:10:18,118 --> 00:10:21,488 line:-2
+Second, it contains a response
+that is for enrollment.
+
+
+180
+00:10:22,055 --> 00:10:24,591 line:-1
+In that response, you'll get some metadata
+
+
+181
+00:10:24,658 --> 00:10:28,128 line:-2
+that is generated by the browser
+for you to validate.
+
+
+182
+00:10:28,195 --> 00:10:30,731 line:-1
+Then it is the meat of the response:
+
+
+183
+00:10:30,797 --> 00:10:34,101 line:-2
+an attestationObject
+that contains the public key data
+
+
+184
+00:10:34,168 --> 00:10:36,203 line:-1
+and attestation certificates.
+
+
+185
+00:10:37,037 --> 00:10:38,839 line:0
+If you didn't opt in for attestation,
+
+
+186
+00:10:38,906 --> 00:10:42,843 line:0
+you will instead get back a "none"
+attestation statement as shown here.
+
+
+187
+00:10:42,910 --> 00:10:45,679 line:-1
+So that's the overview of the response.
+
+
+188
+00:10:46,113 --> 00:10:50,083 line:-2
+Depending on your server's configuration,
+code could be very different.
+
+
+189
+00:10:50,150 --> 00:10:53,520 line:-2
+However, here is a checklist
+you should follow in this order.
+
+
+190
+00:10:53,587 --> 00:10:58,425 line:-2
+First, validate all metadata: the client
+data and the authenticator data.
+
+
+191
+00:10:58,492 --> 00:11:00,727 line:-1
+Second, if you opt in to attestation,
+
+
+192
+00:11:00,794 --> 00:11:02,930 line:-2
+you should validate
+the attestation statement.
+
+
+193
+00:11:03,864 --> 00:11:07,067 line:-2
+Third, save the credential ID
+and the public key data,
+
+
+194
+00:11:07,134 --> 00:11:09,636 line:-1
+which you will use for future sign-in.
+
+
+195
+00:11:09,703 --> 00:11:13,373 line:-2
+Lastly, you can optionally set
+a server-side cookie to indicate
+
+
+196
+00:11:13,440 --> 00:11:17,911 line:-2
+Face ID or Touch ID is enabled for
+this particular account on this device.
+
+
+197
+00:11:18,579 --> 00:11:21,849 line:-2
+This will make the re-authentication
+process a lot easier.
+
+
+198
+00:11:21,915 --> 00:11:24,818 line:-2
+So that's all you need to do
+for onboarding users.
+
+
+199
+00:11:24,885 --> 00:11:26,386 line:-1
+Now let's move to sign in.
+
+
+200
+00:11:27,120 --> 00:11:28,488 line:-1
+If you have saved a cookie
+
+
+201
+00:11:28,555 --> 00:11:31,758 line:-2
+about the Touch ID-enabled account
+during enrollment,
+
+
+202
+00:11:31,825 --> 00:11:35,529 line:-2
+then now you could list it
+as a fast path for sign-in.
+
+
+203
+00:11:35,596 --> 00:11:39,533 line:-2
+To use Touch ID for your fast path,
+you will need the following script.
+
+
+204
+00:11:40,467 --> 00:11:44,538 line:-2
+This is a very similar formula,
+like the enrollment, to do sign-in.
+
+
+205
+00:11:44,605 --> 00:11:49,977 line:-2
+The must-have field here is the challenge,
+just like any other public key crypto.
+
+
+206
+00:11:50,043 --> 00:11:52,279 line:-1
+Then it is helpful for you to tell Safari
+
+
+207
+00:11:52,346 --> 00:11:54,681 line:-2
+the exact credential
+you are planning to use,
+
+
+208
+00:11:54,748 --> 00:11:58,685 line:-2
+so that Safari can offer
+the most optimized UI for the user.
+
+
+209
+00:11:59,653 --> 00:12:03,123 line:-2
+Most importantly,
+you need to specify the transports.
+
+
+210
+00:12:03,891 --> 00:12:08,028 line:-2
+Now you pass these options
+to navigator.credentials.get,
+
+
+211
+00:12:08,095 --> 00:12:12,332 line:-2
+and then Safari will handle the UI
+and give you back a PublicKeyCredential,
+
+
+212
+00:12:12,399 --> 00:12:13,734 line:-1
+just like the enrollment.
+
+
+213
+00:12:14,234 --> 00:12:16,069 line:-1
+Also, same as the enrollment,
+
+
+214
+00:12:16,136 --> 00:12:20,607 line:-2
+it's important to call this method
+within user-activated events.
+
+
+215
+00:12:21,575 --> 00:12:24,678 line:-2
+Let's see a demo
+of how everything comes together.
+
+
+216
+00:12:25,445 --> 00:12:29,883 line:-2
+Let me click the "sign in" button.
+Safari will then show a confirmation UI.
+
+
+217
+00:12:29,950 --> 00:12:34,188 line:-2
+Click "continue" and then Touch ID.
+I'm in.
+
+
+218
+00:12:34,254 --> 00:12:38,725 line:-2
+So that's just how easy it is
+to use Touch ID to sign in.
+
+
+219
+00:12:38,792 --> 00:12:40,727 line:-1
+Now let's focus on the back end.
+
+
+220
+00:12:41,428 --> 00:12:42,763 line:-1
+In the sign-in case,
+
+
+221
+00:12:42,829 --> 00:12:46,133 line:-2
+the returned PublicKeyCredential
+is slightly different.
+
+
+222
+00:12:46,200 --> 00:12:50,437 line:-2
+The type of the response
+is now AuthenticatorAssertionResponse.
+
+
+223
+00:12:50,504 --> 00:12:53,407 line:-2
+The meat of the response here
+is the signature.
+
+
+224
+00:12:53,473 --> 00:12:57,845 line:-2
+Yes, the old-school signature you need
+to verify for every public key crypto.
+
+
+225
+00:12:57,911 --> 00:12:59,346 line:-1
+So that's the response.
+
+
+226
+00:13:00,180 --> 00:13:04,685 line:-2
+The checklist here for sign-in
+is much simpler than the enrollment part.
+
+
+227
+00:13:04,751 --> 00:13:09,289 line:-2
+First, you need to validate that
+the user ID is indeed one of your users,
+
+
+228
+00:13:09,356 --> 00:13:14,261 line:-2
+and then check if the credential ID
+is associated with that user ID.
+
+
+229
+00:13:14,328 --> 00:13:18,198 line:-2
+Once you've done that,
+you then validate all other metadata.
+
+
+230
+00:13:18,265 --> 00:13:20,534 line:-1
+Finally, you verify the signature.
+
+
+231
+00:13:20,601 --> 00:13:23,303 line:-2
+Then you can log the user in,
+and you are done.
+
+
+232
+00:13:24,338 --> 00:13:29,443 line:-2
+That is everything you need to do
+to enable Face ID and Touch ID on the Web.
+
+
+233
+00:13:29,510 --> 00:13:31,812 line:-1
+Let me recap those three things.
+
+
+234
+00:13:31,879 --> 00:13:34,982 line:-2
+First, you need to detect
+the existence of the feature.
+
+
+235
+00:13:35,048 --> 00:13:38,819 line:-2
+Then you should show a notification
+to ask users to enable the feature
+
+
+236
+00:13:38,886 --> 00:13:42,890 line:-2
+right after the user has signed in
+with traditional mechanisms.
+
+
+237
+00:13:42,956 --> 00:13:47,361 line:-2
+And then you are ready to go with
+Face ID or Touch ID for future sign-in.
+
+
+238
+00:13:48,896 --> 00:13:53,066 line:-2
+Face ID and Touch ID for the Web
+is available in Safari
+
+
+239
+00:13:53,133 --> 00:13:57,604 line:-2
+as SFSafariViewController
+and ASWebAuthenticationSession
+
+
+240
+00:13:57,671 --> 00:14:01,141 line:-1
+in macOS, iPadOS and iOS.
+
+
+241
+00:14:02,142 --> 00:14:04,077 line:-1
+Finally, some best practices.
+
+
+242
+00:14:04,811 --> 00:14:06,079 line:-1
+The most important one
+
+
+243
+00:14:06,146 --> 00:14:09,082 line:-2
+is to use this feature
+as an alternative way to sign in,
+
+
+244
+00:14:09,149 --> 00:14:10,484 line:-1
+not the only one.
+
+
+245
+00:14:10,551 --> 00:14:13,120 line:-1
+Since the private key is tied to a device,
+
+
+246
+00:14:13,187 --> 00:14:15,956 line:-2
+if this is the only way
+to sign in to your website,
+
+
+247
+00:14:16,023 --> 00:14:18,926 line:-2
+your users will be
+forever locked out of their accounts
+
+
+248
+00:14:18,992 --> 00:14:20,961 line:-1
+if they lose their devices.
+
+
+249
+00:14:21,028 --> 00:14:25,499 line:-2
+Use feature detection instead of
+user-agent strings to detect this feature.
+
+
+250
+00:14:26,967 --> 00:14:33,106 line:-2
+Call navigator.credentials.create and .get
+within user-activated events.
+
+
+251
+00:14:33,173 --> 00:14:34,675 line:-1
+If you ever need to set a flag
+
+
+252
+00:14:34,741 --> 00:14:38,512 line:-2
+to indicate if this feature is enabled
+for an account on a device,
+
+
+253
+00:14:38,579 --> 00:14:42,015 line:-2
+use a server-side, secure,
+HttpOnly cookie,
+
+
+254
+00:14:42,082 --> 00:14:44,651 line:-2
+which should give you
+the longest-term storage.
+
+
+255
+00:14:45,419 --> 00:14:48,055 line:-2
+Finally,
+for websites that have already enabled
+
+
+256
+00:14:48,121 --> 00:14:50,791 line:-1
+security keys with Web Authentication,
+
+
+257
+00:14:50,858 --> 00:14:53,961 line:-2
+you should consider whether it makes sense
+to present this feature
+
+
+258
+00:14:54,027 --> 00:14:56,897 line:-1
+along with security keys to your users,
+
+
+259
+00:14:56,964 --> 00:15:00,467 line:-2
+because the end-to-end user experiences
+are quite different.
+
+
+260
+00:15:01,735 --> 00:15:06,206 line:-2
+In summary, today I introduced
+Face ID and Touch ID for the Web,
+
+
+261
+00:15:06,273 --> 00:15:08,775 line:-2
+which provides
+a frictionless user experience
+
+
+262
+00:15:08,842 --> 00:15:12,846 line:-2
+and yet a strong
+multi-factor authentication mechanism.
+
+
+263
+00:15:12,913 --> 00:15:15,449 line:-2
+It can be easily integrated
+into your website
+
+
+264
+00:15:15,516 --> 00:15:18,018 line:-2
+to streamline
+your user's sign-in experience
+
+
+265
+00:15:18,085 --> 00:15:22,155 line:-2
+without having to change the way
+you manage your user session state.
+
+
+266
+00:15:22,789 --> 00:15:25,259 line:-1
+Please start testing this feature today
+
+
+267
+00:15:25,325 --> 00:15:31,431 line:-2
+and file any potential bugs
+on Feedback Assistant or bugs.webkit.org.
+
+
+268
+00:15:31,498 --> 00:15:32,699 line:-1
+Thanks for watching.
+

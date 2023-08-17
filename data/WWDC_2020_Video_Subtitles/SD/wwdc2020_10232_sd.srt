@@ -1,0 +1,957 @@
+1
+00:00:03,804 --> 00:00:06,540 line:-1
+Hello and welcome to WWDC.
+
+
+2
+00:00:08,809 --> 00:00:10,577 line:0
+My name is Roger Pantos.
+
+
+3
+00:00:10,644 --> 00:00:16,717 line:0
+And today we are gonna talk about
+inserting ads into Low-Latency HLS.
+
+
+4
+00:00:17,150 --> 00:00:19,186 line:-1
+To set the stage for that,
+
+
+5
+00:00:19,253 --> 00:00:24,324 line:-2
+let's start with a quick review
+of how regular live HLS works.
+
+
+6
+00:00:24,925 --> 00:00:30,364 line:-2
+Usually, in a live HLS, the server adds
+a new segment every target duration,
+
+
+7
+00:00:30,430 --> 00:00:35,736 line:-2
+and the client reloads that Playlist every
+Target Duration to see what's changed.
+
+
+8
+00:00:35,802 --> 00:00:41,275 line:-2
+So the timing model for the client is
+defined entirely by the current Playlist
+
+
+9
+00:00:41,341 --> 00:00:42,743 line:-1
+and the segments inside it.
+
+
+10
+00:00:43,944 --> 00:00:48,448 line:-2
+The first segment in the current Playlist
+defines the earliest seekable point
+
+
+11
+00:00:48,515 --> 00:00:52,553 line:-2
+and the end of the last segment represents
+what's currently the live edge
+
+
+12
+00:00:52,619 --> 00:00:53,921 line:-1
+of the presentation.
+
+
+13
+00:00:54,521 --> 00:00:58,258 line:-2
+Now that's important because clients
+use the position of that live edge
+
+
+14
+00:00:58,325 --> 00:01:00,160 line:-1
+to make some essential decisions,
+
+
+15
+00:01:00,227 --> 00:01:03,430 line:-2
+such as how close it is safe to play
+without stalling.
+
+
+16
+00:01:04,197 --> 00:01:07,868 line:-2
+So let's take a look at Playlists
+in a graphical way.
+
+
+17
+00:01:08,635 --> 00:01:12,706 line:-2
+We'll start with a Playlist
+that has four six-second segments.
+
+
+18
+00:01:13,907 --> 00:01:18,245 line:-2
+Six seconds later a new segment is added
+and the Playlist is updated
+
+
+19
+00:01:18,312 --> 00:01:20,480 line:-2
+to roll the first segment
+out of the Playlist.
+
+
+20
+00:01:20,547 --> 00:01:22,149 line:-1
+We're showing it here as gray
+
+
+21
+00:01:22,216 --> 00:01:25,018 line:-2
+because it is no longer part
+of the live window.
+
+
+22
+00:01:25,085 --> 00:01:28,155 line:-2
+Now the end of segment five
+is the live edge.
+
+
+23
+00:01:28,222 --> 00:01:31,491 line:-2
+Next we'll add a new segment
+and the process repeats.
+
+
+24
+00:01:31,558 --> 00:01:36,196 line:-2
+Now one consequence of this is that
+if every segment is six seconds,
+
+
+25
+00:01:36,263 --> 00:01:39,867 line:-2
+then each segment
+has a six-second publishing delay.
+
+
+26
+00:01:39,933 --> 00:01:42,603 line:-2
+In other words,
+you have to wait for six seconds
+
+
+27
+00:01:42,669 --> 00:01:45,839 line:-2
+before any part of that segment
+becomes available for playback,
+
+
+28
+00:01:45,906 --> 00:01:47,808 line:-1
+even the first few frames.
+
+
+29
+00:01:47,875 --> 00:01:51,178 line:-2
+That's a long time
+if you want to play really close to live.
+
+
+30
+00:01:51,245 --> 00:01:55,649 line:-2
+So enter Low-Latency HLS
+and Partial Segments.
+
+
+31
+00:01:56,316 --> 00:01:59,286 line:-2
+Partial Segments
+are like looking through a microscope
+
+
+32
+00:01:59,353 --> 00:02:01,588 line:-1
+at the live edge of the presentation.
+
+
+33
+00:02:02,489 --> 00:02:05,259 line:-2
+The way it works
+is that every regular segment
+
+
+34
+00:02:05,325 --> 00:02:07,661 line:-1
+at the live edge, called a Parent Segment,
+
+
+35
+00:02:07,728 --> 00:02:12,199 line:-2
+is accompanied
+by a series of shorter Partial Segments.
+
+
+36
+00:02:12,266 --> 00:02:16,570 line:-2
+And these offer the same media
+just with a lower publishing latency.
+
+
+37
+00:02:17,271 --> 00:02:20,007 line:-2
+So, in this case,
+the client can get the first media
+
+
+38
+00:02:20,073 --> 00:02:24,178 line:-2
+from segment five after only two seconds
+instead of waiting for six seconds.
+
+
+39
+00:02:24,811 --> 00:02:27,447 line:-2
+Two seconds after that
+it can get a little bit more.
+
+
+40
+00:02:27,514 --> 00:02:29,216 line:-1
+And then two seconds after that,
+
+
+41
+00:02:29,283 --> 00:02:33,787 line:-2
+the final part of segment five appears
+along with segment five itself.
+
+
+42
+00:02:33,854 --> 00:02:36,823 line:-2
+Now there's nothing magic about
+six seconds and two seconds here.
+
+
+43
+00:02:36,890 --> 00:02:38,926 line:-1
+You can use any combination of durations.
+
+
+44
+00:02:39,526 --> 00:02:44,631 line:-2
+Here we've looked at Low-Latency HLS
+and how it differs from regular live HLS
+
+
+45
+00:02:44,698 --> 00:02:46,266 line:-1
+for delivering program content.
+
+
+46
+00:02:46,800 --> 00:02:48,969 line:-2
+Let's stick a pin in that
+for just a second
+
+
+47
+00:02:49,036 --> 00:02:53,707 line:-2
+and go back to regular live HLS
+so we can talk about ad insertion.
+
+
+48
+00:02:53,774 --> 00:02:55,876 line:-1
+Now there are a few different variations,
+
+
+49
+00:02:55,943 --> 00:02:59,880 line:-2
+but the basic idea is that you'll start
+with a source feed for your program
+
+
+50
+00:02:59,947 --> 00:03:03,417 line:-2
+that includes markers
+for where the ads can be inserted.
+
+
+51
+00:03:04,117 --> 00:03:07,921 line:-2
+Now these markers are often not
+on regular segment boundaries.
+
+
+52
+00:03:07,988 --> 00:03:11,158 line:-2
+So your packager may need
+to add a short segment
+
+
+53
+00:03:11,225 --> 00:03:13,994 line:-2
+so the ad can start
+exactly on a segment boundary.
+
+
+54
+00:03:14,862 --> 00:03:16,396 line:-1
+When it's time to pick an ad,
+
+
+55
+00:03:16,463 --> 00:03:20,467 line:-2
+your decisioning engine will choose
+one out of your available inventory.
+
+
+56
+00:03:20,534 --> 00:03:25,405 line:-2
+Then your packager will begin replacing
+program segments with the ad segments
+
+
+57
+00:03:25,472 --> 00:03:27,841 line:-1
+separating them with discontinuity tags.
+
+
+58
+00:03:28,542 --> 00:03:33,447 line:-2
+The packager will then continue to spool
+out ad segments, one per Target Duration,
+
+
+59
+00:03:33,514 --> 00:03:35,816 line:-1
+until it reaches the end of the ad,
+
+
+60
+00:03:35,883 --> 00:03:38,819 line:-2
+and then it goes back
+to regular program segments.
+
+
+61
+00:03:39,486 --> 00:03:41,054 line:-1
+So to go back to our diagram,
+
+
+62
+00:03:41,121 --> 00:03:42,856 line:-1
+it's gonna look like this.
+
+
+63
+00:03:42,923 --> 00:03:45,692 line:-2
+We start with these three program segments
+in blue.
+
+
+64
+00:03:46,226 --> 00:03:50,097 line:-2
+When an ad comes up,
+we place one last short program segment
+
+
+65
+00:03:50,163 --> 00:03:52,299 line:-2
+to align with the start
+of the ad boundary.
+
+
+66
+00:03:53,000 --> 00:03:57,004 line:-2
+Then we wait six seconds
+and then we lay down the first ad segment.
+
+
+67
+00:03:57,771 --> 00:04:01,508 line:-2
+Then six seconds after that
+we lay down a second ad segment.
+
+
+68
+00:04:02,309 --> 00:04:06,446 line:-2
+At the end of the ad, it might not end
+exactly on a segment boundary.
+
+
+69
+00:04:06,513 --> 00:04:10,250 line:-2
+So we might have again a short segment.
+This time a short ad segment.
+
+
+70
+00:04:11,018 --> 00:04:14,221 line:-2
+And then we wait six seconds more
+and then we lay down
+
+
+71
+00:04:14,288 --> 00:04:16,623 line:-1
+the first program segment after the ad.
+
+
+72
+00:04:17,089 --> 00:04:20,459 line:-1
+This is ad insertion for regular live HLS,
+
+
+73
+00:04:20,527 --> 00:04:23,797 line:-2
+for Low-Latency HLS
+you'll do much of the same thing
+
+
+74
+00:04:23,864 --> 00:04:26,066 line:-2
+but with program segments
+added to the mix.
+
+
+75
+00:04:26,733 --> 00:04:29,303 line:-1
+So here we have the same stream,
+
+
+76
+00:04:29,369 --> 00:04:32,206 line:-2
+but for Low-Latency
+it has Partial Segments as well.
+
+
+77
+00:04:32,906 --> 00:04:37,144 line:-2
+It updates faster. So after two seconds
+you get another Partial Segment.
+
+
+78
+00:04:37,211 --> 00:04:39,947 line:-2
+And then you'll get
+a short Partial Segment
+
+
+79
+00:04:40,013 --> 00:04:43,217 line:-2
+to line up to the ad boundary
+along with the Parent Segment.
+
+
+80
+00:04:44,184 --> 00:04:46,720 line:-2
+At this point,
+we'll start spooling out the ad.
+
+
+81
+00:04:46,787 --> 00:04:50,824 line:-2
+The packager needs to maintain
+the same Low-Latency timing model.
+
+
+82
+00:04:50,891 --> 00:04:55,562 line:-2
+Which means, every two seconds
+it'll add a Partial Segment from the ad.
+
+
+83
+00:04:56,029 --> 00:04:58,398 line:-2
+So then two seconds after that
+we'll get another
+
+
+84
+00:04:58,465 --> 00:05:00,901 line:-2
+and two seconds after that
+we'll get the last one
+
+
+85
+00:05:00,968 --> 00:05:03,670 line:-1
+along with the Parent Segment from the ad.
+
+
+86
+00:05:03,737 --> 00:05:06,840 line:-2
+This then continues
+through the next ad segment.
+
+
+87
+00:05:06,907 --> 00:05:10,377 line:-2
+And then the ad ends
+on a short Partial Segment
+
+
+88
+00:05:10,444 --> 00:05:14,047 line:-2
+to line up with the ad boundary
+just like the program segments did.
+
+
+89
+00:05:14,681 --> 00:05:18,886 line:-2
+After that the program Partial Segments
+and Parent Segments resume,
+
+
+90
+00:05:18,952 --> 00:05:20,554 line:-1
+and you're back to the program.
+
+
+91
+00:05:21,255 --> 00:05:24,725 line:-2
+So inserting ads
+into Low-Latency HLS is very similar
+
+
+92
+00:05:24,791 --> 00:05:27,461 line:-1
+to doing it with regular live HLS.
+
+
+93
+00:05:27,528 --> 00:05:28,896 line:-1
+The biggest difference is that
+
+
+94
+00:05:28,962 --> 00:05:31,765 line:-2
+before ads are spooled
+out as regular segments
+
+
+95
+00:05:31,832 --> 00:05:34,234 line:-2
+they get doled out
+as Partial Segments first,
+
+
+96
+00:05:34,301 --> 00:05:37,871 line:-2
+so the Playlist can update more frequently
+at the live edge
+
+
+97
+00:05:37,938 --> 00:05:39,640 line:-1
+and then the Parent Segments follow.
+
+
+98
+00:05:40,440 --> 00:05:44,878 line:-2
+The overall segmentation stays the same
+in terms of where the ad boundaries are,
+
+
+99
+00:05:44,945 --> 00:05:48,615 line:-2
+where the discontinuities are placed,
+where key rotation happens, et cetera.
+
+
+100
+00:05:48,916 --> 00:05:51,785 line:-2
+And just as when
+you're serving program content,
+
+
+101
+00:05:51,852 --> 00:05:54,721 line:-2
+the origin has to implement
+Blocking Playlist Reload
+
+
+102
+00:05:54,788 --> 00:05:58,292 line:-2
+for ads as well to preserve
+the Low-Latency timing model.
+
+
+103
+00:05:58,892 --> 00:06:01,528 line:0
+We've got a separate video about
+Blocking Playlist Reload.
+
+
+104
+00:06:01,595 --> 00:06:06,266 line:0
+If you'd like to learn more about it,
+it's part of the new HLS Origin API.
+
+
+105
+00:06:06,633 --> 00:06:08,602 line:-1
+And speaking of the Origin API,
+
+
+106
+00:06:08,669 --> 00:06:12,039 line:-2
+another consideration
+for ad delivery is Preload Hinting.
+
+
+107
+00:06:13,006 --> 00:06:16,910 line:-2
+Preload Hinting is a technique used
+by Low-Latency HLS
+
+
+108
+00:06:16,977 --> 00:06:18,846 line:-1
+to lower segment delivery time.
+
+
+109
+00:06:19,446 --> 00:06:22,282 line:0
+We also have a video
+talking about that this year.
+
+
+110
+00:06:22,349 --> 00:06:24,218 line:0
+But the basic requirement
+
+
+111
+00:06:24,284 --> 00:06:27,788 line:0
+is that every Playlist
+has to contain the URL
+
+
+112
+00:06:27,855 --> 00:06:31,225 line:0
+of the next Partial Segment
+that we expect to have show up
+
+
+113
+00:06:31,291 --> 00:06:34,428 line:0
+in the Playlist
+carried in a Preload Hint Tag.
+
+
+114
+00:06:34,995 --> 00:06:38,365 line:0
+Ad content must be hinted,
+just like program content.
+
+
+115
+00:06:38,432 --> 00:06:42,369 line:0
+But it's a little easier to implement
+for ads because unlike program content,
+
+
+116
+00:06:42,436 --> 00:06:44,004 line:0
+where the server has to block
+
+
+117
+00:06:44,071 --> 00:06:47,341 line:0
+until each Partial Segment
+has been completely produced,
+
+
+118
+00:06:47,407 --> 00:06:50,110 line:0
+with prerecorded content
+we don't have to block,
+
+
+119
+00:06:50,177 --> 00:06:53,046 line:0
+and so you can serve it up
+from a regular origin.
+
+
+120
+00:06:53,881 --> 00:06:57,751 line:0
+Let's take a look at an example of what
+Preload Hinting looks like for an ad.
+
+
+121
+00:06:59,086 --> 00:07:00,721 line:-1
+Here's a Low-Latency Playlist,
+
+
+122
+00:07:00,787 --> 00:07:04,324 line:-2
+and segment seven is the last thing
+that's currently available.
+
+
+123
+00:07:04,391 --> 00:07:08,161 line:-2
+But we also have a couple
+of Preload Hint Tags at the end.
+
+
+124
+00:07:08,228 --> 00:07:10,130 line:-1
+Because we're transitioning to an ad
+
+
+125
+00:07:10,197 --> 00:07:11,532 line:-1
+the first one tells us
+
+
+126
+00:07:11,598 --> 00:07:15,235 line:-2
+that the client should load
+a new Media Initialization Section.
+
+
+127
+00:07:15,302 --> 00:07:19,907 line:-2
+The second one gives us the URL
+for the first Partial Segment of the ad.
+
+
+128
+00:07:20,541 --> 00:07:24,444 line:-2
+Two seconds later, when the live edge
+of the presentation reaches the ad,
+
+
+129
+00:07:24,511 --> 00:07:26,613 line:-2
+the Playlist will update
+to look like this.
+
+
+130
+00:07:27,848 --> 00:07:29,917 line:0
+Now we can see
+that there's a discontinuity
+
+
+131
+00:07:29,983 --> 00:07:31,885 line:0
+following the program segment seven
+
+
+132
+00:07:32,519 --> 00:07:34,955 line:0
+followed by a map tag for the ad
+
+
+133
+00:07:35,022 --> 00:07:37,324 line:0
+followed by the first Partial Segment
+of the ad.
+
+
+134
+00:07:38,091 --> 00:07:40,294 line:0
+The Preload Hint Tag has been updated
+
+
+135
+00:07:40,360 --> 00:07:42,663 line:0
+to hint the second Partial Segment
+of the ad
+
+
+136
+00:07:42,729 --> 00:07:46,834 line:0
+which we expect will show up as its own
+part tag two seconds from now
+
+
+137
+00:07:46,900 --> 00:07:48,468 line:0
+when it goes live.
+
+
+138
+00:07:48,535 --> 00:07:51,138 line:0
+Then we'll hit the third Partial Segment,
+and so on.
+
+
+139
+00:07:51,638 --> 00:07:54,341 line:-1
+Like clockwork, right? Well, not always.
+
+
+140
+00:07:55,375 --> 00:07:59,379 line:-2
+One phenomenon you might be familiar with
+is called "early return."
+
+
+141
+00:07:59,446 --> 00:08:02,382 line:-2
+Usually, you see this
+when something really exciting happens
+
+
+142
+00:08:02,449 --> 00:08:04,885 line:-1
+in a live broadcast during an ad break
+
+
+143
+00:08:04,952 --> 00:08:09,223 line:-2
+and the producer wants to cut back to the
+program right away so you don't miss it.
+
+
+144
+00:08:09,823 --> 00:08:12,159 line:-1
+Just like in regular live HLS,
+
+
+145
+00:08:12,226 --> 00:08:15,529 line:-2
+you'll stop serving ad segments
+before you get to the end of the ad.
+
+
+146
+00:08:16,463 --> 00:08:18,398 line:-1
+If you've got an agile packager,
+
+
+147
+00:08:18,465 --> 00:08:21,435 line:-2
+you might be able to end it
+at the last published Partial Segment.
+
+
+148
+00:08:22,202 --> 00:08:24,838 line:-2
+In which case, you would conjure up
+a short Parent Segment
+
+
+149
+00:08:24,905 --> 00:08:26,440 line:-1
+that ends at the same place.
+
+
+150
+00:08:26,974 --> 00:08:31,278 line:-2
+Then you'd signal a discontinuity
+and resume feeding program segments.
+
+
+151
+00:08:32,011 --> 00:08:34,280 line:-1
+In this case, a hint you served earlier
+
+
+152
+00:08:34,347 --> 00:08:37,751 line:-2
+before you knew you were going
+to return early might need to change.
+
+
+153
+00:08:37,818 --> 00:08:41,221 line:-2
+So just set it to the next
+program Partial Segment instead.
+
+
+154
+00:08:41,288 --> 00:08:44,124 line:-2
+The client will switch back
+to loading program content
+
+
+155
+00:08:44,191 --> 00:08:46,093 line:-1
+and you'll have your early return.
+
+
+156
+00:08:47,027 --> 00:08:51,598 line:-2
+So to wrap up our discussion
+of inserting ads into Low-Latency HLS,
+
+
+157
+00:08:52,099 --> 00:08:56,770 line:-2
+it's pretty similar to inserting ads into
+regular live HLS but with one difference:
+
+
+158
+00:08:56,837 --> 00:09:00,174 line:-2
+ads get spooled out more frequently
+as Partial Segments.
+
+
+159
+00:09:01,175 --> 00:09:04,478 line:-2
+Your packager does need
+to implement Blocking Playlist Reload
+
+
+160
+00:09:04,545 --> 00:09:06,747 line:-1
+for both ads and program content.
+
+
+161
+00:09:07,648 --> 00:09:11,185 line:-2
+And it has to supply preload hints
+for both as well.
+
+
+162
+00:09:11,251 --> 00:09:15,322 line:-2
+Although, your ad origin does not need
+to enforce the blocking semantics
+
+
+163
+00:09:15,389 --> 00:09:18,158 line:-1
+because ads themselves are prerecorded.
+
+
+164
+00:09:18,659 --> 00:09:20,127 line:-1
+We know that for many of you
+
+
+165
+00:09:20,194 --> 00:09:23,897 line:-2
+ads are an essential part of your
+Low-Latency content delivery strategy.
+
+
+166
+00:09:24,431 --> 00:09:26,400 line:-1
+So we hope that what we've covered here
+
+
+167
+00:09:26,466 --> 00:09:29,870 line:-2
+helps you to deliver them
+with Low-Latency HLS.
+
+
+168
+00:09:29,937 --> 00:09:31,004 line:-1
+Thank you.
+

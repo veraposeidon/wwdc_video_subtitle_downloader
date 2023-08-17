@@ -1,0 +1,996 @@
+2
+00:00:00.501 --> 00:00:08.509 line:-1 align:center
+♪ ♪
+
+
+3
+00:00:09.309 --> 00:00:11.211 line:-1 align:center
+August Joki: Hello, I'm August Joki,
+
+
+4
+00:00:11.245 --> 00:00:13.113 line:-1 align:center
+a software engineer on watchOS,
+
+
+5
+00:00:13.146 --> 00:00:18.519 line:-2 align:center
+and I'm here to show you how to go further
+with WidgetKit complications.
+
+
+6
+00:00:18.552 --> 00:00:22.189 line:-2 align:center
+I hope you've seen the wonderful
+Complications and Widgets: Reloaded talk
+
+
+7
+00:00:22,222 --> 00:00:26,260 line:-2
+first, covering the basics
+of complications in WidgetKit.
+
+
+8
+00:00:26,293 --> 00:00:29,029 line:-2
+This talk expands
+on the concepts covered there
+
+
+9
+00:00:29.062 --> 00:00:33.066 line:-2 align:center
+as they relate to complications
+on the watch faces.
+
+
+10
+00:00:33,100 --> 00:00:38,238 line:0
+And my WWDC 2020 talk:
+Build complications in SwiftUI
+
+
+11
+00:00:38,272 --> 00:00:43,477 line:0
+covers more specifics about tinting
+and SwiftUI drawing in complications.
+
+
+12
+00:00:44.211 --> 00:00:46.713 line:-2 align:center
+In this talk,
+I'll be discussing the WidgetKit features
+
+
+13
+00:00:46.747 --> 00:00:48.782 line:-1 align:center
+unique to watchOS,
+
+
+14
+00:00:48.815 --> 00:00:51.351 line:-2 align:center
+as well as how to migrate your,
+and your users',
+
+
+15
+00:00:51.385 --> 00:00:54.421 line:-2 align:center
+existing ClockKit complications
+to WidgetKit.
+
+
+16
+00:00:54,454 --> 00:00:57,424 line:-2
+I've taken inspiration from
+the Coffee Tracker sample app
+
+
+17
+00:00:57.457 --> 00:00:59.793 line:-2 align:center
+to use as an example
+throughout this talk.
+
+
+18
+00:00:59.826 --> 00:01:02.896 line:-2 align:center
+The app records the number of coffees,
+teas, and sodas
+
+
+19
+00:01:02.930 --> 00:01:04.598 line:-1 align:center
+you drink throughout the day
+
+
+20
+00:01:04.631 --> 00:01:08.669 line:-2 align:center
+and tracks the amount of caffeine
+in your body over time.
+
+
+21
+00:01:08,702 --> 00:01:12,072 line:-1
+Let's start with what's unique to watchOS.
+
+
+22
+00:01:12.105 --> 00:01:14.975 line:-2 align:center
+In iOS 16
+we brought complication style widgets
+
+
+23
+00:01:15.008 --> 00:01:16.810 line:-1 align:center
+to the phone's lock screen
+
+
+24
+00:01:16.844 --> 00:01:21.682 line:-2 align:center
+and in watchOS 9 we brought WidgetKit
+to the watch's complications.
+
+
+25
+00:01:21,715 --> 00:01:25,352 line:-2
+On the watch faces we have
+a unique complication presentation
+
+
+26
+00:01:25,385 --> 00:01:27,087 line:-1
+for the corners of the watch screen.
+
+
+27
+00:01:27.120 --> 00:01:29.623 line:-1 align:center
+And it requires a unique WidgetKit family
+
+
+28
+00:01:29,656 --> 00:01:33,060 line:-1
+called accessoryCorner, to describe it.
+
+
+29
+00:01:33,093 --> 00:01:36,230 line:-2
+Part of that unique presentation
+is auxiliary content
+
+
+30
+00:01:36,263 --> 00:01:38,298 line:-1
+specified by your SwiftUI view,
+
+
+31
+00:01:38.332 --> 00:01:40.400 line:-1 align:center
+but not rendered as part of your content.
+
+
+32
+00:01:40,434 --> 00:01:42,836 line:-1
+Instead, it is rendered by the watch face.
+
+
+33
+00:01:44.271 --> 00:01:47.407 line:-2 align:center
+The circular part of the corner
+is standard SwiftUI rendering
+
+
+34
+00:01:47.441 --> 00:01:50.878 line:-2 align:center
+and the auxiliary content
+is the curved part in the corners.
+
+
+35
+00:01:53.080 --> 00:01:55.682 line:-1 align:center
+Or in the dial on the Infograph face.
+
+
+36
+00:01:58,318 --> 00:02:02,856 line:-2
+The accessoryInline family
+has a unique behavior on watch faces.
+
+
+37
+00:02:02.890 --> 00:02:07.361 line:-2 align:center
+It has multiple ways of being rendered
+depending on the face.
+
+
+38
+00:02:07,394 --> 00:02:10,697 line:-1
+Sometimes flat,
+
+
+39
+00:02:10,731 --> 00:02:12,766 line:-1
+sometimes curved to match the dial.
+
+
+40
+00:02:14.234 --> 00:02:17.237 line:-2 align:center
+Let's talk about how to support
+these unique features
+
+
+41
+00:02:17,271 --> 00:02:21,475 line:-2
+by looking at how the coffee tracker app
+might be updated to use WidgetKit.
+
+
+42
+00:02:23.510 --> 00:02:26.580 line:-2 align:center
+In addition to the three new
+complication-styled widget families
+
+
+43
+00:02:26.613 --> 00:02:30.017 line:-2 align:center
+on iOS 16:
+AccessoryRectangular,
+
+
+44
+00:02:30.050 --> 00:02:34.021 line:-2 align:center
+accessoryCircular,
+and accessoryInline,
+
+
+45
+00:02:34.054 --> 00:02:37.958 line:-2 align:center
+we have a fourth family on watchOS 9
+called accessoryCorner.
+
+
+46
+00:02:39.426 --> 00:02:43.330 line:-2 align:center
+accessoryCorner can either be shown
+as a large circular content,
+
+
+47
+00:02:43,363 --> 00:02:47,768 line:-2
+like the maps and heart rate
+complications shown in the lower corners,
+
+
+48
+00:02:47.801 --> 00:02:51.939 line:-2 align:center
+or as smaller circular content
+with a curved label or gauge
+
+
+49
+00:02:51.972 --> 00:02:56.009 line:-2 align:center
+like the coffee tracker and moonphase
+complications shown in the upper corners.
+
+
+50
+00:02:57,911 --> 00:03:01,081 line:-2
+To control whether
+the inner auxiliary content is shown,
+
+
+51
+00:03:01,114 --> 00:03:06,153 line:-2
+watchOS 9 has added a new view modifier
+you can use, which I'll show you now.
+
+
+52
+00:03:08,055 --> 00:03:11,625 line:-2
+Let's look at building a corner
+complication for my coffee tracker app.
+
+
+53
+00:03:13.060 --> 00:03:16.163 line:-2 align:center
+Starting with the larger
+circular content style,
+
+
+54
+00:03:16.196 --> 00:03:19.933 line:-2 align:center
+I have a ZStack
+with an SF Symbol and a background.
+
+
+55
+00:03:19,967 --> 00:03:22,936 line:-2
+The SwiftUI content is
+automatically clipped to a circle
+
+
+56
+00:03:22,970 --> 00:03:26,807 line:-2
+to keep in line with the design
+of the other corner complications.
+
+
+57
+00:03:28,408 --> 00:03:32,212 line:-2
+To add the inner curved content,
+we use the new to watchOS 9
+
+
+58
+00:03:32.246 --> 00:03:34.581 line:-1 align:center
+widgetLabel view modifier.
+
+
+59
+00:03:34,615 --> 00:03:38,886 line:-2
+The watch face extracts the contents
+of the modifier to draw the control
+
+
+60
+00:03:38.919 --> 00:03:42.890 line:-2 align:center
+appropriate for the family
+and the style of the watch face.
+
+
+61
+00:03:42.923 --> 00:03:47.261 line:-2 align:center
+And the circular content
+automatically scales down to make room.
+
+
+62
+00:03:47.294 --> 00:03:51.231 line:-2 align:center
+For accessoryCorner
+you can specify a SwiftUI text, gauge,
+
+
+63
+00:03:51,265 --> 00:03:54,201 line:-1
+or progressView in your widget's label.
+
+
+64
+00:03:55.736 --> 00:03:59.373 line:-2 align:center
+AccessoryCorner isn't the only family
+that supports widgetLabel.
+
+
+65
+00:03:59.406 --> 00:04:03.510 line:-2 align:center
+Let's look at how it is used
+on the accessoryCircular family.
+
+
+66
+00:04:04,378 --> 00:04:08,482 line:-2
+On the Infograph watch face,
+in addition to the corner complications,
+
+
+67
+00:04:08.515 --> 00:04:12.586 line:-2 align:center
+there are four circular complications
+inside the dial.
+
+
+68
+00:04:12.619 --> 00:04:16.256 line:-2 align:center
+My coffee tracker circular complication,
+in the middle top,
+
+
+69
+00:04:16,290 --> 00:04:19,560 line:-2
+looks very similar to the corner
+complication we just saw,
+
+
+70
+00:04:19.593 --> 00:04:21.295 line:-1 align:center
+but with text in the dial.
+
+
+71
+00:04:21,328 --> 00:04:23,430 line:-1
+I'll show you how to add that text now.
+
+
+72
+00:04:24.665 --> 00:04:28.168 line:-2 align:center
+For my circular complication design,
+I thought it more appropriate
+
+
+73
+00:04:28,202 --> 00:04:30,370 line:-2
+to move the gauge
+that was in the widgetLabel
+
+
+74
+00:04:30.404 --> 00:04:34.107 line:-2 align:center
+in my corner complication,
+to be front and center.
+
+
+75
+00:04:34,141 --> 00:04:37,311 line:-2
+To take advantage of the top
+middle position on Infograph,
+
+
+76
+00:04:37,344 --> 00:04:41,481 line:-2
+I add a widgetLabel to the gauge
+in order to display additional text
+
+
+77
+00:04:41,515 --> 00:04:46,453 line:-2
+in the longer bezel area that wouldn't
+otherwise fit in the circular content.
+
+
+78
+00:04:46.486 --> 00:04:49.156 line:-2 align:center
+But now I have redundant information
+between the main view
+
+
+79
+00:04:49.189 --> 00:04:51.892 line:-1 align:center
+and the text above it.
+
+
+80
+00:04:51.925 --> 00:04:54.695 line:-2 align:center
+I can clean that up
+by switching the circular content
+
+
+81
+00:04:54,728 --> 00:04:59,733 line:-2
+to that good looking coffee cup SF Symbol
+from my corner complication
+
+
+82
+00:04:59.766 --> 00:05:02.903 line:-2 align:center
+But when I switch to a face
+showing my circular complication
+
+
+83
+00:05:02,936 --> 00:05:04,438 line:-1
+that does not have the bezel,
+
+
+84
+00:05:04,471 --> 00:05:06,540 line:-1
+then I've lost all of my caffeine info.
+
+
+85
+00:05:06.573 --> 00:05:10.110 line:-2 align:center
+Luckily, there's a piece of API I can add
+to make my complication work
+
+
+86
+00:05:10,143 --> 00:05:11,311 line:-1
+in both cases.
+
+
+87
+00:05:13.247 --> 00:05:16.350 line:-2 align:center
+I update my complication
+to add the Environment property
+
+
+88
+00:05:16.383 --> 00:05:19.052 line:-1 align:center
+called showsWidgetLabel to my view.
+
+
+89
+00:05:19.086 --> 00:05:22.422 line:-2 align:center
+This will be true whenever
+the complication is in a position
+
+
+90
+00:05:22.456 --> 00:05:26.226 line:-2 align:center
+on the watch face that shows
+the content in the widget's label.
+
+
+91
+00:05:28.095 --> 00:05:33.500 line:-2 align:center
+And then I can change the content
+to depend on the value of showsWidgetLabel
+
+
+92
+00:05:33.534 --> 00:05:38.972 line:-2 align:center
+so I am able to have the appropriate level
+of information in each complication spot.
+
+
+93
+00:05:39.006 --> 00:05:42.776 line:-2 align:center
+I just demonstrated two different ways
+that the accessoryCircular family
+
+
+94
+00:05:42,809 --> 00:05:44,378 line:-1
+can show up on watch faces,
+
+
+95
+00:05:44,411 --> 00:05:47,014 line:-2
+and there is one more way
+you need to be aware of.
+
+
+96
+00:05:47.047 --> 00:05:51.552 line:-2 align:center
+The Extra Large watch face has long been
+a great way for people to see the time
+
+
+97
+00:05:51,585 --> 00:05:54,688 line:-1
+in an extra large format.
+
+
+98
+00:05:54,721 --> 00:05:58,091 line:-2
+And it supports a single,
+large circular complication.
+
+
+99
+00:05:58,125 --> 00:06:01,295 line:-2
+The Extra Large face uses
+the accessoryCircular family
+
+
+100
+00:06:01.328 --> 00:06:06.533 line:-2 align:center
+and automatically scales up the content
+to match the style of the face.
+
+
+101
+00:06:06,567 --> 00:06:08,769 line:-2
+Please note:
+as this face is designed
+
+
+102
+00:06:08,802 --> 00:06:10,737 line:-1
+to have a single, large complication,
+
+
+103
+00:06:10.771 --> 00:06:13.340 line:-1 align:center
+do not use the increased canvas size
+
+
+104
+00:06:13,373 --> 00:06:16,710 line:-2
+as an opportunity
+to densely pack your complication.
+
+
+105
+00:06:16.743 --> 00:06:22.216 line:-2 align:center
+The content should be identical to
+the normal circular family, only larger.
+
+
+106
+00:06:22,249 --> 00:06:25,285 line:-2
+As I mentioned earlier,
+there are two more widget families used
+
+
+107
+00:06:25,319 --> 00:06:29,857 line:-2
+on watch faces:
+accessoryRectangular and accessoryInline.
+
+
+108
+00:06:29.890 --> 00:06:33.560 line:-2 align:center
+There are no faces with rectangular
+complications that show the widgetLabel.
+
+
+109
+00:06:33.594 --> 00:06:37.931 line:-2 align:center
+And the accessoryInline family acts,
+already, as a widgetLabel.
+
+
+110
+00:06:37,965 --> 00:06:42,002 line:-2
+The watch face extracts Images
+and Texts from your inline content
+
+
+111
+00:06:42.035 --> 00:06:45.506 line:-2 align:center
+and renders them itself
+to match the look of the face.
+
+
+112
+00:06:45.539 --> 00:06:48.075 line:-1 align:center
+Next up is Migration.
+
+
+113
+00:06:48,108 --> 00:06:49,676 line:-1
+There are two parts to migration:
+
+
+114
+00:06:49.710 --> 00:06:53.247 line:-2 align:center
+rewriting your existing ClockKit
+complication code in WidgetKit;
+
+
+115
+00:06:53.280 --> 00:06:56.617 line:-2 align:center
+and providing a mapping
+to let the system know how to upgrade
+
+
+116
+00:06:56,650 --> 00:07:00,554 line:-2
+your complications people have set
+on their watch faces.
+
+
+117
+00:07:00.587 --> 00:07:04.925 line:-2 align:center
+When you adopt WidgetKit the system
+will stop asking your ClockKit data source
+
+
+118
+00:07:04,958 --> 00:07:10,264 line:-2
+for new content and show only your new
+complications in the face editing picker.
+
+
+119
+00:07:11,732 --> 00:07:13,867 line:-2
+As well as bringing
+WidgetKit to the watch,
+
+
+120
+00:07:13,901 --> 00:07:18,572 line:-2
+watchOS 9 has updated every face
+to support rich complications,
+
+
+121
+00:07:18,605 --> 00:07:21,909 line:-2
+which allowed us to dramatically reduce
+the number of complication families
+
+
+122
+00:07:21.942 --> 00:07:25.445 line:-1 align:center
+from 12 to only 4.
+
+
+123
+00:07:25.479 --> 00:07:28.916 line:-2 align:center
+Rectangular and Corner
+map directly across
+
+
+124
+00:07:28,949 --> 00:07:32,486 line:-2
+to accessoryRectangular
+and accessoryCorner.
+
+
+125
+00:07:32.519 --> 00:07:35.622 line:-2 align:center
+All three graphic Circular
+styled ClockKit families
+
+
+126
+00:07:35.656 --> 00:07:39.860 line:-2 align:center
+are now a single
+accessoryCircular WidgetKit family.
+
+
+127
+00:07:39.893 --> 00:07:44.398 line:-2 align:center
+And the accessoryInline family
+is used where the old utilitarianSmallFlat
+
+
+128
+00:07:44,431 --> 00:07:47,334 line:-1
+or utilitarianLarge used to be.
+
+
+129
+00:07:48.836 --> 00:07:52.139 line:-2 align:center
+And many places that used to be
+utilitarianSmall
+
+
+130
+00:07:52,172 --> 00:07:56,443 line:-2
+have been updated
+to use the accessoryCorner family.
+
+
+131
+00:07:57,611 --> 00:08:00,914 line:-2
+With WidgetKit, SwiftUI views
+and their state driven layout
+
+
+132
+00:08:00.948 --> 00:08:03.317 line:-1 align:center
+have replaced ClockKit's templates.
+
+
+133
+00:08:03,350 --> 00:08:06,019 line:-2
+WidgetKit still has
+familiar timelines and entries.
+
+
+134
+00:08:06.053 --> 00:08:09.590 line:-2 align:center
+In fact, they were originally inspired
+by ClockKit itself,
+
+
+135
+00:08:09.623 --> 00:08:12.826 line:-2 align:center
+which means that your complication
+data source will nicely migrate
+
+
+136
+00:08:12,860 --> 00:08:16,730 line:-2
+to one of either a static or intent based
+WidgetKit configuration.
+
+
+137
+00:08:17,998 --> 00:08:20,968 align:center
+Please see the original WidgetKit talk
+for more details
+
+
+138
+00:08:21,001 --> 00:08:23,837 align:center
+about the types of configurations
+WidgetKit supports
+
+
+139
+00:08:23,871 --> 00:08:25,906 line:0
+as well as general family support.
+
+
+140
+00:08:25.939 --> 00:08:30.143 line:-2 align:center
+We've added one last API to ClockKit
+to allow a person's complications
+
+
+141
+00:08:30.177 --> 00:08:33.313 line:-2 align:center
+to be migrated by
+the system automatically.
+
+
+142
+00:08:33,347 --> 00:08:36,450 line:-2
+This allows for your existing
+complications that are already
+
+
+143
+00:08:36.483 --> 00:08:40.754 line:-2 align:center
+on watch faces to automatically be
+upgraded to your new WidgetKit based
+
+
+144
+00:08:40.787 --> 00:08:44.625 line:-2 align:center
+complications
+without any user interaction.
+
+
+145
+00:08:44,658 --> 00:08:46,793 line:-1
+When your app gets updated on a watch,
+
+
+146
+00:08:46.827 --> 00:08:49.496 line:-2 align:center
+the Watch Faces will check
+for the presence of widgets
+
+
+147
+00:08:49,530 --> 00:08:51,365 line:-1
+in your app's bundle.
+
+
+148
+00:08:51,398 --> 00:08:55,936 line:-2
+If it finds any, it will then launch
+your ClockKit complication data source
+
+
+149
+00:08:55.969 --> 00:09:00.140 line:-2 align:center
+to generate the migrations
+for the existing complications.
+
+
+150
+00:09:00.174 --> 00:09:03.410 line:-2 align:center
+From this point forward,
+your CLKComplicationDataSource
+
+
+151
+00:09:03,443 --> 00:09:07,881 line:-2
+will only be run to ask for migrations
+when a person receives a shared face
+
+
+152
+00:09:07.915 --> 00:09:10.551 line:-1 align:center
+with your ClockKit complications on it.
+
+
+153
+00:09:10.584 --> 00:09:14.855 line:-2 align:center
+The system will ask for your migrations
+every time a new face is shared,
+
+
+154
+00:09:14.888 --> 00:09:18.592 line:-2 align:center
+so for a consistent experience you should
+keep your migrations consistent.
+
+
+155
+00:09:18.625 --> 00:09:22.062 line:-2 align:center
+Once you've finished creating
+your beautiful WidgetKit complications,
+
+
+156
+00:09:22,095 --> 00:09:25,065 line:-2
+you can add the new property,
+widgetMigrator,
+
+
+157
+00:09:25,098 --> 00:09:29,136 line:-2
+to provide the object that conforms
+to the new Migrator protocol.
+
+
+158
+00:09:29.169 --> 00:09:33.473 line:-2 align:center
+Be that your complication data source
+itself or some other type you provide.
+
+
+159
+00:09:35,008 --> 00:09:39,213 line:-2
+The CLKComplication WidgetMigrator
+protocol has a single function
+
+
+160
+00:09:39,246 --> 00:09:43,150 line:-2
+to provide to the watch faces
+widget migration configurations
+
+
+161
+00:09:43,183 --> 00:09:47,321 line:-1
+from existing CLKComplicationDescriptors.
+
+
+162
+00:09:47.354 --> 00:09:50.123 line:-2 align:center
+The most straightforward way
+to adopt the new API
+
+
+163
+00:09:50.157 --> 00:09:53.660 line:-2 align:center
+is to have your data source conform
+to the new Migrator protocol.
+
+
+164
+00:09:55.028 --> 00:09:58.632 line:-2 align:center
+If your WidgetKit complication
+uses the static configuration,
+
+
+165
+00:09:58.665 --> 00:10:02.569 line:-2 align:center
+you provide a static migration
+configuration.
+
+
+166
+00:10:02.603 --> 00:10:04.838 line:-2 align:center
+And there's an equivalent
+migration configuration
+
+
+167
+00:10:04.872 --> 00:10:08.275 line:-2 align:center
+if you use intents
+in your widget complication.
+
+
+168
+00:10:08.308 --> 00:10:12.045 line:-2 align:center
+Note that if you provide intent based
+migration configurations,
+
+
+169
+00:10:12,079 --> 00:10:15,716 line:-2
+you will need to also include your intent
+definitions in your watch app
+
+
+170
+00:10:15.749 --> 00:10:17.651 line:-1 align:center
+as well as your widget extensions,
+
+
+171
+00:10:17.684 --> 00:10:20.554 line:-2 align:center
+so you can create your intent objects
+in both places.
+
+
+172
+00:10:21.488 --> 00:10:25.292 line:-2 align:center
+WidgetKit enables new and creative ways
+to make complications for the watch,
+
+
+173
+00:10:25,325 --> 00:10:28,161 line:-2
+while dramatically simplifying
+the experience.
+
+
+174
+00:10:28.195 --> 00:10:30.430 line:-1 align:center
+Thanks for watching.
+

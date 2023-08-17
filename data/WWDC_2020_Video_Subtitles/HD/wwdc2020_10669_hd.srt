@@ -1,0 +1,691 @@
+1
+00:00:03,904 --> 00:00:07,007 line:-1
+Hello and welcome to WWDC.
+
+
+2
+00:00:08,842 --> 00:00:10,711 line:0
+Hi. My name is Pascal,
+
+
+3
+00:00:10,777 --> 00:00:14,348 line:0
+and I'm here to talk about handling PHIR
+without getting burned.
+
+
+4
+00:00:14,414 --> 00:00:17,017 line:-1
+As you may know, since early 2018,
+
+
+5
+00:00:17,084 --> 00:00:20,754 line:-2
+the Health app supports Fast Healthcare
+Interoperability Resources,
+
+
+6
+00:00:21,221 --> 00:00:24,791 line:-2
+better known as "FHIR,"
+to download clinical data to your phone.
+
+
+7
+00:00:26,260 --> 00:00:28,529 line:-2
+This is possible
+thanks to the open standards
+
+
+8
+00:00:28,595 --> 00:00:32,566 line:-2
+developed by HL7 and the SMART team,
+which the Health app leverages.
+
+
+9
+00:00:33,901 --> 00:00:37,104 line:-2
+To recap,
+for us it all starts with the Health app.
+
+
+10
+00:00:37,604 --> 00:00:42,376 line:-2
+Health establishes a secure connection
+directly to the health provider's API...
+
+
+11
+00:00:43,677 --> 00:00:47,214 line:-2
+and then downloads FHIR data directly
+to the iOS device.
+
+
+12
+00:00:49,016 --> 00:00:51,318 line:-1
+This data is stored securely in HealthKit,
+
+
+13
+00:00:51,919 --> 00:00:55,255 line:-2
+which allows aggregation of data
+from multiple institutions.
+
+
+14
+00:00:55,689 --> 00:00:59,159 line:-2
+This data is then available to you
+via the HealthKit API.
+
+
+15
+00:01:01,261 --> 00:01:02,563 line:0
+At the end of a download,
+
+
+16
+00:01:02,629 --> 00:01:06,400 line:0
+clinical data is presented
+neatly laid out in the Health app.
+
+
+17
+00:01:07,668 --> 00:01:12,272 line:-2
+Now let's see how your app can obtain
+and work with this FHIR data.
+
+
+18
+00:01:13,407 --> 00:01:17,010 line:-2
+First, your app will request authorization
+from the user.
+
+
+19
+00:01:18,912 --> 00:01:22,883 line:-2
+The user is guided through the
+authorization process in three screens.
+
+
+20
+00:01:24,117 --> 00:01:25,219 line:-1
+On the first screen,
+
+
+21
+00:01:25,285 --> 00:01:29,256 line:-2
+general information about
+what granting access entails is shown.
+
+
+22
+00:01:30,457 --> 00:01:34,828 line:-2
+Next, the explanation text
+that you provide in your app's Info.plist
+
+
+23
+00:01:34,895 --> 00:01:38,365 line:-2
+is presented alongside a link
+to your privacy policy.
+
+
+24
+00:01:39,366 --> 00:01:42,169 line:-2
+And, yes,
+we will review your privacy policy.
+
+
+25
+00:01:43,170 --> 00:01:45,706 line:-2
+In this simple example
+of a medication list app,
+
+
+26
+00:01:45,772 --> 00:01:48,175 line:-1
+only access to medications is requested.
+
+
+27
+00:01:49,076 --> 00:01:52,846 line:-2
+This follows our "proportional
+to what you need" data use principle.
+
+
+28
+00:01:53,780 --> 00:01:58,952 line:-2
+Finally, by default, only data already on
+the device will be shared with your app,
+
+
+29
+00:01:59,653 --> 00:02:04,491 line:-2
+so request authorization each
+and every time you query for FHIR data
+
+
+30
+00:02:04,558 --> 00:02:06,393 line:-1
+to ensure the user has a chance
+
+
+31
+00:02:06,460 --> 00:02:09,663 line:-2
+to authorize access to new data
+if applicable.
+
+
+32
+00:02:10,297 --> 00:02:13,534 line:-2
+The sheet won't appear
+if there is nothing to authorize for.
+
+
+33
+00:02:14,902 --> 00:02:19,806 line:0
+More details about this process are
+available in our WWDC talk from 2018.
+
+
+34
+00:02:21,475 --> 00:02:24,411 line:-2
+Now that your app has access
+to clinical health records,
+
+
+35
+00:02:24,478 --> 00:02:26,780 line:-1
+let's take a closer look at FHIR data.
+
+
+36
+00:02:27,614 --> 00:02:30,317 line:-2
+This is a simplified FHIR
+prescription resource.
+
+
+37
+00:02:30,884 --> 00:02:32,653 line:-1
+There are a variety of field types:
+
+
+38
+00:02:33,320 --> 00:02:37,991 line:-2
+simple strings, strings that can only be
+of certain values, so-called codes...
+
+
+39
+00:02:39,226 --> 00:02:43,530 line:-2
+date and times that come as strings
+in an ISO-8601-like format,
+
+
+40
+00:02:44,097 --> 00:02:47,000 line:-2
+other primitive types,
+such as Booleans and numbers,
+
+
+41
+00:02:47,067 --> 00:02:50,838 line:-2
+and complex nested structures
+comprised of primitives.
+
+
+42
+00:02:52,172 --> 00:02:54,842 line:-2
+Previously,
+you had to write your own Swift Codable
+
+
+43
+00:02:54,908 --> 00:02:57,744 line:-2
+if you wanted to work with FHIR data
+in a native format.
+
+
+44
+00:02:58,412 --> 00:03:02,082 line:-2
+This seems straightforward if you only
+want to look at certain data elements,
+
+
+45
+00:03:02,149 --> 00:03:04,351 line:-1
+and you know that the data is uniform.
+
+
+46
+00:03:04,418 --> 00:03:09,389 line:-2
+In this example, you only want the status,
+date and the medication of a prescription.
+
+
+47
+00:03:10,824 --> 00:03:14,294 line:-2
+Soon, however, you start to realize
+the depth, complexity,
+
+
+48
+00:03:14,361 --> 00:03:16,964 line:-2
+and even just the sheer number
+of FHIR resources.
+
+
+49
+00:03:17,831 --> 00:03:21,335 line:-2
+Just indulge in this full definition
+of a prescription resource.
+
+
+50
+00:03:22,102 --> 00:03:25,439 line:-2
+Yes, you probably don't want to model this
+all by yourself.
+
+
+51
+00:03:26,773 --> 00:03:29,476 line:-2
+So, how can we help you work
+with FHIR data?
+
+
+52
+00:03:30,744 --> 00:03:32,713 line:-1
+Introducing FHIRModels.
+
+
+53
+00:03:32,779 --> 00:03:36,884 line:-2
+FHIRModels is an open-source Swift package
+available via GitHub
+
+
+54
+00:03:36,950 --> 00:03:39,620 line:-2
+allowing you to file issues,
+request features,
+
+
+55
+00:03:39,686 --> 00:03:41,722 line:-1
+and to generally provide feedback.
+
+
+56
+00:03:42,623 --> 00:03:45,025 line:-2
+There is support
+for multiple FHIR releases,
+
+
+57
+00:03:45,092 --> 00:03:48,829 line:-2
+and data models are provided
+for all the resources in a release.
+
+
+58
+00:03:49,830 --> 00:03:53,166 line:-2
+Resource integrity on encode
+and decode is enforced,
+
+
+59
+00:03:53,233 --> 00:03:56,470 line:-2
+preventing creation
+of structurally invalid resources.
+
+
+60
+00:03:57,538 --> 00:04:01,175 line:-2
+There is date/time parsing,
+enums enforcing code fields,
+
+
+61
+00:04:01,909 --> 00:04:06,079 line:-2
+enums enforcing value[x] polymorphic
+properties, and much, much more.
+
+
+62
+00:04:07,247 --> 00:04:09,783 line:-2
+And of course
+we will keep the package up to date
+
+
+63
+00:04:09,850 --> 00:04:12,019 line:-1
+with new FHIR and Swift releases.
+
+
+64
+00:04:13,187 --> 00:04:19,159 line:-2
+The package comes with libraries for the
+DSTU2, R4 and the latest build release.
+
+
+65
+00:04:19,860 --> 00:04:22,963 line:-2
+We'll add support for new releases
+as they emerge.
+
+
+66
+00:04:24,665 --> 00:04:28,335 line:-2
+It is available via GitHub,
+cohosted by our friends at CareKit.
+
+
+67
+00:04:29,803 --> 00:04:31,738 line:-1
+Now, let's handle some FHIR.
+
+
+68
+00:04:33,240 --> 00:04:35,709 line:-2
+Here's how you can get
+a full-fledged FHIR data model
+
+
+69
+00:04:35,776 --> 00:04:39,279 line:-2
+from clinical data
+that you obtain via the HealthKit API.
+
+
+70
+00:04:40,214 --> 00:04:43,784 line:-2
+First,
+import HealthKit and the DSTU2 library
+
+
+71
+00:04:43,851 --> 00:04:45,552 line:-1
+from the FHIRModels package.
+
+
+72
+00:04:46,553 --> 00:04:51,291 line:-2
+Grab an HKClinicalRecord from HealthKit
+and its associated HK fhirResource.
+
+
+73
+00:04:52,059 --> 00:04:54,962 line:-2
+You can inspect HK fhirResource
+to know its type.
+
+
+74
+00:04:56,330 --> 00:04:58,599 line:-1
+Parse the resource's JSON data to receive,
+
+
+75
+00:04:58,665 --> 00:05:01,034 line:-1
+in this case, a MedicationOrder instance.
+
+
+76
+00:05:01,635 --> 00:05:03,203 line:-1
+You could then print the note.
+
+
+77
+00:05:05,038 --> 00:05:08,008 line:-2
+Let's complicate things a bit
+by presenting dosage instructions
+
+
+78
+00:05:08,075 --> 00:05:11,078 line:-2
+with an associated date range
+from a deeply nested structure.
+
+
+79
+00:05:12,346 --> 00:05:15,048 line:-1
+First, write an extension on TimingRepeat,
+
+
+80
+00:05:15,115 --> 00:05:16,950 line:-1
+a type provided by FHIRModels.
+
+
+81
+00:05:17,751 --> 00:05:21,388 line:-2
+We want to pull out the start
+and end dates of the bounds period.
+
+
+82
+00:05:22,489 --> 00:05:26,059 line:-2
+In the real world, you would want
+to make this far more extensive,
+
+
+83
+00:05:26,126 --> 00:05:29,429 line:-2
+like check for nullability
+and use a good old date formatter.
+
+
+84
+00:05:30,564 --> 00:05:33,867 line:-2
+Then, map over all
+the prescription's dosage instructions.
+
+
+85
+00:05:35,135 --> 00:05:39,873 line:-2
+Use your new extension to prefix
+the instruction with a date range
+
+
+86
+00:05:39,940 --> 00:05:42,042 line:-2
+during which
+these instructions were valid.
+
+
+87
+00:05:44,044 --> 00:05:45,479 line:-1
+Another fun part of FHIR
+
+
+88
+00:05:45,546 --> 00:05:48,882 line:-2
+is the fact that different releases
+are in use out there in the wild.
+
+
+89
+00:05:49,850 --> 00:05:51,318 line:-1
+In the fall of 2014,
+
+
+90
+00:05:51,385 --> 00:05:55,355 line:-2
+the first draft standard for trial use,
+DSTU1, was released.
+
+
+91
+00:05:56,356 --> 00:06:01,028 line:-2
+It was followed
+by three more major releases up to today.
+
+
+92
+00:06:03,797 --> 00:06:06,300 line:-2
+Soon,
+release 5 will be let out of the barn.
+
+
+93
+00:06:06,834 --> 00:06:10,370 line:-2
+However, as I alluded to,
+when a new release is published,
+
+
+94
+00:06:10,437 --> 00:06:12,706 line:-1
+existing APIs aren't magically updated.
+
+
+95
+00:06:13,340 --> 00:06:16,310 line:-2
+You'll likely want to support
+the more popular releases,
+
+
+96
+00:06:16,376 --> 00:06:19,780 line:-1
+especially DSTU2, for a few more years.
+
+
+97
+00:06:21,148 --> 00:06:25,185 line:-2
+So, let's see how you can support
+multiple FHIR releases with FHIRModels.
+
+
+98
+00:06:26,220 --> 00:06:29,456 line:-2
+First, import the appropriate libraries
+from FHIRModels.
+
+
+99
+00:06:30,591 --> 00:06:32,993 line:-1
+Then, assuming you have a FHIRRelease enum
+
+
+100
+00:06:33,060 --> 00:06:35,796 line:-2
+with values for all FHIR releases
+you want to support,
+
+
+101
+00:06:36,396 --> 00:06:37,998 line:0
+switch over the release
+
+
+102
+00:06:38,632 --> 00:06:41,935 line:0
+and use the JSON decoder
+with the appropriate model types.
+
+
+103
+00:06:42,603 --> 00:06:48,709 line:0
+Here, we use MedicationOrder for DSTU2
+and MedicationRequest for R4.
+
+
+104
+00:06:49,343 --> 00:06:51,912 line:0
+Finally, walk the properties accordingly
+
+
+105
+00:06:51,979 --> 00:06:54,281 line:0
+to arrive at the values
+you want to extract.
+
+
+106
+00:06:54,882 --> 00:06:58,519 line:0
+This, and much more,
+is what you can do with FHIRModels.
+
+
+107
+00:07:00,053 --> 00:07:04,758 line:-2
+To wrap up, FHIRModels helps you deal
+with the complexity of FHIR resources
+
+
+108
+00:07:04,825 --> 00:07:06,426 line:-1
+and even FHIR releases.
+
+
+109
+00:07:07,461 --> 00:07:10,163 line:-2
+Use the package
+when you are working with clinical data
+
+
+110
+00:07:10,230 --> 00:07:12,099 line:-1
+obtained via the HealthKit API.
+
+
+111
+00:07:13,100 --> 00:07:15,736 line:-2
+Also,
+take a look at "What's new in CareKit"
+
+
+112
+00:07:15,802 --> 00:07:19,940 line:-2
+to see how you can use FHIR
+with CareKit to build care apps...
+
+
+113
+00:07:21,074 --> 00:07:24,811 line:-2
+or, of course,
+enhance your own independent FHIR apps
+
+
+114
+00:07:24,878 --> 00:07:26,413 line:-1
+with the use of this package.
+
+
+115
+00:07:28,015 --> 00:07:29,950 line:-1
+Here's what you can do from here.
+
+
+116
+00:07:30,517 --> 00:07:34,555 line:-2
+Clone the library, add it to your project
+and start exploring the code.
+
+
+117
+00:07:35,956 --> 00:07:40,127 line:-2
+File issues, even if you just want
+to provide feedback or ask questions.
+
+
+118
+00:07:41,562 --> 00:07:44,932 line:-2
+Get our sample app which shows
+how you can integrate FHIRModels
+
+
+119
+00:07:44,998 --> 00:07:47,501 line:-1
+into an app that uses the HealthKit API.
+
+
+120
+00:07:48,869 --> 00:07:54,374 line:-2
+And finally, you can learn more about FHIR
+and chime in at chat.fhir.org.
+
+
+121
+00:07:56,009 --> 00:07:57,744 line:-1
+Thank you, and happy coding.
+

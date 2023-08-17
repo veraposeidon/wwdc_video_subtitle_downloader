@@ -1,0 +1,1903 @@
+1
+00:00:03,904 --> 00:00:06,573 line:-1
+Hello and welcome to WWDC.
+
+
+2
+00:00:08,208 --> 00:00:09,710 line:0
+Hi, and welcome.
+
+
+3
+00:00:10,043 --> 00:00:13,413 line:0
+My name is Jad Osseiran,
+and I'm a software engineer on tvOS.
+
+
+4
+00:00:14,181 --> 00:00:16,817 line:-2
+In this session,
+we'll begin with a high-level overview
+
+
+5
+00:00:16,884 --> 00:00:18,585 line:-1
+of tvOS Picture in Picture.
+
+
+6
+00:00:19,353 --> 00:00:21,755 line:-2
+We will then cover what it takes
+to implement Picture in Picture
+
+
+7
+00:00:21,822 --> 00:00:23,257 line:-1
+in your applications,
+
+
+8
+00:00:23,790 --> 00:00:25,359 line:-1
+and I will then hand it off to Dan,
+
+
+9
+00:00:25,425 --> 00:00:27,961 line:-2
+who will talk about how you can make
+your existing applications
+
+
+10
+00:00:28,028 --> 00:00:29,763 line:-1
+work great with Picture in Picture.
+
+
+11
+00:00:30,597 --> 00:00:32,766 line:-1
+Finally, Dan will run us through a demo
+
+
+12
+00:00:32,833 --> 00:00:35,035 line:-2
+that covers what we've learned
+in this session.
+
+
+13
+00:00:35,869 --> 00:00:40,541 line:-2
+Okay. So let's get started and have a look
+at an overview of tvOS Picture in Picture,
+
+
+14
+00:00:40,874 --> 00:00:42,609 line:-1
+or, more succinctly, PiP.
+
+
+15
+00:00:43,477 --> 00:00:46,780 line:-2
+Here, we have an application
+with two videos in its browse view.
+
+
+16
+00:00:47,047 --> 00:00:50,150 line:-2
+Let's see how we can put these videos
+in Picture in Picture,
+
+
+17
+00:00:50,217 --> 00:00:51,618 line:-1
+and even swap between them.
+
+
+18
+00:00:52,119 --> 00:00:54,688 line:-1
+First, let's bring a video full screen.
+
+
+19
+00:00:54,755 --> 00:00:59,326 line:-2
+By bringing up the playback UI,
+we can select the "start PiP" button,
+
+
+20
+00:00:59,793 --> 00:01:02,229 line:-2
+bringing this video
+into Picture in Picture.
+
+
+21
+00:01:02,696 --> 00:01:05,866 line:-2
+Unique to tvOS,
+we can start the other video
+
+
+22
+00:01:06,200 --> 00:01:09,136 line:-2
+and have them play simultaneously
+side by side.
+
+
+23
+00:01:10,170 --> 00:01:12,906 line:-2
+At any time,
+the playback UI can be brought up
+
+
+24
+00:01:13,507 --> 00:01:16,343 line:-2
+to swap the full-screen video
+with the content in the PiP.
+
+
+25
+00:01:16,944 --> 00:01:19,213 line:-1
+If we now go back to our browse view...
+
+
+26
+00:01:20,380 --> 00:01:23,917 line:-2
+we can see that the video in PiP
+is the second video that we played.
+
+
+27
+00:01:23,984 --> 00:01:27,221 line:-2
+We have effectively PiP-ed both videos
+and swapped them.
+
+
+28
+00:01:28,088 --> 00:01:32,259 line:-2
+So we have seen that tvOS PiP
+brings a familiar experience from iPadOS
+
+
+29
+00:01:32,526 --> 00:01:35,495 line:-2
+and augments it
+by adding simultaneous video playback.
+
+
+30
+00:01:36,029 --> 00:01:38,498 line:-2
+So how can your application
+take advantage of this?
+
+
+31
+00:01:39,566 --> 00:01:44,505 line:-2
+To find out, let's dive into how you can
+implement Picture in Picture in tvOS.
+
+
+32
+00:01:45,038 --> 00:01:47,841 line:-2
+The first step is to set up
+your Xcode project.
+
+
+33
+00:01:48,542 --> 00:01:49,877 line:-1
+Before you write any code,
+
+
+34
+00:01:49,943 --> 00:01:52,446 line:-2
+you will need to add
+the Picture in Picture capability
+
+
+35
+00:01:52,513 --> 00:01:54,214 line:-1
+to your application in Xcode 12.
+
+
+36
+00:01:54,882 --> 00:01:59,186 line:-2
+To do so, you select Background Modes
+in the Add Capabilities window.
+
+
+37
+00:02:00,153 --> 00:02:03,323 line:-2
+It is then as easy as checking
+the Picture in Picture box
+
+
+38
+00:02:03,390 --> 00:02:06,059 line:-2
+in the Signing and Capabilities tab
+of your project.
+
+
+39
+00:02:06,927 --> 00:02:10,030 line:-2
+Next up, you will need to configure
+your audio session
+
+
+40
+00:02:10,097 --> 00:02:13,267 line:-2
+by setting your application's
+AV-Audio-Category to "playback."
+
+
+41
+00:02:13,667 --> 00:02:16,403 line:-2
+Here is what this code might look like
+in your application.
+
+
+42
+00:02:16,470 --> 00:02:18,138 line:-1
+And that's it for project setup.
+
+
+43
+00:02:18,539 --> 00:02:21,408 line:-2
+If you have previously implemented PiP
+on iPadOS,
+
+
+44
+00:02:21,475 --> 00:02:23,777 line:-2
+these steps should be very familiar
+to you,
+
+
+45
+00:02:23,844 --> 00:02:25,946 line:-1
+as they are the same across our platforms.
+
+
+46
+00:02:26,346 --> 00:02:30,784 line:-2
+The second step in implementing tvOS PiP
+is adapting your playback UI.
+
+
+47
+00:02:31,485 --> 00:02:34,421 line:-2
+So let's see what that entails
+for the standard playback UI.
+
+
+48
+00:02:35,822 --> 00:02:39,059 line:-2
+Our standard playback UI,
+or AV-Player-View-Controller,
+
+
+49
+00:02:39,393 --> 00:02:41,828 line:-2
+will display the right UI affordances
+for PiP.
+
+
+50
+00:02:42,429 --> 00:02:45,299 line:-2
+This happens automatically
+if you've configured your project
+
+
+51
+00:02:45,365 --> 00:02:47,801 line:-2
+following the setup steps
+we've just discussed.
+
+
+52
+00:02:49,536 --> 00:02:51,705 line:-2
+To help you respond
+to the PiP's life cycle,
+
+
+53
+00:02:52,005 --> 00:02:53,507 line:-1
+your application will make use
+
+
+54
+00:02:53,574 --> 00:02:56,009 line:-2
+of AV-Player-View-Controller's
+delegate methods,
+
+
+55
+00:02:56,076 --> 00:02:57,678 line:-1
+which are now in tvOS.
+
+
+56
+00:02:58,612 --> 00:03:00,347 line:-1
+If this API is new to you,
+
+
+57
+00:03:00,414 --> 00:03:02,549 line:-2
+or you would benefit
+from a quick refresher,
+
+
+58
+00:03:02,616 --> 00:03:06,386 line:-2
+here are some of the delegate methods
+we will be seeing again in this session.
+
+
+59
+00:03:06,820 --> 00:03:10,090 line:-2
+These methods cover the life cycle
+for starting PiP,
+
+
+60
+00:03:10,824 --> 00:03:12,025 line:-1
+stopping PiP,
+
+
+61
+00:03:12,593 --> 00:03:13,861 line:-1
+and restoring PiP.
+
+
+62
+00:03:14,494 --> 00:03:16,563 line:-1
+Now I'd like to call out the restore.
+
+
+63
+00:03:16,630 --> 00:03:20,868 line:-2
+In this method, your application is given
+the opportunity to restore its UI
+
+
+64
+00:03:20,934 --> 00:03:24,104 line:-2
+so that it can accommodate the player
+coming out of Picture in Picture.
+
+
+65
+00:03:24,505 --> 00:03:26,006 line:-1
+When implementing this method,
+
+
+66
+00:03:26,073 --> 00:03:28,609 line:-2
+keep in mind
+that a fast restoration is ideal,
+
+
+67
+00:03:28,976 --> 00:03:30,477 line:-1
+and that avoiding animations
+
+
+68
+00:03:30,544 --> 00:03:33,780 line:-2
+is a great way to ensure the restoration
+is quick for your user.
+
+
+69
+00:03:34,448 --> 00:03:38,452 line:-2
+If your application takes too long,
+the restoring player will be terminated,
+
+
+70
+00:03:38,519 --> 00:03:40,487 line:-1
+leading to a poor user experience.
+
+
+71
+00:03:41,288 --> 00:03:45,492 line:-2
+Getting started with a standard playback
+UI is straightforward and very familiar
+
+
+72
+00:03:45,559 --> 00:03:47,661 line:-1
+with the existing iPadOS implementation.
+
+
+73
+00:03:48,495 --> 00:03:51,164 line:-2
+Later in this talk,
+Dan will go into further details
+
+
+74
+00:03:51,231 --> 00:03:54,935 line:-2
+on how you can get the most out of PiP
+with AV-Player-View-Controller.
+
+
+75
+00:03:55,636 --> 00:03:58,372 line:-2
+However, we recognize that some
+of your applications
+
+
+76
+00:03:58,438 --> 00:04:00,274 line:-1
+require a custom playback UI.
+
+
+77
+00:04:00,974 --> 00:04:02,976 line:-1
+If this is true of your application,
+
+
+78
+00:04:03,043 --> 00:04:05,646 line:-2
+then your second step
+in implementing tvOS PiP
+
+
+79
+00:04:05,712 --> 00:04:07,848 line:-2
+will be different
+than what we've just covered.
+
+
+80
+00:04:08,282 --> 00:04:09,683 line:-1
+So let's explore that now.
+
+
+81
+00:04:10,417 --> 00:04:14,054 line:-2
+AV-Picture-In-Picture-Controller
+is now available on tvOS.
+
+
+82
+00:04:14,655 --> 00:04:16,723 line:-1
+And just like on iPadOS and iOS,
+
+
+83
+00:04:17,156 --> 00:04:19,493 line:-2
+your application will use it
+to control the PiP.
+
+
+84
+00:04:20,793 --> 00:04:24,264 line:-2
+AV-Picture-In-Picture-Controller
+now has a new tvOS API
+
+
+85
+00:04:24,331 --> 00:04:26,133 line:-1
+to help you manage your custom UI.
+
+
+86
+00:04:27,201 --> 00:04:29,002 line:-1
+So let's have a look at that API.
+
+
+87
+00:04:30,037 --> 00:04:32,339 line:-2
+Your app will use
+can-Stop-Picture-In-Picture
+
+
+88
+00:04:32,406 --> 00:04:34,942 line:-2
+to help you display
+the appropriate affordances
+
+
+89
+00:04:35,008 --> 00:04:37,878 line:-2
+and provide the correct behavior
+in your custom playback UI.
+
+
+90
+00:04:38,645 --> 00:04:40,514 line:-1
+So let's dig into this a little more.
+
+
+91
+00:04:41,281 --> 00:04:44,751 line:-2
+If can-Stop-Picture-In-Picture is false
+for your full-screen player,
+
+
+92
+00:04:45,152 --> 00:04:48,722 line:0
+it indicates to your application
+that your custom playback UI
+
+
+93
+00:04:48,789 --> 00:04:50,924 line:0
+should display a start-PiP affordance.
+
+
+94
+00:04:52,092 --> 00:04:54,962 line:0
+When your users select
+the start PiP affordance,
+
+
+95
+00:04:55,028 --> 00:04:57,431 line:0
+your app should call
+start-Picture-In-Picture
+
+
+96
+00:04:57,497 --> 00:05:00,033 line:0
+under managing
+AV-Picture-In-Picture-Controller
+
+
+97
+00:05:00,100 --> 00:05:02,202 line:0
+to programmatically start PiP.
+
+
+98
+00:05:03,337 --> 00:05:06,740 line:0
+Conversely,
+when can-Stop-Picture-In-Picture is true,
+
+
+99
+00:05:07,107 --> 00:05:10,077 line:0
+your application should display
+UI affordances
+
+
+100
+00:05:10,143 --> 00:05:12,980 line:0
+for swap and stop
+in your custom playback UI.
+
+
+101
+00:05:13,981 --> 00:05:17,484 line:0
+It is worth noting that there is
+no special call to initiate a swap.
+
+
+102
+00:05:17,551 --> 00:05:20,020 line:0
+Your application should call
+start-Picture-In-Picture
+
+
+103
+00:05:20,087 --> 00:05:23,490 line:0
+when starting a swap,
+and the system will take care of the rest.
+
+
+104
+00:05:23,891 --> 00:05:27,361 line:-2
+If we think about this from the point
+of view of the full-screen player,
+
+
+105
+00:05:27,728 --> 00:05:31,465 line:-2
+it is starting PiP in both a simple start
+and a swap case,
+
+
+106
+00:05:31,532 --> 00:05:36,036 line:-2
+making start-Picture-In-Picture
+the appropriate method in both scenarios.
+
+
+107
+00:05:36,870 --> 00:05:39,573 line:0
+To stop an existing PiP
+from your full-screen player,
+
+
+108
+00:05:39,640 --> 00:05:42,376 line:0
+your application should call
+stop-Picture-In-Picture
+
+
+109
+00:05:42,442 --> 00:05:46,246 line:0
+on the AV-Picture-In-Picture-Controller
+managing that full-screen player.
+
+
+110
+00:05:48,482 --> 00:05:51,952 line:0
+It is important that your app
+only call stop-Picture-In-Picture
+
+
+111
+00:05:52,019 --> 00:05:54,354 line:0
+when the user has selected
+your stop affordance.
+
+
+112
+00:05:56,156 --> 00:05:58,759 line:-2
+Can-Stop-Picture-In-Picture
+can change at any time.
+
+
+113
+00:05:59,293 --> 00:06:02,996 line:-2
+For example, a user might stop the PiP
+from the PiP window itself.
+
+
+114
+00:06:03,564 --> 00:06:06,934 line:-2
+As such,
+your UI must always be up to date.
+
+
+115
+00:06:07,501 --> 00:06:08,535 line:-1
+To do so,
+
+
+116
+00:06:08,602 --> 00:06:12,639 line:-2
+your application will need to observe
+can-Stop-Picture-In-Picture for changes
+
+
+117
+00:06:12,706 --> 00:06:14,341 line:-1
+and update your UI accordingly.
+
+
+118
+00:06:15,242 --> 00:06:18,145 line:-2
+Here's a sample
+of how that might look in your code.
+
+
+119
+00:06:18,612 --> 00:06:22,216 line:-2
+We strongly encourage you to read
+the latest Human Interface Guidelines,
+
+
+120
+00:06:22,282 --> 00:06:26,019 line:-2
+which goes into detail about
+how to best display these affordances.
+
+
+121
+00:06:26,386 --> 00:06:29,189 line:-1
+Next up, let's talk about how tvOS 14
+
+
+122
+00:06:29,256 --> 00:06:32,159 line:-2
+allows publishing to multiple
+Now Playing info centers.
+
+
+123
+00:06:32,593 --> 00:06:35,062 line:-2
+When two videos
+are playing simultaneously,
+
+
+124
+00:06:35,128 --> 00:06:38,232 line:-2
+their respective Now Playing information
+should also be updated.
+
+
+125
+00:06:38,966 --> 00:06:43,504 line:-2
+You can do this by tying AV-Players
+to an MP-Now-Playing-Session.
+
+
+126
+00:06:44,104 --> 00:06:46,940 line:-2
+Your application can have multiple
+MP-Now-Playing-Sessions,
+
+
+127
+00:06:47,307 --> 00:06:48,609 line:-1
+and in the case of PiP,
+
+
+128
+00:06:48,675 --> 00:06:51,445 line:-2
+you would have a Now Playing session
+for your PiP content
+
+
+129
+00:06:51,512 --> 00:06:53,614 line:-2
+as well as one
+for your full-screen content.
+
+
+130
+00:06:54,181 --> 00:06:57,050 line:-1
+In fact, in order to use PiP on tvOS,
+
+
+131
+00:06:57,351 --> 00:07:00,420 line:-2
+the same player used
+in AV-Picture-In-Picture-Controller
+
+
+132
+00:07:00,487 --> 00:07:02,890 line:-1
+must be tied to an MP-Now-Playing-Session.
+
+
+133
+00:07:03,557 --> 00:07:05,859 line:-2
+So let's have a look
+at what that means in code.
+
+
+134
+00:07:06,927 --> 00:07:10,664 line:-2
+Here is a snippet of what a custom
+playback UI controller might look like.
+
+
+135
+00:07:11,632 --> 00:07:15,135 line:-2
+We see that the player used to create
+the AV-Picture-In-Picture-Controller
+
+
+136
+00:07:15,202 --> 00:07:18,372 line:-2
+is also used
+in the MP-Now-Playing-Session initializer.
+
+
+137
+00:07:19,173 --> 00:07:21,141 line:-1
+Later on, and when appropriate,
+
+
+138
+00:07:21,208 --> 00:07:24,611 line:-2
+you can set the session's Now Playing
+info center and make it active.
+
+
+139
+00:07:25,112 --> 00:07:28,815 line:-2
+This tells MediaPlayer to start publishing
+this information on your behalf.
+
+
+140
+00:07:29,516 --> 00:07:30,984 line:-1
+Before we move on,
+
+
+141
+00:07:31,051 --> 00:07:34,354 line:-2
+there are a couple of things to note
+when using MP-Now-Playing-Session.
+
+
+142
+00:07:34,421 --> 00:07:38,492 line:-2
+The first thing to note
+is that updating to MP-Now-Playing-Session
+
+
+143
+00:07:38,559 --> 00:07:42,963 line:-2
+will make the system ignore updates from
+the default MP-Now-Playing-Info-Center.
+
+
+144
+00:07:43,363 --> 00:07:46,867 line:-2
+As such, you should make sure
+that when you implement PiP,
+
+
+145
+00:07:46,934 --> 00:07:50,771 line:-2
+you switch over to MP-Now-Playing-Session
+across your whole application.
+
+
+146
+00:07:51,305 --> 00:07:54,341 line:-2
+Because there are now
+multiple Now Playing info centers,
+
+
+147
+00:07:54,408 --> 00:07:58,679 line:-2
+the system will decide which information
+to display in the Now Playing system UI.
+
+
+148
+00:07:59,446 --> 00:08:01,215 line:-1
+It is important, however,
+
+
+149
+00:08:01,281 --> 00:08:03,383 line:-2
+to keep publishing
+Now Playing information,
+
+
+150
+00:08:03,784 --> 00:08:06,920 line:-2
+even if your session
+is not currently shown in the system UI.
+
+
+151
+00:08:07,754 --> 00:08:09,323 line:-1
+Your app will want to do this,
+
+
+152
+00:08:09,389 --> 00:08:12,793 line:-2
+as the system may choose
+to display your session at any moment.
+
+
+153
+00:08:13,560 --> 00:08:15,629 line:-1
+So far, we have covered setup
+
+
+154
+00:08:15,696 --> 00:08:19,032 line:-2
+and the two different ways you can
+integrate your playback UI with PiP.
+
+
+155
+00:08:19,900 --> 00:08:23,337 line:-2
+The last thing we want to cover
+on implementing tvOS PiP
+
+
+156
+00:08:23,403 --> 00:08:27,140 line:-2
+is the life cycle your application
+should expect when performing a swap.
+
+
+157
+00:08:28,742 --> 00:08:31,645 line:-2
+The first scenario is swapping
+within your own application.
+
+
+158
+00:08:32,246 --> 00:08:35,515 line:-2
+If we imagine that these videos come
+from your application,
+
+
+159
+00:08:35,582 --> 00:08:38,652 line:-2
+let's look at the lifecycle between
+your sports PiP content
+
+
+160
+00:08:38,719 --> 00:08:40,486 line:-1
+and your full-screen animated movie.
+
+
+161
+00:08:42,823 --> 00:08:46,193 line:-2
+Here's a snippet of what
+a player delegate object would look like.
+
+
+162
+00:08:47,227 --> 00:08:50,731 line:-2
+First, your application will see
+the will-Start delegate callback
+
+
+163
+00:08:50,797 --> 00:08:52,900 line:-1
+for the player that is going into PiP.
+
+
+164
+00:08:53,400 --> 00:08:57,237 line:-2
+Next, your stopping player will ask
+your application to restore a UI
+
+
+165
+00:08:57,304 --> 00:08:59,239 line:-1
+to accommodate it coming out of PiP.
+
+
+166
+00:08:59,873 --> 00:09:02,676 line:-2
+Remember,
+restoring quickly is essential here.
+
+
+167
+00:09:03,243 --> 00:09:05,145 line:-1
+Once you have restored your UI,
+
+
+168
+00:09:05,212 --> 00:09:07,981 line:-2
+you will get a will-Stop callback
+for the stopping player.
+
+
+169
+00:09:08,549 --> 00:09:11,718 line:-2
+And finally, your players will get
+their respective did-Start
+
+
+170
+00:09:11,785 --> 00:09:14,888 line:-2
+and did-Stop delegate callbacks
+once the swap has completed.
+
+
+171
+00:09:15,589 --> 00:09:19,326 line:-2
+The second scenario we will cover
+is swapping across applications.
+
+
+172
+00:09:19,927 --> 00:09:22,629 line:-2
+Here, your application
+can either start Picture in Picture,
+
+
+173
+00:09:22,696 --> 00:09:26,500 line:-2
+swapping with another application's PiP,
+or your application can be the one
+
+
+174
+00:09:26,567 --> 00:09:29,002 line:-2
+that is bringing its Picture in Picture
+full-screen.
+
+
+175
+00:09:29,570 --> 00:09:32,706 line:-2
+So let's first cover the case
+of your application starting PiP.
+
+
+176
+00:09:34,007 --> 00:09:38,178 line:-2
+Let's now imagine that your application is
+providing the full-screen animated movie.
+
+
+177
+00:09:38,712 --> 00:09:43,283 line:-2
+In this scenario, the PiP sports content
+is provided by another application.
+
+
+178
+00:09:44,017 --> 00:09:47,354 line:-2
+Now when we swap,
+your content is going into PiP.
+
+
+179
+00:09:48,322 --> 00:09:50,591 line:-1
+So taking our player delegate from before,
+
+
+180
+00:09:50,657 --> 00:09:53,060 line:-2
+let's focus on the delegate callbacks
+of interest.
+
+
+181
+00:09:54,194 --> 00:09:55,963 line:-1
+You will get a will-Start callback
+
+
+182
+00:09:56,530 --> 00:10:00,234 line:-2
+and as you might expect, a matching
+did-Start once the animation is complete.
+
+
+183
+00:10:01,768 --> 00:10:04,137 line:-2
+Your application
+will then get backgrounded.
+
+
+184
+00:10:04,204 --> 00:10:06,206 line:-1
+This is because as part of the swap,
+
+
+185
+00:10:06,273 --> 00:10:08,375 line:-2
+another application
+became the foreground app
+
+
+186
+00:10:08,442 --> 00:10:10,177 line:-1
+to play their full-screen content.
+
+
+187
+00:10:10,577 --> 00:10:13,614 line:-2
+If you have implemented Picture in Picture
+in iPadOS,
+
+
+188
+00:10:13,680 --> 00:10:15,349 line:-1
+this may look familiar to you.
+
+
+189
+00:10:15,415 --> 00:10:17,518 line:-1
+It is the same sequence you would see
+
+
+190
+00:10:17,584 --> 00:10:20,387 line:-2
+when your application
+is automatically put into PiP
+
+
+191
+00:10:20,454 --> 00:10:22,456 line:-1
+when the user returns to the home screen.
+
+
+192
+00:10:24,024 --> 00:10:26,193 line:-1
+Lastly, let's cover the cross-app case,
+
+
+193
+00:10:26,260 --> 00:10:28,829 line:-2
+where your application brings its PiP
+full-screen.
+
+
+194
+00:10:29,730 --> 00:10:30,964 line:-1
+For this last example,
+
+
+195
+00:10:31,031 --> 00:10:34,434 line:-2
+let's imagine that your application
+now owns the content in the PiP,
+
+
+196
+00:10:34,501 --> 00:10:37,004 line:-2
+and that another application
+is playing full-screen.
+
+
+197
+00:10:37,738 --> 00:10:41,341 line:-2
+During a swap, your PiP content
+will take over the full screen.
+
+
+198
+00:10:42,476 --> 00:10:45,445 line:-2
+So let's again follow this
+in our play delegate example.
+
+
+199
+00:10:46,580 --> 00:10:49,149 line:-2
+First your application is brought
+to the foreground.
+
+
+200
+00:10:50,050 --> 00:10:53,220 line:-2
+Then you will get the opportunity
+to quickly restore your UI.
+
+
+201
+00:10:54,421 --> 00:10:56,823 line:-2
+It is then told that Picture in Picture
+will stop.
+
+
+202
+00:10:57,824 --> 00:11:00,294 line:-2
+And finally,
+once the animation is complete,
+
+
+203
+00:11:00,360 --> 00:11:03,397 line:-2
+you will be told that Picture in Picture
+did stop for your player.
+
+
+204
+00:11:03,463 --> 00:11:07,434 line:-2
+Okay. We've just covered what it took to
+implement Picture in Picture from scratch.
+
+
+205
+00:11:07,801 --> 00:11:09,603 line:-1
+After configuring your projects,
+
+
+206
+00:11:09,670 --> 00:11:13,307 line:-2
+we explored the two approaches
+to integrating your playback UI with PiP.
+
+
+207
+00:11:13,674 --> 00:11:16,376 line:-2
+If your application uses
+AV-Player-View-Controller,
+
+
+208
+00:11:16,443 --> 00:11:18,779 line:-1
+the heavy lifting is already done for you.
+
+
+209
+00:11:18,846 --> 00:11:22,082 line:-2
+However, if your needs require
+a custom playback UI,
+
+
+210
+00:11:22,149 --> 00:11:24,484 line:-2
+you can use
+AV-Picture-In-Picture-Controller.
+
+
+211
+00:11:24,952 --> 00:11:27,087 line:-1
+The last implementation step we covered
+
+
+212
+00:11:27,154 --> 00:11:30,390 line:-2
+was the expectations your app should have
+during a swap.
+
+
+213
+00:11:30,991 --> 00:11:32,292 line:-1
+By following these steps,
+
+
+214
+00:11:32,359 --> 00:11:35,562 line:-2
+you will find that getting tvOS
+Picture in Picture up and running
+
+
+215
+00:11:35,629 --> 00:11:36,730 line:-1
+is a breeze.
+
+
+216
+00:11:37,664 --> 00:11:39,733 line:-1
+But what about your existing applications?
+
+
+217
+00:11:40,200 --> 00:11:43,170 line:-2
+To tell you all about that,
+I would like to hand it off to Dan,
+
+
+218
+00:11:43,237 --> 00:11:46,406 line:-2
+who will show you how you can get the most
+out of AV-Player-View-Controller.
+
+
+219
+00:11:47,374 --> 00:11:48,575 line:-1
+Thanks, Jad.
+
+
+220
+00:11:49,142 --> 00:11:52,546 line:-2
+AV-Player-View-Controller provides
+the standard video playback experience
+
+
+221
+00:11:52,613 --> 00:11:53,847 line:-1
+on Apple TV,
+
+
+222
+00:11:54,281 --> 00:11:59,119 line:-2
+supporting a wide variety of remotes,
+skipping, scanning, scrubbing,
+
+
+223
+00:11:59,186 --> 00:12:02,155 line:-2
+Siri command, interstitial support,
+and more.
+
+
+224
+00:12:02,222 --> 00:12:05,526 line:-2
+And we encourage all tvOS apps
+to adopt it for video playback.
+
+
+225
+00:12:06,093 --> 00:12:10,464 line:-2
+For those of you who are already shipping
+apps with AV-Player-View-Controller,
+
+
+226
+00:12:10,531 --> 00:12:12,065 line:-1
+let's look at what you'll need to do
+
+
+227
+00:12:12,132 --> 00:12:14,902 line:-2
+to get your application working
+with Picture in Picture.
+
+
+228
+00:12:15,702 --> 00:12:18,205 line:-2
+First,
+let's talk about interactive overlays.
+
+
+229
+00:12:20,040 --> 00:12:24,178 line:-2
+Interactive overlays display
+custom application controls over a video,
+
+
+230
+00:12:24,244 --> 00:12:28,715 line:-2
+such as a channel guide
+or suggestions for further viewing.
+
+
+231
+00:12:29,616 --> 00:12:31,084 line:-1
+In most apps today,
+
+
+232
+00:12:31,151 --> 00:12:34,555 line:-2
+users get to these overlays
+by swiping up on the remote.
+
+
+233
+00:12:35,022 --> 00:12:40,093 line:-2
+Since tvOS 13, the swipe-up gesture
+is reserved by AV-Player-View-Controller,
+
+
+234
+00:12:40,160 --> 00:12:44,898 line:-2
+and this gesture is required for users
+to reach the Picture in Picture controls.
+
+
+235
+00:12:44,965 --> 00:12:45,966 line:-1
+So,
+
+
+236
+00:12:46,433 --> 00:12:50,938 line:-2
+use the custom-Overlay-View-Controller
+property of AV-Player-View-Controller
+
+
+237
+00:12:51,004 --> 00:12:52,873 line:-1
+for your interactive slide-up controls.
+
+
+238
+00:12:53,273 --> 00:12:56,443 line:-2
+This property was introduced last year
+in tvOS 13.
+
+
+239
+00:12:56,910 --> 00:13:00,547 line:-2
+If you haven't adopted
+custom-Overlay-View-Controller already,
+
+
+240
+00:13:00,614 --> 00:13:03,450 line:-2
+you will need to do so when you move
+to the latest SDK,
+
+
+241
+00:13:03,517 --> 00:13:06,954 line:-2
+because your custom swipe-up
+gesture recognizer will stop working.
+
+
+242
+00:13:07,688 --> 00:13:12,125 line:-2
+Users can access your custom overlay
+by swiping up quickly on the remote
+
+
+243
+00:13:12,192 --> 00:13:16,230 line:-2
+or by clicking an on-screen button
+when the transfer bar is visible.
+
+
+244
+00:13:16,897 --> 00:13:19,333 line:-1
+For an in-depth look at custom overlays,
+
+
+245
+00:13:19,399 --> 00:13:23,837 line:-2
+see the presentation for "Delivering
+Intuitive Media Playback with AVKit"
+
+
+246
+00:13:23,904 --> 00:13:25,506 line:-1
+from last year's WWDC.
+
+
+247
+00:13:25,973 --> 00:13:29,910 line:-2
+The button for the custom overlay controls
+appears on the left
+
+
+248
+00:13:29,977 --> 00:13:31,812 line:-1
+when the transport bar is visible.
+
+
+249
+00:13:32,613 --> 00:13:35,549 line:-1
+Next, let's talk about Now Playing info.
+
+
+250
+00:13:35,983 --> 00:13:41,088 line:-2
+Now Playing info is metadata,
+static and dynamic, about your video,
+
+
+251
+00:13:41,154 --> 00:13:45,759 line:-2
+relayed to the OS, other applications,
+and remote devices.
+
+
+252
+00:13:46,093 --> 00:13:49,997 line:-2
+AVKit publishes Now Playing info
+on your application's behalf.
+
+
+253
+00:13:50,564 --> 00:13:53,166 line:-1
+So if you need to augment this metadata,
+
+
+254
+00:13:53,233 --> 00:13:56,403 line:-2
+use the external metadata property
+of AV-Player-Item
+
+
+255
+00:13:56,470 --> 00:13:59,540 line:-2
+rather than talking directly
+to the MediaPlayer framework.
+
+
+256
+00:14:00,908 --> 00:14:06,547 line:-2
+In tvOS 14, the old shared
+Now Playing info center is no longer used.
+
+
+257
+00:14:07,247 --> 00:14:10,784 line:-2
+So make sure you aren't still trying
+to publish this info yourself
+
+
+258
+00:14:10,851 --> 00:14:13,554 line:-2
+when you update your app
+to the latest SDK.
+
+
+259
+00:14:14,388 --> 00:14:17,357 line:-2
+This code illustrates
+using a helper function
+
+
+260
+00:14:17,424 --> 00:14:20,527 line:-2
+to create metadata
+to put in the external metadata property.
+
+
+261
+00:14:20,594 --> 00:14:24,264 line:-2
+Most of you are already using similar code
+to provide title,
+
+
+262
+00:14:24,331 --> 00:14:26,500 line:-1
+description, media content rating
+
+
+263
+00:14:26,567 --> 00:14:29,503 line:-2
+and other information
+to be displayed in the info panel.
+
+
+264
+00:14:30,337 --> 00:14:31,805 line:-1
+As you can see here,
+
+
+265
+00:14:31,872 --> 00:14:34,441 line:-2
+it can also be used
+for non-displayed metadata
+
+
+266
+00:14:34,508 --> 00:14:35,976 line:-1
+such as a service identifier.
+
+
+267
+00:14:37,411 --> 00:14:40,848 line:-2
+Next, let's talk about how this affects
+the architecture of your app.
+
+
+268
+00:14:41,415 --> 00:14:45,919 line:-2
+The AV-Player-View-Controller delegate
+receives and handles messages from AVKit
+
+
+269
+00:14:45,986 --> 00:14:49,690 line:-2
+about user actions and other events,
+including Picture in Picture.
+
+
+270
+00:14:50,390 --> 00:14:52,659 line:-1
+In the past, you may have had the parent
+
+
+271
+00:14:52,726 --> 00:14:54,962 line:-2
+or presenting view controller
+act as the delegate.
+
+
+272
+00:14:55,562 --> 00:14:58,265 line:-2
+However,
+the delegate must continue to exist
+
+
+273
+00:14:58,332 --> 00:15:00,534 line:-2
+and respond to messages
+during Picture in Picture.
+
+
+274
+00:15:01,168 --> 00:15:05,672 line:-2
+But at the same time, users can navigate
+throughout your application.
+
+
+275
+00:15:06,240 --> 00:15:09,510 line:-2
+So this means your delegate must not
+be part of your view hierarchy.
+
+
+276
+00:15:10,310 --> 00:15:12,646 line:-1
+It should probably be a separate object
+
+
+277
+00:15:12,713 --> 00:15:15,983 line:-2
+that can persist
+while your video is PiP-ed.
+
+
+278
+00:15:16,483 --> 00:15:19,820 line:-2
+Let's think about what will happen
+when the user swaps two videos.
+
+
+279
+00:15:20,487 --> 00:15:21,655 line:-1
+So visually,
+
+
+280
+00:15:21,722 --> 00:15:24,992 line:-2
+the two videos will trade places
+on the screen with a smooth animation.
+
+
+281
+00:15:25,692 --> 00:15:28,395 line:-2
+But you'll need to do a few things
+to make this happen.
+
+
+282
+00:15:28,996 --> 00:15:31,865 line:-2
+If you're simply presenting
+the player view controller,
+
+
+283
+00:15:31,932 --> 00:15:35,502 line:-2
+then you can implement swapping
+by dismissing one view controller,
+
+
+284
+00:15:35,569 --> 00:15:39,206 line:-2
+the one going to Picture in Picture,
+and presenting the other.
+
+
+285
+00:15:39,273 --> 00:15:42,943 line:-2
+Embedding AV-Player-View-Controller
+in another view controller
+
+
+286
+00:15:43,010 --> 00:15:44,811 line:-1
+poses additional challenges.
+
+
+287
+00:15:45,279 --> 00:15:48,849 line:-2
+Do you want or need
+to recreate the parent view controller
+
+
+288
+00:15:48,916 --> 00:15:51,418 line:-1
+when a PiP video returns to full-screen?
+
+
+289
+00:15:51,885 --> 00:15:53,654 line:-1
+And think about what should happen
+
+
+290
+00:15:53,720 --> 00:15:56,023 line:-2
+to the navigational hierarchy
+when this happens.
+
+
+291
+00:15:57,191 --> 00:16:00,794 line:-2
+What part of your app should the users see
+after they dismiss the video?
+
+
+292
+00:16:01,428 --> 00:16:05,132 line:-2
+Should it be what the users saw
+right before they started the last video?
+
+
+293
+00:16:05,732 --> 00:16:09,970 line:-2
+Or maybe the landing page for the video
+they just swapped to full-screen.
+
+
+294
+00:16:11,471 --> 00:16:13,540 line:-1
+Perhaps the main screen of your app.
+
+
+295
+00:16:14,575 --> 00:16:17,778 line:-2
+Depending on what you want to do,
+there may be additional work to perform
+
+
+296
+00:16:17,845 --> 00:16:19,012 line:-1
+when videos swap.
+
+
+297
+00:16:19,580 --> 00:16:21,114 line:-1
+Don't overlook these details.
+
+
+298
+00:16:21,181 --> 00:16:25,519 line:-2
+Be sure to allow time in your process
+to properly design and implement
+
+
+299
+00:16:25,586 --> 00:16:29,089 line:-2
+the right solution for your application
+and your customers.
+
+
+300
+00:16:29,990 --> 00:16:32,459 line:-1
+If you have a custom playback UI,
+
+
+301
+00:16:32,526 --> 00:16:35,963 line:-2
+you may currently be pausing playback
+when your app is deactivated.
+
+
+302
+00:16:36,463 --> 00:16:40,167 line:-2
+But you should not do so
+if the video is in Picture in Picture.
+
+
+303
+00:16:40,634 --> 00:16:44,371 line:-2
+You do not need to do so at all
+if you use AV-Player-View-Controller,
+
+
+304
+00:16:44,438 --> 00:16:46,507 line:-1
+and we recommend that you don't.
+
+
+305
+00:16:46,840 --> 00:16:50,477 line:-2
+So we've talked about implementing
+Picture in Picture with AVKit.
+
+
+306
+00:16:50,911 --> 00:16:52,379 line:-1
+Let's see what it looks like.
+
+
+307
+00:16:53,347 --> 00:16:57,251 line:-2
+Okay. So here we've got a video playing.
+Let's move this to Picture in Picture.
+
+
+308
+00:16:57,684 --> 00:17:00,287 line:-2
+I'll swipe up to move the focus
+to the PiP buttons.
+
+
+309
+00:17:01,154 --> 00:17:03,390 line:0
+And we click to go to Picture in Picture.
+
+
+310
+00:17:03,457 --> 00:17:05,692 line:0
+Now let's start another video in our app.
+
+
+311
+00:17:08,729 --> 00:17:12,199 line:0
+All right. Let's swipe up again
+to bring up the PiP controls.
+
+
+312
+00:17:13,066 --> 00:17:15,068 line:0
+Swap and stop PiP are in the middle.
+
+
+313
+00:17:15,736 --> 00:17:18,137 line:0
+We can swap the videos like so.
+
+
+314
+00:17:19,239 --> 00:17:22,542 line:-2
+All right. Let's try that one more time
+in case you missed it.
+
+
+315
+00:17:22,608 --> 00:17:25,646 line:0
+We swipe up again, and we click,
+and there it goes.
+
+
+316
+00:17:27,114 --> 00:17:28,882 line:0
+So let's look at the custom overlay.
+
+
+317
+00:17:28,949 --> 00:17:31,585 line:0
+The button for the custom overlay
+is on the left.
+
+
+318
+00:17:32,486 --> 00:17:35,355 line:0
+And click, and here's our custom overlay.
+
+
+319
+00:17:35,656 --> 00:17:38,892 line:0
+The PiP window, you'll notice,
+moves out of the way of the focus,
+
+
+320
+00:17:38,959 --> 00:17:42,129 line:0
+so your users don't have to move it
+to a different corner of the screen
+
+
+321
+00:17:42,196 --> 00:17:43,463 line:0
+to see your controls.
+
+
+322
+00:17:44,331 --> 00:17:46,333 line:0
+Now let's stop Picture in Picture.
+
+
+323
+00:17:46,967 --> 00:17:48,001 line:0
+And there we go.
+
+
+324
+00:17:48,068 --> 00:17:53,974 line:-2
+In summary, use AV-Player-View-Controller
+to get the full tvOS playback experience,
+
+
+325
+00:17:54,041 --> 00:17:57,811 line:-2
+including Picture in Picture,
+with very little work in your application.
+
+
+326
+00:17:58,512 --> 00:18:01,481 line:-2
+If your needs require
+a custom playback UI,
+
+
+327
+00:18:01,548 --> 00:18:03,550 line:-2
+be sure to follow
+the Human Interface Guidelines
+
+
+328
+00:18:03,617 --> 00:18:07,321 line:-2
+to ensure that users are as comfortable
+using PiP in your application
+
+
+329
+00:18:07,387 --> 00:18:08,989 line:-1
+as any other on Apple TV.
+
+
+330
+00:18:09,523 --> 00:18:12,125 line:-2
+Do not install
+a custom swipe-up gesture recognizer
+
+
+331
+00:18:12,192 --> 00:18:16,363 line:-2
+for your own overlaid UI when
+you're using AV-Player-View-Controller.
+
+
+332
+00:18:16,830 --> 00:18:20,100 line:-2
+And be sure to allow time
+to adjust your application architecture
+
+
+333
+00:18:20,167 --> 00:18:23,804 line:-2
+to provide the best possible support
+for Picture in Picture.
+
+
+334
+00:18:24,371 --> 00:18:26,974 line:-2
+Thank you very much,
+and enjoy the rest of your conference.
+

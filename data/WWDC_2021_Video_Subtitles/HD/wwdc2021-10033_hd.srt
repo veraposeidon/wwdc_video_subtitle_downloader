@@ -1,0 +1,2858 @@
+2
+00:00:00.334 --> 00:00:03.337 line:-1
+[upbeat music]
+
+
+3
+00:00:03.370 --> 00:00:09.376 line:-1
+♪ ♪
+
+
+4
+00:00:09.409 --> 00:00:11.211 line:-1
+[Kate] Hi. I'm Kate.
+
+
+5
+00:00:11.245 --> 00:00:13.881 line:-2
+I'm an engineer
+on the Safari and WebKit team,
+
+
+6
+00:00:13.914 --> 00:00:15.215 line:-2
+and today I'm gonna be
+telling you
+
+
+7
+00:00:15.249 --> 00:00:17.885 line:-2
+about Privacy-Preserving
+Ad Attribution.
+
+
+8
+00:00:17.918 --> 00:00:20.020 line:-2
+I know a lot of you
+watching today's session
+
+
+9
+00:00:20.053 --> 00:00:24.224 line:-2
+are probably already experts on
+the history of ad attribution,
+
+
+10
+00:00:24.258 --> 00:00:26.627 line:-2
+but to make sure
+everyone's on the same page,
+
+
+11
+00:00:26.660 --> 00:00:27.961 line:-1
+I'll start with some background
+
+
+12
+00:00:27.995 --> 00:00:30.364 line:-2
+on cookies, advertising,
+and tracking.
+
+
+13
+00:00:31.999 --> 00:00:34.701 line:-2
+Then, I'll introduce
+Private Click Measurement,
+
+
+14
+00:00:34.735 --> 00:00:36.537 line:-2
+a tool that allows you
+to privately measure
+
+
+15
+00:00:36.570 --> 00:00:39.907 line:-1
+ad campaigns across websites.
+
+
+16
+00:00:39.940 --> 00:00:43.210 line:-2
+Then I'll show you how you can
+expand PCM even more,
+
+
+17
+00:00:43.243 --> 00:00:45.646 line:-2
+to measure ad campaigns
+that start in apps
+
+
+18
+00:00:45.679 --> 00:00:47.247 line:-1
+and convert on the web.
+
+
+19
+00:00:48.815 --> 00:00:50.784 line:-2
+Finally, I'll talk
+about improvements
+
+
+20
+00:00:50.817 --> 00:00:54.021 line:-2
+in privacy-preserving
+app-to-App Store ad attribution
+
+
+21
+00:00:54.054 --> 00:00:55.889 line:-1
+using SKAdNetwork.
+
+
+22
+00:00:57.391 --> 00:00:59.560 line:-2
+So, let's start
+with the history of cookies
+
+
+23
+00:00:59.593 --> 00:01:02.362 line:-2
+and their role
+in web advertising.
+
+
+24
+00:01:02.396 --> 00:01:05.899 line:-2
+Cookies are useful to businesses
+because they provide support
+
+
+25
+00:01:05.933 --> 00:01:08.468 line:-2
+for something
+called ad attribution.
+
+
+26
+00:01:08.502 --> 00:01:12.172 line:-2
+Ad attribution is the process
+of linking an ad-related action,
+
+
+27
+00:01:12.206 --> 00:01:13.440 line:-1
+like a click,
+
+
+28
+00:01:13.473 --> 00:01:16.810 line:-2
+with a desired outcome,
+like a purchase.
+
+
+29
+00:01:16.844 --> 00:01:19.346 line:-2
+You'll also hear me refer
+to those desired outcomes
+
+
+30
+00:01:19.379 --> 00:01:21.782 line:-1
+as "conversions."
+
+
+31
+00:01:21.815 --> 00:01:24.585 line:-2
+This concept may seem
+a little abstract in words,
+
+
+32
+00:01:24,618 --> 00:01:26,720
+so let's walk through
+an example.
+
+
+33
+00:01:26,753 --> 00:01:28,922
+I happen
+to really like longboarding.
+
+
+34
+00:01:28,956 --> 00:01:32,025
+Say I tap an ad for a longboard
+on my favorite search site,
+
+
+35
+00:01:32,059 --> 00:01:34,361
+searchforlongboard.biz.
+
+
+36
+00:01:34,394 --> 00:01:37,364
+searchforlongboard.biz can store
+something called a cookie
+
+
+37
+00:01:37,397 --> 00:01:39,132
+in the browser.
+
+
+38
+00:01:39,166 --> 00:01:41,768
+Cookies are
+useful little bits of text
+
+
+39
+00:01:41,802 --> 00:01:44,371
+that help sites remember data
+about your previous visits,
+
+
+40
+00:01:44,404 --> 00:01:46,106
+like products
+in your shopping cart.
+
+
+41
+00:01:47,808 --> 00:01:49,776
+The link
+on searchforlongboard.biz
+
+
+42
+00:01:49,810 --> 00:01:51,612
+might navigate me to a new site,
+
+
+43
+00:01:51,645 --> 00:01:53,380
+longboardshop.biz,
+
+
+44
+00:01:53,413 --> 00:01:55,916
+where I add the longboard to
+my cart.
+
+
+45
+00:01:55,949 --> 00:01:58,552
+searchforlongboard.biz
+can reference the cookie
+
+
+46
+00:01:58,585 --> 00:01:59,987
+that it stored earlier
+
+
+47
+00:02:00,020 --> 00:02:03,323
+to link my purchase
+with the initial ad tap I made.
+
+
+48
+00:02:03,357 --> 00:02:06,326
+This is an example
+of ad attribution.
+
+
+49
+00:02:06,360 --> 00:02:08,695
+The cookie data allows
+searchforlongboard.biz
+
+
+50
+00:02:08,729 --> 00:02:11,732
+to measure the effectiveness
+of this particular ad campaign,
+
+
+51
+00:02:11,765 --> 00:02:14,601
+which is really useful
+for its business.
+
+
+52
+00:02:14,635 --> 00:02:18,205
+But what if I hadn't made
+an initial ad tap earlier?
+
+
+53
+00:02:18.238 --> 00:02:20.374 line:-2
+searchforlongboard.biz
+would still get
+
+
+54
+00:02:20.407 --> 00:02:22.075 line:-1
+the cookie data about me,
+
+
+55
+00:02:22.109 --> 00:02:23.810 line:-2
+which can include
+clicks I've made,
+
+
+56
+00:02:23.844 --> 00:02:26.780 line:-2
+sites I've visited,
+time I've spent on a page,
+
+
+57
+00:02:26.813 --> 00:02:28.282 line:-1
+and other detailed information
+
+
+58
+00:02:28.315 --> 00:02:30.651 line:-2
+about my web history
+and behavior.
+
+
+59
+00:02:30.684 --> 00:02:33.320 line:-2
+Companies like
+searchforlongboard.biz
+
+
+60
+00:02:33.353 --> 00:02:34.555 line:-1
+can use this information
+
+
+61
+00:02:34.588 --> 00:02:37.758 line:-2
+to follow users across sites
+and build detailed profiles
+
+
+62
+00:02:37.791 --> 00:02:41.261 line:-2
+for advertisers,
+all without a user's consent.
+
+
+63
+00:02:41.295 --> 00:02:44.598 line:-2
+We call this
+cross-site tracking.
+
+
+64
+00:02:44.631 --> 00:02:47.734 line:-2
+Most users don't expect
+to have an invasive experience
+
+
+65
+00:02:47.768 --> 00:02:51.305 line:-2
+on the web,
+where their interests, behavior,
+
+
+66
+00:02:51.338 --> 00:02:54.608 line:-2
+and personal information
+is stored and tracked.
+
+
+67
+00:02:54.641 --> 00:02:56.610 line:-1
+Tracking can break trust
+
+
+68
+00:02:56.643 --> 00:03:00.714 line:-2
+and create a misalignment
+between users and businesses.
+
+
+69
+00:03:00.747 --> 00:03:03.450 line:-2
+And now, more and more users
+have started turning
+
+
+70
+00:03:03.483 --> 00:03:06.253 line:-2
+to mechanisms,
+like ad and content blockers
+
+
+71
+00:03:06.286 --> 00:03:08.889 line:-2
+to limit tracking
+on the sites they use.
+
+
+72
+00:03:08.922 --> 00:03:11.758 line:-2
+From a user perspective,
+content blockers are great
+
+
+73
+00:03:11.792 --> 00:03:13.527 line:-1
+for preventing tracking,
+
+
+74
+00:03:13.560 --> 00:03:16.930 line:-2
+but can often lead
+to compatibility issues.
+
+
+75
+00:03:16.964 --> 00:03:20.367 line:-2
+Additionally, since content
+blockers block all ads,
+
+
+76
+00:03:20.400 --> 00:03:24.872 line:-2
+there's clearly no possibility
+for any sort of ad attribution.
+
+
+77
+00:03:24.905 --> 00:03:27.407 line:-2
+The disconnect between users
+and businesses
+
+
+78
+00:03:27.441 --> 00:03:29.076 line:-1
+around ads and tracking
+
+
+79
+00:03:29.109 --> 00:03:31.745 line:-2
+is hugely damaging
+to the web experience,
+
+
+80
+00:03:31.778 --> 00:03:34.915 line:-2
+and we wanted to find ways
+to protect user privacy
+
+
+81
+00:03:34.948 --> 00:03:36.950 line:-2
+while maintaining
+web compatibility.
+
+
+82
+00:03:38.151 --> 00:03:41.555 line:-2
+So, in 2017, Apple built
+Intelligent Tracking Prevention,
+
+
+83
+00:03:41.588 --> 00:03:43.056 line:-1
+or ITP,
+
+
+84
+00:03:43.090 --> 00:03:45.459 line:-2
+which identifies trackers
+and protects users
+
+
+85
+00:03:45.492 --> 00:03:47.694 line:-2
+against this sort of profiling
+on the web,
+
+
+86
+00:03:47,728 --> 00:03:49,563
+without blocking ads.
+
+
+87
+00:03:49,596 --> 00:03:52,065
+With ITP, I might tap
+the same ad
+
+
+88
+00:03:52,099 --> 00:03:54,034
+on searchforlongboard.biz,
+
+
+89
+00:03:54,067 --> 00:03:55,502
+which stores
+a first-party cookie
+
+
+90
+00:03:55,536 --> 00:03:58,805
+and navigates me
+to longboardshop.biz,
+
+
+91
+00:03:58,839 --> 00:04:01,475
+where I add
+the longboard to my cart again.
+
+
+92
+00:04:01,508 --> 00:04:05,712
+But now, ITP prevents cookies
+and other website data
+
+
+93
+00:04:05,746 --> 00:04:07,181
+from being sent
+to third parties,
+
+
+94
+00:04:07,214 --> 00:04:09,216
+like searchforlongboard.biz.
+
+
+95
+00:04:09.249 --> 00:04:12.286 line:-2
+So, they may know that
+I tapped an ad for longboards,
+
+
+96
+00:04:12.319 --> 00:04:16.557 line:-2
+but they won't be able to track
+my behavior on any other sites.
+
+
+97
+00:04:16.590 --> 00:04:18.559 line:-1
+ITP specifically mitigates
+
+
+98
+00:04:18.592 --> 00:04:20.427 line:-2
+cross-site tracking
+in the browser,
+
+
+99
+00:04:20.460 --> 00:04:22.829 line:-2
+but tracking is not unique
+to the web.
+
+
+100
+00:04:22.863 --> 00:04:27.100 line:-2
+The Identifier For Advertisers,
+or IDFA, has long been used
+
+
+101
+00:04:27.134 --> 00:04:30.804 line:-2
+to perform similar profiling
+of iOS users across apps.
+
+
+102
+00:04:32,339 --> 00:04:35,108
+In 2020, Apple launched
+SKAdNetwork,
+
+
+103
+00:04:35,142 --> 00:04:37,110
+a part
+of the StoreKit framework.
+
+
+104
+00:04:37,144 --> 00:04:39,213
+It collects and reports data
+about ads
+
+
+105
+00:04:39,246 --> 00:04:41,048
+that lead to app installs,
+
+
+106
+00:04:41,081 --> 00:04:42,950
+and it was designed
+to give Ad Networks
+
+
+107
+00:04:42,983 --> 00:04:45,552
+privacy-preserving techniques
+for ad attribution.
+
+
+108
+00:04:45.586 --> 00:04:47.588 line:-2
+I'll talk later on
+about improvements
+
+
+109
+00:04:47.621 --> 00:04:49.756 line:-2
+to SKAdNetwork
+over the last year.
+
+
+110
+00:04:49.790 --> 00:04:52.759 line:-2
+Tracking infringes
+on a user's privacy
+
+
+111
+00:04:52.793 --> 00:04:56.063 line:-2
+without giving them the ability
+to identify, understand,
+
+
+112
+00:04:56.096 --> 00:04:58.599 line:-2
+or consent to what's being
+shared about them.
+
+
+113
+00:04:58.632 --> 00:05:01.134 line:-2
+And we aren't the only ones
+thinking about this.
+
+
+114
+00:05:01.168 --> 00:05:05.272 line:-1
+Regulations like CCPA and GDPR
+
+
+115
+00:05:05.305 --> 00:05:08.075 line:-2
+are requiring websites
+to inform their users
+
+
+116
+00:05:08.108 --> 00:05:10.878 line:-2
+about how their data
+is being used.
+
+
+117
+00:05:10.911 --> 00:05:14.581 line:-2
+Other browsers like Brave
+and Firefox are also shipping
+
+
+118
+00:05:14.615 --> 00:05:16.984 line:-2
+with built-in
+tracking protections.
+
+
+119
+00:05:17.017 --> 00:05:19.152 line:-2
+It's becoming clear
+that business models
+
+
+120
+00:05:19.186 --> 00:05:22.623 line:-2
+that rely on tracking
+aren't sustainable.
+
+
+121
+00:05:22.656 --> 00:05:24.358 line:-1
+We recognize the importance
+
+
+122
+00:05:24.391 --> 00:05:27.160 line:-2
+of providing a more private way
+to measure ads
+
+
+123
+00:05:27.194 --> 00:05:30.964 line:-2
+to help you thrive
+in this changing ecosystem.
+
+
+124
+00:05:30.998 --> 00:05:32.866 line:-2
+So the rest of our session
+will focus
+
+
+125
+00:05:32.900 --> 00:05:35.602 line:-2
+on some of the exciting new
+solutions we've implemented
+
+
+126
+00:05:35.636 --> 00:05:38.438 line:-2
+to help you measure ads
+with privacy.
+
+
+127
+00:05:38.472 --> 00:05:42.309 line:-2
+The first case I'm gonna cover
+is web-to-web ad attribution,
+
+
+128
+00:05:42.342 --> 00:05:44.278 line:-2
+meaning both
+the initial click or tap
+
+
+129
+00:05:44.311 --> 00:05:47.314 line:-2
+and the final conversion event
+both occur in the browser.
+
+
+130
+00:05:48.649 --> 00:05:50.651 line:-2
+This year, we're so excited
+to introduce
+
+
+131
+00:05:50.684 --> 00:05:52.886 line:-2
+Private Click Measurement,
+or PCM,
+
+
+132
+00:05:52.920 --> 00:05:55.722 line:-2
+which brings privacy-preserving
+ad attribution to the web.
+
+
+133
+00:05:57.024 --> 00:05:58.926 line:-1
+PCM is a proposed standard
+
+
+134
+00:05:58.959 --> 00:06:02.095 line:-2
+in the W3C
+Privacy Community Group.
+
+
+135
+00:06:02.129 --> 00:06:04.398 line:-2
+To be on track
+to become a full standard,
+
+
+136
+00:06:04.431 --> 00:06:07.534 line:-2
+it needs an implementation
+from another browser.
+
+
+137
+00:06:07.568 --> 00:06:08.969 line:-2
+We're working
+with other browsers
+
+
+138
+00:06:09.002 --> 00:06:11.405 line:-2
+to standardize PCM
+across the web.
+
+
+139
+00:06:13.140 --> 00:06:15.375 line:-1
+PCM is an entirely on-device
+
+
+140
+00:06:15.409 --> 00:06:18.212 line:-2
+ad-attribution
+reporting mechanism.
+
+
+141
+00:06:18.245 --> 00:06:20.848 line:-2
+Limited entropy in the reports
+prevents a site
+
+
+142
+00:06:20.881 --> 00:06:24.518 line:-2
+from being able to identify
+a specific user.
+
+
+143
+00:06:24.551 --> 00:06:26.119 line:-1
+And when using PCM,
+
+
+144
+00:06:26.153 --> 00:06:29.122 line:-2
+the user isn't being tracked
+across sites.
+
+
+145
+00:06:29.156 --> 00:06:31.892 line:-2
+This means App Tracking
+Transparency requirements
+
+
+146
+00:06:31.925 --> 00:06:34.161 line:-1
+don't apply for uses of PCM.
+
+
+147
+00:06:35.362 --> 00:06:38.432 line:-2
+Currently, PCM web-to-web
+and app-to-web
+
+
+148
+00:06:38.465 --> 00:06:40.968 line:-1
+are fully supported in Safari.
+
+
+149
+00:06:41.001 --> 00:06:43.237 line:-2
+So, throughout
+the rest of this presentation,
+
+
+150
+00:06:43.270 --> 00:06:45.038 line:-2
+whenever I refer
+to "the browser,"
+
+
+151
+00:06:45.072 --> 00:06:47.040 line:-1
+I mean Safari.
+
+
+152
+00:06:47.074 --> 00:06:49.009 line:-2
+We are working
+towards adding support
+
+
+153
+00:06:49.042 --> 00:06:51.011 line:-1
+for other browsers as well,
+
+
+154
+00:06:51.044 --> 00:06:52.679 line:-2
+both those that use
+the WebKit engine
+
+
+155
+00:06:52.713 --> 00:06:54.982 line:-1
+and those that don't.
+
+
+156
+00:06:55.015 --> 00:06:57.284 line:-2
+Let's go back to our
+original longboard example
+
+
+157
+00:06:57.317 --> 00:06:58.752 line:-1
+to show how PCM works.
+
+
+158
+00:06:59,486 --> 00:07:01,655
+Again, I tap an ad
+for a longboard
+
+
+159
+00:07:01,688 --> 00:07:04,024
+on searchforlongboard.biz.
+
+
+160
+00:07:04,057 --> 00:07:06,226
+With PCM, this link specifies
+
+
+161
+00:07:06,260 --> 00:07:08,795
+two additional pieces
+of information:
+
+
+162
+00:07:08,829 --> 00:07:11,665
+a Source ID,
+which is 8 bits of entropy
+
+
+163
+00:07:11,698 --> 00:07:14,434
+that you can use to specify
+the ad campaign,
+
+
+164
+00:07:14,468 --> 00:07:16,470
+and the site
+that the ad will convert on,
+
+
+165
+00:07:16,503 --> 00:07:19,540
+called the attribution
+destination site.
+
+
+166
+00:07:19,573 --> 00:07:22,743
+These are stored on-device
+in the browser.
+
+
+167
+00:07:22,776 --> 00:07:27,581
+The ad link then navigates me
+to longboardshop.biz.
+
+
+168
+00:07:27,614 --> 00:07:29,249
+When I tap Add to Cart,
+
+
+169
+00:07:29,283 --> 00:07:31,852
+longboardshop.biz can
+specify information
+
+
+170
+00:07:31,885 --> 00:07:34,988
+about the conversion event
+using an additional value
+
+
+171
+00:07:35,022 --> 00:07:37,191
+called the trigger data.
+
+
+172
+00:07:37,224 --> 00:07:40,360
+The trigger data is 4 bits,
+and it might specify
+
+
+173
+00:07:40,394 --> 00:07:43,530
+an action like an Add to Cart
+or a purchase.
+
+
+174
+00:07:43,564 --> 00:07:46,233
+This is stored on-device,
+in the browser, as well.
+
+
+175
+00:07:47.634 --> 00:07:49.436 line:-1
+So, what about reporting?
+
+
+176
+00:07:49.469 --> 00:07:52.206 line:-2
+Note that only the browser
+has both the click-side
+
+
+177
+00:07:52.239 --> 00:07:54.808 line:-2
+and the conversion-side
+information.
+
+
+178
+00:07:54.842 --> 00:07:57.377 line:-2
+So, if the conversion matches
+a stored click,
+
+
+179
+00:07:57.411 --> 00:07:59.479 line:-2
+the browser can format
+this information
+
+
+180
+00:07:59.513 --> 00:08:02.649 line:-2
+into a report
+that's useful to the advertiser,
+
+
+181
+00:08:02.683 --> 00:08:04.585 line:-2
+while preventing
+any identification
+
+
+182
+00:08:04.618 --> 00:08:06.186 line:-1
+of a user across sites.
+
+
+183
+00:08:07.621 --> 00:08:09.289 line:-2
+The browser then schedules
+the report
+
+
+184
+00:08:09.323 --> 00:08:11.058 line:-1
+to be sent to both the source
+
+
+185
+00:08:11.091 --> 00:08:16.129 line:-2
+and the destination sites,
+randomly 24 to 48 hours later.
+
+
+186
+00:08:16.163 --> 00:08:18.298 line:-2
+The random delay
+prevents the reports
+
+
+187
+00:08:18.332 --> 00:08:20.634 line:-2
+from providing
+any time-related data
+
+
+188
+00:08:20.667 --> 00:08:23.303 line:-2
+that might link ad-clicks
+and conversions together
+
+
+189
+00:08:23.337 --> 00:08:25.405 line:-1
+to identify someone.
+
+
+190
+00:08:25.439 --> 00:08:28.475 line:-1
+As of iOS 15 and macOS 12,
+
+
+191
+00:08:28.509 --> 00:08:31.778 line:-2
+these reports also have
+IP address protection,
+
+
+192
+00:08:31.812 --> 00:08:35.048 line:-2
+which is crucial
+to prevent fingerprinting.
+
+
+193
+00:08:35,082 --> 00:08:38,252
+You can find out more
+about IP address protection
+
+
+194
+00:08:38,285 --> 00:08:42,289
+in Apple's privacy pillars
+in focus WWDC session.
+
+
+195
+00:08:44.358 --> 00:08:47.094 line:-2
+OK, so how do you
+actually specify PCM data
+
+
+196
+00:08:47.127 --> 00:08:49.463 line:-1
+when running an ad campaign?
+
+
+197
+00:08:49.496 --> 00:08:52.099 line:-2
+On the source site,
+where the ad is being displayed,
+
+
+198
+00:08:52.132 --> 00:08:56.036 line:-2
+you can specify PCM data
+using link attributes.
+
+
+199
+00:08:56.069 --> 00:08:58.972 line:-2
+Here we see the Lemon Yellow
+Longboard campaign
+
+
+200
+00:08:59.006 --> 00:09:00.941 line:-1
+has an identifier 55,
+
+
+201
+00:09:00.974 --> 00:09:03.510 line:-2
+and converts
+on longboardshop.biz.
+
+
+202
+00:09:04.645 --> 00:09:06.180 line:-1
+On the destination site,
+
+
+203
+00:09:06.213 --> 00:09:07.948 line:-2
+you can trigger
+an attribution event
+
+
+204
+00:09:07.981 --> 00:09:11.418 line:-2
+by making an HTTP GET request
+to the source site,
+
+
+205
+00:09:11.451 --> 00:09:15.088 line:-2
+potentially specifying data
+about the conversion event.
+
+
+206
+00:09:15.122 --> 00:09:16.924 line:-2
+The source site gets
+this request,
+
+
+207
+00:09:16.957 --> 00:09:21.161 line:-2
+then needs to redirect it
+to this well-known location.
+
+
+208
+00:09:21.195 --> 00:09:25.732 line:-2
+Adding the longboard to my cart
+has a trigger data value of 15.
+
+
+209
+00:09:25.766 --> 00:09:28.468 line:-2
+And if you later on wanted
+to override this conversion
+
+
+210
+00:09:28.502 --> 00:09:31.004 line:-2
+with a more important one,
+like a purchase,
+
+
+211
+00:09:31.038 --> 00:09:33.874 line:-2
+you might specify
+a higher 6-bit priority.
+
+
+212
+00:09:34.908 --> 00:09:38.045 line:-2
+This design was intended
+to support legacy pixels
+
+
+213
+00:09:38.078 --> 00:09:39.580 line:-1
+to make adoption easy.
+
+
+214
+00:09:40.714 --> 00:09:42.816 line:-1
+The last step is reporting.
+
+
+215
+00:09:42.850 --> 00:09:45.419 line:-2
+The report will be sent
+in a JSON format
+
+
+216
+00:09:45.452 --> 00:09:47.688 line:-1
+to this well-known location.
+
+
+217
+00:09:47.721 --> 00:09:49.156 line:-1
+The report provides the data
+
+
+218
+00:09:49.189 --> 00:09:51.558 line:-2
+that links an ad click
+with a conversion,
+
+
+219
+00:09:51.592 --> 00:09:54.127 line:-2
+but you can see that there's
+no identifying information
+
+
+220
+00:09:54.161 --> 00:09:56.363 line:-1
+about the user included.
+
+
+221
+00:09:56.396 --> 00:09:59.800 line:-2
+In this case, what you learn
+is that someone, somewhere
+
+
+222
+00:09:59.833 --> 00:10:01.935 line:-2
+added a lemon yellow longboard
+to their cart
+
+
+223
+00:10:01.969 --> 00:10:04.371 line:-1
+on longboardshop.biz.
+
+
+224
+00:10:04.404 --> 00:10:07.374 line:-2
+You can use this information
+to measure ad campaigns
+
+
+225
+00:10:07.407 --> 00:10:09.943 line:-2
+without needing to track
+specific users.
+
+
+226
+00:10:09.977 --> 00:10:11.111 line:-1
+And those are the basics
+
+
+227
+00:10:11.144 --> 00:10:13.213 line:-2
+for implementing
+Private Click Measurement
+
+
+228
+00:10:13.247 --> 00:10:16.550 line:-2
+to measure web-to-web
+ad campaigns.
+
+
+229
+00:10:16.583 --> 00:10:19.586 line:-2
+Now, I'll show you how you can
+expand PCM even more,
+
+
+230
+00:10:19.620 --> 00:10:21.421 line:-1
+to use in your apps.
+
+
+231
+00:10:21.455 --> 00:10:22.956 line:-1
+We've heard lots of feedback
+
+
+232
+00:10:22.990 --> 00:10:24.958 line:-2
+about the importance
+of measuring ad taps
+
+
+233
+00:10:24.992 --> 00:10:28.128 line:-2
+that start in apps
+and convert on the web.
+
+
+234
+00:10:28.161 --> 00:10:31.265 line:-2
+We realized how crucial it is
+that we bridge this gap,
+
+
+235
+00:10:31.298 --> 00:10:33.500 line:-2
+so we're excited
+to also be introducing
+
+
+236
+00:10:33.534 --> 00:10:36.170 line:-1
+PCM app-to-web attribution.
+
+
+237
+00:10:36.203 --> 00:10:39.139 line:-2
+Let's go through an example
+of how this works.
+
+
+238
+00:10:39.173 --> 00:10:42.276 line:-2
+Now, I open Social App,
+which is what I use to catch up
+
+
+239
+00:10:42.309 --> 00:10:44.645 line:-2
+with all
+of my longboarding friends.
+
+
+240
+00:10:44.678 --> 00:10:47.714 line:-1
+And I tap an ad for a longboard.
+
+
+241
+00:10:47,748 --> 00:10:49,917
+The Source ID
+and destination site
+
+
+242
+00:10:49,950 --> 00:10:51,685
+are stored on-device.
+
+
+243
+00:10:51,718 --> 00:10:56,089
+Then, I'm navigated
+to longboardshop.biz in Safari.
+
+
+244
+00:10:56,123 --> 00:11:00,127
+The conversion side is exactly
+the same as the web-to-web case.
+
+
+245
+00:11:00,160 --> 00:11:03,363
+When I tap Add to Cart,
+longboardshop.biz can trigger
+
+
+246
+00:11:03,397 --> 00:11:05,432
+a conversion
+with the trigger data,
+
+
+247
+00:11:05,465 --> 00:11:07,067
+which is stored in the browser.
+
+
+248
+00:11:09,570 --> 00:11:13,073
+The browser combines
+the information into a report,
+
+
+249
+00:11:13,106 --> 00:11:15,209
+then sends it to both
+the app reporting site
+
+
+250
+00:11:15,242 --> 00:11:18,912
+and the destination site
+on a random 24 to 48 hour delay.
+
+
+251
+00:11:20.247 --> 00:11:23.183 line:-2
+To use PCM
+app-to-web attribution,
+
+
+252
+00:11:23.217 --> 00:11:24.651 line:-2
+you should add
+an attribution report
+
+
+253
+00:11:24.685 --> 00:11:27.721 line:-2
+destination site
+to the app's info.plist,
+
+
+254
+00:11:27.754 --> 00:11:32.125 line:-2
+with the key NSAdvertising-
+AttributionReportEndpoint.
+
+
+255
+00:11:32.159 --> 00:11:33.627 line:-1
+This step is crucial,
+
+
+256
+00:11:33.660 --> 00:11:35.495 line:-2
+because we take
+the registrable domain
+
+
+257
+00:11:35.529 --> 00:11:37.798 line:-1
+from the report destination URL
+
+
+258
+00:11:37.831 --> 00:11:40.133 line:-2
+to form a well-known path
+for sending reports.
+
+
+259
+00:11:41.168 --> 00:11:45.839 line:-2
+This well-known path is exactly
+the same as the web-to-web case.
+
+
+260
+00:11:45.873 --> 00:11:48.709 line:-2
+For PCM app-to-web, you'll also
+need to make some changes
+
+
+261
+00:11:48.742 --> 00:11:50.811 line:-1
+in your app's code.
+
+
+262
+00:11:50.844 --> 00:11:53.914 line:-2
+We know that, in order to
+measure campaigns effectively,
+
+
+263
+00:11:53.947 --> 00:11:57.584 line:-2
+it's important to know that
+an ad tap has actually occurred.
+
+
+264
+00:11:57.618 --> 00:11:59.586 line:-2
+So, we've added
+a new data structure
+
+
+265
+00:11:59.620 --> 00:12:02.322 line:-1
+called a UIEventAttributionView.
+
+
+266
+00:12:02.356 --> 00:12:04.157 line:-2
+When you display an ad
+in your app,
+
+
+267
+00:12:04.191 --> 00:12:07.895 line:-2
+you'll create a new
+UIEventAttributionView.
+
+
+268
+00:12:07.928 --> 00:12:10.130 line:-2
+Then, you'll place it
+over your ad.
+
+
+269
+00:12:10.163 --> 00:12:12.299 line:-2
+The UIEventAttributionView
+verifies
+
+
+270
+00:12:12.332 --> 00:12:15.869 line:-2
+that a user gesture has happened
+before reporting an attribution,
+
+
+271
+00:12:15.903 --> 00:12:19.173 line:-2
+so that you know that
+the reported data is accurate.
+
+
+272
+00:12:19.206 --> 00:12:21.875 line:-2
+When the user taps the ad,
+you then need to create
+
+
+273
+00:12:21.909 --> 00:12:25.512 line:-2
+a new data structure
+called a UIEventAttribution,
+
+
+274
+00:12:25.546 --> 00:12:27.748 line:-2
+which is submitted
+when an app opens a URL
+
+
+275
+00:12:27.781 --> 00:12:30.083 line:-1
+to an external website.
+
+
+276
+00:12:30.117 --> 00:12:32.586 line:-2
+This gets populated
+with four things:
+
+
+277
+00:12:32.619 --> 00:12:33.921 line:-1
+the source identifier,
+
+
+278
+00:12:33.954 --> 00:12:35.923 line:-2
+which identifies
+the ad campaign,
+
+
+279
+00:12:35.956 --> 00:12:39.326 line:-2
+in this case,
+for a lemon yellow longboard;
+
+
+280
+00:12:39.359 --> 00:12:43.697 line:-2
+the destinationURL,
+where the ad will be converted;
+
+
+281
+00:12:43.730 --> 00:12:44.998 line:-1
+the sourceDescription,
+
+
+282
+00:12:45.032 --> 00:12:48.001 line:-2
+a description
+of the content that was tapped;
+
+
+283
+00:12:48.035 --> 00:12:49.203 line:-1
+and the purchaser,
+
+
+284
+00:12:49.236 --> 00:12:52.272 line:-2
+a description of the buyer
+of the content.
+
+
+285
+00:12:52.306 --> 00:12:55.475 line:-2
+If you're using a UIScene-based
+life cycle management,
+
+
+286
+00:12:55.509 --> 00:12:59.646 line:-2
+you'll create
+a OpenExternalURLOptions object.
+
+
+287
+00:12:59.680 --> 00:13:02.082 line:-2
+Then, you should assign
+your event attribution object
+
+
+288
+00:13:02.115 --> 00:13:06.720 line:-2
+to the corresponding property
+and call the open function.
+
+
+289
+00:13:06.753 --> 00:13:08.522 line:-2
+If you're using
+UIApplication-based
+
+
+290
+00:13:08.555 --> 00:13:10.057 line:-1
+life cycle management,
+
+
+291
+00:13:10.090 --> 00:13:12.359 line:-2
+adding support
+for app-to-web campaigns
+
+
+292
+00:13:12.392 --> 00:13:14.194 line:-1
+is a bit different.
+
+
+293
+00:13:14.228 --> 00:13:16.096 line:-2
+You'll need to create
+a dictionary
+
+
+294
+00:13:16.129 --> 00:13:18.999 line:-2
+that contains
+the eventAttribution object.
+
+
+295
+00:13:19.032 --> 00:13:20.801 line:-2
+Then you can call
+the open function
+
+
+296
+00:13:20.834 --> 00:13:24.505 line:-2
+with the dictionary as the value
+for the options parameter.
+
+
+297
+00:13:24.538 --> 00:13:26.039 line:-1
+And that's pretty much it
+
+
+298
+00:13:26.073 --> 00:13:28.375 line:-2
+for implementing
+app-to-web attribution.
+
+
+299
+00:13:30.310 --> 00:13:33.347 line:-2
+Before we move on
+to SKAdNetwork improvements,
+
+
+300
+00:13:33.380 --> 00:13:37.084 line:-2
+I want to touch briefly
+on PCM fraud prevention.
+
+
+301
+00:13:37.117 --> 00:13:40.921 line:-2
+Since PCM reports carry
+no identifying information,
+
+
+302
+00:13:40.954 --> 00:13:43.023 line:-2
+there's no inherent way
+for the server to know
+
+
+303
+00:13:43.056 --> 00:13:46.226 line:-2
+if a conversion report
+is trustworthy.
+
+
+304
+00:13:46.260 --> 00:13:48.495 line:-2
+So, PCM uses
+cryptographic signatures
+
+
+305
+00:13:48.529 --> 00:13:50.430 line:-1
+to prevent fraud.
+
+
+306
+00:13:50.464 --> 00:13:51.865 line:-1
+To explain signatures,
+
+
+307
+00:13:51.899 --> 00:13:55.035 line:-2
+I'm going to use
+a popular envelope analogy.
+
+
+308
+00:13:55.068 --> 00:13:56.837 line:-1
+It works like this.
+
+
+309
+00:13:56.870 --> 00:14:00.207 line:-2
+When the ad tap occurs
+on searchforlongboard.biz,
+
+
+310
+00:14:00.240 --> 00:14:03.110 line:-2
+the browser fetches
+searchforlongboard's public key.
+
+
+311
+00:14:03.143 --> 00:14:04.411 line:-1
+It then creates a message
+
+
+312
+00:14:04.444 --> 00:14:07.481 line:-2
+that searchforlongboard will
+validate later on.
+
+
+313
+00:14:07.514 --> 00:14:10.450 line:-2
+However, since we don't want
+searchforlongboard.biz
+
+
+314
+00:14:10.484 --> 00:14:13.420 line:-2
+to be able to link
+a click and conversion together,
+
+
+315
+00:14:13.453 --> 00:14:15.122 line:-1
+we'll hide this message.
+
+
+316
+00:14:15.155 --> 00:14:18.825 line:-2
+Think of it like putting
+the message in an envelope.
+
+
+317
+00:14:18.859 --> 00:14:20.894 line:-2
+The browser will then send
+the hidden message
+
+
+318
+00:14:20.928 --> 00:14:23.363 line:-1
+to searchforlongboard.biz.
+
+
+319
+00:14:23.397 --> 00:14:24.965 line:-1
+They sign the hidden message
+
+
+320
+00:14:24.998 --> 00:14:27.301 line:-2
+using an RSA
+blind signature scheme
+
+
+321
+00:14:27.334 --> 00:14:29.336 line:-1
+and send it back.
+
+
+322
+00:14:29.369 --> 00:14:32.439 line:-2
+You can think of this
+like carbon copy paper.
+
+
+323
+00:14:32.472 --> 00:14:36.376 line:-2
+The signature on the envelope
+will also apply to the message.
+
+
+324
+00:14:36.410 --> 00:14:39.012 line:-2
+So, when the browser removes
+the message from the envelope,
+
+
+325
+00:14:39.046 --> 00:14:40.380 line:-2
+it will have
+searchforlongboard's
+
+
+326
+00:14:40.414 --> 00:14:42.716 line:-1
+signature on it.
+
+
+327
+00:14:42.749 --> 00:14:44.218 line:-1
+When the attribution occurs,
+
+
+328
+00:14:44.251 --> 00:14:46.153 line:-2
+the browser sends
+the attribution report
+
+
+329
+00:14:46.186 --> 00:14:49.690 line:-2
+with searchforlongboard's
+signature.
+
+
+330
+00:14:49.723 --> 00:14:50.991 line:-1
+Now, the source
+
+
+331
+00:14:51.024 --> 00:14:52.759 line:-2
+and destination site
+can validate
+
+
+332
+00:14:52.793 --> 00:14:55.429 line:-2
+that the click was deemed
+trustworthy when it happened,
+
+
+333
+00:14:55.462 --> 00:14:58.365 line:-2
+using searchforlongboard's
+public key.
+
+
+334
+00:14:58.398 --> 00:15:02.236 line:-2
+Since searchforlongboard.biz
+never saw the original message,
+
+
+335
+00:15:02.269 --> 00:15:05.239 line:-2
+it can't link it
+with the ad click.
+
+
+336
+00:15:05.272 --> 00:15:07.841 line:-2
+So, that's it
+on fraud prevention.
+
+
+337
+00:15:07.875 --> 00:15:09.843 line:-2
+And I also want to talk
+about testing
+
+
+338
+00:15:09.877 --> 00:15:11.378 line:-2
+because we know
+that it's important
+
+
+339
+00:15:11.411 --> 00:15:15.415 line:-2
+for you all to be able to have
+a simple, fast, and easy way
+
+
+340
+00:15:15.449 --> 00:15:18.085 line:-1
+to test and debug.
+
+
+341
+00:15:18.118 --> 00:15:20.387 line:-2
+WebKit has
+an experimental feature
+
+
+342
+00:15:20.420 --> 00:15:23.156 line:-2
+called Private Click Measurement
+Debug Mode.
+
+
+343
+00:15:23.190 --> 00:15:26.193 line:-2
+You'll find it in the Safari
+Develop menu for macOS,
+
+
+344
+00:15:26.226 --> 00:15:27.895 line:-1
+under Experimental Features.
+
+
+345
+00:15:29,463 --> 00:15:31,932
+On iOS, you can turn on
+Debug Mode
+
+
+346
+00:15:31,965 --> 00:15:33,967
+in the WebKit
+Experimental Features menu.
+
+
+347
+00:15:35,035 --> 00:15:38,005
+Debug Mode has
+enhanced Web Inspector logging,
+
+
+348
+00:15:38.038 --> 00:15:40.307 line:-2
+and reports will go out
+every 10 seconds,
+
+
+349
+00:15:40.340 --> 00:15:42.543 line:-2
+as opposed to 24
+to 48 hours later.
+
+
+350
+00:15:44.111 --> 00:15:46.213 line:-1
+That's it for using PCM
+
+
+351
+00:15:46.246 --> 00:15:49.283 line:-2
+to support your web-to-web
+and app-to-web campaigns.
+
+
+352
+00:15:50.717 --> 00:15:53.353 line:-2
+I now want to pivot to talk about
+how you can improve
+
+
+353
+00:15:53.387 --> 00:15:55.355 line:-2
+your app-to-App Store
+ad campaigns,
+
+
+354
+00:15:55.389 --> 00:15:58.592 line:-2
+with recent updates
+to SKAdNetwork.
+
+
+355
+00:15:58,625 --> 00:16:00,761
+First, let's start
+with a brief overview
+
+
+356
+00:16:00,794 --> 00:16:03,397
+of SKAdNetwork up to this point.
+
+
+357
+00:16:03,430 --> 00:16:05,933
+Note that the basics
+of SKAdNetwork were covered
+
+
+358
+00:16:05,966 --> 00:16:08,569
+at WWDC in 2020,
+
+
+359
+00:16:08,602 --> 00:16:11,205
+so it would be useful
+to reference those presentations
+
+
+360
+00:16:11,238 --> 00:16:14,675
+for a more detailed overview
+of how it works.
+
+
+361
+00:16:14,708 --> 00:16:18,111
+Essentially, SKAdNetwork
+involves three parties:
+
+
+362
+00:16:18,145 --> 00:16:22,850
+ad networks, publisher apps,
+and advertised apps.
+
+
+363
+00:16:22,883 --> 00:16:25,919
+Let's say I'm using Social App,
+and I'm served an ad
+
+
+364
+00:16:25,953 --> 00:16:29,089
+for Longboard App
+by SocialAdNet.
+
+
+365
+00:16:29,122 --> 00:16:32,960
+In SKAdNetwork terms,
+SocialAdNet is the AdNetwork,
+
+
+366
+00:16:32,993 --> 00:16:34,862
+Social App is the publisher app,
+
+
+367
+00:16:34,895 --> 00:16:37,731
+and Longboard App is
+the advertised app.
+
+
+368
+00:16:37,764 --> 00:16:39,733
+If I tap the ad
+for Longboard App,
+
+
+369
+00:16:39,766 --> 00:16:41,235
+this generates a report
+
+
+370
+00:16:41,268 --> 00:16:45,806
+with the Ad network ID,
+Publisher app ID, Campaign ID,
+
+
+371
+00:16:45,839 --> 00:16:48,242
+timestamp,
+and additional information
+
+
+372
+00:16:48,275 --> 00:16:50,244
+for fraud prevention.
+
+
+373
+00:16:50,277 --> 00:16:54,081
+This information is stored
+on-device, in the App Store.
+
+
+374
+00:16:54,114 --> 00:16:55,983
+Let's say the ad
+for Longboard App
+
+
+375
+00:16:56,016 --> 00:16:57,484
+takes me to the App Store,
+
+
+376
+00:16:57,518 --> 00:17:00,821
+where I install and launch
+Longboard App.
+
+
+377
+00:17:00,854 --> 00:17:05,058
+Now Longboard App calls one
+of two APIs offered by StoreKit:
+
+
+378
+00:17:05,092 --> 00:17:07,895
+RegisterApp-
+ForAdNetworkAttribution
+
+
+379
+00:17:07,928 --> 00:17:10,597
+or updateConversionValue.
+
+
+380
+00:17:10,631 --> 00:17:13,367
+Both will trigger
+the SKAdNetwork reporting,
+
+
+381
+00:17:13,400 --> 00:17:15,102
+and you can check out
+the documentation
+
+
+382
+00:17:15,135 --> 00:17:18,672
+for more information
+on when to use which call.
+
+
+383
+00:17:18,705 --> 00:17:21,708
+StoreKit will combine the useful
+information into a report
+
+
+384
+00:17:21.742 --> 00:17:23.844 line:-1
+and send it to the ad network.
+
+
+385
+00:17:23.877 --> 00:17:26.380 line:-2
+Now that we have
+some background on SKAdNetwork,
+
+
+386
+00:17:26.413 --> 00:17:28.015 line:-2
+I'll talk about
+some improvements we've made
+
+
+387
+00:17:28.048 --> 00:17:29.616 line:-1
+over the last year.
+
+
+388
+00:17:29.650 --> 00:17:31.919 line:-1
+Since we launched SKAdNetwork,
+
+
+389
+00:17:31.952 --> 00:17:33.487 line:-2
+we've been listening
+to your feedback
+
+
+390
+00:17:33.520 --> 00:17:35.522 line:-1
+and making changes.
+
+
+391
+00:17:35.556 --> 00:17:37.457 line:-2
+Each version
+introduced something
+
+
+392
+00:17:37.491 --> 00:17:38.659 line:-2
+to help you better meet
+your needs
+
+
+393
+00:17:38.692 --> 00:17:42.729 line:-2
+with ad attribution,
+whether that be more security,
+
+
+394
+00:17:42.763 --> 00:17:46.867 line:-2
+more ways to measure ads,
+or more attribution reporting.
+
+
+395
+00:17:46,900 --> 00:17:50,904
+In this section, we'll talk
+about Signing Key improvements,
+
+
+396
+00:17:50,938 --> 00:17:54,174
+support for
+View-Through Attribution,
+
+
+397
+00:17:54,208 --> 00:17:57,744
+Multiple Postback
+and IP address Protection,
+
+
+398
+00:17:57,778 --> 00:18:00,147
+and Postback to Developer.
+
+
+399
+00:18:00,180 --> 00:18:02,449
+Also, note
+the minimum iOS version
+
+
+400
+00:18:02,482 --> 00:18:05,052
+needed to utilize
+each new feature.
+
+
+401
+00:18:05.085 --> 00:18:09.323 line:-2
+First, in version 2.1,
+Apple introduced a stronger
+
+
+402
+00:18:09.356 --> 00:18:13.260 line:-2
+and more secure 256-bit
+public key.
+
+
+403
+00:18:13.293 --> 00:18:15.529 line:-2
+You should update the Apple
+public key you're using
+
+
+404
+00:18:15.562 --> 00:18:18.565 line:-2
+to validate postbacks
+in order to utilize this.
+
+
+405
+00:18:19.566 --> 00:18:22.603 line:-2
+Detailed steps on how to verify
+Apple's signature
+
+
+406
+00:18:22.636 --> 00:18:23.770 line:-1
+can be found in the link
+
+
+407
+00:18:23.804 --> 00:18:27.307 line:-2
+to SKAdNetwork's documentation
+associated with this session.
+
+
+408
+00:18:30.744 --> 00:18:35.749 line:-2
+Next, Version 2.2 added support
+for view-through ad campaigns.
+
+
+409
+00:18:35.782 --> 00:18:38.886 line:-2
+This involves creating a new
+SKAdImpression instance,
+
+
+410
+00:18:38.919 --> 00:18:42.456 line:-2
+generating a signature,
+and calling two new APIs:
+
+
+411
+00:18:42.489 --> 00:18:43.624 line:-1
+startImpression,
+
+
+412
+00:18:43.657 --> 00:18:46.226 line:-2
+when you start to present
+your custom ad to the user,
+
+
+413
+00:18:46.260 --> 00:18:47.561 line:-1
+and endImpression,
+
+
+414
+00:18:47.594 --> 00:18:50.163 line:-2
+when you finish
+presenting the ad.
+
+
+415
+00:18:50.197 --> 00:18:52.900 line:-2
+With view-through attribution,
+StoreKit also introduced
+
+
+416
+00:18:52.933 --> 00:18:55.903 line:-2
+a new parameter
+called Fidelity type.
+
+
+417
+00:18:55.936 --> 00:18:57.571 line:-2
+StoreKit-rendered
+click-through ads
+
+
+418
+00:18:57.604 --> 00:18:59.540 line:-1
+have a fidelity type of 1,
+
+
+419
+00:18:59.573 --> 00:19:03.577 line:-2
+while custom view-through ads
+have a fidelity type of 0.
+
+
+420
+00:19:03.610 --> 00:19:05.245 line:-2
+This gives
+view-through impressions
+
+
+421
+00:19:05.279 --> 00:19:07.915 line:-2
+a lower priority
+than click-through ones,
+
+
+422
+00:19:07.948 --> 00:19:10.417 line:-2
+and a view-through postback
+will only be reported
+
+
+423
+00:19:10.450 --> 00:19:12.286 line:-2
+if there's no
+competing impression
+
+
+424
+00:19:12.319 --> 00:19:14.221 line:-1
+with a higher fidelity.
+
+
+425
+00:19:14,254 --> 00:19:17,658
+iOS 14.6 introduced
+multiple postback
+
+
+426
+00:19:17,691 --> 00:19:20,227
+and IP address protection.
+
+
+427
+00:19:20,260 --> 00:19:22,229
+Now, SKAdNetwork supports
+
+
+428
+00:19:22,262 --> 00:19:24,431
+sending reports
+to a winner network
+
+
+429
+00:19:24,464 --> 00:19:27,201
+and up to five runner-ups.
+
+
+430
+00:19:27,234 --> 00:19:28,869
+The winning network is
+determined
+
+
+431
+00:19:28,902 --> 00:19:31,738
+by the last impression that
+occurred before the conversion.
+
+
+432
+00:19:33,240 --> 00:19:34,808
+When a report is generated,
+
+
+433
+00:19:34,842 --> 00:19:36,677
+the winner has
+the possibility to receive
+
+
+434
+00:19:36,710 --> 00:19:38,879
+the crowd anonymity
+controlled values,
+
+
+435
+00:19:38,912 --> 00:19:41,915
+like the sourceApp
+and conversion value.
+
+
+436
+00:19:41,949 --> 00:19:45,519
+Runner-ups will not get
+this information.
+
+
+437
+00:19:45,552 --> 00:19:49,122
+Also new in SKAdNetwork is
+the postback to developer,
+
+
+438
+00:19:49,156 --> 00:19:50,991
+where the winning postback
+gets reported
+
+
+439
+00:19:51,024 --> 00:19:52,492
+to the advertised app.
+
+
+440
+00:19:54,394 --> 00:19:57,598
+In order to utilize the
+postback-to-developer feature,
+
+
+441
+00:19:57.631 --> 00:20:00.634 line:-2
+your app will have to specify
+the developer reporting site
+
+
+442
+00:20:00.667 --> 00:20:02.970 line:-1
+in your Info.plist.
+
+
+443
+00:20:03.003 --> 00:20:04.238 line:-1
+This uses the same
+
+
+444
+00:20:04.271 --> 00:20:07.508 line:-2
+NSAdvertising-
+AttributionReportEndpoint key
+
+
+445
+00:20:07.541 --> 00:20:10.544 line:-2
+necessary for PCM
+app-to-web reporting.
+
+
+446
+00:20:11.879 --> 00:20:14.548 line:-2
+Just like with PCM,
+the registrable domain
+
+
+447
+00:20:14.581 --> 00:20:16.950 line:-2
+from the URL specified
+in the plist
+
+
+448
+00:20:16.984 --> 00:20:19.019 line:-2
+will be used to form
+the well-known location
+
+
+449
+00:20:19.052 --> 00:20:20.654 line:-2
+where the postbacks
+will be sent.
+
+
+450
+00:20:22.289 --> 00:20:24.324 line:-2
+Now, I'll give
+some best practices
+
+
+451
+00:20:24.358 --> 00:20:25.959 line:-1
+for successfully testing
+
+
+452
+00:20:25.993 --> 00:20:29.463 line:-2
+and debugging
+new SKAdNetwork technologies.
+
+
+453
+00:20:29.496 --> 00:20:32.399 line:-2
+First, a reminder that the nonce
+for each impression
+
+
+454
+00:20:32.432 --> 00:20:33.934 line:-1
+should be unique.
+
+
+455
+00:20:33.967 --> 00:20:35.969 line:-2
+This is important
+for fraud prevention
+
+
+456
+00:20:36.003 --> 00:20:39.673 line:-2
+and maintaining the integrity
+of your reports.
+
+
+457
+00:20:39.706 --> 00:20:42.009 line:-2
+Next, the order
+of the arguments matters
+
+
+458
+00:20:42.042 --> 00:20:43.877 line:-1
+when creating the signature.
+
+
+459
+00:20:43.911 --> 00:20:45.879 line:-2
+So, if you're encountering
+issues at this step,
+
+
+460
+00:20:45.913 --> 00:20:47.514 line:-2
+you can check out
+the documentation
+
+
+461
+00:20:47.548 --> 00:20:50.484 line:-2
+to make sure
+your argument order is correct.
+
+
+462
+00:20:50.517 --> 00:20:53.554 line:-2
+Next, for testing postbacks,
+you should always use
+
+
+463
+00:20:53.587 --> 00:20:58.492 line:-2
+a development-signed source app
+with a source app ID of 0.
+
+
+464
+00:20:58.525 --> 00:21:01.528 line:-2
+And lastly, a reminder
+that a testing profile
+
+
+465
+00:21:01.562 --> 00:21:03.830 line:-2
+will speed up
+postback transmission time
+
+
+466
+00:21:03.864 --> 00:21:05.365 line:-1
+and is available to download
+
+
+467
+00:21:05.399 --> 00:21:09.102 line:-2
+from the link
+associated with this session.
+
+
+468
+00:21:09.136 --> 00:21:11.905 line:-2
+So, that's it
+for SKAdNetwork improvements,
+
+
+469
+00:21:11.939 --> 00:21:14.308 line:-2
+and that concludes
+all of this year's updates
+
+
+470
+00:21:14.341 --> 00:21:16.343 line:-2
+for privacy-preserving
+ad attribution.
+
+
+471
+00:21:17.978 --> 00:21:19.847 line:-2
+As you can see,
+there's a lot of features
+
+
+472
+00:21:19.880 --> 00:21:22.583 line:-2
+we've implemented and improved
+over the last year
+
+
+473
+00:21:22.616 --> 00:21:25.185 line:-2
+to help you adopt
+private ad attribution.
+
+
+474
+00:21:25.219 --> 00:21:26.954 line:-2
+So let's review
+what I covered today.
+
+
+475
+00:21:28.155 --> 00:21:32.159 line:-2
+First, I introduced PCM,
+an ad-attribution mechanism
+
+
+476
+00:21:32.192 --> 00:21:34.995 line:-2
+that brings private ad measuring
+to the web.
+
+
+477
+00:21:35.028 --> 00:21:37.364 line:-2
+PCM supports
+not only ad campaigns
+
+
+478
+00:21:37.397 --> 00:21:39.199 line:-1
+measured entirely on the web,
+
+
+479
+00:21:39.233 --> 00:21:42.236 line:-2
+but also campaigns that start
+in apps and convert on the web.
+
+
+480
+00:21:43.937 --> 00:21:47.074 line:-2
+I also went over all the updates
+that have gone into SKAdNetwork
+
+
+481
+00:21:47.107 --> 00:21:48.475 line:-1
+over the last year,
+
+
+482
+00:21:48.509 --> 00:21:50.177 line:-2
+that give you
+an even more private,
+
+
+483
+00:21:50.210 --> 00:21:53.213 line:-2
+secure, and useful way
+to measure app installs.
+
+
+484
+00:21:54.882 --> 00:21:56.650 line:-1
+And lastly, I want to reiterate
+
+
+485
+00:21:56.683 --> 00:21:58.819 line:-2
+that so much of the design
+and improvements
+
+
+486
+00:21:58.852 --> 00:22:00.754 line:-1
+of these technologies has come
+
+
+487
+00:22:00.787 --> 00:22:03.156 line:-2
+from hearing from you all
+as developers.
+
+
+488
+00:22:03.190 --> 00:22:04.958 line:-1
+So, thanks. And we ask
+
+
+489
+00:22:04.992 --> 00:22:07.327 line:-2
+that you keep
+providing feedback.
+
+
+490
+00:22:07.361 --> 00:22:10.464 line:-2
+We welcome any thoughts
+on the PCM proposed standard,
+
+
+491
+00:22:10.497 --> 00:22:12.599 line:-1
+which can be found on the W3C
+
+
+492
+00:22:12.633 --> 00:22:14.668 line:-2
+Privacy Community Group
+GitHub page.
+
+
+493
+00:22:16.069 --> 00:22:17.404 line:-2
+If you came into this
+with the idea
+
+
+494
+00:22:17.437 --> 00:22:19.706 line:-2
+that privacy and advertising
+don't mix,
+
+
+495
+00:22:19.740 --> 00:22:21.642 line:-2
+I hope this session helped you
+see a future
+
+
+496
+00:22:21.675 --> 00:22:23.277 line:-1
+where they actually align.
+
+
+497
+00:22:23.310 --> 00:22:26.613 line:-2
+Thanks for watching, and I hope
+you enjoy the rest of WWDC.
+
+
+498
+00:22:26,647 --> 00:22:29,983
+[upbeat music]
+

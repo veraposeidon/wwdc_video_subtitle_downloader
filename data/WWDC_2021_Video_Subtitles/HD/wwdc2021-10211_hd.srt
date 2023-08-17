@@ -1,0 +1,4808 @@
+2
+00:00:00,000 --> 00:00:02,035 line:-1
+[MAC STARTUP CHIME]
+
+
+3
+00:00:02,035 --> 00:00:05,739 line:-1
+♪ Bass music playing ♪
+
+
+4
+00:00:05.739 --> 00:00:07.274 line:-1 position:50%
+[KEYSTROKES]
+
+
+5
+00:00:07,274 --> 00:00:09,509 line:0 align:right size:2%
+♪
+
+
+6
+00:00:09,509 --> 00:00:10,544 line:-1
+Alejandro Lucena:
+Hello, everyone.
+
+
+7
+00:00:10,544 --> 00:00:13,146 line:-1
+Thank you for attending
+this session on symbolication.
+
+
+8
+00:00:13,146 --> 00:00:15,415 line:-1
+While symbolication may
+seem like a vague term,
+
+
+9
+00:00:15,415 --> 00:00:17,451 line:-1
+we'll see the instrumental role
+it plays in helping you
+
+
+10
+00:00:17.451 --> 00:00:19.953 line:-1 position:50%
+to quickly identify
+the root causes of bugs,
+
+
+11
+00:00:19,953 --> 00:00:22,322 line:-1
+crashes, and performance
+bottlenecks.
+
+
+12
+00:00:22,322 --> 00:00:25,759 line:-1
+We'll gain a deeper intuition
+as to how symbolication works
+
+
+13
+00:00:25,759 --> 00:00:28,562 line:-1
+and cover several tools
+that you have at your disposal
+
+
+14
+00:00:28,562 --> 00:00:30,731 line:-1
+to follow along firsthand.
+
+
+15
+00:00:30,731 --> 00:00:32,299 line:-1
+Along the way,
+we'll discuss
+
+
+16
+00:00:32,299 --> 00:00:34,601 line:-1
+the various sources
+of debug information
+
+
+17
+00:00:34.601 --> 00:00:37.571 line:-1 position:50%
+that are necessary for a rich
+symbolication experience
+
+
+18
+00:00:37.571 --> 00:00:39.606 line:-1 position:50%
+and how you can
+configure your app
+
+
+19
+00:00:39.606 --> 00:00:43.310 line:-1 position:50%
+to best utilize
+this information.
+
+
+20
+00:00:43,310 --> 00:00:45,279 line:-1
+Let's get started
+by familiarizing ourselves
+
+
+21
+00:00:45,279 --> 00:00:49,149 line:-1
+with a concrete definition
+and example of symbolication.
+
+
+22
+00:00:49.149 --> 00:00:51.618 line:-1 position:50%
+Fundamentally,
+symbolication is a mechanism
+
+
+23
+00:00:51.618 --> 00:00:53.186 line:-1 position:50%
+to convert or translate
+
+
+24
+00:00:53.186 --> 00:00:55.656 line:-1 position:50%
+how our devices
+see our apps at runtime —
+
+
+25
+00:00:55.656 --> 00:00:58.525 line:-1 position:50%
+which is in terms of memory
+addresses and instructions —
+
+
+26
+00:00:58.525 --> 00:01:00.761 line:-1 position:50%
+back to how we as developers
+see our apps —
+
+
+27
+00:01:00,761 --> 00:01:03,964 line:-1
+which is in terms of functions,
+names, and files.
+
+
+28
+00:01:03.964 --> 00:01:05.332 line:-1 position:50%
+Without this bridging layer,
+
+
+29
+00:01:05,332 --> 00:01:07,601 line:-1
+it vastly complicates
+diagnosing a bug
+
+
+30
+00:01:07.601 --> 00:01:11.171 line:-1 position:50%
+even for a few lines of code.
+
+
+31
+00:01:11.171 --> 00:01:13.941 line:-1 position:50%
+As an example,
+let's consider this Swift code.
+
+
+32
+00:01:13,941 --> 00:01:16,310 line:0
+Here I have a function,
+`generateMagicNumber()`,
+
+
+33
+00:01:16,310 --> 00:01:18,145 position:50%
+that selects
+a particular number
+
+
+34
+00:01:18,145 --> 00:01:20,380 position:50%
+from a list
+of candidate numbers.
+
+
+35
+00:01:20.380 --> 00:01:23.116 line:-1 position:50%
+To do this, we first call into
+`numberChoices()`
+
+
+36
+00:01:23.116 --> 00:01:27.120 line:-1 position:50%
+that returns an array of 10
+randomly generated numbers.
+
+
+37
+00:01:27.120 --> 00:01:30.324 line:-1 position:50%
+Then, we pass that array
+into `selectMagicNumber(choices:)`,
+
+
+38
+00:01:30.324 --> 00:01:33.360 line:-1 position:50%
+which returns the number
+at a particular index.
+
+
+39
+00:01:33,360 --> 00:01:35,162 line:-1
+This seems like
+a reasonable program,
+
+
+40
+00:01:35,162 --> 00:01:37,531 line:-1
+but I encounter a crash
+when I first run it.
+
+
+41
+00:01:37,531 --> 00:01:40,701 line:-1
+My first recourse
+is to check the crash log,
+
+
+42
+00:01:40,701 --> 00:01:42,936 position:50%
+which is rather unfruitful.
+
+
+43
+00:01:42,936 --> 00:01:44,738 line:0
+All I can tell from
+the thread backtrace
+
+
+44
+00:01:44,738 --> 00:01:47,841 position:50%
+is that my MagicNumbers app
+crashed somewhere.
+
+
+45
+00:01:47,841 --> 00:01:49,943 line:0
+Thanks,
+but I already knew that.
+
+
+46
+00:01:49.943 --> 00:01:50.744 line:-1 position:50%
+I have no idea
+
+
+47
+00:01:50,744 --> 00:01:54,081 line:-1
+what any of the registers
+are referring to either.
+
+
+48
+00:01:54,081 --> 00:01:56,149 line:-1
+I can try to step through
+the app with the debugger
+
+
+49
+00:01:56.149 --> 00:01:58.852 line:-1 position:50%
+and identify the crash,
+but what if this only happens
+
+
+50
+00:01:58,852 --> 00:02:02,622 line:-1
+in particular circumstances
+that I can't reproduce?
+
+
+51
+00:02:02.622 --> 00:02:04.691 line:-1 position:50%
+Using the debugger
+won't necessarily pinpoint
+
+
+52
+00:02:04.691 --> 00:02:07.561 line:-1 position:50%
+the problem for me
+in that case.
+
+
+53
+00:02:07,561 --> 00:02:10,130 line:-1
+Or I can try to look
+at the disassembly,
+
+
+54
+00:02:10,130 --> 00:02:13,133 line:-1
+but it's much more difficult
+to keep track of things.
+
+
+55
+00:02:13.133 --> 00:02:16.003 line:-1 position:50%
+This clearly isn't a viable way
+to diagnose the problem,
+
+
+56
+00:02:16.003 --> 00:02:18.772 line:-1 position:50%
+and more importantly,
+with the help of symbolication,
+
+
+57
+00:02:18,772 --> 00:02:22,442 line:-1
+we don't have to debug
+from this starting point.
+
+
+58
+00:02:22.442 --> 00:02:25.312 line:-1 position:50%
+The Xcode Organizer tells me
+I can download the dSYM
+
+
+59
+00:02:25,312 --> 00:02:28,148 line:-1
+for this app, which will
+reprocess the crash log.
+
+
+60
+00:02:28,148 --> 00:02:31,585 line:-1
+In doing so, Xcode applies
+the concepts of symbolication
+
+
+61
+00:02:31,585 --> 00:02:35,722 line:-1
+so that I can diagnose the issue
+with a much nicer crash log,
+
+
+62
+00:02:35.722 --> 00:02:37.891 line:-1 position:50%
+where I can not only see
+all of my functions
+
+
+63
+00:02:37.891 --> 00:02:40.527 line:-1 position:50%
+actually being called,
+but I can also determine
+
+
+64
+00:02:40,527 --> 00:02:44,264 line:-1
+the file and line number
+to refer back to in my code.
+
+
+65
+00:02:44.264 --> 00:02:46.967 line:-1 position:50%
+This updated crash log
+also tells me that we tried
+
+
+66
+00:02:46,967 --> 00:02:49,503 line:-1
+to access an index
+out of range.
+
+
+67
+00:02:49,503 --> 00:02:52,539 line:-1
+Alternatively, If I already have
+the dSYM,
+
+
+68
+00:02:52,539 --> 00:02:56,510 line:-1
+I can use the `atos` command
+to get the same information.
+
+
+69
+00:02:56.510 --> 00:02:59.112 line:-1 position:50%
+Looking back at my code,
+I come to realize
+
+
+70
+00:02:59,112 --> 00:03:01,381 line:-1
+that `MAGIC_CHOICE`
+is far outside the bounds
+
+
+71
+00:03:01,381 --> 00:03:03,150 line:-1
+of our 10-element array.
+
+
+72
+00:03:03,150 --> 00:03:04,951 line:-1
+Oops.
+
+
+73
+00:03:04,951 --> 00:03:07,854 line:-1
+In another instance, I'm
+interested in profiling my app
+
+
+74
+00:03:07.854 --> 00:03:10.323 line:-1 position:50%
+to deliver the fastest
+user experience.
+
+
+75
+00:03:10.323 --> 00:03:13.260 line:-1 position:50%
+Here, Instruments shows me
+that the app cycles through
+
+
+76
+00:03:13.260 --> 00:03:16.396 line:-1 position:50%
+periods of high utilization
+and low utilization.
+
+
+77
+00:03:16,396 --> 00:03:18,899 line:-1
+If we focus on a period
+of low utilization,
+
+
+78
+00:03:18.899 --> 00:03:20.434 line:-1 position:50%
+Instruments tells us
+that the app
+
+
+79
+00:03:20,434 --> 00:03:22,903 line:-1
+was writing some content
+to a file.
+
+
+80
+00:03:22,903 --> 00:03:25,672 line:-1
+However, when I inspect
+a period of high utilization,
+
+
+81
+00:03:25,672 --> 00:03:28,275 line:-1
+I get the same exact backtrace.
+
+
+82
+00:03:28.275 --> 00:03:29.776 line:-1 position:50%
+How is this possible?
+
+
+83
+00:03:29.776 --> 00:03:32.345 line:-1 position:50%
+Isn't this executing
+the same exact code?
+
+
+84
+00:03:32.345 --> 00:03:34.347 line:-1 position:50%
+As we'll see,
+this Instruments trace
+
+
+85
+00:03:34,347 --> 00:03:36,283 line:-1
+is only partially symbolicated.
+
+
+86
+00:03:36,283 --> 00:03:38,085 line:-1
+For instance,
+I don't see any file names
+
+
+87
+00:03:38,085 --> 00:03:39,986 line:-1
+or line numbers
+in the backtrace
+
+
+88
+00:03:39,986 --> 00:03:42,422 line:-1
+as I did with
+the updated crash log.
+
+
+89
+00:03:42,422 --> 00:03:45,459 line:-1
+As a result,
+it's missing some information.
+
+
+90
+00:03:45.459 --> 00:03:46.426 line:-1 position:50%
+With that in mind,
+
+
+91
+00:03:46.426 --> 00:03:49.396 line:-1 position:50%
+I can similarly locate
+my dSYM in Instruments.
+
+
+92
+00:03:49,396 --> 00:03:51,865 line:-1
+After doing this,
+my new Instruments trace
+
+
+93
+00:03:51,865 --> 00:03:54,101 line:-1
+shows that
+the high-utilization regions
+
+
+94
+00:03:54.101 --> 00:03:55.836 line:-1 position:50%
+were indeed writing to a file,
+
+
+95
+00:03:55,836 --> 00:03:58,672 line:-1
+but they were specifically
+within a debug code path
+
+
+96
+00:03:58.672 --> 00:04:00.540 line:-1 position:50%
+that I left in the program.
+
+
+97
+00:04:00.540 --> 00:04:02.576 line:-1 position:50%
+The low-utilization areas
+avoid this
+
+
+98
+00:04:02,576 --> 00:04:05,846 line:-1
+and represent how my app
+behaves in production.
+
+
+99
+00:04:05,846 --> 00:04:08,982 line:-1
+Just as Xcode utilized the dSYM
+to symbolicate
+
+
+100
+00:04:08,982 --> 00:04:11,218 line:-1
+a rather uninformative
+crash log,
+
+
+101
+00:04:11,218 --> 00:04:13,253 line:-1
+Instruments also used the dSYM
+
+
+102
+00:04:13,253 --> 00:04:15,889 line:-1
+to enrich a partially
+symbolicated trace
+
+
+103
+00:04:15,889 --> 00:04:19,493 line:-1
+and tell me the exact cause
+of the performance issue.
+
+
+104
+00:04:19,493 --> 00:04:22,062 line:-1
+Now, while it's great that these
+tools leverage symbolication
+
+
+105
+00:04:22,062 --> 00:04:24,364 line:-1
+to pinpoint problem areas
+in my code,
+
+
+106
+00:04:24.364 --> 00:04:26.666 line:-1 position:50%
+it naturally begs
+a few questions.
+
+
+107
+00:04:26.666 --> 00:04:28.135 line:-1 position:50%
+How does this all work?
+
+
+108
+00:04:28.135 --> 00:04:29.503 line:-1 position:50%
+Where else can I apply this?
+
+
+109
+00:04:29.503 --> 00:04:32.072 line:-1 position:50%
+And is this all about dSYMs?
+
+
+110
+00:04:32.072 --> 00:04:33.440 line:-1 position:50%
+To answer these questions
+
+
+111
+00:04:33,440 --> 00:04:35,876 line:-1
+and unlock symbolication's
+capabilities,
+
+
+112
+00:04:35.876 --> 00:04:38.712 line:-1 position:50%
+we'll need to take a deeper dive
+into the details.
+
+
+113
+00:04:38.712 --> 00:04:40.247 line:-1 position:50%
+This may seem
+a little overwhelming,
+
+
+114
+00:04:40.247 --> 00:04:43.250 line:-1 position:50%
+but these are important concepts
+to understand.
+
+
+115
+00:04:43,250 --> 00:04:45,952 line:-1
+There are many tools to aid
+in debugging and profiling
+
+
+116
+00:04:45,952 --> 00:04:48,221 line:-1
+that build upon symbolication.
+
+
+117
+00:04:48,221 --> 00:04:51,858 line:-1
+`atos` alone already gave us
+the exact root cause of a crash,
+
+
+118
+00:04:51,858 --> 00:04:54,294 line:-1
+and there are many more tools
+built into Xcode.
+
+
+119
+00:04:54,294 --> 00:04:59,032 line:-1
+Further, we specified flags
+like `o`, `l`, and `i` to `atos`,
+
+
+120
+00:04:59.032 --> 00:05:00.700 line:-1 position:50%
+but what do they mean?
+
+
+121
+00:05:00,700 --> 00:05:02,802 line:-1
+Do we always use
+the same set of flags?
+
+
+122
+00:05:02.802 --> 00:05:05.605 line:-1 position:50%
+What if we don't have
+one of the values available?
+
+
+123
+00:05:05,605 --> 00:05:06,940 line:-1
+You'll also gain
+a good foundation
+
+
+124
+00:05:06.940 --> 00:05:09.876 line:-1 position:50%
+in understanding when and why
+your backtraces
+
+
+125
+00:05:09,876 --> 00:05:12,879 line:-1
+may not be fully symbolicated
+and how to fix that,
+
+
+126
+00:05:12,879 --> 00:05:15,515 line:-1
+as we saw
+in the Instruments case.
+
+
+127
+00:05:15,515 --> 00:05:17,484 line:-1
+Lastly, there are a number
+of build settings
+
+
+128
+00:05:17.484 --> 00:05:18.818 line:-1 position:50%
+that you're in control of
+
+
+129
+00:05:18,818 --> 00:05:21,555 line:-1
+that influence the richness
+of symbolication.
+
+
+130
+00:05:21,555 --> 00:05:23,023 line:-1
+We'll go through
+these build settings
+
+
+131
+00:05:23.023 --> 00:05:26.159 line:-1 position:50%
+so you have a solid intuition
+about how they're utilized.
+
+
+132
+00:05:26,159 --> 00:05:28,094 line:-1
+To that end,
+I'd like to introduce
+
+
+133
+00:05:28,094 --> 00:05:30,597 line:-1
+the two-step process
+for symbolication.
+
+
+134
+00:05:30.597 --> 00:05:32.832 line:-1 position:50%
+Step number one
+is going back to the file,
+
+
+135
+00:05:32,832 --> 00:05:36,102 line:-1
+and step number two is
+to consult debug information.
+
+
+136
+00:05:36,102 --> 00:05:38,271 line:-1
+As we'll see,
+going back to the file
+
+
+137
+00:05:38.271 --> 00:05:40.607 line:-1 position:50%
+is all about converting
+or translating
+
+
+138
+00:05:40,607 --> 00:05:44,644 line:-1
+runtime memory addresses
+into a more stable, usable form.
+
+
+139
+00:05:44,644 --> 00:05:47,314 line:-1
+This allows us to communicate
+with our debug information
+
+
+140
+00:05:47,314 --> 00:05:48,882 line:-1
+to make a meaningful connection
+
+
+141
+00:05:48,882 --> 00:05:52,185 line:-1
+between a raw memory address
+and the source code.
+
+
+142
+00:05:52,185 --> 00:05:54,521 line:-1
+Let's start off by discussing
+step number one,
+
+
+143
+00:05:54.521 --> 00:05:57.691 line:-1 position:50%
+going back to the file.
+
+
+144
+00:05:57.691 --> 00:05:59.926 line:-1 position:50%
+The ultimate goal in this step
+is to translate
+
+
+145
+00:05:59.926 --> 00:06:01.761 line:-1 position:50%
+a runtime memory address,
+
+
+146
+00:06:01,761 --> 00:06:04,397 line:-1
+such as those we saw
+in the original crash log,
+
+
+147
+00:06:04,397 --> 00:06:07,934 line:-1
+to a corresponding address
+in your binary on disk.
+
+
+148
+00:06:07,934 --> 00:06:09,836 line:-1
+Just like we have
+runtime addresses,
+
+
+149
+00:06:09,836 --> 00:06:11,171 line:-1
+your apps and frameworks
+
+
+150
+00:06:11,171 --> 00:06:13,773 line:-1
+have an address space
+on disk, too!
+
+
+151
+00:06:13,773 --> 00:06:16,843 line:-1
+The on disk address space
+differs from the address space
+
+
+152
+00:06:16,843 --> 00:06:19,346 line:-1
+that your app occupies
+at runtime,
+
+
+153
+00:06:19,346 --> 00:06:23,083 line:-1
+and we need a mechanism
+to figure out those differences.
+
+
+154
+00:06:23.083 --> 00:06:24.918 line:-1 position:50%
+First, we should understand
+
+
+155
+00:06:24,918 --> 00:06:27,554 line:-1
+exactly what
+the on disk addresses are.
+
+
+156
+00:06:27.554 --> 00:06:29.656 line:-1 position:50%
+These addresses
+are assigned by the linker
+
+
+157
+00:06:29,656 --> 00:06:31,191 line:-1
+when you build your app.
+
+
+158
+00:06:31,191 --> 00:06:34,828 line:-1
+Specifically, the linker groups
+your binary into segments.
+
+
+159
+00:06:34.828 --> 00:06:38.064 line:-1 position:50%
+Each segment contains
+related data and has properties
+
+
+160
+00:06:38.064 --> 00:06:39.466 line:-1 position:50%
+such as a name, a size,
+
+
+161
+00:06:39.466 --> 00:06:41.701 line:-1 position:50%
+and their assigned
+addresses.
+
+
+162
+00:06:41,701 --> 00:06:44,170 line:0
+For example, the `__TEXT`
+segment of your binary
+
+
+163
+00:06:44,170 --> 00:06:47,507 line:0
+contains all of the functions
+and methods you've written,
+
+
+164
+00:06:47,507 --> 00:06:49,876 line:0
+and the `__DATA` segment
+contains program-wide state
+
+
+165
+00:06:49,876 --> 00:06:52,078 position:50%
+such as global variables.
+
+
+166
+00:06:52,078 --> 00:06:54,514 line:0
+Each of these segments gets
+assigned a different address
+
+
+167
+00:06:54,514 --> 00:06:57,484 position:50%
+such that they don't overlap.
+
+
+168
+00:06:57,484 --> 00:06:58,952 line:0
+The linker records
+this information
+
+
+169
+00:06:58,952 --> 00:07:01,187 line:0
+at the very beginning
+of your executables
+
+
+170
+00:07:01,187 --> 00:07:03,256 position:50%
+as part of the Mach-O header.
+
+
+171
+00:07:03,256 --> 00:07:05,592 line:-1
+Mach-O is the format used
+for all executable binaries
+
+
+172
+00:07:05.592 --> 00:07:07.794 line:-1 position:50%
+and libraries,
+and the system knows that
+
+
+173
+00:07:07,794 --> 00:07:10,563 line:-1
+it needs to read this header
+to run your apps.
+
+
+174
+00:07:10,563 --> 00:07:12,465 line:-1
+Looking a little more closely,
+
+
+175
+00:07:12,465 --> 00:07:14,968 line:-1
+the Mach-O header contains
+a number of load commands
+
+
+176
+00:07:14,968 --> 00:07:17,504 line:-1
+that hold the segment
+properties.
+
+
+177
+00:07:17.504 --> 00:07:19.205 line:-1 position:50%
+The system uses
+these load commands
+
+
+178
+00:07:19,205 --> 00:07:21,574 line:-1
+to load the segments
+into memory.
+
+
+179
+00:07:21,574 --> 00:07:23,977 line:-1
+Note that if your apps
+are Universal 2,
+
+
+180
+00:07:23.977 --> 00:07:25.578 line:-1 position:50%
+then the app will have
+one header
+
+
+181
+00:07:25.578 --> 00:07:28.748 line:-1 position:50%
+and a set of segments
+for each architecture.
+
+
+182
+00:07:28.748 --> 00:07:32.619 line:-1 position:50%
+We can see for ourselves
+by using the `otool -l` command,
+
+
+183
+00:07:32.619 --> 00:07:35.789 line:-1 position:50%
+which prints the load commands
+for a specified file.
+
+
+184
+00:07:35.789 --> 00:07:38.258 line:-1 position:50%
+Here, we're looking
+a segment load command
+
+
+185
+00:07:38,258 --> 00:07:41,661 line:-1
+identified with `LC_SEGMENT_64`.
+
+
+186
+00:07:41.661 --> 00:07:43.863 line:-1 position:50%
+This load commands says
+that the `__TEXT` segment
+
+
+187
+00:07:43,863 --> 00:07:48,668 line:-1
+starts at the address in `vmaddr`
+and is `vmsize` bytes long.
+
+
+188
+00:07:48,668 --> 00:07:51,137 line:-1
+So if the kernel follows
+these load commands
+
+
+189
+00:07:51,137 --> 00:07:53,006 line:-1
+to load the segments
+into memory,
+
+
+190
+00:07:53,006 --> 00:07:54,240 line:-1
+what exactly
+is the difference
+
+
+191
+00:07:54.240 --> 00:07:57.177 line:-1 position:50%
+between the runtime
+and the linker addresses?
+
+
+192
+00:07:57,177 --> 00:08:00,380 position:50%
+Well, before the kernel
+actually loads the segments,
+
+
+193
+00:08:00,380 --> 00:08:04,651 line:0
+it initializes a random value
+known as the ASLR slide.
+
+
+194
+00:08:04,651 --> 00:08:06,853 line:0
+The kernel then
+adds the ASLR slide
+
+
+195
+00:08:06,853 --> 00:08:09,155 position:50%
+to the addresses
+in the load commands.
+
+
+196
+00:08:09,155 --> 00:08:11,958 line:0
+So rather than loading
+the `__TEXT` segment at address A
+
+
+197
+00:08:11,958 --> 00:08:14,260 line:0
+and the `__DATA` segment
+at address B,
+
+
+198
+00:08:14,260 --> 00:08:18,331 line:0
+the kernel instead loads them
+to A+S and B+S,
+
+
+199
+00:08:18,331 --> 00:08:21,167 position:50%
+where S is the ASLR slide.
+
+
+200
+00:08:21,167 --> 00:08:25,672 line:0
+Since A+S and B+S are the true
+addresses that the system uses,
+
+
+201
+00:08:25,672 --> 00:08:28,441 line:0
+they're also known
+as load addresses.
+
+
+202
+00:08:28.441 --> 00:08:31.411 line:-1 position:50%
+With that in mind, we now know
+that the difference between
+
+
+203
+00:08:31.411 --> 00:08:33.847 line:-1 position:50%
+a runtime address
+and the linker address
+
+
+204
+00:08:33,847 --> 00:08:36,449 line:-1
+is the ASLR slide.
+
+
+205
+00:08:36.449 --> 00:08:39.753 line:-1 position:50%
+We can calculate the ASLR slide
+with the following equation:
+
+
+206
+00:08:39.753 --> 00:08:44.724 line:-1 position:50%
+S = L-A,
+where S is the ASLR slide,
+
+
+207
+00:08:44,724 --> 00:08:48,561 line:-1
+L is the load address,
+and A is the linker address.
+
+
+208
+00:08:48.561 --> 00:08:50.797 line:-1 position:50%
+We'll see examples
+of this equation shortly,
+
+
+209
+00:08:50.797 --> 00:08:53.032 line:-1 position:50%
+but the key point is that
+we can always go back
+
+
+210
+00:08:53.032 --> 00:08:57.237 line:-1 position:50%
+to the file address space
+once we know the ASLR slide.
+
+
+211
+00:08:57,237 --> 00:09:00,507 line:-1
+The ASLR slide equation
+required two addresses —
+
+
+212
+00:09:00,507 --> 00:09:02,776 line:-1
+the load address
+and the linker address —
+
+
+213
+00:09:02.776 --> 00:09:04.811 line:-1 position:50%
+so where do we get them from?
+
+
+214
+00:09:04.811 --> 00:09:07.614 line:-1 position:50%
+We already saw how we can
+query the load commands
+
+
+215
+00:09:07,614 --> 00:09:11,151 line:-1
+to know the linker address
+using `otool`.
+
+
+216
+00:09:11,151 --> 00:09:13,019 line:-1
+To know the runtime address,
+
+
+217
+00:09:13.019 --> 00:09:16.189 line:-1 position:50%
+the system queries your app
+either at the point of a crash
+
+
+218
+00:09:16.189 --> 00:09:18.792 line:-1 position:50%
+or as its being profiled
+by Instruments
+
+
+219
+00:09:18.792 --> 00:09:21.428 line:-1 position:50%
+for its runtime address space.
+
+
+220
+00:09:21,428 --> 00:09:22,796 line:-1
+This information is reflected
+
+
+221
+00:09:22,796 --> 00:09:27,133 line:-1
+in the Binary Images list
+in your crash logs.
+
+
+222
+00:09:27,133 --> 00:09:29,869 line:-1
+You can also see
+the load addresses interactively
+
+
+223
+00:09:29,869 --> 00:09:31,638 line:-1
+with the `vmmap` tool,
+
+
+224
+00:09:31,638 --> 00:09:35,508 line:-1
+which enumerates the active
+memory regions in your program.
+
+
+225
+00:09:35.508 --> 00:09:37.977 line:-1 position:50%
+Let's compute the ASLR
+slide value ourselves
+
+
+226
+00:09:37.977 --> 00:09:40.013 line:-1 position:50%
+from the original crash log.
+
+
+227
+00:09:40.013 --> 00:09:41.514 line:-1 position:50%
+In the Binary Images list,
+
+
+228
+00:09:41.514 --> 00:09:44.050 line:-1 position:50%
+I have the load address
+of the `__TEXT` segment.
+
+
+229
+00:09:44.050 --> 00:09:46.986 line:-1 position:50%
+I also have the linker address
+for the binary on disk
+
+
+230
+00:09:46,986 --> 00:09:49,322 line:-1
+when I looked
+at the load commands.
+
+
+231
+00:09:49.322 --> 00:09:52.325 line:-1 position:50%
+Subtracting these two yields
+an ASLR slide value
+
+
+232
+00:09:52,325 --> 00:09:54,694 line:-1
+of 0x45c000.
+
+
+233
+00:09:54.694 --> 00:09:56.362 line:-1 position:50%
+This means that every address
+
+
+234
+00:09:56,362 --> 00:09:59,065 line:-1
+in my program's
+runtime `__TEXT` segment
+
+
+235
+00:09:59,065 --> 00:10:04,971 line:-1
+is 0x45c000 bytes away from the
+linker `__TEXT` segment address.
+
+
+236
+00:10:04.971 --> 00:10:08.575 line:-1 position:50%
+So to see what a backtrace
+address from the crash log
+
+
+237
+00:10:08,575 --> 00:10:10,743 line:-1
+corresponds to in the file,
+
+
+238
+00:10:10,743 --> 00:10:13,146 line:-1
+I can subtract 0x45c000
+from it
+
+
+239
+00:10:13,146 --> 00:10:15,715 line:-1
+to get the address on disk.
+
+
+240
+00:10:15,715 --> 00:10:18,985 line:-1
+Since this address is now part
+of the on-disk address space,
+
+
+241
+00:10:18.985 --> 00:10:21.988 line:-1 position:50%
+I can inspect my app
+to see what resides there.
+
+
+242
+00:10:21,988 --> 00:10:24,157 line:-1
+The crash log tells me
+that a thread crashed
+
+
+243
+00:10:24,157 --> 00:10:27,026 line:-1
+while executing
+whatever is at this address,
+
+
+244
+00:10:27,026 --> 00:10:31,130 line:-1
+so we can use `otool` again to see
+the problematic instruction.
+
+
+245
+00:10:31,130 --> 00:10:35,735 line:-1
+This time, I specified
+the `-tV` flags to `otool`,
+
+
+246
+00:10:35,735 --> 00:10:37,737 line:-1
+which will print
+the disassembly.
+
+
+247
+00:10:37,737 --> 00:10:41,441 line:-1
+Notice that I'm also specifying
+the architecture as arm64.
+
+
+248
+00:10:41,441 --> 00:10:43,276 line:-1
+This is so that otool knows
+
+
+249
+00:10:43.276 --> 00:10:45.512 line:-1 position:50%
+which Mach-O header
+and segments to consider
+
+
+250
+00:10:45.512 --> 00:10:48.414 line:-1 position:50%
+since the app
+is built as Universal 2.
+
+
+251
+00:10:48.414 --> 00:10:51.084 line:-1 position:50%
+The output of `otool` reveals
+a `brk` instruction
+
+
+252
+00:10:51,084 --> 00:10:52,719 line:-1
+at the address.
+
+
+253
+00:10:52.719 --> 00:10:56.723 line:-1 position:50%
+`brk` signals an exception
+or a problem in the app.
+
+
+254
+00:10:56.723 --> 00:11:00.193 line:-1 position:50%
+Tools such as `atos` also
+calculate the ASLR slide
+
+
+255
+00:11:00,193 --> 00:11:03,396 line:-1
+using the same technique
+we went through together.
+
+
+256
+00:11:03.396 --> 00:11:05.665 line:-1 position:50%
+`atos` will read
+the load commands for the file
+
+
+257
+00:11:05.665 --> 00:11:08.468 line:-1 position:50%
+indicated by the `-o` flag,
+and we tell it about
+
+
+258
+00:11:08,468 --> 00:11:11,738 line:-1
+the load address
+with the `-l` flag.
+
+
+259
+00:11:11,738 --> 00:11:14,173 line:-1
+As I mentioned,
+`vmmap` can also tell us
+
+
+260
+00:11:14,173 --> 00:11:16,976 line:-1
+about the load addresses
+of a running app.
+
+
+261
+00:11:16,976 --> 00:11:18,611 line:-1
+Let's try
+this calculation again,
+
+
+262
+00:11:18.611 --> 00:11:22.482 line:-1 position:50%
+but this time we'll use `vmmap`
+instead of the binary image list
+
+
+263
+00:11:22,482 --> 00:11:24,784 line:-1
+to determine the ASLR slide.
+
+
+264
+00:11:24,784 --> 00:11:26,953 line:-1
+I ran the MagicNumbers
+program again
+
+
+265
+00:11:26,953 --> 00:11:28,888 line:-1
+and got the `__TEXT` segment
+load address
+
+
+266
+00:11:28.888 --> 00:11:31.591 line:-1 position:50%
+before the program crashed.
+
+
+267
+00:11:31.591 --> 00:11:35.061 line:-1 position:50%
+Using the previous formula,
+I can determine that this time
+
+
+268
+00:11:35.061 --> 00:11:38.798 line:-1 position:50%
+the ASLR slide value
+was 0x104d14000.
+
+
+269
+00:11:38,798 --> 00:11:41,034 position:50%
+Again, to go back to the file,
+
+
+270
+00:11:41,034 --> 00:11:43,836 line:0
+I need to subtract
+the ASLR slide value.
+
+
+271
+00:11:43,836 --> 00:11:46,706 position:50%
+If I subtract 0x104d14000
+
+
+272
+00:11:46,706 --> 00:11:49,609 position:50%
+from the topmost entry
+in the new crash log,
+
+
+273
+00:11:49,609 --> 00:11:52,912 line:0
+I get the same exact
+file address as before.
+
+
+274
+00:11:52,912 --> 00:11:54,614 line:-1
+And this is no coincidence;
+
+
+275
+00:11:54.614 --> 00:11:57.350 line:-1 position:50%
+the kernel just picked
+a different ASLR value
+
+
+276
+00:11:57,350 --> 00:12:00,486 line:-1
+so our load addresses changed
+between the crash logs.
+
+
+277
+00:12:00,486 --> 00:12:03,990 line:-1
+However, we can still determine
+the file address
+
+
+278
+00:12:03.990 --> 00:12:06.492 line:-1 position:50%
+that was responsible
+for the crash.
+
+
+279
+00:12:06.492 --> 00:12:09.228 line:-1 position:50%
+The important takeaway here
+is that we have a mechanism
+
+
+280
+00:12:09.228 --> 00:12:11.931 line:-1 position:50%
+to understand exactly
+what our app was doing
+
+
+281
+00:12:11.931 --> 00:12:13.866 line:-1 position:50%
+down to the instruction level,
+
+
+282
+00:12:13,866 --> 00:12:16,970 line:-1
+regardless of
+its runtime address.
+
+
+283
+00:12:16.970 --> 00:12:19.305 line:-1 position:50%
+And with that mapping,
+we can then consult
+
+
+284
+00:12:19,305 --> 00:12:21,608 line:-1
+our debug information
+for the source code
+
+
+285
+00:12:21,608 --> 00:12:24,577 line:-1
+that was compiled
+to those instructions.
+
+
+286
+00:12:24,577 --> 00:12:27,347 line:-1
+Before we move on,
+I want to present a summary
+
+
+287
+00:12:27,347 --> 00:12:30,350 line:-1
+of what we covered
+and the tools we used.
+
+
+288
+00:12:30.350 --> 00:12:33.486 line:-1 position:50%
+App binaries and frameworks
+are Mach-O files.
+
+
+289
+00:12:33.486 --> 00:12:35.688 line:-1 position:50%
+This means that
+they have related content
+
+
+290
+00:12:35.688 --> 00:12:37.523 line:-1 position:50%
+in their different segments.
+
+
+291
+00:12:37.523 --> 00:12:40.059 line:-1 position:50%
+These segments
+are created by the linker.
+
+
+292
+00:12:40,059 --> 00:12:41,694 line:-1
+The Mach-O header
+load commands
+
+
+293
+00:12:41,694 --> 00:12:45,064 line:-1
+describe the properties of those
+segments, including an address.
+
+
+294
+00:12:45,064 --> 00:12:50,670 line:-1
+We used `otool` with the `-l` flag
+to print out the load commands.
+
+
+295
+00:12:50,670 --> 00:12:53,640 line:-1
+Next, we learned that the kernel
+adds a random value,
+
+
+296
+00:12:53.640 --> 00:12:57.110 line:-1 position:50%
+known as the ASLR slide,
+to the linker addresses.
+
+
+297
+00:12:57,110 --> 00:13:00,279 line:-1
+The addition of the ASLR slide
+and the linker address
+
+
+298
+00:13:00,279 --> 00:13:02,448 line:-1
+is known as a load address.
+
+
+299
+00:13:02.448 --> 00:13:05.351 line:-1 position:50%
+We can check the binary image
+list in a crash log
+
+
+300
+00:13:05,351 --> 00:13:08,254 line:-1
+to see the load addresses
+in the event of a crash,
+
+
+301
+00:13:08.254 --> 00:13:11.090 line:-1 position:50%
+or we can use `vmmap`
+to see the load addresses
+
+
+302
+00:13:11,090 --> 00:13:12,892 line:-1
+for a running app.
+
+
+303
+00:13:12.892 --> 00:13:15.361 line:-1 position:50%
+Finally, we walked through
+some examples
+
+
+304
+00:13:15.361 --> 00:13:17.230 line:-1 position:50%
+of calculating the ASLR slide
+
+
+305
+00:13:17.230 --> 00:13:19.766 line:-1 position:50%
+to get back
+to the file address space.
+
+
+306
+00:13:19.766 --> 00:13:21.834 line:-1 position:50%
+Now we can discuss
+debug information,
+
+
+307
+00:13:21.834 --> 00:13:23.536 line:-1 position:50%
+which contains the crucial links
+
+
+308
+00:13:23,536 --> 00:13:26,673 line:-1
+between the file addresses
+and the source code.
+
+
+309
+00:13:26,673 --> 00:13:28,441 line:-1
+Xcode creates
+the debug information
+
+
+310
+00:13:28.441 --> 00:13:29.776 line:-1 position:50%
+when you build your app
+
+
+311
+00:13:29,776 --> 00:13:32,712 line:-1
+and will either embed it
+directly into your app binaries
+
+
+312
+00:13:32,712 --> 00:13:35,982 line:-1
+or store it as a separate file,
+such as a dSYM.
+
+
+313
+00:13:35,982 --> 00:13:39,318 line:-1
+There are a few categories
+or types of debug info.
+
+
+314
+00:13:39,318 --> 00:13:41,654 line:-1
+Each one offers
+a different level of detail
+
+
+315
+00:13:41.654 --> 00:13:43.723 line:-1 position:50%
+for a given file address.
+
+
+316
+00:13:43,723 --> 00:13:47,160 line:-1
+We'll look at three different
+types of debug info today.
+
+
+317
+00:13:47,160 --> 00:13:49,762 line:-1
+First, we'll cover
+the function starts,
+
+
+318
+00:13:49,762 --> 00:13:52,031 line:-1
+which by itself doesn't add
+too much value,
+
+
+319
+00:13:52.031 --> 00:13:54.233 line:-1 position:50%
+but it is a common
+starting point.
+
+
+320
+00:13:54,233 --> 00:13:56,769 line:-1
+Next we'll see
+the nlist symbol tables,
+
+
+321
+00:13:56.769 --> 00:13:58.971 line:-1 position:50%
+which add function
+and method names.
+
+
+322
+00:13:58.971 --> 00:14:00.907 line:-1 position:50%
+Lastly, we'll look at DWARF,
+
+
+323
+00:14:00,907 --> 00:14:03,876 line:-1
+which comes from dSYMs
+and static libraries.
+
+
+324
+00:14:03.876 --> 00:14:06.713 line:-1 position:50%
+DWARF adds the most detail,
+including file names,
+
+
+325
+00:14:06.713 --> 00:14:09.615 line:-1 position:50%
+line numbers,
+and optimization records.
+
+
+326
+00:14:09.615 --> 00:14:11.684 line:-1 position:50%
+Since DWARF
+offers the most detail,
+
+
+327
+00:14:11.684 --> 00:14:14.620 line:-1 position:50%
+we really want to strive
+to have this type of debug info
+
+
+328
+00:14:14,620 --> 00:14:16,089 line:-1
+whenever possible.
+
+
+329
+00:14:16,089 --> 00:14:18,725 line:-1
+We'll learn about each of these
+and how they can be used
+
+
+330
+00:14:18,725 --> 00:14:21,894 line:-1
+to build up the
+fully symbolicated crash log.
+
+
+331
+00:14:21,894 --> 00:14:24,530 line:-1
+Let's begin
+with function starts.
+
+
+332
+00:14:24.530 --> 00:14:25.998 line:-1 position:50%
+As we saw in the table,
+
+
+333
+00:14:25.998 --> 00:14:29.402 line:-1 position:50%
+function starts offers
+the least source code detail.
+
+
+334
+00:14:29,402 --> 00:14:31,404 line:-1
+Also keeping true to its name,
+
+
+335
+00:14:31,404 --> 00:14:34,040 line:-1
+this type of debug information
+only tells us about
+
+
+336
+00:14:34.040 --> 00:14:36.843 line:-1 position:50%
+the first address —
+or the literal start —
+
+
+337
+00:14:36,843 --> 00:14:38,544 line:-1
+of our functions.
+
+
+338
+00:14:38,544 --> 00:14:41,114 line:-1
+For example, this would
+tell us that a function
+
+
+339
+00:14:41.114 --> 00:14:44.317 line:-1 position:50%
+begins and exists
+at a certain address.
+
+
+340
+00:14:44,317 --> 00:14:47,086 line:-1
+However, it doesn't tell us
+which functions
+
+
+341
+00:14:47.086 --> 00:14:51.124 line:-1 position:50%
+begin at those addresses,
+only that they exist.
+
+
+342
+00:14:51,124 --> 00:14:54,026 line:-1
+The function starts debug info
+does this by encoding
+
+
+343
+00:14:54,026 --> 00:14:57,930 line:-1
+the list of addresses in your
+app's `__LINKEDIT` segment.
+
+
+344
+00:14:57,930 --> 00:15:00,299 line:-1
+Since this is embedded
+directly in your app,
+
+
+345
+00:15:00.299 --> 00:15:02.435 line:-1 position:50%
+the Mach-O header
+also has a load command
+
+
+346
+00:15:02.435 --> 00:15:04.504 line:-1 position:50%
+to inform us
+where we can find it,
+
+
+347
+00:15:04,504 --> 00:15:07,507 line:-1
+which is `LC_FUNCTION_STARTS`.
+
+
+348
+00:15:07.507 --> 00:15:10.209 line:-1 position:50%
+You can see these for yourself
+with the `symbols` command
+
+
+349
+00:15:10,209 --> 00:15:13,279 line:-1
+and the
+`-onlyFuncStartsData` flag.
+
+
+350
+00:15:13.279 --> 00:15:17.049 line:-1 position:50%
+Here we get back a list of
+addresses and null placeholders.
+
+
+351
+00:15:17,049 --> 00:15:19,085 line:-1
+These placeholders
+would ideally have
+
+
+352
+00:15:19.085 --> 00:15:21.587 line:-1 position:50%
+function and method names
+instead of null,
+
+
+353
+00:15:21,587 --> 00:15:24,724 line:-1
+but the function starts data
+doesn't provide names.
+
+
+354
+00:15:24,724 --> 00:15:28,327 line:-1
+Again, this isn't
+the most descriptive data.
+
+
+355
+00:15:28,327 --> 00:15:32,131 line:-1
+However, it does allow for a
+slight update to the crash log.
+
+
+356
+00:15:32,131 --> 00:15:33,599 line:-1
+We can now view
+the file addresses
+
+
+357
+00:15:33,599 --> 00:15:35,735 line:-1
+as offsets from a function.
+
+
+358
+00:15:35,735 --> 00:15:39,772 line:-1
+For example,
+first we go back to the file
+
+
+359
+00:15:39,772 --> 00:15:43,376 line:-1
+by subtracting
+the ASLR slide value.
+
+
+360
+00:15:43.376 --> 00:15:46.045 line:-1 position:50%
+Then we find
+the function starts value
+
+
+361
+00:15:46,045 --> 00:15:48,681 line:-1
+that could contain
+the file address.
+
+
+362
+00:15:48.681 --> 00:15:50.783 line:-1 position:50%
+In this case,
+only the first value
+
+
+363
+00:15:50,783 --> 00:15:52,318 line:-1
+could contain the address
+
+
+364
+00:15:52.318 --> 00:15:56.589 line:-1 position:50%
+because all of the other values
+are larger than the address.
+
+
+365
+00:15:56.589 --> 00:15:59.492 line:-1 position:50%
+Finally we can claim
+that our file address
+
+
+366
+00:15:59.492 --> 00:16:04.030 line:-1 position:50%
+is actually 264 bytes
+into this function.
+
+
+367
+00:16:04,030 --> 00:16:06,499 line:-1
+This is primarily useful
+for debuggers,
+
+
+368
+00:16:06,499 --> 00:16:07,533 line:-1
+since they can understand
+
+
+369
+00:16:07,533 --> 00:16:10,136 line:-1
+the details of how this function
+was set up
+
+
+370
+00:16:10.136 --> 00:16:11.838 line:-1 position:50%
+and which registers
+were modified.
+
+
+371
+00:16:11.838 --> 00:16:14.073 line:-1 position:50%
+What this means for you,
+however,
+
+
+372
+00:16:14,073 --> 00:16:16,342 line:-1
+is that if you ever
+encounter a crash log
+
+
+373
+00:16:16.342 --> 00:16:19.478 line:-1 position:50%
+that lacks function names,
+you're probably dealing with
+
+
+374
+00:16:19.478 --> 00:16:21.981 line:-1 position:50%
+this lowest level
+of debug information.
+
+
+375
+00:16:21,981 --> 00:16:24,350 line:-1
+This is good news
+because it means there are
+
+
+376
+00:16:24,350 --> 00:16:27,286 line:-1
+plenty of opportunities
+to enrich the crash log
+
+
+377
+00:16:27.286 --> 00:16:29.455 line:-1 position:50%
+with better debug information.
+
+
+378
+00:16:29.455 --> 00:16:32.658 line:-1 position:50%
+Naturally, the next level
+of detail we'd like to see
+
+
+379
+00:16:32.658 --> 00:16:34.560 line:-1 position:50%
+are function names.
+
+
+380
+00:16:34,560 --> 00:16:36,662 line:-1
+This gives us
+our first real opportunity
+
+
+381
+00:16:36.662 --> 00:16:39.432 line:-1 position:50%
+to take a crash log
+or an Instruments trace
+
+
+382
+00:16:39,432 --> 00:16:43,102 line:-1
+and use it to track down
+an issue in our source code.
+
+
+383
+00:16:43.102 --> 00:16:46.272 line:-1 position:50%
+This leads us
+to nlist symbol tables.
+
+
+384
+00:16:46,272 --> 00:16:49,308 line:-1
+The symbol tables build on
+the idea of function starts
+
+
+385
+00:16:49,308 --> 00:16:51,377 line:-1
+and also encode
+a list of information
+
+
+386
+00:16:51.377 --> 00:16:55.348 line:-1 position:50%
+in the `__LINKEDIT` segment, and
+has its own load command too.
+
+
+387
+00:16:55,348 --> 00:16:58,651 line:-1
+However, rather than just
+encoding addresses,
+
+
+388
+00:16:58.651 --> 00:17:00.820 line:-1 position:50%
+they encode C structs.
+
+
+389
+00:17:00.820 --> 00:17:03.890 line:-1 position:50%
+This lets us add more details
+for any given entry
+
+
+390
+00:17:03.890 --> 00:17:06.392 line:-1 position:50%
+compared to function starts.
+
+
+391
+00:17:06,392 --> 00:17:10,796 line:-1
+Specifically, they encode
+the `nlist_64` struct.
+
+
+392
+00:17:10.796 --> 00:17:13.532 line:-1 position:50%
+Here we have the definition
+of that struct.
+
+
+393
+00:17:13,532 --> 00:17:16,302 line:-1
+A cursory glance shows
+that we have access
+
+
+394
+00:17:16.302 --> 00:17:18.938 line:-1 position:50%
+to a name
+and several properties.
+
+
+395
+00:17:18,938 --> 00:17:21,240 line:-1
+The values
+of these struct fields
+
+
+396
+00:17:21.240 --> 00:17:24.443 line:-1 position:50%
+are determined
+by the nlist's `n_type`.
+
+
+397
+00:17:24,443 --> 00:17:27,747 line:-1
+There are three primary n_types
+that we're interested in,
+
+
+398
+00:17:27,747 --> 00:17:30,583 line:-1
+but for now we'll only
+focus on two.
+
+
+399
+00:17:30.583 --> 00:17:33.085 line:-1 position:50%
+The first is known
+as a direct symbol.
+
+
+400
+00:17:33,085 --> 00:17:36,155 line:-1
+These are functions and methods
+that you have fully defined
+
+
+401
+00:17:36,155 --> 00:17:38,557 line:-1
+within your apps and frameworks.
+
+
+402
+00:17:38.557 --> 00:17:41.060 line:-1 position:50%
+Direct symbols have
+a name and an address
+
+
+403
+00:17:41,060 --> 00:17:43,496 line:-1
+in the `nlist_64` struct.
+
+
+404
+00:17:43,496 --> 00:17:45,431 line:-1
+Additionally,
+they're represented
+
+
+405
+00:17:45.431 --> 00:17:49.468 line:-1 position:50%
+by a particular bit pattern
+in the `n_type` field.
+
+
+406
+00:17:49,468 --> 00:17:53,306 line:-1
+Specifically, `n_type` will have
+the second, third, and fourth
+
+
+407
+00:17:53.306 --> 00:17:55.875 line:-1 position:50%
+least significant bits set.
+
+
+408
+00:17:55.875 --> 00:17:59.011 line:-1 position:50%
+These bits are also known
+as `N_SECT`.
+
+
+409
+00:17:59.011 --> 00:18:01.747 line:-1 position:50%
+We can see these
+with `nm` and specifying
+
+
+410
+00:18:01,747 --> 00:18:05,584 line:-1
+the `-defined-only`
+and `--numeric-sort` flags.
+
+
+411
+00:18:05,584 --> 00:18:08,621 line:-1
+Here, `nm` walked through
+the defined symbols
+
+
+412
+00:18:08,621 --> 00:18:10,556 line:-1
+of the MagicNumbers program
+
+
+413
+00:18:10,556 --> 00:18:13,626 line:-1
+and listed them
+in address order.
+
+
+414
+00:18:13,626 --> 00:18:16,095 line:-1
+The names we get back
+appear cryptic.
+
+
+415
+00:18:16,095 --> 00:18:18,130 line:-1
+That's because the names
+that are actually stored
+
+
+416
+00:18:18,130 --> 00:18:20,700 line:-1
+in the symbol tables
+are mangled names.
+
+
+417
+00:18:20,700 --> 00:18:23,536 line:-1
+These mangled names
+help the compiler and linker
+
+
+418
+00:18:23.536 --> 00:18:25.671 line:-1 position:50%
+to uniquely identify a function,
+
+
+419
+00:18:25,671 --> 00:18:27,373 line:-1
+but they aren't
+easy to understand
+
+
+420
+00:18:27.373 --> 00:18:29.775 line:-1 position:50%
+unless they're demangled.
+
+
+421
+00:18:29,775 --> 00:18:31,911 line:-1
+To get a friendlier version
+of these names,
+
+
+422
+00:18:31,911 --> 00:18:34,947 line:-1
+I passed the output
+to `swift-demangle`.
+
+
+423
+00:18:34,947 --> 00:18:38,617 line:-1
+Now we get some familiar names,
+such as `main` and `numberChoices`,
+
+
+424
+00:18:38,617 --> 00:18:41,320 line:-1
+because they're directly
+defined in my app.
+
+
+425
+00:18:41.320 --> 00:18:44.223 line:-1 position:50%
+Similarly, the `symbols` tool
+has an option
+
+
+426
+00:18:44.223 --> 00:18:46.192 line:-1 position:50%
+to show the nlist data,
+
+
+427
+00:18:46,192 --> 00:18:49,462 line:-1
+and it also demangles the names
+automatically.
+
+
+428
+00:18:49,462 --> 00:18:52,598 line:-1
+Now that we can associate
+a function name to an address,
+
+
+429
+00:18:52,598 --> 00:18:55,901 line:-1
+this lets us update
+the crash log once again.
+
+
+430
+00:18:55,901 --> 00:18:58,004 line:-1
+Here we can observe
+that our offset expression
+
+
+431
+00:18:58.004 --> 00:19:00.172 line:-1 position:50%
+that we got
+from the function starts data
+
+
+432
+00:19:00,172 --> 00:19:02,875 line:-1
+also matches an entry
+from the direct symbols,
+
+
+433
+00:19:02.875 --> 00:19:05.444 line:-1 position:50%
+and that entry has a name.
+
+
+434
+00:19:05.444 --> 00:19:06.946 line:-1 position:50%
+Putting these two together,
+
+
+435
+00:19:06,946 --> 00:19:08,681 line:-1
+we can now say
+that our crash happened
+
+
+436
+00:19:08,681 --> 00:19:11,884 line:-1
+at 264 bytes into main.
+
+
+437
+00:19:11.884 --> 00:19:14.253 line:-1 position:50%
+This still leaves some details
+to be desired,
+
+
+438
+00:19:14.253 --> 00:19:15.654 line:-1 position:50%
+since we know for a fact
+
+
+439
+00:19:15.654 --> 00:19:18.557 line:-1 position:50%
+that main isn't the only
+function involved.
+
+
+440
+00:19:18.557 --> 00:19:21.994 line:-1 position:50%
+And it would also help to have
+an exact line number too.
+
+
+441
+00:19:21.994 --> 00:19:23.562 line:-1 position:50%
+We encountered
+something similar to this
+
+
+442
+00:19:23,562 --> 00:19:25,464 line:-1
+in the Instruments trace
+example —
+
+
+443
+00:19:25.464 --> 00:19:29.268 line:-1 position:50%
+we had some function names
+available, but it missed others.
+
+
+444
+00:19:29.268 --> 00:19:31.937 line:-1 position:50%
+One reason for this
+is that the symbol table
+
+
+445
+00:19:31.937 --> 00:19:34.140 line:-1 position:50%
+only has direct symbol entries
+
+
+446
+00:19:34,140 --> 00:19:36,976 line:-1
+for functions that are
+involved in linking.
+
+
+447
+00:19:36,976 --> 00:19:39,845 line:-1
+These are functions
+that you use across modules
+
+
+448
+00:19:39.845 --> 00:19:42.915 line:-1 position:50%
+or functions that you export
+from your frameworks.
+
+
+449
+00:19:42.915 --> 00:19:46.318 line:-1 position:50%
+This makes it useful
+for identifying API boundaries.
+
+
+450
+00:19:46,318 --> 00:19:48,854 line:-1
+And it also means that
+it has the necessary data
+
+
+451
+00:19:48,854 --> 00:19:50,489 line:-1
+to power dynamic loading
+
+
+452
+00:19:50,489 --> 00:19:54,326 line:-1
+with functions such as
+`dlsym()` and `dladdr()`.
+
+
+453
+00:19:54,326 --> 00:19:57,730 line:-1
+One downside though is that
+local or static functions
+
+
+454
+00:19:57.730 --> 00:19:59.632 line:-1 position:50%
+aren't represented
+in the symbol table
+
+
+455
+00:19:59,632 --> 00:20:03,035 line:-1
+since they aren't referenced
+outside of their module.
+
+
+456
+00:20:03.035 --> 00:20:05.504 line:-1 position:50%
+This ends up omitting
+implementation functions
+
+
+457
+00:20:05,504 --> 00:20:09,341 line:-1
+where we may have a significant
+portion of the app logic.
+
+
+458
+00:20:09.341 --> 00:20:12.378 line:-1 position:50%
+Further, it's common for
+binaries built in Release mode
+
+
+459
+00:20:12.378 --> 00:20:14.547 line:-1 position:50%
+to have their symbol table
+stripped.
+
+
+460
+00:20:14.547 --> 00:20:16.449 line:-1 position:50%
+This means that
+unnecessary entries
+
+
+461
+00:20:16,449 --> 00:20:18,284 line:-1
+are removed
+from the symbol table,
+
+
+462
+00:20:18,284 --> 00:20:21,053 line:-1
+which helps reduce
+the size of your app.
+
+
+463
+00:20:21.053 --> 00:20:23.622 line:-1 position:50%
+If we think about it,
+it's rather uncommon
+
+
+464
+00:20:23,622 --> 00:20:27,726 line:-1
+for our app's primary driver to
+export functionality anywhere,
+
+
+465
+00:20:27.726 --> 00:20:29.161 line:-1 position:50%
+so we'd be wasting space
+
+
+466
+00:20:29.161 --> 00:20:32.164 line:-1 position:50%
+keeping those symbol table
+entries around.
+
+
+467
+00:20:32,164 --> 00:20:33,866 line:-1
+For our frameworks
+and libraries,
+
+
+468
+00:20:33.866 --> 00:20:35.935 line:-1 position:50%
+we definitely have
+exported functions
+
+
+469
+00:20:35,935 --> 00:20:38,404 line:-1
+that clients should use,
+but there's no need
+
+
+470
+00:20:38,404 --> 00:20:40,973 line:-1
+to keep around
+the locally shared functions
+
+
+471
+00:20:40.973 --> 00:20:44.276 line:-1 position:50%
+since they can't be used
+anywhere else.
+
+
+472
+00:20:44,276 --> 00:20:47,379 line:-1
+Stripping our primary app
+executables will almost always
+
+
+473
+00:20:47,379 --> 00:20:50,416 line:-1
+leave the symbol table
+practically empty.
+
+
+474
+00:20:50,416 --> 00:20:52,184 line:-1
+Stripping our frameworks
+and libraries
+
+
+475
+00:20:52,184 --> 00:20:54,854 line:-1
+leaves only the exported
+functions.
+
+
+476
+00:20:54,854 --> 00:20:57,323 line:-1
+You may have come across
+build settings in Xcode
+
+
+477
+00:20:57.323 --> 00:20:59.291 line:-1 position:50%
+such as Strip Linked Product,
+
+
+478
+00:20:59,291 --> 00:21:02,495 line:-1
+Strip Style,
+and Strip Swift Symbols.
+
+
+479
+00:21:02,495 --> 00:21:04,830 line:-1
+These build settings control
+how your app is stripped
+
+
+480
+00:21:04.830 --> 00:21:06.632 line:-1 position:50%
+during the build.
+
+
+481
+00:21:06.632 --> 00:21:09.235 line:-1 position:50%
+If Strip Linked Product
+is enabled,
+
+
+482
+00:21:09,235 --> 00:21:12,738 line:-1
+then the binary is stripped
+according to Strip Style.
+
+
+483
+00:21:12.738 --> 00:21:15.040 line:-1 position:50%
+For example,
+All Symbols will perform
+
+
+484
+00:21:15,040 --> 00:21:16,809 line:-1
+the most invasive removal
+
+
+485
+00:21:16,809 --> 00:21:19,745 line:-1
+and leave behind
+only the bare essentials.
+
+
+486
+00:21:19,745 --> 00:21:22,014 line:-1
+Non Globals removes
+direct symbols
+
+
+487
+00:21:22.014 --> 00:21:24.750 line:-1 position:50%
+that are used within
+different modules of your app
+
+
+488
+00:21:24.750 --> 00:21:28.254 line:-1 position:50%
+but are not exported for use
+in other apps.
+
+
+489
+00:21:28.254 --> 00:21:31.991 line:-1 position:50%
+Debugging Symbols removes
+the third type of nlist type
+
+
+490
+00:21:31.991 --> 00:21:35.094 line:-1 position:50%
+that we'll discuss later
+when we get to DWARF.
+
+
+491
+00:21:35.094 --> 00:21:39.198 line:-1 position:50%
+However, this strip style does
+preserve the direct symbols.
+
+
+492
+00:21:39,198 --> 00:21:41,333 line:-1
+For example,
+here I have a framework
+
+
+493
+00:21:41,333 --> 00:21:43,469 line:-1
+that defines
+two public interfaces
+
+
+494
+00:21:43,469 --> 00:21:46,805 line:-1
+and one internal shared
+implementation function.
+
+
+495
+00:21:46,805 --> 00:21:49,141 line:-1
+Since all of these functions
+play a role in linking,
+
+
+496
+00:21:49,141 --> 00:21:52,211 line:-1
+they all have
+direct symbol entries.
+
+
+497
+00:21:52,211 --> 00:21:53,879 line:-1
+If I strip non globals,
+
+
+498
+00:21:53,879 --> 00:21:56,448 line:-1
+then I'm only left
+with my interfaces.
+
+
+499
+00:21:56.448 --> 00:21:59.318 line:-1 position:50%
+The shared implementation
+function was only used
+
+
+500
+00:21:59.318 --> 00:22:02.588 line:-1 position:50%
+within my framework,
+so it isn't considered global.
+
+
+501
+00:22:02.588 --> 00:22:06.392 line:-1 position:50%
+Similarly, stripping all symbols
+still leaves the interface
+
+
+502
+00:22:06,392 --> 00:22:08,227 line:-1
+since these are required
+for other apps
+
+
+503
+00:22:08.227 --> 00:22:10.529 line:-1 position:50%
+to use the framework.
+
+
+504
+00:22:10,529 --> 00:22:15,034 line:-1
+You can also notice in the
+`symbols --onlyNListData` output
+
+
+505
+00:22:15.034 --> 00:22:16.702 line:-1 position:50%
+that there are function starts
+addresses
+
+
+506
+00:22:16,702 --> 00:22:19,805 line:-1
+interspersed between
+the direct symbols.
+
+
+507
+00:22:19,805 --> 00:22:21,874 line:-1
+These addresses represent
+functions that were either
+
+
+508
+00:22:21.874 --> 00:22:25.311 line:-1 position:50%
+never in the direct symbols,
+or were stripped.
+
+
+509
+00:22:25,311 --> 00:22:26,745 line:-1
+You can tailor
+these strip settings
+
+
+510
+00:22:26,745 --> 00:22:30,316 line:-1
+to your desired level
+of symbol table visibility.
+
+
+511
+00:22:30,316 --> 00:22:32,318 line:-1
+With this information,
+we can determine
+
+
+512
+00:22:32,318 --> 00:22:34,887 line:-1
+when we're working with
+direct symbols.
+
+
+513
+00:22:34.887 --> 00:22:37.623 line:-1 position:50%
+Some telltale signs of this
+are having function names
+
+
+514
+00:22:37,623 --> 00:22:40,059 line:-1
+but no line numbers
+or file names;
+
+
+515
+00:22:40.059 --> 00:22:42.428 line:-1 position:50%
+or having a mix
+of function names
+
+
+516
+00:22:42.428 --> 00:22:44.129 line:-1 position:50%
+and function starts addresses,
+
+
+517
+00:22:44,129 --> 00:22:46,932 line:-1
+as we have here
+with the framework example.
+
+
+518
+00:22:46,932 --> 00:22:49,335 line:-1
+The second type
+of nlist struct we'll analyze
+
+
+519
+00:22:49,335 --> 00:22:51,303 line:-1
+is known as
+an indirect symbol,
+
+
+520
+00:22:51,303 --> 00:22:54,106 line:-1
+as opposed to direct symbol.
+
+
+521
+00:22:54,106 --> 00:22:59,778 line:-1
+This is when the `n_type` matches
+only the `N_EXT` bit pattern.
+
+
+522
+00:22:59.778 --> 00:23:02.081 line:-1 position:50%
+These are functions
+and methods that you're using
+
+
+523
+00:23:02,081 --> 00:23:05,451 line:-1
+from other frameworks
+or libraries, such as `print()`.
+
+
+524
+00:23:05.451 --> 00:23:08.988 line:-1 position:50%
+You can see these with `nm`,
+only this time we'll specify
+
+
+525
+00:23:08,988 --> 00:23:12,291 line:-1
+`--undefined-only` instead of `--defined-only`.
+
+
+526
+00:23:12,291 --> 00:23:14,693 line:-1
+We'll also add the `-m` flag,
+
+
+527
+00:23:14,693 --> 00:23:16,929 line:-1
+which will show you
+which frameworks or libraries
+
+
+528
+00:23:16,929 --> 00:23:19,698 line:-1
+the functions
+should be found in.
+
+
+529
+00:23:19,698 --> 00:23:21,867 line:-1
+For example,
+the MagicNumbers app
+
+
+530
+00:23:21,867 --> 00:23:24,069 line:-1
+depends on a variety
+of Swift functions
+
+
+531
+00:23:24,069 --> 00:23:27,072 line:-1
+that are defined
+in libswiftCore.
+
+
+532
+00:23:27,072 --> 00:23:29,375 line:-1
+Now that we've covered
+two of the three
+
+
+533
+00:23:29,375 --> 00:23:31,477 line:-1
+debug information categories,
+
+
+534
+00:23:31,477 --> 00:23:34,280 line:-1
+let's make sure
+we understand their properties.
+
+
+535
+00:23:34.280 --> 00:23:36.382 line:-1 position:50%
+Function starts
+are a list of addresses,
+
+
+536
+00:23:36,382 --> 00:23:38,183 line:-1
+so they lack names,
+
+
+537
+00:23:38.183 --> 00:23:41.220 line:-1 position:50%
+but do allow us
+to determine offsets.
+
+
+538
+00:23:41.220 --> 00:23:44.923 line:-1 position:50%
+nlist symbol tables encode
+entire structs of information
+
+
+539
+00:23:44,923 --> 00:23:48,027 line:-1
+and can associate
+a name to an address.
+
+
+540
+00:23:48,027 --> 00:23:51,363 line:-1
+They describe direct symbols —
+which are defined in your app —
+
+
+541
+00:23:51,363 --> 00:23:52,798 line:-1
+and indirect symbols,
+
+
+542
+00:23:52.798 --> 00:23:55.634 line:-1 position:50%
+which are provided
+by dependencies.
+
+
+543
+00:23:55.634 --> 00:23:57.269 line:-1 position:50%
+Direct symbols
+are generally reserved
+
+
+544
+00:23:57,269 --> 00:23:59,138 line:-1
+for functions involved
+in linking,
+
+
+545
+00:23:59.138 --> 00:24:01.206 line:-1 position:50%
+and the strip build settings
+influence
+
+
+546
+00:24:01,206 --> 00:24:03,942 line:-1
+which direct symbols
+are available.
+
+
+547
+00:24:03.942 --> 00:24:06.145 line:-1 position:50%
+Finally, both
+the function starts
+
+
+548
+00:24:06,145 --> 00:24:10,349 line:-1
+and the nlist symbol tables are
+embedded directly in your app.
+
+
+549
+00:24:10,349 --> 00:24:14,086 line:-1
+What we haven't seen yet
+is the richer levels of detail,
+
+
+550
+00:24:14,086 --> 00:24:16,221 line:-1
+such as file names
+and line numbers.
+
+
+551
+00:24:16,221 --> 00:24:18,924 line:-1
+This is provided to us by DWARF.
+
+
+552
+00:24:18,924 --> 00:24:21,660 line:-1
+DWARF takes the concepts
+of nlist symbol tables
+
+
+553
+00:24:21,660 --> 00:24:23,762 line:-1
+to a completely different level.
+
+
+554
+00:24:23.762 --> 00:24:26.699 line:-1 position:50%
+Rather than keeping
+only a subset of functions,
+
+
+555
+00:24:26,699 --> 00:24:29,802 line:-1
+DWARF strives
+to describe everything.
+
+
+556
+00:24:29.802 --> 00:24:33.272 line:-1 position:50%
+We saw that nlist symbol tables
+added vastly more information
+
+
+557
+00:24:33.272 --> 00:24:35.107 line:-1 position:50%
+versus the function starts.
+
+
+558
+00:24:35.107 --> 00:24:37.876 line:-1 position:50%
+It accomplished that
+by adding a dimension.
+
+
+559
+00:24:37.876 --> 00:24:41.213 line:-1 position:50%
+Remember, we started with
+just a single dimension,
+
+
+560
+00:24:41,213 --> 00:24:42,481 line:-1
+which were the addresses,
+
+
+561
+00:24:42.481 --> 00:24:44.683 line:-1 position:50%
+when we looked
+at function starts.
+
+
+562
+00:24:44,683 --> 00:24:46,585 line:-1
+Then we upgraded
+to two dimensions
+
+
+563
+00:24:46.585 --> 00:24:48.954 line:-1 position:50%
+by encoding
+a struct full of information
+
+
+564
+00:24:48,954 --> 00:24:51,123 line:-1
+in the nlist symbol table.
+
+
+565
+00:24:51.123 --> 00:24:52.725 line:-1 position:50%
+DWARF adds
+a third dimension,
+
+
+566
+00:24:52.725 --> 00:24:54.893 line:-1 position:50%
+which is about relationships.
+
+
+567
+00:24:54.893 --> 00:24:58.430 line:-1 position:50%
+DWARF recognizes that
+functions aren't isolated.
+
+
+568
+00:24:58,430 --> 00:25:00,799 line:-1
+They call other functions,
+they have parameters,
+
+
+569
+00:25:00.799 --> 00:25:05.371 line:-1 position:50%
+return meaningful data, and are
+defined in a particular file.
+
+
+570
+00:25:05,371 --> 00:25:06,839 line:-1
+Encoding these relationships
+
+
+571
+00:25:06,839 --> 00:25:10,776 line:-1
+unlocks the most powerful
+aspects of symbolication.
+
+
+572
+00:25:10,776 --> 00:25:12,578 line:-1
+When we're analyzing DWARF,
+
+
+573
+00:25:12.578 --> 00:25:15.647 line:-1 position:50%
+we're primarily referring
+to a dSYM bundle.
+
+
+574
+00:25:15,647 --> 00:25:18,684 line:-1
+In addition to other metadata
+such as plists,
+
+
+575
+00:25:18.684 --> 00:25:22.221 line:-1 position:50%
+the dSYM bundle contains
+a binary with DWARF.
+
+
+576
+00:25:22.221 --> 00:25:24.990 line:-1 position:50%
+What makes this binary
+so special?
+
+
+577
+00:25:24.990 --> 00:25:29.328 line:-1 position:50%
+The binary contains its data
+in a special `__DWARF` segment.
+
+
+578
+00:25:29.328 --> 00:25:32.865 line:-1 position:50%
+The DWARF specification
+mentions three streams of data
+
+
+579
+00:25:32.865 --> 00:25:35.367 line:-1 position:50%
+within the segment
+that we'll focus on.
+
+
+580
+00:25:35,367 --> 00:25:38,170 line:-1
+`debug_info`
+contains the raw data,
+
+
+581
+00:25:38,170 --> 00:25:41,306 line:-1
+`debug_abbrev` assigns structure
+to the data,
+
+
+582
+00:25:41.306 --> 00:25:45.444 line:-1 position:50%
+and `debug_line` contains the
+file names and line numbers.
+
+
+583
+00:25:45.444 --> 00:25:47.813 line:-1 position:50%
+DWARF also defines
+two vocabulary types
+
+
+584
+00:25:47,813 --> 00:25:49,114 line:-1
+that we'll study first:
+
+
+585
+00:25:49,114 --> 00:25:51,784 line:-1
+the compile unit
+and the subprogram.
+
+
+586
+00:25:51,784 --> 00:25:54,953 line:-1
+We'll introduce
+a third one later.
+
+
+587
+00:25:54.953 --> 00:25:57.790 line:-1 position:50%
+A compile unit represents
+a single source file
+
+
+588
+00:25:57.790 --> 00:26:00.192 line:-1 position:50%
+that went into
+building the product.
+
+
+589
+00:26:00,192 --> 00:26:03,228 line:-1
+For example, we can expect
+to have one compile unit
+
+
+590
+00:26:03,228 --> 00:26:06,098 line:-1
+for each Swift file
+in our project.
+
+
+591
+00:26:06,098 --> 00:26:08,400 line:-1
+DWARF assigns properties
+to a compile unit,
+
+
+592
+00:26:08,400 --> 00:26:11,170 line:-1
+such as the name of the file,
+the SDKs,
+
+
+593
+00:26:11,170 --> 00:26:14,206 line:-1
+the portion of the `__TEXT`
+segment its functions occupy,
+
+
+594
+00:26:14,206 --> 00:26:16,508 line:-1
+and much more.
+
+
+595
+00:26:16,508 --> 00:26:19,645 line:-1
+The main.swift compile unit
+contains these properties
+
+
+596
+00:26:19,645 --> 00:26:22,114 line:-1
+in the `debug_info` stream
+on the left,
+
+
+597
+00:26:22.114 --> 00:26:25.584 line:-1 position:50%
+and it has a corresponding entry
+in the `debug _abbrev` stream
+
+
+598
+00:26:25,584 --> 00:26:29,688 line:-1
+on the right which tells us what
+the values represent.
+
+
+599
+00:26:29,688 --> 00:26:32,558 line:-1
+Here we see the file name,
+the language it's written in,
+
+
+600
+00:26:32.558 --> 00:26:37.463 line:-1 position:50%
+and a low/high pair representing
+the `__TEXT` segment range.
+
+
+601
+00:26:37.463 --> 00:26:40.599 line:-1 position:50%
+A subprogram represents
+a defined function.
+
+
+602
+00:26:40.599 --> 00:26:44.136 line:-1 position:50%
+We saw defined functions in the
+nlist symbol table already,
+
+
+603
+00:26:44,136 --> 00:26:48,640 line:-1
+but the subprogram can describe
+static and local functions too.
+
+
+604
+00:26:48.640 --> 00:26:51.009 line:-1 position:50%
+A subprogram also has a name
+
+
+605
+00:26:51.009 --> 00:26:53.545 line:-1 position:50%
+and its `__TEXT` segment
+address range.
+
+
+606
+00:26:53,545 --> 00:26:55,581 line:-1
+One fundamental relationship
+
+
+607
+00:26:55.581 --> 00:26:58.183 line:-1 position:50%
+between compile units
+and subprograms
+
+
+608
+00:26:58.183 --> 00:27:02.721 line:-1 position:50%
+is that subprograms
+are defined in a compile unit.
+
+
+609
+00:27:02,721 --> 00:27:05,390 line:-1
+DWARF represents this
+with a tree.
+
+
+610
+00:27:05,390 --> 00:27:07,793 line:-1
+The compile unit
+is at the root of the tree
+
+
+611
+00:27:07.793 --> 00:27:11.964 line:-1 position:50%
+and it has subprogram entries
+as children.
+
+
+612
+00:27:11,964 --> 00:27:15,501 line:-1
+The children are searchable by
+following their address ranges.
+
+
+613
+00:27:15,501 --> 00:27:17,503 line:-1
+We can examine these
+in more detail
+
+
+614
+00:27:17,503 --> 00:27:19,438 line:-1
+with the `dwarfdump` command.
+
+
+615
+00:27:19,438 --> 00:27:21,940 line:-1
+First we'll look
+at a compile unit.
+
+
+616
+00:27:21.940 --> 00:27:23.542 line:-1 position:50%
+This matches
+some of the properties
+
+
+617
+00:27:23.542 --> 00:27:25.944 line:-1 position:50%
+of a compile unit
+I mentioned earlier.
+
+
+618
+00:27:25,944 --> 00:27:27,679 line:-1
+`dwarfdump` helpfully combines
+
+
+619
+00:27:27.679 --> 00:27:30.949 line:-1 position:50%
+the `debug_ info`
+and `debug _abbrev` contents
+
+
+620
+00:27:30.949 --> 00:27:32.518 line:-1 position:50%
+to show you
+the structure and content
+
+
+621
+00:27:32,518 --> 00:27:35,521 line:-1
+of the data in your dSYMs.
+
+
+622
+00:27:35,521 --> 00:27:37,389 line:-1
+And if we scroll down
+the output,
+
+
+623
+00:27:37,389 --> 00:27:40,559 line:-1
+we'll encounter one
+subprogram child.
+
+
+624
+00:27:40.559 --> 00:27:42.160 line:-1 position:50%
+The address range it occupies
+
+
+625
+00:27:42,160 --> 00:27:44,396 line:-1
+is within the bounds
+of the compile unit
+
+
+626
+00:27:44,396 --> 00:27:47,399 line:-1
+and we can also see
+the name of the function.
+
+
+627
+00:27:47.399 --> 00:27:50.969 line:-1 position:50%
+I mentioned that DWARF describes
+its data in extreme detail.
+
+
+628
+00:27:50,969 --> 00:27:53,605 line:-1
+While we won't spend much time
+on all of these details,
+
+
+629
+00:27:53,605 --> 00:27:56,708 line:-1
+I think it's fun to see details
+such as function parameters.
+
+
+630
+00:27:56.708 --> 00:27:58.710 line:-1 position:50%
+They have their own
+vocabulary type
+
+
+631
+00:27:58.710 --> 00:28:02.214 line:-1 position:50%
+that describes the name
+and type of the parameter.
+
+
+632
+00:28:02,214 --> 00:28:03,849 line:-1
+Following the tree model,
+
+
+633
+00:28:03.849 --> 00:28:07.185 line:-1 position:50%
+a parameter is a child
+of a subprogram.
+
+
+634
+00:28:07,185 --> 00:28:10,122 line:-1
+Here we come across the entry
+for the choices parameter
+
+
+635
+00:28:10.122 --> 00:28:12.391 line:-1 position:50%
+that we supply to a function.
+
+
+636
+00:28:12,391 --> 00:28:14,826 line:-1
+Next, file names
+and line numbers
+
+
+637
+00:28:14.826 --> 00:28:17.362 line:-1 position:50%
+come from the `debug_line` stream.
+
+
+638
+00:28:17,362 --> 00:28:19,631 line:-1
+This stream doesn't have
+a tree structure.
+
+
+639
+00:28:19.631 --> 00:28:22.267 line:-1 position:50%
+Instead, it defines
+a line table program
+
+
+640
+00:28:22.267 --> 00:28:24.202 line:-1 position:50%
+where the individual
+file addresses
+
+
+641
+00:28:24,202 --> 00:28:27,706 line:-1
+can be mapped back
+to an exact line of code.
+
+
+642
+00:28:27,706 --> 00:28:30,709 line:-1
+This ends up generating
+a list of source code details
+
+
+643
+00:28:30.709 --> 00:28:33.946 line:-1 position:50%
+which we can search
+to find the file and line.
+
+
+644
+00:28:33,946 --> 00:28:36,281 line:-1
+If we parse the `debug_info` tree
+
+
+645
+00:28:36,281 --> 00:28:38,650 line:-1
+and generate
+the `debug_line` list,
+
+
+646
+00:28:38,650 --> 00:28:41,453 line:-1
+we end up with
+a structure like the following.
+
+
+647
+00:28:41,453 --> 00:28:43,822 position:50%
+So if want to match
+a file address,
+
+
+648
+00:28:43,822 --> 00:28:45,824 line:0
+we can traverse the tree.
+
+
+649
+00:28:45,824 --> 00:28:47,793 position:50%
+First, we'll start
+at the compile unit
+
+
+650
+00:28:47,793 --> 00:28:49,695 line:0
+and follow the branches.
+
+
+651
+00:28:49,695 --> 00:28:53,665 line:0
+Then we'll pick up any of the
+`debug_line` entries that matched.
+
+
+652
+00:28:53,665 --> 00:28:56,234 line:-1
+We can automate this again
+with `atos`,
+
+
+653
+00:28:56,234 --> 00:29:01,139 line:-1
+only this time I'm specifically
+leaving out the `-i` flag.
+
+
+654
+00:29:01,139 --> 00:29:03,742 line:-1
+Notice anything
+slightly odd here?
+
+
+655
+00:29:03,742 --> 00:29:06,278 line:-1
+Yes, we have the function name
+and line number,
+
+
+656
+00:29:06,278 --> 00:29:08,547 line:-1
+so we're definitely using DWARF.
+
+
+657
+00:29:08.547 --> 00:29:11.216 line:-1 position:50%
+Other than that though,
+this isn't all too different
+
+
+658
+00:29:11.216 --> 00:29:13.785 line:-1 position:50%
+from the nlist
+symbol table update.
+
+
+659
+00:29:13.785 --> 00:29:18.023 line:-1 position:50%
+In fact, when we compare it
+to the first time we used `atos`,
+
+
+660
+00:29:18,023 --> 00:29:19,858 line:-1
+it still looks like
+we're missing
+
+
+661
+00:29:19,858 --> 00:29:22,594 line:-1
+so many valuable
+functions and details!
+
+
+662
+00:29:22.594 --> 00:29:24.563 line:-1 position:50%
+What happened here?
+
+
+663
+00:29:24.563 --> 00:29:27.766 line:-1 position:50%
+The only thing that changed
+was that we didn't specify
+
+
+664
+00:29:27.766 --> 00:29:30.902 line:-1 position:50%
+the `-i` to `atos` this time.
+
+
+665
+00:29:30,902 --> 00:29:34,339 line:-1
+That flag stands for
+"inlined functions."
+
+
+666
+00:29:34,339 --> 00:29:36,575 line:-1
+Inlining is a routine
+optimization
+
+
+667
+00:29:36.575 --> 00:29:38.777 line:-1 position:50%
+that compilers perform.
+
+
+668
+00:29:38.777 --> 00:29:41.013 line:-1 position:50%
+This involves
+substituting a function call
+
+
+669
+00:29:41,013 --> 00:29:43,882 line:-1
+with the body of the function
+directly.
+
+
+670
+00:29:43.882 --> 00:29:47.853 line:-1 position:50%
+One cool effect that it has is
+making code seemingly disappear.
+
+
+671
+00:29:47,853 --> 00:29:50,856 line:-1
+We can think of it as, rather
+than calling `numberChoices()`,
+
+
+672
+00:29:50.856 --> 00:29:53.458 line:-1 position:50%
+the entirety of the code
+for `numberChoices()`
+
+
+673
+00:29:53,458 --> 00:29:55,661 line:-1
+was dropped in place.
+
+
+674
+00:29:55.661 --> 00:30:00.032 line:-1 position:50%
+Suddenly there's no function
+call to `numberChoices()` anymore!
+
+
+675
+00:30:00,032 --> 00:30:03,402 line:-1
+DWARF represents this
+with an inlined subroutine.
+
+
+676
+00:30:03.402 --> 00:30:05.971 line:-1 position:50%
+This is the third and final
+vocabulary type for DWARF
+
+
+677
+00:30:05,971 --> 00:30:07,973 line:-1
+that we'll discuss today.
+
+
+678
+00:30:07.973 --> 00:30:10.609 line:-1 position:50%
+An inlined subroutine
+is a subprogram —
+
+
+679
+00:30:10.609 --> 00:30:11.843 line:-1 position:50%
+so it's a function —
+
+
+680
+00:30:11,843 --> 00:30:15,347 line:-1
+that was inlined
+into another subprogram.
+
+
+681
+00:30:15.347 --> 00:30:18.016 line:-1 position:50%
+Since an inlined function
+is completely engulfed
+
+
+682
+00:30:18.016 --> 00:30:20.552 line:-1 position:50%
+by another node
+in the relationship tree,
+
+
+683
+00:30:20.552 --> 00:30:24.556 line:-1 position:50%
+the inlined subroutine
+is a child of that node.
+
+
+684
+00:30:24.556 --> 00:30:26.858 line:-1 position:50%
+This definition applies
+recursively too,
+
+
+685
+00:30:26,858 --> 00:30:28,960 line:-1
+meaning that
+an inlined subroutine
+
+
+686
+00:30:28,960 --> 00:30:32,330 line:-1
+can have other inlined children.
+
+
+687
+00:30:32,330 --> 00:30:33,832 line:-1
+Again, with `dwarfdump`,
+
+
+688
+00:30:33,832 --> 00:30:36,268 line:-1
+we can look for
+inlined subroutines.
+
+
+689
+00:30:36,268 --> 00:30:38,336 line:-1
+They're listed as children
+of other nodes
+
+
+690
+00:30:38,336 --> 00:30:40,572 line:-1
+and have similar properties
+to subprograms,
+
+
+691
+00:30:40.572 --> 00:30:42.908 line:-1 position:50%
+such as names and addresses.
+
+
+692
+00:30:42.908 --> 00:30:45.544 line:-1 position:50%
+However, in DWARF,
+these properties
+
+
+693
+00:30:45,544 --> 00:30:48,447 line:-1
+are frequently accessed
+through a common node,
+
+
+694
+00:30:48,447 --> 00:30:50,982 line:-1
+known as the abstract origin.
+
+
+695
+00:30:50,982 --> 00:30:54,086 line:-1
+If there are many inlined copies
+of a particular function,
+
+
+696
+00:30:54,086 --> 00:30:55,921 line:-1
+then their common,
+shared properties
+
+
+697
+00:30:55.921 --> 00:30:57.756 line:-1 position:50%
+are kept in the abstract origin
+
+
+698
+00:30:57.756 --> 00:31:00.959 line:-1 position:50%
+so that they aren't
+duplicated everywhere.
+
+
+699
+00:31:00,959 --> 00:31:05,197 line:-1
+One unique property that inlined
+subroutines have is a call site.
+
+
+700
+00:31:05,197 --> 00:31:07,065 line:-1
+This is the location
+in our source code
+
+
+701
+00:31:07.065 --> 00:31:09.701 line:-1 position:50%
+where we wrote
+the actual function call,
+
+
+702
+00:31:09,701 --> 00:31:12,070 line:-1
+but the optimizer replaced it.
+
+
+703
+00:31:12.070 --> 00:31:15.373 line:-1 position:50%
+Here for instance, we made
+the call to `generateANumber`
+
+
+704
+00:31:15.373 --> 00:31:18.677 line:-1 position:50%
+on line 36
+of the main.swift file.
+
+
+705
+00:31:18,677 --> 00:31:22,948 line:-1
+This lets us update our tree
+with new child nodes.
+
+
+706
+00:31:22,948 --> 00:31:24,750 line:-1
+And now this is looking like
+
+
+707
+00:31:24.750 --> 00:31:27.919 line:-1 position:50%
+a much more comprehensive view
+of our program.
+
+
+708
+00:31:27,919 --> 00:31:30,622 line:-1
+The optimization details
+for inlined functions
+
+
+709
+00:31:30,622 --> 00:31:32,524 line:-1
+were the key details
+in getting us
+
+
+710
+00:31:32.524 --> 00:31:35.360 line:-1 position:50%
+to the fully symbolicated
+crash log.
+
+
+711
+00:31:35,360 --> 00:31:38,263 position:50%
+The `-i` flag for `atos`
+instructs the tool
+
+
+712
+00:31:38,263 --> 00:31:41,500 position:50%
+to consider them
+during symbolication.
+
+
+713
+00:31:41,500 --> 00:31:43,168 position:50%
+They were also
+the missing details
+
+
+714
+00:31:43,168 --> 00:31:44,970 line:0
+from our Instruments trace.
+
+
+715
+00:31:44.970 --> 00:31:47.339 line:-1 position:50%
+The reason why
+we needed a dSYM
+
+
+716
+00:31:47,339 --> 00:31:49,941 line:-1
+both for Instruments
+and for the crash log
+
+
+717
+00:31:49,941 --> 00:31:54,513 line:-1
+was precisely so that we could
+extract all of this content.
+
+
+718
+00:31:54.513 --> 00:31:56.982 line:-1 position:50%
+There is another source
+where you'll find DWARF,
+
+
+719
+00:31:56,982 --> 00:32:00,352 line:-1
+and that is from static
+libraries and object files.
+
+
+720
+00:32:00,352 --> 00:32:03,288 line:-1
+In the absence of a dSYM,
+you can still gather DWARF
+
+
+721
+00:32:03.288 --> 00:32:04.523 line:-1 position:50%
+for functions that you linked
+
+
+722
+00:32:04,523 --> 00:32:07,425 line:-1
+from a static library
+or object file.
+
+
+723
+00:32:07.425 --> 00:32:12.097 line:-1 position:50%
+In those cases, you'll find the
+Debugging Symbols nlist types.
+
+
+724
+00:32:12.097 --> 00:32:15.467 line:-1 position:50%
+These were one of the symbol
+types that could be stripped.
+
+
+725
+00:32:15,467 --> 00:32:18,303 line:-1
+They don't hold the DWARF
+themselves though.
+
+
+726
+00:32:18,303 --> 00:32:20,272 line:-1
+Rather, they associate
+a function
+
+
+727
+00:32:20,272 --> 00:32:22,574 line:-1
+back to the file they came from.
+
+
+728
+00:32:22.574 --> 00:32:25.343 line:-1 position:50%
+If the library was built
+with debug information,
+
+
+729
+00:32:25,343 --> 00:32:28,847 line:-1
+then the nlist entry
+can point us to that DWARF.
+
+
+730
+00:32:28.847 --> 00:32:31.716 line:-1 position:50%
+These types of nlist entries
+can be seen verbosely
+
+
+731
+00:32:31.716 --> 00:32:35.053 line:-1 position:50%
+with `dsymutil -dump-debug-map`.
+
+
+732
+00:32:35,053 --> 00:32:36,988 line:-1
+Here we have the list
+of different functions
+
+
+733
+00:32:36,988 --> 00:32:39,057 line:-1
+and where they were
+pulled from.
+
+
+734
+00:32:39.057 --> 00:32:42.928 line:-1 position:50%
+Those locations can be scanned
+and processed for DWARF.
+
+
+735
+00:32:42.928 --> 00:32:43.962 line:-1 position:50%
+To summarize,
+
+
+736
+00:32:43.962 --> 00:32:47.933 line:-1 position:50%
+DWARF is a vital source
+of in-depth symbolication data.
+
+
+737
+00:32:47.933 --> 00:32:49.968 line:-1 position:50%
+DWARF exposes
+important relationships
+
+
+738
+00:32:49.968 --> 00:32:52.437 line:-1 position:50%
+between functions and files.
+
+
+739
+00:32:52,437 --> 00:32:54,806 line:-1
+Optimizations such as
+function inlining
+
+
+740
+00:32:54,806 --> 00:32:57,843 line:-1
+have an enormous impact
+on the quality of symbolication,
+
+
+741
+00:32:57.843 --> 00:33:00.712 line:-1 position:50%
+and DWARF can express it
+very well.
+
+
+742
+00:33:00.712 --> 00:33:04.649 line:-1 position:50%
+We also saw that dSYMs and
+static libraries contain DWARF.
+
+
+743
+00:33:04.649 --> 00:33:08.386 line:-1 position:50%
+However, please prefer dSYMs
+as you can easily transfer them
+
+
+744
+00:33:08,386 --> 00:33:12,624 line:-1
+to others and have built-in
+support from several tools.
+
+
+745
+00:33:12,624 --> 00:33:15,126 line:-1
+Finally, I want to share
+different tools and tips
+
+
+746
+00:33:15.126 --> 00:33:18.563 line:-1 position:50%
+you can use
+to facilitate symbolication.
+
+
+747
+00:33:18.563 --> 00:33:21.233 line:-1 position:50%
+For local development builds,
+you'll generally have
+
+
+748
+00:33:21,233 --> 00:33:23,134 line:-1
+a great deal
+of debug information
+
+
+749
+00:33:23,134 --> 00:33:25,203 line:-1
+if you build in debug mode.
+
+
+750
+00:33:25,203 --> 00:33:28,874 line:-1
+For release mode, you can ensure
+that Xcode generates a dSYM by
+
+
+751
+00:33:28.874 --> 00:33:32.577 line:-1 position:50%
+checking the Debug Information
+Format build setting.
+
+
+752
+00:33:32.577 --> 00:33:36.882 line:-1 position:50%
+Make sure Release
+is set to DWARF with dSYM File.
+
+
+753
+00:33:36,882 --> 00:33:38,950 line:-1
+For apps that were submitted
+to the App Store,
+
+
+754
+00:33:38.950 --> 00:33:41.987 line:-1 position:50%
+you can download your dSYMs
+through App Store Connect.
+
+
+755
+00:33:41,987 --> 00:33:45,223 line:-1
+This also includes any apps
+with bitcode enabled.
+
+
+756
+00:33:45,223 --> 00:33:47,058 line:-1
+If you want to check that
+a certain dSYM
+
+
+757
+00:33:47.058 --> 00:33:51.529 line:-1 position:50%
+is already on your device,
+you can use the `mdfind` command.
+
+
+758
+00:33:51.529 --> 00:33:54.999 line:-1 position:50%
+The alphanumeric string
+here is your binary's UUID,
+
+
+759
+00:33:54.999 --> 00:33:58.803 line:-1 position:50%
+which is a unique identifier
+defined in a load command.
+
+
+760
+00:33:58.803 --> 00:34:03.475 line:-1 position:50%
+You can see the UUID for your
+dSYMs with `symbols -uuid`.
+
+
+761
+00:34:03,475 --> 00:34:07,245 line:-1
+Sometimes, a toolchain
+could generate invalid DWARF.
+
+
+762
+00:34:07.245 --> 00:34:09.814 line:-1 position:50%
+You can check this
+with `dwarfdump -verify`.
+
+
+763
+00:34:09,814 --> 00:34:13,051 line:-1
+If you see any reported errors,
+please file a bug!
+
+
+764
+00:34:13,051 --> 00:34:17,122 line:-1
+DWARF data also has a cap
+of four gigabytes per binary.
+
+
+765
+00:34:17.122 --> 00:34:19.357 line:-1 position:50%
+If you're running into issues
+with your dSYMs
+
+
+766
+00:34:19,357 --> 00:34:21,927 line:-1
+and see that they're exceeding
+four gigabytes,
+
+
+767
+00:34:21,927 --> 00:34:24,863 line:-1
+consider splitting the project
+into separate components
+
+
+768
+00:34:24,863 --> 00:34:28,967 line:-1
+so that each one
+has its own smaller dSYM.
+
+
+769
+00:34:28.967 --> 00:34:31.436 line:-1 position:50%
+You can make sure
+that the dSYM you're using
+
+
+770
+00:34:31.436 --> 00:34:33.138 line:-1 position:50%
+matches the specific build
+of your app
+
+
+771
+00:34:33.138 --> 00:34:36.675 line:-1 position:50%
+that you're interested in
+by comparing UUIDs.
+
+
+772
+00:34:36,675 --> 00:34:39,210 line:-1
+The app's UUID is in
+the Binary Images list
+
+
+773
+00:34:39,210 --> 00:34:40,946 line:-1
+section of crash reports
+
+
+774
+00:34:40,946 --> 00:34:43,982 line:-1
+and you can also see it
+with the `symbols` command.
+
+
+775
+00:34:43,982 --> 00:34:46,851 line:-1
+You should ensure that
+both your app and your dSYM
+
+
+776
+00:34:46.851 --> 00:34:49.454 line:-1 position:50%
+have the same UUIDs.
+
+
+777
+00:34:49,454 --> 00:34:51,423 line:-1
+The `symbols` tool
+also lets you check
+
+
+778
+00:34:51.423 --> 00:34:55.393 line:-1 position:50%
+the types of debug information
+your app has available.
+
+
+779
+00:34:55,393 --> 00:34:56,962 line:-1
+We've already seen
+examples of this,
+
+
+780
+00:34:56.962 --> 00:35:00.432 line:-1 position:50%
+but it's a helpful reminder that
+these tags in square brackets
+
+
+781
+00:35:00,432 --> 00:35:02,734 line:-1
+tell you the information source.
+
+
+782
+00:35:02,734 --> 00:35:05,503 line:-1
+It's useful if you aren't sure
+which debug information
+
+
+783
+00:35:05.503 --> 00:35:07.539 line:-1 position:50%
+you might be dealing with.
+
+
+784
+00:35:07,539 --> 00:35:10,041 position:50%
+If you're certain that you
+have dSYMs available
+
+
+785
+00:35:10,041 --> 00:35:12,444 line:0
+but still aren't getting names
+for your functions
+
+
+786
+00:35:12,444 --> 00:35:14,179 line:0
+in Instruments traces,
+
+
+787
+00:35:14,179 --> 00:35:16,748 line:0
+please check your entitlements
+and code signing.
+
+
+788
+00:35:16,748 --> 00:35:19,384 line:0
+Specifically,
+with the `codesign` command,
+
+
+789
+00:35:19,384 --> 00:35:23,188 line:0
+you can verify that you have
+a proper code signature.
+
+
+790
+00:35:23,188 --> 00:35:25,657 line:0
+You should also verify
+that locally built apps
+
+
+791
+00:35:25,657 --> 00:35:28,927 position:50%
+for development have
+the `get-task-allow` entitlement.
+
+
+792
+00:35:28,927 --> 00:35:31,196 line:0
+This entitlement grants
+permissions to tools
+
+
+793
+00:35:31,196 --> 00:35:34,599 position:50%
+such as Instruments
+to symbolicate your app.
+
+
+794
+00:35:34,599 --> 00:35:36,968 line:0
+Xcode should set this
+entitlement automatically
+
+
+795
+00:35:36,968 --> 00:35:41,039 line:0
+with the Profile action,
+but it's helpful to verify.
+
+
+796
+00:35:41.039 --> 00:35:43.541 line:-1 position:50%
+If you don't have
+the `get-task-allow` entitlement
+
+
+797
+00:35:43.541 --> 00:35:45.477 line:-1 position:50%
+enabled,
+you should check
+
+
+798
+00:35:45,477 --> 00:35:49,314 line:-1
+your Code Signing Inject Base
+Entitlements build setting
+
+
+799
+00:35:49,314 --> 00:35:52,851 line:-1
+and make sure that it's enabled
+as you're developing.
+
+
+800
+00:35:52,851 --> 00:35:55,720 line:-1
+Lastly, for Universal 2 apps,
+
+
+801
+00:35:55.720 --> 00:35:57.255 line:-1 position:50%
+you should specify
+the architecture
+
+
+802
+00:35:57.255 --> 00:36:00.025 line:-1 position:50%
+that you're interested in
+to the tools.
+
+
+803
+00:36:00,025 --> 00:36:04,095 line:-1
+`symbols`, `otool`, and `dwarfdump`
+all have an `-arch` flag
+
+
+804
+00:36:04.095 --> 00:36:07.932 line:-1 position:50%
+to only operate on a particular
+architecture slice.
+
+
+805
+00:36:07,932 --> 00:36:11,269 line:-1
+This concludes "Symbolication:
+Beyond the basics."
+
+
+806
+00:36:11,269 --> 00:36:12,370 line:-1
+If nothing else,
+
+
+807
+00:36:12,370 --> 00:36:15,640 line:-1
+I want to really emphasize
+a few key points.
+
+
+808
+00:36:15.640 --> 00:36:18.476 line:-1 position:50%
+UUIDs and file addresses
+are a consistent
+
+
+809
+00:36:18.476 --> 00:36:21.813 line:-1 position:50%
+and reliable way to identify
+what your app was doing
+
+
+810
+00:36:21.813 --> 00:36:25.183 line:-1 position:50%
+since they're independent
+of the ASLR slide.
+
+
+811
+00:36:25,183 --> 00:36:28,853 line:-1
+They're also our key
+to querying the debug info.
+
+
+812
+00:36:28.853 --> 00:36:31.823 line:-1 position:50%
+You should also use dSYMs
+whenever possible.
+
+
+813
+00:36:31.823 --> 00:36:34.159 line:-1 position:50%
+dSYMs contain
+the richest debug information
+
+
+814
+00:36:34.159 --> 00:36:36.227 line:-1 position:50%
+in the form of DWARF
+and are supported
+
+
+815
+00:36:36.227 --> 00:36:38.830 line:-1 position:50%
+by Xcode and Instruments.
+
+
+816
+00:36:38.830 --> 00:36:42.033 line:-1 position:50%
+Lastly, we covered
+several tools.
+
+
+817
+00:36:42,033 --> 00:36:44,702 line:-1
+These tools are readily
+available to you in Xcode
+
+
+818
+00:36:44,702 --> 00:36:47,806 line:-1
+and they offer powerful
+diagnostics and insights.
+
+
+819
+00:36:47,806 --> 00:36:49,641 line:-1
+You should strive
+to incorporate them
+
+
+820
+00:36:49,641 --> 00:36:54,279 line:-1
+into your workflows
+for debugging and optimizing.
+
+
+821
+00:36:54,279 --> 00:36:56,081 position:50%
+If you're interested
+in learning more,
+
+
+822
+00:36:56,081 --> 00:36:59,551 position:50%
+I recommend these
+two sessions from WWDC18
+
+
+823
+00:36:59,551 --> 00:37:02,654 position:50%
+to learn how your apps spring
+to life upon launch:
+
+
+824
+00:37:02,654 --> 00:37:04,556 line:0
+"Optimizing app startup time"
+
+
+825
+00:37:04,556 --> 00:37:08,460 line:0
+and "App startup time:
+Past, present, and future".
+
+
+826
+00:37:08.460 --> 00:37:10.095 line:-1 position:50%
+Thank you all very much
+for joining me
+
+
+827
+00:37:10,095 --> 00:37:11,763 line:-1
+to learn about symbolication!
+
+
+828
+00:37:11.763 --> 00:37:13.598 line:-1 position:50%
+Have a wonderful
+rest of the week.
+
+
+829
+00:37:13,598 --> 00:37:17,001 align:right position:90% size:2%
+♪
+

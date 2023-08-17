@@ -1,0 +1,3432 @@
+2
+00:00:00.334 --> 00:00:03.303 line:-1
+[upbeat music]
+
+
+3
+00:00:03.337 --> 00:00:09.009 line:-1
+♪ ♪
+
+
+4
+00:00:09.042 --> 00:00:10.978 line:-1
+[Michael] Hello, everybody.
+
+
+5
+00:00:11.011 --> 00:00:12.880 line:-2
+I'm Michael LeHew
+from the Core Data team.
+
+
+6
+00:00:12.913 --> 00:00:14.948 line:-2
+And today, I'm really excited
+to talk to you
+
+
+7
+00:00:14.982 --> 00:00:17.384 line:-2
+about some of the enhancements
+the team has made
+
+
+8
+00:00:17.417 --> 00:00:19.186 line:-2
+to make working
+with Core Data and Swift
+
+
+9
+00:00:19.219 --> 00:00:22.155 line:-1
+a truly excellent experience.
+
+
+10
+00:00:22.189 --> 00:00:23.991 line:-1
+I'm going to start with a review
+
+
+11
+00:00:24.024 --> 00:00:26.093 line:-2
+of how Core Data
+is a great solution
+
+
+12
+00:00:26.126 --> 00:00:27.861 line:-2
+for your customers’
+data persistence needs
+
+
+13
+00:00:27.895 --> 00:00:30.364 line:-1
+across all Apple platforms.
+
+
+14
+00:00:30.397 --> 00:00:32.466 line:-2
+I'll then follow up
+with a discussion
+
+
+15
+00:00:32.499 --> 00:00:34.568 line:-2
+on some of the ways
+that Core Data has adopted
+
+
+16
+00:00:34.601 --> 00:00:36.270 line:-2
+the new concurrency
+opportunities
+
+
+17
+00:00:36.303 --> 00:00:38.172 line:-1
+in the Swift runtime.
+
+
+18
+00:00:38.205 --> 00:00:40.607 line:-2
+Next, I'll cover
+some of the enhancements
+
+
+19
+00:00:40.641 --> 00:00:42.309 line:-1
+we've made to Core Data APIs
+
+
+20
+00:00:42.342 --> 00:00:45.312 line:-2
+to make your code
+more expressive in Swift.
+
+
+21
+00:00:45.345 --> 00:00:47.948 line:-2
+And then conclude the discussion
+with an exploration
+
+
+22
+00:00:47.981 --> 00:00:50.651 line:-2
+of the dynamic capabilities
+that Core Data is adding
+
+
+23
+00:00:50.684 --> 00:00:52.286 line:-1
+to our existing SwiftUI support
+
+
+24
+00:00:52.319 --> 00:00:55.455 line:-1
+that we introduced in 2020.
+
+
+25
+00:00:55.489 --> 00:00:57.291 line:-2
+Let's start
+at the beginning, though,
+
+
+26
+00:00:57.324 --> 00:01:00.561 line:-2
+where regardless of which Apple
+platform you are developing for,
+
+
+27
+00:01:00.594 --> 00:01:03.363 line:-1
+you simply have an application.
+
+
+28
+00:01:03.397 --> 00:01:05.265 line:-1
+At some point, your application
+
+
+29
+00:01:05.299 --> 00:01:07.568 line:-2
+is going to eventually
+encounter user data,
+
+
+30
+00:01:07.601 --> 00:01:10.204 line:-2
+and you'll likely need
+to store it somewhere.
+
+
+31
+00:01:10.237 --> 00:01:12.506 line:-1
+A great choice for that need
+
+
+32
+00:01:12.539 --> 00:01:14.875 line:-1
+is to use Core Data.
+
+
+33
+00:01:14.908 --> 00:01:17.044 line:-2
+Core Data is Apple's
+hallmark framework
+
+
+34
+00:01:17.077 --> 00:01:19.680 line:-2
+for application developers
+who desire to persist
+
+
+35
+00:01:19.713 --> 00:01:23.116 line:-2
+their users' data in a robust
+and feature-rich way.
+
+
+36
+00:01:23.150 --> 00:01:26.153 line:-2
+The framework takes care
+of many of the complexities
+
+
+37
+00:01:26.186 --> 00:01:28.922 line:-2
+of appropriately managing
+user data,
+
+
+38
+00:01:28.956 --> 00:01:32.125 line:-2
+from the way it was represented
+as an object graph in memory
+
+
+39
+00:01:32.159 --> 00:01:34.461 line:-1
+to how it's modeled in storage.
+
+
+40
+00:01:34.494 --> 00:01:36.663 line:-2
+The framework also goes
+through great efforts
+
+
+41
+00:01:36.697 --> 00:01:38.832 line:-2
+to manage important
+runtime considerations,
+
+
+42
+00:01:38.866 --> 00:01:41.368 line:-1
+like memory use and latency.
+
+
+43
+00:01:41.401 --> 00:01:44.872 line:-2
+The capabilities provided by
+the framework are scalable too.
+
+
+44
+00:01:44.905 --> 00:01:48.108 line:-2
+You can start with a simple,
+locally-persisted store
+
+
+45
+00:01:48.141 --> 00:01:50.744 line:-2
+and expand to use
+multiple execution contexts
+
+
+46
+00:01:50.777 --> 00:01:53.013 line:-2
+to improve performance,
+and even create
+
+
+47
+00:01:53.046 --> 00:01:56.517 line:-2
+powerful shared data experiences
+through CloudKit.
+
+
+48
+00:01:56.550 --> 00:02:00.387 line:-2
+Core Data also works across
+all Apple-supported platforms.
+
+
+49
+00:02:00.420 --> 00:02:03.657 line:-2
+And I'd really like
+to emphasize this last point.
+
+
+50
+00:02:03.690 --> 00:02:07.294 line:-2
+Once you start using Core Data,
+everything you learn will work
+
+
+51
+00:02:07.327 --> 00:02:09.863 line:-2
+on each of our platforms,
+from your Mac,
+
+
+52
+00:02:09.897 --> 00:02:12.733 line:-2
+to your iPhone,
+or even your Apple Watch.
+
+
+53
+00:02:13.700 --> 00:02:15.736 line:-1
+And, of course, Core Data
+
+
+54
+00:02:15.769 --> 00:02:17.938 line:-1
+works great in Swift too.
+
+
+55
+00:02:17.971 --> 00:02:19.740 line:-1
+Over the past few years,
+
+
+56
+00:02:19.773 --> 00:02:22.142 line:-2
+we've been continuing
+to enhance Core Data API
+
+
+57
+00:02:22.176 --> 00:02:25.045 line:-2
+to be as expressive
+as possible in Swift.
+
+
+58
+00:02:25.078 --> 00:02:27.281 line:-2
+And this is a pretty
+exciting year for Swift
+
+
+59
+00:02:27.314 --> 00:02:28.415 line:-1
+with the introduction
+
+
+60
+00:02:28.448 --> 00:02:30.184 line:-2
+of the all-new
+concurrency features
+
+
+61
+00:02:30.217 --> 00:02:33.754 line:-1
+in the language and runtime.
+
+
+62
+00:02:33.787 --> 00:02:35.756 line:-1
+Since its inception,
+
+
+63
+00:02:35.789 --> 00:02:39.026 line:-2
+Core Data has always cared
+about running code concurrently,
+
+
+64
+00:02:39.059 --> 00:02:41.361 line:-2
+and there's a really
+good reason for this.
+
+
+65
+00:02:41.395 --> 00:02:43.997 line:-2
+Persisting data requires
+reading and writing
+
+
+66
+00:02:44.031 --> 00:02:46.133 line:-1
+to some external storage media,
+
+
+67
+00:02:46.166 --> 00:02:48.435 line:-2
+and this makes supporting
+the new concurrency model
+
+
+68
+00:02:48.468 --> 00:02:50.470 line:-1
+a natural fit.
+
+
+69
+00:02:50.504 --> 00:02:53.273 line:-2
+Let's explore how this works
+in the context
+
+
+70
+00:02:53.307 --> 00:02:55.976 line:-2
+of our Earthquakes
+sample application.
+
+
+71
+00:02:56.009 --> 00:02:58.111 line:-2
+This application
+reads a data feed
+
+
+72
+00:02:58.145 --> 00:03:00.047 line:-1
+from the US Geological Survey
+
+
+73
+00:03:00.080 --> 00:03:02.082 line:-2
+and uses Core Data
+to store information
+
+
+74
+00:03:02.115 --> 00:03:03.283 line:-1
+about recent earthquakes,
+
+
+75
+00:03:03.317 --> 00:03:06.086 line:-2
+such as their magnitude,
+location,
+
+
+76
+00:03:06.119 --> 00:03:09.489 line:-2
+and the date for which
+the event occurred.
+
+
+77
+00:03:09.523 --> 00:03:12.693 line:-2
+Architecturally, Earthquakes
+is a Swift application
+
+
+78
+00:03:12.726 --> 00:03:14.962 line:-2
+that has a view context
+to drive the UI
+
+
+79
+00:03:14.995 --> 00:03:16.430 line:-1
+and a background context
+
+
+80
+00:03:16.463 --> 00:03:19.800 line:-2
+to ingest the data
+provided by the USGS.
+
+
+81
+00:03:19.833 --> 00:03:23.003 line:-2
+Our sample has a local container
+for our application
+
+
+82
+00:03:23.036 --> 00:03:26.673 line:-2
+and gathers quake data
+from the USGS's JSON feed.
+
+
+83
+00:03:28.041 --> 00:03:31.512 line:-2
+As we download data, we hand
+it off to our JSON parser
+
+
+84
+00:03:31.545 --> 00:03:33.947 line:-2
+and then import it
+into our background context
+
+
+85
+00:03:33.981 --> 00:03:35.682 line:-2
+to be turned
+into managed objects
+
+
+86
+00:03:35.716 --> 00:03:38.285 line:-1
+and saved to our local store.
+
+
+87
+00:03:38.318 --> 00:03:40.621 line:-2
+The view context then
+merges the changes
+
+
+88
+00:03:40.654 --> 00:03:43.724 line:-1
+to magically update our UI.
+
+
+89
+00:03:43.757 --> 00:03:47.528 line:-2
+In 2020, we focused on how
+to efficiently handle this data
+
+
+90
+00:03:47.561 --> 00:03:49.997 line:-2
+through the use
+of batch operations.
+
+
+91
+00:03:50.030 --> 00:03:51.865 line:-1
+Now, however, I'd like to focus
+
+
+92
+00:03:51.899 --> 00:03:54.668 line:-2
+on how we perform
+these operations concurrently.
+
+
+93
+00:03:54.701 --> 00:03:56.370 line:-1
+In particular,
+
+
+94
+00:03:56.403 --> 00:03:58.739 line:-2
+I'd like to focus
+on the three steps that we take
+
+
+95
+00:03:58.772 --> 00:04:01.074 line:-2
+to import data
+into the application.
+
+
+96
+00:04:01.108 --> 00:04:03.577 line:-2
+Step one is
+to download the raw data,
+
+
+97
+00:04:03.610 --> 00:04:05.345 line:-1
+and upon successful download,
+
+
+98
+00:04:05.379 --> 00:04:06.947 line:-2
+the application needs
+to convert it
+
+
+99
+00:04:06.980 --> 00:04:09.550 line:-2
+to our specific
+local representation.
+
+
+100
+00:04:09.583 --> 00:04:11.652 line:-2
+And finally,
+save the new objects
+
+
+101
+00:04:11.685 --> 00:04:13.754 line:-1
+into the persistent store.
+
+
+102
+00:04:13.787 --> 00:04:17.057 line:-2
+Let's go ahead and convert this
+to high-level code.
+
+
+103
+00:04:17.090 --> 00:04:19.026 line:-1
+I've abstracted each operation
+
+
+104
+00:04:19.059 --> 00:04:21.228 line:-2
+into its own function
+or closure.
+
+
+105
+00:04:21.261 --> 00:04:24.531 line:-2
+The app first retrieves
+the raw data from the server,
+
+
+106
+00:04:24.565 --> 00:04:27.401 line:-2
+processes it into a convenient
+local representation,
+
+
+107
+00:04:27.434 --> 00:04:29.903 line:-2
+and then imports the objects
+into Core Data
+
+
+108
+00:04:29.937 --> 00:04:31.605 line:-1
+by making a batch insert request
+
+
+109
+00:04:31.638 --> 00:04:34.508 line:-2
+on the background
+managed object context.
+
+
+110
+00:04:35.776 --> 00:04:37.978 line:-2
+Written like this,
+it is a bit easier
+
+
+111
+00:04:38.011 --> 00:04:40.347 line:-2
+to visualize
+potential bottlenecks.
+
+
+112
+00:04:40.380 --> 00:04:43.517 line:-2
+Loading data over the network
+would be a great opportunity
+
+
+113
+00:04:43.550 --> 00:04:46.119 line:-2
+to consider doing
+our work asynchronously.
+
+
+114
+00:04:46.153 --> 00:04:49.256 line:-2
+Converting might also be
+a place to consider.
+
+
+115
+00:04:49.289 --> 00:04:51.024 line:-1
+Additionally, importing the data
+
+
+116
+00:04:51.058 --> 00:04:53.794 line:-2
+into our persistent store
+seems quite opportune.
+
+
+117
+00:04:55.195 --> 00:04:57.598 line:-2
+Historically, though,
+in all of these cases,
+
+
+118
+00:04:57.631 --> 00:04:58.999 line:-1
+you would need to implement
+
+
+119
+00:04:59.032 --> 00:05:01.635 line:-2
+any such asynchronous
+mechanism yourself
+
+
+120
+00:05:01.668 --> 00:05:02.769 line:-1
+or lean heavily
+
+
+121
+00:05:02.803 --> 00:05:05.405 line:-2
+upon a framework-specific
+implementation.
+
+
+122
+00:05:05.439 --> 00:05:08.842 line:-2
+Let's talk about Core Data's
+specific abstraction.
+
+
+123
+00:05:10.244 --> 00:05:13.380 line:-2
+In the case of Core Data,
+when you call performAndWait,
+
+
+124
+00:05:13.413 --> 00:05:15.082 line:-1
+the managed object context
+
+
+125
+00:05:15.115 --> 00:05:16.650 line:-2
+will execute
+the provided closure
+
+
+126
+00:05:16.683 --> 00:05:19.486 line:-2
+within its own protected
+execution environment.
+
+
+127
+00:05:19.520 --> 00:05:21.622 line:-2
+This can potentially tie up
+the calling thread
+
+
+128
+00:05:21.655 --> 00:05:23.257 line:-1
+until the work is complete.
+
+
+129
+00:05:24.324 --> 00:05:25.726 line:-1
+If we were to visualize this,
+
+
+130
+00:05:25.759 --> 00:05:28.095 line:-2
+we can imagine
+three blocks of code
+
+
+131
+00:05:28.128 --> 00:05:31.398 line:-2
+which I've labeled
+BEFORE, DURING, and AFTER.
+
+
+132
+00:05:32.432 --> 00:05:33.834 line:-1
+When our code runs,
+
+
+133
+00:05:33.867 --> 00:05:37.037 line:-2
+first the code labeled BEFORE
+gets a chance to execute
+
+
+134
+00:05:37.070 --> 00:05:39.273 line:-1
+on the originating thread.
+
+
+135
+00:05:39.306 --> 00:05:41.275 line:-1
+We then call performAndWait,
+
+
+136
+00:05:41.308 --> 00:05:43.110 line:-2
+and the calling thread
+will block
+
+
+137
+00:05:43,143 --> 00:05:47,080
+until the work that happens
+DURING the closure completes.
+
+
+138
+00:05:47,114 --> 00:05:50,817
+When that work is done, the code
+described AFTER will execute.
+
+
+139
+00:05:52,152 --> 00:05:53,921
+Of course,
+if you don't need to wait
+
+
+140
+00:05:53,954 --> 00:05:54,988
+for the closure to finish,
+
+
+141
+00:05:55,022 --> 00:05:58,425
+we've always offered
+a fully asynchronous variant.
+
+
+142
+00:05:58,458 --> 00:06:00,561
+But new this year,
+Swift has gained
+
+
+143
+00:06:00,594 --> 00:06:03,864
+powerful concurrency model
+with deep language integration
+
+
+144
+00:06:03,897 --> 00:06:06,233
+which allows Core Data
+to more accurately describe
+
+
+145
+00:06:06,266 --> 00:06:09,203
+the intention of our API.
+
+
+146
+00:06:09,236 --> 00:06:11,471
+The syntax is a bit different.
+
+
+147
+00:06:11,505 --> 00:06:14,575
+You ask to await
+the results of the perform,
+
+
+148
+00:06:14,608 --> 00:06:17,411
+but the mental model
+for using this new API
+
+
+149
+00:06:17,444 --> 00:06:18,679
+is exactly the same
+
+
+150
+00:06:18,712 --> 00:06:22,049
+that managed object
+has always supported.
+
+
+151
+00:06:22,082 --> 00:06:24,551
+The benefit, however,
+is that the concurrency
+
+
+152
+00:06:24,585 --> 00:06:26,653
+is no longer a hidden
+implementation detail,
+
+
+153
+00:06:26,687 --> 00:06:28,755
+but instead deeply integrated
+
+
+154
+00:06:28,789 --> 00:06:30,858
+into the Swift language.
+
+
+155
+00:06:30,891 --> 00:06:32,192
+Because of this,
+
+
+156
+00:06:32,226 --> 00:06:34,094
+the compiler can
+automatically prevent
+
+
+157
+00:06:34,127 --> 00:06:35,796
+many common concurrency bugs,
+
+
+158
+00:06:35,829 --> 00:06:37,965
+such as data races
+and deadlocks,
+
+
+159
+00:06:37,998 --> 00:06:40,634
+and even efficiently make use
+of resources
+
+
+160
+00:06:40,667 --> 00:06:43,770
+when tasks are known
+to be awaiting results.
+
+
+161
+00:06:43,804 --> 00:06:45,239
+Let's go back to the code
+
+
+162
+00:06:45,272 --> 00:06:47,741
+and see what using this
+in practice is like.
+
+
+163
+00:06:49.676 --> 00:06:53.514 line:-2
+As we saw, you ask to await
+an async-declared function.
+
+
+164
+00:06:53.547 --> 00:06:54.848 line:-1
+This has the potential
+
+
+165
+00:06:54.882 --> 00:06:56.783 line:-2
+to suspend
+the calling execution context
+
+
+166
+00:06:56.817 --> 00:07:00.287 line:-2
+until the async function
+yields control by returning.
+
+
+167
+00:07:01.555 --> 00:07:03.690 line:-1
+It also seamlessly works
+
+
+168
+00:07:03.724 --> 00:07:06.260 line:-2
+with Swift's existing
+structured error handling
+
+
+169
+00:07:06.293 --> 00:07:09.029 line:-2
+by routing any thrown errors
+to the calling frame,
+
+
+170
+00:07:09.062 --> 00:07:11.832 line:-1
+just as you would expect.
+
+
+171
+00:07:11.865 --> 00:07:13.400 line:-1
+Now that we've seen an example
+
+
+172
+00:07:13.433 --> 00:07:15.702 line:-2
+of calling
+an asynchronous function,
+
+
+173
+00:07:15.736 --> 00:07:17.871 line:-2
+let's take a look
+at how they're declared
+
+
+174
+00:07:17.905 --> 00:07:20.807 line:-2
+by looking at Core Data's
+brand-new way
+
+
+175
+00:07:20.841 --> 00:07:22.342 line:-1
+to perform asynchronous work
+
+
+176
+00:07:22.376 --> 00:07:24.978 line:-1
+within a managed object context.
+
+
+177
+00:07:25.012 --> 00:07:27.347 line:-2
+There is quite a bit
+of functionality packed
+
+
+178
+00:07:27.381 --> 00:07:29.416 line:-2
+into this small stanza
+of Swift code,
+
+
+179
+00:07:29.449 --> 00:07:31.885 line:-2
+but I'm only gonna talk
+about a few important details,
+
+
+180
+00:07:31.919 --> 00:07:33.320 line:-1
+and then we'll jump into showing
+
+
+181
+00:07:33.353 --> 00:07:36.089 line:-1
+how you can use it in practice.
+
+
+182
+00:07:36.123 --> 00:07:39.026 line:-2
+Starting with the declaration
+of the new perform overload.
+
+
+183
+00:07:39.059 --> 00:07:40.761 line:-1
+You can see it's generic
+
+
+184
+00:07:40.794 --> 00:07:43.163 line:-2
+based on the kind of results
+that it can return
+
+
+185
+00:07:43.197 --> 00:07:45.666 line:-2
+and is decorated with the new
+async keyword,
+
+
+186
+00:07:45.699 --> 00:07:46.934 line:-1
+which opts this function
+
+
+187
+00:07:46.967 --> 00:07:50.304 line:-2
+into the new concurrency
+capabilities in Swift.
+
+
+188
+00:07:50.337 --> 00:07:53.473 line:-2
+Perhaps the most significant
+facet of this new API
+
+
+189
+00:07:53.507 --> 00:07:56.009 line:-2
+is that the provided closure
+now allows you
+
+
+190
+00:07:56.043 --> 00:07:58.612 line:-2
+to throw an error
+or return a value,
+
+
+191
+00:07:58.645 --> 00:08:00.914 line:-2
+saving you the effort
+of routing these back
+
+
+192
+00:08:00.948 --> 00:08:02.783 line:-1
+to the calling frame by hand.
+
+
+193
+00:08:02.816 --> 00:08:04.418 line:-1
+Let's see how cool this is
+
+
+194
+00:08:04.451 --> 00:08:07.588 line:-2
+by exploring
+a few different scenarios.
+
+
+195
+00:08:07.621 --> 00:08:10.490 line:-2
+Historically, since
+the concurrency was hiding
+
+
+196
+00:08:10.524 --> 00:08:12.960 line:-2
+inside of our implementation,
+one of the only ways
+
+
+197
+00:08:12.993 --> 00:08:14.928 line:-2
+to route errors
+outside of a performAndWait
+
+
+198
+00:08:14.962 --> 00:08:16.897 line:-1
+was to close over an optional
+
+
+199
+00:08:16.930 --> 00:08:20.634 line:-1
+and then check it afterwards.
+
+
+200
+00:08:20.667 --> 00:08:23.270 line:-2
+This could be more complicated
+if you were using
+
+
+201
+00:08:23.303 --> 00:08:25.172 line:-2
+the fully asynchronous
+versions of perform
+
+
+202
+00:08:25.205 --> 00:08:27.207 line:-2
+because you'd need
+to do a lot of plumbing
+
+
+203
+00:08:27.241 --> 00:08:29.176 line:-2
+by passing
+completion handlers around
+
+
+204
+00:08:29.209 --> 00:08:33.080 line:-2
+and making sure
+you used them consistently.
+
+
+205
+00:08:33.113 --> 00:08:35.415 line:-2
+With the new concurrency model
+in Swift,
+
+
+206
+00:08:35.449 --> 00:08:37.818 line:-2
+all of that plumbing
+is handled for you!
+
+
+207
+00:08:37.851 --> 00:08:40.454 line:-2
+Just try and await
+your asynchronous work,
+
+
+208
+00:08:40.487 --> 00:08:42.956 line:-2
+and if an error occurs,
+just throw it,
+
+
+209
+00:08:42.990 --> 00:08:46.159 line:-2
+and things will unwind
+to the calling frame naturally.
+
+
+210
+00:08:47.728 --> 00:08:50.097 line:-1
+So now, we focused on errors,
+
+
+211
+00:08:50.130 --> 00:08:51.932 line:-1
+but what about results?
+
+
+212
+00:08:51.965 --> 00:08:54.601 line:-2
+Well, everything I've described
+works exactly the same.
+
+
+213
+00:08:54.635 --> 00:08:56.837 line:-2
+Let's look
+at a concrete example.
+
+
+214
+00:08:57.538 --> 00:09:01.375 line:-2
+Let's sketch out what we wanna
+do before jumping into the code.
+
+
+215
+00:09:01.408 --> 00:09:03.610 line:-2
+For this example,
+I'd like to configure
+
+
+216
+00:09:03.644 --> 00:09:06.446 line:-2
+a fetch request to identify
+the number of earthquakes
+
+
+217
+00:09:06.480 --> 00:09:09.183 line:-2
+that have happened
+in the last five hours.
+
+
+218
+00:09:09.216 --> 00:09:10.450 line:-1
+As a sentence,
+
+
+219
+00:09:10.484 --> 00:09:13.153 line:-2
+this is a straightforward task
+to describe.
+
+
+220
+00:09:13.187 --> 00:09:16.557 line:-2
+But in code, we're going to need
+to reorder things a bit.
+
+
+221
+00:09:17.524 --> 00:09:21.061 line:-2
+We'll first need to figure out
+when five hours ago was,
+
+
+222
+00:09:21.094 --> 00:09:23.263 line:-2
+for which we can use
+the Calendar APIs
+
+
+223
+00:09:23.297 --> 00:09:26.333 line:-2
+to calculate this
+in a robust way.
+
+
+224
+00:09:26.366 --> 00:09:28.802 line:-2
+We'll then configure
+a fetch request
+
+
+225
+00:09:28.836 --> 00:09:30.971 line:-2
+with a predicate
+in terms of that date
+
+
+226
+00:09:31.004 --> 00:09:33.774 line:-1
+and ask for a count result type.
+
+
+227
+00:09:33.807 --> 00:09:37.077 line:-2
+In code, it looks
+pretty much like our plan.
+
+
+228
+00:09:37.110 --> 00:09:39.179 line:-1
+We use Calendar's offset API
+
+
+229
+00:09:39.213 --> 00:09:41.215 line:-2
+to calculate five hours
+before now,
+
+
+230
+00:09:41.248 --> 00:09:43.517 line:-2
+and then configure
+a Quake FetchRequest
+
+
+231
+00:09:43.550 --> 00:09:45.719 line:-2
+to return a count result
+with a predicate
+
+
+232
+00:09:45.752 --> 00:09:49.022 line:-2
+that matches the dates
+that we care about.
+
+
+233
+00:09:49.056 --> 00:09:51.091 line:-1
+Historically, returning results
+
+
+234
+00:09:51.124 --> 00:09:54.328 line:-2
+followed a similar pattern
+to the way we captured errors.
+
+
+235
+00:09:54.361 --> 00:09:57.331 line:-2
+You would close over any state
+that you needed to mutate,
+
+
+236
+00:09:57.364 --> 00:10:00.100 line:-2
+perform your computations
+in the managed object context,
+
+
+237
+00:10:00.133 --> 00:10:03.904 line:-2
+and then later, use the result
+after regaining control.
+
+
+238
+00:10:05.038 --> 00:10:07.474 line:-1
+Now, we can simply just try
+
+
+239
+00:10:07.508 --> 00:10:09.776 line:-2
+and await the result
+of our perform call
+
+
+240
+00:10:09.810 --> 00:10:12.412 line:-2
+and return the result
+for perform directly
+
+
+241
+00:10:12.446 --> 00:10:14.214 line:-1
+to our calling frame.
+
+
+242
+00:10:14.248 --> 00:10:17.117 line:-2
+The rest of the code
+is exactly the same.
+
+
+243
+00:10:17.150 --> 00:10:20.387 line:-2
+It's only the by-hand
+value routing that we avoid
+
+
+244
+00:10:20.420 --> 00:10:23.023 line:-2
+along with any potential bugs
+or nuances
+
+
+245
+00:10:23.056 --> 00:10:26.059 line:-1
+that that code may have had.
+
+
+246
+00:10:26.093 --> 00:10:29.096 line:-2
+This new code is quite
+succinct and expressive.
+
+
+247
+00:10:30.497 --> 00:10:32.199 line:-1
+It is worth mentioning, however,
+
+
+248
+00:10:32.232 --> 00:10:35.135 line:-2
+that there are times
+where you should be cautious.
+
+
+249
+00:10:35.169 --> 00:10:39.006 line:-2
+Let's look at a different
+example to see why.
+
+
+250
+00:10:39.039 --> 00:10:41.008 line:-1
+This example attempts to return
+
+
+251
+00:10:41.041 --> 00:10:44.311 line:-2
+the most recent earthquake
+as a managed object.
+
+
+252
+00:10:44.344 --> 00:10:47.481 line:-2
+While the new API makes it
+really easy to return values,
+
+
+253
+00:10:47.514 --> 00:10:49.816 line:-2
+it is not safe
+to return managed objects
+
+
+254
+00:10:49.850 --> 00:10:53.053 line:-2
+that are already registered
+to a managed object context.
+
+
+255
+00:10:53.086 --> 00:10:56.723 line:-2
+It is only valid to refer
+to such registered objects
+
+
+256
+00:10:56.757 --> 00:11:00.627 line:-2
+within the closure
+of a call to perform.
+
+
+257
+00:11:00.661 --> 00:11:04.264 line:-2
+Instead, if you need to refer
+to a managed object
+
+
+258
+00:11:04.298 --> 00:11:06.800 line:-2
+between different
+execution contexts,
+
+
+259
+00:11:06.834 --> 00:11:09.937 line:-2
+either make use of the object ID
+and refetch as needed,
+
+
+260
+00:11:09.970 --> 00:11:12.806 line:-2
+or make use of the dictionary
+representation option
+
+
+261
+00:11:12.840 --> 00:11:15.342 line:-1
+of the fetch request.
+
+
+262
+00:11:15.375 --> 00:11:17.211 line:-2
+Now before we look
+at one more example,
+
+
+263
+00:11:17.244 --> 00:11:21.014 line:-2
+I'd like to cover a detail
+that I haven't talked about yet.
+
+
+264
+00:11:21.048 --> 00:11:23.550 line:-2
+And that detail is
+the ScheduledTaskType.
+
+
+265
+00:11:23.584 --> 00:11:27.287 line:-2
+So far, every async perform
+that we have seen
+
+
+266
+00:11:27.321 --> 00:11:29.990 line:-2
+has been in terms of the default
+value for this option:
+
+
+267
+00:11:30.023 --> 00:11:32.125 line:-1
+.immediate.
+
+
+268
+00:11:32.159 --> 00:11:34.361 line:-2
+There is a second option
+called .enqueued,
+
+
+269
+00:11:34.394 --> 00:11:35.829 line:-1
+and to understand the difference
+
+
+270
+00:11:35.863 --> 00:11:37.364 line:-2
+between these two
+scheduling approaches,
+
+
+271
+00:11:37.397 --> 00:11:39.800 line:-2
+it helps to think
+about what specifically happens
+
+
+272
+00:11:39.833 --> 00:11:41.702 line:-1
+inside a managed object context
+
+
+273
+00:11:41.735 --> 00:11:43.904 line:-1
+when you ask to schedule work.
+
+
+274
+00:11:43.937 --> 00:11:47.307 line:-2
+As we've seen,
+.immediate behaves a lot
+
+
+275
+00:11:47.341 --> 00:11:50.944 line:-2
+like a Swift-async-aware
+version of performAndWait.
+
+
+276
+00:11:50.978 --> 00:11:53.046 line:-2
+If you're running
+on a different execution context
+
+
+277
+00:11:53.080 --> 00:11:56.650 line:-2
+and ask to await work performed
+on the background context,
+
+
+278
+00:11:56.683 --> 00:12:00.254 line:-2
+you will wait until it is
+scheduled and completed.
+
+
+279
+00:12:05.025 --> 00:12:08.962 line:-2
+If you're already on the same
+execution context, however,
+
+
+280
+00:12:08.996 --> 00:12:12.065 line:-2
+the work will be optimistically
+scheduled right away.
+
+
+281
+00:12:13.267 --> 00:12:15.969 line:-2
+.enqueued, on the other hand,
+is a bit simpler.
+
+
+282
+00:12:16.003 --> 00:12:19.139 line:-2
+It simply always just
+appends the requested work
+
+
+283
+00:12:19.173 --> 00:12:20.908 line:-2
+to the end
+of the contexts' work set,
+
+
+284
+00:12:20.941 --> 00:12:24.411 line:-2
+regardless of the affinity
+of the originating call site.
+
+
+285
+00:12:24.444 --> 00:12:27.181 line:-2
+Let's go ahead and look
+at one more example.
+
+
+286
+00:12:27.214 --> 00:12:28.882 line:-1
+All of these async features
+
+
+287
+00:12:28.916 --> 00:12:31.718 line:-1
+can be adopted by you as well.
+
+
+288
+00:12:31.752 --> 00:12:33.654 line:-2
+Here, I factored
+the import logic
+
+
+289
+00:12:33.687 --> 00:12:34.855 line:-1
+that we have been talking about
+
+
+290
+00:12:34.888 --> 00:12:37.191 line:-2
+into a new
+importQuakes function,
+
+
+291
+00:12:37.224 --> 00:12:40.294 line:-2
+decorated with the new
+async keyword.
+
+
+292
+00:12:40.327 --> 00:12:41.962 line:-1
+This function is, in turn,
+
+
+293
+00:12:41.995 --> 00:12:44.998 line:-2
+implemented in terms
+of other async functionality.
+
+
+294
+00:12:46,400 --> 00:12:49,036
+Now anyone can await
+upon this new function
+
+
+295
+00:12:49,069 --> 00:12:52,272
+to take advantage of the new
+concurrency features in Swift.
+
+
+296
+00:12:52,306 --> 00:12:55,409
+Let's summarize
+what we've seen so far.
+
+
+297
+00:12:55.442 --> 00:12:58.812 line:-2
+Taken altogether,
+this new API brings the support
+
+
+298
+00:12:58.846 --> 00:13:00.514 line:-2
+for Swift's
+structured concurrency
+
+
+299
+00:13:00.547 --> 00:13:02.282 line:-1
+right into Core Data.
+
+
+300
+00:13:02.316 --> 00:13:04.551 line:-2
+The new variants
+of the perform API
+
+
+301
+00:13:04.585 --> 00:13:06.954 line:-2
+are just Swift
+concurrency-aware versions
+
+
+302
+00:13:06.987 --> 00:13:09.223 line:-1
+of the existing Core Data API
+
+
+303
+00:13:09.256 --> 00:13:11.692 line:-1
+you already know and love.
+
+
+304
+00:13:11.725 --> 00:13:13.460 line:-2
+We strongly encourage you
+to take advantage
+
+
+305
+00:13:13.493 --> 00:13:16.063 line:-2
+of this new API
+in your applications.
+
+
+306
+00:13:17.998 --> 00:13:21.268 line:-2
+Further,
+NSManagedObjectContext is not
+
+
+307
+00:13:21.301 --> 00:13:23.670 line:-2
+the only type in Core Data
+that supports performing tasks
+
+
+308
+00:13:23.704 --> 00:13:25.639 line:-2
+within its protected
+concurrency domain.
+
+
+309
+00:13:25.672 --> 00:13:28.041 line:-2
+We're also adding
+similar API to both
+
+
+310
+00:13:28.075 --> 00:13:31.845 line:-2
+NSPersistentContainer and
+NSPersistentStoreCoordinator.
+
+
+311
+00:13:31.879 --> 00:13:35.015 line:-2
+The general shape and behavior
+of these APIs are quite similar
+
+
+312
+00:13:35.048 --> 00:13:36.817 line:-1
+to what I've already described.
+
+
+313
+00:13:36.850 --> 00:13:39.586 line:-2
+But with all
+that concurrent power,
+
+
+314
+00:13:39.620 --> 00:13:41.955 line:-2
+I would be remiss
+to not offer the advice
+
+
+315
+00:13:41.989 --> 00:13:43.690 line:-2
+of using existing
+debugging tools
+
+
+316
+00:13:43.724 --> 00:13:45.459 line:-1
+available at your disposal.
+
+
+317
+00:13:45.492 --> 00:13:47.494 line:-1
+Of course, the Xcode-provided
+
+
+318
+00:13:47.528 --> 00:13:50.163 line:-2
+address and thread sanitizers
+are incredibly helpful
+
+
+319
+00:13:50.197 --> 00:13:52.699 line:-2
+for catching bugs
+you might not even know existed.
+
+
+320
+00:13:52.733 --> 00:13:55.969 line:-2
+These can both be found
+in the Diagnostics pane
+
+
+321
+00:13:56.003 --> 00:13:59.006 line:-2
+of the scheme editor's
+Run settings.
+
+
+322
+00:13:59.039 --> 00:14:01.942 line:-2
+Each sanitizer detects
+different kinds of issues,
+
+
+323
+00:14:01.975 --> 00:14:04.711 line:-2
+including validating
+safe memory use assumptions
+
+
+324
+00:14:04.745 --> 00:14:08.081 line:-2
+and appropriate use of data
+from multiple threads.
+
+
+325
+00:14:08.115 --> 00:14:10.884 line:-2
+It's always a good idea
+to qualify your applications
+
+
+326
+00:14:10.918 --> 00:14:13.387 line:-2
+and their associated tests
+with both sanitizers
+
+
+327
+00:14:13.420 --> 00:14:16.657 line:-2
+before you release your software
+to your community of users.
+
+
+328
+00:14:17.558 --> 00:14:20.427 line:-2
+And while the sanitizers
+are useful in all contexts,
+
+
+329
+00:14:20.460 --> 00:14:22.496 line:-2
+I also wanna highlight
+that Core Data
+
+
+330
+00:14:22.529 --> 00:14:24.131 line:-1
+provides a special runtime flag
+
+
+331
+00:14:24.164 --> 00:14:27.801 line:-2
+that you can enable to get
+more domain-specific help.
+
+
+332
+00:14:27.835 --> 00:14:31.605 line:-2
+By enabling this option,
+Core Data will turn on a number
+
+
+333
+00:14:31.638 --> 00:14:34.041 line:-2
+of useful assertions
+to validate internal locks
+
+
+334
+00:14:34.074 --> 00:14:37.945 line:-2
+and confirm appropriate use
+of various Core Data types.
+
+
+335
+00:14:40,214 --> 00:14:42,282
+Adopting Swift
+concurrency support
+
+
+336
+00:14:42,316 --> 00:14:44,918
+is not the only change made
+to Core Data this year.
+
+
+337
+00:14:44,952 --> 00:14:47,888
+Every new API
+that we are introducing,
+
+
+338
+00:14:47,921 --> 00:14:49,423
+from CloudKit sharing
+
+
+339
+00:14:49,456 --> 00:14:50,891
+to the new
+Spotlight integration,
+
+
+340
+00:14:50,924 --> 00:14:53,193
+has been crafted
+with its presentation
+
+
+341
+00:14:53,227 --> 00:14:55,329
+in Swift in mind.
+
+
+342
+00:14:55,362 --> 00:14:57,130
+This year, we have
+a separate session
+
+
+343
+00:14:57,164 --> 00:14:58,465
+for each of these topics,
+
+
+344
+00:14:58,498 --> 00:15:01,268
+and I encourage you
+to check them out.
+
+
+345
+00:15:01.301 --> 00:15:04.338 line:-2
+We additionally made a pass
+throughout the entire framework
+
+
+346
+00:15:04.371 --> 00:15:05.672 line:-1
+to identify other places
+
+
+347
+00:15:05.706 --> 00:15:07.508 line:-2
+where we can make improvements
+in Swift,
+
+
+348
+00:15:07.541 --> 00:15:11.111 line:-2
+and I'd like to show you
+a few of these now,
+
+
+349
+00:15:11.144 --> 00:15:12.546 line:-1
+starting with the kinds
+
+
+350
+00:15:12.579 --> 00:15:14.481 line:-2
+of different persistent
+stores that we support.
+
+
+351
+00:15:14.515 --> 00:15:17.017 line:-2
+Recall,
+persistent stores describe
+
+
+352
+00:15:17.050 --> 00:15:20.420 line:-2
+how you physically want
+to store your customers' data.
+
+
+353
+00:15:20.454 --> 00:15:23.290 line:-2
+Core Data currently provides
+four such stores:
+
+
+354
+00:15:23.323 --> 00:15:25.559 line:-1
+XML, binary,
+
+
+355
+00:15:25.592 --> 00:15:27.895 line:-1
+in-memory, and SQLite.
+
+
+356
+00:15:27.928 --> 00:15:31.798 line:-2
+And you use these
+identifiers all the time.
+
+
+357
+00:15:31.832 --> 00:15:33.934 line:-1
+New this year, we've gone ahead
+
+
+358
+00:15:33.967 --> 00:15:36.270 line:-2
+and gave these
+more natural names in Swift.
+
+
+359
+00:15:36.303 --> 00:15:38.906 line:-2
+The existing names
+will continue to work,
+
+
+360
+00:15:38.939 --> 00:15:41.108 line:-2
+but the new API
+that consumes these
+
+
+361
+00:15:41.141 --> 00:15:42.809 line:-2
+will be a lot more
+ergonomic to use
+
+
+362
+00:15:42.843 --> 00:15:44.111 line:-1
+due to the shorter names
+
+
+363
+00:15:44.144 --> 00:15:47.214 line:-2
+and ability to autocomplete
+these symbols.
+
+
+364
+00:15:47.247 --> 00:15:49.883 line:-2
+Of course,
+persistent stores are not
+
+
+365
+00:15:49.917 --> 00:15:53.120 line:-2
+the only thing in Core Data
+that concerns itself with types.
+
+
+366
+00:15:53.153 --> 00:15:56.690 line:-2
+After all, the framework
+is all about storing typed data,
+
+
+367
+00:15:56.723 --> 00:15:59.726 line:-2
+and such types are described
+with attribute descriptions.
+
+
+368
+00:16:00.661 --> 00:16:02.129 line:-1
+And this year, we're adding
+
+
+369
+00:16:02.162 --> 00:16:04.865 line:-2
+a new extensible enumeration
+to attribute description
+
+
+370
+00:16:04.898 --> 00:16:06.967 line:-2
+that provides
+a much more natural syntax
+
+
+371
+00:16:07.000 --> 00:16:09.236 line:-1
+for working with their types.
+
+
+372
+00:16:09.269 --> 00:16:10.838 line:-2
+Let's take a look
+at these in action
+
+
+373
+00:16:10.871 --> 00:16:13.707 line:-2
+by writing a unit test that can
+validate that our runtime model
+
+
+374
+00:16:13.740 --> 00:16:16.743 line:-2
+matches what we designed
+in the Xcode model builder.
+
+
+375
+00:16:17.744 --> 00:16:20.080 line:-2
+For simplicity,
+we'll just try to validate
+
+
+376
+00:16:20.113 --> 00:16:23.417 line:-2
+a single runtime type defined
+by our earthquake object model,
+
+
+377
+00:16:23.450 --> 00:16:26.420 line:-2
+but you can imagine
+how this would scale.
+
+
+378
+00:16:26.453 --> 00:16:28.689 line:-2
+This might seem like
+a small test to write,
+
+
+379
+00:16:28.722 --> 00:16:30.324 line:-2
+but it's a good thing
+to validate
+
+
+380
+00:16:30.357 --> 00:16:32.292 line:-2
+as it could speed up
+more interesting diagnoses
+
+
+381
+00:16:32.326 --> 00:16:34.228 line:-1
+in the future.
+
+
+382
+00:16:34.261 --> 00:16:35.762 line:-1
+To write this test,
+
+
+383
+00:16:35.796 --> 00:16:37.364 line:-2
+we'll write a quick
+helper function
+
+
+384
+00:16:37.397 --> 00:16:39.299 line:-2
+in terms of
+the new attribute type.
+
+
+385
+00:16:39.333 --> 00:16:42.169 line:-2
+Let's go ahead
+and describe this function now.
+
+
+386
+00:16:42.202 --> 00:16:45.506 line:-2
+We'll start with the signature,
+which expects an attribute name,
+
+
+387
+00:16:45.539 --> 00:16:48.942 line:-2
+the entity description that
+we care about, and the type,
+
+
+388
+00:16:48.976 --> 00:16:52.179 line:-2
+described in terms of the new
+AttributeType enumeration.
+
+
+389
+00:16:53,180 --> 00:16:56,450
+The definition of this utility
+is fairly straightforward.
+
+
+390
+00:16:56,483 --> 00:16:58,685
+We first validate
+that we have an attribute
+
+
+391
+00:16:58,719 --> 00:16:59,987
+with the provided name,
+
+
+392
+00:17:00,020 --> 00:17:03,123
+failing the test
+if we can't find it.
+
+
+393
+00:17:03,156 --> 00:17:04,858
+And then we validate
+that the type
+
+
+394
+00:17:04,892 --> 00:17:06,660
+of the attribute is as expected.
+
+
+395
+00:17:06,693 --> 00:17:08,962
+And that's really
+all there is to it.
+
+
+396
+00:17:08,996 --> 00:17:11,598
+We could repeat this
+for each entity and property
+
+
+397
+00:17:11,632 --> 00:17:13,066
+and enjoy peace of mind
+
+
+398
+00:17:13,100 --> 00:17:16,336
+that our runtime behavior
+matches the model we defined.
+
+
+399
+00:17:17,371 --> 00:17:18,805
+And this is just a sampling
+
+
+400
+00:17:18,839 --> 00:17:20,641
+of some of the ergonomic
+improvements that we've made
+
+
+401
+00:17:20,674 --> 00:17:23,977
+to Core Data enumerations
+in Swift this year.
+
+
+402
+00:17:26.013 --> 00:17:28.148 line:-1
+Up till now, I've been focusing
+
+
+403
+00:17:28.182 --> 00:17:30.284 line:-2
+on a lot of lower-level
+framework interactions
+
+
+404
+00:17:30.317 --> 00:17:32.452 line:-1
+and how they manifest in Swift,
+
+
+405
+00:17:32.486 --> 00:17:35.722 line:-2
+but what about presenting
+data to your users?
+
+
+406
+00:17:35.756 --> 00:17:38.892 line:-2
+In 2020, we introduced
+a number of conveniences
+
+
+407
+00:17:38.926 --> 00:17:41.361 line:-2
+for working with Core Data
+in SwiftUI.
+
+
+408
+00:17:41.395 --> 00:17:42.863 line:-1
+And now, my colleague, Scott,
+
+
+409
+00:17:42.896 --> 00:17:44.598 line:-2
+has quite a bit
+to share with you
+
+
+410
+00:17:44.631 --> 00:17:47.100 line:-2
+about the new enhancements
+we are introducing this year.
+
+
+411
+00:17:47.134 --> 00:17:48.101 line:-1
+Scott?
+
+
+412
+00:17:48.135 --> 00:17:49.303 line:-1
+[Scott] Thanks, Michael!
+
+
+413
+00:17:49.336 --> 00:17:50.971 line:-2
+There are a bunch
+of improvements
+
+
+414
+00:17:51.004 --> 00:17:52.506 line:-2
+to the experience
+of using Core Data
+
+
+415
+00:17:52.539 --> 00:17:54.074 line:-1
+with SwiftUI this year,
+
+
+416
+00:17:54.107 --> 00:17:57.344 line:-2
+starting with lazy entity
+resolution in fetch requests,
+
+
+417
+00:17:57.377 --> 00:17:59.079 line:-1
+which relaxes the requirement
+
+
+418
+00:17:59.112 --> 00:18:01.081 line:-2
+that apps have
+their Core Data stacks set up
+
+
+419
+00:18:01.114 --> 00:18:03.650 line:-2
+before they construct
+their views.
+
+
+420
+00:18:03.684 --> 00:18:05.886 line:-2
+Also this year,
+fetch requests pick up
+
+
+421
+00:18:05.919 --> 00:18:09.089 line:-2
+dynamic configuration for their
+sort descriptors and predicates.
+
+
+422
+00:18:10.157 --> 00:18:12.226 line:-2
+And there's a new kind
+of fetch request in town
+
+
+423
+00:18:12.259 --> 00:18:15.629 line:-2
+that supports
+sectioned fetching.
+
+
+424
+00:18:15.662 --> 00:18:17.464 line:-2
+I'm going to walk
+through each of these
+
+
+425
+00:18:17.497 --> 00:18:18.866 line:-1
+using our Earthquakes sample app
+
+
+426
+00:18:18.899 --> 00:18:20.667 line:-2
+that Michael mentioned
+earlier in the talk,
+
+
+427
+00:18:20.701 --> 00:18:23.570 line:-2
+starting with
+lazy entity resolution.
+
+
+428
+00:18:24.371 --> 00:18:25.973 line:-1
+Probably in your app,
+
+
+429
+00:18:26.006 --> 00:18:28.709 line:-1
+you have some code like this.
+
+
+430
+00:18:28.742 --> 00:18:32.412 line:-2
+This container property here
+isn't really necessary
+
+
+431
+00:18:32.446 --> 00:18:33.947 line:-2
+to support the code
+in this type,
+
+
+432
+00:18:33.981 --> 00:18:35.749 line:-1
+or even the broader app.
+
+
+433
+00:18:35.782 --> 00:18:37.217 line:-2
+All that stuff
+gets what it needs
+
+
+434
+00:18:37.251 --> 00:18:39.920 line:-2
+from the QuakesProvider
+type directly.
+
+
+435
+00:18:39.953 --> 00:18:41.355 line:-1
+No, this property exists
+
+
+436
+00:18:41.388 --> 00:18:42.890 line:-1
+to make sure the Core Data stack
+
+
+437
+00:18:42.923 --> 00:18:44.558 line:-2
+has been set up
+before any of the views
+
+
+438
+00:18:44.591 --> 00:18:47.461 line:-2
+in the environment try
+to refer to any entities
+
+
+439
+00:18:47.494 --> 00:18:49.830 line:-2
+before the model
+has been loaded.
+
+
+440
+00:18:49.863 --> 00:18:51.965 line:-1
+See here
+
+
+441
+00:18:51.999 --> 00:18:55.035 line:-2
+that the environment
+view modifier is called
+
+
+442
+00:18:55.068 --> 00:18:57.738 line:-2
+after ContentView
+has been initialized.
+
+
+443
+00:18:57.771 --> 00:18:59.506 line:-2
+This trick
+isn't necessary anymore
+
+
+444
+00:18:59.540 --> 00:19:01.975 line:-2
+when deploying
+against this year's SDKs.
+
+
+445
+00:19:02.009 --> 00:19:04.378 line:-2
+The FetchRequest property
+wrapper now looks up entities
+
+
+446
+00:19:04.411 --> 00:19:06.246 line:-1
+by name lazily at fetch-time,
+
+
+447
+00:19:06.280 --> 00:19:08.448 line:-2
+at which point
+the environment has guaranteed
+
+
+448
+00:19:08.482 --> 00:19:11.251 line:-2
+that the Core Data stack
+has been set up,
+
+
+449
+00:19:11.285 --> 00:19:14.421 line:-2
+so it's now safe
+to delete this property...
+
+
+450
+00:19:16.023 --> 00:19:18.959 line:-1
+And just refer to...
+
+
+451
+00:19:20.894 --> 00:19:22.963 line:-2
+the QuakesProvider
+shared container
+
+
+452
+00:19:22.996 --> 00:19:25.933 line:-2
+directly in
+the environment call.
+
+
+453
+00:19:25.966 --> 00:19:28.735 line:-1
+Moving on to some new APIs,
+
+
+454
+00:19:28.769 --> 00:19:31.471 line:-2
+FetchRequest now supports
+dynamic configuration.
+
+
+455
+00:19:31.505 --> 00:19:34.007 line:-2
+There are two new properties
+on the wrapped value
+
+
+456
+00:19:34.041 --> 00:19:36.743 line:-2
+for directly changing
+the request's predicate
+
+
+457
+00:19:36.777 --> 00:19:38.712 line:-1
+as well as its sort descriptors,
+
+
+458
+00:19:38.745 --> 00:19:40.080 line:-1
+which are expressed both
+
+
+459
+00:19:40.113 --> 00:19:42.115 line:-2
+with the NSSortDescriptors
+that you're used to
+
+
+460
+00:19:42.149 --> 00:19:44.518 line:-2
+as well as
+a new SortDescriptor value type
+
+
+461
+00:19:44.551 --> 00:19:46.453 line:-2
+that provides more convenience
+and safety
+
+
+462
+00:19:46.486 --> 00:19:47.888 line:-1
+when fetching entities
+
+
+463
+00:19:47.921 --> 00:19:51.158 line:-2
+with automatically generated
+managed object subclasses.
+
+
+464
+00:19:53.093 --> 00:19:55.395 line:-2
+And finally, there's
+a configuration binding
+
+
+465
+00:19:55.429 --> 00:19:57.464 line:-2
+with the same set of properties
+as the wrapped value
+
+
+466
+00:19:57.497 --> 00:20:00.400 line:-2
+for easier integration
+with views.
+
+
+467
+00:20:00.434 --> 00:20:02.402 line:-1
+Before this new API,
+
+
+468
+00:20:02.436 --> 00:20:04.338 line:-2
+I would've had
+to design my views
+
+
+469
+00:20:04.371 --> 00:20:05.939 line:-2
+so the sort and predicate
+parameters
+
+
+470
+00:20:05.973 --> 00:20:08.041 line:-2
+were passed
+through a view's initializer,
+
+
+471
+00:20:08.075 --> 00:20:09.443 line:-1
+but that made it really tricky
+
+
+472
+00:20:09.476 --> 00:20:11.612 line:-2
+to support things like
+configuring my fetch request
+
+
+473
+00:20:11.645 --> 00:20:14.681 line:-1
+using controls in a toolbar.
+
+
+474
+00:20:14.715 --> 00:20:16.049 line:-1
+This friction is eliminated
+
+
+475
+00:20:16.083 --> 00:20:18.552 line:-2
+by these new dynamic
+configuration properties,
+
+
+476
+00:20:18.585 --> 00:20:20.521 line:-2
+and I'd love to show you
+how to use them
+
+
+477
+00:20:20.554 --> 00:20:22.122 line:-2
+by adding sorting
+and filtering
+
+
+478
+00:20:22.155 --> 00:20:23.590 line:-1
+to the Earthquakes sample app.
+
+
+479
+00:20:23.624 --> 00:20:26.159 line:-2
+Let's look
+at sort descriptors first.
+
+
+480
+00:20:26.193 --> 00:20:29.229 line:-2
+By default, the Earthquakes
+app sorts by recency,
+
+
+481
+00:20:29.263 --> 00:20:31.632 line:-2
+but I'd also like
+to order them by magnitude,
+
+
+482
+00:20:31.665 --> 00:20:32.833 line:-1
+so I'm going to add a menu
+
+
+483
+00:20:32.866 --> 00:20:35.569 line:-2
+that lets me control
+the results' order.
+
+
+484
+00:20:36.403 --> 00:20:40.174 line:-2
+I'll start by adding
+a static array of tuples...
+
+
+485
+00:20:41.942 --> 00:20:44.444 line:-2
+containing the sort descriptors
+I'd like to support
+
+
+486
+00:20:44.478 --> 00:20:46.079 line:-1
+as well as names for them.
+
+
+487
+00:20:46.113 --> 00:20:49.950 line:-2
+See here that they're also using
+the new SortDescriptor type.
+
+
+488
+00:20:52.753 --> 00:20:55.055 line:-2
+I'll also want a bit
+of state to track
+
+
+489
+00:20:55.088 --> 00:20:58.325 line:-2
+which sort order
+I am currently using.
+
+
+490
+00:20:58.358 --> 00:21:01.862 line:-2
+I've already created
+a type for this,
+
+
+491
+00:21:01.895 --> 00:21:05.566 line:-2
+so I'll add it as a property
+of the content view.
+
+
+492
+00:21:05.599 --> 00:21:09.169 line:-2
+Now I'll add a toolbar menu
+to the list view...
+
+
+493
+00:21:11,572 --> 00:21:13,707
+That modifies the selected sort
+
+
+494
+00:21:13,740 --> 00:21:15,709
+as well as an onChange modifier
+
+
+495
+00:21:15,742 --> 00:21:18,512
+that updates the fetch request's
+sort descriptors.
+
+
+496
+00:21:20,747 --> 00:21:24,451
+Now in the preview,
+we can see the new menu,
+
+
+497
+00:21:24,484 --> 00:21:27,955
+and I can use it to sort
+the earthquakes by magnitude.
+
+
+498
+00:21:27,988 --> 00:21:29,423
+Great!
+
+
+499
+00:21:29,456 --> 00:21:32,793
+Now to add filtering.
+
+
+500
+00:21:32.826 --> 00:21:36.496 line:-2
+I'd like to filter based
+on the earthquake's place.
+
+
+501
+00:21:36.530 --> 00:21:39.499 line:-1
+The first thing I need
+
+
+502
+00:21:39.533 --> 00:21:42.936 line:-2
+is some state
+for the search field's text.
+
+
+503
+00:21:42.970 --> 00:21:44.204 line:-1
+And I'll make
+
+
+504
+00:21:44.238 --> 00:21:47.641 line:-1
+a binding property...
+
+
+505
+00:21:48.775 --> 00:21:52.179 line:-2
+for the search field that
+updates the fetch request.
+
+
+506
+00:21:56.550 --> 00:21:59.486 line:-2
+With those in place,
+all I need is the UI.
+
+
+507
+00:21:59.520 --> 00:22:01.688 line:-1
+Conveniently...
+
+
+508
+00:22:04,191 --> 00:22:06,593
+searchable takes
+a binding to a string,
+
+
+509
+00:22:06,627 --> 00:22:09,062
+so we can just plop
+that right in here.
+
+
+510
+00:22:11.431 --> 00:22:13.400 line:-2
+Now in our preview,
+we can narrow down
+
+
+511
+00:22:13.433 --> 00:22:16.370 line:-2
+all the earthquakes near a place
+matching a sandwich
+
+
+512
+00:22:16.403 --> 00:22:20.107 line:-2
+by just typing "sandwich"
+in this new field here.
+
+
+513
+00:22:22.109 --> 00:22:25.746 line:-2
+And that's dynamic configuration
+for FetchRequest.
+
+
+514
+00:22:25.779 --> 00:22:28.749 line:-2
+Another commonly requested piece
+of functionality
+
+
+515
+00:22:28.782 --> 00:22:30.350 line:-2
+is support
+for sectioned fetching,
+
+
+516
+00:22:30.384 --> 00:22:32.686 line:-2
+which arrives this year
+as a new property wrapper type
+
+
+517
+00:22:32.719 --> 00:22:35.822 line:-1
+called SectionedFetchRequest.
+
+
+518
+00:22:35.856 --> 00:22:37.758 line:-1
+This type supports the same
+
+
+519
+00:22:37.791 --> 00:22:40.961 line:-2
+new dynamic configuration
+properties as FetchRequest,
+
+
+520
+00:22:40.994 --> 00:22:43.263 line:-2
+but it gets initialized
+with an additional parameter,
+
+
+521
+00:22:43.297 --> 00:22:46.433 line:-2
+a key path to a property
+that identifies the section,
+
+
+522
+00:22:46.466 --> 00:22:49.469 line:-2
+a lot like
+NSFetchedResultsController.
+
+
+523
+00:22:50.804 --> 00:22:53.307 line:-2
+But unlike the fetched
+results controller,
+
+
+524
+00:22:53.340 --> 00:22:55.108 line:-2
+the property
+that identifies the section
+
+
+525
+00:22:55.142 --> 00:22:57.811 line:-2
+can have any type you like,
+so long as it's hashable.
+
+
+526
+00:22:57.845 --> 00:22:59.813 line:-2
+This gets encoded
+in the type system
+
+
+527
+00:22:59.847 --> 00:23:01.849 line:-2
+using an additional
+generic parameter
+
+
+528
+00:23:01.882 --> 00:23:05.185 line:-1
+on SectionedFetchRequest.
+
+
+529
+00:23:05.219 --> 00:23:07.454 line:-1
+Finally, this new type wraps
+
+
+530
+00:23:07.487 --> 00:23:09.456 line:-1
+a two-dimensional result type.
+
+
+531
+00:23:09.489 --> 00:23:12.459 line:-2
+SectionedFetchResults is
+a collection of sections,
+
+
+532
+00:23:12.492 --> 00:23:15.762 line:-2
+each of which is itself
+a collection of results.
+
+
+533
+00:23:15.796 --> 00:23:19.633 line:-2
+Each section also has a property
+with the section identifier.
+
+
+534
+00:23:21.668 --> 00:23:23.270 line:-1
+This is really easy to adopt,
+
+
+535
+00:23:23.303 --> 00:23:25.005 line:-2
+so I'm going to add
+sectioned fetching
+
+
+536
+00:23:25.038 --> 00:23:26.740 line:-1
+to the Earthquakes app.
+
+
+537
+00:23:26.773 --> 00:23:30.110 line:-2
+First, I update
+my FetchRequest declaration.
+
+
+538
+00:23:34.848 --> 00:23:37.518 line:-2
+Quake already has
+a property for day,
+
+
+539
+00:23:37.551 --> 00:23:40.554 line:-2
+so I'm going to use that
+for the sectioning key path.
+
+
+540
+00:23:41.889 --> 00:23:44.791 line:-2
+Next, I need to update
+the body property...
+
+
+541
+00:23:49.830 --> 00:23:52.232 line:-2
+To match the new
+sectioned results type.
+
+
+542
+00:23:53.967 --> 00:23:57.504 line:-2
+The outer loop here
+iterates over the sections,
+
+
+543
+00:23:57.538 --> 00:24:00.374 line:-2
+so I'm emitting
+a Section view here,
+
+
+544
+00:24:00.407 --> 00:24:02.776 line:-2
+and each section itself
+is a collection of Quakes,
+
+
+545
+00:24:02.809 --> 00:24:06.046 line:-2
+so this inner ForEach
+iterates over the section,
+
+
+546
+00:24:06.079 --> 00:24:09.082 line:-2
+just like I was iterating
+over the results before.
+
+
+547
+00:24:12.920 --> 00:24:15.923 line:-2
+If we look over at the preview,
+I've now got earthquakes
+
+
+548
+00:24:15.956 --> 00:24:18.425 line:-2
+ordered by time
+and sectioned by day.
+
+
+549
+00:24:18.458 --> 00:24:21.161 line:-2
+And SwiftUI even gives me
+automatic support
+
+
+550
+00:24:21.195 --> 00:24:23.197 line:-1
+for collapsing sections.
+
+
+551
+00:24:27.634 --> 00:24:30.437 line:-2
+This new SectionedFetchRequest
+type supports the same
+
+
+552
+00:24:30.470 --> 00:24:33.307 line:-2
+dynamic configuration properties
+as FetchRequest
+
+
+553
+00:24:33.340 --> 00:24:35.709 line:-2
+as well as an additional
+configuration property
+
+
+554
+00:24:35.742 --> 00:24:39.246 line:-2
+for the section
+identifier key path.
+
+
+555
+00:24:39.279 --> 00:24:42.216 line:-2
+This is super important
+because it's not actually safe
+
+
+556
+00:24:42.249 --> 00:24:44.151 line:-2
+for us to change
+the sorting anymore.
+
+
+557
+00:24:44.184 --> 00:24:46.453 line:-2
+It could cause the sections
+to be discontiguous
+
+
+558
+00:24:46.486 --> 00:24:48.722 line:-2
+because time
+and earthquake magnitude
+
+
+559
+00:24:48.755 --> 00:24:50.224 line:-1
+aren't perfectly correlated,
+
+
+560
+00:24:50.257 --> 00:24:53.961 line:-1
+which is probably for the best.
+
+
+561
+00:24:53.994 --> 00:24:57.831 line:-2
+To fix this, I need to update
+the sorts up top...
+
+
+562
+00:24:59.633 --> 00:25:03.103 line:-2
+so each has a corresponding
+section identifier key path.
+
+
+563
+00:25:05.606 --> 00:25:08.242 line:-1
+Next, down in the toolbar...
+
+
+564
+00:25:09,676 --> 00:25:12,346
+I need to update
+the section identifier key path
+
+
+565
+00:25:12,379 --> 00:25:15,015
+each time I update
+the sort descriptors.
+
+
+566
+00:25:16,783 --> 00:25:19,086
+But here's the important part.
+
+
+567
+00:25:19,119 --> 00:25:21,221
+Changes to the request
+are committed
+
+
+568
+00:25:21,255 --> 00:25:23,257
+whenever the results getter
+is called,
+
+
+569
+00:25:23,290 --> 00:25:27,060
+so to update both the sorting
+and the sectioning safely...
+
+
+570
+00:25:29,196 --> 00:25:31,999
+I need to update
+the configuration on a reference
+
+
+571
+00:25:32,032 --> 00:25:34,835
+to the results that I've pulled
+into a local.
+
+
+572
+00:25:36,170 --> 00:25:37,704
+Now in the preview,
+
+
+573
+00:25:37,738 --> 00:25:40,307
+we can see that
+changing the order
+
+
+574
+00:25:40,340 --> 00:25:42,342
+also changes the sectioning.
+
+
+575
+00:25:42.376 --> 00:25:45.379 line:-2
+We can flip between earthquakes
+ordered by time,
+
+
+576
+00:25:45.412 --> 00:25:46.847 line:-1
+sectioned by day,
+
+
+577
+00:25:46.880 --> 00:25:50.851 line:-2
+and earthquakes ordered
+and sectioned by magnitude.
+
+
+578
+00:25:54.988 --> 00:25:58.392 line:-2
+And there we have it:
+lazy stack initialization,
+
+
+579
+00:25:58.425 --> 00:26:01.161 line:-2
+dynamic configuration,
+and sectioned fetching,
+
+
+580
+00:26:01.195 --> 00:26:03.430 line:-2
+all easily applied
+to an existing app
+
+
+581
+00:26:03.463 --> 00:26:06.533 line:-1
+using iOS 15 and macOS Monterey.
+
+
+582
+00:26:07,167 --> 00:26:10,304
+So, to recap, Core Data
+is your one-stop shop
+
+
+583
+00:26:10,337 --> 00:26:12,472
+for managing your app's
+data persistence needs
+
+
+584
+00:26:12,506 --> 00:26:15,342
+across all of Apple's platforms.
+
+
+585
+00:26:15,375 --> 00:26:17,344
+It harnesses the new
+concurrency features
+
+
+586
+00:26:17,377 --> 00:26:20,013
+available in Swift
+through a new perform API,
+
+
+587
+00:26:20,047 --> 00:26:23,383
+and still has powerful thread
+safety debugging built right in.
+
+
+588
+00:26:24,718 --> 00:26:27,354
+It's got new enumeration
+interfaces that make store
+
+
+589
+00:26:27,387 --> 00:26:30,290
+and attribute types even
+more natural to use in Swift,
+
+
+590
+00:26:30,324 --> 00:26:33,994
+plus CloudKit sharing
+and Spotlight integration.
+
+
+591
+00:26:34,027 --> 00:26:36,363
+And it's easier than ever
+to connect your data
+
+
+592
+00:26:36,396 --> 00:26:37,998
+to your views using SwiftUI
+
+
+593
+00:26:38,031 --> 00:26:40,901
+with dynamic configuration
+and sectioned fetching.
+
+
+594
+00:26:43,070 --> 00:26:45,539
+There's lots more
+new stuff to learn
+
+
+595
+00:26:45,572 --> 00:26:46,807
+related to these topics.
+
+
+596
+00:26:46,840 --> 00:26:48,976
+We suggest checking out
+the collections
+
+
+597
+00:26:49,009 --> 00:26:52,446
+"Simplify with SwiftUI
+and Meet Swift Concurrency."
+
+
+598
+00:26:52.479 --> 00:26:53.780 line:-1
+And that's it!
+
+
+599
+00:26:53.814 --> 00:26:55.215 line:-2
+I'm really looking
+forward to seeing
+
+
+600
+00:26:55.249 --> 00:26:57.918 line:-2
+what you all build
+with these new APIs.
+
+
+601
+00:26:57.951 --> 00:27:00.954 line:-1
+[upbeat music]
+

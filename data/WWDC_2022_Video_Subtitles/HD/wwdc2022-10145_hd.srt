@@ -1,0 +1,984 @@
+2
+00:00:00.334 --> 00:00:06.340 line:-1 align:center
+[upbeat music]
+
+
+3
+00:00:09.309 --> 00:00:14.147 line:-2 align:center
+- Hello all.
+I'm Prashant, and welcome to WWDC.
+
+
+4
+00:00:14.181 --> 00:00:18.085 line:-1 align:center
+In 2021, we introduced HLS Interstitials.
+
+
+5
+00:00:18,118 --> 00:00:21,188 line:-2
+They offer a really simple way
+to schedule ads and other interstitials
+
+
+6
+00:00:21.221 --> 00:00:23.423 line:-1 align:center
+in your HLS streams.
+
+
+7
+00:00:23,457 --> 00:00:24,992 line:-1
+This year, we've added features
+
+
+8
+00:00:25.025 --> 00:00:27.494 line:-2 align:center
+that let you better optimize
+your ad inventory
+
+
+9
+00:00:27.528 --> 00:00:29.997 line:-1 align:center
+and also fine tune your presentation.
+
+
+10
+00:00:30,030 --> 00:00:33,467 line:-2
+So come, let's find out
+what's new in HLS Interstitials.
+
+
+11
+00:00:33.500 --> 00:00:39.306 line:-2 align:center
+In this talk, we'll start with a quick
+overview of how HLS Interstitials work.
+
+
+12
+00:00:39.339 --> 00:00:44.144 line:-2 align:center
+And we'll follow that by discussing the
+new ad cueing options that we've added.
+
+
+13
+00:00:44.178 --> 00:00:47.147 line:-2 align:center
+After that, we'll see how you
+can fine tune your ad experience,
+
+
+14
+00:00:47,181 --> 00:00:51,552 line:-2
+especially in live scenarios
+using the SNAP attributes.
+
+
+15
+00:00:51.585 --> 00:00:53.820 line:-2 align:center
+We'll then go over some
+of the new query parameters
+
+
+16
+00:00:53,854 --> 00:00:57,291 line:-1
+that we've added to the HLS specification,
+
+
+17
+00:00:57.324 --> 00:01:00.761 line:-2 align:center
+and finally we'll discuss the changes
+to the AVFoundation APIs
+
+
+18
+00:01:00.794 --> 00:01:03.564 line:-1 align:center
+that incorporate these new features.
+
+
+19
+00:01:03,597 --> 00:01:05,933 line:-1
+But before we dive into the new features,
+
+
+20
+00:01:05.966 --> 00:01:09.369 line:-2 align:center
+let's quickly refresh ourselves
+with HLS Interstitials.
+
+
+21
+00:01:09.403 --> 00:01:12.573 line:-2 align:center
+With HLS Interstitials,
+ads are treated as separate assets
+
+
+22
+00:01:12.606 --> 00:01:15.542 line:-2 align:center
+that can be scheduled
+onto a program timeline.
+
+
+23
+00:01:15.576 --> 00:01:18.545 line:-2 align:center
+They need not be stitched in with
+discontinuity tags anymore.
+
+
+24
+00:01:18.579 --> 00:01:22.716 line:-2 align:center
+Instead, they can be directly referenced
+via their multivariant playlist.
+
+
+25
+00:01:22,749 --> 00:01:26,353 line:-2
+This makes it really simple
+to schedule ads, as you'd only need to
+
+
+26
+00:01:26,386 --> 00:01:29,323 line:-2
+point to their multivariant playlist
+from your primary content.
+
+
+27
+00:01:30,324 --> 00:01:35,028 line:0
+This is your typical media playlist
+that shows a primary content timeline.
+
+
+28
+00:01:35,062 --> 00:01:38,031 align:center
+Say you want to schedule
+two ads during playback.
+
+
+29
+00:01:38,065 --> 00:01:42,202 line:0
+You'd like for the first ad to appear
+some 5 seconds into playback.
+
+
+30
+00:01:42,236 --> 00:01:46,773 align:center
+For that, you'd simply specify the start
+time of the ad using a DATERANGE tag.
+
+
+31
+00:01:48,275 --> 00:01:51,445 align:center
+And you'd like for the second ad
+to appear at 15 seconds.
+
+
+32
+00:01:51,478 --> 00:01:54,748 line:0
+For that, you'd add another
+DATERANGE tag to the playlist.
+
+
+33
+00:01:54,781 --> 00:01:56,316 line:0
+It's as simple as that.
+
+
+34
+00:01:57,451 --> 00:02:02,222 line:0
+It could also be that your primary content
+has some ads already stitched in.
+
+
+35
+00:02:02,256 --> 00:02:05,325 align:center
+You can even replace these ads
+by specifying a resume offset
+
+
+36
+00:02:05,359 --> 00:02:07,861 line:0
+that equals the duration
+of the stitched-in ad.
+
+
+37
+00:02:08.996 --> 00:02:12.432 line:-2 align:center
+Apart from this,
+HLS interstitials also lets you
+
+
+38
+00:02:12.466 --> 00:02:14.668 line:-2 align:center
+specify navigation restrictions
+for your ads,
+
+
+39
+00:02:14.701 --> 00:02:17.371 line:-2 align:center
+and you can even schedule early return
+in live scenarios,
+
+
+40
+00:02:17.404 --> 00:02:18.639 line:-1 align:center
+among other things.
+
+
+41
+00:02:18,672 --> 00:02:21,141 line:-2
+For more information,
+you can check out
+
+
+42
+00:02:21.175 --> 00:02:26.513 line:-2 align:center
+"Dynamically insert midrolls and prerolls
+in HLS" from WWDC 2021.
+
+
+43
+00:02:26.547 --> 00:02:29.650 line:-2 align:center
+While you can schedule ads
+along the content's timeline,
+
+
+44
+00:02:29,683 --> 00:02:33,086 line:-2
+this year we've added attributes
+that force the placement of the ad
+
+
+45
+00:02:33.120 --> 00:02:35.589 line:-2 align:center
+to the beginning
+or at the end of playback.
+
+
+46
+00:02:35.622 --> 00:02:39.760 line:-2 align:center
+For that we've added the following
+new cueing options that you can specify
+
+
+47
+00:02:39,793 --> 00:02:41,895 line:-1
+using the CUE attribute.
+
+
+48
+00:02:41,929 --> 00:02:46,400 line:-2
+This attribute can take on one or
+a combination of the following values.
+
+
+49
+00:02:46,433 --> 00:02:48,602 line:-1
+A value of PRE would make the ad appear
+
+
+50
+00:02:48,635 --> 00:02:51,872 line:-2
+before the presentation of
+the primary content begins.
+
+
+51
+00:02:51,905 --> 00:02:53,774 line:-2
+This is especially useful
+in live scenarios
+
+
+52
+00:02:53,807 --> 00:02:56,243 line:-2
+where you'd want to schedule
+a premium ad spot
+
+
+53
+00:02:56,276 --> 00:02:58,712 line:-1
+before tuning into the program.
+
+
+54
+00:02:58,745 --> 00:03:00,948 line:-2
+A value of POST would indicate
+that the ad should appear
+
+
+55
+00:03:00.981 --> 00:03:03.917 line:-2 align:center
+after the presentation
+of your primary content.
+
+
+56
+00:03:03.951 --> 00:03:06.954 line:-2 align:center
+This might be useful for event streams
+where you'd like to schedule end credits,
+
+
+57
+00:03:06.987 --> 00:03:08.989 line:-1 align:center
+say, at the conclusion of a live event.
+
+
+58
+00:03:09,890 --> 00:03:13,193 line:0
+And a value of ONCE would
+make the ad appear only once.
+
+
+59
+00:03:13,227 --> 00:03:15,696 line:0
+So if the user were to seek back
+to before the ad,
+
+
+60
+00:03:15,729 --> 00:03:18,332 align:center
+they would no longer see the ad
+play again.
+
+
+61
+00:03:18,365 --> 00:03:20,834 align:center
+A great application of this
+would be for rating screens
+
+
+62
+00:03:20,868 --> 00:03:24,338 line:0
+which are typically shown just
+the one time at the start of playback.
+
+
+63
+00:03:25,939 --> 00:03:29,042 line:0
+This shows a playlist example
+where you have ads scheduled
+
+
+64
+00:03:29,076 --> 00:03:31,311 line:0
+as pre and post rolls.
+
+
+65
+00:03:31,345 --> 00:03:34,615 align:center
+Note that the preroll
+is scheduled to play only once.
+
+
+66
+00:03:34,648 --> 00:03:37,351 line:0
+And we also have an ad
+scheduled to play once
+
+
+67
+00:03:37,384 --> 00:03:39,520 line:0
+at some 10 seconds into playback.
+
+
+68
+00:03:40,654 --> 00:03:45,926 line:-2
+Now, scheduling ads in live scenarios
+comes with its own set of challenges.
+
+
+69
+00:03:45,959 --> 00:03:48,562 line:-2
+For instance, your packager
+might be using one clock
+
+
+70
+00:03:48,595 --> 00:03:51,465 line:-2
+to set the program date time tags
+in the playlist
+
+
+71
+00:03:51.498 --> 00:03:53.700 line:-2 align:center
+while the encoder
+that is producing the media
+
+
+72
+00:03:53.734 --> 00:03:56.136 line:-1 align:center
+is driven by a different clock.
+
+
+73
+00:03:56.170 --> 00:03:59.873 line:-2 align:center
+Now, these two clocks
+need not necessarily be in sync.
+
+
+74
+00:03:59.907 --> 00:04:03.377 line:-2 align:center
+For instance, in this example,
+the difference in the date time tags
+
+
+75
+00:04:03,410 --> 00:04:07,581 line:-2
+associated with segment 0 and
+segment 100 is about 800 seconds.
+
+
+76
+00:04:09.449 --> 00:04:13.420 line:-2 align:center
+However, the accumulated media
+duration would be slightly less than that
+
+
+77
+00:04:13,453 --> 00:04:16,190 line:-2
+as individual segment durations
+are under eight seconds.
+
+
+78
+00:04:17,558 --> 00:04:19,493 align:center
+In such scenarios
+where your packager clock
+
+
+79
+00:04:19,526 --> 00:04:21,929 align:center
+is slightly faster
+than the encoder clock,
+
+
+80
+00:04:21,962 --> 00:04:27,134 align:center
+the actual mediatime where the ad starts
+might fall somewhere inside the slate.
+
+
+81
+00:04:27,167 --> 00:04:29,436 line:0
+And if you're expected to rejoin
+the main content
+
+
+82
+00:04:29,469 --> 00:04:32,506 align:center
+at an offset that equals
+the ad duration as shown here,
+
+
+83
+00:04:32,539 --> 00:04:36,276 line:0
+you'd actually end up missing some of the
+primary content that follows the slate.
+
+
+84
+00:04:37,544 --> 00:04:40,314 align:center
+You can now use the SNAP attribute
+with the OUT value
+
+
+85
+00:04:40,347 --> 00:04:43,317 line:0
+to snap out of the primary content
+at a segment boundary
+
+
+86
+00:04:43,350 --> 00:04:46,653 line:0
+that is closest
+to the intended ad start time.
+
+
+87
+00:04:46,687 --> 00:04:49,523 align:center
+And similarly use the SNAP attribute
+with the IN value
+
+
+88
+00:04:49,556 --> 00:04:54,294 align:center
+to snap back in the primary content
+that is closest to the ad return time.
+
+
+89
+00:04:54,328 --> 00:04:56,964 align:center
+Note that we expect you to
+use the SNAP attributes
+
+
+90
+00:04:56,997 --> 00:05:00,934 align:center
+only for live scenarios, as this notion of
+clock drift shouldn't exist
+
+
+91
+00:05:00,968 --> 00:05:03,637 align:center
+when dealing with pre-packaged
+video on demand content.
+
+
+92
+00:05:04,638 --> 00:05:09,676 align:center
+Here we see a live playlist where the ad
+is scheduled to both snap-out and snap-in.
+
+
+93
+00:05:10,410 --> 00:05:13,480 line:-2
+This year, we've also added
+some query parameters
+
+
+94
+00:05:13,514 --> 00:05:15,782 line:-2
+that will help you
+optimize your ad inventory
+
+
+95
+00:05:15,816 --> 00:05:18,218 line:-1
+as well as with session management.
+
+
+96
+00:05:18.252 --> 00:05:21.989 line:-2 align:center
+Now, when you're tuning into a live stream
+in the middle of an ad pod,
+
+
+97
+00:05:22,022 --> 00:05:25,025 line:-2
+you'd be interested to know
+how far that ad pod has progressed
+
+
+98
+00:05:25.058 --> 00:05:28.262 line:-2 align:center
+so that you can show your most valuable
+inventory in the time remaining.
+
+
+99
+00:05:29,396 --> 00:05:33,367 line:-2
+For that, we've added the
+HLS_start_offset query parameter.
+
+
+100
+00:05:33.400 --> 00:05:35.235 line:-1 align:center
+The HLS_start_offset query parameter
+
+
+101
+00:05:35,269 --> 00:05:39,773 line:-2
+will be supplied with the request
+for the interstitials' Asset-list URL.
+
+
+102
+00:05:39.806 --> 00:05:42.709 line:-2 align:center
+For live content, this would specify
+the offset into the Asset-list
+
+
+103
+00:05:42,743 --> 00:05:45,946 line:-2
+where playback would begin
+when joining a live stream,
+
+
+104
+00:05:45,979 --> 00:05:47,481 line:-1
+and for video on demand content,
+
+
+105
+00:05:47.514 --> 00:05:49.583 line:-2 align:center
+it would be the offset
+into the Asset-list
+
+
+106
+00:05:49,616 --> 00:05:52,653 line:-2
+when seeking into a region
+replaced by the interstitial.
+
+
+107
+00:05:54.121 --> 00:05:57.257 line:-2 align:center
+In this sample, we have a live playlist
+with a 15-second ad
+
+
+108
+00:05:57.291 --> 00:06:01.161 line:-2 align:center
+scheduled to start at 5 seconds
+from the top of the playlist.
+
+
+109
+00:06:01,195 --> 00:06:05,399 line:-2
+The highlighted segments shown here
+would be replaced by the interstitial.
+
+
+110
+00:06:05,432 --> 00:06:07,768 line:-2
+Now during live join,
+the client would typically be
+
+
+111
+00:06:07,801 --> 00:06:10,737 line:-2
+some 3 target durations
+behind the live edge.
+
+
+112
+00:06:10.771 --> 00:06:13.640 line:-2 align:center
+At that point, the 15-second ad pod
+that is scheduled
+
+
+113
+00:06:13.674 --> 00:06:15.709 line:-1 align:center
+would've played out for 10 seconds.
+
+
+114
+00:06:15,742 --> 00:06:20,080 line:0
+So this is supplied as part of
+the HLS_start_offset query parameter.
+
+
+115
+00:06:20,113 --> 00:06:22,950 line:0
+Now that the client only
+has 5 seconds of ad time remaining,
+
+
+116
+00:06:22,983 --> 00:06:26,954 align:center
+the server can construct the Asset-list
+such that it places its most valuable ads
+
+
+117
+00:06:26,987 --> 00:06:29,089 line:0
+in the last 5 seconds of that list.
+
+
+118
+00:06:30.190 --> 00:06:32.559 line:-2 align:center
+At your server,
+you might probably need a way
+
+
+119
+00:06:32,593 --> 00:06:35,896 line:-2
+to track the same playback session
+across multiple ad requests
+
+
+120
+00:06:35,929 --> 00:06:39,967 line:-2
+so that you can avoid serving someone
+the same ad over and over.
+
+
+121
+00:06:40.868 --> 00:06:44.037 line:-2 align:center
+So to associate ad requests
+with primary playback sessions,
+
+
+122
+00:06:44,071 --> 00:06:47,741 line:-2
+we've added the
+HLS_primary_id query parameter.
+
+
+123
+00:06:47,774 --> 00:06:51,411 line:-2
+If a client sets the playback session
+id request header for all http requests
+
+
+124
+00:06:51,445 --> 00:06:53,914 line:-1
+of a particular playback session,
+
+
+125
+00:06:53.947 --> 00:06:55.716 line:-1 align:center
+they can then supply this session ID
+
+
+126
+00:06:55,749 --> 00:06:58,418 line:-2
+as part of the HLS_primary_id query
+parameter
+
+
+127
+00:06:58,452 --> 00:07:02,890 line:-2
+to the X-Asset-URI
+and X-Asset-List requests.
+
+
+128
+00:07:02.923 --> 00:07:05.459 line:-2 align:center
+Clients that do not set the session id
+request header
+
+
+129
+00:07:05.492 --> 00:07:08.428 line:-2 align:center
+should create a unique value
+for every primary playback session
+
+
+130
+00:07:08,462 --> 00:07:11,865 line:-2
+and use that as the
+HLS_primary_id query parameter
+
+
+131
+00:07:11,899 --> 00:07:15,469 line:-2
+for both primary
+and interstitial asset requests.
+
+
+132
+00:07:15,502 --> 00:07:18,038 line:-1
+You might recall that AVFoundation
+
+
+133
+00:07:18.071 --> 00:07:22.943 line:-2 align:center
+offers the AVPlayerInterstitialController
+and the AVPlayerInterstitialEvent objects
+
+
+134
+00:07:22,976 --> 00:07:26,079 line:-2
+that let you schedule ads
+on the client side.
+
+
+135
+00:07:26.113 --> 00:07:28.782 line:-2 align:center
+Now we've added support for
+the cue and SNAP options
+
+
+136
+00:07:28.815 --> 00:07:32.219 line:-2 align:center
+to the AVPlayerInterstitialEvent
+object as well.
+
+
+137
+00:07:32,252 --> 00:07:35,589 line:-2
+You can specify the cueing options,
+whether you want the ad to be scheduled
+
+
+138
+00:07:35,622 --> 00:07:38,659 line:-2
+as a preroll or a post roll,
+via the Cue property.
+
+
+139
+00:07:38.692 --> 00:07:43.063 line:-2 align:center
+The play once option that is signaled via
+the Cue attribute in the DATERANGE tag
+
+
+140
+00:07:43.096 --> 00:07:46.366 line:-2 align:center
+is set as a Boolean
+via the willPlayOnce property.
+
+
+141
+00:07:46.400 --> 00:07:48.836 line:-1 align:center
+The option to snap out is signaled via
+
+
+142
+00:07:48.869 --> 00:07:51.839 line:-2 align:center
+alignsStartWithPrimarySegmentBoundary
+property
+
+
+143
+00:07:51,872 --> 00:07:53,807 line:-1
+and to snap in, you'd set the
+
+
+144
+00:07:53.841 --> 00:07:56.877 line:-2 align:center
+alignsResumptionWithPrimarySegmentBoundary
+property.
+
+
+145
+00:07:58,645 --> 00:08:01,148 align:center
+As AVPlayerInterstitialEvent
+continues to grow,
+
+
+146
+00:08:01,181 --> 00:08:03,917 line:0
+we figured it might be better to separate
+the setting of the properties
+
+
+147
+00:08:03,951 --> 00:08:05,986 line:0
+from the creation of the object.
+
+
+148
+00:08:06,019 --> 00:08:10,090 align:center
+So we've now made the
+AVPlayerInterstitialEvent object mutable.
+
+
+149
+00:08:10,123 --> 00:08:12,726 line:0
+You can now create the object
+with just the primary item
+
+
+150
+00:08:12,759 --> 00:08:14,728 line:0
+and start time of the event.
+
+
+151
+00:08:14,761 --> 00:08:17,030 line:0
+And you can then specify
+the different configuration options
+
+
+152
+00:08:17,064 --> 00:08:19,132 line:0
+by setting the relevant properties.
+
+
+153
+00:08:19,967 --> 00:08:22,236 align:center
+Note that once the event
+is set on the controller,
+
+
+154
+00:08:22,269 --> 00:08:24,471 align:center
+any subsequent changes to the event object
+
+
+155
+00:08:24,505 --> 00:08:26,273 line:0
+will not be reflected at the controller,
+
+
+156
+00:08:26,306 --> 00:08:29,343 line:0
+since the controller
+makes a copy of these objects.
+
+
+157
+00:08:29,376 --> 00:08:30,911 align:center
+For the changes to take effect,
+
+
+158
+00:08:30,944 --> 00:08:34,515 align:center
+you'd have to set the event
+once again on the controller.
+
+
+159
+00:08:34.548 --> 00:08:38.886 line:-2 align:center
+To wrap up, you can now schedule
+your ads as pre or post rolls
+
+
+160
+00:08:38,919 --> 00:08:40,654 line:-1
+using the X-CUE attribute.
+
+
+161
+00:08:40.687 --> 00:08:45.692 line:-2 align:center
+You can also force your ads to play
+only once by setting the X-CUE to once.
+
+
+162
+00:08:45.726 --> 00:08:50.464 line:-2 align:center
+To manage clock drift in live scenarios,
+you'd use the X-SNAP attribute.
+
+
+163
+00:08:50,497 --> 00:08:53,233 line:-2
+For constructing your asset lists
+during live join,
+
+
+164
+00:08:53,267 --> 00:08:56,270 line:-2
+you can use
+the HLS_start_offset query parameter
+
+
+165
+00:08:56.303 --> 00:08:58.872 line:-2 align:center
+and you'd use the HLS_primary_id query
+parameter
+
+
+166
+00:08:58,906 --> 00:09:02,543 line:-2
+to relate interstitial requests
+with primary playback sessions.
+
+
+167
+00:09:02,576 --> 00:09:06,780 line:0
+Did you know that if you use
+HLS interstitials to schedule ads,
+
+
+168
+00:09:06,813 --> 00:09:11,018 align:center
+AVFoundation automatically
+manages them while in Shareplay?
+
+
+169
+00:09:11,051 --> 00:09:12,619 line:0
+For more information, check out the
+
+
+170
+00:09:12,653 --> 00:09:16,023 line:0
+"Display ads and other interstitials
+in SharePlay" talk.
+
+
+171
+00:09:16,056 --> 00:09:18,926 line:-2
+That's it for me, folks.
+Thank you.
+

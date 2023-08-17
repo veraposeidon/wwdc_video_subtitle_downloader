@@ -1,0 +1,4726 @@
+1
+00:00:03,836 --> 00:00:06,373 line:-1
+Hello and welcome to WWDC.
+
+
+2
+00:00:08,775 --> 00:00:12,012 line:0
+Hi. My name is Mike Imbrogno
+from GPU software.
+
+
+3
+00:00:12,079 --> 00:00:15,616 line:0
+And welcome to "Optimize Metal Performance
+for Apple Silicon Macs."
+
+
+4
+00:00:16,617 --> 00:00:20,087 line:-2
+As you know by now, Apple GPUs
+are coming to the Mac for the first time,
+
+
+5
+00:00:20,153 --> 00:00:22,389 line:-2
+and we're really excited
+for you to see what they can do.
+
+
+6
+00:00:23,290 --> 00:00:25,792 line:-2
+Apple GPUs are faster
+and more power-efficient.
+
+
+7
+00:00:25,859 --> 00:00:28,495 line:-2
+Your apps are gonna perform great
+out of the box.
+
+
+8
+00:00:28,562 --> 00:00:31,198 line:-2
+They support all the features
+of Intel-based Macs.
+
+
+9
+00:00:31,265 --> 00:00:34,201 line:-2
+And support all the Metal features
+unique to Apple GPUs.
+
+
+10
+00:00:35,002 --> 00:00:39,072 line:-2
+This talk will show you how to optimize
+for the Apple GPU architecture.
+
+
+11
+00:00:39,139 --> 00:00:41,041 line:-1
+If you previously developed for iOS,
+
+
+12
+00:00:41,108 --> 00:00:44,211 line:-2
+then some of the advice here today
+may already be familiar to you.
+
+
+13
+00:00:44,278 --> 00:00:46,113 line:-1
+But if you're new to Apple GPUs,
+
+
+14
+00:00:46,180 --> 00:00:48,815 line:-2
+and want your app to stand out
+on Apple Silicon Macs,
+
+
+15
+00:00:48,882 --> 00:00:50,617 line:-1
+then this is the session for you.
+
+
+16
+00:00:51,418 --> 00:00:54,354 line:-2
+Before we get started, let's take a look
+at where this session fits
+
+
+17
+00:00:54,421 --> 00:00:56,823 line:-1
+in your transition to Apple Silicon Macs.
+
+
+18
+00:00:57,758 --> 00:01:00,460 line:-2
+On Intel-based Macs,
+your app runs natively.
+
+
+19
+00:01:00,994 --> 00:01:03,964 line:-2
+On Apple Silicon Macs,
+your app will run out of the box
+
+
+20
+00:01:04,031 --> 00:01:06,800 line:-2
+under Rosetta's highly optimized
+translation layer.
+
+
+21
+00:01:08,602 --> 00:01:09,703 line:-1
+Under translation,
+
+
+22
+00:01:09,770 --> 00:01:14,041 line:-2
+your app will also be automatically opted
+into several Metal consistency features
+
+
+23
+00:01:14,107 --> 00:01:15,843 line:-1
+to ensure that they look great too.
+
+
+24
+00:01:17,010 --> 00:01:21,081 line:-2
+But translation and consistency features
+will cost you some performance.
+
+
+25
+00:01:21,148 --> 00:01:23,784 line:-2
+So your next step will be
+to recompile your app
+
+
+26
+00:01:23,851 --> 00:01:25,586 line:-1
+with the new macOS SDK.
+
+
+27
+00:01:26,420 --> 00:01:30,490 line:0
+To learn more about Metal consistency
+and translation behavior differences,
+
+
+28
+00:01:30,557 --> 00:01:33,827 line:0
+please see the earlier session
+from my colleagues Gokhan and Sam.
+
+
+29
+00:01:35,262 --> 00:01:37,231 line:-1
+Once consistency issues are fixed,
+
+
+30
+00:01:37,297 --> 00:01:39,766 line:-2
+you're ready to focus
+on performance optimizations
+
+
+31
+00:01:39,833 --> 00:01:41,635 line:-1
+and the focus of this talk.
+
+
+32
+00:01:41,702 --> 00:01:43,270 line:-1
+Let's look at today's agenda.
+
+
+33
+00:01:44,104 --> 00:01:47,307 line:-2
+In the first section, I'll describe
+how to fix the top performance issues
+
+
+34
+00:01:47,374 --> 00:01:48,842 line:-1
+we've observed in your apps
+
+
+35
+00:01:48,909 --> 00:01:50,444 line:-1
+that come from not taking into account
+
+
+36
+00:01:50,511 --> 00:01:53,280 line:-2
+Apple's tile-based
+deferred rendering architecture.
+
+
+37
+00:01:53,981 --> 00:01:56,383 line:-2
+You'll learn how
+to schedule work efficiently,
+
+
+38
+00:01:56,450 --> 00:01:59,653 line:-2
+optimize pass management
+and minimize overdraw.
+
+
+39
+00:02:01,121 --> 00:02:02,289 line:-1
+In the next section,
+
+
+40
+00:02:02,356 --> 00:02:06,593 line:-2
+my colleague Dom will explain how to use
+Metal's explicit TBDR features
+
+
+41
+00:02:06,660 --> 00:02:08,961 line:-2
+to take your optimizations
+to the next level.
+
+
+42
+00:02:09,630 --> 00:02:13,200 line:-2
+You'll learn how to manage Tile Memory
+and use Tile Shaders
+
+
+43
+00:02:13,267 --> 00:02:16,136 line:-2
+to optimize the rendering techniques
+that you already use.
+
+
+44
+00:02:17,738 --> 00:02:19,873 line:-1
+And finally, in the last section,
+
+
+45
+00:02:19,940 --> 00:02:23,877 line:-2
+Dom will also show you how to optimize
+for the Apple GPU Shader Core.
+
+
+46
+00:02:24,578 --> 00:02:25,646 line:-1
+Let's jump in.
+
+
+47
+00:02:26,780 --> 00:02:30,384 line:-2
+This section requires a good understanding
+of the Apple GPU architecture.
+
+
+48
+00:02:30,450 --> 00:02:32,953 line:-2
+So let's start with a recap
+from our earlier talks.
+
+
+49
+00:02:34,021 --> 00:02:38,091 line:-2
+Apple-designed GPUs have a tile-based
+deferred rendering architecture
+
+
+50
+00:02:38,158 --> 00:02:40,861 line:-2
+designed for both
+high performance and low power.
+
+
+51
+00:02:41,828 --> 00:02:44,731 line:-2
+It uses a high-bandwidth,
+low-latency Tile Memory
+
+
+52
+00:02:45,032 --> 00:02:48,001 line:-2
+to eliminate overdraw
+and reduce System Memory traffic.
+
+
+53
+00:02:49,703 --> 00:02:54,374 line:-2
+The Apple GPU first processes all geometry
+of a render pass in the vertex stage.
+
+
+54
+00:02:54,441 --> 00:02:59,079 line:-2
+It transforms and bends your geometry
+into screen-aligned Tile Vertex Buffers
+
+
+55
+00:02:59,146 --> 00:03:01,248 line:-2
+that are then passed
+to the fragment stage.
+
+
+56
+00:03:02,182 --> 00:03:05,219 line:-2
+Each Tile Vertex Buffer is then processed
+entirely on-chip
+
+
+57
+00:03:05,285 --> 00:03:06,820 line:-1
+as part of the fragment stage.
+
+
+58
+00:03:07,621 --> 00:03:10,157 line:-2
+The GPU rasterizes
+all primitives in a tile
+
+
+59
+00:03:10,224 --> 00:03:14,027 line:-2
+before shading any pixels
+using fast, on-chip Tile Memory.
+
+
+60
+00:03:15,395 --> 00:03:18,899 line:-2
+Metal is designed to directly
+take advantage of this architecture.
+
+
+61
+00:03:18,966 --> 00:03:21,468 line:-2
+For example,
+load and store actions make explicit
+
+
+62
+00:03:21,535 --> 00:03:24,972 line:-2
+how render pass attachments
+move in and out of this Tile Memory.
+
+
+63
+00:03:25,873 --> 00:03:29,042 line:-2
+Keep this in mind as we dive
+into our top performance best practices.
+
+
+64
+00:03:29,776 --> 00:03:33,146 line:-2
+I have three optimization categories
+to share with you today.
+
+
+65
+00:03:33,213 --> 00:03:36,216 line:-1
+The first category is workload scheduling.
+
+
+66
+00:03:36,283 --> 00:03:38,819 line:-2
+Apple GPUs execute different workloads
+concurrently
+
+
+67
+00:03:38,886 --> 00:03:42,356 line:-2
+to maximize utilization
+and minimize latency.
+
+
+68
+00:03:42,422 --> 00:03:46,860 line:-2
+But unnecessary dependencies across
+render passes can create serialization.
+
+
+69
+00:03:46,927 --> 00:03:51,098 line:-2
+So in this section, I'll teach you how to
+identify and eliminate those dependencies.
+
+
+70
+00:03:52,533 --> 00:03:55,836 line:-2
+The next category
+is minimizing system bandwidth.
+
+
+71
+00:03:55,903 --> 00:04:00,474 line:-2
+Apple GPUs achieve maximum performance
+when System Memory bandwidth is minimized.
+
+
+72
+00:04:01,008 --> 00:04:05,112 line:-2
+So in this section, I'm also going to show
+you how to structure your render passes
+
+
+73
+00:04:05,179 --> 00:04:07,047 line:-1
+to reduce load and store traffic.
+
+
+74
+00:04:08,749 --> 00:04:11,652 line:-2
+And finally,
+I'll teach you how to minimize overdraw
+
+
+75
+00:04:11,718 --> 00:04:15,756 line:-2
+by maximizing the hidden surface
+removal capabilities of Apple GPUs.
+
+
+76
+00:04:16,790 --> 00:04:18,625 line:-1
+Let's start with workload scheduling.
+
+
+77
+00:04:19,159 --> 00:04:23,030 line:-2
+Apple GPUs process vertex, fragment
+and even compute workloads
+
+
+78
+00:04:23,096 --> 00:04:25,766 line:-2
+in parallel
+using independent hardware channels.
+
+
+79
+00:04:26,466 --> 00:04:29,803 line:-2
+Overlapping these workloads
+maximizes GPU utilization
+
+
+80
+00:04:29,870 --> 00:04:31,471 line:-1
+and minimizes execution time.
+
+
+81
+00:04:32,039 --> 00:04:34,508 line:-2
+So your goal is to overlap
+wherever possible.
+
+
+82
+00:04:35,576 --> 00:04:37,744 line:-2
+Metal automatically overlaps
+your workloads
+
+
+83
+00:04:37,811 --> 00:04:40,547 line:-2
+whenever there are no data dependencies
+between them.
+
+
+84
+00:04:41,048 --> 00:04:44,117 line:-2
+But data dependencies are a natural result
+of producing and consuming
+
+
+85
+00:04:44,184 --> 00:04:46,220 line:-1
+Metal resources between passes.
+
+
+86
+00:04:46,720 --> 00:04:49,857 line:-2
+So what we're focusing on here
+are the unnecessary dependencies
+
+
+87
+00:04:49,923 --> 00:04:51,491 line:-1
+that don't need to be there.
+
+
+88
+00:04:51,558 --> 00:04:53,026 line:-1
+Let's take a closer look.
+
+
+89
+00:04:54,394 --> 00:04:58,498 line:-2
+Apple GPUs process all vertices
+of render pass before any fragments.
+
+
+90
+00:04:58,565 --> 00:05:01,401 line:-2
+So stages from the same pass
+must execute serially.
+
+
+91
+00:05:02,169 --> 00:05:04,338 line:-1
+But vertex processing of the next pass
+
+
+92
+00:05:04,404 --> 00:05:07,574 line:-2
+should overlap with fragment processing
+of the current pass.
+
+
+93
+00:05:08,642 --> 00:05:12,246 line:-2
+This even occurs across frame boundaries,
+so oftentimes the vertex cost
+
+
+94
+00:05:12,312 --> 00:05:14,948 line:-2
+is almost entirely hidden
+by fragment processing.
+
+
+95
+00:05:15,983 --> 00:05:19,152 line:-2
+Let's take a look at what happens
+when you make vertex work dependent
+
+
+96
+00:05:19,219 --> 00:05:21,421 line:-1
+on fragment work of a previous pass.
+
+
+97
+00:05:22,856 --> 00:05:25,459 line:-2
+In this example,
+the fragment stage of each pass
+
+
+98
+00:05:25,526 --> 00:05:28,195 line:-2
+is producing data
+into a Metal buffer or texture
+
+
+99
+00:05:28,262 --> 00:05:30,163 line:-1
+that is read by the next vertex stage.
+
+
+100
+00:05:30,898 --> 00:05:33,700 line:-2
+This will reduce your overlap
+and extend execution time
+
+
+101
+00:05:33,767 --> 00:05:36,403 line:-2
+by creating a bubble of inactivity
+in the vertex stage.
+
+
+102
+00:05:37,471 --> 00:05:40,707 line:-2
+If you see this pattern in your app,
+then you really wanna fix it.
+
+
+103
+00:05:41,542 --> 00:05:44,444 line:-2
+But sometimes the pattern
+won't be so simple or obvious.
+
+
+104
+00:05:45,012 --> 00:05:48,782 line:-2
+Unnecessary dependencies often involve
+multiple chains of vertex,
+
+
+105
+00:05:48,849 --> 00:05:50,450 line:-1
+fragments and compute.
+
+
+106
+00:05:51,118 --> 00:05:52,352 line:-1
+In this example,
+
+
+107
+00:05:52,419 --> 00:05:55,455 line:-2
+the vertex stage of Render Pass 1
+depends on Compute Pass 1.
+
+
+108
+00:05:55,989 --> 00:05:59,760 line:-2
+And Compute Pass 1 in turn depends on
+the fragment stage of Render Pass 0.
+
+
+109
+00:06:01,195 --> 00:06:04,698 line:-2
+All these holes in your GPU activity
+will again hurt your performance.
+
+
+110
+00:06:05,332 --> 00:06:07,367 line:-1
+So now that you know what to look out for,
+
+
+111
+00:06:07,434 --> 00:06:10,270 line:-2
+let's talk about how false dependencies
+come up in practice.
+
+
+112
+00:06:11,104 --> 00:06:13,974 line:-2
+False dependencies are caused
+by sharing the same Metal resources
+
+
+113
+00:06:14,041 --> 00:06:17,778 line:-2
+between adjacent passes,
+but not the data inside those resources.
+
+
+114
+00:06:18,278 --> 00:06:19,713 line:-1
+In this example,
+
+
+115
+00:06:19,780 --> 00:06:22,282 line:-2
+Render Pass 0 produces data
+for some later passes
+
+
+116
+00:06:22,349 --> 00:06:25,385 line:-2
+into the same resource
+that Render Pass 1 consumes,
+
+
+117
+00:06:25,452 --> 00:06:27,087 line:-1
+but the data is unrelated.
+
+
+118
+00:06:27,721 --> 00:06:30,457 line:-2
+Metal only tracks dependencies
+at the resource level
+
+
+119
+00:06:30,524 --> 00:06:31,925 line:-1
+and not the data itself.
+
+
+120
+00:06:32,860 --> 00:06:35,562 line:-2
+So one way to fix this
+is to use separate resources.
+
+
+121
+00:06:37,197 --> 00:06:40,334 line:-2
+In this example,
+I've separated the resources into two,
+
+
+122
+00:06:40,901 --> 00:06:43,370 line:-2
+so now Metal understands
+that there's no dependency
+
+
+123
+00:06:43,437 --> 00:06:45,439 line:-1
+and will schedule your work optimally.
+
+
+124
+00:06:46,440 --> 00:06:49,776 line:-2
+But if separating your data
+into different resources isn't an option,
+
+
+125
+00:06:49,843 --> 00:06:52,880 line:-2
+then you can also ask Metal
+to not track the resource at all.
+
+
+126
+00:06:54,681 --> 00:06:57,317 line:-2
+In this example,
+we're back to only one resource,
+
+
+127
+00:06:57,384 --> 00:07:01,154 line:-2
+but it's now marked as untracked
+so that Metal will schedule it optimally.
+
+
+128
+00:07:01,955 --> 00:07:05,893 line:-2
+Untracked resources let you control
+if and when synchronization is required.
+
+
+129
+00:07:05,959 --> 00:07:09,363 line:-2
+You'll be responsible for inserting
+any necessary synchronization
+
+
+130
+00:07:09,429 --> 00:07:11,465 line:-1
+using Metal fences or events.
+
+
+131
+00:07:12,599 --> 00:07:16,136 line:0
+Metal fences and events
+are powerful synchronization primitives
+
+
+132
+00:07:16,203 --> 00:07:19,606 line:0
+that give you fine control
+over the scheduling of your work.
+
+
+133
+00:07:19,673 --> 00:07:24,945 line:0
+To learn more about them, please see
+the previous Metal WWDC talks listed here.
+
+
+134
+00:07:25,779 --> 00:07:28,282 line:-2
+Now, the last tip
+for optimal workload scheduling
+
+
+135
+00:07:28,348 --> 00:07:29,883 line:-1
+is pass reordering.
+
+
+136
+00:07:30,918 --> 00:07:34,221 line:-2
+You should always encode independent work
+as early as possible.
+
+
+137
+00:07:35,055 --> 00:07:36,723 line:-1
+Let's consider this example again.
+
+
+138
+00:07:37,324 --> 00:07:40,627 line:0
+If Compute Pass 2 is not dependent
+on Compute Pass 1,
+
+
+139
+00:07:40,694 --> 00:07:44,331 line:0
+then encode it ahead of Compute Pass 1
+to fill in the execution gap.
+
+
+140
+00:07:45,532 --> 00:07:49,336 line:0
+Likewise, if Render Pass 2 is independent
+of Render Pass 1,
+
+
+141
+00:07:49,403 --> 00:07:52,439 line:0
+then it should also be encoded
+ahead of Render Pass 1.
+
+
+142
+00:07:55,075 --> 00:07:57,444 line:-2
+You might not always observe
+a performance improvement
+
+
+143
+00:07:57,511 --> 00:07:59,179 line:-1
+after reordering your passes
+
+
+144
+00:07:59,246 --> 00:08:02,816 line:-2
+because Metal will also reorder
+independent passes when it can,
+
+
+145
+00:08:03,150 --> 00:08:04,952 line:-1
+but Metal's visibility is limited,
+
+
+146
+00:08:05,018 --> 00:08:07,221 line:-2
+so it's always better
+to reorder explicitly.
+
+
+147
+00:08:09,356 --> 00:08:13,060 line:-2
+Okay, so now you know what patterns
+to look out for and how to fix them.
+
+
+148
+00:08:13,527 --> 00:08:15,863 line:-2
+But how do you actually
+find these bubbles?
+
+
+149
+00:08:15,929 --> 00:08:18,732 line:-1
+The answer is to use Metal System Trace.
+
+
+150
+00:08:19,466 --> 00:08:23,837 line:-2
+Metal System Trace will clearly highlight
+missed overlap opportunities in your apps.
+
+
+151
+00:08:25,772 --> 00:08:29,977 line:-2
+In this example, you can see that
+the vertex, fragment and compute stages
+
+
+152
+00:08:30,043 --> 00:08:31,645 line:-1
+do not overlap at all.
+
+
+153
+00:08:31,712 --> 00:08:33,914 line:-2
+This is because there are
+unnecessary dependencies
+
+
+154
+00:08:33,981 --> 00:08:35,582 line:-1
+inserted between each stage.
+
+
+155
+00:08:37,551 --> 00:08:40,254 line:-2
+Here is the exact same frame
+at the exact same scale,
+
+
+156
+00:08:40,320 --> 00:08:42,856 line:-2
+but with all
+the unnecessary dependencies removed.
+
+
+157
+00:08:43,823 --> 00:08:47,561 line:-2
+Notice that there is now significantly
+better overlap between stages,
+
+
+158
+00:08:47,628 --> 00:08:50,130 line:-2
+particularly between
+the vertex and compute stages.
+
+
+159
+00:08:52,032 --> 00:08:54,968 line:-2
+Be sure to use Metal System Trace
+while tuning your workloads
+
+
+160
+00:08:55,035 --> 00:08:58,405 line:-2
+to verify that you're taking advantage
+of overlap between stages.
+
+
+161
+00:09:00,240 --> 00:09:02,109 line:-1
+So that's it for workload scheduling.
+
+
+162
+00:09:02,843 --> 00:09:06,113 line:-2
+Now let's explore how
+to minimize System Memory bandwidth.
+
+
+163
+00:09:08,115 --> 00:09:11,618 line:-2
+Apple GPUs process render pass
+attachments in tile storage,
+
+
+164
+00:09:11,685 --> 00:09:14,688 line:-2
+and those attachments are moved
+in and out of Tile Memory
+
+
+165
+00:09:14,755 --> 00:09:16,423 line:-1
+using load and store actions.
+
+
+166
+00:09:17,191 --> 00:09:20,627 line:-2
+These actions consume the majority
+of your app's system bandwidth.
+
+
+167
+00:09:21,828 --> 00:09:23,997 line:-1
+Apple GPUs achieve peak performance
+
+
+168
+00:09:24,064 --> 00:09:26,533 line:-2
+when they are not
+System Memory bandwidth bound,
+
+
+169
+00:09:26,600 --> 00:09:29,369 line:-2
+so it's important
+to minimize load and store traffic.
+
+
+170
+00:09:30,771 --> 00:09:33,640 line:-2
+Load and store actions are executed
+for each render pass,
+
+
+171
+00:09:33,707 --> 00:09:35,509 line:-1
+so you can minimize load and store traffic
+
+
+172
+00:09:35,576 --> 00:09:38,078 line:-2
+by reducing the number
+of render passes used.
+
+
+173
+00:09:39,112 --> 00:09:42,216 line:-2
+We sometimes see apps with more
+render passes than necessary.
+
+
+174
+00:09:42,983 --> 00:09:46,220 line:-2
+Let me show you some of those
+common cases and how to fix them.
+
+
+175
+00:09:47,321 --> 00:09:50,224 line:-2
+Some apps split updates
+to the exact same set of attachments
+
+
+176
+00:09:50,290 --> 00:09:52,726 line:-1
+into separate yet adjacent passes.
+
+
+177
+00:09:53,260 --> 00:09:54,328 line:-1
+In this example,
+
+
+178
+00:09:54,394 --> 00:09:58,165 line:-2
+we have three render passes drawing
+to the same attachments incrementally,
+
+
+179
+00:09:58,232 --> 00:10:01,502 line:-2
+so that each attachment
+is loaded and stored multiple times.
+
+
+180
+00:10:02,569 --> 00:10:04,738 line:-2
+That uses a lot
+of System Memory bandwidth.
+
+
+181
+00:10:05,772 --> 00:10:09,877 line:-2
+This often happens when you parallelize
+encoding using multiple command buffers.
+
+
+182
+00:10:10,477 --> 00:10:14,314 line:-2
+Metal lets you encode different passes
+to different command buffers in parallel
+
+
+183
+00:10:14,381 --> 00:10:16,216 line:-1
+to minimize CPU latency,
+
+
+184
+00:10:16,283 --> 00:10:19,419 line:-2
+so it's not surprising that you might
+be using it in this way.
+
+
+185
+00:10:19,920 --> 00:10:23,190 line:-2
+You might even think it's the only way
+to achieve encoding parallelism
+
+
+186
+00:10:23,257 --> 00:10:26,727 line:-2
+in Metal based on experience
+with other graphics APIs.
+
+
+187
+00:10:28,495 --> 00:10:32,132 line:-2
+In this example,
+the app is encoding, on the CPU timeline,
+
+
+188
+00:10:32,199 --> 00:10:35,903 line:-2
+the three parts of the G-buffer
+into three separate command buffers.
+
+
+189
+00:10:37,304 --> 00:10:40,274 line:-2
+But the G-buffer is logically
+a single render pass,
+
+
+190
+00:10:40,340 --> 00:10:43,443 line:-2
+so it should be encoded that way
+to avoid the execution overhead
+
+
+191
+00:10:43,510 --> 00:10:46,413 line:-2
+of repeatedly loading and storing
+the same attachments.
+
+
+192
+00:10:47,648 --> 00:10:51,852 line:-2
+To fix this, we should instead use Metal's
+parallel render command encoder.
+
+
+193
+00:10:53,453 --> 00:10:55,556 line:-1
+With parallel render command encoders,
+
+
+194
+00:10:55,622 --> 00:10:58,292 line:-2
+you still achieve your goal
+of multi-threaded encoding
+
+
+195
+00:10:58,358 --> 00:11:00,460 line:-1
+but without the execution cost.
+
+
+196
+00:11:00,527 --> 00:11:01,628 line:-1
+In this example,
+
+
+197
+00:11:01,695 --> 00:11:05,332 line:-2
+I've replaced the separate command buffers
+with parallel sub-encoders.
+
+
+198
+00:11:06,733 --> 00:11:08,502 line:-1
+Metal will combine those sub-encoders
+
+
+199
+00:11:08,569 --> 00:11:11,171 line:-2
+into a single render pass
+before execution,
+
+
+200
+00:11:11,238 --> 00:11:14,074 line:-2
+saving most of the System Memory
+bandwidth along the way.
+
+
+201
+00:11:15,609 --> 00:11:17,978 line:-2
+Let's take a quick look
+at how the API is used.
+
+
+202
+00:11:20,347 --> 00:11:23,217 line:-2
+You start by creating
+a parallel render command encoder.
+
+
+203
+00:11:23,283 --> 00:11:25,419 line:-2
+The descriptor is set up
+exactly how you would
+
+
+204
+00:11:25,485 --> 00:11:27,421 line:-1
+for a regular render pass encoder.
+
+
+205
+00:11:28,255 --> 00:11:32,159 line:-2
+All sub-encoders will share
+the exact same render pass configuration.
+
+
+206
+00:11:33,427 --> 00:11:35,362 line:-1
+You then create your sub-encoders.
+
+
+207
+00:11:35,429 --> 00:11:37,865 line:-2
+In this case,
+I'm creating two sub-encoders.
+
+
+208
+00:11:38,565 --> 00:11:42,669 line:-2
+The order in which sub-encoder commands
+execute is implied by the creation order.
+
+
+209
+00:11:42,736 --> 00:11:46,406 line:-2
+So it's important to create those up front
+to match your intended order.
+
+
+210
+00:11:47,474 --> 00:11:51,311 line:-2
+You then hand off the sub-encoders
+to your worker threads for async encoding.
+
+
+211
+00:11:51,378 --> 00:11:54,915 line:-2
+In this case, I'm dispatching
+asynchronously to the global queue.
+
+
+212
+00:11:56,717 --> 00:12:00,988 line:0
+And once encoding is complete,
+you need to finalize the parallel encoder.
+
+
+213
+00:12:01,054 --> 00:12:02,089 line:0
+In this example,
+
+
+214
+00:12:02,155 --> 00:12:06,426 line:0
+I first wait for completion
+using my dispatch group before finalizing.
+
+
+215
+00:12:07,094 --> 00:12:08,795 line:-1
+Now let's look at another common case
+
+
+216
+00:12:08,862 --> 00:12:11,265 line:-2
+where render passes are split
+unnecessarily.
+
+
+217
+00:12:12,699 --> 00:12:14,568 line:-2
+In this example,
+we have a forward renderer
+
+
+218
+00:12:14,635 --> 00:12:18,906 line:-2
+drawing opaque geometry in the first pass
+and translucent objects in the second.
+
+
+219
+00:12:19,773 --> 00:12:21,408 line:-1
+The set of attachments are the same,
+
+
+220
+00:12:21,475 --> 00:12:23,744 line:-2
+but the load and store actions
+are different.
+
+
+221
+00:12:24,678 --> 00:12:27,514 line:-2
+In the first pass,
+color and depth are written,
+
+
+222
+00:12:27,581 --> 00:12:28,849 line:-1
+and in the second pass,
+
+
+223
+00:12:28,916 --> 00:12:31,785 line:-2
+color is accumulated
+but depth is only loaded.
+
+
+224
+00:12:31,852 --> 00:12:33,353 line:-1
+We often see this pattern in apps
+
+
+225
+00:12:33,420 --> 00:12:36,290 line:-2
+that choose to abstract
+their graphics API usage,
+
+
+226
+00:12:36,356 --> 00:12:38,959 line:-2
+and that abstraction decides
+when to start a new pass
+
+
+227
+00:12:39,026 --> 00:12:42,162 line:-2
+based on the attachments used
+and the actions needed.
+
+
+228
+00:12:42,663 --> 00:12:45,532 line:-2
+Now, you don't have to change
+your abstraction layer to fix this.
+
+
+229
+00:12:45,599 --> 00:12:48,836 line:-2
+You only need to update your app logic
+to avoid splitting passes
+
+
+230
+00:12:48,902 --> 00:12:50,571 line:-1
+when only the actions change.
+
+
+231
+00:12:52,072 --> 00:12:54,975 line:-2
+Here, I've merged the two passes
+by drawing the translucent objects
+
+
+232
+00:12:55,042 --> 00:12:57,144 line:-1
+immediately after the opaque objects.
+
+
+233
+00:12:57,611 --> 00:13:00,681 line:-2
+I can do this because render passes
+don't need to be split
+
+
+234
+00:13:00,747 --> 00:13:02,983 line:-1
+when only load and store actions change.
+
+
+235
+00:13:03,884 --> 00:13:06,587 line:-2
+This eliminates
+the intermediate loads and stores
+
+
+236
+00:13:06,653 --> 00:13:09,156 line:-2
+and the associated
+System Memory bandwidth.
+
+
+237
+00:13:09,223 --> 00:13:12,659 line:-2
+Merging also lets you store
+only the final color just once.
+
+
+238
+00:13:14,261 --> 00:13:17,297 line:-2
+We also don't need the depth attachment
+outside of this pass,
+
+
+239
+00:13:17,364 --> 00:13:19,666 line:-1
+so I set its store action to DontCare.
+
+
+240
+00:13:20,801 --> 00:13:24,271 line:-2
+And in this case, the depth buffer
+isn't used outside the pass either,
+
+
+241
+00:13:24,338 --> 00:13:27,140 line:-2
+so I mark it memoryless
+to save on footprint too.
+
+
+242
+00:13:28,842 --> 00:13:32,546 line:-2
+Now let's look at another common pattern
+we call attachment ping-ponging.
+
+
+243
+00:13:34,114 --> 00:13:36,950 line:-2
+Apps often need to perform
+some intermediate rendering
+
+
+244
+00:13:37,017 --> 00:13:39,653 line:-2
+that is then composited
+onto the main scene,
+
+
+245
+00:13:39,720 --> 00:13:41,622 line:-1
+and often have to do so repeatedly.
+
+
+246
+00:13:42,523 --> 00:13:44,091 line:-1
+This looks like a game of ping-pong
+
+
+247
+00:13:44,157 --> 00:13:47,561 line:-2
+where the app switches back and forth
+between two sets of attachments.
+
+
+248
+00:13:48,428 --> 00:13:51,765 line:-2
+In this example, we're lighting a scene
+with a series of lights.
+
+
+249
+00:13:52,132 --> 00:13:54,902 line:-2
+Each light needs a screen-space
+attenuation texture
+
+
+250
+00:13:54,968 --> 00:13:57,237 line:-1
+generated before lighting the scene.
+
+
+251
+00:13:58,739 --> 00:14:01,408 line:-2
+Each light therefore creates
+a separate render pass
+
+
+252
+00:14:01,475 --> 00:14:04,878 line:-2
+forcing the main scene attachments
+to load and store repeatedly.
+
+
+253
+00:14:05,913 --> 00:14:07,848 line:-2
+This of course is not great
+for performance.
+
+
+254
+00:14:08,815 --> 00:14:11,752 line:-2
+To fix this,
+let's use multiple render targets.
+
+
+255
+00:14:11,818 --> 00:14:15,322 line:-2
+Metal lets you reference up to
+eight color attachments in each pass.
+
+
+256
+00:14:16,356 --> 00:14:18,926 line:-2
+So here I just reference
+both the main scene texture
+
+
+257
+00:14:18,992 --> 00:14:21,195 line:-2
+and the light attenuation texture
+together.
+
+
+258
+00:14:22,129 --> 00:14:25,265 line:-2
+Draws for the main scene
+will target the main scene texture,
+
+
+259
+00:14:25,332 --> 00:14:28,001 line:-2
+and attenuation draws
+will target only its texture.
+
+
+260
+00:14:28,869 --> 00:14:31,972 line:-2
+This optimization avoids
+all the intermediate memory traffic.
+
+
+261
+00:14:32,606 --> 00:14:34,942 line:-1
+Only the main scene attachment is stored.
+
+
+262
+00:14:35,008 --> 00:14:38,345 line:-2
+The attenuation attachment is set
+to the DontCare store action.
+
+
+263
+00:14:38,946 --> 00:14:42,583 line:-2
+The attenuation attachment
+isn't referenced outside this pass either,
+
+
+264
+00:14:42,649 --> 00:14:44,318 line:-1
+so I've marked it memoryless too.
+
+
+265
+00:14:44,718 --> 00:14:48,455 line:-2
+Now let's take a quick look at how
+to set up the pass for this example.
+
+
+266
+00:14:49,389 --> 00:14:52,159 line:-2
+You start by creating
+the main scene attachment.
+
+
+267
+00:14:52,226 --> 00:14:55,596 line:-2
+Then create the attenuation attachment
+of the same size.
+
+
+268
+00:14:55,662 --> 00:14:57,798 line:-2
+Notice that I've marked it
+memoryless here.
+
+
+269
+00:14:59,199 --> 00:15:03,237 line:-2
+Then you create the render pass by first
+describing the attachment configuration.
+
+
+270
+00:15:04,071 --> 00:15:07,174 line:-2
+We want to clear both the scene
+and attenuation textures
+
+
+271
+00:15:07,241 --> 00:15:08,976 line:-1
+but only store the scene texture.
+
+
+272
+00:15:10,410 --> 00:15:13,614 line:0
+And finally, we create our render pass
+from our descriptor.
+
+
+273
+00:15:13,680 --> 00:15:14,748 line:0
+That's it.
+
+
+274
+00:15:14,815 --> 00:15:18,318 line:0
+Now let's look at an example
+of how not to clear attachments in Metal.
+
+
+275
+00:15:19,586 --> 00:15:23,223 line:-2
+Here's another common pattern we see
+for apps ported from other graphics APIs
+
+
+276
+00:15:23,290 --> 00:15:25,325 line:-1
+that have a stand-alone clear operation.
+
+
+277
+00:15:25,959 --> 00:15:30,097 line:-2
+In this example, the stand-alone clear
+is translated into a separate render pass
+
+
+278
+00:15:30,163 --> 00:15:32,566 line:-1
+that only exists to clear that attachment.
+
+
+279
+00:15:33,433 --> 00:15:36,170 line:-2
+This again generates
+wasted System Memory traffic.
+
+
+280
+00:15:37,271 --> 00:15:39,406 line:-2
+The solution is to fold
+the clear operation
+
+
+281
+00:15:39,473 --> 00:15:41,408 line:-1
+into the render pass that needs it.
+
+
+282
+00:15:42,476 --> 00:15:46,547 line:-2
+With Apple GPUs, the clear load action
+only operates on Tile Memory,
+
+
+283
+00:15:47,114 --> 00:15:49,149 line:-1
+and draws will also target Tile Memory,
+
+
+284
+00:15:49,216 --> 00:15:52,052 line:-2
+either occluding
+or overwriting the cleared pixel,
+
+
+285
+00:15:52,619 --> 00:15:56,723 line:-2
+so you don't waste bandwidth storing
+cleared pixels that are later overdrawn.
+
+
+286
+00:15:56,790 --> 00:15:59,193 line:-2
+So that's a simple
+load action improvement.
+
+
+287
+00:15:59,660 --> 00:16:02,863 line:-2
+For our last tip, let's look at
+a similar store action improvement
+
+
+288
+00:16:02,930 --> 00:16:05,365 line:-2
+that you can make
+to your multi-sampled apps.
+
+
+289
+00:16:06,500 --> 00:16:10,637 line:-2
+Multi-sample anti-aliasing is a great way
+to improve the image quality of your app,
+
+
+290
+00:16:10,704 --> 00:16:13,974 line:-2
+and on Apple GPUs,
+it's really efficient when used correctly.
+
+
+291
+00:16:14,541 --> 00:16:18,545 line:-2
+Some apps, however, are choosing to first
+store the multi-sampled attachment data,
+
+
+292
+00:16:18,612 --> 00:16:21,882 line:-2
+and then reload it
+just to perform the resolve operation.
+
+
+293
+00:16:21,949 --> 00:16:25,485 line:-2
+In this example, we store the sample data
+for both color and depth
+
+
+294
+00:16:25,552 --> 00:16:29,323 line:-2
+in the first pass, and then resolve both
+in the second pass.
+
+
+295
+00:16:30,657 --> 00:16:32,326 line:-1
+Like the separate clear example,
+
+
+296
+00:16:32,392 --> 00:16:36,396 line:-2
+we often observe this pattern in apps
+ported from other graphics APIs
+
+
+297
+00:16:36,463 --> 00:16:38,265 line:-1
+that don't support load actions.
+
+
+298
+00:16:38,665 --> 00:16:41,034 line:-1
+But sample data is rarely needed off-chip,
+
+
+299
+00:16:41,101 --> 00:16:45,138 line:-2
+so the resolve operation should really be
+performed as part of the previous pass.
+
+
+300
+00:16:46,406 --> 00:16:49,343 line:-2
+That way, we only consume
+System Memory bandwidth
+
+
+301
+00:16:49,409 --> 00:16:52,012 line:-2
+for the pixels that matter
+and not the samples.
+
+
+302
+00:16:52,546 --> 00:16:56,483 line:-2
+Also notice in this example that
+I've made the MSAA textures memoryless.
+
+
+303
+00:16:57,784 --> 00:17:00,621 line:-2
+MSAA samples are often
+only ever needed within a pass,
+
+
+304
+00:17:00,687 --> 00:17:03,123 line:-2
+so that's a great opportunity
+to save a lot of memory.
+
+
+305
+00:17:03,690 --> 00:17:07,027 line:-2
+So that's our advice for minimizing
+System Memory bandwidth in your apps.
+
+
+306
+00:17:07,426 --> 00:17:10,631 line:-2
+Now let's learn how to maximize
+hidden surface removal efficiency
+
+
+307
+00:17:10,696 --> 00:17:12,031 line:-1
+to minimize overdraw.
+
+
+308
+00:17:14,334 --> 00:17:18,305 line:-2
+Remember that Apple GPUs support
+hidden surface removal in hardware.
+
+
+309
+00:17:18,372 --> 00:17:21,675 line:-2
+The goal of HSR is to shade
+only visible pixels,
+
+
+310
+00:17:21,742 --> 00:17:23,944 line:-1
+and not pixels occluded by later draws.
+
+
+311
+00:17:24,711 --> 00:17:28,649 line:-2
+To do this, HSR categorizes fragments
+based on their visibility.
+
+
+312
+00:17:30,250 --> 00:17:32,286 line:-1
+First we have opaque fragments,
+
+
+313
+00:17:32,352 --> 00:17:35,389 line:-2
+which always occlude, or hide,
+everything beneath them.
+
+
+314
+00:17:36,924 --> 00:17:38,592 line:-1
+Then we have feedback fragments,
+
+
+315
+00:17:38,659 --> 00:17:42,062 line:-2
+which are generated by fragment functions
+containing a discard statement,
+
+
+316
+00:17:42,129 --> 00:17:43,730 line:-1
+or that return a depth value.
+
+
+317
+00:17:44,631 --> 00:17:47,301 line:-2
+Alpha-tested foliage
+falls into this category.
+
+
+318
+00:17:48,435 --> 00:17:50,571 line:-1
+And finally we have translucent fragments,
+
+
+319
+00:17:50,637 --> 00:17:53,507 line:-2
+which blend with their background
+like a smoke effect would.
+
+
+320
+00:17:54,041 --> 00:17:56,043 line:-1
+To maximize HSR efficiency,
+
+
+321
+00:17:56,109 --> 00:17:59,313 line:-2
+draw each type of fragment together,
+and in the order shown.
+
+
+322
+00:18:00,214 --> 00:18:04,685 line:-2
+First opaque, then feedback,
+and, finally, translucent objects.
+
+
+323
+00:18:04,751 --> 00:18:06,687 line:-1
+Draw ordering within each category
+
+
+324
+00:18:06,753 --> 00:18:09,556 line:-2
+only matters for feedback
+and translucent fragments.
+
+
+325
+00:18:10,724 --> 00:18:12,793 line:-1
+Opaque draws can be in any order,
+
+
+326
+00:18:12,860 --> 00:18:15,362 line:-2
+but are usually sorted
+by your app's material system.
+
+
+327
+00:18:16,563 --> 00:18:18,599 line:-1
+Let's focus more on opaque fragments.
+
+
+328
+00:18:18,966 --> 00:18:21,902 line:-2
+Opaque fragments allow HSR
+to eliminate the most work
+
+
+329
+00:18:21,969 --> 00:18:25,572 line:-2
+because any pixel beneath them
+can be rejected before shading.
+
+
+330
+00:18:25,639 --> 00:18:28,408 line:-2
+For example, when rendering
+the opaque triangles on the right,
+
+
+331
+00:18:28,475 --> 00:18:30,811 line:-2
+hidden surface removal will reject
+all fragments
+
+
+332
+00:18:30,878 --> 00:18:33,213 line:-2
+belonging to the yellow
+and green triangles
+
+
+333
+00:18:33,680 --> 00:18:35,582 line:-1
+that are covered by the blue triangle.
+
+
+334
+00:18:37,150 --> 00:18:39,853 line:-2
+Not all opaque geometry
+is treated equally though.
+
+
+335
+00:18:39,920 --> 00:18:43,590 line:-2
+We already know that some Metal features
+will make your fragments nonopaque,
+
+
+336
+00:18:43,657 --> 00:18:45,993 line:-1
+like alpha blending and alpha testing,
+
+
+337
+00:18:46,059 --> 00:18:50,264 line:-2
+but some Metal features will also reduce
+hidden surface removal efficiency.
+
+
+338
+00:18:51,331 --> 00:18:53,400 line:-2
+It's okay to use those features
+when needed,
+
+
+339
+00:18:53,467 --> 00:18:55,302 line:-2
+but you should be aware
+of their performance
+
+
+340
+00:18:55,369 --> 00:18:57,437 line:-1
+and how to minimize the efficiency impact.
+
+
+341
+00:18:57,905 --> 00:18:59,239 line:-1
+Let's review them now.
+
+
+342
+00:19:00,541 --> 00:19:04,311 line:-2
+Metal supports writing to buffers
+and textures from fragment functions.
+
+
+343
+00:19:04,378 --> 00:19:07,214 line:-2
+These resources are not
+your render pass attachments.
+
+
+344
+00:19:08,582 --> 00:19:12,152 line:-2
+By default, Metal is required to execute
+all such fragments,
+
+
+345
+00:19:12,219 --> 00:19:14,488 line:-2
+even if they're occluded
+by later fragments.
+
+
+346
+00:19:15,155 --> 00:19:18,759 line:-2
+Metal does this to ensure
+that memory writes are deterministic,
+
+
+347
+00:19:18,825 --> 00:19:20,861 line:-1
+at the expense of hidden surface removal,
+
+
+348
+00:19:21,662 --> 00:19:25,465 line:-2
+but you often don't need resource writes
+to occur for rejected fragments,
+
+
+349
+00:19:25,532 --> 00:19:26,700 line:-1
+and when that's true,
+
+
+350
+00:19:26,767 --> 00:19:31,171 line:-2
+Metal provides the early fragment test
+attribute to recover some efficiency.
+
+
+351
+00:19:31,605 --> 00:19:34,842 line:-2
+That attribute tells Metal that it's okay
+to not shade the fragment
+
+
+352
+00:19:34,908 --> 00:19:36,577 line:-1
+if it fails the depth test.
+
+
+353
+00:19:36,643 --> 00:19:40,280 line:-2
+You should add the early_fragment_tests
+attribute to these fragment functions
+
+
+354
+00:19:40,347 --> 00:19:41,615 line:-1
+wherever possible.
+
+
+355
+00:19:42,416 --> 00:19:46,353 line:-2
+Another feature that reduces
+HSR efficiency is write masking.
+
+
+356
+00:19:48,055 --> 00:19:50,657 line:-2
+Write masks allow you to restrict
+which color channels
+
+
+357
+00:19:50,724 --> 00:19:52,926 line:-1
+of a render pass attachment are written,
+
+
+358
+00:19:52,993 --> 00:19:55,329 line:-2
+even when the shader
+writes all the channels.
+
+
+359
+00:19:56,396 --> 00:19:57,431 line:-1
+In this example,
+
+
+360
+00:19:57,497 --> 00:20:01,034 line:-2
+colorAttachments[0] will only have
+its red and green channels written
+
+
+361
+00:20:01,101 --> 00:20:03,770 line:-2
+by the fragment function
+bound to this pipeline.
+
+
+362
+00:20:03,837 --> 00:20:06,473 line:-2
+The blue and alpha channels
+will not be updated.
+
+
+363
+00:20:07,541 --> 00:20:11,678 line:0
+Metal must preserve the untouched channels
+for correctness, and on Apple GPUs,
+
+
+364
+00:20:11,745 --> 00:20:16,016 line:0
+that means shading underlapping fragments
+to first generate those values.
+
+
+365
+00:20:16,083 --> 00:20:18,652 line:0
+All channels of the underlapping fragment
+are shaded,
+
+
+366
+00:20:18,719 --> 00:20:21,488 line:0
+even though only some channel values
+are actually needed,
+
+
+367
+00:20:21,555 --> 00:20:23,757 line:0
+so some computation is wasted.
+
+
+368
+00:20:24,358 --> 00:20:26,793 line:-2
+If you need write masking
+to express your rendering technique,
+
+
+369
+00:20:26,860 --> 00:20:28,262 line:-1
+then by all means use it,
+
+
+370
+00:20:28,595 --> 00:20:30,564 line:-2
+and you probably intended to use
+write masking
+
+
+371
+00:20:30,631 --> 00:20:32,799 line:-1
+when you set it up through the Metal API.
+
+
+372
+00:20:33,834 --> 00:20:35,802 line:-2
+But now let me show you
+an example we found
+
+
+373
+00:20:35,869 --> 00:20:37,905 line:-1
+where write masking was not intentional.
+
+
+374
+00:20:38,472 --> 00:20:41,208 line:-2
+Write masks can be set up
+in fragment functions too,
+
+
+375
+00:20:41,275 --> 00:20:45,045 line:-2
+and fragment functions that don't
+write any channels of an attachment,
+
+
+376
+00:20:45,112 --> 00:20:46,380 line:-1
+are also write masking.
+
+
+377
+00:20:47,147 --> 00:20:49,850 line:-2
+Consider this on-chip
+deferred rendering example.
+
+
+378
+00:20:49,917 --> 00:20:52,686 line:-2
+The G-buffer consists
+of three render pass attachments:
+
+
+379
+00:20:52,753 --> 00:20:56,089 line:-2
+albedo, normals
+and the light accumulation texture.
+
+
+380
+00:20:57,191 --> 00:20:59,993 line:-2
+The fragment function
+of the G-buffer generation phase
+
+
+381
+00:21:00,060 --> 00:21:02,596 line:-2
+only writes to two
+of those three attachments,
+
+
+382
+00:21:02,663 --> 00:21:05,365 line:-2
+because the last attachment
+isn't used in this phase.
+
+
+383
+00:21:05,933 --> 00:21:08,268 line:-2
+This form of write masking
+was unintentional.
+
+
+384
+00:21:08,335 --> 00:21:11,205 line:-2
+You didn't intend to reduce
+HSR efficiency here.
+
+
+385
+00:21:11,572 --> 00:21:14,775 line:-2
+To fix this, we just need to write
+all of the attachments.
+
+
+386
+00:21:16,577 --> 00:21:20,247 line:-2
+And in this case, we can just initialize
+the lighting attachment to zeros.
+
+
+387
+00:21:20,747 --> 00:21:23,817 line:-2
+Remember that unless you really need
+to preserve the previous values
+
+
+388
+00:21:23,884 --> 00:21:24,885 line:-1
+of an attachment,
+
+
+389
+00:21:24,952 --> 00:21:29,089 line:-2
+you should write to all render pass
+attachments to improve HSR efficiency.
+
+
+390
+00:21:29,623 --> 00:21:32,860 line:-2
+To close our discussion
+on hidden surface removal best practices,
+
+
+391
+00:21:32,926 --> 00:21:36,296 line:-2
+let's look at the role of depth pre-passes
+on Apple GPUs.
+
+
+392
+00:21:37,998 --> 00:21:40,133 line:-2
+Depth pre-pass
+is a commonly used technique
+
+
+393
+00:21:40,200 --> 00:21:42,803 line:-2
+in existing Mac games
+to minimize overdraw.
+
+
+394
+00:21:43,971 --> 00:21:48,242 line:-2
+You first render the scene into your depth
+attachment only to determine visibility.
+
+
+395
+00:21:49,476 --> 00:21:52,346 line:-2
+You then render the scene again
+into your color attachments,
+
+
+396
+00:21:52,412 --> 00:21:55,349 line:-2
+testing against that visibility
+but without updating it.
+
+
+397
+00:21:56,316 --> 00:21:58,719 line:-2
+This ensures that only fragments
+matching the depth test
+
+
+398
+00:21:58,785 --> 00:22:00,487 line:-1
+are shaded in the second pass.
+
+
+399
+00:22:01,054 --> 00:22:04,424 line:-2
+Now, if you need visibility information
+before your main scene renders
+
+
+400
+00:22:04,491 --> 00:22:07,694 line:-2
+for a particular technique,
+then you don't have to change your app,
+
+
+401
+00:22:08,228 --> 00:22:11,231 line:-2
+but if you only perform
+a depth pre-pass for performance,
+
+
+402
+00:22:11,298 --> 00:22:15,202 line:-2
+then hidden surface removal
+serves the same purpose on Apple GPUs.
+
+
+403
+00:22:16,537 --> 00:22:18,038 line:-1
+When HSR is maximized,
+
+
+404
+00:22:18,105 --> 00:22:21,608 line:-2
+it can reject hidden fragments
+as well as depth pre-passes can,
+
+
+405
+00:22:21,675 --> 00:22:23,577 line:-1
+but without any additional costs.
+
+
+406
+00:22:24,545 --> 00:22:27,714 line:-1
+With HSR, geometry is only processed once.
+
+
+407
+00:22:28,982 --> 00:22:32,286 line:-2
+And HSR doesn't require
+the depth attachment to be stored,
+
+
+408
+00:22:32,352 --> 00:22:34,188 line:-1
+or even have memory backing at all.
+
+
+409
+00:22:35,055 --> 00:22:38,158 line:-2
+It also avoids a correctness artifact
+called z-fighting,
+
+
+410
+00:22:38,225 --> 00:22:41,295 line:-2
+where the depth calculation of both passes
+slightly mismatch.
+
+
+411
+00:22:42,763 --> 00:22:44,665 line:0
+For more information on z-fighting,
+
+
+412
+00:22:44,731 --> 00:22:47,734 line:0
+please see this year's
+Apple Silicon Mac porting session.
+
+
+413
+00:22:48,101 --> 00:22:51,038 line:-2
+So that concludes our discussion
+on how to minimize overdraw
+
+
+414
+00:22:51,104 --> 00:22:52,539 line:-1
+with hidden surface removal.
+
+
+415
+00:22:53,073 --> 00:22:54,842 line:-1
+My colleague Dom will introduce you
+
+
+416
+00:22:54,908 --> 00:22:57,277 line:-2
+to even more
+advanced optimization techniques.
+
+
+417
+00:22:57,945 --> 00:22:58,979 line:-1
+Hey, thanks, Mike.
+
+
+418
+00:22:59,379 --> 00:23:00,848 line:-1
+In the first part of this video,
+
+
+419
+00:23:00,914 --> 00:23:04,585 line:-2
+we've seen some performance optimization
+techniques for Apple GPUs
+
+
+420
+00:23:04,651 --> 00:23:08,121 line:-2
+that require some relatively small changes
+in your use of the Metal API.
+
+
+421
+00:23:09,523 --> 00:23:10,858 line:-1
+In this section, instead,
+
+
+422
+00:23:10,924 --> 00:23:14,094 line:-2
+we're going to discuss about
+further optimization opportunities
+
+
+423
+00:23:14,161 --> 00:23:17,731 line:-2
+based on Metal features
+that are specific to Apple GPUs,
+
+
+424
+00:23:17,798 --> 00:23:20,501 line:-2
+such as Tile Shaders
+and programmable blending.
+
+
+425
+00:23:22,002 --> 00:23:26,473 line:-2
+Let's start talking about how to optimize
+deferred shading on Apple GPUs.
+
+
+426
+00:23:26,840 --> 00:23:31,211 line:-2
+Deferred shading is a lighting solution
+commonly used in several game engines.
+
+
+427
+00:23:31,678 --> 00:23:36,016 line:-2
+As a quick recap, in deferred shading,
+rendering is split in two passes.
+
+
+428
+00:23:37,017 --> 00:23:39,419 line:-1
+First we draw all the scene geometry
+
+
+429
+00:23:39,486 --> 00:23:42,222 line:-2
+to compute some
+per-pixel material properties.
+
+
+430
+00:23:42,289 --> 00:23:46,159 line:-2
+In this case, albedo, normals
+and surface roughness
+
+
+431
+00:23:46,226 --> 00:23:48,428 line:-1
+are stored in three different attachments.
+
+
+432
+00:23:48,495 --> 00:23:50,531 line:-1
+That's what we call G-buffer.
+
+
+433
+00:23:52,199 --> 00:23:53,500 line:-1
+Then in the second pass,
+
+
+434
+00:23:53,567 --> 00:23:58,805 line:-2
+the G-buffer data is used to compute
+the final per-pixel lighting output.
+
+
+435
+00:23:59,473 --> 00:24:02,609 line:-2
+The main idea is that
+decoupling geometry from lighting
+
+
+436
+00:24:02,676 --> 00:24:05,078 line:-1
+can keep the shading costs under control.
+
+
+437
+00:24:05,913 --> 00:24:07,681 line:-1
+A common issue of deferred shading
+
+
+438
+00:24:07,748 --> 00:24:12,052 line:-2
+is that G-buffers can have a large
+memory footprint and bandwidth costs,
+
+
+439
+00:24:12,119 --> 00:24:14,721 line:-2
+especially in cases
+where multiple G-buffers
+
+
+440
+00:24:14,788 --> 00:24:18,225 line:-2
+are used to shade unique materials
+such as hair or skin.
+
+
+441
+00:24:19,660 --> 00:24:23,363 line:-2
+However, Apple GPUs
+support features designed to reduce
+
+
+442
+00:24:23,430 --> 00:24:26,133 line:-2
+the number of render passes
+for deferred shading.
+
+
+443
+00:24:26,466 --> 00:24:29,570 line:-2
+Programmable blending
+can reduce the bandwidth cost,
+
+
+444
+00:24:29,636 --> 00:24:32,506 line:-2
+and when combined
+with memoryless render targets,
+
+
+445
+<html>
+<head><title>500 Internal Server Error</title></head>
+<body>
+<center><h1>500 Internal Server Error</h1></center>
+<hr><center>QTL_Cache/1.2.14</center>
+</body>
+</html>
+00:24:36,009 --> 00:24:38,979 line:-2
+Here, you have a basic example
+of a deferred renderer
+
+
+446
+00:24:39,046 --> 00:24:40,981 line:-1
+ported from Intel-based Macs.
+
+
+447
+00:24:42,249 --> 00:24:45,586 line:-2
+The G-buffer attachments are rendered
+and stored to System Memory
+
+
+448
+00:24:45,652 --> 00:24:47,487 line:-1
+by the first command encoder.
+
+
+449
+00:24:48,188 --> 00:24:52,259 line:-2
+The attachments are read back immediately
+afterwards in the lighting pass,
+
+
+450
+00:24:52,326 --> 00:24:55,028 line:-2
+consuming a significant amount
+of memory bandwidth.
+
+
+451
+00:24:55,896 --> 00:24:59,032 line:-2
+Metal on macOS supports the concept
+of memory barrier,
+
+
+452
+00:24:59,099 --> 00:25:02,803 line:-2
+and some developers use this construct
+in their deferred renderers.
+
+
+453
+00:25:03,670 --> 00:25:06,206 line:-2
+A memory barrier
+is a synchronization object
+
+
+454
+00:25:06,273 --> 00:25:10,377 line:-2
+that ensures that all writes to a given
+set of resources have completed,
+
+
+455
+00:25:10,444 --> 00:25:12,913 line:-1
+before further commands can be processed.
+
+
+456
+00:25:14,348 --> 00:25:17,317 line:-2
+So in this case, a memory barrier
+on the fragment stage
+
+
+457
+00:25:17,384 --> 00:25:21,054 line:-2
+could be used to combine the G-buffer
+and lighting passes together.
+
+
+458
+00:25:22,322 --> 00:25:25,025 line:-2
+However, memory barriers
+within the fragment stage
+
+
+459
+00:25:25,092 --> 00:25:28,028 line:-2
+are a very expensive operation
+on Apple GPUs.
+
+
+460
+00:25:28,095 --> 00:25:31,365 line:-2
+That's because they require to flush
+the Tile Memory to System Memory,
+
+
+461
+00:25:31,431 --> 00:25:33,800 line:-2
+which is what we want to avoid
+in the first place.
+
+
+462
+00:25:35,102 --> 00:25:37,604 line:-2
+Fortunately, you can use
+programmable blending
+
+
+463
+00:25:37,671 --> 00:25:40,707 line:-2
+to optimize this deferred renderer
+into a single pass.
+
+
+464
+00:25:41,341 --> 00:25:45,078 line:-2
+Programmable blending allows your shader
+to access the current pixel's value
+
+
+465
+00:25:45,145 --> 00:25:46,680 line:-1
+for all color attachments.
+
+
+466
+00:25:47,247 --> 00:25:50,317 line:-2
+The results are accessible
+in the on-chip Tile Memory
+
+
+467
+00:25:50,384 --> 00:25:52,719 line:-2
+without needing to go through
+System Memory.
+
+
+468
+00:25:53,787 --> 00:25:57,024 line:-2
+One important detail to highlight
+is that the Tile Memory
+
+
+469
+00:25:57,090 --> 00:25:59,893 line:-2
+stores color and depth attachments
+separately,
+
+
+470
+00:25:59,960 --> 00:26:03,263 line:-2
+so the depth is not directly accessible
+to a fragment shader.
+
+
+471
+00:26:03,997 --> 00:26:05,666 line:-1
+To work around this limitation,
+
+
+472
+00:26:05,732 --> 00:26:09,870 line:-2
+you can maintain the current fragment's
+depth in a dedicated color attachment
+
+
+473
+00:26:09,937 --> 00:26:12,739 line:-2
+to keep it available
+to all your fragment shaders.
+
+
+474
+00:26:13,173 --> 00:26:16,143 line:-2
+Now that we know the basics
+of on-chip deferred shading,
+
+
+475
+00:26:16,210 --> 00:26:18,212 line:-1
+let's see some more complex example.
+
+
+476
+00:26:19,913 --> 00:26:22,649 line:-2
+Game engines
+can have multiple lighting pipelines
+
+
+477
+00:26:22,716 --> 00:26:24,484 line:-1
+with unique G-buffer layouts.
+
+
+478
+00:26:24,785 --> 00:26:29,590 line:-2
+For instance, hair or skin shading
+often add additional material properties
+
+
+479
+00:26:29,656 --> 00:26:31,491 line:-1
+and need custom lighting.
+
+
+480
+00:26:31,558 --> 00:26:35,562 line:-2
+Such configuration would consume
+a lot of memory bandwidth on Apple GPUs.
+
+
+481
+00:26:36,096 --> 00:26:38,732 line:-2
+Fortunately, Metal offers
+a number of techniques
+
+
+482
+00:26:38,799 --> 00:26:40,667 line:-1
+to optimize these kind of pipelines.
+
+
+483
+00:26:41,001 --> 00:26:45,572 line:-2
+Remember that Metal supports up to
+eight color attachments per render pass.
+
+
+484
+00:26:45,639 --> 00:26:47,741 line:-1
+If your G-buffer layout is similar
+
+
+485
+00:26:47,808 --> 00:26:50,644 line:-2
+among all logical passes
+of your deferred renderer,
+
+
+486
+00:26:50,711 --> 00:26:53,113 line:-1
+and you use only a few unique attachments
+
+
+487
+00:26:53,180 --> 00:26:55,549 line:-2
+to store
+all the intermediate lighting results,
+
+
+488
+00:26:55,616 --> 00:26:59,119 line:-2
+then you can keep everything in one pass
+using programmable blending.
+
+
+489
+00:26:59,686 --> 00:27:02,723 line:-2
+In this example,
+besides the G-buffer attachments,
+
+
+490
+00:27:03,123 --> 00:27:05,392 line:-2
+you have one attachment
+for regular lighting,
+
+
+491
+00:27:05,459 --> 00:27:08,295 line:-2
+and one attachment
+for the specialized hair lighting
+
+
+492
+00:27:08,362 --> 00:27:10,330 line:-1
+before compositing them together.
+
+
+493
+00:27:11,632 --> 00:27:14,868 line:-2
+And of course, if you don't
+need to reference G-buffer data
+
+
+494
+00:27:14,935 --> 00:27:19,139 line:-2
+outside the render pass, then you can even
+make those attachments memoryless,
+
+
+495
+00:27:19,206 --> 00:27:21,642 line:-2
+reducing the memory footprint
+of your workload.
+
+
+496
+00:27:22,476 --> 00:27:23,477 line:-1
+To summarize,
+
+
+497
+00:27:23,544 --> 00:27:27,447 line:-2
+we now know that programmable blending
+is a simple yet powerful feature
+
+
+498
+00:27:27,514 --> 00:27:29,483 line:-1
+to maximize the use of Tile Memory.
+
+
+499
+00:27:29,917 --> 00:27:33,020 line:-2
+However, there are cases where you
+need to repurpose, more drastically,
+
+
+500
+00:27:33,086 --> 00:27:34,955 line:-1
+the structure of your Tile Memory.
+
+
+501
+00:27:35,022 --> 00:27:37,891 line:-2
+Later in this video,
+we'll focus again on this topic,
+
+
+502
+00:27:37,958 --> 00:27:42,129 line:-2
+but before, we need to talk about
+how to mix render and compute together.
+
+
+503
+00:27:42,462 --> 00:27:46,433 line:-2
+Modern renderers often implement
+more sophisticated lighting pipelines
+
+
+504
+00:27:46,500 --> 00:27:48,101 line:-1
+than what we've seen so far.
+
+
+505
+00:27:48,836 --> 00:27:52,940 line:-2
+In many cases, those pipelines
+use both render-based techniques
+
+
+506
+00:27:53,006 --> 00:27:54,808 line:-1
+as well as compute dispatches.
+
+
+507
+00:27:55,242 --> 00:27:58,579 line:-2
+A typical example
+is tile-based light culling,
+
+
+508
+00:27:58,645 --> 00:27:59,980 line:-1
+which is a rendering technique
+
+
+509
+00:28:00,047 --> 00:28:02,916 line:-2
+where the render target
+is split into small tiles,
+
+
+510
+00:28:02,983 --> 00:28:07,588 line:-2
+and a compute shader builds a list
+of all lights that affect each tile.
+
+
+511
+00:28:08,355 --> 00:28:11,358 line:-2
+The final lighting pass
+uses the per-tile light lists
+
+
+512
+00:28:11,425 --> 00:28:14,561 line:-2
+to shade only the lights
+affecting a given tile,
+
+
+513
+00:28:14,628 --> 00:28:16,797 line:-1
+reducing the shading cost dramatically.
+
+
+514
+00:28:17,364 --> 00:28:19,566 line:-2
+Now that we're throwing compute
+into the mix,
+
+
+515
+00:28:19,633 --> 00:28:23,003 line:-2
+keeping data on-chip
+might require some additional work.
+
+
+516
+00:28:23,837 --> 00:28:26,540 line:-2
+Metal supports render command encoders
+for drawing
+
+
+517
+00:28:26,607 --> 00:28:28,909 line:-2
+and compute command encoders
+for dispatches.
+
+
+518
+00:28:29,743 --> 00:28:35,015 line:-2
+Starting with A11 Bionic, Apple GPUs also
+support tile-based compute dispatches.
+
+
+519
+00:28:35,749 --> 00:28:36,884 line:-1
+With Tile Shaders,
+
+
+520
+00:28:36,950 --> 00:28:40,320 line:-2
+you can dispatch threadgroups
+that operate on a per-tile basis
+
+
+521
+00:28:40,387 --> 00:28:42,256 line:-1
+within a render command encoder.
+
+
+522
+00:28:42,322 --> 00:28:45,125 line:-2
+Tile dispatches
+introduce implicit barriers
+
+
+523
+00:28:45,192 --> 00:28:48,662 line:-2
+against the fragment shading stage
+of the earlier and later draws.
+
+
+524
+00:28:48,729 --> 00:28:52,099 line:-2
+For this reason, a tile dispatch
+can use the fragment shading results
+
+
+525
+00:28:52,165 --> 00:28:53,967 line:-1
+of all earlier draws in the tile,
+
+
+526
+00:28:54,034 --> 00:28:58,405 line:-2
+and finish executing before any subsequent
+draws start their fragment shading.
+
+
+527
+00:28:58,472 --> 00:29:03,010 line:-2
+Tile Shaders are deeply integrated
+in the architecture of modern Apple GPUs,
+
+
+528
+00:29:03,076 --> 00:29:06,046 line:-2
+so they can access Imageblocks,
+Threadgroup Memory
+
+
+529
+00:29:06,113 --> 00:29:07,581 line:-1
+and Device Memory as well.
+
+
+530
+00:29:08,081 --> 00:29:11,385 line:-2
+With this in mind, let's go back
+to our Tile Deferred Renderer.
+
+
+531
+00:29:11,718 --> 00:29:14,121 line:-2
+Here is a pipeline
+that has a G-buffer pass
+
+
+532
+00:29:14,188 --> 00:29:16,890 line:-1
+followed by a light culling compute pass.
+
+
+533
+00:29:16,957 --> 00:29:20,060 line:-2
+To determine whether a light
+affects a given tile,
+
+
+534
+00:29:20,127 --> 00:29:24,831 line:-2
+the light culling pass uses the depth
+attachment produced by the G-buffer pass.
+
+
+535
+00:29:25,399 --> 00:29:29,736 line:-2
+Finally, the culled light list
+is used in the last compute pass
+
+
+536
+00:29:29,803 --> 00:29:33,674 line:-2
+to accumulate the lighting contribution
+of all lights in a given tile.
+
+
+537
+00:29:35,008 --> 00:29:36,376 line:-1
+Without Tile Shading,
+
+
+538
+00:29:36,443 --> 00:29:39,213 line:-2
+dispatching threadgroups
+with a compute command encoder
+
+
+539
+00:29:39,279 --> 00:29:41,648 line:-1
+would break rendering into three passes,
+
+
+540
+00:29:41,715 --> 00:29:44,852 line:-2
+forcing several flushes
+of the Tile Memory to System Memory.
+
+
+541
+00:29:45,853 --> 00:29:47,487 line:-1
+Using Tile Shaders instead,
+
+
+542
+00:29:47,554 --> 00:29:51,391 line:-2
+you can access the whole Imageblock data
+in a tile dispatch,
+
+
+543
+00:29:51,458 --> 00:29:55,963 line:-2
+so you can generate per-tile light lists
+in the middle of a render command encoder.
+
+
+544
+00:29:56,396 --> 00:29:57,731 line:-1
+With this configuration,
+
+
+545
+00:29:57,798 --> 00:30:00,767 line:-2
+the light list is stored
+in a Threadgroup Memory buffer,
+
+
+546
+00:30:00,834 --> 00:30:04,471 line:-2
+which can be read by the fragment shaders
+that calculate lighting later on.
+
+
+547
+00:30:05,239 --> 00:30:08,041 line:-2
+And once again,
+because most of the intermediate data
+
+
+548
+00:30:08,108 --> 00:30:11,712 line:-2
+stays in the on-chip Tile Memory,
+you could use memoryless attachments
+
+
+549
+00:30:11,778 --> 00:30:13,447 line:-1
+to reduce the memory footprint.
+
+
+550
+00:30:14,581 --> 00:30:18,619 line:-2
+Let's look at how to set up the render
+pass descriptor for this configuration.
+
+
+551
+00:30:20,254 --> 00:30:22,890 line:-2
+Let's define the dimension
+of the on-chip tiles
+
+
+552
+00:30:22,956 --> 00:30:25,459 line:-2
+so that they match
+with the light culling scheme.
+
+
+553
+00:30:25,859 --> 00:30:29,530 line:-2
+In this case,
+I'm using 32-by-32 pixels for each tile.
+
+
+554
+00:30:30,597 --> 00:30:31,765 line:-1
+One detail to keep in mind
+
+
+555
+00:30:31,832 --> 00:30:35,836 line:-2
+is that Apple GPUs only support
+a few different tile dimensions.
+
+
+556
+00:30:36,136 --> 00:30:38,672 line:-2
+Then I allocate
+the Threadgroup Memory buffer
+
+
+557
+00:30:38,739 --> 00:30:41,275 line:-1
+used to store the per-tile light list.
+
+
+558
+00:30:41,341 --> 00:30:45,312 line:-2
+I'm assuming that each tile
+will contain up to eight unique lights.
+
+
+559
+00:30:46,680 --> 00:30:49,750 line:-2
+Now it's time to set up
+the G-buffer attachments.
+
+
+560
+00:30:49,816 --> 00:30:52,252 line:-2
+Notice that I'm using
+the dontCare store action,
+
+
+561
+00:30:52,319 --> 00:30:55,956 line:-2
+as I don't want to store the G-buffers
+back to System Memory.
+
+
+562
+00:30:56,023 --> 00:30:57,191 line:-1
+And as discussed,
+
+
+563
+00:30:57,257 --> 00:31:00,127 line:-2
+we can use memoryless textures
+for those attachments.
+
+
+564
+00:31:00,827 --> 00:31:03,797 line:0
+The last three lines
+configure the lighting attachment
+
+
+565
+00:31:03,864 --> 00:31:06,066 line:0
+to be cleared
+at the beginning of the render pass,
+
+
+566
+00:31:06,133 --> 00:31:09,536 line:0
+and stored out to System Memory
+at the end of the render pass.
+
+
+567
+00:31:10,003 --> 00:31:13,640 line:0
+And that's it. Our render pass descriptor
+is now ready to be used.
+
+
+568
+00:31:14,741 --> 00:31:17,344 line:-2
+Tile Shaders
+are a powerful and flexible tool,
+
+
+569
+00:31:17,411 --> 00:31:18,745 line:-1
+and over the last few years,
+
+
+570
+00:31:18,812 --> 00:31:21,615 line:-2
+we at Apple prepared
+a lot of material about it.
+
+
+571
+00:31:22,249 --> 00:31:24,818 line:0
+If you're looking for a deep dive
+into Tile Shading,
+
+
+572
+00:31:24,885 --> 00:31:28,455 line:0
+please, see our Metal 2 for A11 Tech Talk
+on "Tile Shading."
+
+
+573
+00:31:28,522 --> 00:31:31,658 line:0
+And if you want to know more
+about tile-based light culling,
+
+
+574
+00:31:31,725 --> 00:31:36,396 line:0
+please, check our "Modern Rendering
+with Metal" talk at WWDC19.
+
+
+575
+00:31:36,463 --> 00:31:38,599 line:-1
+Now that we know about Tile Shaders,
+
+
+576
+00:31:38,665 --> 00:31:42,202 line:-2
+let's go back to our discussion
+about how to repurpose Tile Memory.
+
+
+577
+00:31:42,269 --> 00:31:45,239 line:-2
+One more reason to have Tile Shaders
+in your toolbox
+
+
+578
+00:31:45,305 --> 00:31:47,708 line:-2
+is when you need to change the layout
+of your Imageblock
+
+
+579
+00:31:47,774 --> 00:31:48,876 line:-1
+or Threadgroup Memory.
+
+
+580
+00:31:48,942 --> 00:31:52,112 line:-2
+When you are looking for opportunities
+to merge passes,
+
+
+581
+00:31:52,179 --> 00:31:55,215 line:-2
+sometimes you have data stored
+in color attachments
+
+
+582
+00:31:55,282 --> 00:31:57,885 line:-2
+or Imageblock fields
+that are no longer needed.
+
+
+583
+00:31:57,951 --> 00:32:02,623 line:-2
+A good example would be transitioning
+an Imageblock from a G-buffer layout
+
+
+584
+00:32:02,689 --> 00:32:04,992 line:-2
+to a layout suitable to sort
+and accumulate
+
+
+585
+00:32:05,058 --> 00:32:07,661 line:-1
+multiple layers of translucent geometry.
+
+
+586
+00:32:07,728 --> 00:32:12,032 line:-2
+To implement this transition,
+you need a fragment-based tile pipeline,
+
+
+587
+00:32:12,099 --> 00:32:15,502 line:-2
+which is a Tile Shader dispatch
+with a fragment function bound.
+
+
+588
+00:32:16,069 --> 00:32:17,704 line:-1
+Let's look at the source code.
+
+
+589
+00:32:19,439 --> 00:32:22,709 line:-2
+Here is the Imageblock layout
+used for deferred shading.
+
+
+590
+00:32:23,277 --> 00:32:24,978 line:-1
+I want to transition to a layout
+
+
+591
+00:32:25,045 --> 00:32:29,216 line:-2
+that is useful for storing multiple layers
+of translucent fragments per pixel.
+
+
+592
+00:32:30,017 --> 00:32:33,554 line:-2
+This struct will serve
+as the fragment shader output.
+
+
+593
+00:32:33,620 --> 00:32:37,558 line:-2
+It has a single field marked
+with the imageblock_data attribute.
+
+
+594
+00:32:38,525 --> 00:32:42,329 line:0
+The fragment function will read
+a DeferredShadingFragment input
+
+
+595
+00:32:42,396 --> 00:32:44,965 line:0
+and return a FragmentOutput structure,
+
+
+596
+00:32:45,032 --> 00:32:48,468 line:0
+which will initialize the Imageblock
+for multi-layer alpha blending.
+
+
+597
+00:32:49,436 --> 00:32:53,640 line:0
+The fragment shader will read any values
+that need to be processed or preserved
+
+
+598
+00:32:53,707 --> 00:32:55,242 line:0
+from the input Imageblock,
+
+
+599
+00:32:55,309 --> 00:32:58,812 line:0
+and return the correct value
+to repurpose the Imageblock itself.
+
+
+600
+00:33:00,414 --> 00:33:03,884 line:-2
+So this concludes our discussion
+about repurposing Tile Memory.
+
+
+601
+00:33:03,951 --> 00:33:05,152 line:0
+For further details,
+
+
+602
+00:33:05,219 --> 00:33:09,489 line:0
+please, see our Metal 2 for A11 Tech Talk
+on "Image Blocks."
+
+
+603
+00:33:09,556 --> 00:33:11,525 line:-1
+In the final section of this video,
+
+
+604
+00:33:11,592 --> 00:33:14,928 line:-2
+we'll have a brief architectural overview
+of the Apple Shader Core,
+
+
+605
+00:33:14,995 --> 00:33:17,364 line:-1
+which is a key component of our GPUs.
+
+
+606
+00:33:17,431 --> 00:33:19,800 line:-2
+Then we'll focus on
+some optimization techniques
+
+
+607
+00:33:19,867 --> 00:33:21,201 line:-1
+for your shaders.
+
+
+608
+00:33:21,668 --> 00:33:24,872 line:-2
+The Apple Shader Core
+uses a modern scalar architecture
+
+
+609
+00:33:24,938 --> 00:33:25,973 line:-1
+that is closely aligned
+
+
+610
+00:33:26,039 --> 00:33:28,809 line:-2
+to the Metal Shading Language
+programming model.
+
+
+611
+00:33:28,876 --> 00:33:31,345 line:-1
+And even if its math units are scalar,
+
+
+612
+00:33:31,411 --> 00:33:35,115 line:-2
+the Apple Shader Core prefers to load
+and store vector types directly.
+
+
+613
+00:33:36,283 --> 00:33:40,053 line:-2
+The Shader Core can hoist execution
+of constant code ahead of time,
+
+
+614
+00:33:40,120 --> 00:33:43,657 line:-2
+and prefetch constant data,
+once per draw or per dispatch.
+
+
+615
+00:33:44,658 --> 00:33:48,495 line:-2
+This allows each parallel thread
+to focus on its own unique work.
+
+
+616
+00:33:49,763 --> 00:33:54,501 line:-2
+The Apple Shader Core contains
+both a 16-bit and a 32-bit ALU,
+
+
+617
+00:33:54,568 --> 00:33:57,037 line:-2
+so it can perform math
+at different precisions
+
+
+618
+00:33:57,104 --> 00:33:59,773 line:-2
+to reduce power usage
+and increase performance.
+
+
+619
+00:34:00,741 --> 00:34:02,843 line:-1
+You get most of these benefits for free,
+
+
+620
+00:34:02,910 --> 00:34:06,246 line:-2
+but optimal performance
+may require some tweaking of your shaders.
+
+
+621
+00:34:06,847 --> 00:34:10,150 line:-2
+The next sections
+will focus around three important topics.
+
+
+622
+00:34:10,217 --> 00:34:12,619 line:-2
+Let's start talking about
+memory address spaces
+
+
+623
+00:34:12,686 --> 00:34:14,454 line:-1
+and how to use them effectively.
+
+
+624
+00:34:14,521 --> 00:34:16,956 line:-1
+GPUs have multiple paths to memory
+
+
+625
+00:34:17,024 --> 00:34:20,159 line:-2
+that are designed
+for different access patterns.
+
+
+626
+00:34:20,226 --> 00:34:21,295 line:-1
+For this reason,
+
+
+627
+00:34:21,360 --> 00:34:24,764 line:-2
+the Metal Shading Language
+implements the concept of address space.
+
+
+628
+00:34:25,699 --> 00:34:28,467 line:-2
+Every time you declare
+a buffer binding in your shaders,
+
+
+629
+00:34:28,534 --> 00:34:31,271 line:-2
+the Metal Shading Language
+requires you to tag your data
+
+
+630
+00:34:31,338 --> 00:34:33,340 line:-1
+with a specific address space.
+
+
+631
+00:34:34,041 --> 00:34:36,877 line:-2
+Choosing the right address space
+is an important decision
+
+
+632
+00:34:36,944 --> 00:34:39,913 line:-2
+that will directly impact
+the performance of your shaders.
+
+
+633
+00:34:40,880 --> 00:34:45,052 line:-2
+We're going to focus our attention
+on the device and constant address spaces.
+
+
+634
+00:34:46,485 --> 00:34:49,456 line:-2
+The device address space
+is a read-write memory space
+
+
+635
+00:34:49,523 --> 00:34:51,592 line:-1
+with virtually no size restrictions.
+
+
+636
+00:34:52,458 --> 00:34:53,493 line:-1
+On the other hand,
+
+
+637
+00:34:53,560 --> 00:34:58,632 line:-2
+the constant address space is read-only
+and can fit only a limited amount of data.
+
+
+638
+00:34:59,967 --> 00:35:02,569 line:-2
+Keep in mind
+that this address space is optimized
+
+
+639
+00:35:02,636 --> 00:35:07,641 line:-2
+for reuse of data that is constant across
+all threads in the same draw or dispatch.
+
+
+640
+00:35:08,909 --> 00:35:10,544 line:-1
+Picking the correct address space
+
+
+641
+00:35:10,611 --> 00:35:13,680 line:-2
+is usually a matter of asking yourself
+two simple questions.
+
+
+642
+00:35:14,515 --> 00:35:18,018 line:-1
+First, how much data are we dealing with?
+
+
+643
+00:35:18,085 --> 00:35:20,821 line:-2
+If the amount of data is not known
+at compile time,
+
+
+644
+00:35:20,888 --> 00:35:25,025 line:-2
+and each thread in your draw or dispatch
+reads a different number of items,
+
+
+645
+00:35:25,092 --> 00:35:28,128 line:-2
+then the data should be placed
+in the device address space.
+
+
+646
+00:35:28,695 --> 00:35:33,133 line:0
+Second, if the size is fixed,
+how many times is each item read?
+
+
+647
+00:35:33,200 --> 00:35:36,904 line:0
+If it's a few,
+then use the device address space.
+
+
+648
+00:35:36,970 --> 00:35:40,908 line:0
+Otherwise, if the same item is reused
+several times by different threads,
+
+
+649
+00:35:40,974 --> 00:35:43,143 line:0
+use the constant address space.
+
+
+650
+00:35:43,210 --> 00:35:47,514 line:0
+For instance, if you're indexing some data
+via vertex ID or fragment coordinates,
+
+
+651
+00:35:47,581 --> 00:35:50,884 line:0
+then each thread will likely access
+a different item.
+
+
+652
+00:35:50,951 --> 00:35:53,854 line:0
+In such case,
+use the device address space.
+
+
+653
+00:35:53,921 --> 00:35:55,989 line:-1
+Choosing the right address space
+
+
+654
+00:35:56,056 --> 00:35:58,825 line:-2
+can be critical
+for achieving the best performance.
+
+
+655
+00:35:58,892 --> 00:36:02,529 line:-2
+Next, let's discuss
+about one particular optimization
+
+
+656
+00:36:02,596 --> 00:36:04,831 line:-1
+related to the constant address space.
+
+
+657
+00:36:05,365 --> 00:36:08,635 line:-2
+In some cases, the shader compiler
+can preload your buffers
+
+
+658
+00:36:08,702 --> 00:36:11,705 line:-2
+into special registers
+dedicated to constant data.
+
+
+659
+00:36:12,272 --> 00:36:14,875 line:-1
+Let's call those registers "uniforms."
+
+
+660
+00:36:16,376 --> 00:36:19,379 line:-2
+The preloading happens
+before your shaders run,
+
+
+661
+00:36:19,446 --> 00:36:22,316 line:-2
+so it's a helpful mechanism
+to reduce latency.
+
+
+662
+00:36:22,382 --> 00:36:24,751 line:-2
+Buffers tagged with
+the constant address space
+
+
+663
+00:36:24,818 --> 00:36:26,987 line:-1
+can likely be preloaded into uniforms.
+
+
+664
+00:36:27,054 --> 00:36:29,056 line:-1
+And preloading is more likely to happen
+
+
+665
+00:36:29,122 --> 00:36:31,692 line:-2
+if the offset of the data
+within your buffer
+
+
+666
+00:36:31,758 --> 00:36:33,827 line:-1
+can be determined at compile time.
+
+
+667
+00:36:34,995 --> 00:36:36,897 line:-1
+And if you're indexing into an array,
+
+
+668
+00:36:36,964 --> 00:36:40,234 line:-2
+its size needs to be known
+at compile time as well.
+
+
+669
+00:36:41,034 --> 00:36:42,803 line:-1
+Let's see an example.
+
+
+670
+00:36:42,870 --> 00:36:46,240 line:-2
+The fragment shader on the left
+reads an array of light structures
+
+
+671
+00:36:46,306 --> 00:36:47,541 line:-1
+from System Memory.
+
+
+672
+00:36:48,108 --> 00:36:51,311 line:-2
+In this example,
+constant preloading will not happen.
+
+
+673
+00:36:51,378 --> 00:36:54,715 line:-2
+That's because even if we specified
+a const qualifier,
+
+
+674
+00:36:54,781 --> 00:36:58,519 line:-2
+we're actually reading the light array
+from the device address space.
+
+
+675
+00:36:58,585 --> 00:37:03,056 line:-2
+But also, the size of the light array
+is not determined at compile time.
+
+
+676
+00:37:04,057 --> 00:37:07,227 line:0
+To help the shader compiler
+to preload your constant buffers,
+
+
+677
+00:37:07,294 --> 00:37:11,965 line:0
+make sure to provide your constants
+as a single struct, passed by reference.
+
+
+678
+00:37:12,032 --> 00:37:16,503 line:0
+And for your constant arrays,
+provide a size known at compile time.
+
+
+679
+00:37:17,371 --> 00:37:19,740 line:0
+The resulting code would look like this.
+
+
+680
+00:37:20,641 --> 00:37:24,745 line:-2
+The light array is now encapsulated
+in a struct loaded by reference
+
+
+681
+00:37:24,811 --> 00:37:26,613 line:-1
+from constant address space.
+
+
+682
+00:37:27,281 --> 00:37:30,417 line:-2
+And the maximum number of lights
+is known at compile time
+
+
+683
+00:37:30,484 --> 00:37:32,286 line:-1
+with the MAX_LIGHTS constant.
+
+
+684
+00:37:33,287 --> 00:37:36,590 line:-2
+The shader compiler is now able
+to preload the light array
+
+
+685
+00:37:36,657 --> 00:37:38,525 line:-1
+into uniform registers.
+
+
+686
+00:37:38,592 --> 00:37:41,328 line:-1
+Let's now talk about ALU data types
+
+
+687
+00:37:41,395 --> 00:37:45,032 line:-2
+and how they can significantly affect
+the performance of your shaders.
+
+
+688
+00:37:45,098 --> 00:37:47,234 line:-1
+First, some definitions.
+
+
+689
+00:37:47,301 --> 00:37:51,772 line:-2
+By data types, we mean whatever types
+you use throughout your shader code.
+
+
+690
+00:37:52,539 --> 00:37:56,510 line:-2
+Apple GPUs are optimized
+for 16-bit data types.
+
+
+691
+00:37:56,577 --> 00:37:59,179 line:-2
+So when you use
+a type bigger than 16 bits,
+
+
+692
+00:37:59,279 --> 00:38:01,782 line:-2
+you will allocate
+more registers accordingly.
+
+
+693
+00:38:01,849 --> 00:38:03,483 line:-1
+And if you use a smaller type,
+
+
+694
+00:38:03,550 --> 00:38:06,954 line:-2
+you will still consume
+a full 16-bit register.
+
+
+695
+00:38:07,020 --> 00:38:10,524 line:-2
+Using 16-bit data types
+instead of 32-bit data types,
+
+
+696
+00:38:10,591 --> 00:38:12,793 line:-1
+your shaders will require less registers,
+
+
+697
+00:38:12,860 --> 00:38:15,429 line:-2
+leading to an increase
+in Shader Core occupancy.
+
+
+698
+00:38:15,495 --> 00:38:18,599 line:-2
+And higher occupancy means
+that more GPU threads
+
+
+699
+00:38:18,665 --> 00:38:20,534 line:-1
+can be in-flight at the same time,
+
+
+700
+00:38:20,601 --> 00:38:23,136 line:-2
+which is great to improve
+the latency-hiding capabilities
+
+
+701
+00:38:23,203 --> 00:38:24,671 line:-1
+of the Shader Core.
+
+
+702
+00:38:24,738 --> 00:38:30,077 line:-2
+But also, in most cases, 16-bit data types
+use faster arithmetic instructions
+
+
+703
+00:38:30,143 --> 00:38:32,713 line:-1
+than the equivalent 32-bit data types,
+
+
+704
+00:38:32,779 --> 00:38:35,749 line:-2
+leading to a significantly better
+ALU utilization.
+
+
+705
+00:38:36,316 --> 00:38:37,551 line:-1
+For all those reasons,
+
+
+706
+00:38:37,618 --> 00:38:41,688 line:-2
+use half and short
+instead of float and int when possible.
+
+
+707
+00:38:41,755 --> 00:38:45,192 line:-2
+Don't worry about type conversions.
+Those are typically free,
+
+
+708
+00:38:45,259 --> 00:38:49,897 line:-2
+even between single-precision
+and half-precision floating-point values.
+
+
+709
+00:38:49,963 --> 00:38:51,265 line:-1
+Let's see some examples.
+
+
+710
+00:38:52,299 --> 00:38:57,237 line:-2
+In this example, consider a kernel using
+the thread position within a threadgroup
+
+
+711
+00:38:57,304 --> 00:38:58,705 line:-1
+for some computation.
+
+
+712
+00:38:59,439 --> 00:39:00,607 line:-1
+I'm using 32 bits,
+
+
+713
+00:39:00,674 --> 00:39:03,076 line:-2
+but the maximum threadgroup size
+supported by Metal
+
+
+714
+00:39:03,143 --> 00:39:05,412 line:-1
+can easily fit in a 16-bit value.
+
+
+715
+00:39:06,613 --> 00:39:09,683 line:-2
+The threadgroup position
+within a dispatch grid, however,
+
+
+716
+00:39:09,750 --> 00:39:12,119 line:-2
+could potentially require
+a larger data type,
+
+
+717
+00:39:12,186 --> 00:39:13,453 line:-1
+depending on the grid size.
+
+
+718
+00:39:13,520 --> 00:39:18,425 line:0
+In this case, for the grid size I'm using,
+a 16-bit value is enough.
+
+
+719
+00:39:19,226 --> 00:39:22,029 line:0
+The resulting code would use
+a smaller number of registers
+
+
+720
+00:39:22,095 --> 00:39:25,065 line:0
+to compute local and global positions
+within the dispatch,
+
+
+721
+00:39:25,132 --> 00:39:27,568 line:0
+potentially increasing
+the Shader Core occupancy.
+
+
+722
+00:39:28,135 --> 00:39:31,038 line:-2
+Next, let's talk about another case
+where it is possible
+
+
+723
+00:39:31,104 --> 00:39:35,909 line:-2
+to use more registers than expected,
+this time through floating-point literals.
+
+
+724
+00:39:37,044 --> 00:39:40,514 line:-2
+The Metal Shading Language specifies
+that operations have to happen
+
+
+725
+00:39:40,581 --> 00:39:43,917 line:-2
+at the highest precision
+among all operands.
+
+
+726
+00:39:43,984 --> 00:39:47,888 line:-2
+So even if the "a" and "b" arguments
+are using half-precision,
+
+
+727
+00:39:47,955 --> 00:39:52,226 line:-2
+the compiler has to promote
+the whole expression to single-precision.
+
+
+728
+00:39:52,292 --> 00:39:55,128 line:-2
+That's because of the minus two
+and five literals.
+
+
+729
+00:39:56,396 --> 00:39:58,665 line:0
+So when you're writing
+half-precision code,
+
+
+730
+00:39:58,732 --> 00:40:03,470 line:0
+make sure to use half-precision literals
+using the "h" letter suffix.
+
+
+731
+00:40:04,771 --> 00:40:08,075 line:-2
+Finally, let's talk about how to avoid
+some common pitfalls
+
+
+732
+00:40:08,141 --> 00:40:10,143 line:-1
+in the memory accesses of your shaders.
+
+
+733
+00:40:11,011 --> 00:40:14,515 line:-2
+In general,
+try to avoid stack-allocated arrays,
+
+
+734
+00:40:14,581 --> 00:40:18,151 line:-2
+as sometimes they force the compiler
+to generate suboptimal code.
+
+
+735
+00:40:19,219 --> 00:40:20,220 line:0
+For instance,
+
+
+736
+00:40:20,287 --> 00:40:24,791 line:0
+the compiler cannot easily optimize away
+dynamically indexed arrays
+
+
+737
+00:40:24,858 --> 00:40:26,627 line:0
+initialized at runtime.
+
+
+738
+00:40:27,261 --> 00:40:30,264 line:0
+In this case,
+if the value of the index argument
+
+
+739
+00:40:30,330 --> 00:40:32,399 line:0
+is not known at compile time,
+
+
+740
+00:40:32,466 --> 00:40:36,069 line:0
+the compiler would likely spill
+to memory "a," "b" and "c"
+
+
+741
+00:40:36,136 --> 00:40:39,640 line:0
+and read back the correct value
+based on the index argument.
+
+
+742
+00:40:40,674 --> 00:40:44,611 line:0
+In this other example, instead,
+the loop will likely get unrolled,
+
+
+743
+00:40:44,678 --> 00:40:47,948 line:0
+so the compiler will be able to know
+the value of the index variable
+
+
+744
+00:40:48,015 --> 00:40:51,051 line:0
+at compile time,
+optimizing away any spilling.
+
+
+745
+00:40:52,352 --> 00:40:56,056 line:-2
+The best way to know if you have
+stack accesses getting spilled to memory
+
+
+746
+00:40:56,123 --> 00:40:59,226 line:-1
+is to use the GPU Frame Debugger in Xcode.
+
+
+747
+00:40:59,293 --> 00:41:03,063 line:-2
+If you see a warning sign
+next to one of your draws,
+
+
+748
+00:41:03,130 --> 00:41:05,899 line:-1
+click on the Pipeline Statistics section.
+
+
+749
+00:41:05,966 --> 00:41:09,469 line:0
+This will open a Remarks panel
+containing a message similar to this
+
+
+750
+00:41:09,536 --> 00:41:12,506 line:0
+if you hit any spilling
+due to stack accesses.
+
+
+751
+00:41:12,573 --> 00:41:17,611 line:-2
+Another thing to look out for is the type
+of the indices used in memory accesses.
+
+
+752
+00:41:17,678 --> 00:41:21,148 line:-2
+The best practice is to use signed types
+wherever you can.
+
+
+753
+00:41:21,915 --> 00:41:23,851 line:-1
+Let's consider the following example.
+
+
+754
+00:41:25,085 --> 00:41:28,655 line:-2
+Here you have a simple loop
+accessing a buffer.
+
+
+755
+00:41:28,722 --> 00:41:32,025 line:-2
+The loop index variable uses
+an unsigned type.
+
+
+756
+00:41:33,026 --> 00:41:35,996 line:-2
+Unsigned types have
+a well-defined wrapping semantic
+
+
+757
+00:41:36,063 --> 00:41:38,165 line:-1
+in the Metal Shading Language.
+
+
+758
+00:41:38,232 --> 00:41:40,934 line:-1
+So, if the index overflows,
+
+
+759
+00:41:41,001 --> 00:41:44,271 line:-2
+the compiler needs to make sure
+that it wraps around correctly,
+
+
+760
+00:41:44,338 --> 00:41:46,440 line:-1
+and such behavior comes at a cost.
+
+
+761
+00:41:47,541 --> 00:41:49,576 line:-2
+Let's take a look
+at a memory access pattern
+
+
+762
+00:41:49,643 --> 00:41:50,944 line:-1
+involving wrapping.
+
+
+763
+00:41:51,879 --> 00:41:55,315 line:-2
+In this case,
+start has a value larger than end.
+
+
+764
+00:41:56,083 --> 00:41:58,919 line:-2
+In the Metal Shading Language,
+this is perfectly valid,
+
+
+765
+00:41:58,986 --> 00:42:03,257 line:-2
+and what will happen is that the index
+will wrap around when reaching UINT_MAX.
+
+
+766
+00:42:03,323 --> 00:42:04,758 line:-1
+To implement this behavior,
+
+
+767
+00:42:04,825 --> 00:42:07,995 line:-2
+the shader compiler
+cannot vectorize the loads together,
+
+
+768
+00:42:08,061 --> 00:42:10,631 line:-2
+potentially affecting
+the performance of this shader.
+
+
+769
+00:42:10,697 --> 00:42:14,034 line:-2
+If you need the wrapping behavior,
+of course, use an unsigned type.
+
+
+770
+00:42:14,101 --> 00:42:16,770 line:-2
+However, most of the times,
+this is not necessary.
+
+
+771
+00:42:17,538 --> 00:42:19,606 line:0
+Replacing the index with a signed type
+
+
+772
+00:42:19,673 --> 00:42:22,476 line:0
+will tell the compiler
+you don't need a wrapping semantic,
+
+
+773
+00:42:22,543 --> 00:42:25,179 line:0
+as overflow of signed values
+is undefined behavior
+
+
+774
+00:42:25,279 --> 00:42:26,847 line:0
+in the Metal Shading Language.
+
+
+775
+00:42:26,914 --> 00:42:27,981 line:0
+With this change,
+
+
+776
+00:42:28,048 --> 00:42:31,618 line:0
+the shader compiler is now able
+to vectorize the four loads together,
+
+
+777
+00:42:31,685 --> 00:42:34,154 line:0
+likely leading to
+a performance improvement.
+
+
+778
+00:42:34,221 --> 00:42:35,589 line:-1
+And once again,
+
+
+779
+00:42:35,656 --> 00:42:39,993 line:-2
+batching your memory accesses together
+is generally a good thing for performance.
+
+
+780
+00:42:40,060 --> 00:42:43,931 line:-2
+The compiler will try to do it for you,
+but sometimes it needs your help.
+
+
+781
+00:42:44,598 --> 00:42:46,533 line:0
+Let's consider the following example.
+
+
+782
+00:42:47,868 --> 00:42:51,839 line:0
+The main loop is accessing fields
+"a" and "c" of the foo struct
+
+
+783
+00:42:51,905 --> 00:42:53,507 line:0
+at the same time.
+
+
+784
+00:42:53,607 --> 00:42:56,810 line:0
+The problem here is that those fields
+are not adjacent,
+
+
+785
+00:42:56,877 --> 00:42:59,012 line:0
+as "b" is sitting between them.
+
+
+786
+00:42:59,079 --> 00:43:02,216 line:0
+Therefore, the compiler will not be able
+to load them together.
+
+
+787
+00:43:04,484 --> 00:43:08,222 line:0
+To fix that, you can merge the fields
+manually like this.
+
+
+788
+00:43:08,288 --> 00:43:10,557 line:0
+Using a vector data type directly
+
+
+789
+00:43:10,624 --> 00:43:13,961 line:0
+forces the compiler
+to emit a vectorized load in this case.
+
+
+790
+00:43:14,628 --> 00:43:18,031 line:0
+You can achieve the same behavior
+by simply modifying your structure
+
+
+791
+00:43:18,098 --> 00:43:20,434 line:0
+so that the fields are next to each other.
+
+
+792
+00:43:21,001 --> 00:43:24,171 line:-2
+And this concludes our discussion
+about the Apple Shader Core.
+
+
+793
+00:43:24,972 --> 00:43:27,241 line:-1
+Okay, let's review what we learned today.
+
+
+794
+00:43:27,774 --> 00:43:31,678 line:-2
+In this video, Mike and I showed you
+many different optimization techniques
+
+
+795
+00:43:31,745 --> 00:43:33,547 line:-1
+for the Apple GPU architecture.
+
+
+796
+00:43:34,648 --> 00:43:37,284 line:-2
+We discussed about eliminating
+unnecessary dependencies
+
+
+797
+00:43:37,351 --> 00:43:40,621 line:-2
+to maximize vertex,
+fragment and compute overlap.
+
+
+798
+00:43:41,555 --> 00:43:45,392 line:-2
+Next, we discussed about avoiding
+unnecessary pass changes
+
+
+799
+00:43:45,459 --> 00:43:47,594 line:-1
+through pass reordering and merging.
+
+
+800
+00:43:48,529 --> 00:43:51,598 line:-2
+We also talked about how to minimize
+memory bandwidth
+
+
+801
+00:43:51,665 --> 00:43:54,067 line:-2
+through proper use of load
+and store actions.
+
+
+802
+00:43:55,302 --> 00:43:57,638 line:-2
+We then discussed about how to maximize
+the efficiency
+
+
+803
+00:43:57,704 --> 00:44:01,108 line:-2
+of the hidden surface removal hardware
+by ordering draws properly
+
+
+804
+00:44:01,175 --> 00:44:03,210 line:-1
+and paying attention to the uses of Metal
+
+
+805
+00:44:03,277 --> 00:44:05,712 line:-2
+that can affect the opaqueness
+of your fragments.
+
+
+806
+00:44:07,414 --> 00:44:11,018 line:-2
+We also showed you how to use
+Metal's TBDR-specific features
+
+
+807
+00:44:11,084 --> 00:44:14,388 line:-2
+to optimize your apps
+for Apple GPUs even further.
+
+
+808
+00:44:14,955 --> 00:44:18,225 line:-2
+We showed you how to optimize
+for the Apple Shader Core
+
+
+809
+00:44:18,292 --> 00:44:21,161 line:-1
+by using 16-bit data types where possible,
+
+
+810
+00:44:21,228 --> 00:44:24,798 line:-2
+and using the right address space
+to enable constant data prefetch.
+
+
+811
+00:44:25,666 --> 00:44:29,069 line:0
+And then we discussed about
+how to avoid common pitfalls
+
+
+812
+00:44:29,136 --> 00:44:31,405 line:0
+in the memory accesses of your shaders.
+
+
+813
+00:44:32,573 --> 00:44:34,308 line:-1
+We are now at the end of this road
+
+
+814
+00:44:34,374 --> 00:44:37,311 line:-2
+that started with porting
+your native x86 apps
+
+
+815
+00:44:37,377 --> 00:44:39,112 line:-1
+to the new Apple Silicon Macs.
+
+
+816
+00:44:39,746 --> 00:44:41,782 line:0
+So, what are the next steps?
+
+
+817
+00:44:41,849 --> 00:44:43,517 line:0
+If you want to profile your apps,
+
+
+818
+00:44:43,584 --> 00:44:47,588 line:0
+the Metal System Trace instrument
+is the best tool at your disposal.
+
+
+819
+00:44:48,355 --> 00:44:51,525 line:0
+And remember that we at Apple
+prepared a lot of material
+
+
+820
+00:44:51,592 --> 00:44:54,828 line:0
+to help you squeeze
+every bit of performance out of your apps.
+
+
+821
+00:44:55,362 --> 00:44:57,631 line:0
+In particular, check out our new talk
+
+
+822
+00:44:57,698 --> 00:45:02,135 line:0
+about Metal app profiling
+in Xcode 12 from my colleague Sam.
+
+
+823
+00:45:02,202 --> 00:45:05,205 line:0
+And don't forget to check last year's
+WWDC talks
+
+
+824
+00:45:05,272 --> 00:45:08,509 line:0
+about "Delivering Optimized
+Metal Apps and Games,"
+
+
+825
+00:45:08,575 --> 00:45:10,978 line:0
+as well as
+the "Modern Rendering with Metal" talk.
+
+
+826
+00:45:12,346 --> 00:45:13,747 line:-1
+Thank you.
+

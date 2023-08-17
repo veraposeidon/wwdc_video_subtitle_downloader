@@ -1,0 +1,3885 @@
+2
+00:00:00,000 --> 00:00:02,236 line:-1
+[MAC STARTUP CHIME]
+
+
+3
+00:00:02.236 --> 00:00:05.639 line:-1 position:50%
+♪ Bass music playing ♪
+
+
+4
+00:00:05,639 --> 00:00:07,808 line:-1
+[KEYSTROKES]
+
+
+5
+00:00:07,808 --> 00:00:09,042 align:right line:0 position:90%
+♪
+
+
+6
+00:00:09.042 --> 00:00:11.745 line:-1 position:50%
+Eugene Zhidkov:
+Hi and welcome to WWDC.
+
+
+7
+00:00:11,745 --> 00:00:14,648 line:-1
+My name is Eugene Zhidkov.
+I am from GPU software.
+
+
+8
+00:00:14,648 --> 00:00:18,151 line:-1
+And together, with Harsh Patil
+from Mac system architecture,
+
+
+9
+00:00:18.151 --> 00:00:21.421 line:-1 position:50%
+we'll show you how to create
+image-processing applications
+
+
+10
+00:00:21,421 --> 00:00:24,157 line:-1
+powered by Metal
+on Apple silicon.
+
+
+11
+00:00:24.157 --> 00:00:25.926 line:-1 position:50%
+First, I will focus
+
+
+12
+00:00:25,926 --> 00:00:28,295 line:-1
+on the best practices
+and lessons learned,
+
+
+13
+00:00:28,295 --> 00:00:31,965 line:-1
+optimizing image-processing
+applications for M1
+
+
+14
+00:00:31.965 --> 00:00:35.669 line:-1 position:50%
+based on developer engagements
+we have had over the last year.
+
+
+15
+00:00:35.669 --> 00:00:38.972 line:-1 position:50%
+And then Harsh will give you
+a step-by-step guide
+
+
+16
+00:00:38.972 --> 00:00:41.742 line:-1 position:50%
+to how you can redesign
+your image-processing pipeline
+
+
+17
+00:00:41.742 --> 00:00:44.478 line:-1 position:50%
+for optimal performance
+on Apple silicon.
+
+
+18
+00:00:44,478 --> 00:00:46,413 line:-1
+So let’s jump right in!
+
+
+19
+00:00:46.413 --> 00:00:49.516 line:-1 position:50%
+To start, let’s briefly revisit
+Apple system
+
+
+20
+00:00:49,516 --> 00:00:52,519 line:-1
+on-the-chip architecture
+and its benefits.
+
+
+21
+00:00:52.519 --> 00:00:54.788 line:-1 position:50%
+Many image-processing
+and video-editing apps
+
+
+22
+00:00:54.788 --> 00:00:57.724 line:-1 position:50%
+are designed
+with discrete GPUs in mind.
+
+
+23
+00:00:57,724 --> 00:01:00,127 line:-1
+So it’s important to highlight
+what’s so different
+
+
+24
+00:01:00,127 --> 00:01:02,296 line:-1
+about Apple GPUs.
+
+
+25
+00:01:02.296 --> 00:01:06.566 line:-1 position:50%
+First, all Apple chips use
+Unified Memory Architecture.
+
+
+26
+00:01:06,566 --> 00:01:07,768 line:0
+All blocks --
+
+
+27
+00:01:07,768 --> 00:01:10,871 position:50%
+such as CPU, GPU,
+Neural and Media engines --
+
+
+28
+00:01:10,871 --> 00:01:12,873 position:50%
+have access to the same
+system memory
+
+
+29
+00:01:12,873 --> 00:01:15,442 position:50%
+using unified memory interface.
+
+
+30
+00:01:15,442 --> 00:01:19,680 line:-1
+And second, our GPUs are
+Tile Based Deferred Renderers,
+
+
+31
+00:01:19.680 --> 00:01:21.214 line:-1 position:50%
+or TBDRs.
+
+
+32
+00:01:21,214 --> 00:01:24,885 line:0
+TBDRs have two main phases:
+tiling,
+
+
+33
+00:01:24,885 --> 00:01:27,788 position:50%
+where whole render surfaces
+split into tiles
+
+
+34
+00:01:27,788 --> 00:01:30,757 position:50%
+and processed geometry
+is then handled independently;
+
+
+35
+00:01:30,757 --> 00:01:31,959 line:0
+and rendering,
+
+
+36
+00:01:31,959 --> 00:01:35,696 position:50%
+where all of the pixels will be
+processed for each tile.
+
+
+37
+00:01:35.696 --> 00:01:38.832 line:-1 position:50%
+So in order to be most efficient
+on Apple silicon,
+
+
+38
+00:01:38,832 --> 00:01:40,300 line:-1
+your image-processing app
+
+
+39
+00:01:40,300 --> 00:01:43,070 line:-1
+should start leveraging
+unified memory --
+
+
+40
+00:01:43,070 --> 00:01:45,806 line:-1
+to avoid any copies
+your pipeline used to have --
+
+
+41
+00:01:45.806 --> 00:01:49.643 line:-1 position:50%
+and TBDR architecture
+by exploiting tile memory
+
+
+42
+00:01:49,643 --> 00:01:51,445 line:-1
+and local image block.
+
+
+43
+00:01:51,445 --> 00:01:55,515 position:50%
+To learn more about how
+Apple TBDR works at low level
+
+
+44
+00:01:55,515 --> 00:01:57,718 line:0
+and how to target
+our shader core,
+
+
+45
+00:01:57,718 --> 00:02:00,620 position:50%
+please watch these sessions
+from the last year.
+
+
+46
+00:02:00,620 --> 00:02:02,489 line:-1
+And now, let’s talk about
+
+
+47
+00:02:02.489 --> 00:02:05.125 line:-1 position:50%
+the exact things
+we are going to do to optimize
+
+
+48
+00:02:05,125 --> 00:02:06,927 line:-1
+image-processing
+compute workloads
+
+
+49
+00:02:06,927 --> 00:02:08,495 line:-1
+for Apple silicon.
+
+
+50
+00:02:08,495 --> 00:02:09,596 line:-1
+Last year,
+
+
+51
+00:02:09,596 --> 00:02:12,265 line:-1
+we’ve been working closely
+with many great developers
+
+
+52
+00:02:12,265 --> 00:02:14,735 line:-1
+on their image pipeline
+transitions.
+
+
+53
+00:02:14.735 --> 00:02:17.771 line:-1 position:50%
+We picked the six most
+rewarding tips to share.
+
+
+54
+00:02:17,771 --> 00:02:20,007 line:-1
+First, we’ll discuss
+how to avoid
+
+
+55
+00:02:20.007 --> 00:02:22.576 line:-1 position:50%
+unnecessary memory copies
+or blits.
+
+
+56
+00:02:22,576 --> 00:02:23,643 line:-1
+This is really important
+
+
+57
+00:02:23.643 --> 00:02:27.014 line:-1 position:50%
+given we are now working
+with images up to 8K.
+
+
+58
+00:02:27,014 --> 00:02:29,683 line:-1
+Then, we wanted to highlight
+the benefits of using
+
+
+59
+00:02:29.683 --> 00:02:31.585 line:-1 position:50%
+render pipeline and textures
+
+
+60
+00:02:31.585 --> 00:02:33.620 line:-1 position:50%
+instead of using compute
+on buffers
+
+
+61
+00:02:33,620 --> 00:02:35,022 line:-1
+and how you could do that
+
+
+62
+00:02:35.022 --> 00:02:38.125 line:-1 position:50%
+in your own
+image-processing pipeline.
+
+
+63
+00:02:38,125 --> 00:02:40,227 line:-1
+Once we have the render
+and textures paths
+
+
+64
+00:02:40,227 --> 00:02:41,461 line:-1
+up and running,
+
+
+65
+00:02:41.461 --> 00:02:43.730 line:-1 position:50%
+we wanted to show you
+the importance of proper
+
+
+66
+00:02:43.730 --> 00:02:46.767 line:-1 position:50%
+load/store actions
+and memoryless attachments.
+
+
+67
+00:02:46.767 --> 00:02:50.570 line:-1 position:50%
+This will help you getting
+the most out of the tile memory.
+
+
+68
+00:02:50,570 --> 00:02:53,974 line:-1
+Then, we’ll talk how to best
+approach Uber-shaders
+
+
+69
+00:02:53.974 --> 00:02:56.376 line:-1 position:50%
+with its dynamic control flow
+
+
+70
+00:02:56.376 --> 00:02:59.146 line:-1 position:50%
+and also how to leverage
+smaller data types --
+
+
+71
+00:02:59,146 --> 00:03:00,981 line:-1
+such as short and half --
+
+
+72
+00:03:00.981 --> 00:03:03.250 line:-1 position:50%
+to improve performance
+and efficiency.
+
+
+73
+00:03:03,250 --> 00:03:05,285 line:0
+And we’ll finish
+with important advice
+
+
+74
+00:03:05,285 --> 00:03:08,655 line:0
+about texture formats
+to get the best throughput.
+
+
+75
+00:03:08.655 --> 00:03:09.656 line:-1 position:50%
+All right.
+
+
+76
+00:03:09.656 --> 00:03:12.759 line:-1 position:50%
+So let’s get started with one
+of the most rewarding tips:
+
+
+77
+00:03:12,759 --> 00:03:15,862 line:-1
+avoiding unneeded blits
+on Apple silicon.
+
+
+78
+00:03:15,862 --> 00:03:20,634 line:-1
+Most image-processing apps are
+designed around discrete GPUs.
+
+
+79
+00:03:20,634 --> 00:03:22,369 line:-1
+With discrete GPUs,
+
+
+80
+00:03:22.369 --> 00:03:25.639 line:-1 position:50%
+you have separate system memory
+and video memory.
+
+
+81
+00:03:25,639 --> 00:03:28,742 line:-1
+To make the frame image visible
+or resident to the GPU,
+
+
+82
+00:03:28,742 --> 00:03:31,044 line:-1
+explicit copy is required.
+
+
+83
+00:03:31.044 --> 00:03:33.747 line:-1 position:50%
+Moreover,
+it is usually required twice;
+
+
+84
+00:03:33.747 --> 00:03:35.882 line:-1 position:50%
+to upload the data
+for the GPU to process it,
+
+
+85
+00:03:35.882 --> 00:03:37.617 line:-1 position:50%
+and to pull it back.
+
+
+86
+00:03:37.617 --> 00:03:41.588 line:-1 position:50%
+Let’s consider we are decoding
+an 8K video, processing it,
+
+
+87
+00:03:41.588 --> 00:03:43.790 line:-1 position:50%
+and saving it to disk.
+
+
+88
+00:03:43,790 --> 00:03:48,428 line:-1
+So this is a CPU thread,
+decoding, in this case.
+
+
+89
+00:03:48.428 --> 00:03:53.066 line:-1 position:50%
+That’s where we need to copy
+the decoded frame to GPU VRAM.
+
+
+90
+00:03:53,066 --> 00:03:54,835 line:-1
+And here is GPU timeline,
+
+
+91
+00:03:54.835 --> 00:03:58.805 line:-1 position:50%
+where all the effects
+and filters are applied.
+
+
+92
+00:03:58,805 --> 00:04:01,141 line:-1
+Let’s take it one step further
+and let’s recall
+
+
+93
+00:04:01,141 --> 00:04:03,643 line:-1
+we need to save the results
+to disk, right?
+
+
+94
+00:04:03,643 --> 00:04:07,380 line:-1
+So we must also consider
+bringing the processed frame
+
+
+95
+00:04:07,380 --> 00:04:09,082 line:-1
+back to system memory
+
+
+96
+00:04:09,082 --> 00:04:12,052 line:-1
+and the actual encoding
+of the frame.
+
+
+97
+00:04:12,052 --> 00:04:15,288 line:0
+So, these are known as "copy"
+or "blit gaps",
+
+
+98
+00:04:15,288 --> 00:04:17,290 line:0
+and advanced
+image-processing applications
+
+
+99
+00:04:17,290 --> 00:04:20,393 position:50%
+had to do deep pipelining
+and other smart things
+
+
+100
+00:04:20,393 --> 00:04:21,928 line:0
+to fill them in.
+
+
+101
+00:04:21.928 --> 00:04:24.965 line:-1 position:50%
+Well, the good news
+is that on Apple GPUs,
+
+
+102
+00:04:24.965 --> 00:04:26.600 line:-1 position:50%
+blitting for the sake
+of residence
+
+
+103
+00:04:26,600 --> 00:04:28,068 line:-1
+is no longer needed.
+
+
+104
+00:04:28.068 --> 00:04:29.736 line:-1 position:50%
+Since memory is shared,
+
+
+105
+00:04:29.736 --> 00:04:33.473 line:-1 position:50%
+both the CPU and GPU
+can access it directly.
+
+
+106
+00:04:33,473 --> 00:04:36,476 line:-1
+So please add a simple check
+to detect if you are running
+
+
+107
+00:04:36.476 --> 00:04:40.247 line:-1 position:50%
+on unified memory system
+and avoid unnecessary copies.
+
+
+108
+00:04:40,247 --> 00:04:42,349 line:-1
+It will save you memory, time,
+
+
+109
+00:04:42.349 --> 00:04:45.986 line:-1 position:50%
+and is an absolute first step
+to do.
+
+
+110
+00:04:45.986 --> 00:04:48.688 line:-1 position:50%
+So this is where we land
+on Unified Memory Architecture
+
+
+111
+00:04:48,688 --> 00:04:51,758 line:-1
+with the blits removed.
+
+
+112
+00:04:51.758 --> 00:04:54.828 line:-1 position:50%
+By removing the blits,
+we completely avoid copy gaps
+
+
+113
+00:04:54.828 --> 00:04:58.165 line:-1 position:50%
+and can start processing
+immediately.
+
+
+114
+00:04:58,165 --> 00:05:01,134 line:-1
+This also gives better CPU
+and GPU pipelining
+
+
+115
+00:05:01.134 --> 00:05:03.170 line:-1 position:50%
+with less hassle.
+
+
+116
+00:05:03,170 --> 00:05:05,672 line:-1
+Let’s make sure you implement
+unified memory path
+
+
+117
+00:05:05.672 --> 00:05:07.941 line:-1 position:50%
+with no copies involved.
+
+
+118
+00:05:07.941 --> 00:05:10.644 line:-1 position:50%
+If you just leave blit copies
+exactly as it was
+
+
+119
+00:05:10,644 --> 00:05:12,078 line:-1
+on the discrete GPU,
+
+
+120
+00:05:12,078 --> 00:05:14,247 line:-1
+you’ll pay with system
+memory bandwidth,
+
+
+121
+00:05:14,247 --> 00:05:16,550 line:-1
+less GPU time
+for actual processing,
+
+
+122
+00:05:16,550 --> 00:05:18,985 line:-1
+and potential
+scheduling overhead.
+
+
+123
+00:05:18,985 --> 00:05:24,024 line:-1
+Not to mention we no longer need
+separate VRAM image allocated.
+
+
+124
+00:05:24.024 --> 00:05:28.828 line:-1 position:50%
+GPU frame capture can help
+you with spotting large blits.
+
+
+125
+00:05:28.828 --> 00:05:30.964 line:-1 position:50%
+Please inspect
+your application blits
+
+
+126
+00:05:30,964 --> 00:05:34,401 line:-1
+and make sure you only do
+the copies required.
+
+
+127
+00:05:34,401 --> 00:05:36,503 line:-1
+Now, let’s talk about
+how exactly we should start
+
+
+128
+00:05:36.503 --> 00:05:38.772 line:-1 position:50%
+leveraging Apple GPU
+TBDR architecture
+
+
+129
+00:05:38.772 --> 00:05:40.874 line:-1 position:50%
+for image processing.
+
+
+130
+00:05:40,874 --> 00:05:42,909 line:-1
+Most image-processing
+applications operate
+
+
+131
+00:05:42.909 --> 00:05:47.047 line:-1 position:50%
+on image buffers by dispatching
+series of compute kernels.
+
+
+132
+00:05:47,047 --> 00:05:48,682 position:50%
+When you dispatch
+a compute kernel
+
+
+133
+00:05:48,682 --> 00:05:50,350 position:50%
+in default serial mode,
+
+
+134
+00:05:50,350 --> 00:05:53,286 position:50%
+Metal guarantees that
+all subsequent dispatches
+
+
+135
+00:05:53,286 --> 00:05:55,789 line:0
+see all the memory writes.
+
+
+136
+00:05:55,789 --> 00:06:00,527 line:0
+This guarantee implies memory
+coherency for all shader cores,
+
+
+137
+00:06:00,527 --> 00:06:03,964 line:0
+so every memory write is made
+visible to all other cores
+
+
+138
+00:06:03,964 --> 00:06:06,233 position:50%
+by the time
+the next dispatch starts.
+
+
+139
+00:06:06,233 --> 00:06:09,536 line:0
+This also means memory traffic
+could be really high;
+
+
+140
+00:06:09,536 --> 00:06:12,839 position:50%
+the whole image has to be read
+and written to.
+
+
+141
+00:06:12.839 --> 00:06:17.744 line:-1 position:50%
+With M1, Apple GPUs enable
+tile dispatches on MacOS.
+
+
+142
+00:06:17.744 --> 00:06:21.214 line:-1 position:50%
+In contrast to regular compute,
+they operate in tile memory
+
+
+143
+00:06:21,214 --> 00:06:23,049 line:-1
+with tile-only sync points.
+
+
+144
+00:06:23,049 --> 00:06:25,285 line:0
+Some filters --
+like convolutions --
+
+
+145
+00:06:25,285 --> 00:06:27,454 position:50%
+cannot be mapped
+to the tile paradigm,
+
+
+146
+00:06:27,454 --> 00:06:29,789 line:0
+but many other filters can!
+
+
+147
+00:06:29,789 --> 00:06:33,260 position:50%
+Deferring system memory flush
+until the encoder end point
+
+
+148
+00:06:33,260 --> 00:06:35,295 line:0
+provides solid efficiency gains.
+
+
+149
+00:06:35.295 --> 00:06:38.231 line:-1 position:50%
+You can execute more useful
+GPU work
+
+
+150
+00:06:38.231 --> 00:06:41.534 line:-1 position:50%
+when not limited
+by system memory bandwidth.
+
+
+151
+00:06:41.534 --> 00:06:43.470 line:-1 position:50%
+To take it even further,
+
+
+152
+00:06:43,470 --> 00:06:46,072 line:-1
+let’s notice that many
+per-pixel operations
+
+
+153
+00:06:46,072 --> 00:06:48,942 line:-1
+don’t require access
+to neighboring pixels,
+
+
+154
+00:06:48,942 --> 00:06:52,078 line:-1
+so tile sync point
+is not necessary.
+
+
+155
+00:06:52,078 --> 00:06:55,515 line:0
+This maps really well
+to fragment functions.
+
+
+156
+00:06:55,515 --> 00:06:57,050 position:50%
+Fragment functions
+can be executed
+
+
+157
+00:06:57,050 --> 00:06:58,918 line:0
+without implicit tile sync,
+
+
+158
+00:06:58,918 --> 00:07:01,221 position:50%
+requiring sync
+only at the encoder boundary
+
+
+159
+00:07:01,221 --> 00:07:03,623 position:50%
+or when tile kernels
+are dispatched serially
+
+
+160
+00:07:03,623 --> 00:07:05,759 position:50%
+after the fragment kernels.
+
+
+161
+00:07:05,759 --> 00:07:08,762 line:-1
+We now learned that Apple GPUs
+enable fragment functions
+
+
+162
+00:07:08.762 --> 00:07:11.631 line:-1 position:50%
+and tile kernels for
+more efficient image processing.
+
+
+163
+00:07:11,631 --> 00:07:14,301 line:-1
+Let’s see how we could use that.
+
+
+164
+00:07:14.301 --> 00:07:17.837 line:-1 position:50%
+We do that by converting
+regular compute dispatches
+
+
+165
+00:07:17.837 --> 00:07:21.775 line:-1 position:50%
+on buffers to render
+command encoder on textures.
+
+
+166
+00:07:21,775 --> 00:07:25,245 line:-1
+As we just discussed,
+rule of thumb is the following.
+
+
+167
+00:07:25,245 --> 00:07:28,581 line:-1
+Per-pixel operations
+with no interpixel dependency
+
+
+168
+00:07:28.581 --> 00:07:31.184 line:-1 position:50%
+should be implemented
+using fragment functions.
+
+
+169
+00:07:31.184 --> 00:07:33.787 line:-1 position:50%
+Any filter with threadgroup
+scoped operations
+
+
+170
+00:07:33,787 --> 00:07:35,388 line:-1
+should be implemented
+with tile shading,
+
+
+171
+00:07:35.388 --> 00:07:39.025 line:-1 position:50%
+since neighbor pixels access
+within a tile is required.
+
+
+172
+00:07:39.025 --> 00:07:41.494 line:-1 position:50%
+Scatter-gather
+and convolution filters
+
+
+173
+00:07:41.494 --> 00:07:43.363 line:-1 position:50%
+cannot be mapped
+to tile paradigm
+
+
+174
+00:07:43.363 --> 00:07:45.532 line:-1 position:50%
+since they require
+random access,
+
+
+175
+00:07:45,532 --> 00:07:49,069 line:-1
+so these should still remain
+compute dispatches.
+
+
+176
+00:07:49.069 --> 00:07:51.271 line:-1 position:50%
+Render command encoder
+also enables
+
+
+177
+00:07:51.271 --> 00:07:53.173 line:-1 position:50%
+a unique Apple GPU feature:
+
+
+178
+00:07:53,173 --> 00:07:56,810 line:-1
+lossless bandwidth compression
+for textures and render targets.
+
+
+179
+00:07:56.810 --> 00:07:58.745 line:-1 position:50%
+This is a really great
+bandwidth saver,
+
+
+180
+00:07:58.745 --> 00:08:01.047 line:-1 position:50%
+especially for
+an image-processing pipeline,
+
+
+181
+00:08:01.047 --> 00:08:04.050 line:-1 position:50%
+so let’s see
+how we should use it.
+
+
+182
+00:08:04.050 --> 00:08:06.686 line:-1 position:50%
+Well, speaking of enabling
+lossless compression,
+
+
+183
+00:08:06,686 --> 00:08:10,056 line:-1
+it’s actually easier to say
+what you should not do.
+
+
+184
+00:08:10,056 --> 00:08:12,859 line:-1
+First, already-compressed
+texture formats
+
+
+185
+00:08:12.859 --> 00:08:15.295 line:-1 position:50%
+cannot benefit from lossless.
+
+
+186
+00:08:15.295 --> 00:08:18.531 line:-1 position:50%
+Second, there are
+three particular texture flags
+
+
+187
+00:08:18,531 --> 00:08:20,734 line:-1
+which cannot work
+with this compression,
+
+
+188
+00:08:20,734 --> 00:08:24,371 line:-1
+so make sure you don’t set them
+just by an accident.
+
+
+189
+00:08:24,371 --> 00:08:28,908 line:-1
+And third, linear textures --
+or backed by an MTLBuffer --
+
+
+190
+00:08:28.908 --> 00:08:31.578 line:-1 position:50%
+are not allowed as well.
+
+
+191
+00:08:31,578 --> 00:08:33,913 position:50%
+Some special treatment
+is also required
+
+
+192
+00:08:33,913 --> 00:08:35,882 position:50%
+for nonprivate textures;
+
+
+193
+00:08:35,882 --> 00:08:38,885 position:50%
+make sure to call
+optimizeContentsForGPUAccess
+
+
+194
+00:08:38,885 --> 00:08:41,521 line:0
+to stay on the fastest path.
+
+
+195
+00:08:41.521 --> 00:08:44.457 line:-1 position:50%
+GPU frame capture Summary pane
+now shows you
+
+
+196
+00:08:44.457 --> 00:08:46.126 line:-1 position:50%
+lossless compression warnings
+
+
+197
+00:08:46.126 --> 00:08:49.262 line:-1 position:50%
+and highlights the reasons
+why the texture has opted out.
+
+
+198
+00:08:49,262 --> 00:08:54,067 line:-1
+In this example,
+PixelFormatView flag was set.
+
+
+199
+00:08:54,067 --> 00:08:55,301 line:-1
+In many cases,
+
+
+200
+00:08:55.301 --> 00:08:58.238 line:-1 position:50%
+developers are setting
+these flags unintentionally.
+
+
+201
+00:08:58.238 --> 00:08:59.906 line:-1 position:50%
+Don’t set PixelFormatView
+
+
+202
+00:08:59,906 --> 00:09:05,311 line:-1
+if all you need is components
+swizzle or sRGB conversion.
+
+
+203
+00:09:05.311 --> 00:09:07.614 line:-1 position:50%
+All right, we have the render
+and textures path
+
+
+204
+00:09:07,614 --> 00:09:08,615 line:-1
+up and running.
+
+
+205
+00:09:08.615 --> 00:09:11.618 line:-1 position:50%
+Now, let’s make sure
+we properly use tile memory.
+
+
+206
+00:09:11.618 --> 00:09:14.154 line:-1 position:50%
+Tile memory TBDR concepts --
+
+
+207
+00:09:14.154 --> 00:09:17.023 line:-1 position:50%
+such as load/store actions
+and memoryless attachments --
+
+
+208
+00:09:17.023 --> 00:09:19.826 line:-1 position:50%
+are totally new
+to the desktop world.
+
+
+209
+00:09:19.826 --> 00:09:22.495 line:-1 position:50%
+So let’s make sure
+we use them properly.
+
+
+210
+00:09:22,495 --> 00:09:25,732 line:-1
+Let’s start
+with load/store actions!
+
+
+211
+00:09:25.732 --> 00:09:26.933 line:-1 position:50%
+As we already know,
+
+
+212
+00:09:26.933 --> 00:09:29.803 line:-1 position:50%
+the whole render target
+is split into the tiles.
+
+
+213
+00:09:29,803 --> 00:09:32,672 line:-1
+Load/store are per-tile
+bulk actions
+
+
+214
+00:09:32.672 --> 00:09:34.841 line:-1 position:50%
+guaranteed to take
+the most optimal path
+
+
+215
+00:09:34.841 --> 00:09:36.810 line:-1 position:50%
+through memory hierarchy.
+
+
+216
+00:09:36,810 --> 00:09:39,879 line:-1
+They are executed at the
+beginning of the render pass --
+
+
+217
+00:09:39,879 --> 00:09:43,016 line:-1
+where we tell the GPU how
+to initialize the tile memory --
+
+
+218
+00:09:43.016 --> 00:09:45.585 line:-1 position:50%
+and at the end of the pass
+to inform the GPU
+
+
+219
+00:09:45,585 --> 00:09:48,621 line:-1
+what attachments
+need to be written back.
+
+
+220
+00:09:48.621 --> 00:09:52.292 line:-1 position:50%
+The key thing here is to avoid
+loading what we don’t need.
+
+
+221
+00:09:52,292 --> 00:09:54,828 line:-1
+If we are overwriting
+the whole image,
+
+
+222
+00:09:54.828 --> 00:09:56.596 line:-1 position:50%
+or the resource is temporary,
+
+
+223
+00:09:56.596 --> 00:09:59.532 line:-1 position:50%
+set load action
+to LoadActionDontCare.
+
+
+224
+00:09:59.532 --> 00:10:00.834 line:-1 position:50%
+With render encoder,
+
+
+225
+00:10:00.834 --> 00:10:04.204 line:-1 position:50%
+you no longer need to clear
+your output or temporary data,
+
+
+226
+00:10:04,204 --> 00:10:07,006 line:-1
+as you probably did before
+with dedicated compute pass
+
+
+227
+00:10:07,006 --> 00:10:09,175 line:-1
+or fillBuffer call.
+
+
+228
+00:10:09,175 --> 00:10:11,077 line:-1
+By setting LoadActionClear,
+
+
+229
+00:10:11,077 --> 00:10:14,247 line:-1
+you can efficiently specify
+the clear value.
+
+
+230
+00:10:14.247 --> 00:10:16.382 line:-1 position:50%
+And the same goes
+for the store action.
+
+
+231
+00:10:16.382 --> 00:10:19.385 line:-1 position:50%
+Make sure to only store the data
+you will later need --
+
+
+232
+00:10:19.385 --> 00:10:20.887 line:-1 position:50%
+like the main attachment --
+
+
+233
+00:10:20,887 --> 00:10:23,990 line:-1
+and don’t store
+anything temporary.
+
+
+234
+00:10:23.990 --> 00:10:26.593 line:-1 position:50%
+Besides explicit load
+and store actions,
+
+
+235
+00:10:26.593 --> 00:10:28.795 line:-1 position:50%
+Apple GPUs saves
+your memory footprint
+
+
+236
+00:10:28,795 --> 00:10:30,997 line:-1
+with memoryless attachments.
+
+
+237
+00:10:30,997 --> 00:10:33,099 position:50%
+We can explicitly define
+an attachment
+
+
+238
+00:10:33,099 --> 00:10:35,735 line:0
+as having memoryless
+storage mode.
+
+
+239
+00:10:35,735 --> 00:10:38,771 line:0
+This enables tile-only
+memory allocation,
+
+
+240
+00:10:38,771 --> 00:10:40,440 position:50%
+meaning that your resource
+will persist
+
+
+241
+00:10:40,440 --> 00:10:43,443 line:0
+for each and every tile
+only within encoder lifetime.
+
+
+242
+00:10:43.443 --> 00:10:45.879 line:-1 position:50%
+This can greatly reduce
+your memory footprint,
+
+
+243
+00:10:45.879 --> 00:10:48.448 line:-1 position:50%
+especially for 6K/8K images,
+
+
+244
+00:10:48.448 --> 00:10:51.317 line:-1 position:50%
+where every frame takes
+hundreds of megabytes.
+
+
+245
+00:10:51,317 --> 00:10:54,687 line:-1
+Let’s see how this all
+can be done in code.
+
+
+246
+00:10:54.687 --> 00:10:57.490 line:-1 position:50%
+We start by creating
+the textureDescriptor
+
+
+247
+00:10:57.490 --> 00:11:00.059 line:-1 position:50%
+and then create
+the outputTexture.
+
+
+248
+00:11:00.059 --> 00:11:02.462 line:-1 position:50%
+We then create
+a temporary texture.
+
+
+249
+00:11:02.462 --> 00:11:04.864 line:-1 position:50%
+Notice that I’ve marked it
+memoryless,
+
+
+250
+00:11:04.864 --> 00:11:07.267 line:-1 position:50%
+as we don’t want
+any storage here.
+
+
+251
+00:11:07,267 --> 00:11:09,536 line:-1
+Then we create the render pass
+
+
+252
+00:11:09,536 --> 00:11:12,005 line:-1
+by first describing
+what the attachments are
+
+
+253
+00:11:12,005 --> 00:11:14,440 line:-1
+and then what are
+the load/store actions.
+
+
+254
+00:11:14.440 --> 00:11:16.776 line:-1 position:50%
+We don’t care about loading
+the output
+
+
+255
+00:11:16.776 --> 00:11:20.079 line:-1 position:50%
+since it is fully overwritten,
+but we need to store it.
+
+
+256
+00:11:20.079 --> 00:11:23.816 line:-1 position:50%
+As for the temporary texture,
+we don’t load but clear it,
+
+
+257
+00:11:23.816 --> 00:11:26.319 line:-1 position:50%
+and we don’t need
+to store it either.
+
+
+258
+00:11:26,319 --> 00:11:31,257 line:-1
+Finally, we create our
+renderPass from the descriptor.
+
+
+259
+00:11:31,257 --> 00:11:32,892 line:-1
+That’s it.
+
+
+260
+00:11:32.892 --> 00:11:35.028 line:-1 position:50%
+So we are using unified memory,
+
+
+261
+00:11:35.028 --> 00:11:37.096 line:-1 position:50%
+moved our image-processing
+pipeline
+
+
+262
+00:11:37.096 --> 00:11:38.531 line:-1 position:50%
+to render command encoder,
+
+
+263
+00:11:38.531 --> 00:11:41.234 line:-1 position:50%
+and are properly leveraging
+tile memory.
+
+
+264
+00:11:41,234 --> 00:11:44,837 line:-1
+Now, let’s talk about
+uber-shaders.
+
+
+265
+00:11:44.837 --> 00:11:46.839 line:-1 position:50%
+Uber-shaders, or uber-kernels,
+
+
+266
+00:11:46,839 --> 00:11:50,810 line:-1
+is a pretty popular way
+to make developers' life easier.
+
+
+267
+00:11:50.810 --> 00:11:53.913 line:-1 position:50%
+Host code sets up
+the control structure,
+
+
+268
+00:11:53.913 --> 00:11:57.584 line:-1 position:50%
+and shader just loops through
+a series of if/else statements,
+
+
+269
+00:11:57.584 --> 00:11:59.852 line:-1 position:50%
+for example,
+if tone mapping is enabled
+
+
+270
+00:11:59,852 --> 00:12:03,656 line:-1
+or if the input is in HDR
+or SDR formats.
+
+
+271
+00:12:03,656 --> 00:12:06,793 line:-1
+This approach is also known
+as "ubers-shader"
+
+
+272
+00:12:06,793 --> 00:12:08,161 line:-1
+and is really good at bringing
+
+
+273
+00:12:08.161 --> 00:12:11.531 line:-1 position:50%
+total number
+of pipeline state objects down.
+
+
+274
+00:12:11.531 --> 00:12:14.267 line:-1 position:50%
+However, it has drawbacks.
+
+
+275
+00:12:14.267 --> 00:12:17.270 line:-1 position:50%
+The main one is increased
+register pressure
+
+
+276
+00:12:17,270 --> 00:12:19,806 line:-1
+to keep up with more complex
+control flow.
+
+
+277
+00:12:19.806 --> 00:12:23.109 line:-1 position:50%
+Using more registers can easily
+limit maximum occupancy
+
+
+278
+00:12:23.109 --> 00:12:25.612 line:-1 position:50%
+your shader is running at.
+
+
+279
+00:12:25.612 --> 00:12:29.816 line:-1 position:50%
+Consider a simple kernel where
+we pass in the control struct.
+
+
+280
+00:12:29.816 --> 00:12:33.152 line:-1 position:50%
+We use flags inside the struct
+to control what we do.
+
+
+281
+00:12:33,152 --> 00:12:35,054 line:-1
+We have two features here:
+
+
+282
+00:12:35.054 --> 00:12:38.725 line:-1 position:50%
+if the input is in HDR
+and if tonemapping is enabled.
+
+
+283
+00:12:38,725 --> 00:12:40,860 line:-1
+All look good, right?
+
+
+284
+00:12:40,860 --> 00:12:44,030 line:-1
+Well, here is what happens
+on the GPU.
+
+
+285
+00:12:44.030 --> 00:12:46.866 line:-1 position:50%
+Since we cannot deduce anything
+at compile time,
+
+
+286
+00:12:46.866 --> 00:12:49.135 line:-1 position:50%
+we have to assume
+we could take both paths --
+
+
+287
+00:12:49,135 --> 00:12:51,104 line:-1
+HDR and non-HDR --
+
+
+288
+00:12:51.104 --> 00:12:54.774 line:-1 position:50%
+and then combine
+based on the flag.
+
+
+289
+00:12:54,774 --> 00:12:56,676 position:50%
+Same goes for tone mapping.
+
+
+290
+00:12:56,676 --> 00:12:59,879 position:50%
+We evaluate it and then mask it
+in or out,
+
+
+291
+00:12:59,879 --> 00:13:02,148 line:0
+based on the input flag.
+
+
+292
+00:13:02,148 --> 00:13:04,517 line:-1
+The problem here is registers.
+
+
+293
+00:13:04.517 --> 00:13:07.453 line:-1 position:50%
+Every control flow path
+needs live registers.
+
+
+294
+00:13:07,453 --> 00:13:10,790 line:-1
+This is where uber-shaders
+are not so good.
+
+
+295
+00:13:10,790 --> 00:13:14,060 position:50%
+As you recall,
+registers used by the kernel
+
+
+296
+00:13:14,060 --> 00:13:17,096 position:50%
+define maximum occupancy
+the shader could run.
+
+
+297
+00:13:17,096 --> 00:13:20,833 line:0
+That happens because registers
+file is shared by all simdlanes
+
+
+298
+00:13:20,833 --> 00:13:22,635 line:0
+on the shader core.
+
+
+299
+00:13:22,635 --> 00:13:24,671 position:50%
+If we could only run
+what’s only needed,
+
+
+300
+00:13:24,671 --> 00:13:27,874 line:0
+that would enable
+higher simdgroup concurrency
+
+
+301
+00:13:27,874 --> 00:13:30,076 line:0
+and GPU utilization.
+
+
+302
+00:13:30,076 --> 00:13:32,145 line:0
+Let’s talk how to fix this.
+
+
+303
+00:13:32,145 --> 00:13:34,714 line:-1
+Metal API has the right tool
+for the job,
+
+
+304
+00:13:34,714 --> 00:13:37,216 line:-1
+and it's called
+"function_constants".
+
+
+305
+00:13:37,216 --> 00:13:39,686 line:-1
+We define
+both control parameters
+
+
+306
+00:13:39.686 --> 00:13:41.087 line:-1 position:50%
+as function_constants,
+
+
+307
+00:13:41.087 --> 00:13:43.723 line:-1 position:50%
+and we modify the code
+accordingly.
+
+
+308
+00:13:43.723 --> 00:13:46.693 line:-1 position:50%
+Here, we are showing
+the modified kernel code.
+
+
+309
+00:13:46.693 --> 00:13:49.429 line:-1 position:50%
+Host side must be also updated
+to provide
+
+
+310
+00:13:49,429 --> 00:13:52,799 line:-1
+function_constant value
+at pipeline creation time.
+
+
+311
+00:13:52,799 --> 00:13:56,102 line:-1
+Another great way
+to reduce register pressure
+
+
+312
+00:13:56.102 --> 00:13:59.739 line:-1 position:50%
+is using 16-bit types
+in your shaders.
+
+
+313
+00:13:59.739 --> 00:14:03.242 line:-1 position:50%
+Apple GPUs have native
+16-bit type support.
+
+
+314
+00:14:03,242 --> 00:14:05,945 line:-1
+So, when using
+smaller data types,
+
+
+315
+00:14:05,945 --> 00:14:08,114 line:-1
+your shaders will require
+less registers,
+
+
+316
+00:14:08,114 --> 00:14:10,216 line:-1
+increasing occupancy.
+
+
+317
+00:14:10.216 --> 00:14:13.886 line:-1 position:50%
+Half and short types
+also require less energy
+
+
+318
+00:14:13,886 --> 00:14:16,355 line:-1
+and might achieve
+higher peak rates.
+
+
+319
+00:14:16.355 --> 00:14:18.491 line:-1 position:50%
+So, please use half
+and short types
+
+
+320
+00:14:18.491 --> 00:14:20.760 line:-1 position:50%
+instead of float and int
+when possible,
+
+
+321
+00:14:20.760 --> 00:14:24.163 line:-1 position:50%
+since type conversions
+are usually free.
+
+
+322
+00:14:24.163 --> 00:14:25.431 line:-1 position:50%
+In this example,
+
+
+323
+00:14:25,431 --> 00:14:28,401 line:-1
+consider a kernel
+using the thread_position
+
+
+324
+00:14:28.401 --> 00:14:32.105 line:-1 position:50%
+in threadgroup
+for some computations.
+
+
+325
+00:14:32.105 --> 00:14:33.940 line:-1 position:50%
+We are using unsigned int,
+
+
+326
+00:14:33,940 --> 00:14:37,176 line:-1
+but the maximum threadgroup size
+supported by Metal
+
+
+327
+00:14:37,176 --> 00:14:40,246 line:-1
+can easily fit in
+unsigned short.
+
+
+328
+00:14:40,246 --> 00:14:42,915 line:-1
+threadgroup_position_in_grid,
+however,
+
+
+329
+00:14:42.915 --> 00:14:46.285 line:-1 position:50%
+could potentially require
+a larger data type.
+
+
+330
+00:14:46,285 --> 00:14:49,055 line:-1
+But for the grid sizes we’re
+using in image processing --
+
+
+331
+00:14:49.055 --> 00:14:54.193 line:-1 position:50%
+up to 8K or 16K --
+unsigned short is also enough.
+
+
+332
+00:14:54,193 --> 00:14:57,563 position:50%
+If we use 16-bit types instead,
+the resulting code
+
+
+333
+00:14:57,563 --> 00:14:59,632 position:50%
+will use a smaller number
+of registers,
+
+
+334
+00:14:59,632 --> 00:15:02,435 line:0
+potentially increasing
+the occupancy.
+
+
+335
+00:15:02.435 --> 00:15:04.771 line:-1 position:50%
+Now, let me show you
+where you can have
+
+
+336
+00:15:04.771 --> 00:15:07.340 line:-1 position:50%
+all the details on registers.
+
+
+337
+00:15:07.340 --> 00:15:10.476 line:-1 position:50%
+GPU frame debugger in Xcode13
+
+
+338
+00:15:10,476 --> 00:15:13,746 line:-1
+now has advanced pipeline state
+object view for render,
+
+
+339
+00:15:13,746 --> 00:15:15,782 line:-1
+tile, and compute PSOs.
+
+
+340
+00:15:15.782 --> 00:15:18.484 line:-1 position:50%
+You can inspect
+detailed pipeline statistics --
+
+
+341
+00:15:18.484 --> 00:15:22.822 line:-1 position:50%
+now with registers usage --
+and fine-tune all your shaders.
+
+
+342
+00:15:22,822 --> 00:15:25,191 line:0
+With register concerns covered,
+
+
+343
+00:15:25,191 --> 00:15:28,327 position:50%
+let’s talk about
+texture formats.
+
+
+344
+00:15:28.327 --> 00:15:30.997 line:-1 position:50%
+First, we want to note
+that different pixel formats
+
+
+345
+00:15:30,997 --> 00:15:33,332 line:-1
+might have
+different sampling rates.
+
+
+346
+00:15:33,332 --> 00:15:36,502 line:-1
+Depending on hardware generation
+and number of channels,
+
+
+347
+00:15:36.502 --> 00:15:38.538 line:-1 position:50%
+wider floating-point types
+might have
+
+
+348
+00:15:38,538 --> 00:15:40,807 line:-1
+reduced point sampling rate.
+
+
+349
+00:15:40,807 --> 00:15:44,510 line:-1
+Especially floating-point
+formats such as RGBA32F
+
+
+350
+00:15:44,510 --> 00:15:46,913 line:-1
+will be slower
+than FP16 variants
+
+
+351
+00:15:46.913 --> 00:15:49.315 line:-1 position:50%
+when sampling filtered values.
+
+
+352
+00:15:49.315 --> 00:15:51.284 line:-1 position:50%
+Smaller types
+reduce memory storage,
+
+
+353
+00:15:51.284 --> 00:15:53.386 line:-1 position:50%
+bandwidth,
+and cache footprint as well.
+
+
+354
+00:15:53,386 --> 00:15:54,787 line:-1
+So we encourage, again,
+
+
+355
+00:15:54.787 --> 00:15:56.355 line:-1 position:50%
+to use the smallest type
+possible,
+
+
+356
+00:15:56.355 --> 00:15:59.425 line:-1 position:50%
+but in this case,
+for the textures storage.
+
+
+357
+00:15:59.425 --> 00:16:03.729 line:-1 position:50%
+This was actually a common case
+for 3D LUTs in image processing;
+
+
+358
+00:16:03,729 --> 00:16:07,266 line:-1
+most applications we worked with
+were using float RGBA
+
+
+359
+00:16:07.266 --> 00:16:12.004 line:-1 position:50%
+for a 3D LUT application phase
+with bilinear filtering enabled.
+
+
+360
+00:16:12.004 --> 00:16:14.874 line:-1 position:50%
+Please consider if your app
+can instead use halfs
+
+
+361
+00:16:14.874 --> 00:16:17.043 line:-1 position:50%
+and the precision
+will be enough.
+
+
+362
+00:16:17.043 --> 00:16:18.377 line:-1 position:50%
+If that’s the case,
+
+
+363
+00:16:18,377 --> 00:16:22,215 line:-1
+switch to FP16 right away
+to get peak sampling rates.
+
+
+364
+00:16:22,215 --> 00:16:24,050 line:-1
+If half precision is not enough,
+
+
+365
+00:16:24,050 --> 00:16:26,452 line:-1
+we found out that fixed-point
+unsigned short
+
+
+366
+00:16:26,452 --> 00:16:29,255 line:-1
+provides great uniform range
+of values,
+
+
+367
+00:16:29,255 --> 00:16:31,557 line:-1
+so encoding your LUTs
+in unit scale
+
+
+368
+00:16:31.557 --> 00:16:33.826 line:-1 position:50%
+and providing LUT range
+to the shader
+
+
+369
+00:16:33,826 --> 00:16:36,662 line:-1
+was a great way to get
+both peak sampling rate
+
+
+370
+00:16:36,662 --> 00:16:39,866 line:-1
+and sufficient numerical
+accuracy.
+
+
+371
+00:16:39.866 --> 00:16:41.767 line:-1 position:50%
+All right, so we just went over
+
+
+372
+00:16:41.767 --> 00:16:44.403 line:-1 position:50%
+how we should leverage
+Apple GPU architecture to make
+
+
+373
+00:16:44.403 --> 00:16:48.040 line:-1 position:50%
+your image-processing pipeline
+run as efficient as possible.
+
+
+374
+00:16:48,040 --> 00:16:50,910 line:-1
+To apply it all right away,
+please meet Harsh!
+
+
+375
+00:16:50,910 --> 00:16:52,378 line:-1
+Harsh Patil: Thanks, Eugene.
+
+
+376
+00:16:52,378 --> 00:16:54,280 line:-1
+Now let’s walk through
+redesigning
+
+
+377
+00:16:54,280 --> 00:16:56,949 line:-1
+an image-processing pipeline
+for Apple silicon
+
+
+378
+00:16:56.949 --> 00:16:59.518 line:-1 position:50%
+based on all the best practices
+we have learned so far.
+
+
+379
+00:16:59,518 --> 00:17:00,553 line:-1
+To be specific,
+
+
+380
+00:17:00,553 --> 00:17:02,488 line:-1
+we are going to tailor
+the image-processing phase
+
+
+381
+00:17:02.488 --> 00:17:05.825 line:-1 position:50%
+of the video-processing pipeline
+for Apple GPUs.
+
+
+382
+00:17:05.825 --> 00:17:08.461 line:-1 position:50%
+Real-time image processing
+is very GPU compute
+
+
+383
+00:17:08.461 --> 00:17:10.596 line:-1 position:50%
+and memory bandwidth intensive.
+
+
+384
+00:17:10,596 --> 00:17:13,132 line:-1
+We will first understand
+how it is usually designed
+
+
+385
+00:17:13,132 --> 00:17:16,269 line:-1
+and then how we can optimize it
+for Apple silicon.
+
+
+386
+00:17:16,269 --> 00:17:18,104 line:0
+We are not going to go
+into the details
+
+
+387
+00:17:18,104 --> 00:17:20,072 line:0
+of video-editing workflow
+in this section,
+
+
+388
+00:17:20,072 --> 00:17:22,441 position:50%
+so please refer to our talk
+from two years ago.
+
+
+389
+00:17:22.441 --> 00:17:24.110 line:-1 position:50%
+We will solely focus
+on transitioning
+
+
+390
+00:17:24.110 --> 00:17:27.480 line:-1 position:50%
+the compute part of
+image processing to render path.
+
+
+391
+00:17:27.480 --> 00:17:28.748 line:-1 position:50%
+Before we start,
+
+
+392
+00:17:28,748 --> 00:17:30,983 line:-1
+let's begin quickly take a look
+at where image-processing phase
+
+
+393
+00:17:30.983 --> 00:17:33.886 line:-1 position:50%
+stands in a typical
+video-processing pipeline.
+
+
+394
+00:17:33,886 --> 00:17:37,523 line:-1
+We'll take ProRes-encoded
+input file as an example.
+
+
+395
+00:17:37.523 --> 00:17:40.059 line:-1 position:50%
+We first read the ProRes-encoded
+frame from the disk
+
+
+396
+00:17:40.059 --> 00:17:41.827 line:-1 position:50%
+or external storage.
+
+
+397
+00:17:41.827 --> 00:17:44.030 line:-1 position:50%
+We then decode the frame on CPU,
+
+
+398
+00:17:44,030 --> 00:17:45,631 line:-1
+and now
+the image-processing phase
+
+
+399
+00:17:45,631 --> 00:17:48,100 line:-1
+executes on this decoded frame
+on the GPU
+
+
+400
+00:17:48.100 --> 00:17:50.336 line:-1 position:50%
+and renders
+the final output frame.
+
+
+401
+00:17:50,336 --> 00:17:53,005 line:0
+Finally,
+we display this output frame.
+
+
+402
+00:17:53,005 --> 00:17:56,075 line:0
+We could additionally also
+encode the final rendered frame
+
+
+403
+00:17:56,075 --> 00:17:57,576 position:50%
+for delivery.
+
+
+404
+00:17:57,576 --> 00:17:59,879 line:-1
+Next, let’s take a look
+at what comprises
+
+
+405
+00:17:59,879 --> 00:18:02,214 line:-1
+an image-processing pipeline.
+
+
+406
+00:18:02.214 --> 00:18:04.850 line:-1 position:50%
+Image processing starts with
+unpacking different channels
+
+
+407
+00:18:04.850 --> 00:18:07.353 line:-1 position:50%
+of the source image
+RGB in alpha
+
+
+408
+00:18:07,353 --> 00:18:09,622 line:-1
+into separate buffers
+in the beginning.
+
+
+409
+00:18:09.622 --> 00:18:11.190 line:-1 position:50%
+We will process
+each of these channels
+
+
+410
+00:18:11.190 --> 00:18:12.558 line:-1 position:50%
+in our image-processing
+pipeline,
+
+
+411
+00:18:12.558 --> 00:18:15.494 line:-1 position:50%
+either together or separately.
+
+
+412
+00:18:15,494 --> 00:18:17,430 line:-1
+Next, there might be
+color space conversions
+
+
+413
+00:18:17.430 --> 00:18:21.167 line:-1 position:50%
+to operate in the desired
+color-managed environment.
+
+
+414
+00:18:21,167 --> 00:18:26,005 line:-1
+We then apply a 3D LUT;
+perform color corrections;
+
+
+415
+00:18:26.005 --> 00:18:29.275 line:-1 position:50%
+and then apply spatial-temporal
+noise reduction, convolutions,
+
+
+416
+00:18:29.275 --> 00:18:31.243 line:-1 position:50%
+blurs, and other effects.
+
+
+417
+00:18:31.243 --> 00:18:32.244 line:-1 position:50%
+And finally,
+
+
+418
+00:18:32,244 --> 00:18:34,280 line:-1
+we pack the individually
+processed channels together
+
+
+419
+00:18:34,280 --> 00:18:36,515 line:-1
+for final output.
+
+
+420
+00:18:36.515 --> 00:18:39.085 line:-1 position:50%
+What do these selected steps
+have in common?
+
+
+421
+00:18:39,085 --> 00:18:40,252 line:-1
+They are all point filters,
+
+
+422
+00:18:40.252 --> 00:18:43.789 line:-1 position:50%
+operating only on a single pixel
+with no interpixel dependency.
+
+
+423
+00:18:43.789 --> 00:18:47.526 line:-1 position:50%
+These map well to fragment
+shader implementation.
+
+
+424
+00:18:47.526 --> 00:18:49.228 line:-1 position:50%
+Spatial and convolution-style
+operations
+
+
+425
+00:18:49.228 --> 00:18:51.130 line:-1 position:50%
+require access
+to large radius of pixels,
+
+
+426
+00:18:51,130 --> 00:18:52,198 line:-1
+and we have scattered
+
+
+427
+00:18:52,198 --> 00:18:54,700 line:-1
+read-write access patterns
+as well.
+
+
+428
+00:18:54.700 --> 00:18:57.403 line:-1 position:50%
+These are well-suited
+for compute kernels.
+
+
+429
+00:18:57.403 --> 00:18:58.838 line:-1 position:50%
+We’ll use this knowledge later.
+
+
+430
+00:18:58.838 --> 00:19:02.208 line:-1 position:50%
+For now, let’s see how
+these operations are executed.
+
+
+431
+00:19:02,208 --> 00:19:03,976 line:-1
+Applications represent
+chain of effects
+
+
+432
+00:19:03.976 --> 00:19:06.512 line:-1 position:50%
+applied to an image
+as a filter graph.
+
+
+433
+00:19:06,512 --> 00:19:08,247 position:50%
+Every filter is its own kernel,
+
+
+434
+00:19:08,247 --> 00:19:10,216 position:50%
+processing the inputs
+from the previous stage
+
+
+435
+00:19:10,216 --> 00:19:12,685 position:50%
+and producing outputs
+for the next stage.
+
+
+436
+00:19:12,685 --> 00:19:15,121 position:50%
+Every arrow here means a buffer
+being written
+
+
+437
+00:19:15,121 --> 00:19:16,822 line:0
+to/from output of one stage
+
+
+438
+00:19:16,822 --> 00:19:20,860 position:50%
+and read as the input
+in the next stage.
+
+
+439
+00:19:20,860 --> 00:19:22,294 line:-1
+Since memory is limited,
+
+
+440
+00:19:22.294 --> 00:19:24.296 line:-1 position:50%
+applications usually linearize
+the graph
+
+
+441
+00:19:24,296 --> 00:19:26,198 line:-1
+by doing a topological sort.
+
+
+442
+00:19:26.198 --> 00:19:29.101 line:-1 position:50%
+This is done to keep the total
+number of intermediate resources
+
+
+443
+00:19:29.101 --> 00:19:33.305 line:-1 position:50%
+as low as possible while
+also avoiding race conditions.
+
+
+444
+00:19:33.305 --> 00:19:35.107 line:-1 position:50%
+This simple filter graph
+in that example
+
+
+445
+00:19:35,107 --> 00:19:38,044 line:-1
+would need two intermediate
+buffers to be able to operate
+
+
+446
+00:19:38.044 --> 00:19:41.614 line:-1 position:50%
+without race conditions
+and produce the final output.
+
+
+447
+00:19:41.614 --> 00:19:43.883 line:-1 position:50%
+The linearized graph here
+roughly represents
+
+
+448
+00:19:43.883 --> 00:19:46.986 line:-1 position:50%
+the GPU command buffer encoding
+as well.
+
+
+449
+00:19:46,986 --> 00:19:49,388 position:50%
+Let’s look deeper on why
+this filter graph
+
+
+450
+00:19:49,388 --> 00:19:52,958 position:50%
+is very device memory
+bandwidth intensive.
+
+
+451
+00:19:52,958 --> 00:19:55,628 position:50%
+Every filter operation
+has to load whole image
+
+
+452
+00:19:55,628 --> 00:19:58,197 line:0
+from device memory
+into the registers
+
+
+453
+00:19:58,197 --> 00:20:01,167 line:0
+and write the result
+back to the device memory.
+
+
+454
+00:20:01,167 --> 00:20:03,903 position:50%
+And that’s quite a bit
+of memory traffic.
+
+
+455
+00:20:03,903 --> 00:20:05,971 line:-1
+Let’s estimate
+the memory footprint
+
+
+456
+00:20:05,971 --> 00:20:07,907 line:-1
+for a 4K-frame image processing
+
+
+457
+00:20:07.907 --> 00:20:11.644 line:-1 position:50%
+based on our example
+image-processing graph.
+
+
+458
+00:20:11.644 --> 00:20:15.581 line:-1 position:50%
+A 4K decoded frame itself
+takes 67 megabytes of memory
+
+
+459
+00:20:15,581 --> 00:20:17,550 line:-1
+for floating-point 16 precision
+
+
+460
+00:20:17,550 --> 00:20:21,454 line:-1
+or 135 megabytes of memory
+for floating-point 32 precision,
+
+
+461
+00:20:21,454 --> 00:20:22,621 line:-1
+and professional workflows
+
+
+462
+00:20:22.621 --> 00:20:25.825 line:-1 position:50%
+absolutely need
+floating-point 32 precision.
+
+
+463
+00:20:25.825 --> 00:20:29.395 line:-1 position:50%
+For processing one 4K frame
+in floating-point 32 precision
+
+
+464
+00:20:29.395 --> 00:20:32.531 line:-1 position:50%
+through this image-processing
+graph, we are talking more than
+
+
+465
+00:20:32,531 --> 00:20:36,068 line:-1
+two gigabytes of read-write
+traffic to device memory.
+
+
+466
+00:20:36.068 --> 00:20:39.105 line:-1 position:50%
+Also, writes to buffers holding
+the intermediate output
+
+
+467
+00:20:39,105 --> 00:20:40,739 line:-1
+thrashes the cache hierarchy
+
+
+468
+00:20:40.739 --> 00:20:43.809 line:-1 position:50%
+and impacts other blocks
+on the chip as well.
+
+
+469
+00:20:43,809 --> 00:20:45,077 line:0
+Regular compute kernels
+
+
+470
+00:20:45,077 --> 00:20:48,547 line:0
+don’t benefit from the on-chip
+tile memory implicitly.
+
+
+471
+00:20:48,547 --> 00:20:51,617 line:0
+Kernels can explicitly allocate
+threadgroup-scoped memory,
+
+
+472
+00:20:51,617 --> 00:20:54,353 position:50%
+which will be backed
+by the on-chip tile memory.
+
+
+473
+00:20:54.353 --> 00:20:56.989 line:-1 position:50%
+However, that tile memory
+is not persistent
+
+
+474
+00:20:56.989 --> 00:21:00.025 line:-1 position:50%
+across dispatches
+within a compute encoder.
+
+
+475
+00:21:00,025 --> 00:21:02,828 line:-1
+In contrast, the tile memory
+is actually persistent
+
+
+476
+00:21:02.828 --> 00:21:06.298 line:-1 position:50%
+across draw passes within
+one render command encoder.
+
+
+477
+00:21:06,298 --> 00:21:08,868 line:-1
+Let’s see how we can redesign
+this representative
+
+
+478
+00:21:08.868 --> 00:21:12.671 line:-1 position:50%
+image-processing pipeline
+to leverage the tile memory.
+
+
+479
+00:21:12,671 --> 00:21:15,741 line:-1
+We are going to address this
+by following three steps.
+
+
+480
+00:21:15.741 --> 00:21:18.277 line:-1 position:50%
+We first change the compute pass
+to render pass
+
+
+481
+00:21:18.277 --> 00:21:21.113 line:-1 position:50%
+and all the intermediate
+output buffers to textures.
+
+
+482
+00:21:21.113 --> 00:21:23.516 line:-1 position:50%
+We then encode
+per-pixel operations
+
+
+483
+00:21:23,516 --> 00:21:27,052 line:-1
+with no interpixel dependency
+as fragment shader invocations
+
+
+484
+00:21:27.052 --> 00:21:28.888 line:-1 position:50%
+within one render
+command encoder,
+
+
+485
+00:21:28.888 --> 00:21:31.924 line:-1 position:50%
+making sure to account
+for all the intermediate results
+
+
+486
+00:21:31,924 --> 00:21:34,827 line:-1
+and setting appropriate
+load/store actions.
+
+
+487
+00:21:34,827 --> 00:21:38,130 line:-1
+And finally, we discuss what do
+we do in more complex situation
+
+
+488
+00:21:38.130 --> 00:21:40.166 line:-1 position:50%
+than just point filters.
+
+
+489
+00:21:40.166 --> 00:21:42.234 line:-1 position:50%
+Our first step
+is to use separate
+
+
+490
+00:21:42.234 --> 00:21:45.538 line:-1 position:50%
+MTLRenderCommandEncoder
+to encode eligible shaders.
+
+
+491
+00:21:45,538 --> 00:21:49,909 line:0
+In this filter graph, unpack,
+color space conversion, LUT,
+
+
+492
+00:21:49,909 --> 00:21:53,379 line:0
+and color-correction filters
+are all point per-pixel filters
+
+
+493
+00:21:53,379 --> 00:21:55,681 line:0
+that we can convert
+to fragment shader
+
+
+494
+00:21:55,681 --> 00:21:59,652 position:50%
+and encode them using
+one render command encoder.
+
+
+495
+00:21:59,652 --> 00:22:02,154 position:50%
+Similarly, mixer
+and pack shaders --
+
+
+496
+00:22:02,154 --> 00:22:03,222 position:50%
+which are towards the end
+
+
+497
+00:22:03,222 --> 00:22:05,090 position:50%
+of this image-processing
+pipeline --
+
+
+498
+00:22:05,090 --> 00:22:07,259 position:50%
+can also be converted
+to fragment shaders
+
+
+499
+00:22:07,259 --> 00:22:11,130 position:50%
+and encoded using another
+MTLRenderCommandEncoder.
+
+
+500
+00:22:11,130 --> 00:22:12,865 line:0
+Then we can invoke these shaders
+
+
+501
+00:22:12,865 --> 00:22:15,401 position:50%
+within their respective
+render passes.
+
+
+502
+00:22:15.401 --> 00:22:17.036 line:-1 position:50%
+When you create the render pass,
+
+
+503
+00:22:17.036 --> 00:22:19.438 line:-1 position:50%
+all the resources attached
+to the color attachments
+
+
+504
+00:22:19,438 --> 00:22:22,708 line:-1
+in that render pass
+are implicitly tiled for you.
+
+
+505
+00:22:22,708 --> 00:22:26,011 line:-1
+A fragment shader can only
+update the image block data
+
+
+506
+00:22:26,011 --> 00:22:29,181 line:-1
+associated with
+fragment’s position in the tile.
+
+
+507
+00:22:29.181 --> 00:22:31.150 line:-1 position:50%
+Next shader in the same
+render pass
+
+
+508
+00:22:31.150 --> 00:22:33.452 line:-1 position:50%
+can pick up the output
+of the previous shader
+
+
+509
+00:22:33.452 --> 00:22:35.387 line:-1 position:50%
+directly from the tile memory.
+
+
+510
+00:22:35,387 --> 00:22:37,122 line:-1
+In the next section,
+we will take a look
+
+
+511
+00:22:37.122 --> 00:22:39.058 line:-1 position:50%
+at how we can structure
+the fragment shaders
+
+
+512
+00:22:39,058 --> 00:22:41,560 line:-1
+which map to these filters.
+
+
+513
+00:22:41,560 --> 00:22:43,629 line:-1
+We will also take a look
+at what constructs
+
+
+514
+00:22:43.629 --> 00:22:46.465 line:-1 position:50%
+we need to define and use
+to enable access
+
+
+515
+00:22:46,465 --> 00:22:48,234 line:-1
+to the underlying tile memory
+
+
+516
+00:22:48,234 --> 00:22:50,469 line:-1
+from within
+these fragment shaders.
+
+
+517
+00:22:50.469 --> 00:22:52.071 line:-1 position:50%
+And finally, we will take a look
+
+
+518
+00:22:52,071 --> 00:22:54,406 line:-1
+at how the output generated
+in the tile memory
+
+
+519
+00:22:54.406 --> 00:22:56.609 line:-1 position:50%
+by one fragment shader
+can be consumed
+
+
+520
+00:22:56.609 --> 00:22:59.578 line:-1 position:50%
+directly from the tile memory
+by the next fragment shader
+
+
+521
+00:22:59.578 --> 00:23:02.748 line:-1 position:50%
+within the same
+render command encoder.
+
+
+522
+00:23:02.748 --> 00:23:05.050 line:-1 position:50%
+This is what you have to do
+in your code.
+
+
+523
+00:23:05,050 --> 00:23:07,786 line:-1
+Here I have attached
+output image as a texture
+
+
+524
+00:23:07,786 --> 00:23:11,457 line:-1
+attached to color attachment 0
+of the render pass descriptor.
+
+
+525
+00:23:11.457 --> 00:23:14.727 line:-1 position:50%
+I have attached texture
+holding intermediate result
+
+
+526
+00:23:14.727 --> 00:23:17.930 line:-1 position:50%
+to color attachment 1
+of the render pass descriptor.
+
+
+527
+00:23:17.930 --> 00:23:21.267 line:-1 position:50%
+Both of these will be
+implicitly tiled for you.
+
+
+528
+00:23:21.267 --> 00:23:23.569 line:-1 position:50%
+Please set the appropriate
+load/store properties
+
+
+529
+00:23:23.569 --> 00:23:26.372 line:-1 position:50%
+as discussed earlier
+in the talk.
+
+
+530
+00:23:26.372 --> 00:23:29.108 line:-1 position:50%
+Now, set up a structure
+to access these textures
+
+
+531
+00:23:29.108 --> 00:23:30.476 line:-1 position:50%
+in your fragment shader.
+
+
+532
+00:23:30.476 --> 00:23:31.644 line:-1 position:50%
+In the coming examples,
+
+
+533
+00:23:31.644 --> 00:23:33.178 line:-1 position:50%
+we will show how to use
+this structure
+
+
+534
+00:23:33.178 --> 00:23:35.581 line:-1 position:50%
+within your fragment shaders.
+
+
+535
+00:23:35.581 --> 00:23:38.584 line:-1 position:50%
+You simply access the output
+and the intermediate textures
+
+
+536
+00:23:38,584 --> 00:23:40,619 line:-1
+within your fragment shader
+as highlighted
+
+
+537
+00:23:40,619 --> 00:23:43,689 line:-1
+by using the structure
+we defined earlier.
+
+
+538
+00:23:43.689 --> 00:23:45.324 line:-1 position:50%
+Writes to these textures
+are done
+
+
+539
+00:23:45.324 --> 00:23:47.226 line:-1 position:50%
+to appropriate
+tile memory location
+
+
+540
+00:23:47.226 --> 00:23:49.528 line:-1 position:50%
+corresponding to the fragment.
+
+
+541
+00:23:49.528 --> 00:23:53.132 line:-1 position:50%
+Output produced by the unpack
+shader is consumed as input
+
+
+542
+00:23:53,132 --> 00:23:54,900 line:-1
+by color space conversion shader
+
+
+543
+00:23:54,900 --> 00:23:57,670 line:-1
+using the same structure
+that we defined earlier.
+
+
+544
+00:23:57,670 --> 00:24:00,072 line:0
+This fragment shader can do
+its own processing
+
+
+545
+00:24:00,072 --> 00:24:02,808 line:0
+and update the output
+and intermediate textures
+
+
+546
+00:24:02,808 --> 00:24:03,942 position:50%
+which will, once again,
+
+
+547
+00:24:03,942 --> 00:24:06,779 position:50%
+update the corresponding
+tile memory location.
+
+
+548
+00:24:06,779 --> 00:24:08,280 line:0
+You are to continue
+the same steps
+
+
+549
+00:24:08,280 --> 00:24:09,948 position:50%
+for all the other
+fragment shaders
+
+
+550
+00:24:09,948 --> 00:24:12,484 position:50%
+within the same
+render encoder pass.
+
+
+551
+00:24:12.484 --> 00:24:13.752 line:-1 position:50%
+Next, let's visualize
+
+
+552
+00:24:13,752 --> 00:24:17,756 line:-1
+how this sequence of operations
+looks now with these changes.
+
+
+553
+00:24:17,756 --> 00:24:20,759 line:-1
+As you can see,
+now you have unpack,
+
+
+554
+00:24:20.759 --> 00:24:23.162 line:-1 position:50%
+color space conversion,
+application of 3D LUT,
+
+
+555
+00:24:23.162 --> 00:24:26.432 line:-1 position:50%
+and color-correction steps,
+all executed on the tile memory
+
+
+556
+00:24:26,432 --> 00:24:27,866 line:-1
+using one render pass
+
+
+557
+00:24:27.866 --> 00:24:30.803 line:-1 position:50%
+with no device memory passes
+in between.
+
+
+558
+00:24:30,803 --> 00:24:32,504 line:-1
+At the end of the render pass,
+
+
+559
+00:24:32.504 --> 00:24:34.406 line:-1 position:50%
+render targets
+that are not memoryless
+
+
+560
+00:24:34,406 --> 00:24:36,375 line:-1
+are flushed
+to the device memory.
+
+
+561
+00:24:36.375 --> 00:24:39.545 line:-1 position:50%
+You can then execute
+the next class of filters.
+
+
+562
+00:24:39.545 --> 00:24:41.213 line:-1 position:50%
+Let’s talk a bit about filters
+
+
+563
+00:24:41.213 --> 00:24:43.649 line:-1 position:50%
+that have scatter-gather
+access patterns.
+
+
+564
+00:24:43.649 --> 00:24:45.217 line:-1 position:50%
+Kernels representing
+such filters
+
+
+565
+00:24:45,217 --> 00:24:49,054 line:-1
+can directly operate on the data
+in the device memory.
+
+
+566
+00:24:49.054 --> 00:24:51.223 line:-1 position:50%
+Convolution filters
+are very well-suited
+
+
+567
+00:24:51.223 --> 00:24:54.426 line:-1 position:50%
+for tile-based operations
+in compute kernels.
+
+
+568
+00:24:54.426 --> 00:24:57.162 line:-1 position:50%
+Here, you can express intent
+to use tile memory
+
+
+569
+00:24:57.162 --> 00:25:00.099 line:-1 position:50%
+by declaring a
+threadgroup-scoped memory.
+
+
+570
+00:25:00,099 --> 00:25:03,402 line:-1
+Now, you bring in the block
+of pixels into the tile memory
+
+
+571
+00:25:03.402 --> 00:25:05.504 line:-1 position:50%
+along with all the necessary
+halo pixels,
+
+
+572
+00:25:05.504 --> 00:25:07.639 line:-1 position:50%
+depending upon
+the filter radius,
+
+
+573
+00:25:07.639 --> 00:25:09.408 line:-1 position:50%
+and perform
+the convolution operation
+
+
+574
+00:25:09.408 --> 00:25:11.477 line:-1 position:50%
+directly on the tile memory.
+
+
+575
+00:25:11,477 --> 00:25:14,146 line:-1
+Remember,
+tile memory is not persistent
+
+
+576
+00:25:14.146 --> 00:25:17.116 line:-1 position:50%
+across compute dispatches
+within a compute encoder.
+
+
+577
+00:25:17.116 --> 00:25:19.218 line:-1 position:50%
+So after executing Filter1,
+
+
+578
+00:25:19,218 --> 00:25:21,954 line:-1
+you have to explicitly flush
+the tile memory contents
+
+
+579
+00:25:21.954 --> 00:25:23.389 line:-1 position:50%
+to device memory.
+
+
+580
+00:25:23,389 --> 00:25:27,593 line:-1
+That way, Filter2 can consume
+the output of Filter1.
+
+
+581
+00:25:27,593 --> 00:25:30,896 line:-1
+So where do we land once we make
+all of these changes?
+
+
+582
+00:25:30.896 --> 00:25:34.433 line:-1 position:50%
+For processing one 4K frame
+in floating-point 32 precision
+
+
+583
+00:25:34.433 --> 00:25:37.403 line:-1 position:50%
+through our example restructured
+image-processing graph,
+
+
+584
+00:25:37.403 --> 00:25:39.405 line:-1 position:50%
+here’s what we have now.
+
+
+585
+00:25:39,405 --> 00:25:42,174 line:-1
+Bandwidth goes down
+from 2.16 gigabytes
+
+
+586
+00:25:42,174 --> 00:25:45,010 line:-1
+to just load and store
+worth 810 megabytes,
+
+
+587
+00:25:45.010 --> 00:25:47.312 line:-1 position:50%
+and that’s 62 percent reduction
+in memory traffic
+
+
+588
+00:25:47.312 --> 00:25:48.914 line:-1 position:50%
+to the device memory.
+
+
+589
+00:25:48.914 --> 00:25:51.049 line:-1 position:50%
+We don't need two intermediate
+device buffers
+
+
+590
+00:25:51,049 --> 00:25:54,853 line:-1
+saving 270 megabytes
+of memory per frame.
+
+
+591
+00:25:54.853 --> 00:25:56.855 line:-1 position:50%
+And finally, we have
+reduced cache thrashing,
+
+
+592
+00:25:56.855 --> 00:25:59.124 line:-1 position:50%
+and that's because
+all the fragment shaders
+
+
+593
+00:25:59,124 --> 00:26:00,659 line:-1
+within that render pass
+are operating
+
+
+594
+00:26:00,659 --> 00:26:02,995 line:-1
+directly on the tile memory.
+
+
+595
+00:26:02,995 --> 00:26:05,197 line:-1
+One of the key features
+of Apple silicon
+
+
+596
+00:26:05.197 --> 00:26:07.633 line:-1 position:50%
+is its
+Unified Memory Architecture.
+
+
+597
+00:26:07.633 --> 00:26:09.301 line:-1 position:50%
+Let’s see an example
+of how to leverage
+
+
+598
+00:26:09,301 --> 00:26:11,870 line:-1
+this Unified Memory Architecture
+for interaction
+
+
+599
+00:26:11,870 --> 00:26:15,641 line:-1
+between different blocks
+on the Apple silicon.
+
+
+600
+00:26:15.641 --> 00:26:18.677 line:-1 position:50%
+We will take HEVC encoding
+of the final video frame
+
+
+601
+00:26:18.677 --> 00:26:21.280 line:-1 position:50%
+rendered by GPU
+as a case study.
+
+
+602
+00:26:21,280 --> 00:26:24,516 position:50%
+This encoding is done using
+dedicated hardware media engines
+
+
+603
+00:26:24,516 --> 00:26:27,286 position:50%
+on Apple silicon.
+
+
+604
+00:26:27,286 --> 00:26:29,621 line:0
+The final output frame
+rendered by the GPU
+
+
+605
+00:26:29,621 --> 00:26:31,723 line:0
+can be consumed directly
+by our media engines
+
+
+606
+00:26:31,723 --> 00:26:33,859 line:0
+with no extra memory copies.
+
+
+607
+00:26:33,859 --> 00:26:35,360 line:0
+In the coming section,
+
+
+608
+00:26:35,360 --> 00:26:38,263 position:50%
+we will walk through an example
+on how to set up a pipeline
+
+
+609
+00:26:38,263 --> 00:26:41,033 line:0
+for HEVC encoding
+of the final output frame
+
+
+610
+00:26:41,033 --> 00:26:43,969 line:0
+produced by the GPU
+in the most efficient way.
+
+
+611
+00:26:43,969 --> 00:26:47,439 line:-1
+For that, first we will leverage
+CoreVideo API
+
+
+612
+00:26:47.439 --> 00:26:49.041 line:-1 position:50%
+to create a pool
+of pixel buffers
+
+
+613
+00:26:49.041 --> 00:26:51.243 line:-1 position:50%
+backed by IOSurfaces.
+
+
+614
+00:26:51.243 --> 00:26:53.278 line:-1 position:50%
+Then, using the Metal API,
+
+
+615
+00:26:53.278 --> 00:26:55.614 line:-1 position:50%
+we render the final frames
+into Metal textures
+
+
+616
+00:26:55.614 --> 00:26:59.117 line:-1 position:50%
+backed by IOSurfaces
+from the pool we just created.
+
+
+617
+00:26:59.117 --> 00:27:01.753 line:-1 position:50%
+And finally, we dispatch
+these pixel buffers
+
+
+618
+00:27:01.753 --> 00:27:03.822 line:-1 position:50%
+directly to the media engine
+for encode
+
+
+619
+00:27:03.822 --> 00:27:06.091 line:-1 position:50%
+without any additional copies
+of the output frames
+
+
+620
+00:27:06.091 --> 00:27:07.559 line:-1 position:50%
+produced by the GPU,
+
+
+621
+00:27:07.559 --> 00:27:09.628 line:-1 position:50%
+thus leveraging
+the Unified Memory Architecture.
+
+
+622
+00:27:09.628 --> 00:27:11.864 line:-1 position:50%
+Let’s walk through
+on how to do this step by step
+
+
+623
+00:27:11,864 --> 00:27:15,067 line:-1
+and covering all the constructs
+we need to enable this flow.
+
+
+624
+00:27:15.067 --> 00:27:17.736 line:-1 position:50%
+First, we create
+a CVPixelBufferPool
+
+
+625
+00:27:17,736 --> 00:27:21,373 line:-1
+backed by IOSurface
+in the desired pixel format.
+
+
+626
+00:27:21,373 --> 00:27:23,242 line:-1
+Here, we will use the biplanar
+
+
+627
+00:27:23,242 --> 00:27:28,046 line:-1
+chroma-subsampled
+pixel format for HEVC encode.
+
+
+628
+00:27:28.046 --> 00:27:32.784 line:-1 position:50%
+Now, you get a CVPixelBuffer
+from this CVPixelBufferPool.
+
+
+629
+00:27:32,784 --> 00:27:35,220 line:0
+Pass this CVPixelBuffer
+to the MetalTextureCache
+
+
+630
+00:27:35,220 --> 00:27:36,655 position:50%
+with the right plane index
+
+
+631
+00:27:36,655 --> 00:27:39,291 position:50%
+to get
+the CVMetalTextureReference.
+
+
+632
+00:27:39,291 --> 00:27:41,126 line:0
+Since we are using
+biplanar pixel format,
+
+
+633
+00:27:41,126 --> 00:27:42,528 line:0
+you need to perform this step
+
+
+634
+00:27:42,528 --> 00:27:45,864 position:50%
+for both planes
+of the biplanar pixel buffer.
+
+
+635
+00:27:45,864 --> 00:27:48,166 position:50%
+Next, get the underlying
+Metal texture from the
+
+
+636
+00:27:48,166 --> 00:27:50,469 position:50%
+CVMetalTextureReference
+object.
+
+
+637
+00:27:50,469 --> 00:27:53,505 position:50%
+Perform this step for both
+luma and chroma planes.
+
+
+638
+00:27:53,505 --> 00:27:55,440 line:0
+Remember that
+these Metal textures
+
+
+639
+00:27:55,440 --> 00:27:57,309 line:0
+are backed by the same
+IOSurfaces
+
+
+640
+00:27:57,309 --> 00:28:00,979 line:0
+which are also backing
+the CVPixelBuffer planes.
+
+
+641
+00:28:00,979 --> 00:28:03,982 line:0
+Using Metal API,
+render into the textures
+
+
+642
+00:28:03,982 --> 00:28:06,418 line:0
+corresponding to luma
+and chroma planes.
+
+
+643
+00:28:06,418 --> 00:28:07,920 position:50%
+This will update the IOSurface
+
+
+644
+00:28:07,920 --> 00:28:10,522 position:50%
+which backs these Metal textures
+as well.
+
+
+645
+00:28:10,522 --> 00:28:12,891 line:0
+We highly recommend doing
+the chroma subsampling step
+
+
+646
+00:28:12,891 --> 00:28:14,893 line:0
+on the chroma planes
+on the GPU itself
+
+
+647
+00:28:14,893 --> 00:28:18,530 position:50%
+as a shader pass within
+your image-processing pipeline.
+
+
+648
+00:28:18,530 --> 00:28:19,831 position:50%
+An important thing to note
+
+
+649
+00:28:19,831 --> 00:28:22,801 position:50%
+is that both CVPixelBuffer
+and the Metal textures --
+
+
+650
+00:28:22,801 --> 00:28:24,336 position:50%
+which we just rendered into --
+
+
+651
+00:28:24,336 --> 00:28:26,872 position:50%
+are backed by the same
+underlying IOSurface copy
+
+
+652
+00:28:26,872 --> 00:28:29,041 line:0
+in the system memory.
+
+
+653
+00:28:29.041 --> 00:28:30.909 line:-1 position:50%
+You can now send
+this CVPixelBuffer
+
+
+654
+00:28:30,909 --> 00:28:33,745 line:-1
+directly to the media engine
+for encode.
+
+
+655
+00:28:33,745 --> 00:28:34,880 position:50%
+As you can see,
+
+
+656
+00:28:34,880 --> 00:28:36,415 position:50%
+due to the Unified Memory
+Architecture,
+
+
+657
+00:28:36,415 --> 00:28:38,483 line:0
+we can seamlessly move data
+between GPU
+
+
+658
+00:28:38,483 --> 00:28:41,787 line:0
+and media engine block
+with no memory copies.
+
+
+659
+00:28:41,787 --> 00:28:44,623 position:50%
+And finally, remember to release
+the CVPixelBuffer
+
+
+660
+00:28:44,623 --> 00:28:48,327 position:50%
+and CVMetalTexture reference
+after every frame.
+
+
+661
+00:28:48,327 --> 00:28:49,695 position:50%
+Releasing the CVPixelBuffer
+
+
+662
+00:28:49,695 --> 00:28:53,165 position:50%
+enables recycling of this buffer
+for future frames.
+
+
+663
+00:28:53.165 --> 00:28:56.201 line:-1 position:50%
+To wrap up, we encourage
+you again to do the following:
+
+
+664
+00:28:56,201 --> 00:28:58,337 line:-1
+leverage Unified Memory
+Architecture,
+
+
+665
+00:28:58,337 --> 00:29:00,839 line:-1
+use MTLRenderCommandEncoder
+instead of compute
+
+
+666
+00:29:00,839 --> 00:29:02,174 line:-1
+when applicable,
+
+
+667
+00:29:02,174 --> 00:29:04,076 line:-1
+merge all your eligible
+render passes
+
+
+668
+00:29:04.076 --> 00:29:06.478 line:-1 position:50%
+within single render
+command encoder,
+
+
+669
+00:29:06.478 --> 00:29:08.647 line:-1 position:50%
+set appropriate
+load/store actions,
+
+
+670
+00:29:08.647 --> 00:29:11.316 line:-1 position:50%
+use memoryless
+for transient resources,
+
+
+671
+00:29:11.316 --> 00:29:13.385 line:-1 position:50%
+leverage tile shading
+when applicable,
+
+
+672
+00:29:13,385 --> 00:29:16,755 line:0
+and use buffer pools
+with other APIs for zero-copy.
+
+
+673
+00:29:16.755 --> 00:29:19.224 line:-1 position:50%
+We want to thank you
+for joining this session today.
+
+
+674
+00:29:19,224 --> 00:29:22,027 line:-1
+Enjoy the rest of WWDC 2021!
+
+
+675
+00:29:22.027 --> 00:29:28.867 line:-1 position:50%
+[SPEAKS FOREIGN LANGUAGE]
+
+
+676
+00:29:28,867 --> 00:29:32,204 size:2% position:90% line:0
+♪
+

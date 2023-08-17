@@ -1,0 +1,2331 @@
+2
+00:00:02.002 --> 00:00:05.005 line:-1 align:center
+[percussive music]
+
+
+3
+00:00:09,042 --> 00:00:12,112 line:-2
+[Joel]
+Hello, and welcome to WWDC.
+
+
+4
+00:00:12,112 --> 00:00:13,981 line:-2
+My name is Joel,
+and I would like to tell you
+
+
+5
+00:00:13.981 --> 00:00:17.050 line:-2 align:center
+about how you can add music
+to your apps with MusicKit.
+
+
+6
+00:00:17.050 --> 00:00:20.187 line:-2 align:center
+MusicKit is a new framework
+for Apple platforms
+
+
+7
+00:00:20,187 --> 00:00:21,922 line:-1
+which offers expressive APIs
+
+
+8
+00:00:21,922 --> 00:00:25,025 line:-2
+for your apps to access
+music items in Swift.
+
+
+9
+00:00:25.025 --> 00:00:28.095 line:-2 align:center
+It leverages the new
+Swift concurrency syntax
+
+
+10
+00:00:28,095 --> 00:00:29,863 line:-2
+and is designed from
+the ground up to be
+
+
+11
+00:00:29.863 --> 00:00:32.165 line:-2 align:center
+used in conjunction
+with SwiftUI.
+
+
+12
+00:00:32,165 --> 00:00:34,368 line:-2
+MusicKit accelerates
+the way your apps integrate
+
+
+13
+00:00:34,368 --> 00:00:36,904 line:-2
+with Apple Music API,
+which are our set
+
+
+14
+00:00:36.904 --> 00:00:38.205 line:-1 align:center
+of server-side APIs
+
+
+15
+00:00:38,205 --> 00:00:40,474 line:-2
+for accessing the wide array
+of catalog content
+
+
+16
+00:00:40,474 --> 00:00:41,942 line:-1
+from Apple Music,
+
+
+17
+00:00:41.942 --> 00:00:45.445 line:-2 align:center
+thus making it much easier
+for you to build compelling apps
+
+
+18
+00:00:45,445 --> 00:00:47,347 line:-1
+that tie into Apple Music.
+
+
+19
+00:00:47,347 --> 00:00:50,417 line:-2
+First, we'll talk about
+how to request music content
+
+
+20
+00:00:50.417 --> 00:00:51.952 line:-1 align:center
+with MusicKit.
+
+
+21
+00:00:51,952 --> 00:00:54,188 line:-2
+Next, we'll talk about
+other topics that are
+
+
+22
+00:00:54,188 --> 00:00:57,824 line:-2
+important for the way your
+apps integrate with Apple Music,
+
+
+23
+00:00:57,824 --> 00:01:01,261 line:-2
+such as requesting consent from
+the user for your app to access
+
+
+24
+00:01:01,261 --> 00:01:04,064 line:-1
+Apple Music-related data,
+
+
+25
+00:01:04.064 --> 00:01:08.135 line:-2 align:center
+managing tokens required
+for accessing Apple Music API,
+
+
+26
+00:01:08,135 --> 00:01:10,037 line:-2
+accessing subscription
+information
+
+
+27
+00:01:10,037 --> 00:01:12,973 line:-1
+and related capabilities,
+
+
+28
+00:01:12,973 --> 00:01:16,510 line:-2
+playing music from
+the Apple Music catalog,
+
+
+29
+00:01:16,510 --> 00:01:19,079 line:-2
+and finally, how to show
+subscription offers
+
+
+30
+00:01:19.079 --> 00:01:23.016 line:-2 align:center
+for Apple Music, in case your
+user isn't already a subscriber.
+
+
+31
+00:01:23,016 --> 00:01:25,219 line:-2
+MusicKit offers
+a new model layer
+
+
+32
+00:01:25,219 --> 00:01:26,687 line:-1
+for accessing music items,
+
+
+33
+00:01:26,687 --> 00:01:28,889 line:-2
+with structured requests that
+allow you to fetch content
+
+
+34
+00:01:28,889 --> 00:01:30,924 line:-1
+from Apple Music API.
+
+
+35
+00:01:30.924 --> 00:01:32.893 line:-2 align:center
+You can either search
+for content
+
+
+36
+00:01:32,893 --> 00:01:34,695 line:-1
+in the Apple Music catalog,
+
+
+37
+00:01:34.695 --> 00:01:38.398 line:-2 align:center
+or fetch resources
+based on a specific filter.
+
+
+38
+00:01:38,398 --> 00:01:40,801 line:-2
+These requests produce
+responses with items
+
+
+39
+00:01:40.801 --> 00:01:42.069 line:-1 align:center
+grouped in collections,
+
+
+40
+00:01:42,069 --> 00:01:43,904 line:-2
+which have built-in
+support for pagination,
+
+
+41
+00:01:43.904 --> 00:01:45.506 line:-2 align:center
+allowing you to get
+the next batch of items
+
+
+42
+00:01:45.506 --> 00:01:47.007 line:-1 align:center
+from an initial response.
+
+
+43
+00:01:47,007 --> 00:01:49,243 line:-2
+So, what do these
+music items look like?
+
+
+44
+00:01:49.243 --> 00:01:51.845 line:-2 align:center
+Let's take a look at a specific
+example with an album.
+
+
+45
+00:01:51.845 --> 00:01:54.147 line:-2 align:center
+"Album" is a value type
+with properties grouped
+
+
+46
+00:01:54,147 --> 00:01:56,049 line:-1
+in three different categories.
+
+
+47
+00:01:56,049 --> 00:01:58,752 line:-2
+The first category contains
+simple attributes,
+
+
+48
+00:01:58,752 --> 00:02:00,954 line:-2
+such as a string property
+like "title,"
+
+
+49
+00:02:00,954 --> 00:02:03,156 line:-2
+a boolean property
+like "isCompilation,"
+
+
+50
+00:02:03.156 --> 00:02:05.425 line:-2 align:center
+or more structured properties
+like "artwork,"
+
+
+51
+00:02:05,425 --> 00:02:08,562 line:-2
+which gives you access to URLs
+for the artwork
+
+
+52
+00:02:08.562 --> 00:02:11.665 line:-2 align:center
+alongside relevant sizing
+information and related colors.
+
+
+53
+00:02:11.665 --> 00:02:14.501 line:-2 align:center
+Album also offers several
+relationships,
+
+
+54
+00:02:14,501 --> 00:02:17,070 line:-2
+such as related
+artists or genres,
+
+
+55
+00:02:17,070 --> 00:02:19,306 line:-2
+or the list
+of tracks in a given album.
+
+
+56
+00:02:19,306 --> 00:02:22,042 line:-2
+For example, the result
+of the "tracks" relationship
+
+
+57
+00:02:22,042 --> 00:02:24,811 line:-2
+is a collection of values
+of type "Track,"
+
+
+58
+00:02:24,811 --> 00:02:26,880 line:-2
+which is
+another type of music item.
+
+
+59
+00:02:26,880 --> 00:02:28,515 align:center
+Finally, in addition to these
+
+
+60
+00:02:28,515 --> 00:02:30,617 line:0
+strong model-level
+relationships,
+
+
+61
+00:02:30,617 --> 00:02:32,753 line:0
+"Album" offers several
+weaker associations
+
+
+62
+00:02:32,753 --> 00:02:34,288 align:center
+of related content.
+
+
+63
+00:02:34,288 --> 00:02:37,057 align:center
+Associations are very similar
+to relationships,
+
+
+64
+00:02:37,057 --> 00:02:38,792 line:0
+but they are
+typically more ephemeral,
+
+
+65
+00:02:38,792 --> 00:02:40,794 line:0
+or more editorially driven.
+
+
+66
+00:02:40,794 --> 00:02:43,597 align:center
+For example, the "appearsOn"
+association on an album
+
+
+67
+00:02:43,597 --> 00:02:46,133 line:0
+returns a collection of
+playlists,
+
+
+68
+00:02:46,133 --> 00:02:48,302 align:center
+but, unlike collections
+for relationships,
+
+
+69
+00:02:48,302 --> 00:02:50,304 line:0
+this one also has a title.
+
+
+70
+00:02:50,304 --> 00:02:52,206 line:-2
+Loading and accessing
+relationships
+
+
+71
+00:02:52.206 --> 00:02:53.540 line:-1 align:center
+with MusicKit is very simple.
+
+
+72
+00:02:53.540 --> 00:02:56.944 line:-2 align:center
+Given an album, you can easily
+fetch another representation
+
+
+73
+00:02:56,944 --> 00:03:00,514 line:-2
+of this same album that includes
+relationships like "artists"
+
+
+74
+00:03:00,514 --> 00:03:02,983 line:-2
+and "tracks,"
+as well as associations
+
+
+75
+00:03:02.983 --> 00:03:06.220 line:-2 align:center
+like "related albums,"
+in a single operation.
+
+
+76
+00:03:06.220 --> 00:03:08.222 line:-2 align:center
+The "with" method needs to be
+called
+
+
+77
+00:03:08,222 --> 00:03:10,724 line:-2
+with the special
+Swift keyword "await,"
+
+
+78
+00:03:10,724 --> 00:03:12,559 line:-2
+which indicates that this
+will perform
+
+
+79
+00:03:12.559 --> 00:03:14.962 line:-2 align:center
+an asynchronous operation
+behind the scenes.
+
+
+80
+00:03:14.962 --> 00:03:17.297 line:-2 align:center
+This will indeed fetch a more
+complete representation
+
+
+81
+00:03:17,297 --> 00:03:20,734 line:-2
+of this album from Apple Music
+API over the network.
+
+
+82
+00:03:20,734 --> 00:03:22,603 line:-2
+You can then
+get the list of tracks
+
+
+83
+00:03:22.603 --> 00:03:24.137 line:-1 align:center
+from this detailed album,
+
+
+84
+00:03:24.137 --> 00:03:28.075 line:-2 align:center
+and iterate over those tracks as
+you would with a regular array.
+
+
+85
+00:03:28,075 --> 00:03:30,677 align:center
+And here's the console
+output for this code.
+
+
+86
+00:03:30,677 --> 00:03:33,013 align:center
+Accessing associations such as
+"related albums"
+
+
+87
+00:03:33,013 --> 00:03:34,615 align:center
+works the same way,
+
+
+88
+00:03:34,615 --> 00:03:36,383 line:0
+with the only difference being
+that they typically
+
+
+89
+00:03:36,383 --> 00:03:40,287 align:center
+also include a title, accessible
+directly on the collection.
+
+
+90
+00:03:40,287 --> 00:03:43,390 align:center
+You can then iterate over the
+collection in that same manner
+
+
+91
+00:03:43,390 --> 00:03:45,492 align:center
+to print a few
+of those related albums.
+
+
+92
+00:03:45,492 --> 00:03:48,061 align:center
+And here's the console
+output for this code.
+
+
+93
+00:03:48,061 --> 00:03:50,264 line:-2
+Now, let's take a look at
+a demo of requesting
+
+
+94
+00:03:50,264 --> 00:03:51,765 line:-1
+music content with MusicKit.
+
+
+95
+00:03:51,765 --> 00:03:53,867 line:-2
+I've been working
+on an app which allows me
+
+
+96
+00:03:53,867 --> 00:03:57,471 line:-2
+to find and enjoy
+albums from Apple Music.
+
+
+97
+00:03:57,471 --> 00:04:00,274 line:-2
+I can search for albums
+using this search field,
+
+
+98
+00:04:00,274 --> 00:04:02,342 line:-2
+which is already connected
+some code to load
+
+
+99
+00:04:02,342 --> 00:04:03,610 line:-1
+matching search results
+
+
+100
+00:04:03,610 --> 00:04:05,646 line:-2
+using the music catalog
+search request.
+
+
+101
+00:04:05,646 --> 00:04:07,247 line:-1
+This app also keeps track
+
+
+102
+00:04:07.247 --> 00:04:09.216 line:-2 align:center
+of the list of albums
+I recently viewed.
+
+
+103
+00:04:09,216 --> 00:04:11,652 line:-2
+We can find more information
+about this album titled
+
+
+104
+00:04:11.652 --> 00:04:14.721 line:-2 align:center
+"Catch A Vibe - EP"
+by selecting it,
+
+
+105
+00:04:14.721 --> 00:04:16.290 line:-1 align:center
+and you may have noticed
+
+
+106
+00:04:16.290 --> 00:04:19.126 line:-2 align:center
+the list of tracks for
+this album being animated in
+
+
+107
+00:04:19.126 --> 00:04:20.794 line:-1 align:center
+after this detail view appeared.
+
+
+108
+00:04:20.794 --> 00:04:23.197 line:-2 align:center
+This is done by loading
+the "tracks" relationship
+
+
+109
+00:04:23,197 --> 00:04:25,098 line:-1
+of this album as we just saw,
+
+
+110
+00:04:25.098 --> 00:04:28.035 line:-2 align:center
+and updating the state variable
+for our SwiftUI view,
+
+
+111
+00:04:28.035 --> 00:04:30.404 line:-2 align:center
+which is then used
+to populate this list.
+
+
+112
+00:04:30.404 --> 00:04:33.307 line:-2 align:center
+We can begin playing music from
+this album with the play button
+
+
+113
+00:04:33.307 --> 00:04:34.408 line:-1 align:center
+underneath the artwork,
+
+
+114
+00:04:34,408 --> 00:04:36,944 line:-2
+or by selecting
+a specific track.
+
+
+115
+00:04:36.944 --> 00:04:39.780 line:-2 align:center
+This will simply use the
+playback API in MusicKit
+
+
+116
+00:04:39.780 --> 00:04:42.082 line:-2 align:center
+to set the queue
+with this list of tracks,
+
+
+117
+00:04:42.082 --> 00:04:44.885 line:-2 align:center
+and call the play
+method on the player.
+
+
+118
+00:04:44,885 --> 00:04:47,254 line:-1
+Let's try it out!
+
+
+119
+00:04:47.254 --> 00:04:49.690 line:-2 align:center
+So, if I select the track
+titled "Catch a Vibe"
+
+
+120
+00:04:49,690 --> 00:04:52,726 line:-1
+by Karun & MONBRU...
+
+
+121
+00:04:52.726 --> 00:04:54.895 line:-1 align:center
+[music playing]
+
+
+122
+00:04:54.895 --> 00:04:57.231 line:-1 align:center
+This song begins playing.
+
+
+123
+00:04:57,231 --> 00:04:59,600 line:-2
+[singer]
+♪ Ooh, oh, no ♪
+
+
+124
+00:04:59,600 --> 00:05:01,435 line:-2
+[Joel] Our app even
+works automatically
+
+
+125
+00:05:01.435 --> 00:05:03.003 line:-2 align:center
+in media controls
+in the Lock screen,
+
+
+126
+00:05:03,003 --> 00:05:05,906 line:-2
+which allows me to scrub
+to a halfway point in this song.
+
+
+127
+00:05:05.906 --> 00:05:09.176 line:-1 align:center
+[music playing]
+
+
+128
+00:05:12,246 --> 00:05:14,581 line:-2
+But I was hoping to use this app
+to help me rediscover
+
+
+129
+00:05:14.581 --> 00:05:16.316 line:-1 align:center
+old music from my CD library,
+
+
+130
+00:05:16,316 --> 00:05:18,652 line:-1
+like this album from Phoenix.
+
+
+131
+00:05:18,652 --> 00:05:20,621 line:-2
+So, I'd like to add a feature
+that would allow me
+
+
+132
+00:05:20,621 --> 00:05:24,591 line:-2
+to point the camera of my iPhone
+to the barcode of an old CD
+
+
+133
+00:05:24.591 --> 00:05:29.096 line:-2 align:center
+and have this app surface this
+same album in digital format.
+
+
+134
+00:05:29.096 --> 00:05:30.864 line:-2 align:center
+I've already added
+some experimental code
+
+
+135
+00:05:30,864 --> 00:05:32,399 line:-1
+for this feature.
+
+
+136
+00:05:32,399 --> 00:05:35,969 line:-2
+When I enable it,
+I can see a barcode button
+
+
+137
+00:05:35,969 --> 00:05:38,138 line:-1
+at the bottom,
+
+
+138
+00:05:38,138 --> 00:05:39,573 line:-1
+which brings up a camera view.
+
+
+139
+00:05:39.573 --> 00:05:42.743 line:-2 align:center
+If I point it to the barcode
+of this CD,
+
+
+140
+00:05:42,743 --> 00:05:46,847 line:-2
+it automatically recognizes the
+barcode value and displays it.
+
+
+141
+00:05:46.847 --> 00:05:49.149 line:-2 align:center
+All I'm missing is some
+code that uses MusicKit
+
+
+142
+00:05:49,149 --> 00:05:51,385 line:-2
+to find the corresponding
+album.
+
+
+143
+00:05:51.385 --> 00:05:54.121 line:-2 align:center
+Let's go ahead
+and add that to our app.
+
+
+144
+00:05:54,121 --> 00:05:58,091 line:-2
+So let me make
+an albumsRequest
+
+
+145
+00:05:58.091 --> 00:06:01.328 line:-2 align:center
+using the
+MusicCatalogResourceRequest.
+
+
+146
+00:06:01,328 --> 00:06:03,997 line:-2
+I am looking specifically
+for albums.
+
+
+147
+00:06:07,201 --> 00:06:10,437 line:-2
+And here, we want to make sure
+we find albums
+
+
+148
+00:06:10.437 --> 00:06:12.272 line:-1 align:center
+where the UPC property,
+
+
+149
+00:06:12,272 --> 00:06:15,709 line:-2
+which stands
+for Universal Product Code,
+
+
+150
+00:06:15.709 --> 00:06:18.378 line:-2 align:center
+that's the technical term
+for bar code,
+
+
+151
+00:06:18.378 --> 00:06:22.049 line:-1 align:center
+is equalTo: detectedBarcode.
+
+
+152
+00:06:23,016 --> 00:06:25,385 line:-2
+I can perform this
+request asynchronously.
+
+
+153
+00:06:31,191 --> 00:06:34,394 line:-1
+albumsRequest.response.
+
+
+154
+00:06:36.597 --> 00:06:38.031 line:-1 align:center
+And then from the response,
+
+
+155
+00:06:38.031 --> 00:06:40.868 line:-1 align:center
+I can look for the first album
+
+
+156
+00:06:40.868 --> 00:06:42.870 line:-1 align:center
+in the results.
+
+
+157
+00:06:49.543 --> 00:06:51.111 line:-2 align:center
+Then I can then pass this
+first album
+
+
+158
+00:06:51.111 --> 00:06:52.813 line:-2 align:center
+to the
+handleDetectedAlbum
+
+
+159
+00:06:52,813 --> 00:06:55,749 line:-1
+helper method down below.
+
+
+160
+00:06:57.351 --> 00:07:00.320 line:-2 align:center
+handleDetectedAlbum
+(firstAlbum).
+
+
+161
+00:07:02.055 --> 00:07:05.559 line:-2 align:center
+This method dismisses the
+barcode scanning view,
+
+
+162
+00:07:05,559 --> 00:07:08,862 line:-2
+and then pushes the album detail
+view for the detected album.
+
+
+163
+00:07:10,163 --> 00:07:12,466 line:-2
+And it's decorated here
+with MainActor
+
+
+164
+00:07:12,466 --> 00:07:16,403 line:-2
+to make sure it will be
+executed on the main thread.
+
+
+165
+00:07:16.403 --> 00:07:17.871 line:-2 align:center
+So when we call it,
+we need to make sure
+
+
+166
+00:07:17.871 --> 00:07:19.806 line:-1 align:center
+that we add the await keyword.
+
+
+167
+00:07:23,076 --> 00:07:27,247 line:-2
+So let's build and run
+our app again and try it out.
+
+
+168
+00:07:28,982 --> 00:07:32,019 line:-1
+Tap the barcode button.
+
+
+169
+00:07:32.019 --> 00:07:33.787 line:-1 align:center
+Take my album.
+
+
+170
+00:07:38,492 --> 00:07:40,360 line:-1
+It worked!
+
+
+171
+00:07:41.628 --> 00:07:43.764 line:-2 align:center
+Now, it's going to be
+much easier to enjoy
+
+
+172
+00:07:43,764 --> 00:07:47,201 line:-2
+my old music in digital
+format on Apple Music.
+
+
+173
+00:07:47,201 --> 00:07:51,205 line:-2
+MusicKit also offers a general
+purpose data request,
+
+
+174
+00:07:51,205 --> 00:07:53,207 line:-2
+which is different from
+structured requests
+
+
+175
+00:07:53,207 --> 00:07:54,842 line:-2
+in that it allows you
+to load content
+
+
+176
+00:07:54.842 --> 00:07:58.946 line:-2 align:center
+from an arbitrary Apple Music
+API endpoint using its URL.
+
+
+177
+00:08:01.548 --> 00:08:04.551 line:-2 align:center
+What you'll get back from
+this request is the raw data
+
+
+178
+00:08:04,551 --> 00:08:07,955 line:-2
+for the JSON response
+from Apple Music API.
+
+
+179
+00:08:07,955 --> 00:08:11,892 line:-2
+You need to decode this raw data
+with JSONDecoder,
+
+
+180
+00:08:11,892 --> 00:08:13,827 line:-2
+but doing that
+doesn't have to be hard
+
+
+181
+00:08:13,827 --> 00:08:17,097 line:-2
+because you can leverage
+existing music item types,
+
+
+182
+00:08:17,097 --> 00:08:19,766 line:-2
+since they conform
+to the Codable protocol.
+
+
+183
+00:08:19,766 --> 00:08:21,768 line:-2
+Let's take a look
+at an example.
+
+
+184
+00:08:21.768 --> 00:08:23.871 line:-2 align:center
+If you wanted to load the list
+of top level genres
+
+
+185
+00:08:23,871 --> 00:08:25,239 line:-1
+from Apple Music,
+
+
+186
+00:08:25,239 --> 00:08:26,740 line:-2
+you could do it
+by loading content
+
+
+187
+00:08:26.740 --> 00:08:28.509 line:-2 align:center
+from this
+specific URL,
+
+
+188
+00:08:28,509 --> 00:08:31,078 line:-2
+and here's the corresponding
+JSON response.
+
+
+189
+00:08:31,078 --> 00:08:33,614 line:-2
+If you take a closer
+look at this result,
+
+
+190
+00:08:33,614 --> 00:08:36,850 line:-2
+you can see in the middle what
+looks like a genre resource.
+
+
+191
+00:08:36,850 --> 00:08:39,486 line:-2
+So, how would you
+represent this in Swift?
+
+
+192
+00:08:39,486 --> 00:08:42,122 line:-2
+Sure enough,
+MusicKit has a Genre type.
+
+
+193
+00:08:42,122 --> 00:08:44,157 line:-2
+Zooming back,
+how would you represent
+
+
+194
+00:08:44,157 --> 00:08:46,093 line:-1
+the entire response in Swift?
+
+
+195
+00:08:46,093 --> 00:08:48,495 line:-2
+You can create a struct,
+with a data member,
+
+
+196
+00:08:48,495 --> 00:08:51,164 line:-2
+which is
+a simple array of genres.
+
+
+197
+00:08:51,164 --> 00:08:54,134 line:-2
+Then, make sure to mark
+this struct as Decodable.
+
+
+198
+00:08:54,134 --> 00:08:56,036 line:-2
+And this doesn't even require
+writing
+
+
+199
+00:08:56,036 --> 00:08:58,438 line:-1
+any additional decoding logic,
+
+
+200
+00:08:58,438 --> 00:09:02,976 line:-2
+because "Genre" itself also
+conforms to Decodable.
+
+
+201
+00:09:02,976 --> 00:09:04,811 line:-2
+So, to load this data in your
+app,
+
+
+202
+00:09:04,811 --> 00:09:07,514 line:-2
+you would put this struct
+at the top of your file,
+
+
+203
+00:09:07.514 --> 00:09:10.250 line:-2 align:center
+then you would construct
+the URL using the specific
+
+
+204
+00:09:10.250 --> 00:09:12.686 line:-1 align:center
+country code for your user.
+
+
+205
+00:09:12.686 --> 00:09:15.389 line:-2 align:center
+Create a music data
+request using this URL,
+
+
+206
+00:09:15,389 --> 00:09:17,057 line:-1
+and get the response from that,
+
+
+207
+00:09:17.057 --> 00:09:20.227 line:-2 align:center
+following the same
+pattern we've already seen.
+
+
+208
+00:09:20,227 --> 00:09:23,130 line:-2
+Once you have that response,
+you can decode its data
+
+
+209
+00:09:23,130 --> 00:09:24,698 line:-1
+using JSONDecoder,
+
+
+210
+00:09:24,698 --> 00:09:27,501 line:-2
+by passing
+in the type MyGenresResponse
+
+
+211
+00:09:27,501 --> 00:09:29,236 line:-1
+to the decode method.
+
+
+212
+00:09:29,236 --> 00:09:30,437 line:-1
+And that's it!
+
+
+213
+00:09:30,437 --> 00:09:32,639 line:-2
+You can now access
+individual genres
+
+
+214
+00:09:32,639 --> 00:09:35,742 line:-2
+in your strongly-typed
+genres response.
+
+
+215
+00:09:35,742 --> 00:09:39,046 align:center
+And, as you can see, you get
+the same kind of music item
+
+
+216
+00:09:39,046 --> 00:09:42,416 align:center
+you can otherwise fetch
+from other requests in MusicKit.
+
+
+217
+00:09:42,416 --> 00:09:43,984 line:0
+So, that's how you would
+load content
+
+
+218
+00:09:43,984 --> 00:09:47,054 align:center
+from any arbitrary URL
+for Apple Music API.
+
+
+219
+00:09:47,054 --> 00:09:50,591 line:-2
+And now that we know how to load
+music content,
+
+
+220
+00:09:50,591 --> 00:09:52,526 line:-2
+let's discuss
+some important preliminary steps
+
+
+221
+00:09:52,526 --> 00:09:54,695 line:-2
+for integrating your
+apps with Apple Music,
+
+
+222
+00:09:54.695 --> 00:09:56.129 line:-1 align:center
+starting with privacy.
+
+
+223
+00:09:56,129 --> 00:09:59,166 line:-2
+We want users to remain
+in control over which apps
+
+
+224
+00:09:59.166 --> 00:10:01.101 line:-1 align:center
+have access to their data.
+
+
+225
+00:10:01.101 --> 00:10:03.971 line:-2 align:center
+So, before you can request any
+data from Apple Music API,
+
+
+226
+00:10:03,971 --> 00:10:06,206 line:-2
+which can include the user's
+listening history
+
+
+227
+00:10:06,206 --> 00:10:07,741 line:-1
+or their music library,
+
+
+228
+00:10:07,741 --> 00:10:09,977 line:-2
+you need to get the user's
+informed consent
+
+
+229
+00:10:09.977 --> 00:10:12.446 line:-2 align:center
+for your app
+to access Apple Music.
+
+
+230
+00:10:12,446 --> 00:10:14,982 line:-2
+Asking for this user
+content needs to be done
+
+
+231
+00:10:14,982 --> 00:10:17,184 line:-2
+on a per-device
+and per-app basis.
+
+
+232
+00:10:17.184 --> 00:10:19.453 line:-2 align:center
+And here's what the user consent
+dialog looks like
+
+
+233
+00:10:19.453 --> 00:10:21.655 line:-2 align:center
+in the context
+of an app named Zova,
+
+
+234
+00:10:21.655 --> 00:10:22.990 line:-1 align:center
+which is a great fitness app
+
+
+235
+00:10:22.990 --> 00:10:24.691 line:-2 align:center
+that allows you to
+work out with their playlists
+
+
+236
+00:10:24,691 --> 00:10:28,095 line:-2
+on Apple Music
+or your own playlist.
+
+
+237
+00:10:28,095 --> 00:10:30,497 line:-2
+When you go to start
+a workout for the first time,
+
+
+238
+00:10:30.497 --> 00:10:33.834 line:-2 align:center
+Zova asks for permission
+to access Apple Music.
+
+
+239
+00:10:33.834 --> 00:10:36.370 line:-2 align:center
+This dialog needs to convey
+to the user why your app
+
+
+240
+00:10:36.370 --> 00:10:38.272 line:-1 align:center
+needs access to Apple Music.
+
+
+241
+00:10:38.272 --> 00:10:42.075 line:-2 align:center
+To that end, your app's usage
+description for Apple Music,
+
+
+242
+00:10:42.075 --> 00:10:44.678 line:-2 align:center
+which you need to define
+in your Info.plist,
+
+
+243
+00:10:44,678 --> 00:10:48,081 line:-2
+is included
+as the subtitle of this dialog.
+
+
+244
+00:10:48.081 --> 00:10:50.651 line:-2 align:center
+Here's an example of how
+you might request user consent
+
+
+245
+00:10:50.651 --> 00:10:51.785 line:-1 align:center
+for MusicKit.
+
+
+246
+00:10:51.785 --> 00:10:53.420 line:-2 align:center
+Say you have a feature
+in your app
+
+
+247
+00:10:53,420 --> 00:10:54,755 line:-1
+that requires MusicKit,
+
+
+248
+00:10:54.755 --> 00:10:56.790 line:-2 align:center
+and that you're gating
+access to this feature
+
+
+249
+00:10:56,790 --> 00:10:58,525 line:-2
+using the
+isAuthorizedForMusicKit
+
+
+250
+00:10:58,525 --> 00:10:59,826 line:-1
+state variable.
+
+
+251
+00:10:59,826 --> 00:11:01,862 line:-2
+At the appropriate point
+in your app,
+
+
+252
+00:11:01,862 --> 00:11:05,232 line:-2
+before you try to use MusicKit,
+you can request authorization
+
+
+253
+00:11:05,232 --> 00:11:08,869 line:-2
+to access Apple Music with this
+asynchronous request method.
+
+
+254
+00:11:08,869 --> 00:11:11,004 line:-2
+This will only prompt
+the user if your app
+
+
+255
+00:11:11,004 --> 00:11:13,140 line:-1
+hasn't been authorized yet.
+
+
+256
+00:11:13,140 --> 00:11:15,409 line:-2
+The request method returns
+a status value,
+
+
+257
+00:11:15,409 --> 00:11:17,444 line:-2
+and you can set
+your isAuthorizedForMusicKit
+
+
+258
+00:11:17.444 --> 00:11:21.715 line:-2 align:center
+variable to "true" if that
+status is equal to "authorized."
+
+
+259
+00:11:21.715 --> 00:11:24.184 line:-2 align:center
+Now, let's talk briefly about
+tokens required
+
+
+260
+00:11:24,184 --> 00:11:26,453 line:-2
+for loading data
+from Apple Music API.
+
+
+261
+00:11:26.453 --> 00:11:29.656 line:-2 align:center
+Apple Music API requires
+a developer token,
+
+
+262
+00:11:29,656 --> 00:11:32,326 line:-2
+which essentially authenticates
+your app with the API.
+
+
+263
+00:11:32.326 --> 00:11:35.229 line:-2 align:center
+Previously,
+to get this developer token,
+
+
+264
+00:11:35,229 --> 00:11:37,698 line:-2
+you would have had to create
+a MusicKit private key
+
+
+265
+00:11:37.698 --> 00:11:39.533 line:-1 align:center
+in the developer portal,
+
+
+266
+00:11:39.533 --> 00:11:41.535 line:-2 align:center
+put it on a server
+under your control,
+
+
+267
+00:11:41,535 --> 00:11:43,704 line:-2
+to ensure the key
+is kept private,
+
+
+268
+00:11:43,704 --> 00:11:45,939 line:-2
+and have your app request a new
+developer token
+
+
+269
+00:11:45,939 --> 00:11:48,208 line:-1
+from your server.
+
+
+270
+00:11:48,208 --> 00:11:49,877 line:-2
+But now,
+with MusicKit for Swift,
+
+
+271
+00:11:49.877 --> 00:11:52.112 line:-2 align:center
+you no longer need to worry
+about any of this,
+
+
+272
+00:11:52.112 --> 00:11:54.381 line:-2 align:center
+as the developer token
+is automatically generated
+
+
+273
+00:11:54.381 --> 00:11:56.183 line:-1 align:center
+for your app.
+
+
+274
+00:11:56,183 --> 00:11:59,086 line:-2
+You just need to opt in
+to this new automatic behavior
+
+
+275
+00:11:59,086 --> 00:12:01,355 line:-2
+by enrolling in
+the developer portal.
+
+
+276
+00:12:01.355 --> 00:12:04.758 line:-2 align:center
+Specifically, in the page where
+you register your App ID,
+
+
+277
+00:12:04,758 --> 00:12:07,661 line:-2
+select the App Services
+tab at the bottom,
+
+
+278
+00:12:07,661 --> 00:12:10,497 line:-2
+and enable the MusicKit
+checkbox.
+
+
+279
+00:12:10,497 --> 00:12:11,331 line:-1
+And you're done!
+
+
+280
+00:12:11,331 --> 00:12:13,700 line:-2
+Additionally,
+Apple Music API requires
+
+
+281
+00:12:13,700 --> 00:12:17,070 line:-2
+a user token for any
+personalized endpoint.
+
+
+282
+00:12:17,070 --> 00:12:19,773 line:-2
+And just like the developer
+token, new this year,
+
+
+283
+00:12:19,773 --> 00:12:23,010 line:-2
+the user token is automatically
+generated on your behalf.
+
+
+284
+00:12:23,010 --> 00:12:25,979 line:-2
+One more thing you may need
+to use MusicKit in your app
+
+
+285
+00:12:25.979 --> 00:12:27.848 line:-2 align:center
+is a way to figure out
+if your user has
+
+
+286
+00:12:27,848 --> 00:12:30,017 line:-2
+an active
+Apple Music subscription.
+
+
+287
+00:12:30,017 --> 00:12:32,586 line:-2
+Subscription information
+in MusicKit is exposed
+
+
+288
+00:12:32.586 --> 00:12:34.821 line:-1 align:center
+as three distinct capabilities,
+
+
+289
+00:12:34,821 --> 00:12:36,890 line:-2
+which tell you if the user
+can play content
+
+
+290
+00:12:36.890 --> 00:12:38.525 line:-1 align:center
+from the Apple Music catalog,
+
+
+291
+00:12:38.525 --> 00:12:41.161 line:-2 align:center
+if they have iCloud
+Music Library enabled,
+
+
+292
+00:12:41,161 --> 00:12:42,963 line:-2
+or if they
+can become subscribers,
+
+
+293
+00:12:42.963 --> 00:12:45.699 line:-2 align:center
+in case they don't already
+have an active subscription.
+
+
+294
+00:12:47,367 --> 00:12:50,470 line:-2
+Make sure to check the relevant
+capability for the specific
+
+
+295
+00:12:50.470 --> 00:12:53.273 line:-2 align:center
+Apple Music-related
+functionality in your app.
+
+
+296
+00:12:53.273 --> 00:12:55.709 line:-2 align:center
+For example,
+if you have a play button
+
+
+297
+00:12:55,709 --> 00:12:57,544 line:-1
+hooked up to play some music,
+
+
+298
+00:12:57.544 --> 00:12:59.546 line:-2 align:center
+you may want to keep it disabled
+if your user
+
+
+299
+00:12:59,546 --> 00:13:02,482 line:-2
+cannot play catalog content
+from Apple Music.
+
+
+300
+00:13:02,482 --> 00:13:05,052 line:-2
+You can define a state
+variable in your view
+
+
+301
+00:13:05.052 --> 00:13:07.688 line:-2 align:center
+to keep track of the music
+subscription.
+
+
+302
+00:13:07.688 --> 00:13:11.058 line:-2 align:center
+Then, you can apply the disabled
+modifier to your button
+
+
+303
+00:13:11.058 --> 00:13:12.759 line:-1 align:center
+to make sure it stays disabled
+
+
+304
+00:13:12,759 --> 00:13:14,595 line:-2
+if the music
+subscription property
+
+
+305
+00:13:14.595 --> 00:13:17.831 line:-2 align:center
+"canPlayCatalogContent"
+is set to "false."
+
+
+306
+00:13:17,831 --> 00:13:20,968 line:-2
+And finally, inside of an
+asynchronous block
+
+
+307
+00:13:20,968 --> 00:13:23,036 line:-2
+passed to
+the new task modifier,
+
+
+308
+00:13:23.036 --> 00:13:25.906 line:-2 align:center
+you can use the new
+subscription updates stream
+
+
+309
+00:13:25.906 --> 00:13:28.575 line:-2 align:center
+to be notified of changes
+in the music subscription.
+
+
+310
+00:13:28.575 --> 00:13:31.044 line:-2 align:center
+Now, let's talk about
+playback with MusicKit.
+
+
+311
+00:13:31,044 --> 00:13:33,480 line:-2
+MusicKit offers
+two distinct players,
+
+
+312
+00:13:33.480 --> 00:13:37.518 line:-2 align:center
+which we call SystemMusicPlayer
+and ApplicationMusicPlayer.
+
+
+313
+00:13:37.518 --> 00:13:39.753 line:-2 align:center
+Let's get into the differences
+between those players,
+
+
+314
+00:13:39.753 --> 00:13:41.455 line:-1 align:center
+starting with an example.
+
+
+315
+00:13:41,455 --> 00:13:43,590 line:-2
+Whereas a social media
+app may want to use
+
+
+316
+00:13:43.590 --> 00:13:45.959 line:-2 align:center
+the SystemMusicPlayer to change
+what's playing
+
+
+317
+00:13:45.959 --> 00:13:47.895 line:-2 align:center
+out of
+the system music app,
+
+
+318
+00:13:47.895 --> 00:13:49.730 line:-2 align:center
+a fitness app might prefer
+to use
+
+
+319
+00:13:49.730 --> 00:13:52.599 line:-2 align:center
+the ApplicationMusicPlayer
+to keep their playback state
+
+
+320
+00:13:52,599 --> 00:13:55,369 line:-2
+completely independent
+from the system music app.
+
+
+321
+00:13:55.369 --> 00:13:57.437 line:-2 align:center
+Both of these players
+automatically report
+
+
+322
+00:13:57.437 --> 00:14:00.507 line:-2 align:center
+the now playing information
+and handle remote commands.
+
+
+323
+00:14:00,507 --> 00:14:02,376 line:-2
+This is what gave us
+deep integration
+
+
+324
+00:14:02.376 --> 00:14:04.444 line:-2 align:center
+with system media
+controls in the lock screen,
+
+
+325
+00:14:04,444 --> 00:14:06,180 line:-1
+earlier in our demo.
+
+
+326
+00:14:06,180 --> 00:14:09,283 line:-2
+However, the now-playing app
+is reported differently.
+
+
+327
+00:14:09.283 --> 00:14:11.518 line:-2 align:center
+If you use
+the SystemMusicPlayer,
+
+
+328
+00:14:11.518 --> 00:14:14.655 line:-2 align:center
+the Music app will be reported
+as the now-playing app,
+
+
+329
+00:14:14,655 --> 00:14:17,057 line:-2
+whereas if you use
+the ApplicationMusicPlayer,
+
+
+330
+00:14:17.057 --> 00:14:20.460 line:-2 align:center
+your app will be the one
+reported as the now-playing app.
+
+
+331
+00:14:20,460 --> 00:14:23,330 line:-2
+Ownership of the playback
+queue is also different.
+
+
+332
+00:14:23.330 --> 00:14:26.800 line:-2 align:center
+With SystemMusicPlayer, your app
+is merely remote-controlling
+
+
+333
+00:14:26,800 --> 00:14:30,137 line:-2
+the system Music app, whereas
+with ApplicationMusicPlayer,
+
+
+334
+00:14:30,137 --> 00:14:33,240 line:-2
+your app owns a completely
+separate playback queue.
+
+
+335
+00:14:33.240 --> 00:14:35.409 line:-2 align:center
+Both of these players
+allow you to set the queue
+
+
+336
+00:14:35.409 --> 00:14:37.311 line:-2 align:center
+with one
+or more items,
+
+
+337
+00:14:37.311 --> 00:14:40.848 line:-2 align:center
+add an item to play next,
+or to play later.
+
+
+338
+00:14:40,848 --> 00:14:42,683 line:0
+But only
+the ApplicationMusicPlayer
+
+
+339
+00:14:42,683 --> 00:14:45,052 align:center
+gives you additional control
+over the playback queue,
+
+
+340
+00:14:45,052 --> 00:14:47,321 line:0
+allowing you to insert
+items in the middle,
+
+
+341
+00:14:47,321 --> 00:14:50,991 line:0
+or removing items that had
+been added previously.
+
+
+342
+00:14:50,991 --> 00:14:53,560 line:-2
+Finally,
+if your user isn't already
+
+
+343
+00:14:53.560 --> 00:14:54.995 line:-1 align:center
+an Apple Music subscriber,
+
+
+344
+00:14:54.995 --> 00:14:57.331 line:-2 align:center
+you may want to allow them
+to start a free trial
+
+
+345
+00:14:57,331 --> 00:14:59,399 line:-2
+for Apple Music
+from within your app,
+
+
+346
+00:14:59,399 --> 00:15:01,468 line:-2
+so they'll be able to enjoy
+all the functionality
+
+
+347
+00:15:01.468 --> 00:15:03.504 line:-2 align:center
+you've worked on to improve
+the user experience
+
+
+348
+00:15:03.504 --> 00:15:04.771 line:-1 align:center
+of your app with music.
+
+
+349
+00:15:04.771 --> 00:15:07.341 line:-2 align:center
+The subscription offer
+can be configured by tailoring
+
+
+350
+00:15:07.341 --> 00:15:10.310 line:-2 align:center
+the main message shown
+to the user to better correspond
+
+
+351
+00:15:10.310 --> 00:15:13.647 line:-2 align:center
+to the functionality in your
+app, like “play music”.
+
+
+352
+00:15:15,048 --> 00:15:17,251 line:-1
+It can also be contextual,
+
+
+353
+00:15:17,251 --> 00:15:20,487 line:-2
+highlighting a specific song,
+album, or a playlist.
+
+
+354
+00:15:21,889 --> 00:15:24,858 line:-2
+And by using the subscription
+offer sheet in your app,
+
+
+355
+00:15:24.858 --> 00:15:26.627 line:-2 align:center
+you can
+get rewarded for bringing in
+
+
+356
+00:15:26,627 --> 00:15:28,228 line:-1
+new Apple Music subscribers,
+
+
+357
+00:15:28,228 --> 00:15:29,863 line:-1
+through our affiliate program,
+
+
+358
+00:15:29.863 --> 00:15:31.632 line:-2 align:center
+which we call
+the Apple Services
+
+
+359
+00:15:31,632 --> 00:15:33,700 line:-1
+Performance Partners Program.
+
+
+360
+00:15:33.700 --> 00:15:36.103 line:-2 align:center
+To show a contextual
+music subscription offer
+
+
+361
+00:15:36,103 --> 00:15:38,405 line:-2
+in your app,
+you'll need to keep track
+
+
+362
+00:15:38.405 --> 00:15:41.308 line:-2 align:center
+of the music subscription
+as we saw earlier.
+
+
+363
+00:15:41,308 --> 00:15:43,377 line:-2
+You'll also need another state
+variable
+
+
+364
+00:15:43,377 --> 00:15:46,246 line:-2
+to keep track of whether
+the offer is being shown.
+
+
+365
+00:15:46,246 --> 00:15:49,516 line:-2
+Pass in the ID of, say,
+an album,
+
+
+366
+00:15:49.516 --> 00:15:53.353 line:-2 align:center
+as the itemID property of your
+subscription offer options.
+
+
+367
+00:15:53.353 --> 00:15:56.857 line:-2 align:center
+Keep the offer button disabled
+whenever “canBecomeSubscriber”
+
+
+368
+00:15:56.857 --> 00:15:59.293 line:-2 align:center
+is set to "false"
+on the music subscription.
+
+
+369
+00:15:59,293 --> 00:16:02,529 line:-2
+Then, use the musicSubscriptionOffer
+modifier
+
+
+370
+00:16:02.529 --> 00:16:05.599 line:-2 align:center
+with a binding
+to the isShowingOffer property,
+
+
+371
+00:16:05,599 --> 00:16:08,068 line:-1
+and also including your options.
+
+
+372
+00:16:08,068 --> 00:16:11,605 align:center
+Finally, set the isShowingOffer
+variable to "true."
+
+
+373
+00:16:11.605 --> 00:16:13.740 line:-2 align:center
+Let's go back
+to our app and see what
+
+
+374
+00:16:13.740 --> 00:16:16.944 line:-2 align:center
+the contextual offer
+for Apple Music looks like.
+
+
+375
+00:16:16,944 --> 00:16:19,246 line:-2
+In our earlier demo,
+we were already signed in
+
+
+376
+00:16:19,246 --> 00:16:21,381 line:-2
+with an active
+Apple Music subscription.
+
+
+377
+00:16:21,381 --> 00:16:23,550 line:-2
+So, to simulate the scenario
+where it might be appropriate
+
+
+378
+00:16:23,550 --> 00:16:25,786 line:-2
+to show a subscription
+offer for Apple Music,
+
+
+379
+00:16:25.786 --> 00:16:29.556 line:-1 align:center
+you can just go Settings,
+
+
+380
+00:16:29.556 --> 00:16:31.725 line:-1 align:center
+and sign out of your account.
+
+
+381
+00:16:33,694 --> 00:16:37,331 line:-2
+Then, if I go back to my app,
+you can see that the play button
+
+
+382
+00:16:37,331 --> 00:16:40,934 line:-2
+was disabled and moved
+to the left to make room
+
+
+383
+00:16:40,934 --> 00:16:45,105 line:-2
+for another button that invites
+the user to join Apple Music.
+
+
+384
+00:16:45.105 --> 00:16:48.775 line:-2 align:center
+If I tap this button,
+a subscription offer
+
+
+385
+00:16:48.775 --> 00:16:52.012 line:-2 align:center
+is presented,
+highlighting the specific album
+
+
+386
+00:16:52,012 --> 00:16:54,281 line:-2
+we were just
+looking at in our app.
+
+
+387
+00:16:54.281 --> 00:16:55.616 line:-1 align:center
+And that's how you can allow
+
+
+388
+00:16:55.616 --> 00:16:57.017 line:-1 align:center
+users to start a free trial
+
+
+389
+00:16:57,017 --> 00:16:58,252 line:-1
+for Apple Music
+
+
+390
+00:16:58.252 --> 00:16:59.620 line:-1 align:center
+from within your app.
+
+
+391
+00:16:59,620 --> 00:17:02,122 line:-2
+In conclusion,
+there are many types of apps
+
+
+392
+00:17:02,122 --> 00:17:04,358 line:-2
+that can be enhanced by adding
+a little bit of music
+
+
+393
+00:17:04.358 --> 00:17:06.126 line:-1 align:center
+as part of their experience.
+
+
+394
+00:17:06,126 --> 00:17:09,229 line:-2
+For example, you can make your
+games a lot more immersive
+
+
+395
+00:17:09.229 --> 00:17:13.400 line:-2 align:center
+by playing background music that
+matches the mood of your game.
+
+
+396
+00:17:13.400 --> 00:17:15.302 line:-1 align:center
+Or you can play upbeat music
+
+
+397
+00:17:15.302 --> 00:17:18.772 line:-2 align:center
+to keep your users
+motivated in a fitness app.
+
+
+398
+00:17:18,772 --> 00:17:21,241 line:-2
+And in a social media app,
+you can keep your users
+
+
+399
+00:17:21,241 --> 00:17:24,545 line:-2
+even more engaged with content
+that highlights music.
+
+
+400
+00:17:25,646 --> 00:17:27,814 line:0
+To go even further,
+make sure to check out
+
+
+401
+00:17:27,814 --> 00:17:30,083 align:center
+some related sessions,
+so you can learn about
+
+
+402
+00:17:30,083 --> 00:17:33,820 align:center
+harnessing the power of Shazam
+signatures with ShazamKit,
+
+
+403
+00:17:33,820 --> 00:17:36,356 align:center
+and dive deeper into
+concurrency with SwiftUI.
+
+
+404
+00:17:36.356 --> 00:17:39.660 line:-2 align:center
+Thanks for watching,
+and enjoy WWDC 2021!
+
+
+405
+00:17:39.660 --> 00:17:42.029 line:-1 align:center
+[percussive music]
+

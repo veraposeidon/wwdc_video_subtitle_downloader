@@ -1,0 +1,1677 @@
+2
+00:00:00.200 --> 00:00:03.003 line:-1 position:50%
+♪ instrumental hip hop music ♪
+
+
+3
+00:00:03,003 --> 00:00:09,676 line:0 align:right size:2%
+♪
+
+
+4
+00:00:09.676 --> 00:00:11.612 line:-1 position:50%
+Hi, my name is David Findlay,
+
+
+5
+00:00:11.612 --> 00:00:14.014 line:-1 position:50%
+and I'm an engineer
+on the Create ML team.
+
+
+6
+00:00:14.014 --> 00:00:16.583 line:-1 position:50%
+This session is all about
+Create ML Components,
+
+
+7
+00:00:16,583 --> 00:00:20,487 line:-1
+a powerful new way to build
+your own machine learning tasks.
+
+
+8
+00:00:20.487 --> 00:00:23.023 line:-1 position:50%
+My colleague Alejandro gave
+an introduction in the session
+
+
+9
+00:00:23,023 --> 00:00:25,092 line:-1
+"Get to know
+Create ML Components."
+
+
+10
+00:00:25,092 --> 00:00:27,394 line:0
+He explores deconstructing
+Create ML tasks
+
+
+11
+00:00:27,394 --> 00:00:29,863 position:50%
+into components
+and revealed how easy it is
+
+
+12
+00:00:29,863 --> 00:00:31,865 line:0
+to build custom models.
+
+
+13
+00:00:31,865 --> 00:00:35,002 position:50%
+Transformers and estimators
+are the main building blocks
+
+
+14
+00:00:35,002 --> 00:00:37,938 line:0
+that you can compose together
+to build custom models
+
+
+15
+00:00:37,938 --> 00:00:40,140 line:0
+like image regression.
+
+
+16
+00:00:40,140 --> 00:00:43,377 line:-1
+In this session, I want to go
+way beyond the basics
+
+
+17
+00:00:43,377 --> 00:00:46,613 line:-1
+and demonstrate what's possible
+with Create ML Components.
+
+
+18
+00:00:46.613 --> 00:00:49.917 line:-1 position:50%
+Let's go over the agenda;
+there's lots to cover.
+
+
+19
+00:00:49,917 --> 00:00:53,186 line:-1
+I'll start by talking about
+video data and go into detail
+
+
+20
+00:00:53.186 --> 00:00:57.090 line:-1 position:50%
+about new components designed
+to handle values over time.
+
+
+21
+00:00:57,090 --> 00:00:58,792 line:-1
+Then I'll put
+those concepts to work
+
+
+22
+00:00:58.792 --> 00:01:01.061 line:-1 position:50%
+and build a human action
+repetition counter
+
+
+23
+00:01:01,061 --> 00:01:03,430 line:-1
+using only transformers.
+
+
+24
+00:01:03,430 --> 00:01:05,232 line:-1
+Finally,
+I'll move on to training
+
+
+25
+00:01:05.232 --> 00:01:07.200 line:-1 position:50%
+a custom sound
+classifier model.
+
+
+26
+00:01:07,200 --> 00:01:09,469 line:-1
+I'll discuss incremental fitting
+which allows you
+
+
+27
+00:01:09.469 --> 00:01:11.271 line:-1 position:50%
+to update your model
+with batches,
+
+
+28
+00:01:11,271 --> 00:01:13,941 line:-1
+stop training early,
+and checkpoint your model.
+
+
+29
+00:01:13.941 --> 00:01:17.144 line:-1 position:50%
+There's so much opportunity
+with this level of flexibility.
+
+
+30
+00:01:17.144 --> 00:01:19.012 line:-1 position:50%
+I can't wait to dive in.
+
+
+31
+00:01:19,012 --> 00:01:21,081 line:-1
+Let's get started.
+
+
+32
+00:01:21,081 --> 00:01:24,551 line:-1
+At WWDC 2020, we introduced
+Action Classification
+
+
+33
+00:01:24.551 --> 00:01:26.153 line:-1 position:50%
+in Create ML,
+
+
+34
+00:01:26,153 --> 00:01:28,989 line:0
+which allows you to classify
+actions from videos.
+
+
+35
+00:01:28,989 --> 00:01:31,625 position:50%
+And we demonstrated how you can
+create a fitness classifier
+
+
+36
+00:01:31,625 --> 00:01:34,127 position:50%
+to recognize a person's
+workout routines,
+
+
+37
+00:01:34,127 --> 00:01:37,998 position:50%
+such as jumping jacks,
+lunges, and squats.
+
+
+38
+00:01:37.998 --> 00:01:40.500 line:-1 position:50%
+For example, you can use
+the action classifier
+
+
+39
+00:01:40,500 --> 00:01:44,037 line:-1
+to recognize the action in
+this video as a jumping jack.
+
+
+40
+00:01:44,037 --> 00:01:47,441 line:-1
+But what if you wanted
+to count your jumping jacks?
+
+
+41
+00:01:47,441 --> 00:01:49,109 line:-1
+The first thing
+you need to consider
+
+
+42
+00:01:49,109 --> 00:01:52,079 line:-1
+is that a jumping jack
+spans consecutive frames,
+
+
+43
+00:01:52,079 --> 00:01:55,182 line:-1
+and you'll need a way
+to handle values over time.
+
+
+44
+00:01:55,182 --> 00:01:57,050 line:-1
+Thankfully,
+Swift's AsyncSequence
+
+
+45
+00:01:57,050 --> 00:01:59,386 line:-1
+makes this really easy.
+
+
+46
+00:01:59,386 --> 00:02:01,888 line:0
+If you're unfamiliar
+with async sequences,
+
+
+47
+00:02:01,888 --> 00:02:06,259 line:0
+you should check out the session
+"Meet AsyncSequence”.
+
+
+48
+00:02:06,259 --> 00:02:09,062 line:0
+With Create ML Components,
+you can read your video
+
+
+49
+00:02:09,062 --> 00:02:13,133 line:0
+as an async sequence of frames,
+using the video reader.
+
+
+50
+00:02:13,133 --> 00:02:16,169 position:50%
+And AsyncSequence provides a
+way of iterating over the frames
+
+
+51
+00:02:16,169 --> 00:02:19,840 line:0
+as they are received
+from the video.
+
+
+52
+00:02:19,840 --> 00:02:22,576 line:-1
+For example,
+I can easily transform
+
+
+53
+00:02:22.576 --> 00:02:26.146 line:-1 position:50%
+each video frame asynchronously
+using the map method.
+
+
+54
+00:02:26,146 --> 00:02:30,550 line:-1
+This is useful when you want
+to process frames one at a time.
+
+
+55
+00:02:30.550 --> 00:02:32.085 line:-1 position:50%
+But what if you wanted
+to process
+
+
+56
+00:02:32,085 --> 00:02:34,254 line:-1
+multiple frames at a time?
+
+
+57
+00:02:34,254 --> 00:02:36,857 line:-1
+That's where
+temporal transformers come in.
+
+
+58
+00:02:36.857 --> 00:02:39.626 line:-1 position:50%
+For example, you may want
+to downsample frames
+
+
+59
+00:02:39.626 --> 00:02:42.095 line:-1 position:50%
+to speed-up an action
+in a video.
+
+
+60
+00:02:42,095 --> 00:02:44,064 position:50%
+You can use
+a downsampler for that
+
+
+61
+00:02:44,064 --> 00:02:45,766 position:50%
+which takes an async sequence
+
+
+62
+00:02:45,766 --> 00:02:48,802 line:0
+and returns a downsampled
+async sequence.
+
+
+63
+00:02:48,802 --> 00:02:51,505 line:-1
+Or you may want to group
+frames into windows,
+
+
+64
+00:02:51.505 --> 00:02:54.708 line:-1 position:50%
+which is important
+for counting action repetitions.
+
+
+65
+00:02:54,708 --> 00:02:58,111 line:-1
+That's where you can use
+a sliding window transformer.
+
+
+66
+00:02:58,111 --> 00:03:00,881 line:-1
+You can specify a window length,
+which is how many frames
+
+
+67
+00:03:00,881 --> 00:03:03,450 line:-1
+you want to group in a window,
+and a stride,
+
+
+68
+00:03:03,450 --> 00:03:06,586 line:-1
+which is how you control
+the sliding interval.
+
+
+69
+00:03:06,586 --> 00:03:09,956 position:50%
+The input is, again,
+an async sequence,
+
+
+70
+00:03:09,956 --> 00:03:15,662 position:50%
+and the output in this case is
+a windowed async sequence.
+
+
+71
+00:03:15.662 --> 00:03:17.964 line:-1 position:50%
+Generally speaking,
+a temporal transformer
+
+
+72
+00:03:17,964 --> 00:03:20,600 line:-1
+provides a way to process
+an async sequence
+
+
+73
+00:03:20.600 --> 00:03:22.903 line:-1 position:50%
+into a new async sequence.
+
+
+74
+00:03:22,903 --> 00:03:25,772 line:-1
+So let's put
+these concepts to work.
+
+
+75
+00:03:25.772 --> 00:03:27.941 line:-1 position:50%
+I don't know about you,
+but when I'm working out,
+
+
+76
+00:03:27,941 --> 00:03:30,143 line:-1
+I always lose count of my reps.
+
+
+77
+00:03:30,143 --> 00:03:32,112 line:-1
+So I decided
+to shake things up a bit
+
+
+78
+00:03:32,112 --> 00:03:34,214 line:-1
+and build an action
+repetition counter
+
+
+79
+00:03:34.214 --> 00:03:36.383 line:-1 position:50%
+with Create ML Components.
+
+
+80
+00:03:36.383 --> 00:03:39.920 line:-1 position:50%
+In this example, I'll go over
+how to compose transformers
+
+
+81
+00:03:39,920 --> 00:03:42,255 line:-1
+and temporal transformers
+together.
+
+
+82
+00:03:42.255 --> 00:03:45.525 line:-1 position:50%
+Let's start with
+pose extraction.
+
+
+83
+00:03:45,525 --> 00:03:49,296 line:-1
+I can extract poses using
+the human body pose extractor.
+
+
+84
+00:03:49,296 --> 00:03:50,831 line:-1
+The input is an image
+
+
+85
+00:03:50.831 --> 00:03:54.401 line:-1 position:50%
+and the output is an array
+of human body poses.
+
+
+86
+00:03:54.401 --> 00:03:56.837 line:-1 position:50%
+Behind the scenes,
+we leverage the Vision framework
+
+
+87
+00:03:56,837 --> 00:03:59,573 line:-1
+to extract the poses.
+
+
+88
+00:03:59,573 --> 00:04:02,375 line:-1
+Note that images
+can contain multiple people,
+
+
+89
+00:04:02.375 --> 00:04:05.011 line:-1 position:50%
+which is common
+for group workouts.
+
+
+90
+00:04:05.011 --> 00:04:08.415 line:-1 position:50%
+That's why the output
+is an array of poses.
+
+
+91
+00:04:08.415 --> 00:04:11.184 line:-1 position:50%
+But I'm only interested in
+counting action repetitions
+
+
+92
+00:04:11,184 --> 00:04:13,520 line:-1
+for one person at a time.
+
+
+93
+00:04:13.520 --> 00:04:16.356 line:-1 position:50%
+So I'll compose
+the human body pose extractor
+
+
+94
+00:04:16.356 --> 00:04:19.659 line:-1 position:50%
+with a pose selector.
+
+
+95
+00:04:19,659 --> 00:04:22,129 line:-1
+A pose selector
+takes an array of poses
+
+
+96
+00:04:22.129 --> 00:04:26.833 line:-1 position:50%
+as well as a selection strategy
+and returns a single pose.
+
+
+97
+00:04:26,833 --> 00:04:29,236 line:-1
+There's a few selection
+strategies to choose from,
+
+
+98
+00:04:29,236 --> 00:04:30,604 line:-1
+but for this example,
+
+
+99
+00:04:30.604 --> 00:04:33.507 line:-1 position:50%
+I'll use the
+rightMostJointLocation strategy.
+
+
+100
+00:04:33,507 --> 00:04:38,311 line:-1
+The next step is to group
+the poses into windows.
+
+
+101
+00:04:38.311 --> 00:04:42.015 line:-1 position:50%
+I'll append a sliding window
+transformer for that.
+
+
+102
+00:04:42.015 --> 00:04:44.851 line:-1 position:50%
+And I'll use a window length
+and stride of 90,
+
+
+103
+00:04:44,851 --> 00:04:47,120 line:-1
+which will generate
+nonoverlapping windows
+
+
+104
+00:04:47,120 --> 00:04:49,823 line:-1
+of 90 poses.
+
+
+105
+00:04:49.823 --> 00:04:52.826 line:-1 position:50%
+Recall that a sliding window
+transformer is temporal,
+
+
+106
+00:04:52,826 --> 00:04:55,729 line:-1
+which makes
+the whole task temporal,
+
+
+107
+00:04:55,729 --> 00:05:00,367 line:-1
+and the expected input is now
+an async sequence of frames.
+
+
+108
+00:05:00.367 --> 00:05:05.639 line:-1 position:50%
+Finally, I'll append
+a human body action counter.
+
+
+109
+00:05:05,639 --> 00:05:06,740 line:-1
+This temporal transformer
+
+
+110
+00:05:06,740 --> 00:05:10,043 line:-1
+consumes a windowed
+async sequence of poses
+
+
+111
+00:05:10.043 --> 00:05:13.013 line:-1 position:50%
+and returns a cumulative count
+of the action repetitions
+
+
+112
+00:05:13,013 --> 00:05:14,514 line:-1
+so far.
+
+
+113
+00:05:14.514 --> 00:05:15.749 line:-1 position:50%
+By now, you may have noticed
+
+
+114
+00:05:15,749 --> 00:05:18,285 line:-1
+that the count is
+a floating-point number.
+
+
+115
+00:05:18,285 --> 00:05:21,821 line:-1
+And that's because the task
+counts partial actions too.
+
+
+116
+00:05:21,821 --> 00:05:23,323 line:-1
+It's that easy.
+
+
+117
+00:05:23,323 --> 00:05:25,625 line:-1
+Now I can count my reps
+in my workout videos
+
+
+118
+00:05:25.625 --> 00:05:27.961 line:-1 position:50%
+and make sure
+I'm not cheating.
+
+
+119
+00:05:27,961 --> 00:05:31,264 line:-1
+But it would be even better
+to count repetitions live
+
+
+120
+00:05:31.264 --> 00:05:35.168 line:-1 position:50%
+in an app, so that I can keep
+track of my current workouts.
+
+
+121
+00:05:35,168 --> 00:05:38,071 line:-1
+Let me show you
+how you can do that.
+
+
+122
+00:05:38,071 --> 00:05:40,607 line:-1
+First, I'll use
+the readCamera method
+
+
+123
+00:05:40.607 --> 00:05:42.409 line:-1 position:50%
+which takes
+a camera configuration
+
+
+124
+00:05:42,409 --> 00:05:45,879 line:-1
+and returns an async sequence
+of camera frames.
+
+
+125
+00:05:45.879 --> 00:05:49.149 line:-1 position:50%
+Next, I'll adjust the stride
+parameter to 15 frames
+
+
+126
+00:05:49.149 --> 00:05:52.285 line:-1 position:50%
+so that I get an updated count
+more often.
+
+
+127
+00:05:52,285 --> 00:05:55,422 line:-1
+If my camera captures frames at
+a rate of 30 frames per second,
+
+
+128
+00:05:55,422 --> 00:05:58,858 line:-1
+then I get counts
+every half second.
+
+
+129
+00:05:58,858 --> 00:06:03,396 line:-1
+Now I can workout and not worry
+about missing a rep.
+
+
+130
+00:06:03.396 --> 00:06:06.132 line:-1 position:50%
+So far, I've explored
+temporal components
+
+
+131
+00:06:06,132 --> 00:06:08,668 line:-1
+for transforming
+async sequences.
+
+
+132
+00:06:08.668 --> 00:06:11.238 line:-1 position:50%
+Next, I want to focus on
+training custom models
+
+
+133
+00:06:11,238 --> 00:06:14,641 line:-1
+that rely on temporal data.
+
+
+134
+00:06:14,641 --> 00:06:18,445 line:0
+In 2019, we demonstrated how
+you can train a sound classifier
+
+
+135
+00:06:18,445 --> 00:06:19,946 line:0
+in Create ML.
+
+
+136
+00:06:19,946 --> 00:06:22,716 position:50%
+Then in 2021,
+we introduced enhancements
+
+
+137
+00:06:22,716 --> 00:06:24,951 line:0
+to sound classification.
+
+
+138
+00:06:24,951 --> 00:06:26,419 position:50%
+I want to go even further
+
+
+139
+00:06:26,419 --> 00:06:30,657 position:50%
+and train a custom sound
+classifier incrementally.
+
+
+140
+00:06:30.657 --> 00:06:33.393 line:-1 position:50%
+The MLSoundClassifier
+in the Create ML framework
+
+
+141
+00:06:33.393 --> 00:06:34.694 line:-1 position:50%
+is still the easiest way
+
+
+142
+00:06:34,694 --> 00:06:36,896 line:-1
+to train a custom
+sound classifier model.
+
+
+143
+00:06:36,896 --> 00:06:39,933 line:0
+But when you need more
+customizability and control,
+
+
+144
+00:06:39,933 --> 00:06:42,168 position:50%
+you can use the components
+under the hood.
+
+
+145
+00:06:42,168 --> 00:06:46,406 position:50%
+In its simplest form, the sound
+classifier has two components:
+
+
+146
+00:06:46,406 --> 00:06:49,075 position:50%
+an Audio Feature Print
+feature extractor
+
+
+147
+00:06:49,075 --> 00:06:51,745 position:50%
+and a classifier of your choice.
+
+
+148
+00:06:51,745 --> 00:06:54,247 line:-1
+AudioFeaturePrint is
+a temporal transformer
+
+
+149
+00:06:54.247 --> 00:06:56.850 line:-1 position:50%
+that extracts audio features
+from an async sequence
+
+
+150
+00:06:56,850 --> 00:06:59,252 line:-1
+of audio buffers.
+
+
+151
+00:06:59,252 --> 00:07:01,755 line:-1
+Similar to
+a sliding window transformer,
+
+
+152
+00:07:01,755 --> 00:07:04,357 line:-1
+AudioFeaturePrint windows
+the async sequence
+
+
+153
+00:07:04.357 --> 00:07:07.327 line:-1 position:50%
+then extracts features.
+
+
+154
+00:07:07,327 --> 00:07:09,529 line:-1
+There are a few classifiers
+to choose from,
+
+
+155
+00:07:09.529 --> 00:07:14.034 line:-1 position:50%
+but for this example, I'll use
+a logistic regression classifier
+
+
+156
+00:07:14.034 --> 00:07:16.836 line:-1 position:50%
+and then compose it together
+with the feature extractor
+
+
+157
+00:07:16,836 --> 00:07:20,573 line:-1
+to build a custom
+sound classifier.
+
+
+158
+00:07:20,573 --> 00:07:23,643 position:50%
+The next step is to fit
+the custom sound classifier
+
+
+159
+00:07:23,643 --> 00:07:25,378 line:0
+to labeled training data.
+
+
+160
+00:07:25,378 --> 00:07:27,881 position:50%
+For more information about
+collecting training data,
+
+
+161
+00:07:27,881 --> 00:07:30,150 position:50%
+the "Get to know Create ML
+Components" session
+
+
+162
+00:07:30,150 --> 00:07:32,085 line:0
+is a good place to start.
+
+
+163
+00:07:32.085 --> 00:07:34.688 line:-1 position:50%
+So far, I've covered
+the happy path.
+
+
+164
+00:07:34.688 --> 00:07:36.623 line:-1 position:50%
+But building
+machine learning models
+
+
+165
+00:07:36,623 --> 00:07:39,659 line:-1
+can be an iterative process.
+
+
+166
+00:07:39,659 --> 00:07:43,029 position:50%
+For example, you may discover
+and collect new training data
+
+
+167
+00:07:43,029 --> 00:07:46,333 position:50%
+over time and want
+to refresh your model.
+
+
+168
+00:07:46,333 --> 00:07:49,502 line:0
+It's possible that you can
+improve the model quality.
+
+
+169
+00:07:49.502 --> 00:07:53.340 line:-1 position:50%
+But retraining your model
+from scratch is time-consuming.
+
+
+170
+00:07:53,340 --> 00:07:55,942 line:-1
+That's because you need
+to redo feature extraction
+
+
+171
+00:07:55.942 --> 00:07:58.044 line:-1 position:50%
+for all of your previous data.
+
+
+172
+00:07:58.044 --> 00:08:00.714 line:-1 position:50%
+Let me give you an example
+of how you can save time
+
+
+173
+00:08:00,714 --> 00:08:04,184 line:-1
+when training your models
+with newly discovered data.
+
+
+174
+00:08:04,184 --> 00:08:06,686 line:-1
+The key is to preprocess
+your training data
+
+
+175
+00:08:06.686 --> 00:08:09.456 line:-1 position:50%
+separately from
+fitting your model.
+
+
+176
+00:08:09,456 --> 00:08:12,792 line:-1
+In this example, I can extract
+audio features separately
+
+
+177
+00:08:12,792 --> 00:08:15,428 line:-1
+from the classifier fitting.
+
+
+178
+00:08:15.428 --> 00:08:17.530 line:-1 position:50%
+And this works in general too.
+
+
+179
+00:08:17.530 --> 00:08:19.966 line:-1 position:50%
+Whenever you have
+a series of transformers
+
+
+180
+00:08:19,966 --> 00:08:21,634 line:-1
+followed by an estimator,
+
+
+181
+00:08:21.634 --> 00:08:24.637 line:-1 position:50%
+you can preprocess the input
+through the transformers
+
+
+182
+00:08:24,637 --> 00:08:26,506 line:-1
+leading up to the estimator.
+
+
+183
+00:08:26,506 --> 00:08:30,143 line:-1
+All you need to do
+is call the preprocess method
+
+
+184
+00:08:30,143 --> 00:08:33,513 line:-1
+and then fit the model on
+the preprocessed features.
+
+
+185
+00:08:33.513 --> 00:08:35.849 line:-1 position:50%
+I find this convenient
+because I didn't need to change
+
+
+186
+00:08:35.849 --> 00:08:38.785 line:-1 position:50%
+the sound classifier
+composition.
+
+
+187
+00:08:38.785 --> 00:08:41.087 line:-1 position:50%
+Now that I have the features
+extracted separately,
+
+
+188
+00:08:41,087 --> 00:08:44,057 line:-1
+I have the flexibility
+to only extract audio features
+
+
+189
+00:08:44,057 --> 00:08:46,760 line:-1
+for the new data.
+
+
+190
+00:08:46,760 --> 00:08:49,129 line:-1
+As you discover new
+training data for your model,
+
+
+191
+00:08:49.129 --> 00:08:51.998 line:-1 position:50%
+you can easily preprocess
+this data separately.
+
+
+192
+00:08:51.998 --> 00:08:54.000 line:-1 position:50%
+And then append
+the supplemental features
+
+
+193
+00:08:54.000 --> 00:08:56.770 line:-1 position:50%
+to the previously
+extracted ones.
+
+
+194
+00:08:56.770 --> 00:08:58.605 line:-1 position:50%
+This is just the first example
+
+
+195
+00:08:58.605 --> 00:09:01.741 line:-1 position:50%
+of where preprocessing
+can save you time.
+
+
+196
+00:09:01,741 --> 00:09:04,644 line:0
+Let's go back to
+the model-building lifecycle.
+
+
+197
+00:09:04,644 --> 00:09:06,813 line:0
+You may need to tune
+your estimator parameters
+
+
+198
+00:09:06,813 --> 00:09:09,482 position:50%
+until you're satisfied
+with your model's quality.
+
+
+199
+00:09:09,482 --> 00:09:12,385 line:0
+By separating the feature
+extraction from the fitting,
+
+
+200
+00:09:12,385 --> 00:09:14,821 position:50%
+you can extract
+your features only once
+
+
+201
+00:09:14,821 --> 00:09:18,324 line:0
+and then fit your model with
+different estimator parameters.
+
+
+202
+00:09:18,324 --> 00:09:19,592 line:0
+Let's go over an example
+
+
+203
+00:09:19,592 --> 00:09:21,261 position:50%
+of changing
+the classifier parameters
+
+
+204
+00:09:21,261 --> 00:09:24,531 position:50%
+without redoing
+feature extraction.
+
+
+205
+00:09:24.531 --> 00:09:26.933 line:-1 position:50%
+Assuming that I've already
+extracted features,
+
+
+206
+00:09:26,933 --> 00:09:30,770 line:-1
+I'll modify the classifier's
+L2 penalty parameter.
+
+
+207
+00:09:30,770 --> 00:09:33,006 line:-1
+And then I'll need to append
+the new classifier
+
+
+208
+00:09:33.006 --> 00:09:35.375 line:-1 position:50%
+to the old feature extractor.
+
+
+209
+00:09:35,375 --> 00:09:37,944 line:-1
+It's important not to change
+the feature extractor
+
+
+210
+00:09:37.944 --> 00:09:40.747 line:-1 position:50%
+when tuning your estimator,
+because that would invalidate
+
+
+211
+00:09:40,747 --> 00:09:43,049 line:-1
+the previously
+extracted features.
+
+
+212
+00:09:43.049 --> 00:09:47.420 line:-1 position:50%
+Let's move on to incrementally
+fitting your model with batches.
+
+
+213
+00:09:47,420 --> 00:09:49,322 line:-1
+Machine learning models
+in general
+
+
+214
+00:09:49,322 --> 00:09:51,724 line:-1
+benefit from large amounts
+of training data.
+
+
+215
+00:09:51,724 --> 00:09:55,094 line:-1
+However, your app may have
+limited memory constraints.
+
+
+216
+00:09:55.094 --> 00:09:56.729 line:-1 position:50%
+So what do you do?
+
+
+217
+00:09:56.729 --> 00:09:59.265 line:-1 position:50%
+You can use Create ML Components
+to train a model
+
+
+218
+00:09:59,265 --> 00:10:02,569 line:-1
+by loading only a batch of data
+into memory at a time.
+
+
+219
+00:10:02.569 --> 00:10:05.605 line:-1 position:50%
+The first thing I need to do
+is replace the classifier
+
+
+220
+00:10:05.605 --> 00:10:07.707 line:-1 position:50%
+with an updatable classifier.
+
+
+221
+00:10:07,707 --> 00:10:10,076 line:-1
+In order to train
+a custom model with batches,
+
+
+222
+00:10:10,076 --> 00:10:12,679 line:-1
+your classifier
+needs to be updatable.
+
+
+223
+00:10:12.679 --> 00:10:16.382 line:-1 position:50%
+For example, the fully connected
+neural network classifier,
+
+
+224
+00:10:16.382 --> 00:10:17.684 line:-1 position:50%
+which I can easily use
+
+
+225
+00:10:17,684 --> 00:10:20,220 line:-1
+instead of the logistic
+regression classifier
+
+
+226
+00:10:20.220 --> 00:10:22.021 line:-1 position:50%
+which is not updatable.
+
+
+227
+00:10:25,291 --> 00:10:28,795 line:-1
+All right, now I'll write
+a training loop.
+
+
+228
+00:10:28,795 --> 00:10:32,031 line:-1
+I'll start by creating
+a default initialized model.
+
+
+229
+00:10:32,031 --> 00:10:34,033 line:-1
+You won't be able
+to make predictions yet;
+
+
+230
+00:10:34,033 --> 00:10:37,837 line:-1
+that's because this is just
+the starting point for training.
+
+
+231
+00:10:37,837 --> 00:10:39,873 line:-1
+Then I'll extract
+the audio features
+
+
+232
+00:10:39.873 --> 00:10:41.908 line:-1 position:50%
+before the training starts.
+
+
+233
+00:10:41.908 --> 00:10:43.109 line:-1 position:50%
+This is an important step
+
+
+234
+00:10:43.109 --> 00:10:46.913 line:-1 position:50%
+because I don't want to extract
+features every iteration.
+
+
+235
+00:10:46,913 --> 00:10:49,749 line:-1
+The next step is
+to define the training loop
+
+
+236
+00:10:49,749 --> 00:10:51,384 line:-1
+and specify the number
+of iterations
+
+
+237
+00:10:51.384 --> 00:10:53.853 line:-1 position:50%
+you'd like to train for.
+
+
+238
+00:10:53,853 --> 00:10:57,891 line:-1
+Before I continue, I'll import
+the algorithm's Swift package.
+
+
+239
+00:10:57,891 --> 00:11:01,327 line:-1
+I'll need it for creating
+batches of training data.
+
+
+240
+00:11:01,327 --> 00:11:02,795 line:0
+Make sure to check out
+the session
+
+
+241
+00:11:02,795 --> 00:11:05,331 position:50%
+"Meet the Swift Algorithms
+and Collections packages"
+
+
+242
+00:11:05,331 --> 00:11:08,701 line:0
+from WWDC 2021
+to learn more.
+
+
+243
+00:11:10.403 --> 00:11:13.506 line:-1 position:50%
+Within the training loop is
+where the batching happens.
+
+
+244
+00:11:13,506 --> 00:11:15,708 line:-1
+I'll use the chunks method
+to group the features
+
+
+245
+00:11:15,708 --> 00:11:18,344 line:-1
+into batches for training.
+
+
+246
+00:11:18,344 --> 00:11:20,346 line:-1
+The chunk size
+is the number of features
+
+
+247
+00:11:20.346 --> 00:11:23.116 line:-1 position:50%
+that are loaded
+into memory at once.
+
+
+248
+00:11:23,116 --> 00:11:26,519 line:-1
+Then, I can update the model
+by iterating over the batches
+
+
+249
+00:11:26,519 --> 00:11:28,655 line:-1
+and calling the update method.
+
+
+250
+00:11:31,491 --> 00:11:33,293 line:-1
+When you train your model
+incrementally,
+
+
+251
+00:11:33,293 --> 00:11:35,495 line:-1
+you can unlock a few more
+training techniques.
+
+
+252
+00:11:35,495 --> 00:11:36,596 line:-1
+For example,
+
+
+253
+00:11:36,596 --> 00:11:39,065 line:-1
+in this training graph,
+after about 10 iterations,
+
+
+254
+00:11:39.065 --> 00:11:42.669 line:-1 position:50%
+the model accuracy
+plateaus at 95 percent.
+
+
+255
+00:11:42.669 --> 00:11:45.004 line:-1 position:50%
+At this point,
+the model has converged
+
+
+256
+00:11:45,004 --> 00:11:46,639 line:-1
+and you can stop early.
+
+
+257
+00:11:46,639 --> 00:11:50,510 line:-1
+Let's implement early stopping
+in the training loop.
+
+
+258
+00:11:50,510 --> 00:11:52,779 line:-1
+The first thing I need to do
+is make predictions
+
+
+259
+00:11:52,779 --> 00:11:54,581 line:-1
+for my validation set.
+
+
+260
+00:11:54.581 --> 00:11:56.349 line:-1 position:50%
+I'm using the mapFeatures
+method here
+
+
+261
+00:11:56,349 --> 00:11:58,818 line:-1
+because I need to pair
+the validation predictions
+
+
+262
+00:11:58,818 --> 00:12:01,721 line:-1
+with its annotations.
+
+
+263
+00:12:01,721 --> 00:12:04,691 line:-1
+The next step is to measure
+the quality of the model.
+
+
+264
+00:12:04.691 --> 00:12:06.759 line:-1 position:50%
+I'll use the built-in metrics
+for now,
+
+
+265
+00:12:06,759 --> 00:12:08,127 line:-1
+but there's nothing
+stopping you
+
+
+266
+00:12:08.127 --> 00:12:10.663 line:-1 position:50%
+from implementing
+your own custom metrics.
+
+
+267
+00:12:10.663 --> 00:12:12.498 line:-1 position:50%
+And finally, I'll stop training
+
+
+268
+00:12:12.498 --> 00:12:16.269 line:-1 position:50%
+when my model has reached
+an accuracy of 95 percent.
+
+
+269
+00:12:16,269 --> 00:12:19,505 line:0
+Outside of the training loop,
+I'll write the model out to disk
+
+
+270
+00:12:19,505 --> 00:12:22,842 line:0
+so that I can use it later
+to make predictions.
+
+
+271
+00:12:22,842 --> 00:12:24,377 line:0
+In addition to stopping early,
+
+
+272
+00:12:24,377 --> 00:12:26,779 position:50%
+I'd like to talk about
+model checkpointing.
+
+
+273
+00:12:28.548 --> 00:12:30.984 line:-1 position:50%
+You can save your model's
+progress during training
+
+
+274
+00:12:30,984 --> 00:12:33,152 line:-1
+rather than waiting
+until the end.
+
+
+275
+00:12:33,152 --> 00:12:34,787 line:-1
+And you can even use
+checkpointing
+
+
+276
+00:12:34.787 --> 00:12:37.423 line:-1 position:50%
+in order to resume training,
+which is convenient
+
+
+277
+00:12:37.423 --> 00:12:41.327 line:-1 position:50%
+especially when your model
+takes a long time to train.
+
+
+278
+00:12:41,327 --> 00:12:45,031 line:0
+All you need to do is write out
+your model in the training loop.
+
+
+279
+00:12:45,031 --> 00:12:47,500 line:0
+We recommend doing this
+every few iterations
+
+
+280
+00:12:47,500 --> 00:12:49,469 position:50%
+by defining
+a checkpoint interval.
+
+
+281
+00:12:49,469 --> 00:12:51,604 position:50%
+It's that easy.
+
+
+282
+00:12:51.604 --> 00:12:54.674 line:-1 position:50%
+In this session, I introduced
+temporal components,
+
+
+283
+00:12:54.674 --> 00:12:56.643 line:-1 position:50%
+a new way to build
+machine learning tasks
+
+
+284
+00:12:56,643 --> 00:13:00,246 line:-1
+with temporal data
+like audio and video.
+
+
+285
+00:13:00.246 --> 00:13:02.915 line:-1 position:50%
+I composed
+temporal components together
+
+
+286
+00:13:02.915 --> 00:13:05.752 line:-1 position:50%
+to make a human action
+repetition counter.
+
+
+287
+00:13:05.752 --> 00:13:08.921 line:-1 position:50%
+And finally, I talked about
+incremental fitting.
+
+
+288
+00:13:08,921 --> 00:13:10,723 line:-1
+This will unlock
+new possibilities for you
+
+
+289
+00:13:10,723 --> 00:13:13,426 line:-1
+to build machine learning
+into your apps.
+
+
+290
+00:13:13,426 --> 00:13:16,763 line:-1
+Thanks for joining me
+and enjoy the rest of WWDC.
+
+
+291
+00:13:16,763 --> 00:13:21,300 position:90% line:0 align:right
+♪
+

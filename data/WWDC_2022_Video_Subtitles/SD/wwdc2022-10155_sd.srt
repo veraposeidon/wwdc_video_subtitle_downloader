@@ -1,0 +1,3481 @@
+2
+00:00:00.000 --> 00:00:03.003 line:-1 position:50%
+♪ Mellow instrumental
+hip-hop music ♪
+
+
+3
+00:00:03,003 --> 00:00:10,177 line:0 position:90% size:2%
+♪
+
+
+4
+00:00:10.177 --> 00:00:12.212 line:-1 position:50%
+Meng Yang: Hi,
+my name is Meng Yang,
+
+
+5
+00:00:12.212 --> 00:00:15.949 line:-1 position:50%
+an engineer from GPU Software
+here at Apple.
+
+
+6
+00:00:15.949 --> 00:00:19.119 line:-1 position:50%
+Today I am going cover
+a few advanced topics
+
+
+7
+00:00:19.119 --> 00:00:21.989 line:-1 position:50%
+about ScreenCaptureKit
+and how it can take
+
+
+8
+00:00:21,989 --> 00:00:26,226 line:-1
+your app's screen sharing
+experience to the next level.
+
+
+9
+00:00:26.226 --> 00:00:28.929 line:-1 position:50%
+Later, my colleague Drew
+will demonstrate
+
+
+10
+00:00:28.929 --> 00:00:32.699 line:-1 position:50%
+this exciting new API in action.
+
+
+11
+00:00:32.699 --> 00:00:37.137 line:-1 position:50%
+Screen capture is at the heart
+of screen sharing applications
+
+
+12
+00:00:37.137 --> 00:00:41.575 line:-1 position:50%
+such as Zoom,
+Google Meet, SharePlay
+
+
+13
+00:00:41.575 --> 00:00:46.346 line:-1 position:50%
+and even popular game streaming
+services like Twitch,
+
+
+14
+00:00:46.346 --> 00:00:50.851 line:-1 position:50%
+which have become the new norm
+of how we work, study,
+
+
+15
+00:00:50,851 --> 00:00:55,656 line:-1
+collaborate, and socialize
+over the past few years.
+
+
+16
+00:00:55.656 --> 00:00:58.058 line:-1 position:50%
+ScreenCaptureKit
+is a brand-new,
+
+
+17
+00:00:58,058 --> 00:01:00,794 line:-1
+high-performance
+screen capture framework
+
+
+18
+00:01:00,794 --> 00:01:05,565 line:-1
+built from ground up
+with a powerful feature set.
+
+
+19
+00:01:05.565 --> 00:01:10.137 line:-1 position:50%
+The rich set of features
+includes highly customizable
+
+
+20
+00:01:10.137 --> 00:01:14.474 line:-1 position:50%
+content control that allows you
+to easily pick and then choose
+
+
+21
+00:01:14.474 --> 00:01:18.045 line:-1 position:50%
+any combination
+of windows, applications,
+
+
+22
+00:01:18.045 --> 00:01:21.515 line:-1 position:50%
+and displays to capture.
+
+
+23
+00:01:21.515 --> 00:01:24.618 line:-1 position:50%
+Ability to capture
+up to the screen content's
+
+
+24
+00:01:24,618 --> 00:01:28,422 line:-1
+native resolution
+and frame rate.
+
+
+25
+00:01:28.422 --> 00:01:32.092 line:-1 position:50%
+Dynamic stream property controls
+like resolution,
+
+
+26
+00:01:32.092 --> 00:01:34.628 line:-1 position:50%
+frame rate, pixel format.
+
+
+27
+00:01:34.628 --> 00:01:37.497 line:-1 position:50%
+And these controls
+can be modified on the fly
+
+
+28
+00:01:37.497 --> 00:01:40.867 line:-1 position:50%
+without recreating the stream.
+
+
+29
+00:01:40,867 --> 00:01:44,004 line:-1
+Capture buffers that are
+GPU memory-backed
+
+
+30
+00:01:44.004 --> 00:01:47.307 line:-1 position:50%
+to reduce memory copies.
+
+
+31
+00:01:47,307 --> 00:01:51,211 line:-1
+Hardware-accelerated
+content capture, scaling,
+
+
+32
+00:01:51,211 --> 00:01:53,914 line:-1
+pixel and color
+format conversion
+
+
+33
+00:01:53.914 --> 00:01:59.953 line:-1 position:50%
+to achieve high-performance
+capture with reduced CPU usage.
+
+
+34
+00:01:59.953 --> 00:02:07.060 line:-1 position:50%
+Last but not least, support for
+both video and audio capture.
+
+
+35
+00:02:07,060 --> 00:02:08,795 line:0
+Before getting started,
+
+
+36
+00:02:08,795 --> 00:02:11,298 position:50%
+this talk assumes
+you are already familiar
+
+
+37
+00:02:11,298 --> 00:02:14,267 position:50%
+with the basic concepts,
+building blocks,
+
+
+38
+00:02:14,267 --> 00:02:17,504 position:50%
+and workflow of
+how the framework works.
+
+
+39
+00:02:17,504 --> 00:02:21,508 line:0
+Please visit the intro session
+"Meet ScreenCaptureKit"
+
+
+40
+00:02:21,508 --> 00:02:23,510 position:50%
+to learn more.
+
+
+41
+00:02:23.510 --> 00:02:26.246 line:-1 position:50%
+In this session,
+I am going to talk about
+
+
+42
+00:02:26.246 --> 00:02:30.250 line:-1 position:50%
+how to capture and display
+a single window.
+
+
+43
+00:02:30,250 --> 00:02:36,857 line:-1
+Next, how to add screen content
+to full display capture.
+
+
+44
+00:02:36.857 --> 00:02:40.961 line:-1 position:50%
+How to remove content
+from display capture.
+
+
+45
+00:02:40.961 --> 00:02:45.032 line:-1 position:50%
+I will then show you a few ways
+to configure the stream
+
+
+46
+00:02:45,032 --> 00:02:48,235 line:-1
+for different use cases.
+
+
+47
+00:02:48,235 --> 00:02:52,372 line:-1
+And last, you will see a demo
+of how ScreenCaptureKit
+
+
+48
+00:02:52,372 --> 00:02:56,309 line:-1
+transformed the screen
+and audio capture experience
+
+
+49
+00:02:56,309 --> 00:03:03,417 line:-1
+of OBS Studio, a popular
+open source screen capture app.
+
+
+50
+00:03:03.417 --> 00:03:06.553 line:-1 position:50%
+Now, let's start
+with the first example,
+
+
+51
+00:03:06,553 --> 00:03:10,223 line:-1
+and probably
+the most common use case:
+
+
+52
+00:03:10.223 --> 00:03:14.194 line:-1 position:50%
+capture a single window.
+
+
+53
+00:03:14.194 --> 00:03:16.897 line:-1 position:50%
+This example is going to cover
+
+
+54
+00:03:16.897 --> 00:03:20.300 line:-1 position:50%
+how to set up
+a single window filter;
+
+
+55
+00:03:20,300 --> 00:03:22,936 line:-1
+what to expect
+from the stream output
+
+
+56
+00:03:22.936 --> 00:03:27.274 line:-1 position:50%
+when the captured window
+is being resized, occluded,
+
+
+57
+00:03:27,274 --> 00:03:30,677 line:-1
+moved off-screen, or minimized.
+
+
+58
+00:03:30.677 --> 00:03:34.347 line:-1 position:50%
+You will also learn
+how to use per-frame metadata
+
+
+59
+00:03:34.347 --> 00:03:38.318 line:-1 position:50%
+and how to properly display
+the captured window.
+
+
+60
+00:03:38,318 --> 00:03:40,287 line:-1
+Let's dive in.
+
+
+61
+00:03:40,287 --> 00:03:43,523 line:-1
+To capture a single window
+that's independent
+
+
+62
+00:03:43,523 --> 00:03:45,926 line:-1
+of which display it's on,
+
+
+63
+00:03:45.926 --> 00:03:49.362 line:-1 position:50%
+you can start by using
+a single window filter
+
+
+64
+00:03:49,362 --> 00:03:54,201 line:-1
+and initialize the filter
+with just one window.
+
+
+65
+00:03:54,201 --> 00:03:55,902 line:-1
+In the example here,
+
+
+66
+00:03:55.902 --> 00:04:01.341 line:-1 position:50%
+the filter is configured to
+include a single Safari window.
+
+
+67
+00:04:01.341 --> 00:04:06.346 line:-1 position:50%
+The video output includes just
+that window and nothing else.
+
+
+68
+00:04:06.346 --> 00:04:10.150 line:-1 position:50%
+No child, pop-up,
+or other windows from Safari
+
+
+69
+00:04:10.150 --> 00:04:13.186 line:-1 position:50%
+will be included.
+
+
+70
+00:04:13.186 --> 00:04:17.157 line:-1 position:50%
+ScreenCaptureKit's audio capture
+policy on the other hand
+
+
+71
+00:04:17,157 --> 00:04:20,594 line:-1
+always works at the app level.
+
+
+72
+00:04:20.594 --> 00:04:23.730 line:-1 position:50%
+When a single window filter
+is used,
+
+
+73
+00:04:23,730 --> 00:04:26,800 line:-1
+all the audio content
+from the application
+
+
+74
+00:04:26,800 --> 00:04:30,504 line:-1
+that contains the window
+will be captured,
+
+
+75
+00:04:30,504 --> 00:04:36,877 line:-1
+even from those windows that are
+not present in the video output.
+
+
+76
+00:04:36.877 --> 00:04:40.447 line:-1 position:50%
+Now let's take a look
+at the code sample.
+
+
+77
+00:04:40.447 --> 00:04:43.717 line:-1 position:50%
+To create a stream
+with a single window,
+
+
+78
+00:04:43.717 --> 00:04:47.154 line:-1 position:50%
+start by getting
+all available content to share
+
+
+79
+00:04:47.154 --> 00:04:50.457 line:-1 position:50%
+via SCShareableContent.
+
+
+80
+00:04:50.457 --> 00:04:55.462 line:-1 position:50%
+Next, get the window you want
+to share from SCShareableContent
+
+
+81
+00:04:55.462 --> 00:04:58.865 line:-1 position:50%
+by matching the windowID.
+
+
+82
+00:04:58.865 --> 00:05:03.170 line:-1 position:50%
+Then, create a SCContentFilter
+with the type
+
+
+83
+00:05:03.170 --> 00:05:08.575 line:-1 position:50%
+desktopIndependentWindow
+with the specified SCWindow.
+
+
+84
+00:05:08.575 --> 00:05:12.045 line:-1 position:50%
+You can further configure
+the stream to include audio
+
+
+85
+00:05:12,045 --> 00:05:15,382 line:-1
+as part of the stream output.
+
+
+86
+00:05:15,382 --> 00:05:18,051 position:50%
+Now you are ready
+to create a stream
+
+
+87
+00:05:18,051 --> 00:05:21,755 line:0
+with contentFilter
+and streamConfig.
+
+
+88
+00:05:21,755 --> 00:05:27,227 position:50%
+You can then add a StreamOutput
+and start the stream.
+
+
+89
+00:05:27,227 --> 00:05:31,965 position:50%
+Let's take a look
+at the stream output next.
+
+
+90
+00:05:31,965 --> 00:05:36,536 line:-1
+In the example here, the source
+display is on the left
+
+
+91
+00:05:36,536 --> 00:05:40,473 line:-1
+and the stream output
+is on the right.
+
+
+92
+00:05:40,473 --> 00:05:45,579 line:-1
+The stream filter includes
+a single Safari window.
+
+
+93
+00:05:45.579 --> 00:05:49.216 line:-1 position:50%
+Now I am going to start
+to scroll the Safari window
+
+
+94
+00:05:49,216 --> 00:05:52,118 line:-1
+that's being captured.
+
+
+95
+00:05:52,118 --> 00:05:55,055 line:-1
+The stream output includes
+the live content
+
+
+96
+00:05:55,055 --> 00:05:57,257 line:-1
+from the single Safari window
+
+
+97
+00:05:57,257 --> 00:06:02,162 line:-1
+and is updating at the same
+cadence as the source window,
+
+
+98
+00:06:02.162 --> 00:06:06.199 line:-1 position:50%
+up to the source display's
+native frame rate.
+
+
+99
+00:06:06,199 --> 00:06:10,437 position:50%
+For example, when the source
+window is constantly updating
+
+
+100
+00:06:10,437 --> 00:06:14,574 position:50%
+on a 120Hz display,
+the stream output
+
+
+101
+00:06:14,574 --> 00:06:20,347 line:0
+can also achieve
+up to 120 fps update.
+
+
+102
+00:06:20,347 --> 00:06:24,551 line:-1
+You might wonder what happens
+when the window resizes.
+
+
+103
+00:06:24,551 --> 00:06:27,554 line:-1
+Please keep in mind
+that frequently changing
+
+
+104
+00:06:27,554 --> 00:06:29,556 line:-1
+the stream's output dimension
+
+
+105
+00:06:29.556 --> 00:06:32.892 line:-1 position:50%
+can lead to additional
+memory allocation
+
+
+106
+00:06:32.892 --> 00:06:36.029 line:-1 position:50%
+and therefore not recommended.
+
+
+107
+00:06:36,029 --> 00:06:40,333 line:-1
+The stream's output dimension
+is mostly fixed
+
+
+108
+00:06:40.333 --> 00:06:44.337 line:-1 position:50%
+and it does not resize
+with the source window.
+
+
+109
+00:06:44.337 --> 00:06:47.440 line:-1 position:50%
+Now let me start to resize
+the source window
+
+
+110
+00:06:47,440 --> 00:06:51,778 line:-1
+and see what happens
+to the stream's output.
+
+
+111
+00:06:51.778 --> 00:06:55.715 line:-1 position:50%
+ScreenCaptureKit always
+performs hardware scaling
+
+
+112
+00:06:55,715 --> 00:07:00,253 line:-1
+on the captured window so it
+never exceeds the frame output
+
+
+113
+00:07:00,253 --> 00:07:03,490 line:-1
+as the source window resizes.
+
+
+114
+00:07:03.490 --> 00:07:07.861 line:-1 position:50%
+How about windows that are
+covered by other windows?
+
+
+115
+00:07:07.861 --> 00:07:12.799 line:-1 position:50%
+When the source window is
+occluded or partially occluded,
+
+
+116
+00:07:12.799 --> 00:07:15.302 line:-1 position:50%
+the stream output
+always includes
+
+
+117
+00:07:15.302 --> 00:07:19.105 line:-1 position:50%
+the window's full content.
+
+
+118
+00:07:19.105 --> 00:07:21.508 line:-1 position:50%
+And this also applies
+to the case
+
+
+119
+00:07:21,508 --> 00:07:24,377 line:-1
+when the window
+is completely off-screen
+
+
+120
+00:07:24,377 --> 00:07:28,515 line:-1
+or moved to other displays.
+
+
+121
+00:07:28,515 --> 00:07:33,119 line:-1
+And for minimized windows, when
+the source window is minimized,
+
+
+122
+00:07:33.119 --> 00:07:36.623 line:-1 position:50%
+the stream output is paused,
+
+
+123
+00:07:36,623 --> 00:07:41,828 line:-1
+and it resumes when the source
+window is no longer minimized.
+
+
+124
+00:07:41,828 --> 00:07:45,365 line:-1
+Next, let's move
+to audio output.
+
+
+125
+00:07:45.365 --> 00:07:47.233 line:-1 position:50%
+In this example here,
+
+
+126
+00:07:47,233 --> 00:07:50,837 line:-1
+there are two Safari windows
+with audio tracks,
+
+
+127
+00:07:50,837 --> 00:07:55,141 line:-1
+and the window on the left
+is being captured.
+
+
+128
+00:07:55,141 --> 00:07:59,112 line:-1
+The video output includes
+just the first window,
+
+
+129
+00:07:59.112 --> 00:08:01.948 line:-1 position:50%
+and the audio tracks
+from both Safari windows
+
+
+130
+00:08:01.948 --> 00:08:05.352 line:-1 position:50%
+will be included
+in the audio output.
+
+
+131
+00:08:05,352 --> 00:08:07,921 line:-1
+Let's take a look and listen.
+
+
+132
+00:08:07.921 --> 00:08:12.892 line:-1 position:50%
+>> ♪ Electronic dance music ♪
+
+
+133
+00:08:12.892 --> 00:08:16.429 line:-1 position:50%
+Chef: And I wrote down
+my favorite guacamole recipe.
+
+
+134
+00:08:16,429 --> 00:08:19,165 line:-1
+It calls for four avocados. <<
+
+
+135
+00:08:19.165 --> 00:08:21.167 line:-1 position:50%
+Meng: With the stream
+up and running,
+
+
+136
+00:08:21.167 --> 00:08:23.870 line:-1 position:50%
+your app receives a frame update
+
+
+137
+00:08:23.870 --> 00:08:27.774 line:-1 position:50%
+whenever there's
+a new frame available.
+
+
+138
+00:08:27,774 --> 00:08:30,910 line:-1
+The frame's output
+includes IOSurface
+
+
+139
+00:08:30.910 --> 00:08:36.516 line:-1 position:50%
+representing the captured frame
+and the per-frame metadata.
+
+
+140
+00:08:36,516 --> 00:08:42,088 line:-1
+I'd like to spend some time
+talking about metadata.
+
+
+141
+00:08:42,088 --> 00:08:45,024 line:-1
+I am going to show you
+examples of metadata
+
+
+142
+00:08:45.024 --> 00:08:48.495 line:-1 position:50%
+that can be quite useful
+for your app.
+
+
+143
+00:08:48,495 --> 00:08:54,267 line:-1
+And these include dirty rects,
+content rect,
+
+
+144
+00:08:54.267 --> 00:08:58.738 line:-1 position:50%
+content scale, and scale factor.
+
+
+145
+00:08:58,738 --> 00:09:01,207 position:50%
+Let's start with dirty rects.
+
+
+146
+00:09:01,207 --> 00:09:04,477 line:0
+Dirty rects indicate
+where the new content is
+
+
+147
+00:09:04,477 --> 00:09:06,913 position:50%
+from the previous frame.
+
+
+148
+00:09:06,913 --> 00:09:11,017 line:0
+In the example here, the dirty
+rects are being highlighted
+
+
+149
+00:09:11,017 --> 00:09:15,655 position:50%
+to illustrate the regions
+of frame updates.
+
+
+150
+00:09:15,655 --> 00:09:19,325 line:0
+Instead of always
+encoding the entire frame,
+
+
+151
+00:09:19,325 --> 00:09:23,663 line:0
+or calculate the delta between
+two frames in the encoder,
+
+
+152
+00:09:23,663 --> 00:09:27,534 line:0
+you can simply use
+dirty rects to only encode
+
+
+153
+00:09:27,534 --> 00:09:30,403 position:50%
+and transmit the regions
+with new updates
+
+
+154
+00:09:30,403 --> 00:09:33,640 line:0
+and copy the updates
+onto the previous frame
+
+
+155
+00:09:33,640 --> 00:09:38,645 line:0
+on the receiver side
+to generate a new frame.
+
+
+156
+00:09:38,645 --> 00:09:43,082 line:-1
+Dirty rects can be retrieved
+from the output CMSampleBuffer's
+
+
+157
+00:09:43,082 --> 00:09:49,589 line:-1
+metadata dictionary
+using the matching key.
+
+
+158
+00:09:49,589 --> 00:09:54,928 position:50%
+Now let's move to content rect
+and the content scale.
+
+
+159
+00:09:54,928 --> 00:09:58,932 line:0
+The source window to be captured
+is on the left
+
+
+160
+00:09:58,932 --> 00:10:02,735 line:0
+and the stream output
+is on the right.
+
+
+161
+00:10:02,735 --> 00:10:05,438 position:50%
+Since a window can be resized,
+
+
+162
+00:10:05,438 --> 00:10:08,775 position:50%
+the source window's
+native backing surface size
+
+
+163
+00:10:08,775 --> 00:10:13,079 position:50%
+often doesn't match
+the stream output's dimension.
+
+
+164
+00:10:13,079 --> 00:10:16,716 position:50%
+In the example here,
+the captured window has
+
+
+165
+00:10:16,716 --> 00:10:22,655 position:50%
+different aspect ratio from the
+frame's output and is bigger.
+
+
+166
+00:10:22,655 --> 00:10:29,195 line:0
+The captured window is scaled
+down to fit into the output.
+
+
+167
+00:10:29,195 --> 00:10:33,466 line:0
+A content rect, which is
+highlighted in green here,
+
+
+168
+00:10:33,466 --> 00:10:37,537 position:50%
+indicates the region of interest
+of the captured content
+
+
+169
+00:10:37,537 --> 00:10:40,306 position:50%
+on the stream output.
+
+
+170
+00:10:40,306 --> 00:10:44,077 position:50%
+And the content scale
+indicates how much the content
+
+
+171
+00:10:44,077 --> 00:10:46,746 position:50%
+is scaled to fit.
+
+
+172
+00:10:46,746 --> 00:10:50,517 position:50%
+Here the captured Safari window
+is scaled down
+
+
+173
+00:10:50,517 --> 00:10:55,421 position:50%
+by 0.77 to fit inside the frame.
+
+
+174
+00:10:55,421 --> 00:10:58,491 position:50%
+Now you can use the metadata
+just discussed
+
+
+175
+00:10:58,491 --> 00:11:01,294 position:50%
+to correctly display
+the captured window
+
+
+176
+00:11:01,294 --> 00:11:06,032 line:0
+as close to its native
+appearance as possible.
+
+
+177
+00:11:06,032 --> 00:11:10,770 line:0
+First, let's start by cropping
+the content from its output
+
+
+178
+00:11:10,770 --> 00:11:13,940 position:50%
+using the content rect.
+
+
+179
+00:11:13,940 --> 00:11:20,613 line:0
+Next, scale the content back up
+by dividing the content scale.
+
+
+180
+00:11:20,613 --> 00:11:24,884 line:0
+Now the captured content
+is scaled to match one-to-one
+
+
+181
+00:11:24,884 --> 00:11:28,054 line:0
+in pixel size
+as the source window.
+
+
+182
+00:11:28,054 --> 00:11:30,623 line:-1
+But how is the captured window
+going to look
+
+
+183
+00:11:30.623 --> 00:11:33.560 line:-1 position:50%
+on the target display?
+
+
+184
+00:11:33.560 --> 00:11:36.696 line:-1 position:50%
+To answer that question,
+I would like to start
+
+
+185
+00:11:36.696 --> 00:11:40.466 line:-1 position:50%
+by describing
+how scale factor works.
+
+
+186
+00:11:40.466 --> 00:11:44.537 line:-1 position:50%
+A display's scale factor
+indicates the scale ratio
+
+
+187
+00:11:44,537 --> 00:11:48,274 line:-1
+between a display
+or window's logical point size
+
+
+188
+00:11:48,274 --> 00:11:53,112 line:-1
+and its backing surface's
+pixel size.
+
+
+189
+00:11:53,112 --> 00:11:59,152 line:0
+A scale factor 2, or a 2x mode,
+means every one point onscreen
+
+
+190
+00:11:59,152 --> 00:12:03,623 line:0
+equals four pixels
+on the backing surface.
+
+
+191
+00:12:03,623 --> 00:12:06,793 position:50%
+A window can be moved
+from a Retina display
+
+
+192
+00:12:06,793 --> 00:12:11,397 position:50%
+with scale factor 2,
+such as in the example here,
+
+
+193
+00:12:11,397 --> 00:12:14,701 position:50%
+to a non-Retina display
+with scale factor 1
+
+
+194
+00:12:14,701 --> 00:12:17,403 line:0
+while being captured.
+
+
+195
+00:12:17,403 --> 00:12:22,275 position:50%
+With scale factor 1,
+each one logical point onscreen
+
+
+196
+00:12:22,275 --> 00:12:26,713 line:0
+corresponds to one pixel
+on the backing surface.
+
+
+197
+00:12:26,713 --> 00:12:29,649 line:0
+In addition,
+the source display might have
+
+
+198
+00:12:29,649 --> 00:12:33,219 line:0
+mismatched scale factor
+from the target display
+
+
+199
+00:12:33,219 --> 00:12:38,324 position:50%
+where the captured content
+will be displayed.
+
+
+200
+00:12:38,324 --> 00:12:41,894 line:0
+In this example,
+a window is being captured
+
+
+201
+00:12:41,894 --> 00:12:47,033 line:0
+from a Retina display on
+the left with a scale factor 2
+
+
+202
+00:12:47,033 --> 00:12:52,238 position:50%
+and to be displayed on a
+non-Retina display on the right.
+
+
+203
+00:12:52,238 --> 00:12:56,609 position:50%
+If the captured window is
+displayed as-is without scaling
+
+
+204
+00:12:56,609 --> 00:12:58,878 position:50%
+on the target
+non-Retina display
+
+
+205
+00:12:58,878 --> 00:13:01,848 line:0
+with one point
+to one pixel mapping,
+
+
+206
+00:13:01,848 --> 00:13:06,119 position:50%
+the window will look
+four times as big.
+
+
+207
+00:13:06,119 --> 00:13:09,956 position:50%
+To fix this, you should
+always check the scale factor
+
+
+208
+00:13:09,956 --> 00:13:13,826 position:50%
+from the frame's metadata
+against the scale factor
+
+
+209
+00:13:13,826 --> 00:13:16,663 line:0
+of the target display.
+
+
+210
+00:13:16,663 --> 00:13:21,067 line:0
+When there's a mismatch, scale
+the size of the captured content
+
+
+211
+00:13:21,067 --> 00:13:24,871 line:0
+by the scale factor
+before displaying it.
+
+
+212
+00:13:24,871 --> 00:13:29,242 line:0
+After scaling, the captured
+window on the target display
+
+
+213
+00:13:29,242 --> 00:13:34,914 line:0
+now appears to be the same size
+as its source window.
+
+
+214
+00:13:34.914 --> 00:13:37.350 line:-1 position:50%
+Now let's take a look
+at the code,
+
+
+215
+00:13:37,350 --> 00:13:39,686 line:-1
+and it's quite simple.
+
+
+216
+00:13:39,686 --> 00:13:44,490 line:-1
+Content rect, content scale,
+and scale factor
+
+
+217
+00:13:44.490 --> 00:13:48.561 line:-1 position:50%
+can also be retrieved from
+the output CMSampleBuffer's
+
+
+218
+00:13:48.561 --> 00:13:51.097 line:-1 position:50%
+metadata attachment.
+
+
+219
+00:13:51,097 --> 00:13:53,733 line:-1
+You can then use these metadata
+
+
+220
+00:13:53,733 --> 00:14:00,740 line:-1
+to crop and scale the captured
+content to display it correctly.
+
+
+221
+00:14:00.740 --> 00:14:03.743 line:-1 position:50%
+To recap, a single window filter
+
+
+222
+00:14:03.743 --> 00:14:06.713 line:-1 position:50%
+always includes
+full window content
+
+
+223
+00:14:06,713 --> 00:14:11,084 line:-1
+even when the source window
+is off-screen or occluded.
+
+
+224
+00:14:11,084 --> 00:14:14,821 line:-1
+It's display
+and space independent.
+
+
+225
+00:14:14.821 --> 00:14:20.293 line:-1 position:50%
+The output is always offset
+at the top-left corner.
+
+
+226
+00:14:20,293 --> 00:14:25,031 line:-1
+Pop-up or child windows
+are not included.
+
+
+227
+00:14:25.031 --> 00:14:29.736 line:-1 position:50%
+Consider using metadata
+to best display the content.
+
+
+228
+00:14:29,736 --> 00:14:35,842 position:50%
+And the audio includes tracks
+from the entire containing app.
+
+
+229
+00:14:35,842 --> 00:14:38,745 line:-1
+Now that you have just learned
+about how to capture
+
+
+230
+00:14:38.745 --> 00:14:41.180 line:-1 position:50%
+and display a single window,
+
+
+231
+00:14:41.180 --> 00:14:46.519 line:-1 position:50%
+let me move to the next class of
+display-based content filters.
+
+
+232
+00:14:46.519 --> 00:14:48.488 line:-1 position:50%
+In this next example,
+
+
+233
+00:14:48.488 --> 00:14:51.290 line:-1 position:50%
+you will learn to create
+a display-based filter
+
+
+234
+00:14:51.290 --> 00:14:55.194 line:-1 position:50%
+with windows or apps,
+and I will demonstrate
+
+
+235
+00:14:55.194 --> 00:15:00.099 line:-1 position:50%
+some differences between video-
+and audio-filtering rules.
+
+
+236
+00:15:00,099 --> 00:15:04,670 line:-1
+A display-based inclusion filter
+specifies which display
+
+
+237
+00:15:04.670 --> 00:15:07.406 line:-1 position:50%
+you want to capture
+content from.
+
+
+238
+00:15:07,406 --> 00:15:11,878 line:-1
+By default,
+no windows are captured.
+
+
+239
+00:15:11,878 --> 00:15:15,882 line:-1
+You can choose the content
+you want to capture by window.
+
+
+240
+00:15:15.882 --> 00:15:20.486 line:-1 position:50%
+In the example here, a Safari
+window and a Keynote window
+
+
+241
+00:15:20.486 --> 00:15:23.389 line:-1 position:50%
+are added to the display filter.
+
+
+242
+00:15:23,389 --> 00:15:27,226 line:-1
+The video output includes
+just these two windows
+
+
+243
+00:15:27,226 --> 00:15:29,295 line:-1
+placed in a display space
+
+
+244
+00:15:29,295 --> 00:15:32,865 line:-1
+and the audio output
+includes all the soundtracks
+
+
+245
+00:15:32.865 --> 00:15:37.170 line:-1 position:50%
+from Keynote and Safari apps.
+
+
+246
+00:15:37.170 --> 00:15:40.206 line:-1 position:50%
+This code sample demonstrates
+how to create
+
+
+247
+00:15:40.206 --> 00:15:44.443 line:-1 position:50%
+display-based filters
+with included windows.
+
+
+248
+00:15:44,443 --> 00:15:48,014 line:-1
+Start by creating a list
+of SCWindows
+
+
+249
+00:15:48.014 --> 00:15:52.351 line:-1 position:50%
+using SCShareableContent
+and windowIDs.
+
+
+250
+00:15:52.351 --> 00:15:56.789 line:-1 position:50%
+And then, create
+a display-based SCContentFilter
+
+
+251
+00:15:56,789 --> 00:16:01,494 line:-1
+with a given display
+and a list of included windows.
+
+
+252
+00:16:01,494 --> 00:16:03,729 line:0
+You can then create a stream
+
+
+253
+00:16:03,729 --> 00:16:07,200 position:50%
+using the filter and
+configuration in the same way
+
+
+254
+00:16:07,200 --> 00:16:13,172 position:50%
+as a desktop independent
+window and start the stream.
+
+
+255
+00:16:13,172 --> 00:16:15,274 line:0
+With the stream up and running,
+
+
+256
+00:16:15,274 --> 00:16:18,644 position:50%
+let's take a look
+at the stream's output.
+
+
+257
+00:16:18,644 --> 00:16:22,849 position:50%
+The filter is configured
+to include two Safari windows,
+
+
+258
+00:16:22,849 --> 00:16:26,185 line:0
+menu bar, and wallpaper windows.
+
+
+259
+00:16:30,356 --> 00:16:32,959 position:50%
+If a window is moved off-screen,
+
+
+260
+00:16:32,959 --> 00:16:37,363 position:50%
+it will be removed
+from the stream output.
+
+
+261
+00:16:37,363 --> 00:16:40,800 position:50%
+When a new Safari window
+is created,
+
+
+262
+00:16:40,800 --> 00:16:44,170 line:0
+the new window doesn't show up
+in the stream output
+
+
+263
+00:16:44,170 --> 00:16:48,040 position:50%
+because the new window
+is not in the filter.
+
+
+264
+00:16:48,040 --> 00:16:52,111 position:50%
+The same rule also applies
+to child or pop-up windows,
+
+
+265
+00:16:52,111 --> 00:16:56,315 line:0
+which do not show up
+in the stream's output.
+
+
+266
+00:16:56.315 --> 00:16:59.018 line:-1 position:50%
+If you want to ensure
+that child windows
+
+
+267
+00:16:59.018 --> 00:17:02.889 line:-1 position:50%
+are included automatically
+in your stream output,
+
+
+268
+00:17:02.889 --> 00:17:07.960 line:-1 position:50%
+you can use a display-based
+filter with included apps.
+
+
+269
+00:17:07.960 --> 00:17:12.231 line:-1 position:50%
+In this example, adding
+the Safari and Keynote apps
+
+
+270
+00:17:12,231 --> 00:17:16,736 line:-1
+to the filter ensures that
+the audio and video output
+
+
+271
+00:17:16.736 --> 00:17:20.506 line:-1 position:50%
+from all the windows and
+soundtracks from these two apps
+
+
+272
+00:17:20,506 --> 00:17:24,010 line:-1
+are included in the output
+
+
+273
+00:17:24,010 --> 00:17:27,446 line:-1
+Window exception filters
+are a powerful way
+
+
+274
+00:17:27,446 --> 00:17:31,117 line:-1
+of excluding specific windows
+from your output
+
+
+275
+00:17:31,117 --> 00:17:36,389 line:-1
+when the filter is specified
+as a display with included apps.
+
+
+276
+00:17:36,389 --> 00:17:39,392 line:-1
+For example,
+a single Safari window
+
+
+277
+00:17:39.392 --> 00:17:42.328 line:-1 position:50%
+is removed from the output.
+
+
+278
+00:17:42,328 --> 00:17:47,533 line:-1
+ScreenCaptureKit enables
+audio capture at the app level,
+
+
+279
+00:17:47.533 --> 00:17:51.570 line:-1 position:50%
+so excluding audio
+from a single Safari window
+
+
+280
+00:17:51,570 --> 00:17:54,740 line:-1
+is the equivalent
+to removing audio tracks
+
+
+281
+00:17:54.740 --> 00:17:57.877 line:-1 position:50%
+for all Safari apps.
+
+
+282
+00:17:57.877 --> 00:18:00.479 line:-1 position:50%
+Although the stream's
+video output
+
+
+283
+00:18:00.479 --> 00:18:03.916 line:-1 position:50%
+still includes a Safari window,
+
+
+284
+00:18:03.916 --> 00:18:07.987 line:-1 position:50%
+all the sound tracks
+from Safari apps are removed
+
+
+285
+00:18:07,987 --> 00:18:11,490 line:-1
+and the audio output
+includes just the soundtrack
+
+
+286
+00:18:11.490 --> 00:18:13.259 line:-1 position:50%
+from Keynote.
+
+
+287
+00:18:13,259 --> 00:18:17,797 line:-1
+In the code example here,
+we change the SCContentFilter
+
+
+288
+00:18:17,797 --> 00:18:21,067 line:-1
+to include a list of
+SCRunningApplications
+
+
+289
+00:18:21.067 --> 00:18:23.636 line:-1 position:50%
+instead of SCWindows.
+
+
+290
+00:18:23,636 --> 00:18:27,807 line:-1
+If there are individual windows
+you want to further exclude,
+
+
+291
+00:18:27,807 --> 00:18:33,612 line:-1
+build a list of SCWindows and
+then create an SCContentFilter
+
+
+292
+00:18:33.612 --> 00:18:36.615 line:-1 position:50%
+using the list of SCApplications
+
+
+293
+00:18:36.615 --> 00:18:41.954 line:-1 position:50%
+with the list of excepting
+windows to exclude.
+
+
+294
+00:18:41,954 --> 00:18:45,725 line:0
+Let's take a look at what the
+stream output looks like now
+
+
+295
+00:18:45,725 --> 00:18:48,694 line:0
+when new or child windows
+are created
+
+
+296
+00:18:48,694 --> 00:18:51,964 position:50%
+by specifying included apps.
+
+
+297
+00:18:51,964 --> 00:18:58,070 line:0
+This time, Safari app and system
+windows are added to the filter.
+
+
+298
+00:18:58,070 --> 00:19:02,308 position:50%
+A new Safari window
+is now automatically included
+
+
+299
+00:19:02,308 --> 00:19:05,711 position:50%
+in the stream output
+and the same rule applies
+
+
+300
+00:19:05,711 --> 00:19:08,881 line:0
+to child and pop-up windows.
+
+
+301
+00:19:08,881 --> 00:19:12,651 line:0
+This can be quite useful
+when you are doing a tutorial
+
+
+302
+00:19:12,651 --> 00:19:15,621 position:50%
+and want to demonstrate
+the full action
+
+
+303
+00:19:15,621 --> 00:19:19,925 line:0
+including invoking pop-up
+or new windows.
+
+
+304
+00:19:19.925 --> 00:19:22.895 line:-1 position:50%
+I have just demonstrated
+how to add content
+
+
+305
+00:19:22,895 --> 00:19:26,632 line:-1
+to the stream output
+through a few different ways.
+
+
+306
+00:19:26,632 --> 00:19:28,300 line:-1
+My next example will show you
+
+
+307
+00:19:28,300 --> 00:19:32,938 line:-1
+how to remove content
+from the stream output.
+
+
+308
+00:19:32.938 --> 00:19:35.608 line:-1 position:50%
+This example
+includes a test app
+
+
+309
+00:19:35.608 --> 00:19:38.611 line:-1 position:50%
+that emulates
+a video conferencing app
+
+
+310
+00:19:38,611 --> 00:19:43,382 line:-1
+that contains a preview
+of the display being shared.
+
+
+311
+00:19:43.382 --> 00:19:47.953 line:-1 position:50%
+Because the test app recursively
+shows itself in the preview,
+
+
+312
+00:19:47.953 --> 00:19:52.758 line:-1 position:50%
+it's creating the so-called
+mirror hall effect.
+
+
+313
+00:19:52.758 --> 00:19:56.595 line:-1 position:50%
+Even during full display share,
+it's common for screen sharing
+
+
+314
+00:19:56.595 --> 00:20:01.434 line:-1 position:50%
+applications to remove its
+own windows, capture preview,
+
+
+315
+00:20:01.434 --> 00:20:05.905 line:-1 position:50%
+participant camera view
+to avoid the mirror hall effect,
+
+
+316
+00:20:05,905 --> 00:20:10,910 line:-1
+or other system UIs
+such as notification windows.
+
+
+317
+00:20:10.910 --> 00:20:13.079 line:-1 position:50%
+ScreenCaptureKit provides you
+
+
+318
+00:20:13,079 --> 00:20:17,116 line:-1
+with a set of exclusion-based
+filters that allow you
+
+
+319
+00:20:17,116 --> 00:20:21,153 line:-1
+to quickly remove content
+from display capture.
+
+
+320
+00:20:21.153 --> 00:20:25.357 line:-1 position:50%
+An exclusion-based display
+filter captures all the windows
+
+
+321
+00:20:25.357 --> 00:20:28.427 line:-1 position:50%
+from the given display
+by default.
+
+
+322
+00:20:28.427 --> 00:20:32.431 line:-1 position:50%
+You can then start to remove
+individual windows or apps
+
+
+323
+00:20:32,431 --> 00:20:35,968 line:-1
+by adding them
+to the exclusion filter.
+
+
+324
+00:20:35.968 --> 00:20:40.306 line:-1 position:50%
+For example, you can add
+the content capture test app
+
+
+325
+00:20:40.306 --> 00:20:46.846 line:-1 position:50%
+and Notification Center to the
+list of excluded applications.
+
+
+326
+00:20:46,846 --> 00:20:49,315 line:-1
+To create
+a display-based filter
+
+
+327
+00:20:49,315 --> 00:20:52,384 line:-1
+excluding a list
+of applications,
+
+
+328
+00:20:52.384 --> 00:20:56.489 line:-1 position:50%
+start by retrieving
+SCApplications to exclude
+
+
+329
+00:20:56.489 --> 00:20:59.058 line:-1 position:50%
+by matching bundle ID.
+
+
+330
+00:20:59,058 --> 00:21:02,328 line:-1
+If there are individual windows
+you'd like to cherry-pick
+
+
+331
+00:21:02,328 --> 00:21:05,831 line:-1
+back to the stream output,
+you can also build
+
+
+332
+00:21:05,831 --> 00:21:10,302 line:-1
+an optional list of
+excepting SCWindows.
+
+
+333
+00:21:10,302 --> 00:21:13,606 position:50%
+And then use a given display,
+
+
+334
+00:21:13,606 --> 00:21:16,742 position:50%
+the list of applications
+to exclude,
+
+
+335
+00:21:16,742 --> 00:21:22,848 position:50%
+and a list of excepting windows
+to create the content filter.
+
+
+336
+00:21:22,848 --> 00:21:26,285 position:50%
+Let's take a look at the result.
+
+
+337
+00:21:26,285 --> 00:21:28,954 position:50%
+The content capture
+test app that's causing
+
+
+338
+00:21:28,954 --> 00:21:32,892 position:50%
+the mirror hall problem
+and the notification windows
+
+
+339
+00:21:32,892 --> 00:21:36,295 position:50%
+are both removed
+from the stream output.
+
+
+340
+00:21:36,295 --> 00:21:38,964 position:50%
+New or child windows
+from these apps
+
+
+341
+00:21:38,964 --> 00:21:43,135 line:0
+will be automatically
+removed as well.
+
+
+342
+00:21:43,135 --> 00:21:46,639 line:-1
+If these removed apps
+include any audio,
+
+
+343
+00:21:46,639 --> 00:21:50,876 line:-1
+their audio will be removed
+from the audio output.
+
+
+344
+00:21:50.876 --> 00:21:54.246 line:-1 position:50%
+We've just seen how
+to capture a single window,
+
+
+345
+00:21:54.246 --> 00:21:58.417 line:-1 position:50%
+how to add and remove windows
+from a display filter.
+
+
+346
+00:21:58.417 --> 00:22:02.288 line:-1 position:50%
+Let's move
+to stream configuration next.
+
+
+347
+00:22:02.288 --> 00:22:05.558 line:-1 position:50%
+In the next few examples,
+you will learn about
+
+
+348
+00:22:05.558 --> 00:22:09.161 line:-1 position:50%
+different stream properties
+you can configure,
+
+
+349
+00:22:09.161 --> 00:22:13.465 line:-1 position:50%
+how to set up the stream for
+screen capture and streaming,
+
+
+350
+00:22:13.465 --> 00:22:18.204 line:-1 position:50%
+and how to build a window picker
+with live preview.
+
+
+351
+00:22:18.204 --> 00:22:22.241 line:-1 position:50%
+Let's start with
+configuration properties.
+
+
+352
+00:22:22.241 --> 00:22:25.211 line:-1 position:50%
+These are some of
+the common stream properties
+
+
+353
+00:22:25,211 --> 00:22:30,649 line:-1
+you can configure, such as
+stream output dimensions,
+
+
+354
+00:22:30,649 --> 00:22:33,452 line:-1
+source and destination rects,
+
+
+355
+00:22:33,452 --> 00:22:38,557 line:-1
+color space, color matrix,
+and pixel format,
+
+
+356
+00:22:38.557 --> 00:22:43.362 line:-1 position:50%
+whether to include cursor,
+and frame rate control.
+
+
+357
+00:22:43.362 --> 00:22:48.601 line:-1 position:50%
+We will take a look at each
+property in details next.
+
+
+358
+00:22:48,601 --> 00:22:51,237 line:-1
+Let's start
+with output dimension,
+
+
+359
+00:22:51.237 --> 00:22:56.508 line:-1 position:50%
+which can be specified
+as width and height in pixels.
+
+
+360
+00:22:56,508 --> 00:22:59,845 line:-1
+The source display's dimension
+and aspect ratio
+
+
+361
+00:22:59,845 --> 00:23:04,316 line:-1
+doesn't always match
+the output dimension.
+
+
+362
+00:23:04,316 --> 00:23:08,554 position:50%
+And when this mismatch happens
+while capturing a full display,
+
+
+363
+00:23:08,554 --> 00:23:13,659 position:50%
+there will be pillar or
+letterbox in the stream output.
+
+
+364
+00:23:13.659 --> 00:23:17.830 line:-1 position:50%
+You can also specify a source
+rect that defines the region
+
+
+365
+00:23:17,830 --> 00:23:22,334 line:-1
+to capture from and the result
+will be rendered and scaled
+
+
+366
+00:23:22.334 --> 00:23:26.472 line:-1 position:50%
+to the destination rect
+on the frame output.
+
+
+367
+00:23:26,472 --> 00:23:30,342 line:-1
+ScreenCaptureKit supports
+hardware accelerated
+
+
+368
+00:23:30.342 --> 00:23:36.248 line:-1 position:50%
+color space, color matrix,
+and pixel format conversion.
+
+
+369
+00:23:36.248 --> 00:23:41.120 line:-1 position:50%
+Common BGRA and YUV formats
+are supported.
+
+
+370
+00:23:41,120 --> 00:23:46,458 line:-1
+Please visit our developer page
+for the full list.
+
+
+371
+00:23:46.458 --> 00:23:50.829 line:-1 position:50%
+When show cursor is enabled,
+the stream output includes
+
+
+372
+00:23:50.829 --> 00:23:54.466 line:-1 position:50%
+a cursor prerendered
+into the frame.
+
+
+373
+00:23:54,466 --> 00:23:57,469 line:-1
+This applies
+to all system cursors,
+
+
+374
+00:23:57,469 --> 00:24:02,374 line:-1
+even custom cursor like
+the camera-shaped one here.
+
+
+375
+00:24:02,374 --> 00:24:04,943 line:-1
+You can use
+minimum frame interval
+
+
+376
+00:24:04,943 --> 00:24:08,347 line:-1
+to control desired
+output frame rate.
+
+
+377
+00:24:08.347 --> 00:24:12.685 line:-1 position:50%
+For example,
+when requesting 60 fps,
+
+
+378
+00:24:12.685 --> 00:24:16.655 line:-1 position:50%
+set the minimal interval
+to 1/60.
+
+
+379
+00:24:16.655 --> 00:24:21.393 line:-1 position:50%
+You will receive frame update
+no more than 60 fps,
+
+
+380
+00:24:21.393 --> 00:24:26.432 line:-1 position:50%
+and no more than
+the content's native frame rate.
+
+
+381
+00:24:26,432 --> 00:24:29,335 line:-1
+Queue depth can be specified
+to determine
+
+
+382
+00:24:29,335 --> 00:24:34,340 line:-1
+the number of surfaces
+in the server-side surface pool.
+
+
+383
+00:24:34,340 --> 00:24:38,444 line:-1
+More surfaces in the pool
+can lead to better frame rate
+
+
+384
+00:24:38.444 --> 00:24:43.816 line:-1 position:50%
+and performance, but it results
+in higher system memory usage
+
+
+385
+00:24:43,816 --> 00:24:47,286 line:-1
+and potentially
+a latency trade-off,
+
+
+386
+00:24:47,286 --> 00:24:50,956 line:-1
+which I will discuss
+in more details later.
+
+
+387
+00:24:50.956 --> 00:24:54.293 line:-1 position:50%
+ScreenCaptureKit accepts
+queue depth range between
+
+
+388
+00:24:54,293 --> 00:24:59,531 line:-1
+three to eight with a default
+queue depth of three.
+
+
+389
+00:24:59.531 --> 00:25:03.535 line:-1 position:50%
+In this example here,
+the surface pool is configured
+
+
+390
+00:25:03,535 --> 00:25:07,473 line:-1
+to include four surfaces
+available for ScreenCaptureKit
+
+
+391
+00:25:07,473 --> 00:25:09,608 line:-1
+to render to.
+
+
+392
+00:25:09.608 --> 00:25:13.612 line:-1 position:50%
+The current active surface
+is surface 1
+
+
+393
+00:25:13,612 --> 00:25:19,118 line:-1
+and ScreenCaptureKit is
+rendering the next frame to it.
+
+
+394
+00:25:19,118 --> 00:25:22,254 line:-1
+Once surface 1 is complete,
+
+
+395
+00:25:22,254 --> 00:25:26,825 line:-1
+ScreenCaptureKit sends
+surface 1 to your app.
+
+
+396
+00:25:26.825 --> 00:25:30.529 line:-1 position:50%
+Your app is processing
+and holding surface 1,
+
+
+397
+00:25:30.529 --> 00:25:35.033 line:-1 position:50%
+while ScreenCaptureKit
+is rendering to surface 2.
+
+
+398
+00:25:35,033 --> 00:25:39,371 line:-1
+Surface 1 is now marked
+as unavailable in the pool
+
+
+399
+00:25:39.371 --> 00:25:43.242 line:-1 position:50%
+since your app
+is still using it.
+
+
+400
+00:25:43.242 --> 00:25:47.479 line:-1 position:50%
+When surface 2 is complete,
+it's sent to your app
+
+
+401
+00:25:47.479 --> 00:25:51.884 line:-1 position:50%
+and ScreenCaptureKit
+now renders to surface 3.
+
+
+402
+00:25:51,884 --> 00:25:55,654 line:-1
+But if your app is still
+processing surface 1,
+
+
+403
+00:25:55,654 --> 00:25:59,591 line:-1
+it will start to fall behind
+as frames are now provided
+
+
+404
+00:25:59,591 --> 00:26:03,362 line:-1
+faster than they
+can be processed.
+
+
+405
+00:26:03,362 --> 00:26:07,866 line:-1
+If the surface pool contains
+a large number of surfaces,
+
+
+406
+00:26:07.866 --> 00:26:10.402 line:-1 position:50%
+new surfaces
+will start to pile up
+
+
+407
+00:26:10.402 --> 00:26:13.105 line:-1 position:50%
+and you might need to consider
+starting to drop frames
+
+
+408
+00:26:13,105 --> 00:26:15,541 line:-1
+in order to keep up.
+
+
+409
+00:26:15,541 --> 00:26:18,877 line:-1
+In this case,
+more surfaces in the pool
+
+
+410
+00:26:18.877 --> 00:26:22.948 line:-1 position:50%
+can potentially lead
+to higher latency.
+
+
+411
+00:26:22.948 --> 00:26:25.784 line:-1 position:50%
+The number of surfaces
+left in the pool
+
+
+412
+00:26:25,784 --> 00:26:29,788 line:-1
+for ScreenCaptureKit to use,
+equals the queue depth
+
+
+413
+00:26:29.788 --> 00:26:34.493 line:-1 position:50%
+minus the number of surfaces
+held by your app.
+
+
+414
+00:26:34,493 --> 00:26:36,061 line:-1
+In the example here,
+
+
+415
+00:26:36.061 --> 00:26:40.199 line:-1 position:50%
+both surface 1 and 2
+are still held by your app.
+
+
+416
+00:26:40.199 --> 00:26:45.037 line:-1 position:50%
+There are 2 surfaces
+left in the surface pool.
+
+
+417
+00:26:45,037 --> 00:26:49,041 line:-1
+After surface 3 is complete
+and is sent to your app,
+
+
+418
+00:26:49.041 --> 00:26:54.146 line:-1 position:50%
+the only available surface
+left in the pool is surface 4.
+
+
+419
+00:26:54.146 --> 00:26:59.718 line:-1 position:50%
+If your app continues to hold
+on to surface 1, 2, and 3,
+
+
+420
+00:26:59.718 --> 00:27:04.089 line:-1 position:50%
+ScreenCaptureKit will soon
+run out of surfaces to render to
+
+
+421
+00:27:04,089 --> 00:27:07,659 line:-1
+and you will start to see
+frame loss and glitch.
+
+
+422
+00:27:07,659 --> 00:27:11,296 line:-1
+Your app needs to finish
+and release surface 1
+
+
+423
+00:27:11.296 --> 00:27:14.800 line:-1 position:50%
+before ScreenCaptureKit starts
+to render the next frame
+
+
+424
+00:27:14.800 --> 00:27:20.472 line:-1 position:50%
+after surface 4
+in order to avoid frame loss.
+
+
+425
+00:27:20.472 --> 00:27:24.109 line:-1 position:50%
+Now your app releases
+surface 1 and it's available
+
+
+426
+00:27:24,109 --> 00:27:27,679 line:-1
+for ScreenCaptureKit
+to use again.
+
+
+427
+00:27:27.679 --> 00:27:31.116 line:-1 position:50%
+To recap: there are two rules
+your app needs to follow
+
+
+428
+00:27:31.116 --> 00:27:35.420 line:-1 position:50%
+in order avoid frame latency
+and frame loss.
+
+
+429
+00:27:35,420 --> 00:27:38,690 position:50%
+To avoid delayed frame,
+you need to be able to process
+
+
+430
+00:27:38,690 --> 00:27:42,528 line:0
+a frame within
+the MinimumFrameInterval.
+
+
+431
+00:27:42,528 --> 00:27:45,864 position:50%
+To avoid frame loss,
+the time it takes your app
+
+
+432
+00:27:45,864 --> 00:27:50,202 line:0
+to release the surfaces back
+to the pool must be less than
+
+
+433
+00:27:50,202 --> 00:27:55,107 line:0
+MinimumFrameInterval
+times QueueDepth minus 1,
+
+
+434
+00:27:55,107 --> 00:28:00,212 line:0
+after which ScreenCaptureKit
+runs out of surfaces to use,
+
+
+435
+00:28:00,212 --> 00:28:04,716 line:0
+enters a stall, and will
+start to miss new frames.
+
+
+436
+00:28:04,716 --> 00:28:07,052 line:-1
+Now that you've seen
+the various properties
+
+
+437
+00:28:07,052 --> 00:28:10,989 line:-1
+you can configure,
+let's dive into some examples
+
+
+438
+00:28:10,989 --> 00:28:15,727 line:-1
+to configure the stream for
+screen capture and streaming.
+
+
+439
+00:28:15.727 --> 00:28:19.598 line:-1 position:50%
+Some screen content
+includes videos, games,
+
+
+440
+00:28:19.598 --> 00:28:22.768 line:-1 position:50%
+or animations that
+are constantly updating
+
+
+441
+00:28:22,768 --> 00:28:26,204 line:-1
+and that requires
+higher frame rate.
+
+
+442
+00:28:26.204 --> 00:28:30.108 line:-1 position:50%
+While others include
+mostly static text
+
+
+443
+00:28:30.108 --> 00:28:32.110 line:-1 position:50%
+like the keynote window,
+
+
+444
+00:28:32,110 --> 00:28:36,815 line:-1
+which prioritize higher
+resolution over frame rate,
+
+
+445
+00:28:36.815 --> 00:28:40.786 line:-1 position:50%
+you can live-adjust the
+stream's configuration based on
+
+
+446
+00:28:40.786 --> 00:28:45.857 line:-1 position:50%
+the content being shared
+and the networking condition.
+
+
+447
+00:28:45,857 --> 00:28:48,694 line:-1
+In this code example,
+you are going to see
+
+
+448
+00:28:48.694 --> 00:28:55.300 line:-1 position:50%
+how to configure the capture
+to stream 4K, 60-fps game.
+
+
+449
+00:28:55,300 --> 00:28:58,470 line:-1
+You can start by setting
+the stream output dimension
+
+
+450
+00:28:58.470 --> 00:29:01.106 line:-1 position:50%
+to 4K in pixel size.
+
+
+451
+00:29:01.106 --> 00:29:06.211 line:-1 position:50%
+And then, set the output
+frame rate to 60 fps
+
+
+452
+00:29:06.211 --> 00:29:10.916 line:-1 position:50%
+by setting the minimum
+frame interval to 1/60.
+
+
+453
+00:29:10,916 --> 00:29:18,323 line:-1
+Next, use pixel format YUV420
+for encoding and streaming.
+
+
+454
+00:29:18,323 --> 00:29:20,258 line:-1
+Set the optional source rect
+
+
+455
+00:29:20.258 --> 00:29:25.230 line:-1 position:50%
+to just capture
+a portion of the screen.
+
+
+456
+00:29:25,230 --> 00:29:29,101 line:-1
+Next, change the background
+fill color to black,
+
+
+457
+00:29:29.101 --> 00:29:33.372 line:-1 position:50%
+and then include a cursor
+in the frame output.
+
+
+458
+00:29:33,372 --> 00:29:37,542 line:-1
+Configure surface queue depth
+to five for optimal frame rate
+
+
+459
+00:29:37.542 --> 00:29:39.778 line:-1 position:50%
+and performance.
+
+
+460
+00:29:39.778 --> 00:29:45.450 line:-1 position:50%
+Last, enable audio
+on the output stream.
+
+
+461
+00:29:45.450 --> 00:29:48.587 line:-1 position:50%
+All the stream configurations
+you've just seen
+
+
+462
+00:29:48.587 --> 00:29:52.791 line:-1 position:50%
+in the previous example can be
+dynamically changed on the fly
+
+
+463
+00:29:52,791 --> 00:29:55,193 line:-1
+without recreating the stream.
+
+
+464
+00:29:55.193 --> 00:29:59.464 line:-1 position:50%
+For example, you can live adjust
+some properties such as
+
+
+465
+00:29:59,464 --> 00:30:04,302 line:-1
+output dimension, dynamically
+change the frame rate,
+
+
+466
+00:30:04.302 --> 00:30:07.472 line:-1 position:50%
+and update stream filters.
+
+
+467
+00:30:07,472 --> 00:30:10,842 line:-1
+Here's an example to switch
+the output dimension
+
+
+468
+00:30:10.842 --> 00:30:14.413 line:-1 position:50%
+from 4K down to 720p.
+
+
+469
+00:30:14,413 --> 00:30:21,620 line:-1
+And downgrade the frame rate
+from 60 fps to 15 fps.
+
+
+470
+00:30:21.620 --> 00:30:25.757 line:-1 position:50%
+You can then simply call
+updateConfiguration
+
+
+471
+00:30:25.757 --> 00:30:28.193 line:-1 position:50%
+to apply the new settings
+on the fly
+
+
+472
+00:30:28,193 --> 00:30:31,530 line:-1
+without interrupting the stream.
+
+
+473
+00:30:31.530 --> 00:30:35.033 line:-1 position:50%
+In the last example,
+I'd like to walk you through
+
+
+474
+00:30:35.033 --> 00:30:39.671 line:-1 position:50%
+building a window picker
+with live preview.
+
+
+475
+00:30:39.671 --> 00:30:41.506 line:-1 position:50%
+Here is an example
+
+
+476
+00:30:41.506 --> 00:30:45.110 line:-1 position:50%
+of what a typical window
+picker looks like.
+
+
+477
+00:30:45.110 --> 00:30:48.513 line:-1 position:50%
+It's common for web conferencing
+screen sharing apps
+
+
+478
+00:30:48.513 --> 00:30:50.749 line:-1 position:50%
+to offer users an option
+
+
+479
+00:30:50.749 --> 00:30:55.353 line:-1 position:50%
+to choose the exact window
+to share.
+
+
+480
+00:30:55,353 --> 00:30:58,323 line:-1
+ScreenCaptureKit provides
+an efficient
+
+
+481
+00:30:58.323 --> 00:31:02.260 line:-1 position:50%
+and high-performance solution
+to creating large number
+
+
+482
+00:31:02.260 --> 00:31:06.932 line:-1 position:50%
+of thumbnail-sized streams
+with live content update,
+
+
+483
+00:31:06.932 --> 00:31:09.835 line:-1 position:50%
+and it's simple to implement.
+
+
+484
+00:31:09.835 --> 00:31:12.871 line:-1 position:50%
+Let's break it down to see
+what it takes to build
+
+
+485
+00:31:12,871 --> 00:31:17,008 line:-1
+a window picker like this
+using ScreenCaptureKit.
+
+
+486
+00:31:17.008 --> 00:31:20.212 line:-1 position:50%
+To set up the picker,
+you can start by creating
+
+
+487
+00:31:20,212 --> 00:31:23,949 line:-1
+one single window filter
+for each eligible window
+
+
+488
+00:31:23.949 --> 00:31:26.952 line:-1 position:50%
+that your app
+allows the user to pick
+
+
+489
+00:31:26.952 --> 00:31:31.890 line:-1 position:50%
+with desktop independent window
+as the filter type.
+
+
+490
+00:31:31.890 --> 00:31:35.127 line:-1 position:50%
+Next, set up the stream
+configuration
+
+
+491
+00:31:35.127 --> 00:31:41.700 line:-1 position:50%
+that's thumbnail-sized, 5 fps,
+with BGRA pixel format
+
+
+492
+00:31:41,700 --> 00:31:48,240 line:-1
+for onscreen display, default
+queue depth, no cursor or audio.
+
+
+493
+00:31:48.240 --> 00:31:52.344 line:-1 position:50%
+Use single window filter and
+the stream configuration here
+
+
+494
+00:31:52,344 --> 00:31:57,616 line:-1
+to create one stream
+for each window.
+
+
+495
+00:31:57.616 --> 00:32:00.919 line:-1 position:50%
+To do this in code,
+you can start by getting
+
+
+496
+00:32:00.919 --> 00:32:04.623 line:-1 position:50%
+the SCShareableContent
+by excluding desktop
+
+
+497
+00:32:04,623 --> 00:32:07,225 line:-1
+and system windows.
+
+
+498
+00:32:07,225 --> 00:32:10,195 line:-1
+Next, create a content filter
+
+
+499
+00:32:10.195 --> 00:32:16.935 line:-1 position:50%
+of type desktop independent
+window for each eligible window.
+
+
+500
+00:32:16.935 --> 00:32:21.106 line:-1 position:50%
+Then, move to
+the stream configuration part.
+
+
+501
+00:32:21.106 --> 00:32:24.009 line:-1 position:50%
+Choose an appropriate
+thumbnail size --
+
+
+502
+00:32:24.009 --> 00:32:28.647 line:-1 position:50%
+in this example,
+it's 284 by 182 --
+
+
+503
+00:32:28.647 --> 00:32:33.919 line:-1 position:50%
+and then set the minimum
+frame interval to one over five.
+
+
+504
+00:32:33,919 --> 00:32:39,391 line:-1
+With a pixel format of BGRA
+for onscreen display,
+
+
+505
+00:32:39,391 --> 00:32:43,361 line:-1
+disable audio and cursor
+since we don't need them
+
+
+506
+00:32:43,361 --> 00:32:45,263 line:-1
+in the preview.
+
+
+507
+00:32:45.263 --> 00:32:49.401 line:-1 position:50%
+And set queue depth to three
+because we don't expect updates
+
+
+508
+00:32:49.401 --> 00:32:52.337 line:-1 position:50%
+that are too often.
+
+
+509
+00:32:52,337 --> 00:32:56,308 line:-1
+With the stream content filter
+and the configuration created,
+
+
+510
+00:32:56,308 --> 00:32:59,611 line:-1
+you are now ready
+to create the streams.
+
+
+511
+00:32:59.611 --> 00:33:02.914 line:-1 position:50%
+Create one stream
+for each window,
+
+
+512
+00:33:02,914 --> 00:33:06,251 line:-1
+add stream output
+for each stream,
+
+
+513
+00:33:06.251 --> 00:33:08.954 line:-1 position:50%
+and then start the stream.
+
+
+514
+00:33:08,954 --> 00:33:13,925 line:-1
+Last, append it
+to the stream list.
+
+
+515
+00:33:13.925 --> 00:33:16.795 line:-1 position:50%
+This is the window picker
+with live preview
+
+
+516
+00:33:16,795 --> 00:33:20,832 line:-1
+created using the sample code
+we saw earlier.
+
+
+517
+00:33:20,832 --> 00:33:24,502 line:-1
+Each thumbnail is live updating
+and then backed
+
+
+518
+00:33:24,502 --> 00:33:29,474 line:-1
+by an individual stream
+with single-window filter.
+
+
+519
+00:33:29,474 --> 00:33:32,677 line:-1
+With ScreenCaptureKit,
+you can easily build
+
+
+520
+00:33:32.677 --> 00:33:36.314 line:-1 position:50%
+a live preview picker like this,
+that allows you
+
+
+521
+00:33:36.314 --> 00:33:39.851 line:-1 position:50%
+to concurrently capture
+so much live screen content
+
+
+522
+00:33:39,851 --> 00:33:44,823 line:-1
+simultaneously, without
+overburdening the system.
+
+
+523
+00:33:44,823 --> 00:33:47,993 line:-1
+Now let me hand it over
+to my colleague, Drew,
+
+
+524
+00:33:47.993 --> 00:33:51.129 line:-1 position:50%
+who's going to give you
+an exciting demo about
+
+
+525
+00:33:51,129 --> 00:33:54,766 line:-1
+OBS adoption
+of ScreenCaptureKit.
+
+
+526
+00:33:54,766 --> 00:33:56,268 line:-1
+Drew Mills: Thanks, Meng.
+
+
+527
+00:33:56.268 --> 00:33:59.638 line:-1 position:50%
+Hi, my name is Drew, and I'm a
+Partner Engineer here at Apple.
+
+
+528
+00:33:59.638 --> 00:34:02.607 line:-1 position:50%
+OBS Studio is an open source
+application that allows users
+
+
+529
+00:34:02.607 --> 00:34:04.576 line:-1 position:50%
+to manage recording
+and streaming content
+
+
+530
+00:34:04,576 --> 00:34:05,911 line:-1
+from their computer.
+
+
+531
+00:34:05.911 --> 00:34:08.313 line:-1 position:50%
+It contains an implementation
+of ScreenCaptureKit
+
+
+532
+00:34:08.313 --> 00:34:11.016 line:-1 position:50%
+that we worked with the project
+on integrating this spring.
+
+
+533
+00:34:11,016 --> 00:34:13,885 line:-1
+ScreenCaptureKit was easy
+to implement thanks to utilizing
+
+
+534
+00:34:13.885 --> 00:34:18.023 line:-1 position:50%
+similar code to OBS's existing
+CGDisplayStream-based capture.
+
+
+535
+00:34:18,023 --> 00:34:20,292 line:-1
+The ScreenCaptureKit
+implementation demonstrates
+
+
+536
+00:34:20,292 --> 00:34:22,060 line:-1
+many of the features discussed
+
+
+537
+00:34:22,060 --> 00:34:24,296 line:-1
+in the "Meet ScreenCaptureKit"
+session.
+
+
+538
+00:34:24,296 --> 00:34:26,831 line:-1
+This includes:
+capturing an entire desktop,
+
+
+539
+00:34:26.831 --> 00:34:28.700 line:-1 position:50%
+all of the windows
+of an application,
+
+
+540
+00:34:28.700 --> 00:34:30.835 line:-1 position:50%
+or just one specific window.
+
+
+541
+00:34:30.835 --> 00:34:33.371 line:-1 position:50%
+ScreenCaptureKit has
+lower overhead than OBS's
+
+
+542
+00:34:33.371 --> 00:34:36.441 line:-1 position:50%
+CGWindowListCreateImage-based
+capture.
+
+
+543
+00:34:36.441 --> 00:34:39.210 line:-1 position:50%
+This means that when capturing
+a portion of your screen,
+
+
+544
+00:34:39,210 --> 00:34:41,279 line:-1
+you are left with more
+resources that you can use
+
+
+545
+00:34:41.279 --> 00:34:43.081 line:-1 position:50%
+for producing your content.
+
+
+546
+00:34:43,081 --> 00:34:44,382 line:-1
+Let's dive into a demo
+
+
+547
+00:34:44,382 --> 00:34:46,985 line:-1
+to see what we've
+been discussing in action.
+
+
+548
+00:34:46.985 --> 00:34:49.254 line:-1 position:50%
+On the left, there is
+a worst case example
+
+
+549
+00:34:49,254 --> 00:34:51,389 line:-1
+of OBS's Window Capture.
+
+
+550
+00:34:51.389 --> 00:34:55.193 line:-1 position:50%
+This capture uses the
+CGWindowListCreateImage API,
+
+
+551
+00:34:55.193 --> 00:34:56.928 line:-1 position:50%
+and has significant stuttering.
+
+
+552
+00:34:56,928 --> 00:35:01,533 line:-1
+In our testing, we saw frame
+rates dip as low as 7 fps.
+
+
+553
+00:35:01,533 --> 00:35:04,135 line:-1
+Meanwhile, the ScreenCaptureKit
+implementation on the right
+
+
+554
+00:35:04.135 --> 00:35:06.938 line:-1 position:50%
+has a much smoother result,
+providing an output video
+
+
+555
+00:35:06.938 --> 00:35:09.374 line:-1 position:50%
+with significantly
+smoother motion.
+
+
+556
+00:35:09.374 --> 00:35:13.912 line:-1 position:50%
+In this case, delivering 60 fps.
+
+
+557
+00:35:13,912 --> 00:35:16,948 line:0
+All while OBS uses up
+to 15 percent less RAM
+
+
+558
+00:35:16,948 --> 00:35:19,751 line:0
+than Window Capture.
+
+
+559
+00:35:19,751 --> 00:35:23,755 position:50%
+And while OBS's CPU utilization
+is cut by up to half
+
+
+560
+00:35:23,755 --> 00:35:28,660 line:0
+when using ScreenCaptureKit
+instead of OBS's Window Capture.
+
+
+561
+00:35:28.660 --> 00:35:30.395 line:-1 position:50%
+Let's look at the other
+improvements
+
+
+562
+00:35:30,395 --> 00:35:33,498 line:-1
+that ScreenCaptureKit
+has to offer OBS users.
+
+
+563
+00:35:33.498 --> 00:35:35.633 line:-1 position:50%
+I'm still trying to track down
+all of the Gold Ranks
+
+
+564
+00:35:35,633 --> 00:35:37,369 line:-1
+in Sayonara Wild Hearts.
+
+
+565
+00:35:37,369 --> 00:35:39,037 line:-1
+I want to show off
+my best run,
+
+
+566
+00:35:39.037 --> 00:35:40.939 line:-1 position:50%
+so I've been
+recording my gameplay.
+
+
+567
+00:35:40.939 --> 00:35:43.141 line:-1 position:50%
+Thanks to ScreenCaptureKit,
+I can now capture
+
+
+568
+00:35:43.141 --> 00:35:45.110 line:-1 position:50%
+direct audio stream
+from the game,
+
+
+569
+00:35:45.110 --> 00:35:47.212 line:-1 position:50%
+so when I get
+a notification on my Mac,
+
+
+570
+00:35:47.212 --> 00:35:50.048 line:-1 position:50%
+it won't ruin my recording's
+audio or video.
+
+
+571
+00:35:50,048 --> 00:35:51,583 line:-1
+And this is possible
+without having to install
+
+
+572
+00:35:51,583 --> 00:35:54,452 line:-1
+any additional
+audio routing software.
+
+
+573
+00:35:54,452 --> 00:35:56,721 size:2% line:0 position:90%
+♪
+
+
+574
+00:35:56,721 --> 00:35:58,356 line:-1
+Now, using all
+of the enhancements
+
+
+575
+00:35:58.356 --> 00:36:00.525 line:-1 position:50%
+provided by ScreenCaptureKit
+on Apple silicon,
+
+
+576
+00:36:00,525 --> 00:36:03,828 line:-1
+I can stream games like
+Taiko no Tatsujin Pop Tap Beat
+
+
+577
+00:36:03.828 --> 00:36:06.297 line:-1 position:50%
+from my Mac to popular
+streaming services.
+
+
+578
+00:36:06,297 --> 00:36:08,400 line:-1
+A new constant bitrate option
+for Apple silicon's
+
+
+579
+00:36:08.400 --> 00:36:10.435 line:-1 position:50%
+hardware encoder
+means that I can encode
+
+
+580
+00:36:10,435 --> 00:36:12,904 line:-1
+my streaming content
+for services requiring constant
+
+
+581
+00:36:12,904 --> 00:36:17,242 line:-1
+bitrate without significantly
+impacting my game's performance.
+
+
+582
+00:36:17,242 --> 00:36:19,210 line:-1
+Now, thanks to
+ScreenCaptureKit's
+
+
+583
+00:36:19,210 --> 00:36:21,513 line:-1
+lower resource usage
+and encoding offloading,
+
+
+584
+00:36:21.513 --> 00:36:23.314 line:-1 position:50%
+I have even more
+performance available
+
+
+585
+00:36:23.314 --> 00:36:24.816 line:-1 position:50%
+for the content that matters.
+
+
+586
+00:36:24.816 --> 00:36:25.884 line:-1 position:50%
+Back to you, Meng.
+
+
+587
+00:36:25.884 --> 00:36:28.053 line:-1 position:50%
+Meng: Thank you, Drew.
+
+
+588
+00:36:28.053 --> 00:36:30.588 line:-1 position:50%
+Through the demos and examples,
+
+
+589
+00:36:30.588 --> 00:36:34.159 line:-1 position:50%
+you learned about advanced
+screen content filters.
+
+
+590
+00:36:34.159 --> 00:36:38.563 line:-1 position:50%
+Several ways to configure the
+stream for different use cases.
+
+
+591
+00:36:38,563 --> 00:36:42,767 line:-1
+And how to use per-frame
+metadata and correctly display
+
+
+592
+00:36:42,767 --> 00:36:44,903 line:-1
+the captured content.
+
+
+593
+00:36:44,903 --> 00:36:49,741 line:-1
+Some best practices to help you
+achieve best performance.
+
+
+594
+00:36:49,741 --> 00:36:54,746 line:-1
+And finally, Drew showcased
+the significant capability
+
+
+595
+00:36:54,746 --> 00:36:59,884 line:-1
+and performance improvement
+ScreenCaptureKit brought to OBS.
+
+
+596
+00:36:59.884 --> 00:37:03.121 line:-1 position:50%
+I can't wait to see
+how you redefine your app's
+
+
+597
+00:37:03,121 --> 00:37:07,192 line:-1
+screen sharing, streaming,
+and collaboration experience
+
+
+598
+00:37:07.192 --> 00:37:09.461 line:-1 position:50%
+using ScreenCaptureKit.
+
+
+599
+00:37:09,461 --> 00:37:11,429 line:-1
+Thank you for watching!
+
+
+600
+00:37:11,429 --> 00:37:14,799 line:0 position:90% align:right
+♪
+

@@ -1,0 +1,2803 @@
+2
+00:00:00.000 --> 00:00:02.269 line:-1 position:50%
+[MAC STARTUP CHIME]
+
+
+3
+00:00:02.269 --> 00:00:05.939 line:-1 position:50%
+♪ Bass music playing ♪
+
+
+4
+00:00:05.939 --> 00:00:07.875 line:-1 position:50%
+[KEYSTROKES]
+
+
+5
+00:00:07,875 --> 00:00:09,409 size:2% line:0 align:right
+♪
+
+
+6
+00:00:09,409 --> 00:00:11,578 line:-1
+Alejandro Segovia Azapian:
+Welcome to WWDC!
+
+
+7
+00:00:11,578 --> 00:00:13,547 line:-1
+My name is Ale Segovia Azapian,
+
+
+8
+00:00:13.547 --> 00:00:16.216 line:-1 position:50%
+and I'm a GPU software engineer
+at Apple.
+
+
+9
+00:00:16,216 --> 00:00:17,217 line:-1
+In this session,
+
+
+10
+00:00:17.217 --> 00:00:21.088 line:-1 position:50%
+we're going to explore
+bindless rendering in Metal.
+
+
+11
+00:00:21.088 --> 00:00:23.657 line:-1 position:50%
+Bindless is a modern
+resource binding model
+
+
+12
+00:00:23.657 --> 00:00:25.559 line:-1 position:50%
+that allows making
+groups of resources
+
+
+13
+00:00:25.559 --> 00:00:27.394 line:-1 position:50%
+available to the GPU
+
+
+14
+00:00:27.394 --> 00:00:29.396 line:-1 position:50%
+to implement
+modern rendering techniques.
+
+
+15
+00:00:29,396 --> 00:00:31,031 line:-1
+First, we'll take a look
+at the need
+
+
+16
+00:00:31.031 --> 00:00:33.467 line:-1 position:50%
+for the concept behind bindless.
+
+
+17
+00:00:33.467 --> 00:00:35.369 line:-1 position:50%
+Then, we will introduce
+the bindless model
+
+
+18
+00:00:35.369 --> 00:00:37.504 line:-1 position:50%
+and show how it provides
+the flexibility needed
+
+
+19
+00:00:37,504 --> 00:00:41,241 line:-1
+to solve the challenges of
+the traditional binding model.
+
+
+20
+00:00:41,241 --> 00:00:43,810 line:-1
+We will recap the mechanisms
+to encode
+
+
+21
+00:00:43.810 --> 00:00:46.013 line:-1 position:50%
+and make your scene resources
+available to Metal
+
+
+22
+00:00:46.013 --> 00:00:48.482 line:-1 position:50%
+with argument buffers
+
+
+23
+00:00:48,482 --> 00:00:51,485 line:-1
+and how to navigate your
+GPU structures from shaders.
+
+
+24
+00:00:51.485 --> 00:00:53.320 line:-1 position:50%
+Let's get started!
+
+
+25
+00:00:53.320 --> 00:00:57.024 line:-1 position:50%
+So bindless rendering allows
+making all our scene resources
+
+
+26
+00:00:57.024 --> 00:00:59.259 line:-1 position:50%
+available to our shaders,
+
+
+27
+00:00:59.259 --> 00:01:02.562 line:-1 position:50%
+bringing incredible flexibility
+to our graphics techniques.
+
+
+28
+00:01:02.562 --> 00:01:06.066 line:-1 position:50%
+Let's take a look at an example.
+
+
+29
+00:01:06,066 --> 00:01:08,402 position:50%
+Let's imagine we have
+a ray tracing kernel
+
+
+30
+00:01:08,402 --> 00:01:11,772 position:50%
+finding intersections against
+an acceleration structure.
+
+
+31
+00:01:11,772 --> 00:01:14,408 line:0
+For some light effects,
+such as ray-traced shadows,
+
+
+32
+00:01:14,408 --> 00:01:18,245 line:0
+the algorithm is very natural.
+
+
+33
+00:01:18,245 --> 00:01:20,213 line:0
+We want to find any objects
+
+
+34
+00:01:20,213 --> 00:01:23,050 position:50%
+between the intersection point
+and the light.
+
+
+35
+00:01:23,050 --> 00:01:26,320 position:50%
+All we need to trace
+the shadow ray is a position
+
+
+36
+00:01:26,320 --> 00:01:29,323 line:0
+and the direction
+toward the light.
+
+
+37
+00:01:29,323 --> 00:01:32,192 line:-1
+No object attributes
+or Metal resources are needed
+
+
+38
+00:01:32.192 --> 00:01:34.661 line:-1 position:50%
+beyond the world-space position
+of the intersection,
+
+
+39
+00:01:34.661 --> 00:01:36.263 line:-1 position:50%
+which we can derive from the ray
+
+
+40
+00:01:36.263 --> 00:01:39.032 line:-1 position:50%
+and the intersection's
+parameter.
+
+
+41
+00:01:39.032 --> 00:01:41.969 line:-1 position:50%
+For other effects however,
+such as reflections,
+
+
+42
+00:01:41,969 --> 00:01:43,603 line:-1
+the situation
+gets more complicated.
+
+
+43
+00:01:43.603 --> 00:01:45.939 line:-1 position:50%
+Let's take a look at
+a ray tracing reflection shader
+
+
+44
+00:01:45,939 --> 00:01:49,343 line:-1
+in Metal Shading Language.
+
+
+45
+00:01:49.343 --> 00:01:50.911 line:-1 position:50%
+In this new example,
+
+
+46
+00:01:50.911 --> 00:01:52.346 line:-1 position:50%
+we've just found
+an intersection,
+
+
+47
+00:01:52.346 --> 00:01:53.981 line:-1 position:50%
+and we're trying
+to paint the pixel
+
+
+48
+00:01:53.981 --> 00:01:57.417 line:-1 position:50%
+with the correct
+reflected color.
+
+
+49
+00:01:57,417 --> 00:02:00,687 line:-1
+If we just paint a solid color
+after we find an intersection,
+
+
+50
+00:02:00.687 --> 00:02:03.991 line:-1 position:50%
+the reflection on the ground
+will not look accurate.
+
+
+51
+00:02:03.991 --> 00:02:06.259 line:-1 position:50%
+To produce correct results,
+we need to determine
+
+
+52
+00:02:06,259 --> 00:02:08,929 line:-1
+the attributes of each
+reflected point found
+
+
+53
+00:02:08.929 --> 00:02:14.234 line:-1 position:50%
+and calculate the correct
+shading for its pixel.
+
+
+54
+00:02:14,234 --> 00:02:17,137 line:-1
+This problem is also present
+for other ray-traced effects
+
+
+55
+00:02:17,137 --> 00:02:18,972 line:-1
+such as
+diffuse global illumination
+
+
+56
+00:02:18.972 --> 00:02:22.009 line:-1 position:50%
+and even ambient occlusion
+in some cases.
+
+
+57
+00:02:22.009 --> 00:02:24.411 line:-1 position:50%
+The challenge is that
+when we ray trace,
+
+
+58
+00:02:24.411 --> 00:02:27.748 line:-1 position:50%
+our rays may hit any object
+in the acceleration structure.
+
+
+59
+00:02:27.748 --> 00:02:30.250 line:-1 position:50%
+This means that
+from our ray tracing shader,
+
+
+60
+00:02:30,250 --> 00:02:32,853 line:-1
+we potentially need access
+to any Metal resources
+
+
+61
+00:02:32.853 --> 00:02:35.155 line:-1 position:50%
+in our scene,
+including vertex data --
+
+
+62
+00:02:35.155 --> 00:02:37.624 line:-1 position:50%
+associated with
+the mesh intersected --
+
+
+63
+00:02:37,624 --> 00:02:39,526 line:-1
+and its material.
+
+
+64
+00:02:39,526 --> 00:02:41,895 line:-1
+It is just not possible
+to bind this amount of resources
+
+
+65
+00:02:41.895 --> 00:02:43.463 line:-1 position:50%
+directly to our pipeline.
+
+
+66
+00:02:43.463 --> 00:02:47.367 line:-1 position:50%
+This is where the bindless
+binding model comes in.
+
+
+67
+00:02:47.367 --> 00:02:50.570 line:-1 position:50%
+The idea behind bindless
+is to aggregate our resources
+
+
+68
+00:02:50,570 --> 00:02:52,406 line:-1
+and link them together.
+
+
+69
+00:02:52.406 --> 00:02:55.308 line:-1 position:50%
+This allows us to bind
+a single buffer to the pipeline
+
+
+70
+00:02:55,308 --> 00:02:57,544 line:-1
+and make all
+referenced resources available
+
+
+71
+00:02:57.544 --> 00:03:00.247 line:-1 position:50%
+via navigation.
+
+
+72
+00:03:00,247 --> 00:03:02,716 line:-1
+In Metal, the construct
+that allows us to do this
+
+
+73
+00:03:02.716 --> 00:03:03.884 line:-1 position:50%
+is argument buffers.
+
+
+74
+00:03:03,884 --> 00:03:05,886 line:-1
+In particular, for bindless,
+
+
+75
+00:03:05,886 --> 00:03:08,121 line:-1
+argument buffers Tier 2
+are required.
+
+
+76
+00:03:08,121 --> 00:03:12,192 line:-1
+These are available on the
+Apple6 and Mac2 GPU families.
+
+
+77
+00:03:12.192 --> 00:03:16.363 line:-1 position:50%
+Argument buffers can be used
+from all shader types in Metal.
+
+
+78
+00:03:16.363 --> 00:03:18.865 line:-1 position:50%
+This means that you can use them
+for both ray tracing
+
+
+79
+00:03:18,865 --> 00:03:20,867 line:-1
+and rasterization.
+
+
+80
+00:03:20.867 --> 00:03:22.903 line:-1 position:50%
+As we saw,
+for certain ray tracing effects,
+
+
+81
+00:03:22,903 --> 00:03:24,671 line:-1
+using bindless is mandatory
+
+
+82
+00:03:24,671 --> 00:03:27,307 line:-1
+in order to obtain
+good visual results.
+
+
+83
+00:03:27.307 --> 00:03:29.709 line:-1 position:50%
+For rasterization,
+the use is optional
+
+
+84
+00:03:29,709 --> 00:03:32,913 line:-1
+but provides advantages
+over the direct binding model.
+
+
+85
+00:03:32.913 --> 00:03:35.849 line:-1 position:50%
+In particular, it virtually
+removes the slot limits
+
+
+86
+00:03:35.849 --> 00:03:37.984 line:-1 position:50%
+for the number of resources
+that can be bound
+
+
+87
+00:03:37,984 --> 00:03:40,087 line:-1
+for any given draw call,
+
+
+88
+00:03:40,087 --> 00:03:43,490 line:-1
+and it also provides some
+nice optimization opportunities
+
+
+89
+00:03:43,490 --> 00:03:46,393 line:-1
+that we'll explore later
+in this session.
+
+
+90
+00:03:46.393 --> 00:03:49.596 line:-1 position:50%
+We introduced argument buffers
+with Metal 2 as a mechanism
+
+
+91
+00:03:49.596 --> 00:03:52.966 line:-1 position:50%
+to allow you to bind
+constant data and resources
+
+
+92
+00:03:52,966 --> 00:03:56,670 line:-1
+all at once in a single call
+to the Metal API.
+
+
+93
+00:03:56.670 --> 00:03:58.572 line:-1 position:50%
+Argument buffers
+are very flexible
+
+
+94
+00:03:58,572 --> 00:04:02,109 line:-1
+and can even reference
+other buffers.
+
+
+95
+00:04:02.109 --> 00:04:03.977 line:-1 position:50%
+The idea behind
+the bindless model
+
+
+96
+00:04:03.977 --> 00:04:05.779 line:-1 position:50%
+is to leverage this capability
+
+
+97
+00:04:05,779 --> 00:04:08,648 line:-1
+to link all of our
+scene resources together.
+
+
+98
+00:04:08,648 --> 00:04:10,917 line:-1
+This will allow making them
+available to the GPU
+
+
+99
+00:04:10.917 --> 00:04:13.420 line:-1 position:50%
+at the same time.
+
+
+100
+00:04:13.420 --> 00:04:15.622 line:-1 position:50%
+Let's look at an example
+of a way
+
+
+101
+00:04:15,622 --> 00:04:19,493 line:-1
+to link our scene resources
+with argument buffers.
+
+
+102
+00:04:19,493 --> 00:04:23,296 line:-1
+Let's say we want to render
+a model such as this fire truck.
+
+
+103
+00:04:23,296 --> 00:04:25,132 line:-1
+The model is comprised
+of textures,
+
+
+104
+00:04:25.132 --> 00:04:28.969 line:-1 position:50%
+vertex data, and index data.
+
+
+105
+00:04:28,969 --> 00:04:32,639 line:0
+These are the typical resources
+you would bind one by one
+
+
+106
+00:04:32,639 --> 00:04:35,942 line:0
+for every draw call in
+the traditional binding model.
+
+
+107
+00:04:35,942 --> 00:04:37,577 position:50%
+In our case, however --
+
+
+108
+00:04:37,577 --> 00:04:40,013 position:50%
+because we want to make
+all textures, vertex data,
+
+
+109
+00:04:40,013 --> 00:04:42,582 position:50%
+and indices of the scene
+available at once --
+
+
+110
+00:04:42,582 --> 00:04:45,352 position:50%
+we need to aggregate these.
+
+
+111
+00:04:45,352 --> 00:04:47,587 position:50%
+Here's a potential way to do so.
+
+
+112
+00:04:47,587 --> 00:04:49,823 line:0
+We can first create
+a meshes argument buffer
+
+
+113
+00:04:49,823 --> 00:04:52,159 line:0
+to contain all our meshes
+or submeshes,
+
+
+114
+00:04:52,159 --> 00:04:55,629 position:50%
+depending on how our assets
+are organized.
+
+
+115
+00:04:55,629 --> 00:04:58,031 position:50%
+This argument buffer
+will allow referencing
+
+
+116
+00:04:58,031 --> 00:05:01,334 line:0
+the vertex and index arrays
+in our scene.
+
+
+117
+00:05:01,334 --> 00:05:05,038 position:50%
+Similarly, we can do the same
+and encode our materials
+
+
+118
+00:05:05,038 --> 00:05:06,806 position:50%
+to an argument buffer.
+
+
+119
+00:05:06,806 --> 00:05:09,009 line:-1
+Each material
+can reference its textures
+
+
+120
+00:05:09,009 --> 00:05:13,013 line:-1
+as well as contain
+inline constant data.
+
+
+121
+00:05:13,013 --> 00:05:16,016 line:-1
+OK, but now that we have
+all our meshes and materials
+
+
+122
+00:05:16,016 --> 00:05:19,886 line:-1
+available to the GPU,
+how can we bring them together?
+
+
+123
+00:05:19,886 --> 00:05:23,056 position:50%
+Well, we can, for example,
+create an instance object
+
+
+124
+00:05:23,056 --> 00:05:25,592 position:50%
+and also place it
+in an argument buffer.
+
+
+125
+00:05:25,592 --> 00:05:27,427 position:50%
+An instance can reference
+one mesh
+
+
+126
+00:05:27,427 --> 00:05:29,429 line:0
+and an associated material.
+
+
+127
+00:05:29,429 --> 00:05:30,897 position:50%
+This is also a great place
+
+
+128
+00:05:30,897 --> 00:05:32,966 line:0
+to store
+a model transformation matrix
+
+
+129
+00:05:32,966 --> 00:05:34,935 position:50%
+as inline constant data.
+
+
+130
+00:05:34.935 --> 00:05:36.770 line:-1 position:50%
+But we don't have to stop there.
+
+
+131
+00:05:36,770 --> 00:05:38,705 line:-1
+Now that we can store
+one instance,
+
+
+132
+00:05:38,705 --> 00:05:40,173 line:-1
+we can take this further
+
+
+133
+00:05:40.173 --> 00:05:42.142 line:-1 position:50%
+and encode all of our instances
+as an array
+
+
+134
+00:05:42,142 --> 00:05:43,643 line:-1
+into this argument buffer.
+
+
+135
+00:05:43,643 --> 00:05:45,178 line:-1
+Let's simplify this diagram
+
+
+136
+00:05:45.178 --> 00:05:47.013 line:-1 position:50%
+and add a few more
+truck instances,
+
+
+137
+00:05:47,013 --> 00:05:50,483 line:-1
+each one with its own material.
+
+
+138
+00:05:50.483 --> 00:05:53.186 line:-1 position:50%
+As we can see, with this,
+
+
+139
+00:05:53.186 --> 00:05:56.289 line:-1 position:50%
+we can now have our full scene
+and its resources
+
+
+140
+00:05:56.289 --> 00:05:59.759 line:-1 position:50%
+encoded and linked
+with argument buffers.
+
+
+141
+00:05:59.759 --> 00:06:02.495 line:-1 position:50%
+Later, when we want to reference
+any of these resources
+
+
+142
+00:06:02.495 --> 00:06:04.030 line:-1 position:50%
+from our shaders,
+
+
+143
+00:06:04,030 --> 00:06:07,033 line:-1
+we just need a pointer
+to the instances buffer.
+
+
+144
+00:06:07.033 --> 00:06:08.401 line:-1 position:50%
+We can pass it directly
+
+
+145
+00:06:08,401 --> 00:06:10,403 line:-1
+and interpret this buffer
+as an array,
+
+
+146
+00:06:10.403 --> 00:06:15.075 line:-1 position:50%
+or pass a pointer through
+another scene argument buffer.
+
+
+147
+00:06:15.075 --> 00:06:17.911 line:-1 position:50%
+Now, it's important to note
+what happens with the residency
+
+
+148
+00:06:17.911 --> 00:06:20.614 line:-1 position:50%
+of indirectly accessed
+resources.
+
+
+149
+00:06:20.614 --> 00:06:22.949 line:-1 position:50%
+Since we're only passing
+a pointer to the scene
+
+
+150
+00:06:22.949 --> 00:06:24.184 line:-1 position:50%
+into the pipeline,
+
+
+151
+00:06:24.184 --> 00:06:26.052 line:-1 position:50%
+Metal will know about
+this buffer reference,
+
+
+152
+00:06:26,052 --> 00:06:30,257 line:-1
+but not about resources
+accessed indirectly.
+
+
+153
+00:06:30,257 --> 00:06:33,193 line:-1
+The application is responsible
+for declaring residency
+
+
+154
+00:06:33.193 --> 00:06:36.896 line:-1 position:50%
+of all indirectly accessed
+resources.
+
+
+155
+00:06:36.896 --> 00:06:40.433 line:-1 position:50%
+Making a resource resident
+means signaling to the driver
+
+
+156
+00:06:40,433 --> 00:06:43,336 line:-1
+to make its memory available
+to the GPU.
+
+
+157
+00:06:43,336 --> 00:06:48,108 line:-1
+This is necessary so we can
+reference them from our shaders.
+
+
+158
+00:06:48.108 --> 00:06:51.645 line:-1 position:50%
+We can do this by calling
+the useResource:usage: API
+
+
+159
+00:06:51,645 --> 00:06:55,248 line:-1
+for compute encoders and
+useResource:usage:stages: API
+
+
+160
+00:06:55.248 --> 00:06:57.183 line:-1 position:50%
+for render command encoders.
+
+
+161
+00:06:57.183 --> 00:06:59.486 line:-1 position:50%
+Accessing a nonresident resource
+is a common cause
+
+
+162
+00:06:59,486 --> 00:07:02,656 line:-1
+of GPU restarts
+and command buffer failures.
+
+
+163
+00:07:02.656 --> 00:07:06.192 line:-1 position:50%
+This is because its memory pages
+may not be present
+
+
+164
+00:07:06,192 --> 00:07:07,861 line:-1
+if we forgot to call this API.
+
+
+165
+00:07:07,861 --> 00:07:09,229 line:-1
+So it's very important
+to declare
+
+
+166
+00:07:09,229 --> 00:07:12,365 line:-1
+every indirectly accessed
+resource to Metal.
+
+
+167
+00:07:12,365 --> 00:07:14,567 line:-1
+Now, another option,
+for convenience,
+
+
+168
+00:07:14.567 --> 00:07:16.803 line:-1 position:50%
+is that resources allocated
+from MTLHeaps
+
+
+169
+00:07:16.803 --> 00:07:18.805 line:-1 position:50%
+can now be made resident
+with a single call
+
+
+170
+00:07:18.805 --> 00:07:21.007 line:-1 position:50%
+by means of the useHeap API.
+
+
+171
+00:07:21,007 --> 00:07:23,376 line:-1
+This is a great option
+if you are already suballocating
+
+
+172
+00:07:23.376 --> 00:07:27.047 line:-1 position:50%
+or planning to suballocate
+resources from heaps.
+
+
+173
+00:07:27,047 --> 00:07:29,449 line:-1
+Now, heaps are a fantastic part
+of the Metal API,
+
+
+174
+00:07:29.449 --> 00:07:30.483 line:-1 position:50%
+and we recommend you use them
+
+
+175
+00:07:30.483 --> 00:07:32.385 line:-1 position:50%
+for the best resource-creation
+performance,
+
+
+176
+00:07:32,385 --> 00:07:35,021 line:-1
+and memory-saving opportunities.
+
+
+177
+00:07:35,021 --> 00:07:36,823 line:-1
+There are, however,
+a few considerations
+
+
+178
+00:07:36.823 --> 00:07:39.159 line:-1 position:50%
+to use them effectively.
+
+
+179
+00:07:39.159 --> 00:07:40.627 line:-1 position:50%
+The first thing to ask is,
+
+
+180
+00:07:40.627 --> 00:07:44.197 line:-1 position:50%
+Are all our suballocated
+resources only read from?
+
+
+181
+00:07:44.197 --> 00:07:46.466 line:-1 position:50%
+Examples of where we might need
+to write into a resource
+
+
+182
+00:07:46.466 --> 00:07:48.702 line:-1 position:50%
+include mesh skinning
+from a compute shader
+
+
+183
+00:07:48.702 --> 00:07:52.238 line:-1 position:50%
+and dynamic textures,
+amongst others.
+
+
+184
+00:07:52,238 --> 00:07:56,509 line:-1
+In these cases, if the GPU needs
+to write into any resources,
+
+
+185
+00:07:56.509 --> 00:07:58.945 line:-1 position:50%
+they need to be declared
+resident individually
+
+
+186
+00:07:58,945 --> 00:08:02,849 line:-1
+with the write usage flag.
+
+
+187
+00:08:02,849 --> 00:08:06,453 line:-1
+Additionally, any resources
+that may have been modified
+
+
+188
+00:08:06.453 --> 00:08:08.121 line:-1 position:50%
+that we now intend to read from
+
+
+189
+00:08:08.121 --> 00:08:10.724 line:-1 position:50%
+will still need their own
+useResource call.
+
+
+190
+00:08:10.724 --> 00:08:12.392 line:-1 position:50%
+This is so that
+the Metal framework
+
+
+191
+00:08:12,392 --> 00:08:15,662 line:-1
+can handle resource transitions
+for you, flushing GPU caches
+
+
+192
+00:08:15.662 --> 00:08:19.799 line:-1 position:50%
+and adjusting
+the internal memory layout.
+
+
+193
+00:08:19,799 --> 00:08:21,935 line:-1
+The second consideration is,
+
+
+194
+00:08:21.935 --> 00:08:24.904 line:-1 position:50%
+Does the heap track suballocate
+resource dependencies?
+
+
+195
+00:08:24.904 --> 00:08:26.539 line:-1 position:50%
+Again, this is
+especially important
+
+
+196
+00:08:26,539 --> 00:08:28,375 line:-1
+if we're reading and writing
+into resources
+
+
+197
+00:08:28.375 --> 00:08:31.611 line:-1 position:50%
+coming from the same heap.
+
+
+198
+00:08:31,611 --> 00:08:34,280 line:-1
+Metal is great at avoiding
+synchronization problems
+
+
+199
+00:08:34,280 --> 00:08:36,049 line:-1
+through dependency tracking,
+
+
+200
+00:08:36.049 --> 00:08:38.218 line:-1 position:50%
+and since Metal 2.3,
+heaps can be configured
+
+
+201
+00:08:38,218 --> 00:08:42,756 line:-1
+to track hazards in the access
+to their resources.
+
+
+202
+00:08:42,756 --> 00:08:46,359 line:-1
+However, since heaps
+are a single resource to Metal,
+
+
+203
+00:08:46,359 --> 00:08:48,661 line:-1
+synchronization is handled
+at the heap level
+
+
+204
+00:08:48,661 --> 00:08:50,597 line:-1
+not the suballocation level.
+
+
+205
+00:08:50.597 --> 00:08:52.766 line:-1 position:50%
+This may subject
+suballocated resources
+
+
+206
+00:08:52.766 --> 00:08:54.434 line:-1 position:50%
+to the problem of false sharing.
+
+
+207
+00:08:54.434 --> 00:08:56.136 line:-1 position:50%
+Let's take a look.
+
+
+208
+00:08:56,136 --> 00:08:57,971 line:-1
+Let's imagine we have
+two render passes --
+
+
+209
+00:08:57,971 --> 00:08:59,239 line:-1
+A and B --
+
+
+210
+00:08:59,239 --> 00:09:01,775 line:-1
+accessing resources
+from the same heap.
+
+
+211
+00:09:01,775 --> 00:09:04,577 line:0
+Render pass A is rendering
+to a render texture
+
+
+212
+00:09:04,577 --> 00:09:06,579 line:0
+allocated from a tracked heap.
+
+
+213
+00:09:06,579 --> 00:09:09,516 line:0
+Render pass B is reading
+from an unrelated buffer
+
+
+214
+00:09:09,516 --> 00:09:13,153 position:50%
+that is suballocated
+from the same heap.
+
+
+215
+00:09:13,153 --> 00:09:14,854 line:-1
+Depending
+on different conditions,
+
+
+216
+00:09:14,854 --> 00:09:17,190 line:-1
+render passes A and B
+may qualify to be executed
+
+
+217
+00:09:17,190 --> 00:09:18,992 line:-1
+in parallel by the GPU;
+
+
+218
+00:09:18.992 --> 00:09:21.861 line:-1 position:50%
+however,
+due to the potential hazard
+
+
+219
+00:09:21.861 --> 00:09:24.397 line:-1 position:50%
+of writing and reading
+from the same resource --
+
+
+220
+00:09:24.397 --> 00:09:26.699 line:-1 position:50%
+the heap --
+Metal has to serialize access
+
+
+221
+00:09:26.699 --> 00:09:30.537 line:-1 position:50%
+to ensure there are
+no race conditions.
+
+
+222
+00:09:30,537 --> 00:09:33,072 line:-1
+This can potentially increase
+the execution wall-clock time
+
+
+223
+00:09:33,072 --> 00:09:35,508 line:-1
+of our workload by the GPU.
+
+
+224
+00:09:35,508 --> 00:09:37,410 line:-1
+In our case, however,
+
+
+225
+00:09:37,410 --> 00:09:40,246 line:-1
+if we know the individual
+resources are independent,
+
+
+226
+00:09:40.246 --> 00:09:41.848 line:-1 position:50%
+this fence could be avoided.
+
+
+227
+00:09:41,848 --> 00:09:45,485 line:-1
+There are two ways to do this.
+
+
+228
+00:09:45,485 --> 00:09:49,255 position:50%
+One option is to suballocate
+resources that are updatable
+
+
+229
+00:09:49,255 --> 00:09:53,893 line:0
+from heaps separate to the ones
+used for our static resources.
+
+
+230
+00:09:53,893 --> 00:09:56,830 line:0
+The other option, if we desire
+to bundle everything together,
+
+
+231
+00:09:56,830 --> 00:09:58,331 position:50%
+is to make sure heaps
+are configured
+
+
+232
+00:09:58,331 --> 00:10:01,167 line:0
+not to track
+their suballocated resources.
+
+
+233
+00:10:01,167 --> 00:10:03,002 line:-1
+This is the default behavior
+in Metal,
+
+
+234
+00:10:03.002 --> 00:10:05.772 line:-1 position:50%
+and it means we as programmers
+take on the responsibility
+
+
+235
+00:10:05.772 --> 00:10:09.642 line:-1 position:50%
+of synchronizing hazards
+ourselves.
+
+
+236
+00:10:09,642 --> 00:10:11,911 line:-1
+Now, in this diagram
+I simplified things a bit
+
+
+237
+00:10:11.911 --> 00:10:14.113 line:-1 position:50%
+to illustrate the problem
+of false sharing.
+
+
+238
+00:10:14.113 --> 00:10:17.383 line:-1 position:50%
+In practice, overlapping occurs
+at the shading stage level,
+
+
+239
+00:10:17.383 --> 00:10:19.118 line:-1 position:50%
+not at the render pass level.
+
+
+240
+00:10:19.118 --> 00:10:21.221 line:-1 position:50%
+As a consequence,
+Metal allows us
+
+
+241
+00:10:21.221 --> 00:10:24.958 line:-1 position:50%
+to specify our fences
+at the stage granularity.
+
+
+242
+00:10:24,958 --> 00:10:27,627 line:-1
+This is great because
+it allows us to still run
+
+
+243
+00:10:27,627 --> 00:10:30,063 line:-1
+parts of our pipeline --
+such as vertex stage
+
+
+244
+00:10:30.063 --> 00:10:32.499 line:-1 position:50%
+and rasterizer --
+concurrently,
+
+
+245
+00:10:32.499 --> 00:10:34.834 line:-1 position:50%
+and only block later
+in the fragment stage
+
+
+246
+00:10:34,834 --> 00:10:36,269 line:-1
+if it happens to depend on
+
+
+247
+00:10:36.269 --> 00:10:40.240 line:-1 position:50%
+a previous pass's
+fragment stage output.
+
+
+248
+00:10:40.240 --> 00:10:42.909 line:-1 position:50%
+We recommend you always do this
+for maximum performance,
+
+
+249
+00:10:42.909 --> 00:10:46.045 line:-1 position:50%
+if possible.
+
+
+250
+00:10:46,045 --> 00:10:47,914 line:-1
+Now, this is a lot to remember,
+
+
+251
+00:10:47.914 --> 00:10:50.083 line:-1 position:50%
+so if you only get one thing
+from this list,
+
+
+252
+00:10:50,083 --> 00:10:52,619 line:-1
+please remember this:
+read-only data,
+
+
+253
+00:10:52,619 --> 00:10:54,554 line:-1
+such as static textures
+and meshes,
+
+
+254
+00:10:54,554 --> 00:10:57,357 line:-1
+are the easiest to handle.
+
+
+255
+00:10:57.357 --> 00:10:59.092 line:-1 position:50%
+Determine the total
+allocation size
+
+
+256
+00:10:59,092 --> 00:11:00,860 line:-1
+and alignment requirements
+upfront
+
+
+257
+00:11:00.860 --> 00:11:03.429 line:-1 position:50%
+and place these resources
+in a heap when the app starts
+
+
+258
+00:11:03.429 --> 00:11:06.966 line:-1 position:50%
+or during a loading section
+in your game.
+
+
+259
+00:11:06,966 --> 00:11:10,603 line:-1
+This way, you can later make it
+resident in a single call,
+
+
+260
+00:11:10.603 --> 00:11:14.107 line:-1 position:50%
+with minimal overhead
+in your critical path.
+
+
+261
+00:11:14.107 --> 00:11:16.576 line:-1 position:50%
+Now that we know about
+the bindless binding model,
+
+
+262
+00:11:16.576 --> 00:11:18.912 line:-1 position:50%
+let's take a look at how we can
+encode our resources
+
+
+263
+00:11:18.912 --> 00:11:20.179 line:-1 position:50%
+and put this in practice
+
+
+264
+00:11:20.179 --> 00:11:22.949 line:-1 position:50%
+and make our complete scene
+available to the GPU
+
+
+265
+00:11:22.949 --> 00:11:25.285 line:-1 position:50%
+with argument buffers.
+
+
+266
+00:11:25.285 --> 00:11:28.021 line:-1 position:50%
+Let's say we want to encode
+our instances buffer.
+
+
+267
+00:11:28,021 --> 00:11:31,457 line:-1
+Remember, this buffer consists
+of an array of instances.
+
+
+268
+00:11:31,457 --> 00:11:34,727 line:0
+As we saw, instances
+reference a mesh, a material,
+
+
+269
+00:11:34,727 --> 00:11:37,397 position:50%
+and contain an inline constant
+4x4 matrix
+
+
+270
+00:11:37,397 --> 00:11:41,868 line:0
+describing the transformation
+from local to world space.
+
+
+271
+00:11:41,868 --> 00:11:44,871 position:50%
+Encoding is performed
+via an argument buffer encoder,
+
+
+272
+00:11:44,871 --> 00:11:48,908 line:0
+and there are two distinct ways
+to create one in Metal.
+
+
+273
+00:11:48,908 --> 00:11:52,045 line:-1
+You may be familiar
+with encoding via reflection.
+
+
+274
+00:11:52,045 --> 00:11:54,180 line:-1
+If the argument buffer
+is passed as a direct parameter
+
+
+275
+00:11:54,180 --> 00:11:55,615 line:-1
+to the shader function,
+
+
+276
+00:11:55,615 --> 00:11:57,250 line:-1
+we can ask
+the MTLFunction object
+
+
+277
+00:11:57.250 --> 00:12:00.086 line:-1 position:50%
+to create an encoder for us.
+
+
+278
+00:12:00.086 --> 00:12:01.854 line:-1 position:50%
+This mechanism works great,
+
+
+279
+00:12:01.854 --> 00:12:03.790 line:-1 position:50%
+but when we are encoding
+the entire scene
+
+
+280
+00:12:03.790 --> 00:12:06.793 line:-1 position:50%
+into argument buffers, not all
+encoders can be reflected.
+
+
+281
+00:12:06,793 --> 00:12:08,928 line:-1
+In particular,
+the MTLFunction signature
+
+
+282
+00:12:08.928 --> 00:12:13.032 line:-1 position:50%
+does not know about the
+indirectly referenced buffers.
+
+
+283
+00:12:13,032 --> 00:12:15,068 line:-1
+There might also be
+other situations
+
+
+284
+00:12:15,068 --> 00:12:16,903 line:-1
+where creating an encoder
+from a MTLFunction
+
+
+285
+00:12:16,903 --> 00:12:18,237 line:-1
+is not convenient;
+
+
+286
+00:12:18.237 --> 00:12:20.106 line:-1 position:50%
+for example, if your engine
+architecture
+
+
+287
+00:12:20,106 --> 00:12:22,609 line:-1
+handles argument-buffer creation
+and resource loading
+
+
+288
+00:12:22,609 --> 00:12:26,145 line:-1
+separate from pipeline state
+creation.
+
+
+289
+00:12:26,145 --> 00:12:28,848 line:-1
+Additionally, we cannot reflect
+an encoder
+
+
+290
+00:12:28,848 --> 00:12:31,517 line:-1
+when the function is expecting
+to be passed an array.
+
+
+291
+00:12:31.517 --> 00:12:34.387 line:-1 position:50%
+So what can we do
+in these cases?
+
+
+292
+00:12:34,387 --> 00:12:35,355 line:-1
+For these cases,
+
+
+293
+00:12:35.355 --> 00:12:37.256 line:-1 position:50%
+Metal provides a convenient
+second mechanism
+
+
+294
+00:12:37.256 --> 00:12:40.660 line:-1 position:50%
+to create an encoder through
+a MTLArgumentDescriptor.
+
+
+295
+00:12:40,660 --> 00:12:43,262 line:-1
+MTLArgumentDescriptors allow
+describing the struct members
+
+
+296
+00:12:43.262 --> 00:12:45.365 line:-1 position:50%
+to Metal and subsequently
+creating an encoder
+
+
+297
+00:12:45,365 --> 00:12:47,967 line:-1
+without a MTLFunction.
+
+
+298
+00:12:47,967 --> 00:12:51,104 line:-1
+We must first create
+a descriptor for each member,
+
+
+299
+00:12:51,104 --> 00:12:54,874 line:-1
+specifying data type
+and binding index.
+
+
+300
+00:12:54,874 --> 00:12:57,010 line:-1
+Next, we take our descriptors,
+
+
+301
+00:12:57,010 --> 00:12:59,278 line:-1
+and pass them directly
+to the MTLDevice
+
+
+302
+00:12:59.278 --> 00:13:01.247 line:-1 position:50%
+to create our encoder.
+
+
+303
+00:13:01.247 --> 00:13:05.718 line:-1 position:50%
+As a result, we obtain
+our encoder object back.
+
+
+304
+00:13:05,718 --> 00:13:09,222 line:-1
+So let's explore
+what this looks like in code.
+
+
+305
+00:13:09,222 --> 00:13:10,423 line:-1
+For each member,
+
+
+306
+00:13:10.423 --> 00:13:13.660 line:-1 position:50%
+we needed to create
+a MTLArgumentDescriptor;
+
+
+307
+00:13:13.660 --> 00:13:15.261 line:-1 position:50%
+we specify the binding index,
+
+
+308
+00:13:15.261 --> 00:13:16.629 line:-1 position:50%
+corresponding
+to the ID attribute
+
+
+309
+00:13:16.629 --> 00:13:19.065 line:-1 position:50%
+for the member in the struct;
+
+
+310
+00:13:19,065 --> 00:13:23,870 line:-1
+we specify the MTLDataType
+and potentially access;
+
+
+311
+00:13:23,870 --> 00:13:27,006 line:-1
+and finally, after we've
+declared all the members,
+
+
+312
+00:13:27.006 --> 00:13:29.742 line:-1 position:50%
+we can create the encoder
+directly from the device,
+
+
+313
+00:13:29,742 --> 00:13:34,213 line:-1
+passing an array
+with all our descriptors.
+
+
+314
+00:13:34.213 --> 00:13:35.314 line:-1 position:50%
+Once we have an encoder,
+
+
+315
+00:13:35.314 --> 00:13:39.719 line:-1 position:50%
+it's straightforward to record
+our data into a buffer.
+
+
+316
+00:13:39,719 --> 00:13:42,088 line:-1
+We set the argument buffer
+on the encoder,
+
+
+317
+00:13:42.088 --> 00:13:43.890 line:-1 position:50%
+pointing at the beginning
+of the buffer.
+
+
+318
+00:13:43.890 --> 00:13:47.660 line:-1 position:50%
+Then, we simply set the data
+we want to store.
+
+
+319
+00:13:47,660 --> 00:13:50,897 line:-1
+Encoding an array
+is simple as well.
+
+
+320
+00:13:50,897 --> 00:13:51,864 line:-1
+All we have to do
+
+
+321
+00:13:51,864 --> 00:13:54,500 line:-1
+is offset the encoder's
+argument buffer recording point
+
+
+322
+00:13:54,500 --> 00:13:55,702 line:-1
+by the encodedLength,
+
+
+323
+00:13:55,702 --> 00:13:58,304 line:-1
+which we can conveniently
+retrieve from the encoder.
+
+
+324
+00:13:58.304 --> 00:14:00.606 line:-1 position:50%
+For the next instance,
+we add the encodedLength
+
+
+325
+00:14:00.606 --> 00:14:04.043 line:-1 position:50%
+to our offset a second time.
+
+
+326
+00:14:04,043 --> 00:14:07,080 line:0
+In fact, the offset for each
+position we need to record in
+
+
+327
+00:14:07,080 --> 00:14:10,383 line:0
+is going to be the index
+times the encodedLength.
+
+
+328
+00:14:10,383 --> 00:14:11,884 position:50%
+This mechanism
+makes it very easy
+
+
+329
+00:14:11,884 --> 00:14:14,353 position:50%
+to encode arrays of structs.
+
+
+330
+00:14:14.353 --> 00:14:16.456 line:-1 position:50%
+Now, one important point
+worth mentioning
+
+
+331
+00:14:16.456 --> 00:14:19.292 line:-1 position:50%
+is that no special treatment
+is needed from shader side
+
+
+332
+00:14:19,292 --> 00:14:22,528 line:-1
+to index into these arrays.
+
+
+333
+00:14:22.528 --> 00:14:23.996 line:-1 position:50%
+The shader
+does not need to know
+
+
+334
+00:14:23.996 --> 00:14:25.064 line:-1 position:50%
+the length of the buffer
+
+
+335
+00:14:25,064 --> 00:14:27,500 line:-1
+and can freely index
+into any location in the array.
+
+
+336
+00:14:27.500 --> 00:14:29.268 line:-1 position:50%
+It just works!
+
+
+337
+00:14:29,268 --> 00:14:31,637 line:-1
+OK, now that we have encoded
+our bindless scene,
+
+
+338
+00:14:31.637 --> 00:14:35.208 line:-1 position:50%
+let's take a look at navigation.
+
+
+339
+00:14:35.208 --> 00:14:38.611 line:-1 position:50%
+For the case of ray tracing,
+navigation is very natural.
+
+
+340
+00:14:38,611 --> 00:14:40,513 line:-1
+First, we bind the buffer
+that contains the root
+
+
+341
+00:14:40.513 --> 00:14:43.316 line:-1 position:50%
+of our bindless scene
+to our ray tracing pipeline.
+
+
+342
+00:14:43.316 --> 00:14:44.517 line:-1 position:50%
+This is the argument buffer
+
+
+343
+00:14:44.517 --> 00:14:47.453 line:-1 position:50%
+from where we can access
+all the others.
+
+
+344
+00:14:47.453 --> 00:14:49.355 line:-1 position:50%
+Next, from our kernel,
+
+
+345
+00:14:49,355 --> 00:14:52,425 line:-1
+we proceed with the ray-traced
+intersection as usual.
+
+
+346
+00:14:52.425 --> 00:14:54.193 line:-1 position:50%
+After we discovered
+an intersection,
+
+
+347
+00:14:54.193 --> 00:14:58.898 line:-1 position:50%
+the intersection result object
+describes the navigation.
+
+
+348
+00:14:58.898 --> 00:15:00.933 line:-1 position:50%
+We can query this object
+for instance_id,
+
+
+349
+00:15:00.933 --> 00:15:03.436 line:-1 position:50%
+geometry_id,
+and primitive_id.
+
+
+350
+00:15:03,436 --> 00:15:05,304 line:-1
+These members
+are designed specifically
+
+
+351
+00:15:05.304 --> 00:15:07.774 line:-1 position:50%
+for navigating
+our acceleration structures.
+
+
+352
+00:15:07.774 --> 00:15:10.510 line:-1 position:50%
+It is, therefore, important
+to build our bindless scene
+
+
+353
+00:15:10,510 --> 00:15:12,845 line:-1
+with a structure that mirrors
+our acceleration structures,
+
+
+354
+00:15:12.845 --> 00:15:14.914 line:-1 position:50%
+such as the one shown earlier.
+
+
+355
+00:15:14.914 --> 00:15:16.749 line:-1 position:50%
+Let's take a look at it again.
+
+
+356
+00:15:16,749 --> 00:15:18,684 line:-1
+Remember,
+this is just an example
+
+
+357
+00:15:18,684 --> 00:15:20,820 line:-1
+of how to organize the scene,
+
+
+358
+00:15:20.820 --> 00:15:23.723 line:-1 position:50%
+so I'm going to navigate it
+according to how I organized it.
+
+
+359
+00:15:23,723 --> 00:15:25,925 line:-1
+The particular details
+for your scene may vary,
+
+
+360
+00:15:25.925 --> 00:15:27.760 line:-1 position:50%
+according to how you decide
+to organize
+
+
+361
+00:15:27.760 --> 00:15:30.663 line:-1 position:50%
+your own argument buffers.
+
+
+362
+00:15:30,663 --> 00:15:33,399 line:-1
+First, we need to find
+an intersection.
+
+
+363
+00:15:33,399 --> 00:15:34,433 line:0
+Once we have it,
+
+
+364
+00:15:34,433 --> 00:15:37,270 line:0
+because we strategically
+organized our bindless scene,
+
+
+365
+00:15:37,270 --> 00:15:40,173 position:50%
+given the instance_id
+we can now follow the pointer
+
+
+366
+00:15:40,173 --> 00:15:45,111 line:0
+to the instances buffer
+and determine which one we hit.
+
+
+367
+00:15:45,111 --> 00:15:49,115 position:50%
+Next, as we saw, the instance
+knows its mesh and material.
+
+
+368
+00:15:49,115 --> 00:15:51,184 position:50%
+So we can simply use
+the geometry_id
+
+
+369
+00:15:51,184 --> 00:15:52,985 position:50%
+to determine
+which geometry we hit
+
+
+370
+00:15:52,985 --> 00:15:56,856 position:50%
+within the referenced buffer.
+
+
+371
+00:15:56,856 --> 00:15:58,524 position:50%
+Finally, if we prepared
+each mesh
+
+
+372
+00:15:58,524 --> 00:16:01,194 line:0
+to know its index buffer,
+we can use the primitive_id
+
+
+373
+00:16:01,194 --> 00:16:03,930 line:0
+to determine
+the exact primitive that we hit.
+
+
+374
+00:16:03.930 --> 00:16:05.364 line:-1 position:50%
+In the case of a triangle,
+for instance,
+
+
+375
+00:16:05,364 --> 00:16:07,700 line:-1
+we can pull the three indices
+from this array
+
+
+376
+00:16:07.700 --> 00:16:10.870 line:-1 position:50%
+and use them to retrieve
+its vertex data.
+
+
+377
+00:16:10,870 --> 00:16:12,104 line:-1
+Here's what this navigation
+looks like
+
+
+378
+00:16:12,104 --> 00:16:14,407 line:-1
+in Metal Shading Language.
+
+
+379
+00:16:14.407 --> 00:16:17.643 line:-1 position:50%
+From the intersection object,
+we retrieve the instance_id
+
+
+380
+00:16:17.643 --> 00:16:20.813 line:-1 position:50%
+and use it to dynamically index
+into our instances array
+
+
+381
+00:16:20.813 --> 00:16:24.617 line:-1 position:50%
+and retrieve
+the instance we hit.
+
+
+382
+00:16:24.617 --> 00:16:27.753 line:-1 position:50%
+Next, having the instance,
+we use the geometry_id
+
+
+383
+00:16:27.753 --> 00:16:32.892 line:-1 position:50%
+to determine which geometry
+or submesh was hit.
+
+
+384
+00:16:32,892 --> 00:16:34,694 position:50%
+Once we've determined
+the geometry,
+
+
+385
+00:16:34,694 --> 00:16:38,164 position:50%
+we can directly pull the indices
+from the index buffer.
+
+
+386
+00:16:38,164 --> 00:16:40,333 position:50%
+In the case of a triangle,
+we pull three indices,
+
+
+387
+00:16:40,333 --> 00:16:43,402 line:0
+one after the other.
+
+
+388
+00:16:43.402 --> 00:16:46.606 line:-1 position:50%
+We use these indices to access
+into the vertex data array
+
+
+389
+00:16:46.606 --> 00:16:49.275 line:-1 position:50%
+and retrieve any attribute
+we need for our technique.
+
+
+390
+00:16:49,275 --> 00:16:51,210 line:-1
+For example, we can retrieve
+the normals
+
+
+391
+00:16:51,210 --> 00:16:54,747 line:-1
+corresponding to each vertex.
+
+
+392
+00:16:54.747 --> 00:16:57.850 line:-1 position:50%
+And finally, using the point's
+barycentric coordinates,
+
+
+393
+00:16:57,850 --> 00:16:59,752 line:-1
+we manually interpolate
+vertex normals
+
+
+394
+00:16:59.752 --> 00:17:04.523 line:-1 position:50%
+to arrive at the correct normal
+at the intersection point.
+
+
+395
+00:17:04.523 --> 00:17:06.058 line:-1 position:50%
+With these changes in place,
+
+
+396
+00:17:06.058 --> 00:17:08.160 line:-1 position:50%
+taking it back
+to our teapot example,
+
+
+397
+00:17:08,160 --> 00:17:09,929 line:-1
+now that we have a way
+to calculate the normal
+
+
+398
+00:17:09,929 --> 00:17:11,264 line:-1
+at the intersection point,
+
+
+399
+00:17:11.264 --> 00:17:15.268 line:-1 position:50%
+we can correctly shade
+our reflection.
+
+
+400
+00:17:15.268 --> 00:17:17.970 line:-1 position:50%
+We've updated the code
+to find the correct attributes
+
+
+401
+00:17:17.970 --> 00:17:19.272 line:-1 position:50%
+at the intersection point,
+
+
+402
+00:17:19.272 --> 00:17:23.709 line:-1 position:50%
+and now the results
+are visually correct.
+
+
+403
+00:17:23,709 --> 00:17:25,511 line:-1
+We can now continue
+building on this framework
+
+
+404
+00:17:25.511 --> 00:17:27.780 line:-1 position:50%
+to calculate any other attribute
+we want,
+
+
+405
+00:17:27,780 --> 00:17:29,949 line:-1
+such as texture coordinates
+to apply a texture
+
+
+406
+00:17:29,949 --> 00:17:35,054 line:-1
+or tangent vectors
+to implement normal mapping.
+
+
+407
+00:17:35,054 --> 00:17:37,423 line:-1
+So here we saw how to navigate
+our bindless scene
+
+
+408
+00:17:37,423 --> 00:17:40,159 line:-1
+to retrieve vertex data,
+manually interpolate it,
+
+
+409
+00:17:40.159 --> 00:17:42.028 line:-1 position:50%
+and finally, apply it
+to correctly shade
+
+
+410
+00:17:42,028 --> 00:17:44,130 line:-1
+all the intersection points
+discovered.
+
+
+411
+00:17:44.130 --> 00:17:46.966 line:-1 position:50%
+To help you bring these concepts
+into your own engine,
+
+
+412
+00:17:46,966 --> 00:17:49,168 line:-1
+we're going to be releasing
+a companion code sample
+
+
+413
+00:17:49.168 --> 00:17:52.705 line:-1 position:50%
+that shows a concrete
+implementation of all of this.
+
+
+414
+00:17:52,705 --> 00:17:54,307 line:-1
+This is a hybrid rendering
+sample
+
+
+415
+00:17:54,307 --> 00:17:56,175 line:-1
+that calculates ray-traced
+reflections for a scene
+
+
+416
+00:17:56.175 --> 00:17:58.611 line:-1 position:50%
+loaded using
+the Model I/O framework.
+
+
+417
+00:17:58,611 --> 00:18:01,280 line:-1
+The sample shows how you can
+encode a bindless scene
+
+
+418
+00:18:01.280 --> 00:18:04.317 line:-1 position:50%
+that matches the ray tracing
+acceleration structures,
+
+
+419
+00:18:04,317 --> 00:18:06,953 line:-1
+and it also shows
+how to find intersections
+
+
+420
+00:18:06,953 --> 00:18:09,221 line:-1
+and correctly shade
+their associated pixels
+
+
+421
+00:18:09.221 --> 00:18:13.192 line:-1 position:50%
+directly from
+your ray tracing shaders.
+
+
+422
+00:18:13.192 --> 00:18:14.393 line:-1 position:50%
+As we can see here,
+
+
+423
+00:18:14.393 --> 00:18:16.495 line:-1 position:50%
+the sample also allows
+directly visualizing
+
+
+424
+00:18:16.495 --> 00:18:18.831 line:-1 position:50%
+the output of the reflection
+ray tracing shader
+
+
+425
+00:18:18.831 --> 00:18:21.634 line:-1 position:50%
+just at the points where
+the rays intersect the trucks.
+
+
+426
+00:18:21,634 --> 00:18:23,703 line:-1
+This is great
+for iteratively experimenting
+
+
+427
+00:18:23.703 --> 00:18:28.074 line:-1 position:50%
+with the reflection algorithm.
+
+
+428
+00:18:28.074 --> 00:18:30.242 line:-1 position:50%
+Now, we've covered
+a lot of ground here,
+
+
+429
+00:18:30.242 --> 00:18:32.445 line:-1 position:50%
+and so far we've been centering
+most of our discussion
+
+
+430
+00:18:32.445 --> 00:18:34.513 line:-1 position:50%
+in the context of ray tracing.
+
+
+431
+00:18:34.513 --> 00:18:37.183 line:-1 position:50%
+But as I mentioned earlier,
+we can apply the same principles
+
+
+432
+00:18:37.183 --> 00:18:40.720 line:-1 position:50%
+to properly shade our pixels
+in the context of rasterization.
+
+
+433
+00:18:40.720 --> 00:18:44.724 line:-1 position:50%
+Physically based rendering
+is a great candidate for this.
+
+
+434
+00:18:44,724 --> 00:18:47,460 line:-1
+In PBR, our fragment shader
+needs information
+
+
+435
+00:18:47,460 --> 00:18:49,161 line:-1
+coming from several textures;
+
+
+436
+00:18:49,161 --> 00:18:54,400 line:-1
+for example, albedo, roughness,
+metallic, and ambient occlusion.
+
+
+437
+00:18:54.400 --> 00:18:55.968 line:-1 position:50%
+In the direct binding model,
+
+
+438
+00:18:55.968 --> 00:18:57.937 line:-1 position:50%
+we need to bind each slot
+individually
+
+
+439
+00:18:57.937 --> 00:19:01.941 line:-1 position:50%
+before issuing
+each one of our draw calls.
+
+
+440
+00:19:01,941 --> 00:19:05,111 line:-1
+The bindless model
+vastly simplifies this.
+
+
+441
+00:19:05,111 --> 00:19:07,046 line:-1
+Once we have encoded
+our argument buffers,
+
+
+442
+00:19:07,046 --> 00:19:09,115 line:-1
+we can directly bind the scene,
+
+
+443
+00:19:09.115 --> 00:19:11.417 line:-1 position:50%
+navigate to the material
+corresponding to our draw call,
+
+
+444
+00:19:11,417 --> 00:19:13,986 line:-1
+and access all textures
+indirectly.
+
+
+445
+00:19:13.986 --> 00:19:17.790 line:-1 position:50%
+In fact, since we now just need
+to bind a single buffer once,
+
+
+446
+00:19:17.790 --> 00:19:20.459 line:-1 position:50%
+this architecture provides
+an excellent opportunity
+
+
+447
+00:19:20,459 --> 00:19:22,094 line:-1
+to optimize our engines further
+
+
+448
+00:19:22,094 --> 00:19:23,562 line:-1
+by reducing the number
+of draw calls
+
+
+449
+00:19:23,562 --> 00:19:26,098 line:-1
+and use instanced rendering
+instead.
+
+
+450
+00:19:26.098 --> 00:19:31.370 line:-1 position:50%
+Just remember to make resident
+all textures we plan to access.
+
+
+451
+00:19:31.370 --> 00:19:34.740 line:-1 position:50%
+Here's an example
+of a typical PBR shader.
+
+
+452
+00:19:34.740 --> 00:19:37.009 line:-1 position:50%
+In the traditional model,
+each referenced texture
+
+
+453
+00:19:37,009 --> 00:19:40,613 line:-1
+needs to be individually bound
+before this draw call.
+
+
+454
+00:19:40,613 --> 00:19:41,914 line:-1
+If the following draw call
+
+
+455
+00:19:41.914 --> 00:19:43.949 line:-1 position:50%
+requires a different set
+of textures,
+
+
+456
+00:19:43,949 --> 00:19:48,087 line:-1
+all these resources need
+to be bound one by one as well.
+
+
+457
+00:19:48.087 --> 00:19:49.989 line:-1 position:50%
+When using a bindless model,
+
+
+458
+00:19:49,989 --> 00:19:52,058 line:-1
+we can now just pass
+our root argument buffer
+
+
+459
+00:19:52.058 --> 00:19:53.159 line:-1 position:50%
+and retrieve our material
+
+
+460
+00:19:53,159 --> 00:19:57,329 line:-1
+directly from its referenced
+structures, just like before.
+
+
+461
+00:19:57.329 --> 00:19:59.698 line:-1 position:50%
+First we retrieve
+the instance --
+
+
+462
+00:19:59,698 --> 00:20:03,836 line:-1
+this may be determined
+in the vertex shading stage --
+
+
+463
+00:20:03.836 --> 00:20:06.572 line:-1 position:50%
+then retrieve its material,
+
+
+464
+00:20:06,572 --> 00:20:09,141 line:-1
+and use its referenced textures
+and constant data
+
+
+465
+00:20:09.141 --> 00:20:12.211 line:-1 position:50%
+to calculate
+the appropriate shading.
+
+
+466
+00:20:12.211 --> 00:20:15.815 line:-1 position:50%
+Finally, we just return
+the color.
+
+
+467
+00:20:15,815 --> 00:20:16,749 line:-1
+All right!
+
+
+468
+00:20:16,749 --> 00:20:18,484 line:-1
+And that was a tour on how
+to effectively implement
+
+
+469
+00:20:18,484 --> 00:20:20,519 line:-1
+bindless rendering in Metal!
+
+
+470
+00:20:20,519 --> 00:20:23,522 line:-1
+To recap, we explored
+the Metal bindless model
+
+
+471
+00:20:23,522 --> 00:20:25,524 line:-1
+and saw how extremely flexible
+it is,
+
+
+472
+00:20:25,524 --> 00:20:29,261 line:-1
+allowing you to represent
+your scene any way you desire.
+
+
+473
+00:20:29.261 --> 00:20:32.164 line:-1 position:50%
+My recommendation is to design
+and build structures
+
+
+474
+00:20:32,164 --> 00:20:34,834 line:-1
+that ease the navigation
+for your given renderer.
+
+
+475
+00:20:34.834 --> 00:20:37.103 line:-1 position:50%
+This way, navigation becomes
+very natural,
+
+
+476
+00:20:37.103 --> 00:20:38.871 line:-1 position:50%
+and you can even use
+the same buffers
+
+
+477
+00:20:38,871 --> 00:20:42,508 line:-1
+for both ray tracing
+and rasterization.
+
+
+478
+00:20:42,508 --> 00:20:44,510 line:-1
+Bindless completely changes
+the game,
+
+
+479
+00:20:44.510 --> 00:20:46.512 line:-1 position:50%
+giving your GPU
+all the data you need
+
+
+480
+00:20:46,512 --> 00:20:48,948 line:-1
+to implement
+modern rendering techniques.
+
+
+481
+00:20:48,948 --> 00:20:51,550 line:-1
+You can even take it further
+and use this architecture
+
+
+482
+00:20:51,550 --> 00:20:53,152 line:-1
+to put the GPU
+in the driver seat
+
+
+483
+00:20:53,152 --> 00:20:55,554 line:-1
+and adopt indirect pipelines
+through indirect command buffers
+
+
+484
+00:20:55.554 --> 00:20:57.289 line:-1 position:50%
+and GPU culling.
+
+
+485
+00:20:57.289 --> 00:20:59.425 line:-1 position:50%
+We can't wait to see
+how you put this in practice
+
+
+486
+00:20:59,425 --> 00:21:00,926 line:-1
+to deliver the next generation
+
+
+487
+00:21:00,926 --> 00:21:03,095 line:-1
+of graphical applications
+and games.
+
+
+488
+00:21:03.095 --> 00:21:06.532 line:-1 position:50%
+Thank you and enjoy
+the rest of WWDC 2021!
+
+
+489
+00:21:06,532 --> 00:21:09,268 position:90% line:0 align:right
+♪
+

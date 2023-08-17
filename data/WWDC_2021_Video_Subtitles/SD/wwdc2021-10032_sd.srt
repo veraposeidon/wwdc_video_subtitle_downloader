@@ -1,0 +1,2714 @@
+2
+00:00:00,000 --> 00:00:02,102 line:-1
+[MAC STARTUP CHIME]
+
+
+3
+00:00:02.102 --> 00:00:05.706 line:-1 position:50%
+♪ Bass music playing ♪
+
+
+4
+00:00:05,706 --> 00:00:07,875 line:-1
+[KEYSTROKES]
+
+
+5
+00:00:07,875 --> 00:00:09,276 size:2% align:right line:0
+♪
+
+
+6
+00:00:09.276 --> 00:00:12.012 line:-1 position:50%
+Megan Gardner: Hello!
+My name is Megan Gardner,
+
+
+7
+00:00:12,012 --> 00:00:13,847 line:-1
+an engineer on the WebKit team,
+
+
+8
+00:00:13,847 --> 00:00:18,018 line:-1
+and today we're going to explore
+WKWebView additions together.
+
+
+9
+00:00:18,018 --> 00:00:19,586 line:-1
+Before we start our journey,
+
+
+10
+00:00:19,586 --> 00:00:21,722 line:-1
+let's make sure we know
+what we're exploring.
+
+
+11
+00:00:21,722 --> 00:00:24,258 line:-1
+Let me tell you
+what WKWebView is
+
+
+12
+00:00:24,258 --> 00:00:26,927 line:-1
+and why you might want to use it
+in your app.
+
+
+13
+00:00:26.927 --> 00:00:30.564 line:-1 position:50%
+When a user clicks a URL,
+they are expecting a web page
+
+
+14
+00:00:30,564 --> 00:00:33,767 line:-1
+to load and be able
+to interact with that content.
+
+
+15
+00:00:33.767 --> 00:00:36.203 line:-1 position:50%
+Loading the URL,
+rendering the content,
+
+
+16
+00:00:36.203 --> 00:00:38.505 line:-1 position:50%
+and running any JavaScript
+on that content
+
+
+17
+00:00:38.505 --> 00:00:41.508 line:-1 position:50%
+is a very complicated task!
+
+
+18
+00:00:41,508 --> 00:00:43,944 line:-1
+So we have encapsulated
+most of that work for you
+
+
+19
+00:00:43,944 --> 00:00:46,513 line:-1
+inside of WKWebView.
+
+
+20
+00:00:46,513 --> 00:00:48,015 line:-1
+And not just for you!
+
+
+21
+00:00:48,015 --> 00:00:51,485 line:-1
+WKWebView is the view that
+is used to show all web content
+
+
+22
+00:00:51.485 --> 00:00:53.820 line:-1 position:50%
+on iOS and much of MacOS.
+
+
+23
+00:00:53,820 --> 00:00:55,389 line:-1
+This includes Safari.
+
+
+24
+00:00:55,389 --> 00:00:57,958 line:-1
+So if you need to show
+a web page in your app,
+
+
+25
+00:00:57,958 --> 00:01:00,794 line:-1
+then you might assume you need
+to add a WKWebView.
+
+
+26
+00:01:00,794 --> 00:01:01,795 line:-1
+But wait!
+
+
+27
+00:01:01,795 --> 00:01:04,164 line:-1
+What are you doing
+with that content?
+
+
+28
+00:01:04.164 --> 00:01:06.767 line:-1 position:50%
+If you need a way
+to view a web page,
+
+
+29
+00:01:06,767 --> 00:01:08,869 line:-1
+but you don't need
+much customized interaction
+
+
+30
+00:01:08,869 --> 00:01:10,304 line:-1
+with that content,
+
+
+31
+00:01:10.304 --> 00:01:13.707 line:-1 position:50%
+you probably just need
+an SFSafariViewController.
+
+
+32
+00:01:13,707 --> 00:01:17,277 line:-1
+This is like a tiny Safari
+inside your app.
+
+
+33
+00:01:17,277 --> 00:01:19,947 line:-1
+Using one of these views
+is incredibly simple,
+
+
+34
+00:01:19,947 --> 00:01:22,516 line:-1
+but there is a trade-off.
+
+
+35
+00:01:22,516 --> 00:01:23,984 line:-1
+There is little you can do
+
+
+36
+00:01:23.984 --> 00:01:25.819 line:-1 position:50%
+to interact
+with the web content.
+
+
+37
+00:01:25.819 --> 00:01:29.790 line:-1 position:50%
+But this year, we have made it
+easier to do just a bit more
+
+
+38
+00:01:29.790 --> 00:01:31.925 line:-1 position:50%
+with Safari view controller.
+
+
+39
+00:01:31.925 --> 00:01:35.362 line:-1 position:50%
+Your users have always been able
+to run app extensions
+
+
+40
+00:01:35,362 --> 00:01:39,232 line:-1
+through the share sheet on your
+Safari view controller's content,
+
+
+41
+00:01:39.232 --> 00:01:42.869 line:-1 position:50%
+but for special functions
+built only for your app,
+
+
+42
+00:01:42,869 --> 00:01:45,105 line:-1
+that has been
+a little cumbersome
+
+
+43
+00:01:45,105 --> 00:01:47,808 line:-1
+and hard for users to discover.
+
+
+44
+00:01:47.808 --> 00:01:51.545 line:-1 position:50%
+So in iOS 15,
+we have added a new API
+
+
+45
+00:01:51.545 --> 00:01:53.380 line:-1 position:50%
+to bring one
+of your app extensions
+
+
+46
+00:01:53,380 --> 00:01:57,184 line:-1
+to a customized button
+on Safari view controller.
+
+
+47
+00:01:57,184 --> 00:02:00,821 line:-1
+You can map this button to one
+of your app's share extensions,
+
+
+48
+00:02:00.821 --> 00:02:03.290 line:-1 position:50%
+and you can even set an image
+for that button
+
+
+49
+00:02:03,290 --> 00:02:06,259 line:-1
+that will best represent
+the extension that will run,
+
+
+50
+00:02:06,259 --> 00:02:08,462 line:-1
+allowing users
+to run your app extensions
+
+
+51
+00:02:08,462 --> 00:02:10,364 line:-1
+directly from the toolbar,
+
+
+52
+00:02:10,364 --> 00:02:12,699 line:-1
+including running JavaScript
+on the page.
+
+
+53
+00:02:12.699 --> 00:02:15.802 line:-1 position:50%
+But this is still a very limited
+amount of interaction.
+
+
+54
+00:02:15.802 --> 00:02:18.572 line:-1 position:50%
+And that's where WKWebView
+comes in.
+
+
+55
+00:02:18,572 --> 00:02:21,241 line:-1
+WKWebView allows you to do
+many things
+
+
+56
+00:02:21.241 --> 00:02:23.410 line:-1 position:50%
+with the content
+that it is showing.
+
+
+57
+00:02:23.410 --> 00:02:26.380 line:-1 position:50%
+We have many APIs for loading,
+manipulating,
+
+
+58
+00:02:26,380 --> 00:02:28,315 line:-1
+and interacting
+with the content.
+
+
+59
+00:02:28,315 --> 00:02:30,250 line:-1
+So, if you need
+to show web content,
+
+
+60
+00:02:30,250 --> 00:02:33,620 line:-1
+and you need to have
+complex interactions with it,
+
+
+61
+00:02:33.620 --> 00:02:36.189 line:-1 position:50%
+then WKWebView is for you.
+
+
+62
+00:02:36.189 --> 00:02:39.326 line:-1 position:50%
+And since WKWebView is about
+interacting with web content,
+
+
+63
+00:02:39.326 --> 00:02:43.163 line:-1 position:50%
+we are always striving to make
+that easier for you to do.
+
+
+64
+00:02:43.163 --> 00:02:46.400 line:-1 position:50%
+We take on more of the workload
+by making easy APIs
+
+
+65
+00:02:46,400 --> 00:02:49,369 line:-1
+for you to adopt that will
+help you access and manipulate
+
+
+66
+00:02:49.369 --> 00:02:51.638 line:-1 position:50%
+the content of your web view.
+
+
+67
+00:02:51,638 --> 00:02:53,840 line:-1
+This year we have been
+hard at work,
+
+
+68
+00:02:53.840 --> 00:02:56.910 line:-1 position:50%
+adding new and helpful features
+to WKWebView,
+
+
+69
+00:02:56,910 --> 00:03:00,414 line:-1
+and today, I'd love to tell you
+about some of them.
+
+
+70
+00:03:00,414 --> 00:03:03,016 line:-1
+First, we'll cover
+several APIs
+
+
+71
+00:03:03.016 --> 00:03:04.851 line:-1 position:50%
+that will allow you
+to interact with
+
+
+72
+00:03:04,851 --> 00:03:06,653 line:-1
+and manipulate your web content
+
+
+73
+00:03:06,653 --> 00:03:09,556 line:-1
+without using having
+to inject JavaScript.
+
+
+74
+00:03:09.556 --> 00:03:11.625 line:-1 position:50%
+Then we will cover several APIs
+
+
+75
+00:03:11,625 --> 00:03:13,693 line:-1
+that will give you access
+to functionality
+
+
+76
+00:03:13,693 --> 00:03:16,797 line:-1
+that previously has only been
+available in Safari,
+
+
+77
+00:03:16,797 --> 00:03:19,766 line:-1
+allowing for a deeper
+browser-like experience
+
+
+78
+00:03:19,766 --> 00:03:22,235 line:-1
+in your app.
+
+
+79
+00:03:22.235 --> 00:03:24.004 line:-1 position:50%
+Before we go over these APIs
+
+
+80
+00:03:24.004 --> 00:03:27.040 line:-1 position:50%
+that will allow you to opt-out
+of using JavaScript,
+
+
+81
+00:03:27.040 --> 00:03:32.245 line:-1 position:50%
+let's review why you might want
+to avoid JavaScript.
+
+
+82
+00:03:32.245 --> 00:03:35.015 line:-1 position:50%
+We love JavaScript!
+
+
+83
+00:03:35.015 --> 00:03:36.983 line:-1 position:50%
+It is the language of the web!
+
+
+84
+00:03:36,983 --> 00:03:40,187 line:-1
+But injecting JavaScript
+is complicated.
+
+
+85
+00:03:40,187 --> 00:03:42,322 line:-1
+The interface
+between native and web
+
+
+86
+00:03:42,322 --> 00:03:44,357 line:-1
+that you need to cross
+via injection
+
+
+87
+00:03:44,357 --> 00:03:47,327 line:-1
+can be difficult and cumbersome
+to navigate.
+
+
+88
+00:03:47.327 --> 00:03:50.664 line:-1 position:50%
+It can also easily have
+unintended side effects
+
+
+89
+00:03:50,664 --> 00:03:53,133 line:-1
+or be difficult to manage
+when dealing with content
+
+
+90
+00:03:53,133 --> 00:03:55,402 line:-1
+from multiple web sources.
+
+
+91
+00:03:55.402 --> 00:03:59.539 line:-1 position:50%
+It's best to avoid that headache
+if you can.
+
+
+92
+00:03:59,539 --> 00:04:01,074 line:-1
+There are also some features
+
+
+93
+00:04:01,074 --> 00:04:04,544 line:-1
+that are just incompatible
+with injected JavaScript.
+
+
+94
+00:04:04.544 --> 00:04:06.613 line:-1 position:50%
+Last year, we introduced
+a new feature
+
+
+95
+00:04:06.613 --> 00:04:08.548 line:-1 position:50%
+called app-bound domains.
+
+
+96
+00:04:08.548 --> 00:04:10.817 line:-1 position:50%
+This allows you to specify
+which domains
+
+
+97
+00:04:10,817 --> 00:04:13,120 line:-1
+you would like to allow
+deep interaction with
+
+
+98
+00:04:13.120 --> 00:04:14.421 line:-1 position:50%
+in your app.
+
+
+99
+00:04:14,421 --> 00:04:17,591 line:-1
+App-bound domains helps increase
+the security and privacy
+
+
+100
+00:04:17,591 --> 00:04:19,626 line:-1
+of your app for your users.
+
+
+101
+00:04:19.626 --> 00:04:20.927 line:-1 position:50%
+But to get this benefit,
+
+
+102
+00:04:20,927 --> 00:04:23,964 line:-1
+you cannot inject JavaScript
+into your web view.
+
+
+103
+00:04:23.964 --> 00:04:26.733 line:-1 position:50%
+Doing so disables the feature.
+
+
+104
+00:04:26,733 --> 00:04:28,935 line:-1
+There are also
+other high-value features,
+
+
+105
+00:04:28,935 --> 00:04:30,137 line:-1
+like Apple Pay,
+
+
+106
+00:04:30,137 --> 00:04:32,472 line:-1
+that you do not have access to
+in your web view
+
+
+107
+00:04:32,472 --> 00:04:35,041 line:-1
+if you choose to inject
+JavaScript.
+
+
+108
+00:04:35.041 --> 00:04:37.377 line:-1 position:50%
+Therefore, we've added
+several new APIs
+
+
+109
+00:04:37,377 --> 00:04:40,747 line:-1
+to allow you to easily interact
+with the content in your web view
+
+
+110
+00:04:40.747 --> 00:04:44.184 line:-1 position:50%
+without having to deal
+with injecting JavaScript.
+
+
+111
+00:04:44,184 --> 00:04:47,821 line:-1
+These new APIs
+fall into three categories.
+
+
+112
+00:04:47.821 --> 00:04:50.390 line:-1 position:50%
+First, we have simple ways
+for you to access
+
+
+113
+00:04:50,390 --> 00:04:52,926 line:-1
+the pages' theme color
+and related colors
+
+
+114
+00:04:52,926 --> 00:04:55,195 line:-1
+for a website.
+
+
+115
+00:04:55.195 --> 00:04:57.797 line:-1 position:50%
+Next, a way to disable
+text interaction,
+
+
+116
+00:04:57.797 --> 00:05:03.203 line:-1 position:50%
+as well as being able to control
+media playback in your web view.
+
+
+117
+00:05:03.203 --> 00:05:06.773 line:-1 position:50%
+First, let's explore
+theme color.
+
+
+118
+00:05:06,773 --> 00:05:08,942 line:0
+You might remember last year
+we told you about
+
+
+119
+00:05:08,942 --> 00:05:12,546 line:0
+one of our mission-critical
+internal apps, Browser Pets,
+
+
+120
+00:05:12,546 --> 00:05:14,114 line:0
+which was written
+by Brady Eidson
+
+
+121
+00:05:14,114 --> 00:05:15,215 line:0
+to combine the feeds
+
+
+122
+00:05:15,215 --> 00:05:18,652 line:0
+from our WebKittens
+and Pups on Safari websites.
+
+
+123
+00:05:18,652 --> 00:05:21,021 line:-1
+Well, with all the new APIs
+available,
+
+
+124
+00:05:21.021 --> 00:05:24.357 line:-1 position:50%
+Brady and I decided we should
+update this important tool,
+
+
+125
+00:05:24,357 --> 00:05:29,696 line:-1
+to get the most out of our many
+morale-raising cats and dogs.
+
+
+126
+00:05:29,696 --> 00:05:32,199 line:-1
+One of the engineers
+on the WebKittens website
+
+
+127
+00:05:32.199 --> 00:05:35.035 line:-1 position:50%
+has decided to add
+a dynamic theme color
+
+
+128
+00:05:35,035 --> 00:05:36,836 line:-1
+that changes with the season,
+
+
+129
+00:05:36.836 --> 00:05:40.240 line:-1 position:50%
+adding a little flair
+to our important pet photos.
+
+
+130
+00:05:40.240 --> 00:05:42.909 line:-1 position:50%
+I wanted this to be reflected
+in the app as well,
+
+
+131
+00:05:42.909 --> 00:05:45.679 line:-1 position:50%
+but I did not want
+to duplicate the code.
+
+
+132
+00:05:45,679 --> 00:05:51,451 line:-1
+Fortunately, we have a new API
+that makes this very easy.
+
+
+133
+00:05:51,451 --> 00:05:52,986 line:-1
+As you can see here,
+
+
+134
+00:05:52.986 --> 00:05:55.255 line:-1 position:50%
+I can set the color
+of the header view
+
+
+135
+00:05:55,255 --> 00:05:57,490 line:-1
+to the theme color
+of the website
+
+
+136
+00:05:57,490 --> 00:06:00,660 line:-1
+using this new API,
+thus leveraging the work
+
+
+137
+00:06:00,660 --> 00:06:04,030 line:-1
+that my fellow engineer put into
+the WebKittens website.
+
+
+138
+00:06:04,030 --> 00:06:07,067 line:-1
+The website engineer can even
+add new themes in the future,
+
+
+139
+00:06:07.067 --> 00:06:08.768 line:-1 position:50%
+and they will be reflected
+in the app
+
+
+140
+00:06:08.768 --> 00:06:12.439 line:-1 position:50%
+without any additional work
+on my part.
+
+
+141
+00:06:12,439 --> 00:06:15,375 line:-1
+If themeColor isn't set,
+in a future seed
+
+
+142
+00:06:15,375 --> 00:06:18,645 line:-1
+we have an alternate calculated
+background color exposed
+
+
+143
+00:06:18.645 --> 00:06:22.382 line:-1 position:50%
+as underPageBackgroundColor,
+which you can use similarly.
+
+
+144
+00:06:22,382 --> 00:06:24,918 line:-1
+You might have noticed
+how Safari is using this
+
+
+145
+00:06:24,918 --> 00:06:28,388 line:-1
+to create a look that blends
+the app with the web page.
+
+
+146
+00:06:28,388 --> 00:06:31,725 line:-1
+You can even write to this value
+to customize the color
+
+
+147
+00:06:31.725 --> 00:06:33.727 line:-1 position:50%
+that is used
+to fill the background
+
+
+148
+00:06:33,727 --> 00:06:38,031 line:-1
+when scrolling past
+the end of web content.
+
+
+149
+00:06:38,031 --> 00:06:41,167 line:-1
+Next, let's talk about
+text interaction.
+
+
+150
+00:06:41,167 --> 00:06:42,769 line:-1
+We have recently added videos
+
+
+151
+00:06:42.769 --> 00:06:45.639 line:-1 position:50%
+to the WebKittens
+and Pups on Safari websites,
+
+
+152
+00:06:45.639 --> 00:06:47.841 line:-1 position:50%
+and Browser Pets users
+have been complaining
+
+
+153
+00:06:47.841 --> 00:06:50.877 line:-1 position:50%
+about accidentally activating
+the text selection controls
+
+
+154
+00:06:50,877 --> 00:06:53,280 line:-1
+when trying to play
+those videos.
+
+
+155
+00:06:53,280 --> 00:06:55,615 line:-1
+Well, we don't want that!
+
+
+156
+00:06:55,615 --> 00:06:57,651 line:-1
+Fortunately, there is a new API
+
+
+157
+00:06:57,651 --> 00:07:01,621 line:-1
+to quickly and easily disable
+text interaction on a web view.
+
+
+158
+00:07:01,621 --> 00:07:02,956 line:-1
+It's simple!
+
+
+159
+00:07:02,956 --> 00:07:04,357 line:-1
+When setting up your web view,
+
+
+160
+00:07:04.357 --> 00:07:07.761 line:-1 position:50%
+just make sure to set
+textInteractionEnabled to false
+
+
+161
+00:07:07,761 --> 00:07:10,330 line:-1
+in the preferences used
+to create the web view.
+
+
+162
+00:07:10,330 --> 00:07:14,034 line:-1
+This will turn off all text
+interactions in that web view.
+
+
+163
+00:07:14,034 --> 00:07:15,502 line:-1
+Now text selection controls
+
+
+164
+00:07:15,502 --> 00:07:18,004 line:-1
+won't get in the way
+of the media controls,
+
+
+165
+00:07:18,004 --> 00:07:20,774 line:-1
+and we can play
+those kitty videos unhindered.
+
+
+166
+00:07:20.774 --> 00:07:23.009 line:-1 position:50%
+Speaking of media controls,
+
+
+167
+00:07:23,009 --> 00:07:26,680 line:-1
+we have some great updates
+for media playback controls!
+
+
+168
+00:07:26,680 --> 00:07:29,816 line:-1
+Previously, if you wanted
+to pause or suspend media
+
+
+169
+00:07:29.816 --> 00:07:31.584 line:-1 position:50%
+that was playing
+in your web view,
+
+
+170
+00:07:31,584 --> 00:07:34,120 line:-1
+you'd need to inject JavaScript.
+
+
+171
+00:07:34,120 --> 00:07:36,389 line:-1
+You'd also need to find
+the specific element
+
+
+172
+00:07:36,389 --> 00:07:39,159 line:-1
+in the DOM to be able
+to control it.
+
+
+173
+00:07:39,159 --> 00:07:42,829 line:-1
+But now, we have a simple API
+that makes it easy to control
+
+
+174
+00:07:42,829 --> 00:07:46,232 line:-1
+the state of media
+in your web view.
+
+
+175
+00:07:46,232 --> 00:07:49,369 line:-1
+You can now easily pause
+all media,
+
+
+176
+00:07:49.369 --> 00:07:52.505 line:-1 position:50%
+close all media windows,
+
+
+177
+00:07:52.505 --> 00:07:56.009 line:-1 position:50%
+get the state of the media
+on the page,
+
+
+178
+00:07:56.009 --> 00:07:57.844 line:-1 position:50%
+or set media suspended,
+
+
+179
+00:07:57,844 --> 00:08:00,213 line:-1
+which will pause media
+and disable user controls
+
+
+180
+00:08:00,213 --> 00:08:02,382 line:-1
+until
+setAllMediaPlaybackSuspended
+
+
+181
+00:08:02.382 --> 00:08:04.684 line:-1 position:50%
+is set to false.
+
+
+182
+00:08:04,684 --> 00:08:07,420 line:-1
+To help you get more familiar
+with these new APIs
+
+
+183
+00:08:07.420 --> 00:08:09.789 line:-1 position:50%
+and how easy they are use,
+
+
+184
+00:08:09,789 --> 00:08:12,459 line:-1
+I'm going to turn it over
+to Brady who will show you
+
+
+185
+00:08:12.459 --> 00:08:15.161 line:-1 position:50%
+how we utilized these
+new media control APIs
+
+
+186
+00:08:15,161 --> 00:08:16,529 line:-1
+in Browser Pets!
+
+
+187
+00:08:16.529 --> 00:08:18.031 line:-1 position:50%
+Brady Eidson: Thanks, Megan.
+
+
+188
+00:08:18,031 --> 00:08:22,001 line:-1
+Hello, I'm Brady Eidson,
+an engineer on the WebKit team.
+
+
+189
+00:08:22.001 --> 00:08:23.303 line:-1 position:50%
+As Megan alluded,
+
+
+190
+00:08:23,303 --> 00:08:26,806 line:-1
+both the WebKittens
+and Pups on Safari websites
+
+
+191
+00:08:26,806 --> 00:08:28,808 line:-1
+recently added the ability
+to post videos
+
+
+192
+00:08:28.808 --> 00:08:30.810 line:-1 position:50%
+instead of just still images,
+
+
+193
+00:08:30.810 --> 00:08:34.914 line:-1 position:50%
+which means our Browser Pets app
+has videos now, too.
+
+
+194
+00:08:34.914 --> 00:08:37.717 line:-1 position:50%
+Here's how the app looks
+right now.
+
+
+195
+00:08:37,717 --> 00:08:40,053 line:0
+These buttons are
+native UI buttons
+
+
+196
+00:08:40,053 --> 00:08:42,188 position:50%
+for various features I'm adding.
+
+
+197
+00:08:42,188 --> 00:08:45,325 line:-1
+That banner at the top
+of the page is web content,
+
+
+198
+00:08:45.325 --> 00:08:47.560 line:-1 position:50%
+and the website has set
+a theme color,
+
+
+199
+00:08:47,560 --> 00:08:50,163 line:-1
+which I have adopted using
+the web view themeColor property
+
+
+200
+00:08:50.163 --> 00:08:52.165 line:-1 position:50%
+Megan mentioned.
+
+
+201
+00:08:52.165 --> 00:08:53.833 line:-1 position:50%
+Once videos were added,
+
+
+202
+00:08:53,833 --> 00:08:55,502 line:-1
+some folks expressed
+their preferences
+
+
+203
+00:08:55,502 --> 00:08:57,904 line:-1
+to not have videos autoplaying.
+
+
+204
+00:08:57.904 --> 00:09:00.740 line:-1 position:50%
+This Pause button
+is to accommodate them.
+
+
+205
+00:09:00,740 --> 00:09:02,409 line:-1
+Let's see what it does.
+
+
+206
+00:09:04,277 --> 00:09:07,580 position:50%
+Just the kittens video paused,
+not the dogs.
+
+
+207
+00:09:07,580 --> 00:09:10,016 position:50%
+And pressing Play,
+nothing happens.
+
+
+208
+00:09:10,016 --> 00:09:12,018 line:0
+Let's take a look at the code.
+
+
+209
+00:09:14,220 --> 00:09:16,723 line:-1
+This JavaScript
+was my only option
+
+
+210
+00:09:16,723 --> 00:09:18,992 line:-1
+to try to pause
+these videos before,
+
+
+211
+00:09:18.992 --> 00:09:21.094 line:-1 position:50%
+and it's been problematic.
+
+
+212
+00:09:21.094 --> 00:09:23.229 line:-1 position:50%
+I have to understand
+the structure of web pages
+
+
+213
+00:09:23,229 --> 00:09:24,864 line:-1
+from two different websites,
+
+
+214
+00:09:24,864 --> 00:09:27,600 line:-1
+and that structure
+is constantly changing.
+
+
+215
+00:09:27.600 --> 00:09:30.703 line:-1 position:50%
+For example, this JavaScript
+from the Pups website
+
+
+216
+00:09:30,703 --> 00:09:34,474 line:-1
+used to work
+but doesn't anymore.
+
+
+217
+00:09:34,474 --> 00:09:37,110 line:-1
+Fortunately now
+there's a better way.
+
+
+218
+00:09:37,110 --> 00:09:39,679 line:-1
+First, I adopted calling
+pauseAllMediaPlayback
+
+
+219
+00:09:39,679 --> 00:09:41,681 line:-1
+on the web view.
+
+
+220
+00:09:45.752 --> 00:09:48.421 line:-1 position:50%
+That's equivalent to calling
+the JavaScript function pause
+
+
+221
+00:09:48,421 --> 00:09:50,323 line:-1
+on every media element
+on a page.
+
+
+222
+00:09:52,358 --> 00:09:54,727 position:50%
+And it works nicely.
+
+
+223
+00:09:54,727 --> 00:09:58,932 line:0
+But notice what happens
+when I refresh the page.
+
+
+224
+00:09:58,932 --> 00:10:01,434 line:-1
+The videos play again.
+
+
+225
+00:10:01,434 --> 00:10:02,936 line:-1
+New page load.
+
+
+226
+00:10:02.936 --> 00:10:05.538 line:-1 position:50%
+These videos
+have never been paused.
+
+
+227
+00:10:05.538 --> 00:10:08.174 line:-1 position:50%
+If I want something more sticky,
+
+
+228
+00:10:08.174 --> 00:10:13.213 line:-1 position:50%
+I'd use
+setAllMediaPlaybackSuspended.
+
+
+229
+00:10:13.213 --> 00:10:14.914 line:-1 position:50%
+Let's try that now.
+
+
+230
+00:10:17,550 --> 00:10:21,621 position:50%
+Notice how it pauses the videos,
+and they remain paused,
+
+
+231
+00:10:21,621 --> 00:10:23,923 line:0
+even after refreshing the page.
+
+
+232
+00:10:23,923 --> 00:10:25,391 line:-1
+That's because this setting
+
+
+233
+00:10:25.391 --> 00:10:27.560 line:-1 position:50%
+is a property
+of the web view itself
+
+
+234
+00:10:27.560 --> 00:10:30.063 line:-1 position:50%
+and not of any content
+inside of it.
+
+
+235
+00:10:30.063 --> 00:10:33.366 line:-1 position:50%
+It also allows me to resume.
+
+
+236
+00:10:33,366 --> 00:10:36,503 line:-1
+Thanks to these new APIs,
+you now have the flexibility
+
+
+237
+00:10:36.503 --> 00:10:39.105 line:-1 position:50%
+to add a better media experience
+to your app.
+
+
+238
+00:10:39.105 --> 00:10:40.740 line:-1 position:50%
+Back to you, Megan.
+
+
+239
+00:10:40,740 --> 00:10:41,808 line:-1
+Megan: Thanks, Brady!
+
+
+240
+00:10:41,808 --> 00:10:43,610 line:-1
+Those pets look great,
+
+
+241
+00:10:43.610 --> 00:10:46.880 line:-1 position:50%
+and even better
+with the new media controls.
+
+
+242
+00:10:46,880 --> 00:10:49,682 line:-1
+So those are our new APIs
+for WKWebView
+
+
+243
+00:10:49.682 --> 00:10:52.252 line:-1 position:50%
+that let you avoid
+using JavaScript.
+
+
+244
+00:10:52,252 --> 00:10:53,953 line:-1
+We hope they make
+writing your apps
+
+
+245
+00:10:53.953 --> 00:10:55.488 line:-1 position:50%
+and interacting
+with your web content
+
+
+246
+00:10:55.488 --> 00:10:58.658 line:-1 position:50%
+even easier than before.
+
+
+247
+00:10:58.658 --> 00:11:01.828 line:-1 position:50%
+Next, we'll review several
+browser-level APIs
+
+
+248
+00:11:01.828 --> 00:11:03.730 line:-1 position:50%
+that will give you access
+to functionality
+
+
+249
+00:11:03.730 --> 00:11:07.934 line:-1 position:50%
+that previously has only been
+available in Safari.
+
+
+250
+00:11:07,934 --> 00:11:10,904 line:-1
+We have three areas of API
+to cover.
+
+
+251
+00:11:10.904 --> 00:11:14.941 line:-1 position:50%
+First is a simple
+HTTPS override flag.
+
+
+252
+00:11:14.941 --> 00:11:18.478 line:-1 position:50%
+Next is media capture or --
+as it known on the web --
+
+
+253
+00:11:18,478 --> 00:11:20,813 line:-1
+getUserMedia,
+which is fully available
+
+
+254
+00:11:20.813 --> 00:11:23.149 line:-1 position:50%
+in your web view now.
+
+
+255
+00:11:23,149 --> 00:11:26,586 line:-1
+And finally, a new API
+to manage downloads
+
+
+256
+00:11:26,586 --> 00:11:28,955 line:-1
+which will work in connection
+with WKWebView
+
+
+257
+00:11:28.955 --> 00:11:32.959 line:-1 position:50%
+to allow and manage
+downloads in your app.
+
+
+258
+00:11:32.959 --> 00:11:35.828 line:-1 position:50%
+So let's start with HTTPS.
+
+
+259
+00:11:35,828 --> 00:11:37,497 line:-1
+Security and privacy
+on the web
+
+
+260
+00:11:37.497 --> 00:11:39.499 line:-1 position:50%
+has always been important,
+
+
+261
+00:11:39.499 --> 00:11:41.467 line:-1 position:50%
+and we are always searching
+for new ways
+
+
+262
+00:11:41.467 --> 00:11:46.506 line:-1 position:50%
+to make security and privacy
+easier for you and your users.
+
+
+263
+00:11:46.506 --> 00:11:51.644 line:-1 position:50%
+There has been a broad industry
+push to move traffic to HTTPS,
+
+
+264
+00:11:51,644 --> 00:11:54,247 line:-1
+as this is a safer
+and more secure way
+
+
+265
+00:11:54.247 --> 00:11:55.448 line:-1 position:50%
+to browse the web.
+
+
+266
+00:11:55,448 --> 00:11:58,217 line:-1
+Many top sites support HTTPS,
+
+
+267
+00:11:58.217 --> 00:12:00.853 line:-1 position:50%
+and some even automatically
+upgrade connections
+
+
+268
+00:12:00,853 --> 00:12:04,724 line:-1
+from HTTP to HTTPS.
+
+
+269
+00:12:04.724 --> 00:12:07.961 line:-1 position:50%
+Beginning in iOS 15
+and macOS Monterey,
+
+
+270
+00:12:07,961 --> 00:12:11,464 line:-1
+we are taking HTTP requests
+to sites that we know
+
+
+271
+00:12:11.464 --> 00:12:15.335 line:-1 position:50%
+support HTTPS
+and upgrading them for you.
+
+
+272
+00:12:15,335 --> 00:12:17,470 line:-1
+In order to get
+this added security,
+
+
+273
+00:12:17.470 --> 00:12:20.506 line:-1 position:50%
+you don't need to do
+anything at all!
+
+
+274
+00:12:20.506 --> 00:12:22.742 line:-1 position:50%
+But, if you do need
+to turn it off
+
+
+275
+00:12:22,742 --> 00:12:24,544 line:-1
+for some local debugging,
+
+
+276
+00:12:24,544 --> 00:12:28,014 line:-1
+there's an easy flag
+to set on configuration.
+
+
+277
+00:12:28,014 --> 00:12:29,682 line:-1
+Hopefully you will
+not need this,
+
+
+278
+00:12:29,682 --> 00:12:31,284 line:-1
+but it's here if you do,
+
+
+279
+00:12:31,284 --> 00:12:34,354 line:-1
+and it probably shouldn't
+be done in production code.
+
+
+280
+00:12:34.354 --> 00:12:38.758 line:-1 position:50%
+Next, let's review what's been
+happening with media capture.
+
+
+281
+00:12:38,758 --> 00:12:41,494 line:-1
+Staring in iOS 14.3,
+
+
+282
+00:12:41,494 --> 00:12:44,330 line:-1
+we enabled getUserMedia
+for WKWebView,
+
+
+283
+00:12:44.330 --> 00:12:48.601 line:-1 position:50%
+which allowed WebRTC functions
+to work inside your app.
+
+
+284
+00:12:48,601 --> 00:12:51,137 line:-1
+Now, we've made it even better!
+
+
+285
+00:12:51.137 --> 00:12:54.007 line:-1 position:50%
+When you load your web content
+from a custom scheme handler,
+
+
+286
+00:12:54,007 --> 00:12:56,743 line:-1
+the user request prompt
+will show your app
+
+
+287
+00:12:56.743 --> 00:12:58.478 line:-1 position:50%
+as the origin of the request,
+
+
+288
+00:12:58,478 --> 00:13:02,015 line:-1
+rather than show a request
+from the website URL.
+
+
+289
+00:13:02,015 --> 00:13:04,984 line:-1
+This should make the experience
+more intuitive and seamless
+
+
+290
+00:13:04,984 --> 00:13:06,452 line:-1
+for your users.
+
+
+291
+00:13:06.452 --> 00:13:09.756 line:-1 position:50%
+If you want the prompt to remain
+as a request from the URL,
+
+
+292
+00:13:09,756 --> 00:13:12,225 line:-1
+just load without
+the custom scheme handler,
+
+
+293
+00:13:12,225 --> 00:13:15,161 line:-1
+and the prompt will be shown
+as it is today.
+
+
+294
+00:13:15.161 --> 00:13:18.698 line:-1 position:50%
+We also have a new API
+to allow you to decide
+
+
+295
+00:13:18,698 --> 00:13:20,700 line:-1
+when and how to prompt the user
+
+
+296
+00:13:20,700 --> 00:13:22,935 line:-1
+for camera and microphone
+permissions
+
+
+297
+00:13:22,935 --> 00:13:24,504 line:-1
+when working with web content.
+
+
+298
+00:13:24.504 --> 00:13:26.773 line:-1 position:50%
+Once you have obtained
+user permissions
+
+
+299
+00:13:26,773 --> 00:13:28,875 line:-1
+for the camera and microphone
+
+
+300
+00:13:28,875 --> 00:13:31,344 line:-1
+via normal entitlements
+and prompts,
+
+
+301
+00:13:31,344 --> 00:13:35,214 line:-1
+you can decide if the permission
+prompts should be shown.
+
+
+302
+00:13:35,214 --> 00:13:37,784 line:-1
+You can use this to implement
+your own prompt
+
+
+303
+00:13:37,784 --> 00:13:40,853 line:-1
+or remember
+the users' previous response
+
+
+304
+00:13:40.853 --> 00:13:44.490 line:-1 position:50%
+for web content
+you control and trust.
+
+
+305
+00:13:44.490 --> 00:13:47.160 line:-1 position:50%
+By creating and setting
+the UI delegate
+
+
+306
+00:13:47,160 --> 00:13:48,861 line:-1
+on your WKWebView,
+
+
+307
+00:13:48,861 --> 00:13:51,831 line:-1
+you can now decide
+when the user should be prompted
+
+
+308
+00:13:51,831 --> 00:13:55,101 line:-1
+for permission to use
+their camera or microphone.
+
+
+309
+00:13:55,101 --> 00:13:57,203 line:-1
+If you do not implement
+this delegate,
+
+
+310
+00:13:57,203 --> 00:14:01,240 line:-1
+users will continue to get
+the prompt as they do today.
+
+
+311
+00:14:01,240 --> 00:14:03,109 line:-1
+But if you want to skip
+the prompt
+
+
+312
+00:14:03.109 --> 00:14:05.011 line:-1 position:50%
+because you have saved
+the user preferences
+
+
+313
+00:14:05,011 --> 00:14:07,280 line:-1
+from previous interactions
+with a website,
+
+
+314
+00:14:07.280 --> 00:14:10.650 line:-1 position:50%
+this delegate will allow you
+to do that.
+
+
+315
+00:14:10.650 --> 00:14:13.753 line:-1 position:50%
+How did we leverage these
+new APIs for Browser Pets?
+
+
+316
+00:14:13.753 --> 00:14:17.657 line:-1 position:50%
+Well, due to circumstances
+beyond our control,
+
+
+317
+00:14:17,657 --> 00:14:18,991 line:-1
+the team had to cancel
+
+
+318
+00:14:18.991 --> 00:14:21.561 line:-1 position:50%
+our monthly
+Pups in the Park meetup.
+
+
+319
+00:14:21.561 --> 00:14:24.230 line:-1 position:50%
+To fulfill that need to share
+our dear doggies
+
+
+320
+00:14:24,230 --> 00:14:25,264 line:-1
+with each other,
+
+
+321
+00:14:25.264 --> 00:14:27.800 line:-1 position:50%
+Brady and I decided
+to add a virtual dog park
+
+
+322
+00:14:27.800 --> 00:14:29.102 line:-1 position:50%
+to Browser Pets,
+
+
+323
+00:14:29.102 --> 00:14:32.939 line:-1 position:50%
+so we could still get our
+social doggy goodness going on.
+
+
+324
+00:14:32,939 --> 00:14:37,143 line:-1
+This involves using getUserMedia
+to set up WebRTC functionality
+
+
+325
+00:14:37,143 --> 00:14:39,412 line:-1
+so we could see and chat
+with each other
+
+
+326
+00:14:39,412 --> 00:14:43,049 line:-1
+and our doggie friends
+real time!
+
+
+327
+00:14:43.049 --> 00:14:44.917 line:-1 position:50%
+When setting up the UI delegate,
+
+
+328
+00:14:44,917 --> 00:14:47,086 line:-1
+we know that requests
+from our server
+
+
+329
+00:14:47.086 --> 00:14:49.388 line:-1 position:50%
+are ones that our users
+would give permission to
+
+
+330
+00:14:49,388 --> 00:14:51,591 line:-1
+if they already gave permission
+to the app
+
+
+331
+00:14:51.591 --> 00:14:53.826 line:-1 position:50%
+to use the camera
+and microphone.
+
+
+332
+00:14:53.826 --> 00:14:55.995 line:-1 position:50%
+So I can skip that prompt
+by setting this delegate
+
+
+333
+00:14:55,995 --> 00:14:57,997 line:-1
+on my WKWebView.
+
+
+334
+00:14:57,997 --> 00:14:59,999 line:-1
+But that's not all I can do!
+
+
+335
+00:14:59,999 --> 00:15:02,101 line:-1
+Instead of having
+to execute JavaScript
+
+
+336
+00:15:02,101 --> 00:15:04,604 line:-1
+to start and stop
+this user media,
+
+
+337
+00:15:04,604 --> 00:15:06,672 line:-1
+we can get and set the state,
+
+
+338
+00:15:06,672 --> 00:15:08,908 line:-1
+similar to how we can interact
+with media controls
+
+
+339
+00:15:08,908 --> 00:15:10,176 line:-1
+without JavaScript.
+
+
+340
+00:15:10,176 --> 00:15:15,648 line:-1
+This work for camera
+as well as for microphone.
+
+
+341
+00:15:15,648 --> 00:15:18,484 line:-1
+To help you get even more
+familiar with these new APIs
+
+
+342
+00:15:18,484 --> 00:15:20,286 line:-1
+and how easy they are use,
+
+
+343
+00:15:20,286 --> 00:15:22,955 line:-1
+I'm going to turn it back over
+to Brady who will show you
+
+
+344
+00:15:22,955 --> 00:15:26,225 line:-1
+how we added that virtual
+dog park to Browser Pets!
+
+
+345
+00:15:26.225 --> 00:15:28.027 line:-1 position:50%
+Brady: Thanks, Megan.
+
+
+346
+00:15:28,027 --> 00:15:29,428 line:-1
+As Megan mentioned,
+
+
+347
+00:15:29,428 --> 00:15:31,697 line:-1
+we had to get a virtual dog park
+up and running
+
+
+348
+00:15:31,697 --> 00:15:33,966 line:-1
+because of the times
+we're living in.
+
+
+349
+00:15:33,966 --> 00:15:36,836 line:-1
+Let's take another look
+at the Browser Pets app.
+
+
+350
+00:15:36,836 --> 00:15:39,038 position:50%
+Some of you may have noticed
+a Call button.
+
+
+351
+00:15:39,038 --> 00:15:40,907 line:0
+Let's tap that now.
+
+
+352
+00:15:40,907 --> 00:15:43,910 line:0
+We're instantly connected
+to our virtual dog park
+
+
+353
+00:15:43,910 --> 00:15:45,711 line:0
+hosted at our friend's house.
+
+
+354
+00:15:45,711 --> 00:15:49,282 line:0
+Let's join the fun
+by tapping Connect.
+
+
+355
+00:15:49,282 --> 00:15:50,783 line:-1
+Now, because this is
+the first time
+
+
+356
+00:15:50.783 --> 00:15:53.452 line:-1 position:50%
+we've ever used the camera
+in this app,
+
+
+357
+00:15:53.452 --> 00:15:56.255 line:-1 position:50%
+we get the system-wide prompt
+about Browser Pets.
+
+
+358
+00:15:56,255 --> 00:15:59,025 line:-1
+Let's definitely choose Allow.
+
+
+359
+00:15:59.025 --> 00:16:00.660 line:-1 position:50%
+And the second prompt --
+
+
+360
+00:16:00,660 --> 00:16:03,262 line:-1
+specific to the website
+we are currently viewing --
+
+
+361
+00:16:03.262 --> 00:16:05.698 line:-1 position:50%
+is the default behavior today
+in the system.
+
+
+362
+00:16:05,698 --> 00:16:07,967 line:-1
+Let's allow that also.
+
+
+363
+00:16:07.967 --> 00:16:11.804 line:-1 position:50%
+And there we are.
+getUserMedia in action.
+
+
+364
+00:16:11,804 --> 00:16:15,174 line:-1
+But let's see if we can make
+a change to our WKUIDelegate,
+
+
+365
+00:16:15.174 --> 00:16:16.409 line:-1 position:50%
+like Megan mentioned,
+
+
+366
+00:16:16,409 --> 00:16:19,111 line:-1
+to make the experience
+even better.
+
+
+367
+00:16:23,482 --> 00:16:26,485 line:-1
+In our delegate,
+we'll just check for the host
+
+
+368
+00:16:26.485 --> 00:16:28.821 line:-1 position:50%
+providing our virtual dog park
+content
+
+
+369
+00:16:28.821 --> 00:16:30.623 line:-1 position:50%
+and allow media capture access.
+
+
+370
+00:16:30.623 --> 00:16:33.259 line:-1 position:50%
+Let's see how that changes
+Browser Pets.
+
+
+371
+00:16:36,762 --> 00:16:38,931 line:-1
+Great.
+No prompt.
+
+
+372
+00:16:38,931 --> 00:16:40,867 line:-1
+And the way we used
+the delegate,
+
+
+373
+00:16:40,867 --> 00:16:43,102 line:-1
+we also keep our users
+safe and private
+
+
+374
+00:16:43.102 --> 00:16:45.538 line:-1 position:50%
+if future content comes
+from any other host
+
+
+375
+00:16:45.538 --> 00:16:48.007 line:-1 position:50%
+and tries to access the camera.
+
+
+376
+00:16:48,007 --> 00:16:51,878 line:-1
+Now that we're in a video chat,
+let's try the Mute button.
+
+
+377
+00:16:51,878 --> 00:16:54,647 line:0
+As you can see,
+my camera feed dropped.
+
+
+378
+00:16:54,647 --> 00:16:57,149 line:0
+You'll also notice that
+the recording indicator
+
+
+379
+00:16:57,149 --> 00:16:59,151 line:0
+in the status bar
+has disappeared
+
+
+380
+00:16:59,151 --> 00:17:02,054 line:-1
+and unmuting,
+I can bring back my camera feed
+
+
+381
+00:17:02,054 --> 00:17:04,457 line:-1
+and the recording indicator
+returns.
+
+
+382
+00:17:04,457 --> 00:17:07,660 line:-1
+This was easy;
+no JavaScript necessary.
+
+
+383
+00:17:07.660 --> 00:17:11.898 line:-1 position:50%
+All I had to do was hook it up
+to webView.setCameraCaptureState
+
+
+384
+00:17:11.898 --> 00:17:14.400 line:-1 position:50%
+as Megan had mentioned.
+
+
+385
+00:17:14,400 --> 00:17:17,336 line:-1
+This was just a taste of how
+these APIs enable you
+
+
+386
+00:17:17.336 --> 00:17:20.006 line:-1 position:50%
+to easily customize
+the media capture experience
+
+
+387
+00:17:20,006 --> 00:17:21,974 line:-1
+in your WKWebView app.
+
+
+388
+00:17:21,974 --> 00:17:23,576 line:-1
+Back to you, Megan.
+
+
+389
+00:17:23,576 --> 00:17:24,911 line:-1
+Megan: Thanks, Brady!
+
+
+390
+00:17:24,911 --> 00:17:27,313 line:-1
+I'm so glad we could
+continue to meet
+
+
+391
+00:17:27,313 --> 00:17:30,182 line:-1
+with all our fabulous pets.
+
+
+392
+00:17:30,182 --> 00:17:33,653 line:-1
+Lastly, let's talk about
+downloads.
+
+
+393
+00:17:33.653 --> 00:17:36.422 line:-1 position:50%
+Browser Pets users have been
+telling me they want to be able
+
+
+394
+00:17:36,422 --> 00:17:38,324 line:-1
+to share these cute
+animal pictures
+
+
+395
+00:17:38,324 --> 00:17:40,226 line:-1
+with their friends and family,
+
+
+396
+00:17:40.226 --> 00:17:42.428 line:-1 position:50%
+but only Apple employees
+have been allowed to use
+
+
+397
+00:17:42,428 --> 00:17:44,230 line:-1
+the Browser Pets app.
+
+
+398
+00:17:44.230 --> 00:17:46.732 line:-1 position:50%
+Fortunately, we've added an API
+
+
+399
+00:17:46,732 --> 00:17:50,603 line:-1
+that lets you allow and manage
+downloads from your web view,
+
+
+400
+00:17:50,603 --> 00:17:54,740 line:-1
+making sharing files
+easier than ever!
+
+
+401
+00:17:54.740 --> 00:17:58.010 line:-1 position:50%
+There are three ways to initiate
+a download from the web.
+
+
+402
+00:17:58,010 --> 00:18:00,713 line:-1
+The web content can initiate
+a download,
+
+
+403
+00:18:00.713 --> 00:18:03.015 line:-1 position:50%
+the server can initiate
+a download,
+
+
+404
+00:18:03.015 --> 00:18:06.385 line:-1 position:50%
+and the app can initiate
+a download.
+
+
+405
+00:18:06.385 --> 00:18:11.590 line:-1 position:50%
+Web content initiates a download
+with JavaScript similar to this.
+
+
+406
+00:18:11.590 --> 00:18:13.626 line:-1 position:50%
+When this JavaScript
+is executed,
+
+
+407
+00:18:13,626 --> 00:18:16,996 line:-1
+it initiates a download
+navigation action,
+
+
+408
+00:18:16,996 --> 00:18:19,298 line:-1
+which calls
+the navigation delegate
+
+
+409
+00:18:19.298 --> 00:18:22.635 line:-1 position:50%
+with shouldPerformDownload
+set to true.
+
+
+410
+00:18:22.635 --> 00:18:24.937 line:-1 position:50%
+You should use this value
+to determine --
+
+
+411
+00:18:24.937 --> 00:18:26.939 line:-1 position:50%
+along with other logic --
+
+
+412
+00:18:26,939 --> 00:18:30,977 line:-1
+if the download
+should be allowed.
+
+
+413
+00:18:30,977 --> 00:18:34,847 line:-1
+The server can initiate
+a download in HTTP like this
+
+
+414
+00:18:34,847 --> 00:18:39,285 line:-1
+after calling loadRequest
+on your web view.
+
+
+415
+00:18:39.285 --> 00:18:42.355 line:-1 position:50%
+When that happens,
+your WKNavigationResponse
+
+
+416
+00:18:42.355 --> 00:18:45.591 line:-1 position:50%
+will have a Content-Disposition
+header field
+
+
+417
+00:18:45,591 --> 00:18:48,127 line:-1
+with a value containing
+"attachment",
+
+
+418
+00:18:48,127 --> 00:18:50,363 line:-1
+and when it does,
+you should return
+
+
+419
+00:18:50.363 --> 00:18:53.432 line:-1 position:50%
+WKNavigationActionPolicyDownload
+
+
+420
+00:18:53,432 --> 00:18:56,769 line:-1
+from your decision handler
+to start the download.
+
+
+421
+00:18:56,769 --> 00:18:59,839 line:-1
+Finally, your app can decide
+it wants to download something
+
+
+422
+00:18:59.839 --> 00:19:01.774 line:-1 position:50%
+in the context
+of the current page
+
+
+423
+00:19:01,774 --> 00:19:05,745 line:-1
+using an NSURLRequest
+like this.
+
+
+424
+00:19:05.745 --> 00:19:07.380 line:-1 position:50%
+Whatever method you use,
+
+
+425
+00:19:07.380 --> 00:19:09.682 line:-1 position:50%
+when you get
+the WKDownload object,
+
+
+426
+00:19:09.682 --> 00:19:13.486 line:-1 position:50%
+you need to set the delegate
+property on that object
+
+
+427
+00:19:13.486 --> 00:19:17.123 line:-1 position:50%
+to be able to tell it where
+to write the bytes to disk.
+
+
+428
+00:19:17,123 --> 00:19:21,093 line:-1
+If you do not, the download
+will automatically be cancelled.
+
+
+429
+00:19:21.093 --> 00:19:24.597 line:-1 position:50%
+If a download fails,
+the data to resume the download
+
+
+430
+00:19:24.597 --> 00:19:26.032 line:-1 position:50%
+will be handed to you
+
+
+431
+00:19:26,032 --> 00:19:28,667 line:-1
+if you implement the method
+on the delegate.
+
+
+432
+00:19:28.667 --> 00:19:31.504 line:-1 position:50%
+You can then use that data
+to restart the download
+
+
+433
+00:19:31.504 --> 00:19:33.806 line:-1 position:50%
+off of a web view.
+
+
+434
+00:19:33.806 --> 00:19:35.508 line:-1 position:50%
+With this new API,
+
+
+435
+00:19:35,508 --> 00:19:37,410 line:-1
+I can now offer an easy way
+
+
+436
+00:19:37,410 --> 00:19:39,645 line:-1
+to download the kitties
+to Files,
+
+
+437
+00:19:39,645 --> 00:19:42,548 line:-1
+and not to save them to Photos.
+
+
+438
+00:19:42,548 --> 00:19:45,618 line:-1
+So those are our
+browser-level APIs.
+
+
+439
+00:19:45,618 --> 00:19:47,686 line:-1
+We think they will offer you
+and your users
+
+
+440
+00:19:47,686 --> 00:19:50,956 line:-1
+many more options for having
+a rich web experience
+
+
+441
+00:19:50,956 --> 00:19:54,326 line:-1
+in your app.
+
+
+442
+00:19:54,326 --> 00:19:56,962 line:-1
+Wow, what a journey!
+
+
+443
+00:19:56,962 --> 00:20:00,199 line:-1
+Today we have explored
+so many things together.
+
+
+444
+00:20:00,199 --> 00:20:02,935 line:-1
+We've talked about several APIs
+that you can use
+
+
+445
+00:20:02,935 --> 00:20:05,171 line:-1
+instead of injecting JavaScript,
+
+
+446
+00:20:05.171 --> 00:20:10.109 line:-1 position:50%
+and we've covered some more
+powerful browser-level features.
+
+
+447
+00:20:10,109 --> 00:20:13,379 line:-1
+It's so much easier to use
+our new theme color,
+
+
+448
+00:20:13.379 --> 00:20:17.716 line:-1 position:50%
+text interaction,
+and media playback APIs.
+
+
+449
+00:20:17,716 --> 00:20:20,052 line:-1
+And we've made it easier
+and safer
+
+
+450
+00:20:20,052 --> 00:20:22,655 line:-1
+to have a richer experience
+in your app
+
+
+451
+00:20:22.655 --> 00:20:25.458 line:-1 position:50%
+with automatic
+HTTPS connections,
+
+
+452
+00:20:25,458 --> 00:20:29,328 line:-1
+easy and safe control
+of getUserMedia prompts,
+
+
+453
+00:20:29.328 --> 00:20:32.131 line:-1 position:50%
+and the addition of WKDownload,
+
+
+454
+00:20:32.131 --> 00:20:37.236 line:-1 position:50%
+so you can easily manage
+downloads in your app.
+
+
+455
+00:20:37,236 --> 00:20:40,339 position:50%
+You can learn more about
+some of the new web APIs
+
+
+456
+00:20:40,339 --> 00:20:42,108 position:50%
+we are supporting this year,
+
+
+457
+00:20:42,108 --> 00:20:45,344 line:0
+in the "Develop advanced
+web content" session.
+
+
+458
+00:20:45,344 --> 00:20:48,681 line:0
+You can also discover new ways
+to debug and improve
+
+
+459
+00:20:48,681 --> 00:20:52,418 line:0
+your web content in "Discover
+Web Inspector improvements";
+
+
+460
+00:20:52,418 --> 00:20:55,454 line:0
+two great sessions that will
+help you with making
+
+
+461
+00:20:55,454 --> 00:21:00,392 position:50%
+great web content for your app
+or for the web.
+
+
+462
+00:21:00.392 --> 00:21:04.997 line:-1 position:50%
+The web is still growing,
+and as it does, so will we.
+
+
+463
+00:21:04,997 --> 00:21:07,466 line:-1
+Many of the APIs
+we implemented this year
+
+
+464
+00:21:07,466 --> 00:21:09,435 line:-1
+were based
+on developer feedback.
+
+
+465
+00:21:09,435 --> 00:21:12,071 line:-1
+So if you have an API
+you are wanting to see,
+
+
+466
+00:21:12.071 --> 00:21:15.207 line:-1 position:50%
+we want to hear from you!
+
+
+467
+00:21:15,207 --> 00:21:17,510 line:-1
+In addition to feedback
+with Apple,
+
+
+468
+00:21:17,510 --> 00:21:20,379 line:-1
+webkit.org has multiple ways
+to reach out,
+
+
+469
+00:21:20.379 --> 00:21:23.415 line:-1 position:50%
+from our Slack workspaces
+to our mailing lists.
+
+
+470
+00:21:23.415 --> 00:21:25.251 line:-1 position:50%
+WebKit is open source,
+
+
+471
+00:21:25.251 --> 00:21:27.586 line:-1 position:50%
+so this is also where you can
+learn to check out
+
+
+472
+00:21:27,586 --> 00:21:30,723 line:-1
+and build WebKit yourself,
+as well as file bugs.
+
+
+473
+00:21:30,723 --> 00:21:32,124 line:-1
+Thank you joining me
+
+
+474
+00:21:32,124 --> 00:21:34,693 line:-1
+on this exploration
+of our new APIs!
+
+
+475
+00:21:34,693 --> 00:21:38,464 line:-1
+I hope you have
+a great rest of WWDC21!
+
+
+476
+00:21:38,464 --> 00:21:41,033 line:0 position:90% align:right
+♪
+

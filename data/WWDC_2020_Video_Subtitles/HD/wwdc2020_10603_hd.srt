@@ -1,0 +1,3393 @@
+1
+00:00:03,937 --> 00:00:06,273 line:0
+Hello and welcome to WWDC.
+
+
+2
+00:00:07,007 --> 00:00:09,076 line:0
+Guillem Vinals Gangolells:
+Hello and welcome to this session.
+
+
+3
+00:00:09,142 --> 00:00:11,545 line:0
+I am Guillem Vinals
+from the Metal Ecosystem team.
+
+
+4
+00:00:11,612 --> 00:00:15,516 line:0
+Today I will talk about
+how to optimize your game or app
+
+
+5
+00:00:15,582 --> 00:00:17,651 line:0
+using GPU performance counters.
+
+
+6
+00:00:17,718 --> 00:00:21,321 line:-2
+This talk will walk you through
+the architecture of modern Apple GPUs
+
+
+7
+00:00:21,388 --> 00:00:23,357 line:-1
+and explain its performance metrics.
+
+
+8
+00:00:23,423 --> 00:00:27,761 line:-2
+We will start with an introduction to both
+our GPUs and the performance counters.
+
+
+9
+00:00:27,828 --> 00:00:31,231 line:-2
+Then we will cover several groups
+of GPU performance counters.
+
+
+10
+00:00:31,832 --> 00:00:34,968 line:-2
+We'll talk about performance limiters,
+memory bandwidth,
+
+
+11
+00:00:35,035 --> 00:00:37,538 line:0
+occupancy, and hidden surface removal.
+
+
+12
+00:00:37,604 --> 00:00:39,506 line:0
+All of these GPU performance counters
+
+
+13
+00:00:39,573 --> 00:00:42,276 line:0
+will help us understand
+the Apple GPUs much better.
+
+
+14
+00:00:42,342 --> 00:00:46,246 line:-2
+We will start with an introduction
+to the GPU and its performance counters.
+
+
+15
+00:00:46,313 --> 00:00:50,217 line:-2
+The GPU is a central part
+of Apple processors such as A13.
+
+
+16
+00:00:50,284 --> 00:00:53,220 line:-2
+So let's do a quick recap
+of Apple GPUs first.
+
+
+17
+00:00:53,887 --> 00:00:56,490 line:-2
+Apple GPUs
+are part of the Apple processors,
+
+
+18
+00:00:56,557 --> 00:00:58,759 line:-1
+which are very power efficient.
+
+
+19
+00:00:58,825 --> 00:01:01,762 line:-2
+Apple processors
+have unified memory architecture
+
+
+20
+00:01:01,828 --> 00:01:04,864 line:-2
+where the CPU and the GPU
+share System Memory.
+
+
+21
+00:01:04,932 --> 00:01:08,035 line:-1
+The GPU has on-chip Tile Memory.
+
+
+22
+00:01:08,101 --> 00:01:12,272 line:-2
+Notice that the GPU does not have
+dedicated Video Memory,
+
+
+23
+00:01:12,339 --> 00:01:16,743 line:-2
+so bandwidth could be a problem
+if the content has not been tuned.
+
+
+24
+00:01:16,810 --> 00:01:19,012 line:-2
+To be fast and efficient
+without Video Memory,
+
+
+25
+00:01:19,079 --> 00:01:22,850 line:-2
+our GPUs are TBDRs,
+or Tile Based Deferred Renderers.
+
+
+26
+00:01:23,483 --> 00:01:27,120 line:-2
+This diagram shows
+the Apple GPU rendering pipeline.
+
+
+27
+00:01:27,187 --> 00:01:29,690 line:-2
+We have covered the pipeline
+in more detail in other talks,
+
+
+28
+00:01:29,756 --> 00:01:31,692 line:-1
+so I will just provide a quick overview.
+
+
+29
+00:01:31,758 --> 00:01:34,528 line:-2
+The rendering pipeline
+has two distinct phases:
+
+
+30
+00:01:34,595 --> 00:01:38,131 line:-2
+First, Tiling, where all of the geometry
+will be processed.
+
+
+31
+00:01:38,198 --> 00:01:42,135 line:-2
+Second, Rendering,
+where all of the pixels will be processed.
+
+
+32
+00:01:42,202 --> 00:01:46,240 line:-2
+So let's recap both phases,
+starting with the Tiling Phase.
+
+
+33
+00:01:47,174 --> 00:01:50,844 line:-2
+During the Tiling Phase, the GPU will,
+for the entire render pass,
+
+
+34
+00:01:50,911 --> 00:01:53,247 line:-1
+split the viewport into a list of tiles,
+
+
+35
+00:01:53,313 --> 00:01:55,282 line:-1
+shade all of the vertices,
+
+
+36
+00:01:55,349 --> 00:01:57,651 line:-2
+and bin the transformed primitives
+into tiles.
+
+
+37
+00:01:57,718 --> 00:02:01,321 line:-2
+Now, the GPU is going to shade
+all of these tiles separately.
+
+
+38
+00:02:01,388 --> 00:02:04,591 line:-2
+Each GPU core will shade
+at least one tile at a time.
+
+
+39
+00:02:05,259 --> 00:02:09,930 line:-2
+For each tile in the render pass,
+the GPU will execute the load action,
+
+
+40
+00:02:09,997 --> 00:02:13,700 line:-2
+rasterize and compute the visibility
+for all of the primitives,
+
+
+41
+00:02:13,767 --> 00:02:16,203 line:-1
+shade all of the visible pixels,
+
+
+42
+00:02:16,270 --> 00:02:18,405 line:-1
+and then execute the store action.
+
+
+43
+00:02:18,972 --> 00:02:21,441 line:-1
+This is how our design can scale so well.
+
+
+44
+00:02:21,508 --> 00:02:25,812 line:-2
+The more GPU cores we have, the more tiles
+we can shade at the same time.
+
+
+45
+00:02:25,879 --> 00:02:27,781 line:-1
+Before concluding this overview,
+
+
+46
+00:02:27,848 --> 00:02:30,517 line:-2
+let's have a closer look
+at the GPU configuration.
+
+
+47
+00:02:31,218 --> 00:02:33,820 line:-1
+Apple GPUs have multiple cores.
+
+
+48
+00:02:33,887 --> 00:02:38,725 line:-2
+A GPU core contains a Shader Core,
+a Texture Unit, and a Pixel Backend,
+
+
+49
+00:02:38,792 --> 00:02:41,895 line:-2
+as well as a dedicated pool
+of Tile Memory.
+
+
+50
+00:02:41,962 --> 00:02:45,332 line:-2
+Notice that Tile Memory
+is just part of the hierarchy.
+
+
+51
+00:02:45,399 --> 00:02:48,669 line:-2
+Both the ALU and the TPU
+have dedicated L1s.
+
+
+52
+00:02:48,735 --> 00:02:52,072 line:-2
+All of the GPU cores
+share a last level cache.
+
+
+53
+00:02:52,139 --> 00:02:55,642 line:-2
+And then, of course, there's System Memory
+which is basically DRAM.
+
+
+54
+00:02:55,709 --> 00:02:59,780 line:-2
+This talk will assume some familiarity
+with the Apple TBDR architecture
+
+
+55
+00:02:59,847 --> 00:03:02,282 line:-1
+as well as the Metal Best Practices.
+
+
+56
+00:03:02,349 --> 00:03:05,285 line:-2
+Check out these two talks
+to brush up on both topics.
+
+
+57
+00:03:05,352 --> 00:03:08,856 line:-2
+I would actually recommend you to start
+with "Harness Apple GPUs with Metal"
+
+
+58
+00:03:08,922 --> 00:03:11,091 line:-1
+and then look at the Best Practices.
+
+
+59
+00:03:11,158 --> 00:03:14,628 line:-2
+So, let's build up some context
+around GPU profiling first.
+
+
+60
+00:03:14,695 --> 00:03:16,230 line:-1
+In order to render a frame,
+
+
+61
+00:03:16,296 --> 00:03:19,666 line:-2
+the GPU needs to process
+multiple render passes.
+
+
+62
+00:03:19,733 --> 00:03:23,937 line:-2
+Each render pass will be executed
+across multiple GPU cores.
+
+
+63
+00:03:24,004 --> 00:03:27,307 line:-2
+And each GPU core will, in turn,
+process different tasks,
+
+
+64
+00:03:27,374 --> 00:03:29,443 line:-1
+such as shading or texturing.
+
+
+65
+00:03:30,377 --> 00:03:33,547 line:-2
+All of those tasks will be executed
+on different hardware units,
+
+
+66
+00:03:33,614 --> 00:03:36,283 line:-1
+such as the ALU or the TPU.
+
+
+67
+00:03:36,350 --> 00:03:40,220 line:-2
+And of course, every single one
+of these units has a different throughput
+
+
+68
+00:03:40,287 --> 00:03:42,589 line:-1
+which uses different metrics.
+
+
+69
+00:03:42,656 --> 00:03:46,260 line:-2
+For example, we will use FLOPS
+to measure the ALU throughput
+
+
+70
+00:03:46,326 --> 00:03:50,163 line:-2
+or megabytes per second
+to measure the TPU throughput.
+
+
+71
+00:03:50,230 --> 00:03:52,499 line:-1
+So, there's multiple metrics to look at.
+
+
+72
+00:03:52,566 --> 00:03:54,735 line:-1
+What metrics should we look at then?
+
+
+73
+00:03:54,801 --> 00:03:57,204 line:-1
+Well, enter GPU performance counters.
+
+
+74
+00:03:57,271 --> 00:04:01,308 line:-2
+GPU performance counters will measure
+how the GPU is being utilized.
+
+
+75
+00:04:01,375 --> 00:04:04,611 line:-2
+Will help us find
+if the GPU doesn't have enough work,
+
+
+76
+00:04:04,678 --> 00:04:07,447 line:-1
+or if the GPU has too much work.
+
+
+77
+00:04:07,514 --> 00:04:10,317 line:-2
+Will help us identify
+performance bottlenecks,
+
+
+78
+00:04:10,384 --> 00:04:13,420 line:-2
+and also help us optimize the commands
+that take the longest.
+
+
+79
+00:04:13,487 --> 00:04:16,123 line:-2
+Cool, so let's review
+the GPU performance counters
+
+
+80
+00:04:16,190 --> 00:04:17,457 line:-1
+for our Apple GPUs.
+
+
+81
+00:04:17,524 --> 00:04:20,994 line:-1
+Well, that's actually quite a list.
+
+
+82
+00:04:21,060 --> 00:04:25,332 line:-1
+There's over 150 GPU counters to look at.
+
+
+83
+00:04:25,399 --> 00:04:28,936 line:-2
+Maybe at this point,
+there's just far too much data to parse.
+
+
+84
+00:04:30,270 --> 00:04:32,973 line:-2
+So how can we make sense
+of all those numbers?
+
+
+85
+00:04:33,040 --> 00:04:34,641 line:-1
+The answer is tooling.
+
+
+86
+00:04:34,708 --> 00:04:38,378 line:-2
+Our GPU tools
+will help you navigate all that data,
+
+
+87
+00:04:38,445 --> 00:04:42,282 line:-2
+starting with Metal System Trace,
+which is part of Instruments.
+
+
+88
+00:04:42,349 --> 00:04:45,652 line:-2
+You will want to use Metal System Trace
+for performance overview.
+
+
+89
+00:04:45,719 --> 00:04:48,589 line:-2
+You will see both
+the CPU and the GPU timelines.
+
+
+90
+00:04:48,655 --> 00:04:52,392 line:-2
+Your workload will be affected by thermals
+and dynamic system changes.
+
+
+91
+00:04:53,026 --> 00:04:55,062 line:-1
+Metal System Trace is already part of
+
+
+92
+00:04:55,128 --> 00:04:57,531 line:-2
+the Game Performance template
+in Instruments.
+
+
+93
+00:04:57,598 --> 00:05:00,200 line:-2
+You can also enable
+GPU performance counters
+
+
+94
+00:05:00,267 --> 00:05:04,638 line:-2
+which can be used to identify
+potential GPU or memory bottlenecks
+
+
+95
+00:05:04,705 --> 00:05:06,340 line:-1
+at different points during the frame.
+
+
+96
+00:05:06,406 --> 00:05:10,344 line:-2
+Of course, there's also the Metal Debugger
+which is part of Xcode.
+
+
+97
+00:05:11,645 --> 00:05:15,682 line:-2
+You will want to use this tool
+for a deep performance investigation.
+
+
+98
+00:05:15,749 --> 00:05:18,051 line:-1
+You will see both a detailed GPU timeline
+
+
+99
+00:05:18,118 --> 00:05:21,054 line:-2
+as well as
+the Metal API usage of your game.
+
+
+100
+00:05:21,121 --> 00:05:25,559 line:-2
+And your workload will be unaffected
+by thermals or dynamic system changes.
+
+
+101
+00:05:25,626 --> 00:05:28,795 line:-2
+Xcode also supports
+GPU performance counters
+
+
+102
+00:05:28,862 --> 00:05:32,165 line:-2
+and exposes every single one of them
+at encoder granularity.
+
+
+103
+00:05:33,033 --> 00:05:36,436 line:-2
+There's also a large subset of counters
+available per draw call.
+
+
+104
+00:05:37,337 --> 00:05:39,973 line:-2
+Xcode is where
+all of the counters are listed,
+
+
+105
+00:05:40,040 --> 00:05:43,076 line:-2
+so it's definitely the right tool
+to correlate metrics.
+
+
+106
+00:05:43,143 --> 00:05:45,312 line:-1
+So what exactly do those values mean?
+
+
+107
+00:05:45,946 --> 00:05:48,815 line:-2
+By now you know that
+there are a ton of counters,
+
+
+108
+00:05:48,882 --> 00:05:51,552 line:-2
+and that the tools will help you
+focus on the important ones.
+
+
+109
+00:05:52,386 --> 00:05:55,556 line:-2
+The rest of the talk will walk you through
+different groups of counters
+
+
+110
+00:05:55,622 --> 00:05:57,324 line:-1
+and explain them in more detail.
+
+
+111
+00:05:58,525 --> 00:06:00,294 line:-1
+We will start with performance limiters,
+
+
+112
+00:06:00,360 --> 00:06:03,397 line:-2
+arguably the GPU counters
+you should always look at first.
+
+
+113
+00:06:03,463 --> 00:06:07,100 line:-2
+Limiters are very important
+due to the parallel nature of GPUs.
+
+
+114
+00:06:07,835 --> 00:06:10,537 line:-2
+The GPU can execute
+a ton of work in parallel:
+
+
+115
+00:06:10,604 --> 00:06:14,208 line:-2
+arithmetic, memory accesses,
+as well as rasterization tasks.
+
+
+116
+00:06:14,274 --> 00:06:18,445 line:-2
+The limiter counters will measure
+the activity of multiple GPU subsystems.
+
+
+117
+00:06:18,512 --> 00:06:20,981 line:-2
+They will help you find
+work being executed,
+
+
+118
+00:06:21,048 --> 00:06:24,852 line:-2
+as well as find stalls
+that prevent work from being executed.
+
+
+119
+00:06:24,918 --> 00:06:28,422 line:-2
+Remember, the GPU is only as fast
+as the slowest part.
+
+
+120
+00:06:28,488 --> 00:06:31,959 line:-2
+Limiters will point you to that part
+for you to investigate.
+
+
+121
+00:06:32,025 --> 00:06:36,864 line:-2
+Time for a demo. Please welcome Sam
+for a cool demo of Metal System Trace.
+
+
+122
+00:06:36,930 --> 00:06:41,502 line:-2
+Thanks, Guillem. I've got my iPad Pro,
+and I'm playing <i>Respawnables Heroes</i>,
+
+
+123
+00:06:41,568 --> 00:06:44,304 line:-2
+a game by our friends
+over at Digital Legends.
+
+
+124
+00:06:44,371 --> 00:06:49,710 line:-2
+It looks great. It's got reflections,
+beautiful dynamic lighting with shadows,
+
+
+125
+00:06:49,776 --> 00:06:52,045 line:-1
+and many more post-processing effects.
+
+
+126
+00:06:52,713 --> 00:06:54,648 line:-2
+But to get a sense
+of how well it's running,
+
+
+127
+00:06:54,715 --> 00:06:58,385 line:-2
+I'm going to show you how to record
+the performance limiters in Instruments.
+
+
+128
+00:06:58,452 --> 00:07:01,555 line:-2
+Let's switch back to my computer
+where I've already got Instruments open.
+
+
+129
+00:07:02,155 --> 00:07:05,826 line:-2
+First, I'll select
+the Game Performance template.
+
+
+130
+00:07:05,893 --> 00:07:09,630 line:-2
+Then, I'll make sure
+that my device is selected and the game.
+
+
+131
+00:07:09,696 --> 00:07:14,368 line:-2
+I'm gonna long-press on the Record button
+and click on Recording Options.
+
+
+132
+00:07:15,335 --> 00:07:18,238 line:-2
+Then, I'll switch to
+the Metal Application recording options
+
+
+133
+00:07:18,305 --> 00:07:22,442 line:-2
+and make sure that Performance Limiters
+is selected under the GPU Counter Set.
+
+
+134
+00:07:23,710 --> 00:07:26,813 line:-2
+I'm also going to enable
+the new Shader Timeline,
+
+
+135
+00:07:26,880 --> 00:07:28,715 line:-1
+and you'll see why in a sec.
+
+
+136
+00:07:28,782 --> 00:07:31,285 line:-2
+But for now,
+let's click on the Record button.
+
+
+137
+00:07:34,588 --> 00:07:39,259 line:-2
+Instruments is now recording the game,
+and when we're done, we can click Stop.
+
+
+138
+00:07:42,462 --> 00:07:43,630 line:-1
+The Game Performance template
+
+
+139
+00:07:43,697 --> 00:07:47,034 line:-2
+gathers a lot of information
+about the state of the system,
+
+
+140
+00:07:47,100 --> 00:07:49,570 line:-1
+but for now, we're interested in the GPU.
+
+
+141
+00:07:50,604 --> 00:07:54,608 line:-2
+So I'm going to disclose the A12Z track
+to see what was running.
+
+
+142
+00:07:55,342 --> 00:07:59,079 line:-2
+I'm going to hold Option and left-click
+and drag to zoom into a frame.
+
+
+143
+00:08:00,247 --> 00:08:03,684 line:-2
+We can now see a timeline
+of all of the command buffers and encoders
+
+
+144
+00:08:03,750 --> 00:08:06,019 line:-1
+that were running, color-coded by frame.
+
+
+145
+00:08:06,954 --> 00:08:11,124 line:-2
+We can see that <i>Respawnables Heroes</i>
+first renders a shadow map.
+
+
+146
+00:08:11,191 --> 00:08:14,094 line:-2
+This is then followed by
+a Deferred Phase Encoder
+
+
+147
+00:08:14,161 --> 00:08:18,966 line:-2
+where it looks roughly 50-50 split
+between the vertex and fragment shader,
+
+
+148
+00:08:19,032 --> 00:08:22,269 line:-2
+but the fragment shader
+is a little bit longer.
+
+
+149
+00:08:22,336 --> 00:08:25,405 line:-1
+In this case, 1.29 milliseconds.
+
+
+150
+00:08:25,472 --> 00:08:28,609 line:-2
+After this is a bunch
+of post-processing effects.
+
+
+151
+00:08:29,176 --> 00:08:32,446 line:-2
+Now, I'm going to take a close look
+at the Deferred Phase Encoder
+
+
+152
+00:08:32,513 --> 00:08:34,780 line:-1
+because it's taking the longest time.
+
+
+153
+00:08:34,847 --> 00:08:39,052 line:-2
+So I can disclose the fragment track
+to see the new Shader Timeline...
+
+
+154
+00:08:41,655 --> 00:08:44,725 line:-2
+which shows me which shaders are running
+at certain sample times
+
+
+155
+00:08:44,791 --> 00:08:46,960 line:-2
+during the execution
+of my command encoder.
+
+
+156
+00:08:48,195 --> 00:08:50,364 line:-2
+This fine-grained detail
+makes it really easy
+
+
+157
+00:08:50,430 --> 00:08:53,100 line:-2
+to see and identify
+longer-running shaders,
+
+
+158
+00:08:53,166 --> 00:08:57,771 line:-2
+and helps to explain why a given encoder
+is taking a certain amount of time.
+
+
+159
+00:08:57,838 --> 00:09:00,440 line:-1
+If I select the track and a region,
+
+
+160
+00:09:00,507 --> 00:09:04,111 line:-2
+I can actually see which shaders
+were running in the table below,
+
+
+161
+00:09:04,178 --> 00:09:06,680 line:-2
+along with how many samples
+they were running for
+
+
+162
+00:09:06,813 --> 00:09:08,682 line:-1
+and an approximate GPU time.
+
+
+163
+00:09:10,417 --> 00:09:13,187 line:-2
+We can also see
+the performance limiters in Instruments.
+
+
+164
+00:09:15,923 --> 00:09:19,726 line:-2
+So, the first track
+is the top performance limiter track.
+
+
+165
+00:09:19,793 --> 00:09:24,164 line:-2
+Now, if I scrub my mouse over this track,
+we can see that during the deferred phase,
+
+
+166
+00:09:24,231 --> 00:09:27,201 line:-1
+the ALU Limiter is the highest.
+
+
+167
+00:09:27,267 --> 00:09:31,205 line:-2
+And during the post-processing,
+it's the Texture Sampler.
+
+
+168
+00:09:32,005 --> 00:09:33,841 line:-1
+Now, this makes a lot of sense.
+
+
+169
+00:09:33,907 --> 00:09:36,343 line:-2
+But don't worry
+if you don't know what they mean.
+
+
+170
+00:09:36,410 --> 00:09:40,347 line:-2
+Guillem will later explain each limiter
+and what to do if you see a high value.
+
+
+171
+00:09:41,782 --> 00:09:45,819 line:-2
+Below the Top Performance Limiter tracks
+are the individual limiters themselves,
+
+
+172
+00:09:45,886 --> 00:09:50,624 line:-2
+such as ALU, Texture Sampler,
+and many, many more.
+
+
+173
+00:09:52,092 --> 00:09:53,660 line:-1
+Now, back to Guillem.
+
+
+174
+00:09:54,595 --> 00:09:57,097 line:-1
+Excellent. Thank you, Sam.
+
+
+175
+00:09:57,164 --> 00:10:00,133 line:-2
+Now we know where to find
+the GPU performance limiters.
+
+
+176
+00:10:00,200 --> 00:10:01,702 line:-1
+So, let's focus on some of them.
+
+
+177
+00:10:02,336 --> 00:10:05,439 line:-2
+We will talk about Arithmetic,
+Texture Read and Write,
+
+
+178
+00:10:05,506 --> 00:10:08,509 line:-2
+Tile Memory Load and Store,
+Buffer Read and Write,
+
+
+179
+00:10:08,575 --> 00:10:13,013 line:-2
+GPU Last Level Cache,
+and Fragment Input Interpolation limiters.
+
+
+180
+00:10:13,080 --> 00:10:14,248 line:-1
+As we go through the list,
+
+
+181
+00:10:14,314 --> 00:10:17,584 line:-2
+we will also be putting them
+in the context of the Apple GPU.
+
+
+182
+00:10:17,651 --> 00:10:20,587 line:-2
+Also, I will show you
+how to find them in Xcode,
+
+
+183
+00:10:20,654 --> 00:10:22,890 line:-1
+starting with the ALU limiter.
+
+
+184
+00:10:22,956 --> 00:10:26,727 line:-2
+Before looking at the limiter,
+we will build some context first.
+
+
+185
+00:10:26,793 --> 00:10:28,929 line:-1
+The ALU is part of the shader core.
+
+
+186
+00:10:28,996 --> 00:10:34,401 line:-2
+It processes arithmetic operations,
+both bit-wise and relational operations.
+
+
+187
+00:10:34,468 --> 00:10:37,237 line:-2
+It is optimized for both
+floating-point arithmetic
+
+
+188
+00:10:37,304 --> 00:10:39,673 line:-2
+and coherent execution.
+So, let's review that.
+
+
+189
+00:10:39,740 --> 00:10:43,076 line:-2
+Let's review the relative throughput
+of the different operations first.
+
+
+190
+00:10:43,143 --> 00:10:46,947 line:-2
+At the top, we can see
+16-bit floating point operations,
+
+
+191
+00:10:47,014 --> 00:10:48,982 line:-1
+which are run at double rate.
+
+
+192
+00:10:49,049 --> 00:10:52,286 line:-2
+Then, we also have
+32-bit floating point operations,
+
+
+193
+00:10:52,352 --> 00:10:53,854 line:-1
+which are run at full rate.
+
+
+194
+00:10:54,621 --> 00:10:58,692 line:-2
+Finally, we also have 32-bit integer
+and complex operations,
+
+
+195
+00:10:58,759 --> 00:11:00,894 line:-1
+which are run at half rate or less.
+
+
+196
+00:11:01,628 --> 00:11:05,799 line:-2
+For example, we should prefer
+F16 over F32 when possible.
+
+
+197
+00:11:06,200 --> 00:11:10,871 line:-2
+Also, watch out for complex operations.
+The best case is shown here.
+
+
+198
+00:11:10,938 --> 00:11:13,440 line:-2
+Some complex operations
+such as a square root
+
+
+199
+00:11:13,507 --> 00:11:15,642 line:-1
+will have an actually lower rate.
+
+
+200
+00:11:15,709 --> 00:11:19,146 line:-2
+Great. So let's talk about
+the execution model of our shader core.
+
+
+201
+00:11:19,880 --> 00:11:24,685 line:-2
+Each shader core has multiple SIMD units,
+as well as dedicated Tile Memory
+
+
+202
+00:11:24,751 --> 00:11:26,887 line:-1
+and a pool of Register Memory.
+
+
+203
+00:11:26,954 --> 00:11:29,823 line:-1
+Each SIMD unit has 32 threads,
+
+
+204
+00:11:29,890 --> 00:11:33,360 line:-2
+and each thread in the SIMD
+executes the same instruction.
+
+
+205
+00:11:33,427 --> 00:11:36,230 line:-2
+This is very important
+when it comes to authoring shaders.
+
+
+206
+00:11:36,763 --> 00:11:41,368 line:-2
+Each SIMD lane has 32 threads
+but a single program counter.
+
+
+207
+00:11:41,435 --> 00:11:44,905 line:-2
+This is ideal when all of the threads
+execute the same instruction.
+
+
+208
+00:11:45,873 --> 00:11:49,576 line:-2
+In this case, the condition "a"
+is equal for all of the threads.
+
+
+209
+00:11:49,643 --> 00:11:51,712 line:-1
+That's what we call coherent execution.
+
+
+210
+00:11:51,778 --> 00:11:54,548 line:-2
+All of the threads
+will execute the same instruction.
+
+
+211
+00:11:54,615 --> 00:11:58,952 line:-2
+And the total time
+to execute this program will be 40 cycles.
+
+
+212
+00:11:59,019 --> 00:12:01,288 line:-1
+There is no penalty for the "if" branch
+
+
+213
+00:12:01,355 --> 00:12:05,359 line:-2
+other than the extra temporary registers
+required and not utilized.
+
+
+214
+00:12:06,360 --> 00:12:09,963 line:-1
+In this case, we have divergent execution.
+
+
+215
+00:12:10,030 --> 00:12:13,100 line:-2
+Some of the threads
+will evaluate "a" to "true."
+
+
+216
+00:12:13,166 --> 00:12:16,837 line:-2
+All of the SIMD lane
+has to execute all of the instructions.
+
+
+217
+00:12:16,904 --> 00:12:20,007 line:-2
+The threads that don't take the branch
+will mask out the execution,
+
+
+218
+00:12:20,073 --> 00:12:22,176 line:-1
+but still spend the cycles.
+
+
+219
+00:12:22,242 --> 00:12:25,812 line:-2
+In this case,
+the total cost will be 70 cycles.
+
+
+220
+00:12:25,879 --> 00:12:29,716 line:-2
+Notice that we have the extra 30 cycles
+from the "if" condition.
+
+
+221
+00:12:29,783 --> 00:12:32,252 line:-1
+One last note on execution model.
+
+
+222
+00:12:32,319 --> 00:12:35,122 line:-2
+There are some cases
+where only a few threads of a SIMD
+
+
+223
+00:12:35,189 --> 00:12:37,224 line:-1
+will actually need to run.
+
+
+224
+00:12:37,291 --> 00:12:39,826 line:-2
+This will, of course,
+have an impact on performance,
+
+
+225
+00:12:39,893 --> 00:12:42,729 line:-2
+since most of the threads
+are wasting cycles.
+
+
+226
+00:12:42,796 --> 00:12:46,433 line:-2
+Okay, so with that in mind,
+we can now look at the limiter.
+
+
+227
+00:12:46,500 --> 00:12:49,803 line:-2
+So what can we do
+if we are actually limited by the ALU?
+
+
+228
+00:12:49,870 --> 00:12:52,639 line:-2
+Well, in most cases,
+we may want to celebrate.
+
+
+229
+00:12:52,706 --> 00:12:54,174 line:-1
+That's exactly what we want:
+
+
+230
+00:12:54,241 --> 00:12:58,412 line:-2
+the GPU is crunching numbers,
+and that's exactly what the GPU is for.
+
+
+231
+00:12:58,478 --> 00:13:02,115 line:-2
+But what if we actually want
+to reduce the ALU load?
+
+
+232
+00:13:02,182 --> 00:13:05,586 line:-2
+In which case, we will want to replace
+complex calculations
+
+
+233
+00:13:05,652 --> 00:13:08,422 line:-2
+with either approximations
+or lookup tables.
+
+
+234
+00:13:08,488 --> 00:13:12,893 line:-2
+Also, try to replace floats,
+full-precision by half-precision.
+
+
+235
+00:13:12,960 --> 00:13:15,062 line:-1
+Try to avoid implicit conversions.
+
+
+236
+00:13:15,128 --> 00:13:18,465 line:-2
+Avoid FP32 inputs
+such as textures or buffers.
+
+
+237
+00:13:18,532 --> 00:13:20,367 line:-1
+And also make sure that all of the shaders
+
+
+238
+00:13:20,434 --> 00:13:23,036 line:-2
+are compiled
+using the Metal "-ffast-math" flag.
+
+
+239
+00:13:24,104 --> 00:13:26,740 line:-1
+Notice, though, that a high limiter value
+
+
+240
+00:13:26,807 --> 00:13:29,009 line:-2
+does not mean
+that the workload is efficient.
+
+
+241
+00:13:29,076 --> 00:13:31,178 line:-1
+It's a great step though.
+
+
+242
+00:13:31,245 --> 00:13:37,784 line:-2
+For example, we can be 100% ALU limited
+but only stay at 50% utilization
+
+
+243
+00:13:37,851 --> 00:13:40,921 line:-1
+if all we are doing are FP32 operations.
+
+
+244
+00:13:40,988 --> 00:13:43,290 line:-1
+Xcode is the ideal tool to find out about
+
+
+245
+00:13:43,357 --> 00:13:46,660 line:-2
+what is causing a limiter
+to be high or low.
+
+
+246
+00:13:46,727 --> 00:13:49,496 line:-1
+For example, we can filter by ALU
+
+
+247
+00:13:49,563 --> 00:13:53,066 line:-2
+in order to see
+all of the arithmetic-related counters.
+
+
+248
+00:13:53,133 --> 00:13:56,136 line:-2
+Great. So let's move on
+to Texture Read and Write.
+
+
+249
+00:13:56,203 --> 00:14:00,674 line:-2
+Before we talk about the limiter,
+we should understand Metal textures first.
+
+
+250
+00:14:00,741 --> 00:14:03,210 line:-2
+Metal textures
+are backed by Device Memory.
+
+
+251
+00:14:03,277 --> 00:14:07,381 line:-2
+They are always read by the Texture Unit,
+which does have a dedicated L1,
+
+
+252
+00:14:07,447 --> 00:14:11,485 line:-2
+as well as support for multiple filtering
+and compression modes.
+
+
+253
+00:14:11,552 --> 00:14:15,556 line:-2
+Textures, on the other hand,
+are written by the Pixel Backend.
+
+
+254
+00:14:15,622 --> 00:14:17,958 line:-2
+Notice that the Texture Unit
+and Pixel Backend
+
+
+255
+00:14:18,025 --> 00:14:21,962 line:-2
+are different hardware blocks,
+so we should review them separately,
+
+
+256
+00:14:22,029 --> 00:14:25,799 line:-2
+starting with the Texture Processing Unit,
+or TPU.
+
+
+257
+00:14:25,866 --> 00:14:28,335 line:-1
+The TPU reads texture data.
+
+
+258
+00:14:28,402 --> 00:14:31,738 line:-2
+When the render pass executes
+the LoadActionLoad for an attachment,
+
+
+259
+00:14:31,805 --> 00:14:35,342 line:-2
+or when we are explicitly reading
+or sampling from a shader.
+
+
+260
+00:14:35,409 --> 00:14:39,546 line:-2
+It is optimized for gather operations
+as well as regular pixel formats.
+
+
+261
+00:14:40,380 --> 00:14:43,851 line:-2
+The pixel format has a direct impact
+on the sampling rate.
+
+
+262
+00:14:43,917 --> 00:14:49,489 line:-2
+Particularly, watch out
+for 128-bit formats such as RGBA32Float,
+
+
+263
+00:14:49,556 --> 00:14:52,559 line:-1
+since those are sampled at quarter rate.
+
+
+264
+00:14:52,626 --> 00:14:56,697 line:-2
+Oftentimes, these high precision
+pixel formats are used for noise textures
+
+
+265
+00:14:56,763 --> 00:14:58,899 line:-1
+or lookup tables for post-process effects.
+
+
+266
+00:15:00,133 --> 00:15:04,671 line:-2
+The pixel filtering rate is also important
+and should be kept in mind.
+
+
+267
+00:15:04,738 --> 00:15:08,408 line:-2
+It could be a problem when we have
+very high levels of anisotropy.
+
+
+268
+00:15:10,377 --> 00:15:12,679 line:-1
+Now, let's talk about compressed formats.
+
+
+269
+00:15:12,746 --> 00:15:16,116 line:-2
+Apple GPUs support
+both block-compressed pixel formats,
+
+
+270
+00:15:16,183 --> 00:15:18,619 line:-1
+such as PVRTC or ASTC,
+
+
+271
+00:15:18,685 --> 00:15:22,723 line:-2
+as well as lossless compression
+of conventional pixel formats.
+
+
+272
+00:15:22,789 --> 00:15:27,761 line:-2
+In this diagram, we see an example
+of a block-compressed HDR environment map.
+
+
+273
+00:15:27,828 --> 00:15:32,132 line:-2
+The small Cube Map would require
+three megabytes if left uncompressed.
+
+
+274
+00:15:32,199 --> 00:15:36,036 line:-2
+Using ASTC HDR,
+which is supported by A13 GPUs,
+
+
+275
+00:15:36,103 --> 00:15:39,239 line:-2
+allows us to massively reduce
+the memory footprint
+
+
+276
+00:15:39,306 --> 00:15:42,342 line:-2
+and bandwidth, of course,
+for these assets.
+
+
+277
+00:15:42,409 --> 00:15:46,446 line:-2
+So what can we do
+if we see a high Texture Sample limiter?
+
+
+278
+00:15:46,513 --> 00:15:50,517 line:-2
+Well, you will want to use mipmaps
+if minification is likely occurring.
+
+
+279
+00:15:50,584 --> 00:15:53,887 line:-2
+Also, consider changing
+the filtering options.
+
+
+280
+00:15:53,954 --> 00:15:57,157 line:-2
+Try to use lower anisotropic sample count,
+for example.
+
+
+281
+00:15:57,224 --> 00:15:59,526 line:-1
+Consider using smaller pixel sizes.
+
+
+282
+00:15:59,593 --> 00:16:03,730 line:-2
+And of course, make sure
+you are leveraging texture compression.
+
+
+283
+00:16:03,797 --> 00:16:06,934 line:-2
+Use block-compression
+such as ASTC for assets,
+
+
+284
+00:16:07,000 --> 00:16:11,138 line:-2
+and lossless texture compression
+for textures generated at run-time.
+
+
+285
+00:16:11,205 --> 00:16:15,509 line:-2
+Same as we did before, we can use Xcode
+to find more about texture reads.
+
+
+286
+00:16:15,576 --> 00:16:18,478 line:-2
+In this case,
+we can select the "Texture" group
+
+
+287
+00:16:18,545 --> 00:16:20,914 line:-2
+to see all
+of the texture-related counters.
+
+
+288
+00:16:20,981 --> 00:16:23,917 line:-1
+Great. Now let's move on to texture write.
+
+
+289
+00:16:23,984 --> 00:16:27,654 line:-2
+Textures are written into Device Memory
+by the Pixel Backend.
+
+
+290
+00:16:27,721 --> 00:16:30,357 line:-1
+The Pixel Backend will write texture data
+
+
+291
+00:16:30,424 --> 00:16:34,261 line:-2
+when a render pass executes
+the StoreActionStore for an attachment.
+
+
+292
+00:16:34,328 --> 00:16:38,232 line:-2
+Or when we explicitly write into a texture
+from a shader.
+
+
+293
+00:16:38,298 --> 00:16:41,101 line:-1
+It is also optimized for coherent writes,
+
+
+294
+00:16:41,168 --> 00:16:43,704 line:-2
+so you should avoid
+all kinds of divergent writes,
+
+
+295
+00:16:43,770 --> 00:16:47,508 line:-2
+such as writing to different array indices
+or different tiles.
+
+
+296
+00:16:47,574 --> 00:16:51,245 line:-2
+There really is not much to say
+on the write rates themselves.
+
+
+297
+00:16:51,311 --> 00:16:56,049 line:-2
+Try to keep a small pixel size
+and potentially watch out for MSAA.
+
+
+298
+00:16:56,116 --> 00:16:58,018 line:-1
+The most important thing to bear in mind
+
+
+299
+00:16:58,085 --> 00:17:00,521 line:-2
+is that the Pixel Backend
+and Texture Processing Units
+
+
+300
+00:17:00,587 --> 00:17:02,055 line:-1
+are different hardware blocks,
+
+
+301
+00:17:02,122 --> 00:17:04,223 line:-2
+so they have
+different throughput altogether.
+
+
+302
+00:17:04,290 --> 00:17:06,760 line:-2
+You may want to make sure
+that the lower texture write rate
+
+
+303
+00:17:06,827 --> 00:17:09,363 line:-2
+is not actually
+the main limiter for your shaders.
+
+
+304
+00:17:09,429 --> 00:17:13,534 line:-2
+So what can we do if we see
+a high texture write limiter value?
+
+
+305
+00:17:13,599 --> 00:17:16,837 line:-2
+Based on the rate,
+you should watch out for the pixel sizes,
+
+
+306
+00:17:16,904 --> 00:17:20,641 line:-2
+as well as the number of unique
+MSAA samples per pixel.
+
+
+307
+00:17:20,707 --> 00:17:23,477 line:-1
+Also, try to optimize for coherent writes.
+
+
+308
+00:17:23,544 --> 00:17:26,613 line:-2
+Xcode is a great tool
+to narrow down the search.
+
+
+309
+00:17:26,680 --> 00:17:30,584 line:-2
+We can also use more complex filters
+such as "Texture" and "Write"
+
+
+310
+00:17:30,651 --> 00:17:34,254 line:-2
+to get all of the texture-write counters
+found across different groups.
+
+
+311
+00:17:34,321 --> 00:17:38,492 line:-2
+Great. So, moving on to the next limiter:
+Tile Memory Load and Store.
+
+
+312
+00:17:38,559 --> 00:17:42,162 line:-2
+To understand this limiter,
+first, we need to understand Tile Memory.
+
+
+313
+00:17:42,229 --> 00:17:45,065 line:-2
+Tile Memory is a set
+of high-performance memory
+
+
+314
+00:17:45,132 --> 00:17:47,601 line:-2
+that stores Threadgroup
+and Imageblock data.
+
+
+315
+00:17:47,668 --> 00:17:52,039 line:-2
+Tile Memory is accessed when reading
+or writing pixel data from the Imageblock,
+
+
+316
+00:17:52,105 --> 00:17:53,974 line:-1
+such as when using tile shaders.
+
+
+317
+00:17:54,041 --> 00:17:57,644 line:-2
+It's also accessed when reading
+or writing data from Threadgroup Memory,
+
+
+318
+00:17:57,711 --> 00:18:00,547 line:-2
+for example,
+when you're using compute dispatches,
+
+
+319
+00:18:00,614 --> 00:18:03,150 line:-2
+and it is also accessed
+when reading or writing
+
+
+320
+00:18:03,217 --> 00:18:07,321 line:-2
+to render pass color attachments,
+such as when using programmable blending,
+
+
+321
+00:18:07,387 --> 00:18:10,858 line:-2
+or even when enabling blending
+on a rendering pipeline.
+
+
+322
+00:18:10,924 --> 00:18:14,061 line:-1
+So what can we do if we see a high value?
+
+
+323
+00:18:14,127 --> 00:18:16,964 line:-2
+This may be the case
+when writing complex compute shaders
+
+
+324
+00:18:17,030 --> 00:18:19,399 line:-2
+that explicitly leverage
+threadgroup memory.
+
+
+325
+00:18:19,466 --> 00:18:23,871 line:-2
+If such is the case, you will want to
+reduce the number of threadgroup atomics,
+
+
+326
+00:18:23,937 --> 00:18:26,540 line:-2
+consider using
+threadgroup parallel reductions,
+
+
+327
+00:18:26,607 --> 00:18:29,176 line:-1
+or SIMD lane operations instead.
+
+
+328
+00:18:29,243 --> 00:18:30,944 line:-1
+Also, make sure to align
+
+
+329
+00:18:31,011 --> 00:18:34,314 line:-2
+threadgroup memory allocations
+and accesses to 16 bytes.
+
+
+330
+00:18:35,182 --> 00:18:38,385 line:-2
+Finally, consider reordering
+your memory access patterns
+
+
+331
+00:18:38,452 --> 00:18:40,287 line:-1
+for higher efficiency.
+
+
+332
+00:18:40,354 --> 00:18:44,525 line:-2
+Tile Memory is referred to in the tools
+as Imageblock and Threadgroup Memory.
+
+
+333
+00:18:44,591 --> 00:18:47,728 line:-2
+This is the case for both
+our tools and documentation.
+
+
+334
+00:18:47,794 --> 00:18:49,963 line:-2
+So in this case,
+typing "Imageblock" in Xcode
+
+
+335
+00:18:50,030 --> 00:18:52,833 line:-2
+will reveal
+all of the Tile Memory counters.
+
+
+336
+00:18:52,900 --> 00:18:56,069 line:-2
+On to the next limiter,
+which is Buffer Read and Write.
+
+
+337
+00:18:56,136 --> 00:18:59,973 line:-2
+Same as we did with Textures,
+we should first understand Metal buffers.
+
+
+338
+00:19:00,040 --> 00:19:03,343 line:-2
+Metal buffers
+are also backed by Device Memory.
+
+
+339
+00:19:03,410 --> 00:19:06,413 line:-2
+But Metal buffers are accessed
+only by the Shader Core,
+
+
+340
+00:19:06,480 --> 00:19:08,582 line:-1
+which does have a dedicated L1
+
+
+341
+00:19:08,649 --> 00:19:11,885 line:-2
+as well as support
+for different address spaces.
+
+
+342
+00:19:11,952 --> 00:19:16,957 line:-2
+Address spaces for buffer data
+are device for read-write data
+
+
+343
+00:19:17,024 --> 00:19:19,860 line:-1
+or constant for read-only data.
+
+
+344
+00:19:19,927 --> 00:19:23,297 line:-2
+For example, you will want to use
+the device address space
+
+
+345
+00:19:23,363 --> 00:19:26,800 line:-2
+for data which is indexed per fragment
+or per vertex,
+
+
+346
+00:19:26,867 --> 00:19:28,435 line:-1
+and use constant address space
+
+
+347
+00:19:28,502 --> 00:19:32,072 line:-2
+for data that is utilized by many vertices
+or fragments.
+
+
+348
+00:19:32,139 --> 00:19:35,876 line:-2
+So what can we do
+if we are limited by Buffer Read or Write?
+
+
+349
+00:19:35,943 --> 00:19:38,812 line:-2
+You may actually want to pack data
+more tightly.
+
+
+350
+00:19:38,879 --> 00:19:40,814 line:-1
+Try to use smaller types.
+
+
+351
+00:19:40,881 --> 00:19:43,917 line:-1
+Also, try to vectorize load and store,
+
+
+352
+00:19:43,984 --> 00:19:49,089 line:-2
+and, if possible, avoid device atomics
+and register spills altogether.
+
+
+353
+00:19:49,156 --> 00:19:53,727 line:-2
+Another interesting optimization could be
+to use textures to balance the workload
+
+
+354
+00:19:53,794 --> 00:19:57,197 line:-2
+since both the ALU and the TPU
+have different caches.
+
+
+355
+00:19:57,264 --> 00:20:01,702 line:-2
+Xcode can also help us find
+whether Buffer Read or Write is a problem.
+
+
+356
+00:20:01,768 --> 00:20:03,670 line:-1
+By typing "Buffer" in the filter,
+
+
+357
+00:20:03,737 --> 00:20:06,273 line:-2
+you will see
+all of the Buffer Read and Write counters,
+
+
+358
+00:20:06,340 --> 00:20:08,141 line:-1
+as well as the limiter, of course.
+
+
+359
+00:20:08,208 --> 00:20:12,679 line:-2
+Great. So let's talk about
+GPU Last Level Cache or GPU LLC.
+
+
+360
+00:20:12,746 --> 00:20:17,084 line:-2
+The GPU Last Level Cache
+is shared across all GPU Cores.
+
+
+361
+00:20:17,150 --> 00:20:21,855 line:-2
+It caches both texture and buffer data,
+as well as storing device atomics.
+
+
+362
+00:20:21,922 --> 00:20:25,559 line:-2
+It is optimized
+for spatial and temporal locality.
+
+
+363
+00:20:25,626 --> 00:20:28,729 line:-2
+This is a great opportunity to review
+the relative peak rates
+
+
+364
+00:20:28,795 --> 00:20:30,931 line:-1
+of the memory hierarchy of a GPU core.
+
+
+365
+00:20:30,998 --> 00:20:35,869 line:-2
+Based on these rates, we should actually
+favor Tile Memory over the GPU LLC
+
+
+366
+00:20:35,936 --> 00:20:39,406 line:-1
+and also watch out for atomic operations.
+
+
+367
+00:20:39,473 --> 00:20:43,677 line:-2
+So what can we do if we are being limited
+by the GPU Last Level Cache?
+
+
+368
+00:20:43,744 --> 00:20:47,281 line:-2
+Well, if texture or buffer limiters
+also show a high value,
+
+
+369
+00:20:47,347 --> 00:20:49,283 line:-1
+try to optimize this first.
+
+
+370
+00:20:49,349 --> 00:20:53,020 line:-2
+Potentially consider reducing the size
+of working sets.
+
+
+371
+00:20:53,086 --> 00:20:55,556 line:-1
+If your shaders are using device atomics,
+
+
+372
+00:20:55,622 --> 00:20:58,892 line:-2
+try to refactor code
+to use threadgroup atomics instead.
+
+
+373
+00:20:58,959 --> 00:21:04,131 line:-2
+Also, make sure to access memory
+with better spatial and temporal locality.
+
+
+374
+00:21:04,198 --> 00:21:06,500 line:-2
+Typing "Last Level Cache"
+will, very unsurprisingly,
+
+
+375
+00:21:06,567 --> 00:21:10,637 line:-2
+reveal all of the GPU LLC counters,
+including the limiter, of course.
+
+
+376
+00:21:10,704 --> 00:21:12,639 line:-1
+Great! On to the last limiter,
+
+
+377
+00:21:12,706 --> 00:21:14,508 line:-1
+Fragment Input Interpolation.
+
+
+378
+00:21:14,575 --> 00:21:17,311 line:-2
+Same as we did before,
+we should first understand
+
+
+379
+00:21:17,377 --> 00:21:19,112 line:-1
+Fragment Input Interpolation.
+
+
+380
+00:21:19,847 --> 00:21:23,016 line:-2
+Fragment Input is interpolated
+during the rendering stage
+
+
+381
+00:21:23,083 --> 00:21:24,952 line:-1
+by the Shader Core.
+
+
+382
+00:21:25,018 --> 00:21:28,722 line:-2
+The Shader Core has a dedicated
+Fragment Input Interpolator,
+
+
+383
+00:21:28,789 --> 00:21:31,992 line:-2
+which is both fixed function
+and full precision.
+
+
+384
+00:21:32,059 --> 00:21:35,529 line:-2
+Due to the fixed function nature
+of the Fragment Input Interpolation,
+
+
+385
+00:21:35,596 --> 00:21:38,532 line:-2
+there's not much we can do
+if we see a high limiter value.
+
+
+386
+00:21:38,599 --> 00:21:41,969 line:-2
+We can only remove vertex attributes
+passed to the Fragment Shader.
+
+
+387
+00:21:42,035 --> 00:21:45,806 line:-2
+You can find the Fragment Shader
+Interpolation Limiter in Xcode, of course.
+
+
+388
+00:21:45,873 --> 00:21:48,842 line:-2
+Now it's a great time to point out
+to some of our documentation
+
+
+389
+00:21:48,909 --> 00:21:52,613 line:-2
+on the topic of both limiters
+and developer tools.
+
+
+390
+00:21:52,679 --> 00:21:56,283 line:-2
+Notice that I have also included here
+some articles about memory bandwidth
+
+
+391
+00:21:56,350 --> 00:21:59,086 line:-1
+and occupancy, which we will cover next.
+
+
+392
+00:21:59,152 --> 00:22:02,589 line:-2
+This next section is about understanding
+memory bandwidth.
+
+
+393
+00:22:02,656 --> 00:22:07,294 line:-2
+This is a very important GPU counter
+since many of the TBDR optimizations
+
+
+394
+00:22:07,361 --> 00:22:10,163 line:-2
+have something to do
+with saving bandwidth.
+
+
+395
+00:22:10,230 --> 00:22:13,667 line:-2
+Remember that Device Memory
+is backed by System Memory
+
+
+396
+00:22:13,734 --> 00:22:16,803 line:-1
+on Unified Memory Systems such as the A13.
+
+
+397
+00:22:16,870 --> 00:22:18,972 line:-1
+It will store both Metal resources
+
+
+398
+00:22:19,039 --> 00:22:20,974 line:-2
+as well as the output
+from the tiling phase.
+
+
+399
+00:22:21,041 --> 00:22:24,178 line:-2
+Also, it will be cached
+by the GPU Last Level Cache.
+
+
+400
+00:22:25,212 --> 00:22:27,247 line:-1
+The Memory Bandwidth GPU counter
+
+
+401
+00:22:27,314 --> 00:22:31,418 line:-2
+measures transfer from System Memory
+to the actual GPU itself.
+
+
+402
+00:22:31,485 --> 00:22:34,421 line:-2
+For example,
+when we read buffer or texture data.
+
+
+403
+00:22:34,488 --> 00:22:38,525 line:-2
+Notice, though, that there's also
+System Level Cache, or SLC.
+
+
+404
+00:22:38,592 --> 00:22:41,795 line:-2
+This means that oftentimes
+you may see bursts of data transfer
+
+
+405
+00:22:41,862 --> 00:22:45,332 line:-2
+at a higher rate
+than the actual DRAM throughput.
+
+
+406
+00:22:45,399 --> 00:22:49,837 line:-2
+So what can we do if we see
+a high Memory Bandwidth GPU counter?
+
+
+407
+00:22:49,903 --> 00:22:53,440 line:-2
+Well, if texture or buffer limiters
+show a high value,
+
+
+408
+00:22:53,507 --> 00:22:56,109 line:-1
+you should try to optimize those instead.
+
+
+409
+00:22:56,176 --> 00:22:59,746 line:-2
+Also, make sure that the load and store 
+instructions are efficient,
+
+
+410
+00:22:59,813 --> 00:23:02,850 line:-2
+so only load data needed
+by the current render pass,
+
+
+411
+00:23:02,916 --> 00:23:06,553 line:-2
+and only store data
+needed by future render passes.
+
+
+412
+00:23:06,620 --> 00:23:09,456 line:-2
+Of course,
+this is a great moment to remind you
+
+
+413
+00:23:09,523 --> 00:23:12,359 line:-2
+that you should always leverage
+texture compression.
+
+
+414
+00:23:12,426 --> 00:23:15,395 line:-1
+Use block-compression, ASTC, for assets
+
+
+415
+00:23:15,462 --> 00:23:18,832 line:-2
+and lossless compression
+for textures generated at run-time.
+
+
+416
+00:23:18,899 --> 00:23:22,336 line:-2
+Texture compression really has
+a big impact on the memory bandwidth.
+
+
+417
+00:23:23,403 --> 00:23:24,404 line:-1
+Great. Moving on.
+
+
+418
+00:23:24,471 --> 00:23:27,307 line:-2
+Another good set of counters to look at
+is occupancy.
+
+
+419
+00:23:28,075 --> 00:23:30,577 line:0
+Occupancy measures
+how many threads are executed
+
+
+420
+00:23:30,644 --> 00:23:32,613 line:0
+out of the total thread pool.
+
+
+421
+00:23:32,679 --> 00:23:36,617 line:0
+Latency, in this context, is the time
+it takes for a task to be completed.
+
+
+422
+00:23:36,683 --> 00:23:39,419 line:0
+For example, the left diagram shows a GPU
+
+
+423
+00:23:39,486 --> 00:23:42,055 line:0
+where only half of the thread pool
+is executing.
+
+
+424
+00:23:42,122 --> 00:23:45,559 line:0
+The diagram to the right
+shows a case of 100% occupancy
+
+
+425
+00:23:45,626 --> 00:23:48,295 line:0
+where the GPU runs
+as many tasks as it can.
+
+
+426
+00:23:48,362 --> 00:23:50,631 line:-1
+So, why is occupancy important?
+
+
+427
+00:23:50,697 --> 00:23:55,502 line:-2
+Well, GPUs do hide latency
+by switching between available threads.
+
+
+428
+00:23:55,569 --> 00:23:58,438 line:-1
+GPUs will, of course, create new threads
+
+
+429
+00:23:58,505 --> 00:24:01,341 line:-2
+when there are enough internal resources
+to do so
+
+
+430
+00:24:01,408 --> 00:24:03,810 line:-2
+or when there are commands
+scheduled to run.
+
+
+431
+00:24:03,877 --> 00:24:08,448 line:-2
+So, if a task has high latency,
+for example, due to memory transfers,
+
+
+432
+00:24:08,515 --> 00:24:12,119 line:-2
+the GPU will switch between
+available threads to avoid stalling.
+
+
+433
+00:24:12,186 --> 00:24:15,889 line:-2
+Of course, all of that
+while creating new threads when possible.
+
+
+434
+00:24:15,956 --> 00:24:18,458 line:-1
+Occupancy will depend, in large part,
+
+
+435
+00:24:18,525 --> 00:24:22,529 line:-2
+on some static properties
+of the compute or rendering pipeline.
+
+
+436
+00:24:22,596 --> 00:24:24,431 line:-1
+So you may want to query those.
+
+
+437
+00:24:24,498 --> 00:24:28,001 line:-2
+You may want to query the maximum number
+of threads per threadgroup,
+
+
+438
+00:24:28,068 --> 00:24:31,405 line:-2
+the execution width of a SIMD lane,
+and also,
+
+
+439
+00:24:31,471 --> 00:24:35,576 line:-2
+the length of the threadgroup memory
+that needs to be statically allocated.
+
+
+440
+00:24:35,642 --> 00:24:38,979 line:-2
+So let's talk about
+the occupancy GPU counter.
+
+
+441
+00:24:39,046 --> 00:24:41,281 line:-2
+This GPU counter
+will measure the percentage
+
+
+442
+00:24:41,348 --> 00:24:45,319 line:-2
+of the total thread capacity
+being used by the GPU.
+
+
+443
+00:24:45,385 --> 00:24:48,789 line:-2
+This counter is actually
+the sum of other counters.
+
+
+444
+00:24:48,856 --> 00:24:52,793 line:-2
+It's the sum of Compute, Vertex,
+and Fragment Occupancy.
+
+
+445
+00:24:52,860 --> 00:24:55,896 line:-2
+Notice also that
+neither high or low occupancy
+
+
+446
+00:24:55,963 --> 00:24:57,931 line:-1
+are indicative of a problem.
+
+
+447
+00:24:57,998 --> 00:25:03,036 line:-2
+For example, low Vertex Occupancy is fine
+if there is enough Fragment Occupancy.
+
+
+448
+00:25:03,103 --> 00:25:05,038 line:-1
+Low occupancy is also fine
+
+
+449
+00:25:05,105 --> 00:25:07,841 line:-2
+if the GPU resources
+are being fully utilized.
+
+
+450
+00:25:07,908 --> 00:25:11,945 line:-2
+Overlapping work in different subsystems
+may increase occupancy.
+
+
+451
+00:25:12,012 --> 00:25:14,815 line:-2
+For example, the diagram below
+shows high overlap
+
+
+452
+00:25:14,882 --> 00:25:18,151 line:-1
+between tiling, rendering, and compute.
+
+
+453
+00:25:18,218 --> 00:25:22,155 line:-2
+So what can we do if we see
+a high occupancy GPU counter?
+
+
+454
+00:25:22,222 --> 00:25:25,325 line:-2
+Well, we will want to correlate
+occupancy measurements
+
+
+455
+00:25:25,392 --> 00:25:28,362 line:-1
+with data from other counters or tools.
+
+
+456
+00:25:28,428 --> 00:25:31,198 line:-1
+And if overall occupancy is low,
+
+
+457
+00:25:31,265 --> 00:25:34,801 line:-2
+this means that shaders may have
+exhausted some internal resources,
+
+
+458
+00:25:34,868 --> 00:25:37,171 line:-1
+such as tile or threadgroup memory.
+
+
+459
+00:25:37,237 --> 00:25:40,340 line:-2
+It could also be that
+threads finish executing faster
+
+
+460
+00:25:40,407 --> 00:25:42,709 line:-1
+than the GPU can create new ones.
+
+
+461
+00:25:42,776 --> 00:25:46,413 line:-2
+Also, it may be that your app
+is rendering to a small area
+
+
+462
+00:25:46,480 --> 00:25:49,082 line:-1
+or dispatching very small compute grids.
+
+
+463
+00:25:49,149 --> 00:25:54,188 line:-2
+Great. So now let's talk about
+Hidden Surface Removal, or HSR.
+
+
+464
+00:25:54,254 --> 00:25:57,925 line:-2
+Hidden Surface Removal, or HSR,
+is an early visibility pass.
+
+
+465
+00:25:57,991 --> 00:26:02,529 line:-2
+It is important to use the GPU counters
+to measure its efficiency for your game.
+
+
+466
+00:26:02,596 --> 00:26:04,598 line:-1
+Let's recap HSR first.
+
+
+467
+00:26:05,165 --> 00:26:07,935 line:-1
+HSR allows the GPU to minimize overdraw
+
+
+468
+00:26:08,001 --> 00:26:11,505 line:-2
+by keeping track of the front-most
+visible layer for each pixel.
+
+
+469
+00:26:11,572 --> 00:26:13,373 line:-1
+HSR is both pixel perfect
+
+
+470
+00:26:13,440 --> 00:26:16,376 line:-2
+and submission order independent
+for opaque meshes.
+
+
+471
+00:26:16,443 --> 00:26:19,813 line:-2
+Notice the pixels are processed
+into two stages.
+
+
+472
+00:26:19,880 --> 00:26:24,351 line:-2
+First, Hidden Surface Removal,
+and then, Fragment Processing.
+
+
+473
+00:26:24,418 --> 00:26:27,921 line:-2
+For example, even if you draw
+two triangles back to front,
+
+
+474
+00:26:27,988 --> 00:26:31,425 line:-1
+HSR will ensure that there is no overdraw.
+
+
+475
+00:26:31,491 --> 00:26:34,494 line:-2
+So how can we measure
+Hidden Surface Removal efficiency?
+
+
+476
+00:26:34,561 --> 00:26:37,865 line:-2
+We will actually want to use
+GPU counters for that.
+
+
+477
+00:26:37,931 --> 00:26:41,568 line:-2
+We can use GPU counters to measure
+the number of pixels rasterized,
+
+
+478
+00:26:41,635 --> 00:26:43,871 line:-1
+the number of Fragment Shader invocations,
+
+
+479
+00:26:43,937 --> 00:26:48,775 line:-2
+the number of pixels stored,
+as well as the number of Pre-Z test fails.
+
+
+480
+00:26:48,842 --> 00:26:50,844 line:-1
+Overdraw, in this context, is the ratio
+
+
+481
+00:26:50,911 --> 00:26:54,448 line:-2
+between Fragment Shader invocations
+and Pixels Stored.
+
+
+482
+00:26:54,515 --> 00:26:58,819 line:-2
+Of course, we can minimize overdraw by
+reducing the number of full-screen passes,
+
+
+483
+00:26:58,886 --> 00:27:01,054 line:-1
+as well as reducing blending.
+
+
+484
+00:27:01,121 --> 00:27:02,489 line:-1
+But what else can we do?
+
+
+485
+00:27:03,090 --> 00:27:05,926 line:-1
+We should use HSR efficiently.
+
+
+486
+00:27:05,993 --> 00:27:09,196 line:-2
+You will want to draw meshes
+sorted by visibility state.
+
+
+487
+00:27:09,263 --> 00:27:10,597 line:-1
+First opaque meshes,
+
+
+488
+00:27:10,664 --> 00:27:13,433 line:-2
+then alpha test, discard,
+and depth feedback,
+
+
+489
+00:27:13,500 --> 00:27:16,203 line:-1
+and finally, translucent meshes.
+
+
+490
+00:27:16,270 --> 00:27:19,506 line:-2
+You should avoid interleaving
+opaque and non-opaque meshes,
+
+
+491
+00:27:19,573 --> 00:27:21,942 line:-2
+as well as avoid interleaving
+opaque meshes
+
+
+492
+00:27:22,009 --> 00:27:24,811 line:-2
+with different color attachment
+write masks.
+
+
+493
+00:27:24,878 --> 00:27:28,315 line:-2
+Awesome. So please welcome Sam again
+for another demo.
+
+
+494
+00:27:28,382 --> 00:27:30,717 line:-2
+Guillem's just walked us through
+all the limiters,
+
+
+495
+00:27:30,784 --> 00:27:33,720 line:-2
+what they mean,
+and what to do if you see a high value.
+
+
+496
+00:27:33,787 --> 00:27:35,989 line:-2
+So let's look at
+<i>Respawnables Heroes</i> again,
+
+
+497
+00:27:36,056 --> 00:27:38,859 line:-2
+specifically an older build
+running on my iPhone,
+
+
+498
+00:27:38,926 --> 00:27:43,463 line:-2
+but this time in the Metal Debugger
+with all of the GPU performance counters.
+
+
+499
+00:27:43,530 --> 00:27:47,434 line:-2
+I've already captured the frame in Xcode,
+and I'm looking at the summary.
+
+
+500
+00:27:47,501 --> 00:27:50,571 line:-2
+We can see the GPU time
+in the performance overview
+
+
+501
+00:27:50,637 --> 00:27:53,073 line:-1
+is about 12.82 milliseconds.
+
+
+502
+00:27:53,140 --> 00:27:54,441 line:-1
+But I want more detail,
+
+
+503
+00:27:54,508 --> 00:27:56,443 line:-2
+so I'm going to click
+on the Show Counters button
+
+
+504
+00:27:56,510 --> 00:27:59,880 line:-2
+to jump right into
+the GPU performance counters.
+
+
+505
+00:27:59,947 --> 00:28:01,982 line:-2
+We can now see
+a detailed view of the counters
+
+
+506
+00:28:02,049 --> 00:28:04,218 line:-1
+for each command encoder or draw call.
+
+
+507
+00:28:04,284 --> 00:28:05,819 line:-1
+As Guillem showed you earlier,
+
+
+508
+00:28:05,886 --> 00:28:08,989 line:-2
+there are a ton of counters
+for Apple GPUs.
+
+
+509
+00:28:09,056 --> 00:28:11,225 line:-2
+So we've made a bunch of improvements
+to the tool
+
+
+510
+00:28:11,291 --> 00:28:13,093 line:-1
+to help you find and organize them.
+
+
+511
+00:28:13,427 --> 00:28:16,530 line:-2
+To begin with, we've reorganized
+the counters into groups.
+
+
+512
+00:28:16,597 --> 00:28:20,033 line:-2
+For instance, if you want to see
+all of the counters related to memory,
+
+
+513
+00:28:20,100 --> 00:28:21,768 line:-1
+simply click on the Memory group.
+
+
+514
+00:28:22,703 --> 00:28:24,404 line:-1
+You can also filter for things.
+
+
+515
+00:28:24,471 --> 00:28:29,009 line:-2
+So, if I want to see every counter
+related to the ALU, I can filter for it.
+
+
+516
+00:28:30,477 --> 00:28:33,847 line:-2
+One of the cool things about groups
+is that you can also create your own.
+
+
+517
+00:28:33,914 --> 00:28:36,917 line:-2
+So after filtering, a Save button
+will appear on the top right,
+
+
+518
+00:28:36,984 --> 00:28:40,254 line:-2
+which you can click
+to create your very own group.
+
+
+519
+00:28:41,555 --> 00:28:43,757 line:-2
+There's also a new detail table
+at the bottom,
+
+
+520
+00:28:43,824 --> 00:28:45,893 line:-1
+which is strongly linked with the graph.
+
+
+521
+00:28:45,959 --> 00:28:48,095 line:-1
+So, I can select something here,
+
+
+522
+00:28:48,161 --> 00:28:51,398 line:-2
+and it also selects it in the table,
+and vice versa.
+
+
+523
+00:28:52,666 --> 00:28:54,701 line:-1
+It also selects it in the navigator.
+
+
+524
+00:28:56,036 --> 00:28:58,539 line:-2
+You can also sort the table
+by different counters.
+
+
+525
+00:28:58,605 --> 00:29:01,742 line:-2
+For example, to quickly find
+the most expensive encoder,
+
+
+526
+00:29:01,808 --> 00:29:04,311 line:-1
+those most bottlenecked by ALU.
+
+
+527
+00:29:04,378 --> 00:29:06,813 line:-1
+In this case, it's the deferred phase.
+
+
+528
+00:29:06,880 --> 00:29:10,050 line:-2
+The performance limiters group
+shows us all of the limiters.
+
+
+529
+00:29:10,117 --> 00:29:14,555 line:-2
+We can see that the deferred phase
+is mostly limited by the ALU.
+
+
+530
+00:29:15,789 --> 00:29:19,193 line:-2
+If we look
+at the floating-point 32 utilization,
+
+
+531
+00:29:19,259 --> 00:29:23,096 line:-2
+we can see that it's higher
+than the floating-point 16 utilization.
+
+
+532
+00:29:23,163 --> 00:29:28,502 line:-2
+As Guillem mentioned earlier,
+floating-point 16 is twice as fast.
+
+
+533
+00:29:28,569 --> 00:29:32,306 line:-2
+So we really want to reduce that usage
+of floating-point 32
+
+
+534
+00:29:32,372 --> 00:29:35,809 line:-2
+as much as possible
+to make the game run faster.
+
+
+535
+00:29:35,876 --> 00:29:37,277 line:-1
+What else can we look for?
+
+
+536
+00:29:37,344 --> 00:29:40,280 line:-2
+Guillem mentioned that memory bandwidth
+is pretty important.
+
+
+537
+00:29:40,347 --> 00:29:43,250 line:-2
+So let's focus on that
+and see if we can reduce it.
+
+
+538
+00:29:43,317 --> 00:29:46,053 line:-2
+I want to show you how easy it is
+to pick a limiter
+
+
+539
+00:29:46,119 --> 00:29:49,756 line:-2
+and use the counters to really drill down
+into the fine details.
+
+
+540
+00:29:50,257 --> 00:29:52,426 line:-1
+So let's switch back to the memory group,
+
+
+541
+00:29:52,492 --> 00:29:56,163 line:-2
+and this time I'm going to sort the table
+by Bytes Read From Main Memory.
+
+
+542
+00:29:58,665 --> 00:30:01,735 line:-2
+Once again,
+it's our Deferred Phase encoder.
+
+
+543
+00:30:01,802 --> 00:30:05,806 line:-2
+But we really want to find out
+why we are reading so much memory.
+
+
+544
+00:30:05,873 --> 00:30:07,908 line:-1
+Since an encoder is just a container,
+
+
+545
+00:30:07,975 --> 00:30:13,247 line:-2
+what we really want is to find out
+which draw is using the most memory.
+
+
+546
+00:30:13,313 --> 00:30:14,648 line:-1
+So let's click on the Draw button
+
+
+547
+00:30:14,715 --> 00:30:17,150 line:-2
+to switch the graph
+to Per-Draw Counters mode.
+
+
+548
+00:30:18,619 --> 00:30:21,955 line:-2
+There are thousands of draw calls
+in this frame.
+
+
+549
+00:30:22,022 --> 00:30:23,824 line:-2
+But since we already knew
+that we're interested
+
+
+550
+00:30:23,891 --> 00:30:25,659 line:-1
+in the Deferred Phase encoder,
+
+
+551
+00:30:25,726 --> 00:30:29,196 line:-2
+we can filter the table to only show
+draw calls in this encoder.
+
+
+552
+00:30:31,298 --> 00:30:34,067 line:-1
+Let's sort by texture, L1, by thread,
+
+
+553
+00:30:34,134 --> 00:30:37,871 line:-2
+which gives us the draw call
+that has the most L1 bytes transferred.
+
+
+554
+00:30:37,938 --> 00:30:41,041 line:-2
+Since clicking in the table
+also highlights it in the navigator,
+
+
+555
+00:30:41,108 --> 00:30:43,710 line:-1
+it's really easy to find the draw call.
+
+
+556
+00:30:43,777 --> 00:30:45,445 line:-1
+Since it's right here,
+
+
+557
+00:30:45,512 --> 00:30:48,582 line:-2
+disclosing the draw call,
+we can click on Bound Resources.
+
+
+558
+00:30:50,751 --> 00:30:54,154 line:-2
+This view shows us which resources
+the draw call has bound,
+
+
+559
+00:30:54,221 --> 00:30:56,924 line:-2
+and in this case,
+it looks like the draw binds and reads
+
+
+560
+00:30:56,990 --> 00:31:00,661 line:-2
+from an RGBA16 floating-point
+cube map texture.
+
+
+561
+00:31:01,428 --> 00:31:03,063 line:-1
+Let's check the flags.
+
+
+562
+00:31:03,730 --> 00:31:06,834 line:-1
+Storage mode is shared. Ah.
+
+
+563
+00:31:06,900 --> 00:31:08,702 line:-1
+In this case, since we're sampling,
+
+
+564
+00:31:08,769 --> 00:31:11,371 line:-2
+we could change the texture storage mode
+to private,
+
+
+565
+00:31:11,438 --> 00:31:14,641 line:-2
+which would automatically enable
+lossless texture compression
+
+
+566
+00:31:14,708 --> 00:31:16,877 line:-1
+to reduce the memory bandwidth.
+
+
+567
+00:31:16,944 --> 00:31:19,279 line:-1
+We could even consider block compression
+
+
+568
+00:31:19,346 --> 00:31:22,749 line:-2
+to further reduce the bandwidth,
+not to mention the footprint.
+
+
+569
+00:31:22,816 --> 00:31:25,118 line:-1
+If private storage mode isn't an option,
+
+
+570
+00:31:25,185 --> 00:31:27,921 line:-2
+we can still explicitly optimize it
+for the GPU
+
+
+571
+00:31:27,988 --> 00:31:29,690 line:-1
+with a Blit Command Encoder.
+
+
+572
+00:31:29,756 --> 00:31:31,058 line:-1
+I encourage you to check out
+
+
+573
+00:31:31,124 --> 00:31:33,260 line:-2
+the "Delivering Optimized Metal Apps
+and Games" talk
+
+
+574
+00:31:33,327 --> 00:31:36,096 line:-1
+from last year's WWDC to learn more.
+
+
+575
+00:31:36,163 --> 00:31:37,965 line:-1
+So just like that, we've been able to use
+
+
+576
+00:31:38,031 --> 00:31:40,267 line:-2
+the performance counters
+in the Metal Debugger
+
+
+577
+00:31:40,334 --> 00:31:44,371 line:-2
+to drill down and discover
+some optimizations that can be made.
+
+
+578
+00:31:44,438 --> 00:31:47,374 line:-2
+If you pick a limiter
+and focus on optimizing it,
+
+
+579
+00:31:47,441 --> 00:31:50,978 line:-2
+you can use the tools to really increase
+your game's performance.
+
+
+580
+00:31:51,545 --> 00:31:56,016 line:-2
+In this case, Digital Legends were able
+to make these changes amongst others,
+
+
+581
+00:31:56,083 --> 00:31:59,720 line:-2
+significantly increased
+their floating-point 16 utilization,
+
+
+582
+00:31:59,786 --> 00:32:03,624 line:-2
+and reduced their memory bandwidth
+by block-compressing texture assets.
+
+
+583
+00:32:03,690 --> 00:32:08,095 line:-2
+The game now runs
+at a steady 120 FPS on iPad Pro.
+
+
+584
+00:32:08,161 --> 00:32:10,264 line:-1
+It's been a pleasure. Now back to Guillem.
+
+
+585
+00:32:10,597 --> 00:32:12,833 line:-1
+Thank you, Sam, for this great demo.
+
+
+586
+00:32:12,900 --> 00:32:14,968 line:-1
+Okay, so it's time to wrap up.
+
+
+587
+00:32:15,035 --> 00:32:19,306 line:-2
+Today, we have reviewed a bunch of
+really important GPU performance counters
+
+
+588
+00:32:19,373 --> 00:32:22,743 line:-2
+and put them into the context
+of modern Apple GPUs.
+
+
+589
+00:32:23,310 --> 00:32:26,480 line:-2
+So the next step, of course,
+are for you to profile your game.
+
+
+590
+00:32:26,547 --> 00:32:27,714 line:-1
+Use what we have learned.
+
+
+591
+00:32:27,781 --> 00:32:29,983 line:-2
+Use the GPU performance counters
+to understand
+
+
+592
+00:32:30,050 --> 00:32:33,353 line:-2
+how the GPU is being utilized
+and also find the bottleneck.
+
+
+593
+00:32:33,754 --> 00:32:36,590 line:-2
+You should also learn more
+about GPU tools.
+
+
+594
+00:32:36,657 --> 00:32:40,427 line:-2
+Please check the talks below,
+and thank you for watching.
+

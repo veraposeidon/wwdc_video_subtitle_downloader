@@ -1,0 +1,3145 @@
+2
+00:00:00,601 --> 00:00:07,574 line:-1
+[upbeat music]
+
+
+3
+00:00:09.042 --> 00:00:12.513 line:-2 align:center
+Nihar: Hello, and welcome to
+"What's new in CloudKit."
+
+
+4
+00:00:12,513 --> 00:00:14,248 line:-1
+My name is Nihar Sharma
+
+
+5
+00:00:14,248 --> 00:00:16,183 line:-2
+and I'm an engineer
+on the CloudKit team,
+
+
+6
+00:00:16,183 --> 00:00:18,652 line:-2
+and I'll be joined
+by my colleague Qian.
+
+
+7
+00:00:18.652 --> 00:00:21.221 line:-2 align:center
+We're going to start by
+highlighting some changes
+
+
+8
+00:00:21,221 --> 00:00:25,459 line:-2
+to the CloudKit API that take
+advantage of Swift concurrency.
+
+
+9
+00:00:25,459 --> 00:00:27,995 line:-2
+Then, Qian will walk
+us through
+
+
+10
+00:00:27,995 --> 00:00:30,597 line:-2
+the use
+of encrypted fields on records.
+
+
+11
+00:00:32,099 --> 00:00:34,368 line:-2
+Finally, we'll dig deeper
+into a new feature
+
+
+12
+00:00:34.368 --> 00:00:36.870 line:-2 align:center
+that allows you
+to easily share record zones.
+
+
+13
+00:00:38.372 --> 00:00:41.608 line:-2 align:center
+First up, we have CloudKit
+and Swift concurrency.
+
+
+14
+00:00:41,608 --> 00:00:44,144 line:-2
+As a bit of background,
+CloudKit is a framework
+
+
+15
+00:00:44.144 --> 00:00:48.081 line:-2 align:center
+that gives your application
+access to a database on iCloud.
+
+
+16
+00:00:48,081 --> 00:00:51,151 line:-2
+This is exposed in the API
+as a CKContainer
+
+
+17
+00:00:51,151 --> 00:00:54,154 line:-2
+through which you can access
+multiple CKDatabases.
+
+
+18
+00:00:55.422 --> 00:00:57.824 line:-2 align:center
+Each container has one
+public database
+
+
+19
+00:00:57.824 --> 00:01:01.862 line:-2 align:center
+where all users can potentially
+read and write records.
+
+
+20
+00:01:01,862 --> 00:01:04,598 line:-2
+If the device has
+a logged-in iCloud account,
+
+
+21
+00:01:04,598 --> 00:01:07,501 line:-2
+then your app also has
+access to a private database,
+
+
+22
+00:01:07,501 --> 00:01:10,103 line:-1
+which contains that user's data.
+
+
+23
+00:01:10.103 --> 00:01:12.339 line:-2 align:center
+And if your app
+supports sharing,
+
+
+24
+00:01:12.339 --> 00:01:15.209 line:-2 align:center
+then data which is shared
+to the current iCloud user
+
+
+25
+00:01:15.209 --> 00:01:19.613 line:-2 align:center
+will be available to your app
+in the shared CKDatabase.
+
+
+26
+00:01:19,613 --> 00:01:21,381 line:-2
+When writing code against
+CloudKit,
+
+
+27
+00:01:21.381 --> 00:01:24.384 line:-2 align:center
+there are
+two general areas of API.
+
+
+28
+00:01:24.384 --> 00:01:26.353 line:-2 align:center
+First, the functions,
+which are available
+
+
+29
+00:01:26,353 --> 00:01:29,756 line:-1
+on CKContainer and CKDatabase.
+
+
+30
+00:01:29.756 --> 00:01:33.193 line:-2 align:center
+This API is useful for new
+adopters of CloudKit,
+
+
+31
+00:01:33.193 --> 00:01:36.563 line:-2 align:center
+and is meant to provide
+a low barrier to entry.
+
+
+32
+00:01:36.563 --> 00:01:37.965 line:-1 align:center
+Instead of providing you
+
+
+33
+00:01:37.965 --> 00:01:40.334 line:-2 align:center
+with all of the available
+configurations,
+
+
+34
+00:01:40,334 --> 00:01:42,369 line:-2
+the framework chooses
+a default behavior,
+
+
+35
+00:01:42.369 --> 00:01:44.605 line:-2 align:center
+which is most appropriate
+for a UI application
+
+
+36
+00:01:44.605 --> 00:01:46.874 line:-2 align:center
+that the user
+is interacting with.
+
+
+37
+00:01:46.874 --> 00:01:50.077 line:-2 align:center
+Next is the Operation API,
+which is exposed as
+
+
+38
+00:01:50,077 --> 00:01:53,280 line:-1
+a set of NSOperation subclasses.
+
+
+39
+00:01:53.280 --> 00:01:55.582 line:-2 align:center
+This API provides
+a number of features
+
+
+40
+00:01:55.582 --> 00:01:58.986 line:-2 align:center
+not available as CKContainer
+or CKDatabase functions.
+
+
+41
+00:02:00.087 --> 00:02:02.956 line:-2 align:center
+This includes sending
+and receiving batches of items
+
+
+42
+00:02:02.956 --> 00:02:05.225 line:-2 align:center
+in a single
+round-trip to the server,
+
+
+43
+00:02:05.225 --> 00:02:07.728 line:-1 align:center
+paging through large result sets
+
+
+44
+00:02:07,728 --> 00:02:10,364 line:-2
+by incrementally fetching
+them from the server,
+
+
+45
+00:02:10,364 --> 00:02:14,201 line:-2
+requesting database and record
+zone changes from the server
+
+
+46
+00:02:14,201 --> 00:02:16,370 line:-1
+since some point in the past,
+
+
+47
+00:02:16.370 --> 00:02:19.573 line:-2 align:center
+and lastly, grouping different
+operations together.
+
+
+48
+00:02:19.573 --> 00:02:21.775 line:-2 align:center
+This allows them to be
+logged as a unit
+
+
+49
+00:02:21.775 --> 00:02:23.377 line:-1 align:center
+and lets you inform the system
+
+
+50
+00:02:23,377 --> 00:02:26,780 line:-2
+about the size of your
+operation-spanning workload.
+
+
+51
+00:02:26,780 --> 00:02:29,082 line:-2
+Many developers eventually
+use this API
+
+
+52
+00:02:29.082 --> 00:02:31.051 line:-2 align:center
+when writing
+production-quality code.
+
+
+53
+00:02:31,051 --> 00:02:34,588 line:-2
+Taking advantage of the new
+Swift concurrency functionality,
+
+
+54
+00:02:34,588 --> 00:02:37,224 line:-2
+CloudKit has made
+several improvements.
+
+
+55
+00:02:37.224 --> 00:02:40.260 line:-2 align:center
+First, I'll cover how you
+can use
+
+
+56
+00:02:40,260 --> 00:02:44,965 line:-2
+the new Swift async/await
+feature alongside CloudKit APIs.
+
+
+57
+00:02:44,965 --> 00:02:47,935 line:-2
+Then, I'll talk about new
+API that helps to clarify
+
+
+58
+00:02:47,935 --> 00:02:49,937 line:-2
+the difference between
+a per-item
+
+
+59
+00:02:49,937 --> 00:02:51,839 line:-1
+and a per-operation callback,
+
+
+60
+00:02:51,839 --> 00:02:54,975 line:-2
+and how CloudKit takes advantage
+of the Swift.Result type
+
+
+61
+00:02:54,975 --> 00:02:58,512 line:-2
+to clarify the role of
+parameters to those callbacks.
+
+
+62
+00:02:58.512 --> 00:03:01.048 line:-2 align:center
+And finally, I'll go over
+enhancements we've made
+
+
+63
+00:03:01,048 --> 00:03:03,317 line:-2
+to our container and database
+functions
+
+
+64
+00:03:03,317 --> 00:03:04,952 line:-2
+which help bring over
+some of the features
+
+
+65
+00:03:04,952 --> 00:03:07,221 line:-2
+and configurability
+previously available
+
+
+66
+00:03:07.221 --> 00:03:09.289 line:-1 align:center
+only via the operation APIs.
+
+
+67
+00:03:10,724 --> 00:03:13,327 line:0
+CloudKit API
+is introducing async variants
+
+
+68
+00:03:13,327 --> 00:03:16,029 align:center
+for functions
+on container and database.
+
+
+69
+00:03:16,029 --> 00:03:18,832 align:center
+You can use async functions
+to improve your code
+
+
+70
+00:03:18,832 --> 00:03:21,001 align:center
+that deals with concurrency.
+
+
+71
+00:03:21,001 --> 00:03:23,737 align:center
+It helps with making error
+handling more natural,
+
+
+72
+00:03:23,737 --> 00:03:27,107 line:0
+and simplifies the visual
+control flow in your code.
+
+
+73
+00:03:27,107 --> 00:03:28,775 align:center
+For more detail
+on async functions,
+
+
+74
+00:03:28,775 --> 00:03:32,913 line:0
+please refer to the "Meet
+async/await in Swift" session.
+
+
+75
+00:03:32,913 --> 00:03:34,281 line:0
+Let's check out an example.
+
+
+76
+00:03:36,650 --> 00:03:40,687 line:-2
+This snippet is taken from
+the PrivateDatabase code sample.
+
+
+77
+00:03:40,687 --> 00:03:43,390 line:-2
+This is one of several
+CloudKit-specific code samples
+
+
+78
+00:03:43,390 --> 00:03:45,559 line:-2
+that Apple recently posted
+to GitHub,
+
+
+79
+00:03:45.559 --> 00:03:47.761 line:-1 align:center
+and they are available to you.
+
+
+80
+00:03:47.761 --> 00:03:50.364 line:-2 align:center
+This specific function
+wants to delete a record
+
+
+81
+00:03:50,364 --> 00:03:53,166 line:-2
+from the server and inform
+the caller when it's done.
+
+
+82
+00:03:54,234 --> 00:03:55,936 line:-2
+Note that there are many
+optionals
+
+
+83
+00:03:55,936 --> 00:03:58,705 line:-2
+and conditional unwrappings
+sprinkled around.
+
+
+84
+00:03:58,705 --> 00:04:00,774 line:-2
+And when you first try
+to understand this function,
+
+
+85
+00:04:00,774 --> 00:04:03,010 line:-2
+the control flow
+isn't immediately obvious.
+
+
+86
+00:04:05.145 --> 00:04:06.480 line:-2 align:center
+Now, let's compare this
+to code
+
+
+87
+00:04:06.480 --> 00:04:09.850 line:-2 align:center
+updated to use CloudKit's
+async functions.
+
+
+88
+00:04:09.850 --> 00:04:11.418 line:-2 align:center
+Here, the optionals
+and unwrappings
+
+
+89
+00:04:11.418 --> 00:04:14.087 line:-2 align:center
+have been eliminated,
+and the control flow is linear
+
+
+90
+00:04:14,087 --> 00:04:15,589 line:-1
+and easier to follow.
+
+
+91
+00:04:16,623 --> 00:04:18,625 line:-2
+I'm happy to say
+that each of our code samples
+
+
+92
+00:04:18,625 --> 00:04:20,727 line:-2
+on the GitHub repository
+have updates
+
+
+93
+00:04:20,727 --> 00:04:22,663 line:-2
+which demonstrate
+how the code can be
+
+
+94
+00:04:22,663 --> 00:04:25,666 line:-2
+similarly refactored
+to use Swift concurrency.
+
+
+95
+00:04:27,768 --> 00:04:30,637 line:-2
+Let's talk about per-item
+callbacks.
+
+
+96
+00:04:30,637 --> 00:04:34,241 line:-2
+As an example,
+here's a CKFetchRecordsOperation
+
+
+97
+00:04:34,241 --> 00:04:37,411 line:-2
+sending four
+CKRecord.IDs to the server,
+
+
+98
+00:04:37,411 --> 00:04:41,148 line:-2
+to ideally get back
+four CKRecord payloads.
+
+
+99
+00:04:41.148 --> 00:04:44.151 line:-2 align:center
+This operation can go
+one of three different ways.
+
+
+100
+00:04:45,919 --> 00:04:48,822 line:0
+In the first case,
+the operation succeeds.
+
+
+101
+00:04:48,822 --> 00:04:51,525 align:center
+There are no errors,
+your records are successfully
+
+
+102
+00:04:51,525 --> 00:04:52,826 line:0
+fetched from the server.
+
+
+103
+00:04:54,528 --> 00:04:55,863 line:-1
+The second possibility
+
+
+104
+00:04:55.863 --> 00:04:58.866 line:-2 align:center
+is that you hit
+an operation-wide error.
+
+
+105
+00:04:58,866 --> 00:05:02,636 line:-2
+This is an error that causes
+the entire operation to fail.
+
+
+106
+00:05:02,636 --> 00:05:06,273 line:-2
+As an example, maybe the device
+lacks a network connection.
+
+
+107
+00:05:06.273 --> 00:05:08.575 line:-2 align:center
+In that case,
+the entire operation would fail
+
+
+108
+00:05:08,575 --> 00:05:10,577 line:-2
+with a networkUnavailable
+error code.
+
+
+109
+00:05:13,013 --> 00:05:14,748 line:-1
+Here's the third option.
+
+
+110
+00:05:14,748 --> 00:05:16,717 line:0
+In this scenario,
+your operation
+
+
+111
+00:05:16,717 --> 00:05:19,486 align:center
+has successfully
+round-tripped to the server.
+
+
+112
+00:05:19,486 --> 00:05:21,154 line:0
+The server has
+successfully returned
+
+
+113
+00:05:21,154 --> 00:05:23,423 line:0
+three of the requested
+CKRecords,
+
+
+114
+00:05:23,423 --> 00:05:25,325 line:0
+alongside an error
+indicating
+
+
+115
+00:05:25,325 --> 00:05:28,662 align:center
+that the fourth requested
+record does not exist.
+
+
+116
+00:05:28,662 --> 00:05:30,531 align:center
+In this example,
+the per-item error
+
+
+117
+00:05:30,531 --> 00:05:33,066 align:center
+is unknownItem,
+and it gets bundled
+
+
+118
+00:05:33,066 --> 00:05:36,570 align:center
+into a per-operation
+error called partialFailure.
+
+
+119
+00:05:36,570 --> 00:05:39,039 line:-1
+So, how is this handled in code?
+
+
+120
+00:05:39,039 --> 00:05:41,909 line:-1
+On top, CKFetchRecordsOperation
+
+
+121
+00:05:41,909 --> 00:05:44,311 line:-2
+declares
+its perRecordCompletionBlock
+
+
+122
+00:05:44,311 --> 00:05:46,480 line:-2
+and per-operation
+completion block,
+
+
+123
+00:05:46,480 --> 00:05:48,515 line:-2
+alongside
+a sample implementation
+
+
+124
+00:05:48,515 --> 00:05:49,950 line:-2
+of each
+of these on the bottom.
+
+
+125
+00:05:52,152 --> 00:05:55,189 line:-2
+Note the overlap between
+these two callbacks.
+
+
+126
+00:05:55.189 --> 00:05:57.591 line:-2 align:center
+From the missing record
+example from before,
+
+
+127
+00:05:57,591 --> 00:06:00,761 line:-2
+the code expects
+a per-item error twice--
+
+
+128
+00:06:00.761 --> 00:06:05.265 line:-2 align:center
+once as a top-level unknownItem
+error in the per-item callback
+
+
+129
+00:06:05.265 --> 00:06:08.569 line:-2 align:center
+and again bundled inside
+a partialFailure error
+
+
+130
+00:06:08.569 --> 00:06:11.171 line:-1 align:center
+in the per-operation callback.
+
+
+131
+00:06:11,171 --> 00:06:13,707 line:-2
+Similarly, it also expects
+per-item successes
+
+
+132
+00:06:13,707 --> 00:06:16,877 line:-2
+in two places for the records
+which are fetched successfully--
+
+
+133
+00:06:16,877 --> 00:06:20,714 line:-2
+first, as a top-level parameter
+to a per-item callback,
+
+
+134
+00:06:20,714 --> 00:06:24,284 line:-2
+and once again, wrapped in
+the recordsByRecordID dictionary
+
+
+135
+00:06:24.284 --> 00:06:26.987 line:-2 align:center
+of successful results
+in the per-operation callback.
+
+
+136
+00:06:28,188 --> 00:06:31,358 line:-2
+By leveraging Swift.Result type,
+CloudKit has replaced
+
+
+137
+00:06:31.358 --> 00:06:34.194 line:-2 align:center
+both of these callbacks
+to make the API clearer.
+
+
+138
+00:06:36.697 --> 00:06:39.566 line:-2 align:center
+Notice the top-level of
+separation of block parameters
+
+
+139
+00:06:39,566 --> 00:06:42,636 line:-2
+in the new
+result-based callbacks.
+
+
+140
+00:06:42,636 --> 00:06:46,039 line:-2
+perRecordResultBlock has an ID,
+identifying the item
+
+
+141
+00:06:46,039 --> 00:06:48,275 line:-2
+that CloudKit is calling
+back about.
+
+
+142
+00:06:48,275 --> 00:06:51,078 line:-1
+And it has its per-item result.
+
+
+143
+00:06:51.078 --> 00:06:53.080 line:-2 align:center
+The result
+is now strongly typed,
+
+
+144
+00:06:53,080 --> 00:06:54,381 line:-1
+so you know you're getting
+
+
+145
+00:06:54,381 --> 00:06:57,084 line:-2
+either a successfully
+fetched CKRecord payload,
+
+
+146
+00:06:57,084 --> 00:06:58,852 line:-1
+or a per-item error.
+
+
+147
+00:07:00.087 --> 00:07:02.389 line:-2 align:center
+Similarly, the operation-scoped
+completion block
+
+
+148
+00:07:02.389 --> 00:07:05.626 line:-2 align:center
+has also been updated to an
+operation-scoped result block
+
+
+149
+00:07:05.626 --> 00:07:08.428 line:-2 align:center
+which no longer duplicates
+any success or failure
+
+
+150
+00:07:08.428 --> 00:07:11.098 line:-2 align:center
+already reported by
+the per-item result block.
+
+
+151
+00:07:12.399 --> 00:07:15.769 line:-2 align:center
+So, CloudKit has now formally
+separated their concerns.
+
+
+152
+00:07:15,769 --> 00:07:18,805 line:-2
+One block is used exclusively
+for per-item reporting,
+
+
+153
+00:07:18.805 --> 00:07:21.742 line:-2 align:center
+and another exclusively
+for per-operation reporting.
+
+
+154
+00:07:22.943 --> 00:07:24.945 line:-2 align:center
+Going back to our
+missing record example,
+
+
+155
+00:07:24,945 --> 00:07:28,215 line:-2
+the expectation is three
+invocations of the per-item
+
+
+156
+00:07:28.215 --> 00:07:31.485 line:-2 align:center
+result block with successfully
+fetched CKRecord payloads,
+
+
+157
+00:07:31,485 --> 00:07:34,087 line:-2
+one invocation of the per-item
+result block
+
+
+158
+00:07:34.087 --> 00:07:36.123 line:-1 align:center
+with an unknownItem error,
+
+
+159
+00:07:36,123 --> 00:07:38,859 line:-2
+and one invocation of the
+per-operation result block
+
+
+160
+00:07:38,859 --> 00:07:40,027 line:-1
+with no error,
+
+
+161
+00:07:40.027 --> 00:07:42.129 line:-2 align:center
+as the operation succeeded
+overall.
+
+
+162
+00:07:42.129 --> 00:07:45.032 line:-2 align:center
+One of CloudKit's new
+improvements is to surface
+
+
+163
+00:07:45.032 --> 00:07:47.801 line:-2 align:center
+separate per-item and
+per-operation callbacks
+
+
+164
+00:07:47.801 --> 00:07:49.303 line:-1 align:center
+everywhere.
+
+
+165
+00:07:49,303 --> 00:07:51,872 line:-2
+Previously,
+only the highlighted operations
+
+
+166
+00:07:51,872 --> 00:07:55,242 line:-2
+have had per-item callbacks
+that surface per-item errors.
+
+
+167
+00:07:56.710 --> 00:07:59.279 line:-2 align:center
+I'm happy to announce
+that all CKOperations
+
+
+168
+00:07:59.279 --> 00:08:02.216 line:-2 align:center
+now expose per-item
+callbacks that pass back
+
+
+169
+00:08:02.216 --> 00:08:04.484 line:-2 align:center
+per-item errors
+when appropriate.
+
+
+170
+00:08:04,484 --> 00:08:06,854 line:-2
+Now, let's take a look
+at some enhancements
+
+
+171
+00:08:06.854 --> 00:08:10.557 line:-2 align:center
+and expansions we've made to our
+container and database APIs.
+
+
+172
+00:08:10,557 --> 00:08:13,660 line:-2
+The enhancements take
+the form of new functions
+
+
+173
+00:08:13,660 --> 00:08:15,662 line:-1
+on CKContainer and CKDatabase.
+
+
+174
+00:08:16,763 --> 00:08:18,265 line:-1
+Together, these new functions
+
+
+175
+00:08:18,265 --> 00:08:20,834 line:-2
+make a large chunk
+of CKOperation APIs
+
+
+176
+00:08:20,834 --> 00:08:24,404 line:-2
+available as functions
+on CKContainer and CKDatabase.
+
+
+177
+00:08:25.339 --> 00:08:27.608 line:-2 align:center
+Importantly, this isn't
+a one-to-one mapping
+
+
+178
+00:08:27,608 --> 00:08:29,877 line:-1
+of the operation API.
+
+
+179
+00:08:29,877 --> 00:08:32,279 line:-2
+Instead, we've leveraged
+default parameters
+
+
+180
+00:08:32,279 --> 00:08:33,947 line:-1
+and the Swift.Result type
+
+
+181
+00:08:33.947 --> 00:08:36.083 line:-2 align:center
+to craft an API
+that is approachable,
+
+
+182
+00:08:36.083 --> 00:08:39.586 line:-2 align:center
+powerful,
+and works with async/await.
+
+
+183
+00:08:39,586 --> 00:08:42,723 line:-2
+That is, each new function
+is exposed twice--
+
+
+184
+00:08:42,723 --> 00:08:46,860 line:-2
+once taking a completionHandler,
+and again as an async function.
+
+
+185
+00:08:46.860 --> 00:08:50.697 line:-2 align:center
+With this enhanced API,
+functions on the container
+
+
+186
+00:08:50,697 --> 00:08:53,033 line:-2
+and database now support
+some of the features
+
+
+187
+00:08:53,033 --> 00:08:56,170 line:-2
+from the Operation API,
+like batching multiple items,
+
+
+188
+00:08:56,170 --> 00:09:00,274 line:-2
+paging through large data sets,
+and fetching changes.
+
+
+189
+00:09:00.274 --> 00:09:02.809 line:-2 align:center
+You can also group
+function invocations together
+
+
+190
+00:09:02,809 --> 00:09:05,179 line:-2
+for logging,
+and informing the system
+
+
+191
+00:09:05,179 --> 00:09:06,847 line:-1
+about combined workload size.
+
+
+192
+00:09:07,915 --> 00:09:10,284 line:-2
+Function invocations
+can now also be configured,
+
+
+193
+00:09:10.284 --> 00:09:11.952 line:-1 align:center
+such as by setting timeouts.
+
+
+194
+00:09:11,952 --> 00:09:13,787 line:-1
+So, how does this work?
+
+
+195
+00:09:15.622 --> 00:09:16.790 line:-1 align:center
+Here, once again,
+
+
+196
+00:09:16,790 --> 00:09:19,927 line:-2
+is the GitHub PrivateDatabase
+code sample we saw earlier,
+
+
+197
+00:09:19,927 --> 00:09:22,696 line:-2
+using async functions
+to delete a record.
+
+
+198
+00:09:23,864 --> 00:09:25,766 line:-2
+Let's see how this code
+can be updated
+
+
+199
+00:09:25,766 --> 00:09:28,869 line:-2
+to take advantage
+of item batching.
+
+
+200
+00:09:28.869 --> 00:09:30.838 line:-2 align:center
+I'm going to change
+the behavior of this function
+
+
+201
+00:09:30,838 --> 00:09:32,973 line:-2
+to delete two records
+atomically
+
+
+202
+00:09:32,973 --> 00:09:35,576 line:-2
+by taking advantage of the
+enhanced function API
+
+
+203
+00:09:35.576 --> 00:09:36.844 line:-1 align:center
+on database.
+
+
+204
+00:09:38,846 --> 00:09:41,248 line:-2
+Notice the separation
+of concerns.
+
+
+205
+00:09:41.248 --> 00:09:44.718 line:-2 align:center
+The highlighted areas operate
+at the function scope.
+
+
+206
+00:09:44.718 --> 00:09:46.620 line:-2 align:center
+They kick off the function
+and catch
+
+
+207
+00:09:46,620 --> 00:09:48,622 line:-2
+any function-scoped errors
+that are thrown.
+
+
+208
+00:09:50.691 --> 00:09:52.826 line:-2 align:center
+And if the function successfully
+completes,
+
+
+209
+00:09:52.826 --> 00:09:54.895 line:-2 align:center
+this highlighted area
+will inspect
+
+
+210
+00:09:54,895 --> 00:09:58,031 line:-2
+the per-item successes
+or failures.
+
+
+211
+00:09:58,031 --> 00:10:01,201 line:-2
+We have similar examples
+covering each of these features
+
+
+212
+00:10:01.201 --> 00:10:03.637 line:-2 align:center
+in the code sample repositories
+on GitHub,
+
+
+213
+00:10:03.637 --> 00:10:05.305 line:-1 align:center
+and the notes for this session
+
+
+214
+00:10:05.305 --> 00:10:07.941 line:-2 align:center
+will include links
+to those repositories.
+
+
+215
+00:10:07,941 --> 00:10:09,877 line:-1
+We hope you'll find them useful.
+
+
+216
+00:10:09.877 --> 00:10:12.546 line:-2 align:center
+And with that,
+I'd like to turn it over
+
+
+217
+00:10:12,546 --> 00:10:16,049 line:-2
+to Qian to walk us through
+encrypted fields.
+
+
+218
+00:10:16.049 --> 00:10:18.352 line:-1 align:center
+[Qian] Thanks, Nihar.
+
+
+219
+00:10:18,352 --> 00:10:20,287 line:-2
+I'm Qian,
+and I will be talking about
+
+
+220
+00:10:20,287 --> 00:10:22,956 line:-2
+a new feature in CloudKit
+that will make it super easy
+
+
+221
+00:10:22.956 --> 00:10:25.058 line:-2 align:center
+to protect your
+users' data privacy.
+
+
+222
+00:10:25.058 --> 00:10:28.662 line:-2 align:center
+To do this, I will first
+give an overview of how CloudKit
+
+
+223
+00:10:28,662 --> 00:10:30,297 line:-1
+protects your users' data,
+
+
+224
+00:10:30.297 --> 00:10:33.867 line:-2 align:center
+then I'll introduce the new
+data encryption feature,
+
+
+225
+00:10:33.867 --> 00:10:35.836 line:-2 align:center
+and finally,
+some prerequisites
+
+
+226
+00:10:35,836 --> 00:10:38,438 line:-2
+on the user’s
+account for encryption.
+
+
+227
+00:10:38,438 --> 00:10:41,909 line:-2
+At Apple, privacy is one
+of our core values
+
+
+228
+00:10:41,909 --> 00:10:44,244 line:-2
+that we build
+into all of our products.
+
+
+229
+00:10:44.244 --> 00:10:47.681 line:-2 align:center
+As the framework that powers
+many Apple apps and services,
+
+
+230
+00:10:47,681 --> 00:10:51,251 line:-2
+CloudKit has been innovating
+privacy technologies constantly
+
+
+231
+00:10:51,251 --> 00:10:56,156 line:-2
+to offer protection for any data
+stored and synced with CloudKit.
+
+
+232
+00:10:56,156 --> 00:10:58,425 line:-2
+Firstly,
+let me review how CloudKit
+
+
+233
+00:10:58,425 --> 00:11:00,127 line:-1
+protects your users' data.
+
+
+234
+00:11:00,127 --> 00:11:04,131 line:-2
+CloudKit's approach includes two
+primary data protection methods,
+
+
+235
+00:11:04,131 --> 00:11:06,967 line:-2
+account-based protection
+and cryptographic protection.
+
+
+236
+00:11:08,635 --> 00:11:10,370 line:-1
+Any data stored with CloudKit
+
+
+237
+00:11:10,370 --> 00:11:14,174 line:-2
+is by default protected
+by account-based authentication.
+
+
+238
+00:11:14.174 --> 00:11:16.677 line:-2 align:center
+This includes your
+CloudKit-backed apps
+
+
+239
+00:11:16.677 --> 00:11:19.646 line:-2 align:center
+and all the Apple
+CloudKit-backed apps.
+
+
+240
+00:11:19,646 --> 00:11:22,950 align:center
+Upon storage and retrieval,
+CloudKit uses secure tokens
+
+
+241
+00:11:22,950 --> 00:11:26,854 line:0
+to enforce that only authorized
+users can access their data
+
+
+242
+00:11:26,854 --> 00:11:29,189 line:0
+and not Apple
+nor any third party.
+
+
+243
+00:11:30,958 --> 00:11:33,093 line:-2
+As a reminder,
+only data in private
+
+
+244
+00:11:33.093 --> 00:11:36.997 line:-2 align:center
+and shared databases are covered
+by account-based protection.
+
+
+245
+00:11:36,997 --> 00:11:40,067 line:-2
+In those databases,
+data either belongs to
+
+
+246
+00:11:40,067 --> 00:11:43,437 line:-2
+or is shared to a specific
+iCloud account,
+
+
+247
+00:11:43.437 --> 00:11:47.040 line:-2 align:center
+and access to the shared
+data needs authentication.
+
+
+248
+00:11:47,040 --> 00:11:49,076 line:-1
+However, in public databases,
+
+
+249
+00:11:49.076 --> 00:11:52.479 line:-2 align:center
+data can be accessed by all
+users, and therefore,
+
+
+250
+00:11:52,479 --> 00:11:56,416 line:-2
+account-based data protection is
+not applicable by default.
+
+
+251
+00:11:58.218 --> 00:12:01.788 line:-2 align:center
+Now, moving on to the other data
+protection technology--
+
+
+252
+00:12:01,788 --> 00:12:03,891 line:-1
+cryptographic protection.
+
+
+253
+00:12:03.891 --> 00:12:07.160 line:-2 align:center
+CloudKit provides cryptographic
+protection for sensitive data
+
+
+254
+00:12:07,160 --> 00:12:09,730 line:-2
+stored in Apple-owned apps
+and services
+
+
+255
+00:12:09,730 --> 00:12:11,798 line:-2
+as well as all of your
+users' data
+
+
+256
+00:12:11,798 --> 00:12:14,668 line:-2
+stored in the form of
+CKAsset.
+
+
+257
+00:12:14,668 --> 00:12:17,704 line:-2
+These data are preprocessed
+and encrypted locally
+
+
+258
+00:12:17,704 --> 00:12:20,841 line:-2
+before it's sent to the CloudKit
+server for storage,
+
+
+259
+00:12:20.841 --> 00:12:23.744 line:-2 align:center
+and is decrypted locally
+upon retrieval.
+
+
+260
+00:12:25,279 --> 00:12:28,582 line:-2
+This encryption functionality
+uses key material that is
+
+
+261
+00:12:28,582 --> 00:12:30,918 line:-2
+stored in the iCloud
+Keychain belonging
+
+
+262
+00:12:30.918 --> 00:12:34.021 line:-2 align:center
+to the iCloud account
+signed in on the device.
+
+
+263
+00:12:34,021 --> 00:12:35,222 line:-1
+It's also compatible with
+
+
+264
+00:12:35,222 --> 00:12:36,924 line:-2
+CloudKit's sharing
+functionality,
+
+
+265
+00:12:36.924 --> 00:12:40.060 line:-2 align:center
+ensuring that only the users
+on the CKShare
+
+
+266
+00:12:40.060 --> 00:12:42.596 line:-2 align:center
+can decrypt
+the relevant encrypted fields.
+
+
+267
+00:12:44,932 --> 00:12:47,501 line:-2
+Cryptographic protection
+adds another layer
+
+
+268
+00:12:47,501 --> 00:12:49,970 line:-2
+on top of account-based
+protection.
+
+
+269
+00:12:49.970 --> 00:12:53.140 line:-2 align:center
+Because even if an unauthorized
+party somehow bypasses
+
+
+270
+00:12:53,140 --> 00:12:56,944 line:-2
+the authorization, they cannot
+decrypt the data retrieved.
+
+
+271
+00:12:58,312 --> 00:13:00,714 line:-2
+Cryptographic protection
+should be used for data
+
+
+272
+00:13:00.714 --> 00:13:03.917 line:-2 align:center
+that is sensitive
+or private to your users.
+
+
+273
+00:13:03.917 --> 00:13:06.320 line:-2 align:center
+Many CloudKit-backed apps
+within Apple
+
+
+274
+00:13:06.320 --> 00:13:09.656 line:-2 align:center
+take advantage
+of this functionality
+
+
+275
+00:13:09,656 --> 00:13:12,259 line:-2
+with Photos and Notes
+as two examples.
+
+
+276
+00:13:13.894 --> 00:13:18.465 line:-2 align:center
+Until now, CloudKit's protection
+for your users' non-asset data
+
+
+277
+00:13:18,465 --> 00:13:21,568 line:-2
+provides account-based
+protection by default.
+
+
+278
+00:13:21.568 --> 00:13:25.439 line:-2 align:center
+CloudKit is now offering
+the cryptographic protection
+
+
+279
+00:13:25,439 --> 00:13:29,910 line:-2
+in addition to save you from all
+the key derivation, management,
+
+
+280
+00:13:29,910 --> 00:13:32,946 line:-2
+and the encryption/decryption
+processes,
+
+
+281
+00:13:32,946 --> 00:13:35,949 line:-2
+and this will help you
+build CloudKit-backed apps
+
+
+282
+00:13:35.949 --> 00:13:38.819 line:-2 align:center
+with stronger than ever
+privacy promises.
+
+
+283
+00:13:40,654 --> 00:13:43,657 line:-2
+Let's check out the new API
+to help you do that.
+
+
+284
+00:13:43.657 --> 00:13:46.793 line:-2 align:center
+You can add any key value
+pair in the new property
+
+
+285
+00:13:46,793 --> 00:13:50,731 line:-2
+encryptedValues on CKRecords
+for encryption,
+
+
+286
+00:13:50.731 --> 00:13:53.600 line:-2 align:center
+and the same
+exact property to get back
+
+
+287
+00:13:53,600 --> 00:13:55,602 line:-1
+the decrypted original value.
+
+
+288
+00:13:57,237 --> 00:14:00,007 line:-2
+I'm going to go over
+how the encryptedValues API
+
+
+289
+00:14:00,007 --> 00:14:04,344 line:-2
+enables you to sync encrypted
+data over the CloudKit server.
+
+
+290
+00:14:04,344 --> 00:14:08,282 align:center
+Here, you have two devices
+and one CloudKit server.
+
+
+291
+00:14:08,282 --> 00:14:11,018 align:center
+If you set the encryptedValues
+key value pair,
+
+
+292
+00:14:11,018 --> 00:14:12,753 align:center
+CloudKit will automatically
+
+
+293
+00:14:12,753 --> 00:14:15,222 align:center
+encrypt the record
+values locally
+
+
+294
+00:14:15,222 --> 00:14:18,926 line:0
+in CKModifyRecordsOperation
+to the server.
+
+
+295
+00:14:18,926 --> 00:14:22,029 line:0
+On another device,
+after retrieving the records
+
+
+296
+00:14:22,029 --> 00:14:24,965 line:0
+from the server,
+you can call the same API
+
+
+297
+00:14:24,965 --> 00:14:28,569 align:center
+and CloudKit will automatically
+unwrap the key value pair.
+
+
+298
+00:14:29.603 --> 00:14:33.407 line:-2 align:center
+You only need minimum code
+changed to achieve this process.
+
+
+299
+00:14:33,407 --> 00:14:37,177 line:-2
+On the first device,
+using the encryptedValues API,
+
+
+300
+00:14:37,177 --> 00:14:39,947 line:-2
+you can set the key value
+pair on the record.
+
+
+301
+00:14:39.947 --> 00:14:43.383 line:-2 align:center
+In this case, the key
+is "encryptedStringField"
+
+
+302
+00:14:43,383 --> 00:14:46,220 line:-2
+and the value
+is a string object.
+
+
+303
+00:14:46,220 --> 00:14:49,890 line:-2
+After that, you can then call
+CKModifyRecordsOperation
+
+
+304
+00:14:49,890 --> 00:14:52,492 line:-2
+to save the new records
+to the server.
+
+
+305
+00:14:54,161 --> 00:14:58,599 line:-2
+On the second device, you
+can call CKFetchRecordsOperation
+
+
+306
+00:14:58,599 --> 00:15:00,801 line:-2
+to retrieve the encrypted
+record,
+
+
+307
+00:15:00,801 --> 00:15:04,304 line:-2
+and by using the same
+encryptedValues property,
+
+
+308
+00:15:04,304 --> 00:15:06,373 line:-1
+you get the string back.
+
+
+309
+00:15:06.373 --> 00:15:07.941 line:-1 align:center
+That's it.
+
+
+310
+00:15:07,941 --> 00:15:10,511 line:-2
+One simple property will
+handle all of the encryption
+
+
+311
+00:15:10,511 --> 00:15:12,546 line:-2
+and decryption processes
+for you.
+
+
+312
+00:15:12,546 --> 00:15:16,717 line:-2
+And you can encrypt almost
+all of the CKRecord value types
+
+
+313
+00:15:16.717 --> 00:15:18.852 line:-1 align:center
+except for CKReference
+
+
+314
+00:15:18,852 --> 00:15:22,089 line:-2
+because they need to be
+visible to the server.
+
+
+315
+00:15:22.089 --> 00:15:25.859 line:-2 align:center
+Note that because CKAsset
+field, as mentioned previously,
+
+
+316
+00:15:25,859 --> 00:15:28,896 line:-2
+already employs
+encryption by default,
+
+
+317
+00:15:28,896 --> 00:15:31,498 line:-2
+they cannot be set
+as an encryptedValue.
+
+
+318
+00:15:33,500 --> 00:15:35,369 align:center
+You can visualize
+the encrypted fields
+
+
+319
+00:15:35,369 --> 00:15:37,971 align:center
+by going to the CloudKit
+database schema,
+
+
+320
+00:15:37,971 --> 00:15:41,408 line:0
+just like
+for the regular fields.
+
+
+321
+00:15:41,408 --> 00:15:43,277 line:0
+There is a CloudKit Console
+session,
+
+
+322
+00:15:43,277 --> 00:15:46,046 align:center
+"Meet CloudKit Console,"
+that shows you other changes
+
+
+323
+00:15:46,046 --> 00:15:49,116 align:center
+made to the Console,
+and feel free to check it out.
+
+
+324
+00:15:49,116 --> 00:15:52,252 line:-2
+In the Console,
+all encrypted fields will
+
+
+325
+00:15:52,252 --> 00:15:56,056 line:-2
+be shown in the drop-down
+for record value data types.
+
+
+326
+00:15:57,124 --> 00:16:00,027 line:-2
+They will have the prefix
+"encrypted" such as
+
+
+327
+00:16:00,027 --> 00:16:02,930 line:-2
+"Encrypted Double,"
+"Encrypted Timestamp,"
+
+
+328
+00:16:02,930 --> 00:16:06,867 line:-2
+to help you differentiate them
+from the unencrypted ones.
+
+
+329
+00:16:06,867 --> 00:16:09,136 line:-2
+You can also manage
+encrypted fields through
+
+
+330
+00:16:09.136 --> 00:16:13.140 line:-2 align:center
+the CloudKit Console directly,
+without any code change.
+
+
+331
+00:16:13,140 --> 00:16:15,742 line:-2
+For example, you can add
+a new encrypted field
+
+
+332
+00:16:15.742 --> 00:16:19.646 line:-2 align:center
+to a new record type in your
+development database schema.
+
+
+333
+00:16:21.515 --> 00:16:23.116 line:-1 align:center
+Moving on to the prerequisite
+
+
+334
+00:16:23,116 --> 00:16:26,453 line:-2
+on accounts for operations
+involving encryption.
+
+
+335
+00:16:26,453 --> 00:16:30,257 line:-2
+As any other operations
+in private and shared databases,
+
+
+336
+00:16:30.257 --> 00:16:34.061 line:-2 align:center
+they require a valid
+logged-in account.
+
+
+337
+00:16:34.061 --> 00:16:35.762 line:-2 align:center
+You need
+to check the status of your
+
+
+338
+00:16:35,762 --> 00:16:39,366 line:-2
+current account in your
+initialization logic by calling
+
+
+339
+00:16:39,366 --> 00:16:43,337 line:-2
+CKContainer accountStatus(completionHandler:).
+
+
+340
+00:16:45,138 --> 00:16:47,274 line:-2
+As a reminder,
+the status will need
+
+
+341
+00:16:47.274 --> 00:16:51.812 line:-2 align:center
+to be "available" for operations
+in private and shared databases.
+
+
+342
+00:16:53,280 --> 00:16:56,316 line:-2
+Any other states
+will result in error:
+
+
+343
+00:16:56,316 --> 00:17:00,420 line:-2
+"CKErrorNotAuthenticated,"
+including the new state,
+
+
+344
+00:17:00,420 --> 00:17:04,124 line:-2
+temporarilyUnavailable,
+introduced this year to indicate
+
+
+345
+00:17:04,124 --> 00:17:07,127 line:-2
+that an account is logged in
+but not ready,
+
+
+346
+00:17:07.127 --> 00:17:09.630 line:-2 align:center
+and you may direct users to
+verify their credentials
+
+
+347
+00:17:09.630 --> 00:17:11.498 line:-1 align:center
+in the Settings app.
+
+
+348
+00:17:13,400 --> 00:17:16,069 line:0
+If your user's account is
+not in "available" state,
+
+
+349
+00:17:16,069 --> 00:17:20,340 line:0
+you should listen to
+CKAccountChanged notification,
+
+
+350
+00:17:20,340 --> 00:17:22,342 line:0
+which posts whenever the account
+changes,
+
+
+351
+00:17:22,342 --> 00:17:25,279 align:center
+to be notified
+when the state may be ready.
+
+
+352
+00:17:26,647 --> 00:17:28,782 line:-2
+That's all
+you need to know about
+
+
+353
+00:17:28.782 --> 00:17:30.651 line:-1 align:center
+encrypting data with CloudKit.
+
+
+354
+00:17:30,651 --> 00:17:33,954 line:-2
+It will protect your users' data
+and will save you all the time
+
+
+355
+00:17:33,954 --> 00:17:37,724 line:-2
+and energy from implementing
+your own custom solution.
+
+
+356
+00:17:37,724 --> 00:17:39,927 line:-2
+Now, back to my amazing
+colleague Nihar
+
+
+357
+00:17:39.927 --> 00:17:41.662 line:-1 align:center
+to talk about zone sharing.
+
+
+358
+00:17:41.662 --> 00:17:45.399 line:-2 align:center
+[Nihar] Thanks, Qian! Let's
+talk about CloudKit sharing.
+
+
+359
+00:17:46.867 --> 00:17:48.335 line:-1 align:center
+CloudKit is your secure,
+
+
+360
+00:17:48.335 --> 00:17:51.104 line:-2 align:center
+privacy-conscious iCloud
+database in the sky
+
+
+361
+00:17:51.104 --> 00:17:53.607 line:-2 align:center
+that helps you store
+and sync user data
+
+
+362
+00:17:53,607 --> 00:17:56,376 line:-2
+across
+all of your users' devices.
+
+
+363
+00:17:56.376 --> 00:18:00.514 line:-2 align:center
+iOS 10 and macOS Sierra
+introduced CloudKit sharing,
+
+
+364
+00:18:00,514 --> 00:18:04,751 line:-2
+a way to securely share data
+with other iCloud users.
+
+
+365
+00:18:04,751 --> 00:18:07,054 line:-2
+Before diving into what's
+new in sharing,
+
+
+366
+00:18:07.054 --> 00:18:10.224 line:-2 align:center
+let's take a closer look at how
+CloudKit sharing works today.
+
+
+367
+00:18:12.159 --> 00:18:15.896 line:-2 align:center
+As a reminder, CloudKit sharing
+is initiated via the creation
+
+
+368
+00:18:15,896 --> 00:18:17,865 line:-1
+of a CKShare object
+
+
+369
+00:18:17.865 --> 00:18:20.067 line:-2 align:center
+which separates the data
+being shared
+
+
+370
+00:18:20.067 --> 00:18:22.336 line:-1 align:center
+from sharing-related details,
+
+
+371
+00:18:22.336 --> 00:18:24.271 line:-2 align:center
+like who the data
+is being shared with,
+
+
+372
+00:18:24.271 --> 00:18:27.107 line:-2 align:center
+what permissions those share
+participants have, et cetera.
+
+
+373
+00:18:28.075 --> 00:18:29.276 line:-1 align:center
+Behind the scenes,
+
+
+374
+00:18:29.276 --> 00:18:31.445 line:-2 align:center
+CloudKit establishes
+cryptographic access
+
+
+375
+00:18:31,445 --> 00:18:33,680 line:-2
+to the shared data
+for participants,
+
+
+376
+00:18:33.680 --> 00:18:36.617 line:-2 align:center
+on top of requiring
+account-based authentication
+
+
+377
+00:18:36,617 --> 00:18:38,519 line:-1
+for all requests.
+
+
+378
+00:18:40,420 --> 00:18:42,155 line:0
+Now, there are two
+main ways that you can
+
+
+379
+00:18:42,155 --> 00:18:44,992 line:0
+add sharing support
+in your apps.
+
+
+380
+00:18:44,992 --> 00:18:47,160 align:center
+You can either get
+started quickly by using
+
+
+381
+00:18:47,160 --> 00:18:49,930 line:0
+the system-provided UI
+for share management,
+
+
+382
+00:18:49,930 --> 00:18:53,367 align:center
+vended via
+UICloudSharingController on iOS,
+
+
+383
+00:18:53,367 --> 00:18:56,003 line:0
+and NSSharingService
+on macOS.
+
+
+384
+00:18:56.003 --> 00:18:58.572 line:-2 align:center
+Or, you can also build
+your own custom UI
+
+
+385
+00:18:58.572 --> 00:19:01.408 line:-2 align:center
+for letting users
+interact with the share setup
+
+
+386
+00:19:01.408 --> 00:19:03.410 line:-2 align:center
+by using these
+framework operations.
+
+
+387
+00:19:04,912 --> 00:19:08,148 line:-2
+Like I mentioned earlier,
+CKShares separate
+
+
+388
+00:19:08,148 --> 00:19:11,318 line:-2
+what's being shared
+from who it's shared with.
+
+
+389
+00:19:11.318 --> 00:19:13.820 line:-2 align:center
+Today, we're going to be
+focusing on the first half
+
+
+390
+00:19:13,820 --> 00:19:16,356 line:-2
+of that equation,
+and more specifically,
+
+
+391
+00:19:16.356 --> 00:19:18.325 line:-2 align:center
+take a look at a couple
+of different ways
+
+
+392
+00:19:18,325 --> 00:19:21,128 line:-2
+you can model your data,
+and how that affects
+
+
+393
+00:19:21,128 --> 00:19:23,997 line:-2
+the way that you leverage
+the CloudKit sharing APIs.
+
+
+394
+00:19:26.700 --> 00:19:28.869 line:-2 align:center
+Let's start with an example
+that takes advantage
+
+
+395
+00:19:28.869 --> 00:19:32.039 line:-2 align:center
+of existing CloudKit
+sharing functionality.
+
+
+396
+00:19:32.039 --> 00:19:36.310 line:-2 align:center
+iCloud Drive folder sharing
+is built on top of CloudKit.
+
+
+397
+00:19:36.310 --> 00:19:38.912 line:-2 align:center
+Let's see how you could go
+about building something
+
+
+398
+00:19:38,912 --> 00:19:41,582 line:-1
+similar in your own apps.
+
+
+399
+00:19:41.582 --> 00:19:42.816 line:-1 align:center
+So, the data model here
+
+
+400
+00:19:42,816 --> 00:19:45,085 line:-2
+represents a filesystem
+hierarchy,
+
+
+401
+00:19:45,085 --> 00:19:47,754 line:-2
+and so you would start off
+with records of type "file"
+
+
+402
+00:19:47,754 --> 00:19:50,057 line:-2
+and "folder,"
+and you want to give users
+
+
+403
+00:19:50.057 --> 00:19:52.826 line:-2 align:center
+the ability to easily share
+any folder record
+
+
+404
+00:19:52,826 --> 00:19:55,963 line:-2
+along with all of the records,
+file or folder,
+
+
+405
+00:19:55.963 --> 00:19:57.664 line:-1 align:center
+that are contained within it.
+
+
+406
+00:19:59.800 --> 00:20:02.269 line:-2 align:center
+The way to represent this
+hierarchical relationship
+
+
+407
+00:20:02.269 --> 00:20:05.439 line:-2 align:center
+in CloudKit and leverage
+it for sharing is to use
+
+
+408
+00:20:05,439 --> 00:20:09,510 line:-2
+CKRecord.parent references
+from child to parent records.
+
+
+409
+00:20:11.211 --> 00:20:12.913 line:-2 align:center
+This makes
+it so that CloudKit will
+
+
+410
+00:20:12,913 --> 00:20:16,416 line:-2
+treat the resulting hierarchy
+as a single shareable unit,
+
+
+411
+00:20:16,416 --> 00:20:20,120 line:-2
+and so you'll want to go ahead
+and add those references here.
+
+
+412
+00:20:20,120 --> 00:20:21,922 line:-1
+This is very important
+
+
+413
+00:20:21.922 --> 00:20:25.492 line:-2 align:center
+and what makes parent
+references special in CloudKit.
+
+
+414
+00:20:25.492 --> 00:20:27.594 line:-2 align:center
+Note that if you don't
+plan to support sharing,
+
+
+415
+00:20:27.594 --> 00:20:29.897 line:-2 align:center
+you don't need to use
+parent references,
+
+
+416
+00:20:29,897 --> 00:20:33,433 line:-2
+and any plain CKReference field
+in your own schema will suffice.
+
+
+417
+00:20:36,303 --> 00:20:38,405 line:-2
+With that set up,
+folder sharing can now
+
+
+418
+00:20:38.405 --> 00:20:41.375 line:-2 align:center
+be supported simply by
+initializing a CKShare,
+
+
+419
+00:20:41,375 --> 00:20:45,245 line:-2
+with the folder record as
+a CKShare's root record.
+
+
+420
+00:20:46,413 --> 00:20:48,582 line:-2
+Using the folder as
+the root record means
+
+
+421
+00:20:48.582 --> 00:20:50.751 line:-2 align:center
+that CloudKit will
+automatically share
+
+
+422
+00:20:50.751 --> 00:20:53.487 line:-2 align:center
+all records that are part
+of the parent-reference based
+
+
+423
+00:20:53,487 --> 00:20:57,824 line:-2
+hierarchy ultimately pointing
+at that folder record.
+
+
+424
+00:20:57,824 --> 00:20:59,860 line:-2
+This also
+means that records added
+
+
+425
+00:20:59.860 --> 00:21:02.462 line:-2 align:center
+or removed from this
+hierarchy at a later point
+
+
+426
+00:21:02,462 --> 00:21:06,233 line:-2
+are automatically shared
+or unshared respectively.
+
+
+427
+00:21:06.233 --> 00:21:09.469 line:-2 align:center
+So how is this simple folder
+sharing model set up in code?
+
+
+428
+00:21:11,939 --> 00:21:14,875 line:-2
+Continuing our example,
+here are the two file records
+
+
+429
+00:21:14.875 --> 00:21:17.010 line:-2 align:center
+along with the folder
+record to be shared
+
+
+430
+00:21:17.010 --> 00:21:19.279 line:-2 align:center
+in a custom zone
+in the private database.
+
+
+431
+00:21:21.215 --> 00:21:23.951 line:-2 align:center
+First, the parent
+references are set on both
+
+
+432
+00:21:23,951 --> 00:21:26,787 line:-2
+file records pointing
+to the folder record,
+
+
+433
+00:21:26,787 --> 00:21:30,357 line:-2
+and the file records
+are then saved.
+
+
+434
+00:21:30,357 --> 00:21:32,459 line:-2
+Note that it
+is good practice to save
+
+
+435
+00:21:32.459 --> 00:21:34.895 line:-2 align:center
+the parent references
+as early as possible
+
+
+436
+00:21:34.895 --> 00:21:37.130 line:-2 align:center
+in order to minimize
+the number of records
+
+
+437
+00:21:37.130 --> 00:21:40.033 line:-2 align:center
+that need to be modified
+when the folder is being shared.
+
+
+438
+00:21:42,336 --> 00:21:46,306 line:-2
+Then, all three records are
+shared by initializing a CKShare
+
+
+439
+00:21:46,306 --> 00:21:48,976 line:-2
+with our folder as the root
+record,
+
+
+440
+00:21:48,976 --> 00:21:51,712 line:-2
+and saving the CKShare
+along with the folder record
+
+
+441
+00:21:51,712 --> 00:21:53,514 line:-1
+in the private database.
+
+
+442
+00:21:53.514 --> 00:21:56.250 line:-2 align:center
+Note that since the parent
+references were previously
+
+
+443
+00:21:56,250 --> 00:21:59,052 line:-2
+saved to the server,
+only the root folder record
+
+
+444
+00:21:59,052 --> 00:22:02,689 line:-2
+needs to be modified along
+with the share at share-time.
+
+
+445
+00:22:04,525 --> 00:22:08,428 line:-2
+And that's it, your app
+is now sharing folder records
+
+
+446
+00:22:08,428 --> 00:22:10,731 line:-2
+along with the records
+underneath them.
+
+
+447
+00:22:10,731 --> 00:22:14,568 line:-2
+CloudKit can support multiple
+CKShares within the same zone,
+
+
+448
+00:22:14,568 --> 00:22:17,104 line:-2
+as long as their record
+hierarchies don't overlap.
+
+
+449
+00:22:19,273 --> 00:22:21,508 line:0
+Now, let's say instead
+of a hierarchical folder
+
+
+450
+00:22:21,508 --> 00:22:24,645 line:0
+sharing model, you have records
+representing a few distinct
+
+
+451
+00:22:24,645 --> 00:22:27,915 align:center
+types in your zone, and no
+logical hierarchy between them.
+
+
+452
+00:22:29,316 --> 00:22:31,318 line:0
+In other words,
+the zone is being treated as
+
+
+453
+00:22:31,318 --> 00:22:33,787 line:0
+a bucket of records,
+and you want to quickly
+
+
+454
+00:22:33,787 --> 00:22:36,223 line:0
+get started with sharing
+all of the records in it.
+
+
+455
+00:22:37,591 --> 00:22:40,894 align:center
+Ideally, you'd just be able
+to mark an entire record zone as
+
+
+456
+00:22:40,894 --> 00:22:43,397 line:0
+"shared" without manipulating
+any records within it.
+
+
+457
+00:22:46,366 --> 00:22:49,469 align:center
+Now, with zone sharing,
+you can do just that.
+
+
+458
+00:22:49,469 --> 00:22:51,138 line:0
+So, let's set this up in code.
+
+
+459
+00:22:52.773 --> 00:22:55.442 line:-2 align:center
+All you need to do is
+to use the new initializer
+
+
+460
+00:22:55,442 --> 00:22:58,111 line:-2
+for CKShare
+that takes a record zone ID
+
+
+461
+00:22:58.111 --> 00:23:01.815 line:-2 align:center
+for an existing zone
+in the private database.
+
+
+462
+00:23:01,815 --> 00:23:04,451 line:-2
+Once this new zone-wide
+share record is saved,
+
+
+463
+00:23:04,451 --> 00:23:07,054 line:-2
+all records that exist
+in this zone on the server
+
+
+464
+00:23:07,054 --> 00:23:10,090 line:-2
+are automatically shared,
+and sharing new records
+
+
+465
+00:23:10,090 --> 00:23:13,093 line:-2
+or unsharing records going
+forward works by simply
+
+
+466
+00:23:13,093 --> 00:23:17,030 line:-2
+adding or removing those
+records from the zone.
+
+
+467
+00:23:17.030 --> 00:23:19.900 line:-2 align:center
+The entire record zone can
+be unshared at any point
+
+
+468
+00:23:19.900 --> 00:23:22.569 line:-2 align:center
+by deleting
+the zone-wide share record.
+
+
+469
+00:23:22,569 --> 00:23:25,072 line:-2
+Let's dive a little
+deeper into these new
+
+
+470
+00:23:25,072 --> 00:23:27,040 line:-1
+zone-wide share records.
+
+
+471
+00:23:29.910 --> 00:23:32.379 line:-2 align:center
+For convenience,
+the zone-wide share record
+
+
+472
+00:23:32.379 --> 00:23:34.615 line:-2 align:center
+always has
+a well-known record name,
+
+
+473
+00:23:34,615 --> 00:23:36,783 line:-1
+CKRecordNameZoneWideShare,
+
+
+474
+00:23:36.783 --> 00:23:39.319 line:-2 align:center
+which can be used along
+with the zone ID
+
+
+475
+00:23:39.319 --> 00:23:41.321 line:-2 align:center
+to create
+the full share record ID.
+
+
+476
+00:23:42,556 --> 00:23:45,792 line:-2
+Zones using zone sharing
+do not require any parent
+
+
+477
+00:23:45,792 --> 00:23:48,562 line:-2
+references to be set up
+between records in that zone.
+
+
+478
+00:23:50.297 --> 00:23:51.598 line:-1 align:center
+Note that since zone sharing
+
+
+479
+00:23:51,598 --> 00:23:54,368 line:-2
+only allows a single
+share record per zone,
+
+
+480
+00:23:54.368 --> 00:23:56.870 line:-2 align:center
+this flavor of sharing
+cannot coexist
+
+
+481
+00:23:56.870 --> 00:23:59.673 line:-2 align:center
+with hierarchical shares
+within the same zone.
+
+
+482
+00:23:59,673 --> 00:24:03,243 line:-2
+So, you can either have one
+or more hierarchical shares
+
+
+483
+00:24:03,243 --> 00:24:06,146 line:-2
+in a zone, or a single
+zone-wide share record.
+
+
+484
+00:24:08.048 --> 00:24:10.384 line:-2 align:center
+You can save zone-wide
+shares in any non-default
+
+
+485
+00:24:10,384 --> 00:24:12,519 line:-2
+record zone,
+and these are also marked
+
+
+486
+00:24:12,519 --> 00:24:14,188 line:-1
+with a new zone capability,
+
+
+487
+00:24:14.188 --> 00:24:17.057 line:-2 align:center
+CKRecordZoneCapability
+ZoneWideSharing.
+
+
+488
+00:24:20,327 --> 00:24:23,330 line:-2
+All existing CloudKit sharing
+mechanics past the creation
+
+
+489
+00:24:23,330 --> 00:24:26,967 line:-2
+of the CKShare record remain
+the same and are fully supported
+
+
+490
+00:24:26,967 --> 00:24:30,537 line:-2
+for zone-wide shares,
+with one exception.
+
+
+491
+00:24:30,537 --> 00:24:32,139 line:-2
+Since there are no
+longer any root-records
+
+
+492
+00:24:32,139 --> 00:24:34,942 line:-2
+when using zone sharing,
+related properties
+
+
+493
+00:24:34.942 --> 00:24:38.912 line:-2 align:center
+on CKShareMetadata,
+like hierarchicalRootRecordID
+
+
+494
+00:24:38,912 --> 00:24:42,216 line:-2
+and rootRecord, will be nil
+when accepting zone shares.
+
+
+495
+00:24:43,684 --> 00:24:46,720 line:0
+Similarly, when using
+CKFetchShareMetadataOperation
+
+
+496
+00:24:46,720 --> 00:24:49,723 line:0
+to bootstrap a custom
+share acceptance flow,
+
+
+497
+00:24:49,723 --> 00:24:51,959 line:0
+properties
+"shouldFetchRootRecord"
+
+
+498
+00:24:51,959 --> 00:24:55,028 line:0
+and "rootRecordDesiredKeys"
+will be ignored by the system
+
+
+499
+00:24:55,028 --> 00:24:57,631 align:center
+when fetching share metadata
+for zone-wide shares.
+
+
+500
+00:24:59,499 --> 00:25:01,635 line:-2
+So, there are now two
+flavors of CloudKit sharing
+
+
+501
+00:25:01,635 --> 00:25:04,071 line:-2
+available depending
+upon your data model.
+
+
+502
+00:25:05.038 --> 00:25:07.140 line:-2 align:center
+If your app's schema
+logically forms hierarchies
+
+
+503
+00:25:07.140 --> 00:25:10.511 line:-2 align:center
+and hierarchical trees make
+sense as shareable units,
+
+
+504
+00:25:10,511 --> 00:25:14,147 line:-2
+then continue to use CKRecord
+parent references to represent
+
+
+505
+00:25:14,147 --> 00:25:18,085 line:-2
+those hierarchies, and then
+share their root records.
+
+
+506
+00:25:18,085 --> 00:25:20,954 line:-2
+At Apple, we do this for Notes,
+Reminders,
+
+
+507
+00:25:20,954 --> 00:25:22,756 line:-1
+and iCloud Drive folder sharing
+
+
+508
+00:25:22,756 --> 00:25:24,925 line:-2
+in a similar fashion
+to that explored today.
+
+
+509
+00:25:26.727 --> 00:25:29.663 line:-2 align:center
+And for all other cases,
+you can now efficiently share
+
+
+510
+00:25:29,663 --> 00:25:32,366 line:-2
+an entire record zone
+simply by creating
+
+
+511
+00:25:32.366 --> 00:25:34.434 line:-2 align:center
+a single zone-wide
+share record
+
+
+512
+00:25:34.434 --> 00:25:38.105 line:-2 align:center
+and take full advantage
+of CloudKit sharing.
+
+
+513
+00:25:38,105 --> 00:25:40,574 line:-2
+At Apple,
+we already leverage zone sharing
+
+
+514
+00:25:40.574 --> 00:25:43.410 line:-2 align:center
+for several features, like
+HomeKit secure video sharing
+
+
+515
+00:25:43.410 --> 00:25:45.212 line:-1 align:center
+and HomePod multiuser.
+
+
+516
+00:25:46,914 --> 00:25:50,918 line:-2
+So today we explored how you
+can start writing CloudKit code
+
+
+517
+00:25:50.918 --> 00:25:54.221 line:-2 align:center
+in a new way using async/await
+in Swift,
+
+
+518
+00:25:54,221 --> 00:25:57,424 line:-2
+including enhancements
+to the per-item progress
+
+
+519
+00:25:57,424 --> 00:25:59,159 line:-1
+and error reporting APIs.
+
+
+520
+00:26:00.561 --> 00:26:02.796 line:-2 align:center
+We talked about how you
+can leverage encrypted fields
+
+
+521
+00:26:02,796 --> 00:26:05,399 line:-2
+on your records
+for sensitive user data,
+
+
+522
+00:26:05.399 --> 00:26:08.902 line:-2 align:center
+taking advantage of Apple's
+commitment to user privacy,
+
+
+523
+00:26:08,902 --> 00:26:10,871 line:-2
+without rolling
+your own cryptography.
+
+
+524
+00:26:12,072 --> 00:26:14,508 line:-2
+And we learned about
+a faster way to get started
+
+
+525
+00:26:14.508 --> 00:26:16.543 line:-2 align:center
+with CloudKit sharing
+when your data model
+
+
+526
+00:26:16.543 --> 00:26:18.745 line:-2 align:center
+isn't hierarchical
+with zone sharing.
+
+
+527
+00:26:20,914 --> 00:26:22,950 align:center
+There's some great new
+documentation on these
+
+
+528
+00:26:22,950 --> 00:26:25,519 line:0
+features
+and more available for you
+
+
+529
+00:26:25,519 --> 00:26:27,487 line:0
+on developer.apple.com,
+
+
+530
+00:26:27,487 --> 00:26:28,989 line:0
+so please
+take a look.
+
+
+531
+00:26:28,989 --> 00:26:30,324 line:0
+There are many
+related sessions
+
+
+532
+00:26:30,324 --> 00:26:32,259 align:center
+in the "Explore CloudKit"
+collection
+
+
+533
+00:26:32,259 --> 00:26:33,861 line:0
+for you to check out
+as well,
+
+
+534
+00:26:33,861 --> 00:26:35,462 align:center
+including one from Core Data,
+
+
+535
+00:26:35,462 --> 00:26:37,231 line:0
+introducing sharing
+functionality
+
+
+536
+00:26:37,231 --> 00:26:38,832 line:0
+built on top of
+CloudKit.
+
+
+537
+00:26:38,832 --> 00:26:42,703 line:-2
+Thank you, and hope you have
+a great WWDC.
+
+
+538
+00:26:42.703 --> 00:26:44.771 line:-1 align:center
+[upbeat music]
+

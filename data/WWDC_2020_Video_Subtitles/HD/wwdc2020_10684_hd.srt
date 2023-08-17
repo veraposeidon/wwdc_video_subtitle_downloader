@@ -1,0 +1,781 @@
+1
+00:00:03,871 --> 00:00:06,874 line:-1
+Hello and welcome to WWDC.
+
+
+2
+00:00:07,908 --> 00:00:11,778 line:0
+Hello and welcome back to Swan's Quest.
+I'm Rob, your host,
+
+
+3
+00:00:11,845 --> 00:00:14,715 line:0
+as we go inside
+the final chapter of our quest.
+
+
+4
+00:00:14,781 --> 00:00:16,783 line:0
+We hope you had a fun time so far.
+
+
+5
+00:00:16,850 --> 00:00:19,987 line:0
+For this last chapter,
+we're going to move away from ToneOutputs
+
+
+6
+00:00:20,053 --> 00:00:21,922 line:0
+and talk about sampled instruments.
+
+
+7
+00:00:21,989 --> 00:00:26,260 line:-2
+In the final chapter,
+you meet with the Lizard one last time.
+
+
+8
+00:00:26,326 --> 00:00:30,264 line:-2
+The chest from the Swan is a mystery,
+and I don't want to spoil it.
+
+
+9
+00:00:30,330 --> 00:00:32,966 line:-2
+Let's just say that sequencers
+are going to play
+
+
+10
+00:00:33,033 --> 00:00:35,369 line:-1
+a key role in solving this challenge.
+
+
+11
+00:00:35,435 --> 00:00:37,938 line:-2
+We're gonna start
+with an introduction to sequencers
+
+
+12
+00:00:38,005 --> 00:00:40,774 line:-2
+and some tips
+for constructing one in Swift.
+
+
+13
+00:00:40,841 --> 00:00:44,678 line:-2
+Stephen's gonna return
+to discuss the content SDK's API
+
+
+14
+00:00:44,745 --> 00:00:46,480 line:-1
+for playing sampled instrument,
+
+
+15
+00:00:46,547 --> 00:00:51,385 line:-2
+and a brief overview of the library
+of instruments provided within the SDK.
+
+
+16
+00:00:51,451 --> 00:00:55,022 line:-2
+He's also going to tell you
+how we sampled them in GarageBand.
+
+
+17
+00:00:55,088 --> 00:00:58,125 line:-2
+Finally, we'll wrap up
+with a final side quest
+
+
+18
+00:00:58,192 --> 00:01:01,028 line:-1
+for those who don't want the fun to end.
+
+
+19
+00:01:01,094 --> 00:01:03,363 line:-1
+Let's talk about step sequencers.
+
+
+20
+00:01:04,031 --> 00:01:05,599 line:-1
+At the end of the third challenge,
+
+
+21
+00:01:05,666 --> 00:01:09,002 line:-2
+the Swan gave us a scroll
+with two-part harmony.
+
+
+22
+00:01:09,069 --> 00:01:10,270 line:-1
+Great one, Swan.
+
+
+23
+00:01:10,337 --> 00:01:11,905 line:-1
+Unlike our previous challenge,
+
+
+24
+00:01:11,972 --> 00:01:15,676 line:-2
+this will require multiple instruments
+playing at the same time.
+
+
+25
+00:01:15,742 --> 00:01:17,644 line:-1
+To play multiple parts at once,
+
+
+26
+00:01:17,711 --> 00:01:20,280 line:-2
+we're going to show you
+how to build a step sequencer.
+
+
+27
+00:01:20,347 --> 00:01:21,982 line:-1
+Believe it or not,
+
+
+28
+00:01:22,049 --> 00:01:24,985 line:-2
+you only need a single timer
+for this sequencer.
+
+
+29
+00:01:25,052 --> 00:01:27,821 line:-2
+And instead of a ToneOutput,
+we're going to take advantage
+
+
+30
+00:01:27,888 --> 00:01:31,592 line:-2
+of the sampled instruments
+included in our content SDK.
+
+
+31
+00:01:31,658 --> 00:01:35,195 line:-1
+A sequencer is a multi-track timing loop.
+
+
+32
+00:01:35,262 --> 00:01:38,298 line:-1
+It is divided into equal chunks, or steps,
+
+
+33
+00:01:38,365 --> 00:01:42,302 line:-2
+which play in sequence
+over a predefined duration.
+
+
+34
+00:01:42,369 --> 00:01:46,573 line:-2
+Each track represents an instance
+of a pitched instrument.
+
+
+35
+00:01:46,640 --> 00:01:51,278 line:-2
+Sequencers are also used with
+non-pitched instruments like percussion.
+
+
+36
+00:01:52,779 --> 00:01:54,815 line:-1
+Sequencers are very versatile.
+
+
+37
+00:01:54,882 --> 00:01:57,818 line:-2
+They're great for creating
+atmospheric background loops
+
+
+38
+00:01:57,885 --> 00:02:00,954 line:-2
+or drum beats
+which can sit underneath a melody.
+
+
+39
+00:02:01,555 --> 00:02:06,026 line:-2
+Step sequencers allow one to layer
+multiple tracks on top of another.
+
+
+40
+00:02:06,093 --> 00:02:08,362 line:-1
+In the example shown here,
+
+
+41
+00:02:08,428 --> 00:02:13,166 line:-2
+there is a horn track, a guitar track,
+and a percussion track.
+
+
+42
+00:02:13,233 --> 00:02:17,004 line:-2
+Each column in this sequence
+is a quarter note in length.
+
+
+43
+00:02:17,070 --> 00:02:22,409 line:-2
+What you see are eight beats,
+or two bars of 4/4,
+
+
+44
+00:02:22,476 --> 00:02:25,279 line:-2
+or, as we call it in the music biz,
+common time.
+
+
+45
+00:02:26,780 --> 00:02:29,650 line:-2
+Here's an example
+of a sequencer's timing loop.
+
+
+46
+00:02:29,716 --> 00:02:31,685 line:-1
+The timer's interval is determined
+
+
+47
+00:02:31,752 --> 00:02:34,755 line:-2
+by dividing the total duration,
+four seconds,
+
+
+48
+00:02:34,821 --> 00:02:38,759 line:-2
+by the total number of beats,
+eight, in the sequence.
+
+
+49
+00:02:39,293 --> 00:02:41,528 line:-1
+We need add our tracks and code
+
+
+50
+00:02:41,595 --> 00:02:44,298 line:-2
+to play the instruments
+inside of each track.
+
+
+51
+00:02:44,364 --> 00:02:46,767 line:-1
+Let's check in with Stephen.
+
+
+52
+00:02:46,834 --> 00:02:49,937 line:-1
+Thanks, Rob. We include a rich API
+
+
+53
+00:02:50,003 --> 00:02:53,440 line:-2
+and instrument library
+with our content SDK.
+
+
+54
+00:02:53,507 --> 00:02:57,578 line:-2
+We first introduced the Instruments API
+in Sensor Arcade,
+
+
+55
+00:02:57,644 --> 00:03:00,347 line:-2
+and included a template
+called Sensor Create,
+
+
+56
+00:03:00,414 --> 00:03:02,649 line:-1
+so you could write your own music.
+
+
+57
+00:03:02,716 --> 00:03:05,118 line:-2
+Then, last year,
+we released Sonic Workshop
+
+
+58
+00:03:05,185 --> 00:03:08,222 line:-2
+and its companion starting point:
+Sonic Create.
+
+
+59
+00:03:08,288 --> 00:03:13,327 line:-2
+These both included seven instruments,
+and samples for three octaves of notes.
+
+
+60
+00:03:14,127 --> 00:03:17,631 line:-2
+The fundamental API
+is the playInstrument method.
+
+
+61
+00:03:18,565 --> 00:03:22,202 line:-2
+This API requires a reference
+to one of the seven instruments
+
+
+62
+00:03:22,269 --> 00:03:25,472 line:-1
+included in Playgrounds content SDK:
+
+
+63
+00:03:25,539 --> 00:03:29,643 line:-1
+electric guitar, bass guitar, piano,
+
+
+64
+00:03:29,710 --> 00:03:35,516 line:-2
+warm bells, seven synth, bass synth,
+and the crystal synth.
+
+
+65
+00:03:36,483 --> 00:03:39,353 line:-2
+The second item required
+by the playInstrument method
+
+
+66
+00:03:39,419 --> 00:03:42,189 line:-1
+is a MIDINoteProtocol value.
+
+
+67
+00:03:42,256 --> 00:03:44,825 line:-1
+These MIDI notes include an 8-bit integer
+
+
+68
+00:03:44,892 --> 00:03:48,328 line:-2
+which corresponds
+to the appropriate MIDI code.
+
+
+69
+00:03:48,395 --> 00:03:53,333 line:-2
+Here's an example implementation with
+the second octave of encoded MIDI notes.
+
+
+70
+00:03:53,400 --> 00:03:56,370 line:-1
+Note: we include a value, "rest".
+
+
+71
+00:03:56,436 --> 00:04:01,074 line:-2
+This allows us to represent silent gaps
+for instruments in the sequence.
+
+
+72
+00:04:02,342 --> 00:04:06,246 line:-2
+Before we update our code,
+we need to discuss tracks.
+
+
+73
+00:04:06,313 --> 00:04:11,952 line:-2
+We've included another protocol for you
+in Sequencer.Swift: the TrackProtocol.
+
+
+74
+00:04:12,019 --> 00:04:15,689 line:-2
+This includes an instrument value,
+the length of the track,
+
+
+75
+00:04:15,756 --> 00:04:20,194 line:-2
+and a method which provides the MIDI note
+for a given step in the sequence.
+
+
+76
+00:04:20,961 --> 00:04:24,464 line:-2
+An example implementation
+might look like this.
+
+
+77
+00:04:25,132 --> 00:04:27,935 line:-2
+Remember to check
+for the existence of the notes property,
+
+
+78
+00:04:28,001 --> 00:04:32,739 line:-2
+and ensure the indexed step does not
+exceed the boundaries of the sequence.
+
+
+79
+00:04:33,707 --> 00:04:38,879 line:-2
+With all of the pieces now in place,
+we can revisit our bare-bones example.
+
+
+80
+00:04:39,780 --> 00:04:41,982 line:-1
+First we create our two tracks:
+
+
+81
+00:04:42,049 --> 00:04:45,485 line:-2
+bass and piano,
+and combine them into an array.
+
+
+82
+00:04:46,453 --> 00:04:51,692 line:-2
+Once those are created, we need to assign
+note patterns to each track.
+
+
+83
+00:04:52,292 --> 00:04:54,661 line:0
+Finally, we loop through
+the selected tracks
+
+
+84
+00:04:54,728 --> 00:04:57,397 line:0
+and play the notes
+for the assigned instrument.
+
+
+85
+00:04:58,065 --> 00:05:00,834 line:-2
+Don't forget to call
+the endPerformance method
+
+
+86
+00:05:00,901 --> 00:05:03,070 line:-2
+after the first time
+through your sequence,
+
+
+87
+00:05:03,136 --> 00:05:05,272 line:-1
+so you get credit for your solution.
+
+
+88
+00:05:06,106 --> 00:05:08,475 line:-2
+Let's update the code
+that recycles the index
+
+
+89
+00:05:08,542 --> 00:05:11,211 line:-2
+after we've completed
+a loop of the sequence.
+
+
+90
+00:05:12,479 --> 00:05:17,284 line:-2
+After we reset the index back to zero,
+we can call endPerformance
+
+
+91
+00:05:17,351 --> 00:05:20,721 line:-2
+and the Swan will know
+we've finished their challenge.
+
+
+92
+00:05:21,755 --> 00:05:25,893 line:-2
+Next, I'd like to talk about
+sampling in GarageBand.
+
+
+93
+00:05:25,959 --> 00:05:28,061 line:-1
+One way to create your own instruments
+
+
+94
+00:05:28,128 --> 00:05:31,131 line:-2
+is to take your own samples
+from GarageBand.
+
+
+95
+00:05:31,198 --> 00:05:34,935 line:-2
+First, open GarageBand
+and select Keyboard,
+
+
+96
+00:05:35,002 --> 00:05:38,005 line:-2
+or another instrument
+you're interested in sampling.
+
+
+97
+00:05:38,071 --> 00:05:41,475 line:-2
+Within Keyboard,
+there are many instrument options.
+
+
+98
+00:05:41,542 --> 00:05:45,345 line:-2
+I've chosen the koto,
+a traditional Japanese instrument.
+
+
+99
+00:05:45,412 --> 00:05:49,383 line:-2
+You'll also notice that you can change
+many other properties of the instrument,
+
+
+100
+00:05:49,449 --> 00:05:52,186 line:-1
+such as the tone and the resonance.
+
+
+101
+00:05:54,588 --> 00:05:57,558 line:-2
+You can also select
+which scale the Keyboard uses.
+
+
+102
+00:05:57,624 --> 00:06:00,761 line:-2
+This makes playing your desired notes
+even easier.
+
+
+103
+00:06:00,827 --> 00:06:03,630 line:-1
+Here, I'll select the major scale.
+
+
+104
+00:06:07,167 --> 00:06:09,002 line:-1
+[timer button clicks]
+
+
+105
+00:06:10,037 --> 00:06:16,443 line:-1
+[piano notes play]
+
+
+106
+00:06:18,412 --> 00:06:20,547 line:-2
+Once you've recorded
+your individual notes,
+
+
+107
+00:06:20,614 --> 00:06:24,351 line:-2
+play them to make sure
+they sound exactly as you want them to.
+
+
+108
+00:06:25,352 --> 00:06:31,959 line:-1
+[paino notes play]
+
+
+109
+00:06:33,126 --> 00:06:36,663 line:-2
+If you want, you can make modifications
+within the GarageBand Editor
+
+
+110
+00:06:36,730 --> 00:06:38,398 line:-1
+before you export.
+
+
+111
+00:06:39,066 --> 00:06:41,602 line:-1
+Once you're all set, export your song.
+
+
+112
+00:06:41,668 --> 00:06:44,438 line:-2
+The most lossless format
+is an uncompressed WAV,
+
+
+113
+00:06:44,505 --> 00:06:47,307 line:-2
+but you can also export
+in compressed formats.
+
+
+114
+00:06:47,374 --> 00:06:50,010 line:-2
+Once you've exported,
+trim the individual notes
+
+
+115
+00:06:50,077 --> 00:06:53,647 line:-2
+and import them into your project
+to create your instrument.
+
+
+116
+00:06:53,714 --> 00:06:57,317 line:-2
+Rob, we should do a really cool side quest
+for our final one.
+
+
+117
+00:06:58,252 --> 00:06:59,786 line:-1
+I agree, Stephen.
+
+
+118
+00:07:00,320 --> 00:07:02,489 line:-2
+Is everyone ready?
+Are you ready?
+
+
+119
+00:07:03,824 --> 00:07:05,792 line:-1
+No spoilers this time.
+
+
+120
+00:07:05,859 --> 00:07:08,395 line:-2
+For this final side quest,
+we want you to combine
+
+
+121
+00:07:08,462 --> 00:07:11,532 line:-2
+everything you've done
+across the four chapters:
+
+
+122
+00:07:11,598 --> 00:07:15,969 line:-2
+Add the ToneOutput as an instrument
+for your step sequencer.
+
+
+123
+00:07:16,036 --> 00:07:18,305 line:-1
+During this episode, we gave you tips
+
+
+124
+00:07:18,372 --> 00:07:21,408 line:-2
+for completing the final challenge
+in Swan's Quest.
+
+
+125
+00:07:21,475 --> 00:07:23,277 line:-1
+You learned about step sequencers
+
+
+126
+00:07:23,343 --> 00:07:26,313 line:-2
+and how they could be used
+to create multipart harmony.
+
+
+127
+00:07:26,380 --> 00:07:29,082 line:-2
+We introduced you
+to the pre-sampled instruments
+
+
+128
+00:07:29,149 --> 00:07:30,851 line:-1
+included in Swift Playgrounds,
+
+
+129
+00:07:30,918 --> 00:07:32,452 line:-1
+and then gave you instructions
+
+
+130
+00:07:32,519 --> 00:07:35,622 line:-2
+for sampling and creating
+your own instruments.
+
+
+131
+00:07:35,689 --> 00:07:39,626 line:-2
+We hope you've enjoyed Swan's Quest,
+and learned more about Swift Playgrounds
+
+
+132
+00:07:39,693 --> 00:07:43,363 line:-2
+and everything you can accomplish
+with our embedded content SDK.
+
+
+133
+00:07:43,430 --> 00:07:44,932 line:-1
+If you need a refresher,
+
+
+134
+00:07:44,998 --> 00:07:47,134 line:-2
+or just want to
+play through the fun again,
+
+
+135
+00:07:47,201 --> 00:07:50,003 line:-1
+be sure to check our earlier episodes.
+
+
+136
+00:07:51,305 --> 00:07:52,906 line:-1
+Good luck, have fun,
+
+
+137
+00:07:52,973 --> 00:07:56,810 line:-2
+and join us in the forums to share
+your solutions for the side quests.
+
+
+138
+00:07:56,877 --> 00:07:59,046 line:-1
+We'd love to hear how you did.
+

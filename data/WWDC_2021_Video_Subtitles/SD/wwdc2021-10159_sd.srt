@@ -1,0 +1,1083 @@
+2
+00:00:00.000 --> 00:00:02.035 line:-1 position:50%
+[MAC STARTUP CHIME]
+
+
+3
+00:00:02.035 --> 00:00:05.772 line:-1 position:50%
+♪ Bass music playing ♪
+
+
+4
+00:00:05.772 --> 00:00:07.741 line:-1 position:50%
+[KEYSTROKES]
+
+
+5
+00:00:07.741 --> 00:00:09.176 line:-1 position:50%
+David Hayward:
+Welcome, everyone.
+
+
+6
+00:00:09.176 --> 00:00:10.377 line:-1 position:50%
+My name is David Hayward.
+
+
+7
+00:00:10.377 --> 00:00:12.746 line:-1 position:50%
+I'm a senior engineer
+on the Core Image team,
+
+
+8
+00:00:12.746 --> 00:00:14.815 line:-1 position:50%
+and I'll be giving
+a short presentation today
+
+
+9
+00:00:14.815 --> 00:00:17.517 line:-1 position:50%
+that will show you
+the latest best practices
+
+
+10
+00:00:17,517 --> 00:00:20,087 line:-1
+when adding custom
+Metal Core Image kernels
+
+
+11
+00:00:20.087 --> 00:00:22.656 line:-1 position:50%
+to your Xcode project.
+
+
+12
+00:00:22,656 --> 00:00:25,058 line:-1
+In this presentation,
+I will discuss
+
+
+13
+00:00:25.058 --> 00:00:29.396 line:-1 position:50%
+the general benefits of writing
+custom CIKernels in Metal.
+
+
+14
+00:00:29,396 --> 00:00:31,765 line:-1
+Next, I will introduce
+two recommended ways
+
+
+15
+00:00:31.765 --> 00:00:35.068 line:-1 position:50%
+that Metal CIKernels
+can be built.
+
+
+16
+00:00:35,068 --> 00:00:37,237 line:-1
+And then I will demonstrate
+step by step
+
+
+17
+00:00:37.237 --> 00:00:40.974 line:-1 position:50%
+how to add these
+to your project.
+
+
+18
+00:00:40.974 --> 00:00:42.743 line:-1 position:50%
+First off,
+let's review the benefits
+
+
+19
+00:00:42,743 --> 00:00:46,213 line:-1
+of writing custom
+CIKernels in Metal.
+
+
+20
+00:00:46.213 --> 00:00:47.848 line:-1 position:50%
+By writing CIKernels in Metal,
+
+
+21
+00:00:47.848 --> 00:00:49.783 line:-1 position:50%
+you will get access
+to Core Image features
+
+
+22
+00:00:49,783 --> 00:00:53,520 line:-1
+such as automatic tiling
+and concatenation.
+
+
+23
+00:00:53.520 --> 00:00:55.255 line:-1 position:50%
+It will improve
+your app's performance
+
+
+24
+00:00:55,255 --> 00:00:58,191 line:-1
+by shifting some of the time
+to compile kernels
+
+
+25
+00:00:58.191 --> 00:01:02.162 line:-1 position:50%
+from runtime
+to when your app is built.
+
+
+26
+00:01:02,162 --> 00:01:04,298 line:-1
+And doing so will give
+your kernels access
+
+
+27
+00:01:04,298 --> 00:01:07,100 line:-1
+to high-performance features
+such as gather-reads,
+
+
+28
+00:01:07,100 --> 00:01:11,471 line:-1
+group-writes,
+and half-float math.
+
+
+29
+00:01:11,471 --> 00:01:14,808 line:-1
+Last but not least, it will make
+your life as a developer easier
+
+
+30
+00:01:14.808 --> 00:01:16.910 line:-1 position:50%
+by syntax highlighting
+as you type
+
+
+31
+00:01:16,910 --> 00:01:20,314 line:-1
+and inline error checking
+when you build.
+
+
+32
+00:01:20.314 --> 00:01:21.748 line:-1 position:50%
+So with that for motivation,
+
+
+33
+00:01:21,748 --> 00:01:23,483 line:-1
+I will now show you step by step
+
+
+34
+00:01:23,483 --> 00:01:28,088 line:-1
+how to add Metal Core Image
+kernels to your application.
+
+
+35
+00:01:28,088 --> 00:01:29,790 line:-1
+There are now
+two recommended ways
+
+
+36
+00:01:29,790 --> 00:01:32,092 line:-1
+to add CIKernels
+to your project,
+
+
+37
+00:01:32,092 --> 00:01:35,362 line:-1
+and I will describe
+both methods in detail.
+
+
+38
+00:01:35,362 --> 00:01:37,764 line:-1
+I will refer to this
+as the extern method
+
+
+39
+00:01:37.764 --> 00:01:40.834 line:-1 position:50%
+because it requires the kernel
+functions to be specified
+
+
+40
+00:01:40.834 --> 00:01:45.806 line:-1 position:50%
+as extern "C" and built
+using custom build flags.
+
+
+41
+00:01:45.806 --> 00:01:50.177 line:-1 position:50%
+The second method is new
+in iOS 15 and macOS 12.
+
+
+42
+00:01:50,177 --> 00:01:52,379 line:-1
+I will refer to this
+as the stitchable method
+
+
+43
+00:01:52,379 --> 00:01:54,715 line:-1
+because it requires
+the kernel functions
+
+
+44
+00:01:54,715 --> 00:01:57,551 line:-1
+to be in attributed
+as stitchable.
+
+
+45
+00:01:57.551 --> 00:02:01.054 line:-1 position:50%
+Its implementation uses
+Metal Dynamic Libraries.
+
+
+46
+00:02:01,054 --> 00:02:04,858 line:-1
+In both methods, there are
+four general steps to follow.
+
+
+47
+00:02:04,858 --> 00:02:08,261 line:-1
+First, is to configure
+your project appropriately.
+
+
+48
+00:02:08.261 --> 00:02:13.066 line:-1 position:50%
+Second, is to add Metal CIKernel
+source files to your project.
+
+
+49
+00:02:13.066 --> 00:02:16.837 line:-1 position:50%
+Third, is to write
+your Metal CIKernel code.
+
+
+50
+00:02:16,837 --> 00:02:19,539 line:-1
+And fourth is to write
+Swift or Objective-C code
+
+
+51
+00:02:19.539 --> 00:02:21.875 line:-1 position:50%
+to initialize and apply
+your kernel
+
+
+52
+00:02:21.875 --> 00:02:25.045 line:-1 position:50%
+to create a new CIImage.
+
+
+53
+00:02:25.045 --> 00:02:27.180 line:-1 position:50%
+First, let's describe
+these four steps
+
+
+54
+00:02:27.180 --> 00:02:29.182 line:-1 position:50%
+when using extern CIKernels,
+
+
+55
+00:02:29.182 --> 00:02:32.119 line:-1 position:50%
+starting with project
+configuration.
+
+
+56
+00:02:32.119 --> 00:02:35.255 line:-1 position:50%
+Unlike conventional Metal
+compute and graphics shaders,
+
+
+57
+00:02:35.255 --> 00:02:38.792 line:-1 position:50%
+this Core Image Metal code
+needs to be compiled and linked
+
+
+58
+00:02:38,792 --> 00:02:40,527 line:-1
+with special flags.
+
+
+59
+00:02:40.527 --> 00:02:43.163 line:-1 position:50%
+I recommend adding
+two custom build rules
+
+
+60
+00:02:43.163 --> 00:02:44.631 line:-1 position:50%
+to your project targets
+
+
+61
+00:02:44.631 --> 00:02:48.668 line:-1 position:50%
+which will make using
+these flags automatic.
+
+
+62
+00:02:48,668 --> 00:02:51,171 line:0
+First, you will go
+to the project's target settings
+
+
+63
+00:02:51,171 --> 00:02:56,176 line:0
+and add a build rule for files
+that end in .ci.metal.
+
+
+64
+00:02:56,176 --> 00:02:57,878 position:50%
+For files with this extension,
+
+
+65
+00:02:57,878 --> 00:03:00,247 line:0
+this rule will run
+a one-line script
+
+
+66
+00:03:00,247 --> 00:03:01,848 position:50%
+that calls the Metal compiler
+
+
+67
+00:03:01,848 --> 00:03:06,053 line:0
+with the required
+-fcikernel flag.
+
+
+68
+00:03:06,053 --> 00:03:08,688 line:0
+This build rule will produce
+an output binary
+
+
+69
+00:03:08,688 --> 00:03:12,926 position:50%
+that will end in .ci.air.
+
+
+70
+00:03:12,926 --> 00:03:15,028 line:0
+Next, you will add
+a second build rule
+
+
+71
+00:03:15,028 --> 00:03:18,732 line:0
+for files that end in .ci.air.
+
+
+72
+00:03:18,732 --> 00:03:20,400 position:50%
+For files with this extension,
+
+
+73
+00:03:20,400 --> 00:03:22,803 line:0
+this rule will run
+a one-line script
+
+
+74
+00:03:22,803 --> 00:03:27,941 position:50%
+that calls the Metal linker with
+the required -cikernel flag.
+
+
+75
+00:03:27,941 --> 00:03:30,243 position:50%
+This build rule
+will produce an output
+
+
+76
+00:03:30,243 --> 00:03:32,345 position:50%
+in your app's
+Resources directory
+
+
+77
+00:03:32,345 --> 00:03:36,316 line:0
+that will end in .ci.metallib.
+
+
+78
+00:03:36,316 --> 00:03:38,452 position:50%
+Now that you have added
+the custom build rules,
+
+
+79
+00:03:38,452 --> 00:03:41,755 position:50%
+all you need to do is add
+.ci.metal sources
+
+
+80
+00:03:41,755 --> 00:03:43,490 line:0
+to your project.
+
+
+81
+00:03:43,490 --> 00:03:45,659 position:50%
+To do that,
+select from the File menu
+
+
+82
+00:03:45,659 --> 00:03:48,762 line:0
+that you want to add
+a new Metal file
+
+
+83
+00:03:48,762 --> 00:03:54,167 position:50%
+and then give that new file
+a name ends in .ci.metal.
+
+
+84
+00:03:54,167 --> 00:03:56,570 line:-1
+The next step is
+to write your CIKernel
+
+
+85
+00:03:56,570 --> 00:03:59,239 line:-1
+in the Metal source file.
+
+
+86
+00:03:59.239 --> 00:04:00.674 line:-1 position:50%
+First, at the top of the source,
+
+
+87
+00:04:00,674 --> 00:04:03,176 line:-1
+you will include
+the CoreImage.h header
+
+
+88
+00:04:03,176 --> 00:04:05,178 line:-1
+so that you get access
+to all the classes
+
+
+89
+00:04:05,178 --> 00:04:08,748 line:-1
+that Core Image provides.
+
+
+90
+00:04:08.748 --> 00:04:11.318 line:-1 position:50%
+The kernel must be specified
+as extern "C"
+
+
+91
+00:04:11.318 --> 00:04:14.788 line:-1 position:50%
+to be recognized by Core Image.
+
+
+92
+00:04:14,788 --> 00:04:17,357 line:-1
+The content of your actual
+kernel implementation
+
+
+93
+00:04:17,357 --> 00:04:19,493 line:-1
+is up to your imagination.
+
+
+94
+00:04:19,493 --> 00:04:21,361 line:0
+For one example
+of what you can do,
+
+
+95
+00:04:21,361 --> 00:04:26,032 line:0
+I recommend that you watch
+our WWDC 2020 presentation
+
+
+96
+00:04:26,032 --> 00:04:31,738 position:50%
+on "HDR editing and playback
+using AVFoundation."
+
+
+97
+00:04:31.738 --> 00:04:34.875 line:-1 position:50%
+The final step is to add
+Swift code to load your kernel
+
+
+98
+00:04:34.875 --> 00:04:37.644 line:-1 position:50%
+and apply it
+to create a new image.
+
+
+99
+00:04:37.644 --> 00:04:40.747 line:-1 position:50%
+Kernels are typically used
+in a CIFilter subclass
+
+
+100
+00:04:40,747 --> 00:04:43,583 line:-1
+which will have properties
+such as an inputImage
+
+
+101
+00:04:43.583 --> 00:04:46.653 line:-1 position:50%
+and other input parameters.
+
+
+102
+00:04:46,653 --> 00:04:50,357 line:-1
+I recommend that your filter
+instantiate its CIKernel object
+
+
+103
+00:04:50.357 --> 00:04:52.125 line:-1 position:50%
+into a static property.
+
+
+104
+00:04:52,125 --> 00:04:54,794 line:-1
+This way, the work of loading
+the metallib resource
+
+
+105
+00:04:54.794 --> 00:04:59.065 line:-1 position:50%
+is done only once
+when it is first needed.
+
+
+106
+00:04:59.065 --> 00:05:02.102 line:-1 position:50%
+Because of the custom build rule
+I described earlier,
+
+
+107
+00:05:02,102 --> 00:05:04,704 line:-1
+you will need to specify
+a resource URL
+
+
+108
+00:05:04,704 --> 00:05:06,740 line:-1
+with the same name
+as your source
+
+
+109
+00:05:06.740 --> 00:05:10.810 line:-1 position:50%
+and an extension
+of .ci.metallib.
+
+
+110
+00:05:10,810 --> 00:05:13,847 position:50%
+Lastly, a CIFilter subclass
+must override
+
+
+111
+00:05:13,847 --> 00:05:16,650 position:50%
+the outputImage property.
+
+
+112
+00:05:16,650 --> 00:05:17,684 line:0
+In the getter,
+
+
+113
+00:05:17,684 --> 00:05:20,120 position:50%
+you will take the kernel
+from a static property
+
+
+114
+00:05:20,120 --> 00:05:23,290 position:50%
+and use its apply method
+to create a new image
+
+
+115
+00:05:23,290 --> 00:05:26,693 line:0
+based on the input properties.
+
+
+116
+00:05:26,693 --> 00:05:28,495 line:-1
+So that fully describes
+the process
+
+
+117
+00:05:28.495 --> 00:05:31.031 line:-1 position:50%
+of building extern CIKernels.
+
+
+118
+00:05:31,031 --> 00:05:32,866 line:-1
+Let's now describe
+the new process
+
+
+119
+00:05:32.866 --> 00:05:37.237 line:-1 position:50%
+of building
+stitchable CIKernels.
+
+
+120
+00:05:37.237 --> 00:05:38.505 line:-1 position:50%
+With the stitchable method,
+
+
+121
+00:05:38.505 --> 00:05:40.273 line:-1 position:50%
+only one setting
+change is needed
+
+
+122
+00:05:40.273 --> 00:05:42.576 line:-1 position:50%
+to configure
+your Xcode project.
+
+
+123
+00:05:42,576 --> 00:05:44,544 line:-1
+This setting will tell
+the Metal linker
+
+
+124
+00:05:44.544 --> 00:05:47.514 line:-1 position:50%
+to link against
+the Core Image framework.
+
+
+125
+00:05:47.514 --> 00:05:50.317 line:-1 position:50%
+To do this, just go to
+the project's target setting
+
+
+126
+00:05:50.317 --> 00:05:53.320 line:-1 position:50%
+and add a build setting
+for Other Metal Linker Flags
+
+
+127
+00:05:53.320 --> 00:05:56.256 line:-1 position:50%
+with the value
+"-framework CoreImage".
+
+
+128
+00:05:56,256 --> 00:05:57,791 line:0
+Because stitchable CIKernels
+
+
+129
+00:05:57,791 --> 00:05:59,926 position:50%
+don't require
+custom build rules,
+
+
+130
+00:05:59,926 --> 00:06:03,029 line:0
+you can simply add .metal
+sources to your project
+
+
+131
+00:06:03,029 --> 00:06:05,332 line:0
+without any special suffix.
+
+
+132
+00:06:05,332 --> 00:06:09,035 position:50%
+You can add kernels in either
+one or several sources files.
+
+
+133
+00:06:09,035 --> 00:06:09,970 line:0
+By default,
+
+
+134
+00:06:09,970 --> 00:06:14,641 position:50%
+Xcode will build all of them
+into one .metallib resource.
+
+
+135
+00:06:14.641 --> 00:06:16.910 line:-1 position:50%
+The next step
+is to write your CIKernel
+
+
+136
+00:06:16,910 --> 00:06:18,912 line:-1
+in the Metal source file.
+
+
+137
+00:06:18,912 --> 00:06:22,082 line:-1
+As before, you will include
+the CoreImage.h header
+
+
+138
+00:06:22.082 --> 00:06:25.619 line:-1 position:50%
+to get access
+to the Core Image classes.
+
+
+139
+00:06:25,619 --> 00:06:28,321 line:-1
+But with this method,
+the kernel must be attributed
+
+
+140
+00:06:28.321 --> 00:06:32.892 line:-1 position:50%
+as [[stitchable]]
+to be recognized by Core Image.
+
+
+141
+00:06:32.892 --> 00:06:34.060 line:-1 position:50%
+Once again,
+
+
+142
+00:06:34,060 --> 00:06:37,030 line:-1
+the final step is to add
+Swift code to load your kernel,
+
+
+143
+00:06:37.030 --> 00:06:39.933 line:-1 position:50%
+and apply it
+to create a new image.
+
+
+144
+00:06:39.933 --> 00:06:42.168 line:-1 position:50%
+The only change
+with stitchable CIKernels
+
+
+145
+00:06:42,168 --> 00:06:44,137 line:-1
+is that you can simply
+load the resource
+
+
+146
+00:06:44,137 --> 00:06:47,807 line:-1
+with the standard name
+of default.metallib.
+
+
+147
+00:06:47,807 --> 00:06:52,579 line:-1
+That concludes the process of
+building stitchable CIKernels.
+
+
+148
+00:06:52,579 --> 00:06:54,347 line:-1
+It is worth mentioning
+some of the benefits
+
+
+149
+00:06:54.347 --> 00:06:56.683 line:-1 position:50%
+of using this method.
+
+
+150
+00:06:56.683 --> 00:07:00.887 line:-1 position:50%
+Stitchable kernels can link
+against other Metal libraries.
+
+
+151
+00:07:00.887 --> 00:07:02.889 line:-1 position:50%
+And they now support
+input parameters
+
+
+152
+00:07:02,889 --> 00:07:06,993 line:-1
+that are integer and
+unsigned integer vector types.
+
+
+153
+00:07:06,993 --> 00:07:09,562 line:-1
+Another niche benefit
+is that stitchable kernels
+
+
+154
+00:07:09,562 --> 00:07:12,399 line:-1
+can be compiled
+from source at runtime.
+
+
+155
+00:07:12.399 --> 00:07:14.434 line:-1 position:50%
+Most applications
+should not use this feature
+
+
+156
+00:07:14,434 --> 00:07:18,171 line:-1
+because it will incur
+longer initial compile times.
+
+
+157
+00:07:18.171 --> 00:07:20.740 line:-1 position:50%
+That said, there are some
+classes of applications
+
+
+158
+00:07:20.740 --> 00:07:24.511 line:-1 position:50%
+that may benefit
+from this flexibility.
+
+
+159
+00:07:24,511 --> 00:07:28,014 line:-1
+There is one last topic
+to cover in this presentation.
+
+
+160
+00:07:28.014 --> 00:07:30.283 line:-1 position:50%
+The stitchable CIKernel
+implementation
+
+
+161
+00:07:30,283 --> 00:07:33,853 line:-1
+depends on two important
+Metal features.
+
+
+162
+00:07:33,853 --> 00:07:37,957 line:-1
+The first is the new Metal
+Shading Language version 2.4.
+
+
+163
+00:07:37,957 --> 00:07:39,159 line:-1
+Among other things,
+
+
+164
+00:07:39.159 --> 00:07:41.661 line:-1 position:50%
+this versions supports
+the [[stitchable]] attribute
+
+
+165
+00:07:41.661 --> 00:07:45.131 line:-1 position:50%
+that causes the compiler
+to associate additional metadata
+
+
+166
+00:07:45.131 --> 00:07:48.168 line:-1 position:50%
+with each function.
+
+
+167
+00:07:48.168 --> 00:07:51.137 line:-1 position:50%
+The second is the
+Metal Dynamic Libraries feature
+
+
+168
+00:07:51,137 --> 00:07:52,672 line:-1
+that is used
+so that your kernels
+
+
+169
+00:07:52.672 --> 00:07:56.676 line:-1 position:50%
+can link against
+the Core Image Metal classes.
+
+
+170
+00:07:56,676 --> 00:08:00,013 line:0
+For more details on these Metal
+features, be sure to watch the
+
+
+171
+00:08:00,013 --> 00:08:03,683 position:50%
+"Discover Compilation Workflows
+in Metal" presentation.
+
+
+172
+00:08:03,683 --> 00:08:05,952 line:0
+Be aware, though,
+that Metal Dynamic Libraries
+
+
+173
+00:08:05,952 --> 00:08:09,456 position:50%
+are only supported
+on some graphics devices,
+
+
+174
+00:08:09,456 --> 00:08:13,626 position:50%
+specifically iPhone and iPad
+with A11 and later,
+
+
+175
+00:08:13,626 --> 00:08:16,663 position:50%
+all Macs with Apple silicon,
+
+
+176
+00:08:16,663 --> 00:08:21,935 position:50%
+and Intel Macs
+with AMD Navi and Vega GPUs.
+
+
+177
+00:08:21,935 --> 00:08:24,637 line:-1
+Your application should check
+the Metal device property
+
+
+178
+00:08:24,637 --> 00:08:26,373 line:-1
+supportsDynamicLibraries
+
+
+179
+00:08:26,373 --> 00:08:30,443 line:-1
+before using
+stitchable CIKernels.
+
+
+180
+00:08:30.443 --> 00:08:32.912 line:-1 position:50%
+So that concludes
+my step-by-step description
+
+
+181
+00:08:32.912 --> 00:08:35.382 line:-1 position:50%
+of how to use
+the two recommended ways
+
+
+182
+00:08:35,382 --> 00:08:39,119 line:-1
+to add Metal CIKernels
+to your application.
+
+
+183
+00:08:39.119 --> 00:08:42.355 line:-1 position:50%
+For each method, I've covered
+how to configure your project,
+
+
+184
+00:08:42.355 --> 00:08:43.890 line:-1 position:50%
+write the kernel source,
+
+
+185
+00:08:43.890 --> 00:08:46.926 line:-1 position:50%
+and initialize
+the kernel objects.
+
+
+186
+00:08:46.926 --> 00:08:49.429 line:-1 position:50%
+I hope that this allows you
+to add great visual effects
+
+
+187
+00:08:49.429 --> 00:08:51.731 line:-1 position:50%
+to your app's images and videos.
+
+
+188
+00:08:51.731 --> 00:08:55.902 line:-1 position:50%
+Thank you and enjoy
+the rest of WWDC 2021!
+
+
+189
+00:08:55,902 --> 00:08:58,371 align:center position:89% line:0
+♪
+

@@ -1,0 +1,5788 @@
+2
+00:00:00,200 --> 00:00:01,969 line:-1
+[MAC STARTUP CHIME]
+
+
+3
+00:00:01.969 --> 00:00:05.505 line:-1 position:50%
+♪ Bass music playing ♪
+
+
+4
+00:00:05.505 --> 00:00:07.507 line:-1 position:50%
+[KEYSTROKES]
+
+
+5
+00:00:07,507 --> 00:00:09,343 align:right size:2% position:90%
+♪
+
+
+6
+00:00:09.343 --> 00:00:11.745 line:-1 position:50%
+Ben Cohen: Hi, I'm Ben
+from the Swift team,
+
+
+7
+00:00:11,745 --> 00:00:12,980 line:-1
+and in this video,
+
+
+8
+00:00:12.980 --> 00:00:15.682 line:-1 position:50%
+I'm going to walk through
+porting an existing application
+
+
+9
+00:00:15,682 --> 00:00:19,186 line:-1
+over to use Swift's
+new concurrency features.
+
+
+10
+00:00:19,186 --> 00:00:20,988 line:-1
+We'll see how
+these new features
+
+
+11
+00:00:20.988 --> 00:00:23.390 line:-1 position:50%
+help you write
+clearer asynchronous code,
+
+
+12
+00:00:23.390 --> 00:00:26.026 line:-1 position:50%
+and protect against
+possible race conditions,
+
+
+13
+00:00:26.026 --> 00:00:27.628 line:-1 position:50%
+as well as look
+at some techniques
+
+
+14
+00:00:27,628 --> 00:00:31,632 line:-1
+for gradually moving your code
+to this new way of operating.
+
+
+15
+00:00:34,034 --> 00:00:36,670 line:-1
+I'm going to be using an app
+called Coffee Tracker,
+
+
+16
+00:00:36,670 --> 00:00:39,673 line:-1
+and it's based on a talk
+from WWDC 2020
+
+
+17
+00:00:39,673 --> 00:00:43,143 line:-1
+about creating and updating
+watch complications.
+
+
+18
+00:00:43,143 --> 00:00:45,012 line:-1
+This is a simple app
+that lets you track
+
+
+19
+00:00:45.012 --> 00:00:47.147 line:-1 position:50%
+all the coffee
+you've drunk today,
+
+
+20
+00:00:47.147 --> 00:00:49.983 line:-1 position:50%
+as well as a complication to
+show your current caffeine level
+
+
+21
+00:00:49,983 --> 00:00:52,653 line:-1
+on a watch face.
+
+
+22
+00:00:52,653 --> 00:00:54,721 line:-1
+It's a nice example
+to use for our purposes
+
+
+23
+00:00:54,721 --> 00:00:57,157 line:-1
+because although
+it's a small app,
+
+
+24
+00:00:57,157 --> 00:00:59,993 line:-1
+it shows lots of different
+things we want to think about,
+
+
+25
+00:00:59,993 --> 00:01:02,796 line:-1
+including how concurrency works
+with SwiftUI,
+
+
+26
+00:01:02.796 --> 00:01:05.933 line:-1 position:50%
+delegate callbacks
+from the watch SDK, some I/O,
+
+
+27
+00:01:05,933 --> 00:01:08,302 line:-1
+and interfacing
+with asynchronous APIs
+
+
+28
+00:01:08.302 --> 00:01:10.337 line:-1 position:50%
+in Apple's SDK.
+
+
+29
+00:01:10,337 --> 00:01:12,906 position:50%
+Now let's take a quick tour
+of the app.
+
+
+30
+00:01:12,906 --> 00:01:15,909 line:0
+It's roughly broken up
+into three layers.
+
+
+31
+00:01:15,909 --> 00:01:18,845 line:0
+First, there's the UI layer.
+
+
+32
+00:01:18,845 --> 00:01:21,048 position:50%
+This is mostly SwiftUI views,
+
+
+33
+00:01:21,048 --> 00:01:22,816 position:50%
+but in this we can
+also consider things
+
+
+34
+00:01:22,816 --> 00:01:27,154 line:0
+like the complication data
+source as part of the UI layer.
+
+
+35
+00:01:27,154 --> 00:01:28,789 line:0
+Next there's the model layer
+
+
+36
+00:01:28,789 --> 00:01:30,857 line:0
+that comprises a couple
+of simple value types
+
+
+37
+00:01:30,857 --> 00:01:32,726 position:50%
+to represent caffeine drinks,
+
+
+38
+00:01:32,726 --> 00:01:36,229 line:0
+as well as a model type
+called "Coffee model."
+
+
+39
+00:01:36,229 --> 00:01:39,299 position:50%
+Now, this is what you might call
+the UI Model.
+
+
+40
+00:01:39,299 --> 00:01:42,069 line:0
+That is, the place where
+you hold data for display
+
+
+41
+00:01:42,069 --> 00:01:44,404 line:0
+by the UI layer.
+
+
+42
+00:01:44,404 --> 00:01:47,741 position:50%
+It's an observable object
+that feeds our SwiftUI view,
+
+
+43
+00:01:47,741 --> 00:01:49,309 line:0
+and all of the updates on it
+
+
+44
+00:01:49,309 --> 00:01:52,045 position:50%
+will need to be made
+on the main thread.
+
+
+45
+00:01:52.045 --> 00:01:54.948 line:-1 position:50%
+I'm referring to it
+as a UI model
+
+
+46
+00:01:54.948 --> 00:01:56.616 line:-1 position:50%
+because it might not be
+the full model
+
+
+47
+00:01:56,616 --> 00:01:59,219 line:-1
+of all of your
+application's data.
+
+
+48
+00:01:59,219 --> 00:02:02,055 line:-1
+It might just be a projection
+of your data model
+
+
+49
+00:02:02,055 --> 00:02:03,824 line:-1
+or a subset of it;
+
+
+50
+00:02:03.824 --> 00:02:08.662 line:-1 position:50%
+just what you need to display
+on the UI at this moment.
+
+
+51
+00:02:08,662 --> 00:02:12,599 line:0
+Finally, we have what you can
+think of as the back-end layer:
+
+
+52
+00:02:12,599 --> 00:02:15,002 line:0
+processing that happens --
+probably in the background --
+
+
+53
+00:02:15,002 --> 00:02:20,140 line:0
+to populate your model or talk
+to the world outside your app.
+
+
+54
+00:02:20,140 --> 00:02:24,378 position:50%
+In our case, that's represented
+by this HealthKitController type
+
+
+55
+00:02:24,378 --> 00:02:26,847 position:50%
+that manages communication
+to HealthKit
+
+
+56
+00:02:26,847 --> 00:02:31,118 position:50%
+to save and load
+the user's caffeine intake.
+
+
+57
+00:02:31.118 --> 00:02:33.387 line:-1 position:50%
+Now, before we start looking
+at code,
+
+
+58
+00:02:33.387 --> 00:02:37.124 line:-1 position:50%
+let's talk about how concurrency
+is managed in the app.
+
+
+59
+00:02:37,124 --> 00:02:39,593 line:0
+This architecture
+looks fairly clean,
+
+
+60
+00:02:39,593 --> 00:02:42,596 position:50%
+but when we layer on
+how concurrency is handled,
+
+
+61
+00:02:42,596 --> 00:02:46,867 line:0
+we get a much messier picture.
+
+
+62
+00:02:46,867 --> 00:02:50,170 position:50%
+This app is essentially broken
+up into three concurrent queues
+
+
+63
+00:02:50,170 --> 00:02:53,273 line:0
+on which code can be executing.
+
+
+64
+00:02:53,273 --> 00:02:57,744 line:0
+Work in the UI and on the model
+is done in the main queue.
+
+
+65
+00:02:57,744 --> 00:02:59,646 position:50%
+The app also has
+a dispatch queue
+
+
+66
+00:02:59,646 --> 00:03:02,315 position:50%
+for doing work
+in the background.
+
+
+67
+00:03:02,315 --> 00:03:05,419 line:0
+And finally, certain callbacks
+into completion handlers --
+
+
+68
+00:03:05,419 --> 00:03:07,721 line:0
+like those returning results
+from HealthKit --
+
+
+69
+00:03:07,721 --> 00:03:10,757 line:0
+are done on arbitrary queues.
+
+
+70
+00:03:10,757 --> 00:03:13,026 line:0
+This is a pretty common
+situation.
+
+
+71
+00:03:13,026 --> 00:03:15,862 position:50%
+What seems like a simple
+application architecture
+
+
+72
+00:03:15,862 --> 00:03:17,998 line:0
+ignores a lot
+of the hidden complexity
+
+
+73
+00:03:17,998 --> 00:03:21,735 position:50%
+in how it handles concurrency.
+
+
+74
+00:03:21,735 --> 00:03:23,203 line:0
+Now, for a quick spoiler.
+
+
+75
+00:03:23,203 --> 00:03:25,072 line:0
+In adopting Swift concurrency,
+
+
+76
+00:03:25,072 --> 00:03:29,576 line:0
+we're going to go from this
+ad hoc concurrency architecture
+
+
+77
+00:03:29,576 --> 00:03:32,446 line:0
+to something
+that will look like this.
+
+
+78
+00:03:32,446 --> 00:03:35,315 line:0
+We're going to put our UI views
+and model on what's called
+
+
+79
+00:03:35,315 --> 00:03:37,451 position:50%
+the main actor.
+
+
+80
+00:03:37,451 --> 00:03:41,354 line:0
+We're going to create new actors
+to operate in the background,
+
+
+81
+00:03:41,354 --> 00:03:43,857 line:0
+and these types will pass
+thread-safe values
+
+
+82
+00:03:43,857 --> 00:03:47,561 position:50%
+between each other using
+the async/await feature.
+
+
+83
+00:03:47,561 --> 00:03:50,063 line:0
+When we're done,
+the concurrency architecture
+
+
+84
+00:03:50,063 --> 00:03:52,599 line:0
+should be as clear
+and easy to describe
+
+
+85
+00:03:52,599 --> 00:03:55,368 line:0
+as the type architecture.
+
+
+86
+00:03:55,368 --> 00:03:58,672 line:0
+Now we've used a few terms here
+you might not be familiar with,
+
+
+87
+00:03:58,672 --> 00:04:00,907 line:0
+like "async/await" and "actors,"
+
+
+88
+00:04:00,907 --> 00:04:04,111 position:50%
+and we'll explain them briefly
+as we use them in code.
+
+
+89
+00:04:04,111 --> 00:04:07,214 line:0
+But for a more in-depth
+explanation of these features,
+
+
+90
+00:04:07,214 --> 00:04:08,815 position:50%
+there are several other talks
+available
+
+
+91
+00:04:08,815 --> 00:04:12,819 line:0
+that go into much more detail.
+
+
+92
+00:04:12.819 --> 00:04:15.522 line:-1 position:50%
+So now we've seen
+the overall architecture,
+
+
+93
+00:04:15.522 --> 00:04:17.524 line:-1 position:50%
+let's dive into the code.
+
+
+94
+00:04:19.659 --> 00:04:21.428 line:-1 position:50%
+Here we have
+the different files.
+
+
+95
+00:04:21.428 --> 00:04:24.631 line:-1 position:50%
+First, of some Swift UI views.
+
+
+96
+00:04:24.631 --> 00:04:26.967 line:-1 position:50%
+And then we have our
+watch complication controller's
+
+
+97
+00:04:26,967 --> 00:04:30,670 line:-1
+extension delegate.
+
+
+98
+00:04:30,670 --> 00:04:34,841 line:-1
+We have the simple model type
+that represents a caffeine drink
+
+
+99
+00:04:34,841 --> 00:04:39,679 line:-1
+and a CoffeeData UI model that
+holds an array of these drinks.
+
+
+100
+00:04:39.679 --> 00:04:42.816 line:-1 position:50%
+And finally, we have
+the HealthKitController.
+
+
+101
+00:04:42.816 --> 00:04:45.218 line:-1 position:50%
+And it's in this layer
+I'm going to get started
+
+
+102
+00:04:45,218 --> 00:04:48,021 line:-1
+introducing some of Swift's
+new concurrency features
+
+
+103
+00:04:48,021 --> 00:04:51,224 line:-1
+into our app.
+
+
+104
+00:04:51,224 --> 00:04:53,793 line:-1
+The HealthKitController contains
+a few different calls
+
+
+105
+00:04:53.793 --> 00:04:58.765 line:-1 position:50%
+into the HealthKit SDK
+that take completion handlers.
+
+
+106
+00:04:58,765 --> 00:05:01,168 line:-1
+Let's start by looking at this
+controller's save operation.
+
+
+107
+00:05:01.168 --> 00:05:02.869 line:-1 position:50%
+So I just hit Control-6,
+
+
+108
+00:05:02.869 --> 00:05:05.639 line:-1 position:50%
+and that brings up the list
+of functions in this file,
+
+
+109
+00:05:05,639 --> 00:05:09,943 line:-1
+and we're going to go
+to the save operation.
+
+
+110
+00:05:09,943 --> 00:05:12,979 line:-1
+Now, before we even get into
+the new concurrency features,
+
+
+111
+00:05:12.979 --> 00:05:17.350 line:-1 position:50%
+let's talk a little bit about
+thread safety in Swift today.
+
+
+112
+00:05:17.350 --> 00:05:19.853 line:-1 position:50%
+This code accesses
+some variables,
+
+
+113
+00:05:19,853 --> 00:05:22,656 line:-1
+isAvailable and store.
+
+
+114
+00:05:22.656 --> 00:05:25.492 line:-1 position:50%
+Now, it looks like we're only
+reading these variables
+
+
+115
+00:05:25.492 --> 00:05:26.660 line:-1 position:50%
+in this function.
+
+
+116
+00:05:26,660 --> 00:05:28,428 line:-1
+Is that safe?
+
+
+117
+00:05:28.428 --> 00:05:31.031 line:-1 position:50%
+Well no, not if other code
+could be writing to them
+
+
+118
+00:05:31,031 --> 00:05:32,699 line:-1
+at the same time.
+
+
+119
+00:05:32,699 --> 00:05:34,901 line:-1
+To know whether or not
+this code is thread-safe,
+
+
+120
+00:05:34,901 --> 00:05:38,705 line:-1
+I need more information than
+just looking at this function.
+
+
+121
+00:05:38.705 --> 00:05:40.874 line:-1 position:50%
+There's no use of dispatch
+queues or locks in it,
+
+
+122
+00:05:40,874 --> 00:05:42,943 line:-1
+so whatever makes
+this code thread-safe --
+
+
+123
+00:05:42.943 --> 00:05:46.413 line:-1 position:50%
+assuming it is --
+must be elsewhere.
+
+
+124
+00:05:46,413 --> 00:05:48,949 line:-1
+Maybe the caller
+serializes all calls to save
+
+
+125
+00:05:48,949 --> 00:05:50,217 line:-1
+through a queue.
+
+
+126
+00:05:50,217 --> 00:05:53,920 line:-1
+Or maybe the app is constructed
+in some way that means it's OK.
+
+
+127
+00:05:53,920 --> 00:05:58,525 line:-1
+But I can't know this just
+by looking at this function.
+
+
+128
+00:05:58,525 --> 00:06:00,227 line:-1
+Being able to do that --
+
+
+129
+00:06:00.227 --> 00:06:02.629 line:-1 position:50%
+to look at this function
+and know certain things
+
+
+130
+00:06:02,629 --> 00:06:06,233 line:-1
+without having to go look
+at other parts of my program --
+
+
+131
+00:06:06.233 --> 00:06:08.868 line:-1 position:50%
+is what we call
+local reasoning,
+
+
+132
+00:06:08,868 --> 00:06:12,105 line:-1
+and it's a really important goal
+for Swift.
+
+
+133
+00:06:12.105 --> 00:06:14.641 line:-1 position:50%
+For example, Swift's emphasis
+on value types
+
+
+134
+00:06:14.641 --> 00:06:16.810 line:-1 position:50%
+is about local reasoning.
+
+
+135
+00:06:16,810 --> 00:06:18,311 line:-1
+Unlike a reference type,
+
+
+136
+00:06:18.311 --> 00:06:21.214 line:-1 position:50%
+you don't have to worry that
+a value type you've been passed
+
+
+137
+00:06:21,214 --> 00:06:24,918 line:-1
+is being mutated elsewhere
+in your program.
+
+
+138
+00:06:24.918 --> 00:06:26.453 line:-1 position:50%
+A lot of the language features
+
+
+139
+00:06:26,453 --> 00:06:30,423 line:-1
+being introduced for concurrency
+in Swift 5.5
+
+
+140
+00:06:30.423 --> 00:06:32.259 line:-1 position:50%
+are about giving you
+more opportunity
+
+
+141
+00:06:32,259 --> 00:06:35,128 line:-1
+to reason locally
+about your code.
+
+
+142
+00:06:35.128 --> 00:06:36.363 line:-1 position:50%
+Now, as it happens,
+
+
+143
+00:06:36.363 --> 00:06:38.498 line:-1 position:50%
+this function is entirely
+thread-safe,
+
+
+144
+00:06:38.498 --> 00:06:40.200 line:-1 position:50%
+but I figured that out myself;
+
+
+145
+00:06:40,200 --> 00:06:43,103 line:-1
+the compiler isn't helping me
+spot these issues.
+
+
+146
+00:06:43,103 --> 00:06:47,274 position:50%
+So down here, we have a call
+to the HealthKit SDK
+
+
+147
+00:06:47,274 --> 00:06:51,077 line:0
+to save a caffeineSample
+into the user's health data.
+
+
+148
+00:06:51,077 --> 00:06:52,812 position:50%
+And this takes
+a completion handler,
+
+
+149
+00:06:52,812 --> 00:06:54,714 line:0
+and that completion handler
+takes two values:
+
+
+150
+00:06:54,714 --> 00:06:57,350 line:0
+success or error.
+
+
+151
+00:06:57,350 --> 00:07:00,053 position:50%
+If the operation succeeds,
+there's no error;
+
+
+152
+00:07:00,053 --> 00:07:01,855 position:50%
+the error will be nil.
+
+
+153
+00:07:01,855 --> 00:07:05,258 line:0
+This means we need to remember
+to check the status and then,
+
+
+154
+00:07:05,258 --> 00:07:10,830 position:50%
+when appropriate, unwrap
+the optional error down here.
+
+
+155
+00:07:10,830 --> 00:07:13,833 line:-1
+Now, this isn't normally
+how we handle errors in Swift.
+
+
+156
+00:07:13,833 --> 00:07:15,435 line:-1
+This would be much better
+
+
+157
+00:07:15,435 --> 00:07:18,138 line:-1
+as a method
+that can throw on failure.
+
+
+158
+00:07:18,138 --> 00:07:22,108 line:-1
+But that approach doesn't work
+with completion handlers.
+
+
+159
+00:07:22.108 --> 00:07:24.377 line:-1 position:50%
+But now, with async methods,
+
+
+160
+00:07:24.377 --> 00:07:27.447 line:-1 position:50%
+we can have asynchronous
+functions that can throw.
+
+
+161
+00:07:29,349 --> 00:07:34,254 position:50%
+This HealthKit save method
+now has an async equivalent
+
+
+162
+00:07:34,254 --> 00:07:35,689 line:0
+that does exactly that,
+
+
+163
+00:07:35,689 --> 00:07:38,925 line:0
+so let's switch over
+to using it.
+
+
+164
+00:07:38,925 --> 00:07:43,763 position:50%
+To do that, first we remove
+the completion handler,
+
+
+165
+00:07:43,763 --> 00:07:47,834 line:0
+and we write "await"
+in front of the method call.
+
+
+166
+00:07:51,838 --> 00:07:54,474 position:50%
+This reminds us that
+it's an async function call,
+
+
+167
+00:07:54,474 --> 00:07:57,143 position:50%
+and the code will suspend
+at this point
+
+
+168
+00:07:57,143 --> 00:07:59,713 position:50%
+and allow other code to run.
+
+
+169
+00:07:59,713 --> 00:08:03,750 line:0
+We'll come back to why this
+is important a little bit later.
+
+
+170
+00:08:03,750 --> 00:08:07,220 position:50%
+So if we compile,
+now that we've done this,
+
+
+171
+00:08:07,220 --> 00:08:12,692 position:50%
+we see that the compiler is
+telling us that we need a "try."
+
+
+172
+00:08:12,692 --> 00:08:14,994 line:0
+And this is a big benefit
+of async functions;
+
+
+173
+00:08:14,994 --> 00:08:16,229 line:0
+they can throw.
+
+
+174
+00:08:16,229 --> 00:08:17,530 position:50%
+There's no more having
+to remember
+
+
+175
+00:08:17,530 --> 00:08:20,133 line:0
+to check an optional error.
+
+
+176
+00:08:22,602 --> 00:08:27,841 position:50%
+So we can add a "try"
+in front of this method call,
+
+
+177
+00:08:27,841 --> 00:08:30,043 line:0
+and we want to handle
+the error right away.
+
+
+178
+00:08:30,043 --> 00:08:33,446 line:0
+So we wrap this call
+in a do block...
+
+
+179
+00:08:33,446 --> 00:08:38,017 line:0
+[KEYSTROKES]
+
+
+180
+00:08:38,017 --> 00:08:39,652 line:0
+and then catch the error.
+
+
+181
+00:08:39,652 --> 00:08:45,558 position:50%
+[KEYSTROKES]
+
+
+182
+00:08:45,558 --> 00:08:47,994 position:50%
+We can remove this guard.
+
+
+183
+00:08:47,994 --> 00:08:50,463 position:50%
+And now that we're catching
+the error,
+
+
+184
+00:08:50,463 --> 00:08:54,267 line:0
+it's no longer optional,
+so we can remove the unwrap.
+
+
+185
+00:08:54,267 --> 00:08:56,770 position:50%
+[KEYSTROKES]
+
+
+186
+00:08:57,670 --> 00:09:02,442 line:0
+This also means we can
+rearrange our code
+
+
+187
+00:09:02,442 --> 00:09:05,111 position:50%
+to keep the happy path
+at the top
+
+
+188
+00:09:05,111 --> 00:09:07,814 line:0
+so we can move
+the success logging line
+
+
+189
+00:09:07,814 --> 00:09:11,484 position:50%
+up right underneath the save
+
+
+190
+00:09:11,484 --> 00:09:14,387 line:0
+and then just handle
+the error logging in the cache.
+
+
+191
+00:09:16,823 --> 00:09:19,959 line:-1
+Notice that save no longer
+returns a value.
+
+
+192
+00:09:19,959 --> 00:09:22,595 line:-1
+Returning success/failure
+was really duplicative
+
+
+193
+00:09:22,595 --> 00:09:23,930 line:-1
+with the error,
+
+
+194
+00:09:23.930 --> 00:09:26.533 line:-1 position:50%
+so our new function
+only either throws
+
+
+195
+00:09:26.533 --> 00:09:29.235 line:-1 position:50%
+or it's succeeded.
+
+
+196
+00:09:32,906 --> 00:09:34,908 position:50%
+Now that we've added
+the try-catch,
+
+
+197
+00:09:34,908 --> 00:09:37,977 line:0
+we're getting one more error
+from the compiler.
+
+
+198
+00:09:37,977 --> 00:09:40,980 line:0
+We're calling
+an asynchronous function,
+
+
+199
+00:09:40,980 --> 00:09:44,784 line:0
+but we're calling it from within
+a synchronous function.
+
+
+200
+00:09:44,784 --> 00:09:46,152 position:50%
+This does not work.
+
+
+201
+00:09:46,152 --> 00:09:48,221 line:-1
+Asynchronous functions
+have a capability
+
+
+202
+00:09:48,221 --> 00:09:50,924 line:-1
+that synchronous functions
+don't have:
+
+
+203
+00:09:50,924 --> 00:09:54,360 line:-1
+the ability to give up control
+of the thread they're running on
+
+
+204
+00:09:54.360 --> 00:09:57.163 line:-1 position:50%
+while they await.
+
+
+205
+00:09:57.163 --> 00:09:58.198 line:-1 position:50%
+To do this,
+
+
+206
+00:09:58,198 --> 00:10:00,733 line:-1
+they have a separate way
+of handling their stack frame,
+
+
+207
+00:10:00.733 --> 00:10:04.604 line:-1 position:50%
+and this isn't compatible
+with synchronous functions.
+
+
+208
+00:10:04,604 --> 00:10:12,245 line:-1
+So one option is to make
+this function async instead.
+
+
+209
+00:10:12,245 --> 00:10:15,415 line:-1
+So we can just add
+the async keyword
+
+
+210
+00:10:15,415 --> 00:10:17,584 line:-1
+after the function definition.
+
+
+211
+00:10:17,584 --> 00:10:20,086 line:-1
+And now, this file compiles.
+
+
+212
+00:10:21,921 --> 00:10:24,424 line:-1
+But the whole project
+doesn't compile yet.
+
+
+213
+00:10:24,424 --> 00:10:28,328 line:-1
+Making this function async has
+pushed the problem up a level
+
+
+214
+00:10:28,328 --> 00:10:31,598 line:-1
+to where it's being called.
+
+
+215
+00:10:34,133 --> 00:10:35,468 line:-1
+Here in my data model,
+
+
+216
+00:10:35,468 --> 00:10:37,570 line:-1
+I'm now getting
+that same compiler error
+
+
+217
+00:10:37,570 --> 00:10:40,273 line:-1
+because this function
+isn't async.
+
+
+218
+00:10:40.273 --> 00:10:43.142 line:-1 position:50%
+Now I could keep going
+up the chain, but for now,
+
+
+219
+00:10:43.142 --> 00:10:48.114 line:-1 position:50%
+let's see another technique
+to keep the changes localized.
+
+
+220
+00:10:48,114 --> 00:10:50,383 line:-1
+To call my async function,
+
+
+221
+00:10:50.383 --> 00:10:54.053 line:-1 position:50%
+I'm going to spin off
+a new asynchronous task
+
+
+222
+00:10:54,053 --> 00:10:56,990 line:-1
+which will be allowed
+to call async functions.
+
+
+223
+00:10:56,990 --> 00:11:04,063 line:-1
+[KEYSTROKES]
+
+
+224
+00:11:04,063 --> 00:11:07,333 line:-1
+This async task is very similar
+to calling async
+
+
+225
+00:11:07,333 --> 00:11:09,335 line:-1
+on the global dispatch queue.
+
+
+226
+00:11:09,335 --> 00:11:13,339 line:-1
+You can't return a value back
+from it to the outer function
+
+
+227
+00:11:13,339 --> 00:11:16,676 line:-1
+because the block
+executes concurrently.
+
+
+228
+00:11:16,676 --> 00:11:19,178 line:-1
+So whatever you do
+with the detached closure
+
+
+229
+00:11:19,178 --> 00:11:21,814 line:-1
+needs to be self-contained.
+
+
+230
+00:11:21.814 --> 00:11:24.317 line:-1 position:50%
+In this case,
+we're just calling save,
+
+
+231
+00:11:24,317 --> 00:11:28,254 line:-1
+which doesn't return a value,
+so that's fine.
+
+
+232
+00:11:28.254 --> 00:11:31.324 line:-1 position:50%
+You also need to be careful
+that you're not touching
+
+
+233
+00:11:31.324 --> 00:11:34.827 line:-1 position:50%
+global state that might get
+mutated simultaneously
+
+
+234
+00:11:34.827 --> 00:11:36.296 line:-1 position:50%
+from other threads.
+
+
+235
+00:11:36.296 --> 00:11:37.830 line:-1 position:50%
+And this is where
+it was relevant
+
+
+236
+00:11:37,830 --> 00:11:40,900 line:-1
+that save was
+completely thread-safe,
+
+
+237
+00:11:40,900 --> 00:11:43,303 line:-1
+otherwise we might
+be accidentally introducing
+
+
+238
+00:11:43.303 --> 00:11:47.307 line:-1 position:50%
+new race conditions
+by adding this new task.
+
+
+239
+00:11:50,176 --> 00:11:52,979 line:-1
+Now that we've put it inside
+an async task,
+
+
+240
+00:11:52,979 --> 00:11:55,114 line:-1
+our awaited function compiles,
+
+
+241
+00:11:55.114 --> 00:11:58.718 line:-1 position:50%
+and we've finished our first use
+of async/await in this app,
+
+
+242
+00:11:58.718 --> 00:12:00.887 line:-1 position:50%
+we could run it right now.
+
+
+243
+00:12:04.724 --> 00:12:07.427 line:-1 position:50%
+Let's do another one
+of those refactors
+
+
+244
+00:12:07.427 --> 00:12:10.496 line:-1 position:50%
+and this time,
+look at some other techniques
+
+
+245
+00:12:10.496 --> 00:12:13.933 line:-1 position:50%
+when migrating to async.
+
+
+246
+00:12:13.933 --> 00:12:17.637 line:-1 position:50%
+So let's have a look at the call
+to request authorization
+
+
+247
+00:12:17,637 --> 00:12:19,672 line:-1
+[KEYSTROKES]
+
+
+248
+00:12:19,672 --> 00:12:25,645 line:-1
+of access to the user's
+health data.
+
+
+249
+00:12:25,645 --> 00:12:29,315 line:-1
+This similarly calls HealthKit
+with a completion handler.
+
+
+250
+00:12:29.315 --> 00:12:32.652 line:-1 position:50%
+But unlike before,
+this function takes, itself,
+
+
+251
+00:12:32.652 --> 00:12:35.321 line:-1 position:50%
+a completion handler.
+
+
+252
+00:12:35,321 --> 00:12:37,090 line:-1
+What I'm going to do
+is I'm going to create
+
+
+253
+00:12:37,090 --> 00:12:39,792 line:-1
+a second version of the function
+to become async
+
+
+254
+00:12:39.792 --> 00:12:42.762 line:-1 position:50%
+while keeping
+the completion handler version.
+
+
+255
+00:12:42,762 --> 00:12:44,197 line:-1
+That way other parts of our code
+
+
+256
+00:12:44,197 --> 00:12:46,299 line:-1
+that call it
+with a completion handler
+
+
+257
+00:12:46,299 --> 00:12:51,037 line:-1
+can keep on working
+while we refactor.
+
+
+258
+00:12:51,037 --> 00:12:54,207 line:-1
+I can do this easily by using
+the "Create Async Alternative"
+
+
+259
+00:12:54,207 --> 00:12:56,242 line:-1
+refactoring action.
+
+
+260
+00:12:56.242 --> 00:12:58.144 line:-1 position:50%
+That's available
+in the Code Action menu --
+
+
+261
+00:12:58.144 --> 00:13:02.081 line:-1 position:50%
+which I can bring up
+with Command-Shift-A --
+
+
+262
+00:13:02,081 --> 00:13:05,551 line:-1
+and choose the option
+to add the async alternative.
+
+
+263
+00:13:05.551 --> 00:13:09.055 line:-1 position:50%
+[KEYSTROKES]
+
+
+264
+00:13:12.258 --> 00:13:15.862 line:-1 position:50%
+So this has added
+a second async version
+
+
+265
+00:13:15,862 --> 00:13:17,597 line:-1
+of the original call.
+
+
+266
+00:13:20.700 --> 00:13:24.704 line:-1 position:50%
+And it's replaced the original
+completion handler code
+
+
+267
+00:13:24,704 --> 00:13:28,207 line:-1
+with code that creates
+a new async task...
+
+
+268
+00:13:30,943 --> 00:13:37,750 line:-1
+...and then just awaits the
+async version of the function.
+
+
+269
+00:13:37,750 --> 00:13:40,520 line:-1
+Notice that
+the async refactoring
+
+
+270
+00:13:40,520 --> 00:13:45,258 line:-1
+has added a deprecation warning
+to the original one.
+
+
+271
+00:13:45,258 --> 00:13:48,528 line:-1
+These are going to help guide me
+to parts of my code
+
+
+272
+00:13:48.528 --> 00:13:50.730 line:-1 position:50%
+that could next benefit
+from refactoring
+
+
+273
+00:13:50,730 --> 00:13:53,733 line:-1
+to call this new async version.
+
+
+274
+00:13:53.733 --> 00:13:55.802 line:-1 position:50%
+Let's undo and go back
+for a moment
+
+
+275
+00:13:55,802 --> 00:13:59,605 line:-1
+to that original
+completion handler version.
+
+
+276
+00:13:59,605 --> 00:14:04,310 line:-1
+Inside this requestAuthorization
+callback,
+
+
+277
+00:14:04.310 --> 00:14:08.181 line:-1 position:50%
+this callback can happen
+on an arbitrary thread.
+
+
+278
+00:14:08,181 --> 00:14:14,420 line:-1
+So you need to know that the
+code inside it is thread-safe.
+
+
+279
+00:14:14,420 --> 00:14:19,258 line:-1
+But I don't think it is.
+
+
+280
+00:14:19.258 --> 00:14:23.162 line:-1 position:50%
+This assignment here
+might happen simultaneously
+
+
+281
+00:14:23.162 --> 00:14:27.467 line:-1 position:50%
+with other code reading
+this value on other threads.
+
+
+282
+00:14:27.467 --> 00:14:29.836 line:-1 position:50%
+And there's another example
+of a lack of local reasoning
+
+
+283
+00:14:29,836 --> 00:14:31,671 line:-1
+in this code.
+
+
+284
+00:14:31,671 --> 00:14:36,175 line:-1
+After that assignment, this
+completion handler is called,
+
+
+285
+00:14:36,175 --> 00:14:37,810 line:-1
+and I have no idea
+whether the code
+
+
+286
+00:14:37.810 --> 00:14:41.948 line:-1 position:50%
+inside that completion handler
+is thread-safe.
+
+
+287
+00:14:41.948 --> 00:14:43.182 line:-1 position:50%
+I'd have to go and look
+
+
+288
+00:14:43,182 --> 00:14:45,852 line:-1
+at all of the call sites
+to this function
+
+
+289
+00:14:45.852 --> 00:14:48.488 line:-1 position:50%
+to look at how their completion
+handlers are written
+
+
+290
+00:14:48,488 --> 00:14:52,959 line:-1
+to know that this is OK.
+
+
+291
+00:14:52,959 --> 00:14:58,898 line:-1
+Now, let's redo again
+and see the refactored version.
+
+
+292
+00:14:58,898 --> 00:15:01,334 line:-1
+Now remember,
+
+
+293
+00:15:01.334 --> 00:15:04.771 line:-1 position:50%
+an async task also runs
+on an arbitrary thread
+
+
+294
+00:15:04,771 --> 00:15:07,006 line:-1
+similar to a dispatch callback.
+
+
+295
+00:15:07,006 --> 00:15:10,510 line:-1
+So this forwarding version
+has similar problems
+
+
+296
+00:15:10.510 --> 00:15:14.180 line:-1 position:50%
+to the completion handler
+version we had before.
+
+
+297
+00:15:14,180 --> 00:15:18,084 line:-1
+We haven't made our code
+any safer quite yet.
+
+
+298
+00:15:18.084 --> 00:15:19.318 line:-1 position:50%
+We'll fix this soon
+
+
+299
+00:15:19.318 --> 00:15:21.354 line:-1 position:50%
+by introducing actors
+into our code.
+
+
+300
+00:15:21.354 --> 00:15:22.822 line:-1 position:50%
+But for now,
+we should note
+
+
+301
+00:15:22,822 --> 00:15:25,625 line:-1
+that just because we've
+converted this function to async
+
+
+302
+00:15:25,625 --> 00:15:28,461 line:-1
+does not mean we're free
+from race conditions.
+
+
+303
+00:15:28,461 --> 00:15:30,663 line:-1
+In fact, you should be aware
+of the risk of introducing
+
+
+304
+00:15:30,663 --> 00:15:32,431 line:-1
+new race conditions
+into your code
+
+
+305
+00:15:32.431 --> 00:15:36.702 line:-1 position:50%
+if you only perform refactoring
+to introduce async functions.
+
+
+306
+00:15:36,702 --> 00:15:40,473 line:-1
+Now let's look
+at this new async function.
+
+
+307
+00:15:40,473 --> 00:15:43,476 line:-1
+The refactoring action
+has already converted
+
+
+308
+00:15:43.476 --> 00:15:46.245 line:-1 position:50%
+the call with
+a completion handler here
+
+
+309
+00:15:46,245 --> 00:15:50,249 line:-1
+to call the new async version
+of this SDK API.
+
+
+310
+00:15:52.385 --> 00:15:54.053 line:-1 position:50%
+But converting this function
+to async
+
+
+311
+00:15:54,053 --> 00:15:58,057 line:-1
+has highlighted
+something interesting.
+
+
+312
+00:15:58,057 --> 00:16:01,961 line:-1
+Here, when we were using the
+completion handler technique,
+
+
+313
+00:16:01,961 --> 00:16:05,832 line:-1
+we had a return without calling
+the completion handler.
+
+
+314
+00:16:05,832 --> 00:16:08,234 line:-1
+And this was probably a bug.
+
+
+315
+00:16:08,234 --> 00:16:11,037 line:-1
+The caller would have been
+left hanging.
+
+
+316
+00:16:11.037 --> 00:16:15.775 line:-1 position:50%
+But with async functions,
+you must return a value,
+
+
+317
+00:16:15,775 --> 00:16:19,078 line:-1
+so now we're getting
+a compilation error,
+
+
+318
+00:16:19,078 --> 00:16:23,349 line:-1
+which we can resolve just by
+returning false for failure.
+
+
+319
+00:16:26.953 --> 00:16:29.622 line:-1 position:50%
+And just like before,
+
+
+320
+00:16:29.622 --> 00:16:32.959 line:-1 position:50%
+this new async version
+of requestAuthorization
+
+
+321
+00:16:32,959 --> 00:16:35,461 line:-1
+doesn't actually
+return a value,
+
+
+322
+00:16:37.263 --> 00:16:43.002 line:-1 position:50%
+it either succeeds
+or it throws.
+
+
+323
+00:16:43,002 --> 00:16:47,206 line:-1
+So we just need to delete
+this return value.
+
+
+324
+00:16:47,206 --> 00:16:52,144 line:-1
+[KEYSTROKES]
+
+
+325
+00:16:52,144 --> 00:16:55,114 line:0
+And instead on this path,
+
+
+326
+00:16:55,114 --> 00:16:57,083 position:50%
+we need to assume
+that it succeeded...
+
+
+327
+00:16:57,083 --> 00:17:00,086 position:50%
+[KEYSTROKES]
+
+
+328
+00:17:01,020 --> 00:17:05,157 line:0
+...and on the failure path,
+we need to return false.
+
+
+329
+00:17:05,157 --> 00:17:09,662 line:-1
+[KEYSTROKES]
+
+
+330
+00:17:11,564 --> 00:17:15,935 line:-1
+If I try and compile now,
+
+
+331
+00:17:15.935 --> 00:17:20.473 line:-1 position:50%
+the project compiles
+because the old code elsewhere
+
+
+332
+00:17:20.473 --> 00:17:23.876 line:-1 position:50%
+can still continue to call
+the completion handler version
+
+
+333
+00:17:23,876 --> 00:17:26,212 line:-1
+and we're now seeing
+these deprecation warnings
+
+
+334
+00:17:26,212 --> 00:17:27,947 line:-1
+when we're doing that,
+which can lead us
+
+
+335
+00:17:27,947 --> 00:17:31,817 line:-1
+to a next place that we might
+want to refactor.
+
+
+336
+00:17:31,817 --> 00:17:35,187 line:-1
+OK, let's do one more
+async conversion.
+
+
+337
+00:17:35.187 --> 00:17:38.557 line:-1 position:50%
+Let's find the function
+to load data from HealthKit.
+
+
+338
+00:17:38,557 --> 00:17:42,194 line:-1
+[KEYSTROKES]
+
+
+339
+00:17:42,194 --> 00:17:44,430 line:0
+We'll start --
+just like before --
+
+
+340
+00:17:44,430 --> 00:17:47,266 line:0
+by creating a stub
+for the old code to call.
+
+
+341
+00:17:47,266 --> 00:18:24,537 position:50%
+[KEYSTROKES]
+
+
+342
+00:18:24,537 --> 00:18:28,641 line:0
+Then moving
+to the async version,
+
+
+343
+00:18:28,641 --> 00:18:33,446 line:0
+incidentally, this one takes
+an optional completion handler
+
+
+344
+00:18:33,446 --> 00:18:35,281 line:0
+the async equivalent of this
+
+
+345
+00:18:35,281 --> 00:18:38,017 line:0
+would be to make this function
+have a discardable result.
+
+
+346
+00:18:38,017 --> 00:18:55,534 line:-1
+[KEYSTROKES]
+
+
+347
+00:18:55.534 --> 00:18:59.238 line:-1 position:50%
+So next, we start moving down,
+replacing any use
+
+
+348
+00:18:59,238 --> 00:19:02,742 line:-1
+of the completion handler
+with returns.
+
+
+349
+00:19:02.742 --> 00:19:04.744 line:-1 position:50%
+So for example, we can delete
+this completion handler
+
+
+350
+00:19:04.744 --> 00:19:06.078 line:-1 position:50%
+and just return false.
+
+
+351
+00:19:06,078 --> 00:19:08,881 line:-1
+[KEYSTROKES]
+
+
+352
+00:19:08.881 --> 00:19:11.484 line:-1 position:50%
+But once we move
+a little further,
+
+
+353
+00:19:11.484 --> 00:19:13.919 line:-1 position:50%
+we start to hit a snag,
+
+
+354
+00:19:13,919 --> 00:19:19,392 line:-1
+and it has to do with how the
+HealthKit query API is arranged.
+
+
+355
+00:19:19.392 --> 00:19:22.728 line:-1 position:50%
+Here, there's
+a completion handler
+
+
+356
+00:19:22,728 --> 00:19:28,000 line:-1
+but it's on this query object;
+whereas really,
+
+
+357
+00:19:28,000 --> 00:19:32,805 line:0
+what I want to await
+is the execution of the query
+
+
+358
+00:19:32,805 --> 00:19:36,175 line:0
+all the way down here
+at the bottom of the function.
+
+
+359
+00:19:36,175 --> 00:19:40,212 line:0
+Incidentally, this hopping up
+and down around the function
+
+
+360
+00:19:40,212 --> 00:19:42,281 position:50%
+is another thing
+that async/await
+
+
+361
+00:19:42,281 --> 00:19:44,316 position:50%
+is great at helping resolve.
+
+
+362
+00:19:44,316 --> 00:19:48,521 position:50%
+So what I want to do is create
+a single async function
+
+
+363
+00:19:48,521 --> 00:19:53,592 position:50%
+that both creates the query
+and then executes it.
+
+
+364
+00:19:53,592 --> 00:19:55,027 line:-1
+We're going to do that now
+
+
+365
+00:19:55.027 --> 00:19:58.564 line:-1 position:50%
+using a technique
+called a continuation.
+
+
+366
+00:19:58.564 --> 00:20:01.033 line:-1 position:50%
+So I'm to go back up
+to the top of this function
+
+
+367
+00:20:01,033 --> 00:20:03,736 line:-1
+and I'm going to create
+a helper function
+
+
+368
+00:20:03.736 --> 00:20:08.407 line:-1 position:50%
+[KEYSTROKES]
+called "queryHealthKit."
+
+
+369
+00:20:08,407 --> 00:20:12,711 line:-1
+I could do all of this work
+inside the existing function
+
+
+370
+00:20:12,711 --> 00:20:14,246 line:-1
+but it might get
+a little bit messy,
+
+
+371
+00:20:14.246 --> 00:20:17.383 line:-1 position:50%
+so I like to keep it separate
+in a helper function.
+
+
+372
+00:20:17,383 --> 00:20:21,954 line:-1
+This function will be async,
+so we can await it,
+
+
+373
+00:20:21,954 --> 00:20:26,025 line:-1
+and it will throw because
+the query operation can fail.
+
+
+374
+00:20:26,025 --> 00:20:31,430 line:-1
+And this function is going
+to return the useful values here
+
+
+375
+00:20:31,430 --> 00:20:34,667 line:-1
+that are currently
+being passed into
+
+
+376
+00:20:34,667 --> 00:20:38,871 position:50%
+the completion handler
+on the query.
+
+
+377
+00:20:38,871 --> 00:20:42,608 line:-1
+So I'm going to take the logic
+for performing the query,
+
+
+378
+00:20:42,608 --> 00:20:47,146 line:-1
+cut it, and move it
+into the helper function.
+
+
+379
+00:20:47,146 --> 00:20:50,583 line:0
+And I'm also going to take
+the execution of the query
+
+
+380
+00:20:50,583 --> 00:20:52,985 line:0
+and move that too.
+
+
+381
+00:20:52.985 --> 00:20:56.489 line:-1 position:50%
+[KEYSTROKES]
+
+
+382
+00:20:56,489 --> 00:21:01,227 line:-1
+Now, I need to somehow
+invert this code
+
+
+383
+00:21:01,227 --> 00:21:05,698 line:-1
+so that it can await
+the completion handler
+
+
+384
+00:21:05,698 --> 00:21:09,201 line:-1
+and return these values passed
+into the completion handler
+
+
+385
+00:21:09,201 --> 00:21:13,205 line:-1
+back from my new
+asynchronous function.
+
+
+386
+00:21:13,205 --> 00:21:15,975 line:-1
+And this is where I use
+a continuation.
+
+
+387
+00:21:15,975 --> 00:21:18,777 line:-1
+So in this function,
+we're going to return
+
+
+388
+00:21:18,777 --> 00:21:22,648 line:-1
+the results of trying to await
+a call to a
+
+
+389
+00:21:22,648 --> 00:21:29,522 line:-1
+withCheckedThrowingContinuation
+function.
+
+
+390
+00:21:29,522 --> 00:21:33,759 line:-1
+And this takes a block
+that takes a continuation.
+
+
+391
+00:21:33,759 --> 00:21:40,699 line:-1
+[KEYSTROKES]
+
+
+392
+00:21:40.699 --> 00:21:46.539 line:-1 position:50%
+And we're going to move
+this code inside that block
+
+
+393
+00:21:46,539 --> 00:21:49,408 line:-1
+and then within the block, we're
+going to use the continuation
+
+
+394
+00:21:49.408 --> 00:21:52.711 line:-1 position:50%
+to pass data back out
+of this function either
+
+
+395
+00:21:52,711 --> 00:21:58,150 position:50%
+by using the continuation
+
+
+396
+00:21:58,150 --> 00:22:01,420 position:50%
+to resume throwing
+the error here...
+
+
+397
+00:22:01,420 --> 00:22:04,490 line:0
+[KEYSTROKES]
+
+
+398
+00:22:04,490 --> 00:22:08,994 position:50%
+...or...
+[KEYSTROKES]
+
+
+399
+00:22:08,994 --> 00:22:12,898 position:50%
+...to resume returning
+the values that we received
+
+
+400
+00:22:12,898 --> 00:22:14,900 position:50%
+into the completion handler.
+
+
+401
+00:22:18,070 --> 00:22:33,052 line:-1
+[KEYSTROKES]
+
+
+402
+00:22:33.052 --> 00:22:35.854 line:-1 position:50%
+Now that we have
+this awaitable function,
+
+
+403
+00:22:35,854 --> 00:22:38,357 line:-1
+we can use it
+in our original code.
+
+
+404
+00:22:41,627 --> 00:22:43,862 line:-1
+[KEYSTROKES]
+
+
+405
+00:22:43,862 --> 00:22:47,700 line:-1
+So we assign the results
+from calling the function.
+
+
+406
+00:22:47,700 --> 00:23:01,313 line:-1
+[KEYSTROKES]
+
+
+407
+00:23:01.313 --> 00:23:03.916 line:-1 position:50%
+And we need to handle the error
+that can be thrown.
+
+
+408
+00:23:03.916 --> 00:23:12.625 line:-1 position:50%
+[KEYSTROKES]
+
+
+409
+00:23:12.625 --> 00:23:14.260 line:-1 position:50%
+In fact, actually,
+I'm going to go up here
+
+
+410
+00:23:14,260 --> 00:23:18,631 line:-1
+and take this bit of logging
+and do that in the handler.
+
+
+411
+00:23:23,402 --> 00:23:28,374 line:0
+And then we just need to move
+all of this success code
+
+
+412
+00:23:28,374 --> 00:23:30,409 position:50%
+up into the happy path.
+
+
+413
+00:23:30,409 --> 00:23:39,885 line:-1
+[KEYSTROKES]
+
+
+414
+00:23:39,885 --> 00:23:42,921 line:-1
+Finally, we need to address
+this closure.
+
+
+415
+00:23:46,358 --> 00:23:52,731 line:-1
+Here, we're using dispatch async
+back to the main thread.
+
+
+416
+00:23:52,731 --> 00:23:54,900 line:-1
+But we've ditched
+our completion handler,
+
+
+417
+00:23:54,900 --> 00:23:56,802 line:-1
+so there's no way
+of relaying this information
+
+
+418
+00:23:56,802 --> 00:23:59,271 line:-1
+back to the main thread
+using it.
+
+
+419
+00:23:59,271 --> 00:24:02,508 line:-1
+We need a different way.
+
+
+420
+00:24:02,508 --> 00:24:06,979 line:-1
+To resolve this, we're going
+to make our first use of actors.
+
+
+421
+00:24:06,979 --> 00:24:08,981 line:-1
+In Swift's concurrency model,
+
+
+422
+00:24:08.981 --> 00:24:12.484 line:-1 position:50%
+there is a global actor
+called the main actor
+
+
+423
+00:24:12,484 --> 00:24:17,189 line:-1
+that coordinates all of its
+operations on the main thread.
+
+
+424
+00:24:17,189 --> 00:24:23,762 line:-1
+We can replace our
+dispatch main.async call
+
+
+425
+00:24:23.762 --> 00:24:27.533 line:-1 position:50%
+with a call to main actor's
+run function.
+
+
+426
+00:24:27.533 --> 00:24:34.440 line:-1 position:50%
+[KEYSTROKES]
+
+
+427
+00:24:34,440 --> 00:24:40,779 line:-1
+And this takes a block of code
+to run on the main actor.
+
+
+428
+00:24:40,779 --> 00:24:43,782 line:-1
+run is an async function,
+so we need to await it.
+
+
+429
+00:24:43.782 --> 00:24:48.520 line:-1 position:50%
+[KEYSTROKES]
+
+
+430
+00:24:48.520 --> 00:24:50.222 line:-1 position:50%
+Awaiting it is necessary
+
+
+431
+00:24:50,222 --> 00:24:53,192 line:-1
+because this function
+may need to suspend
+
+
+432
+00:24:53,192 --> 00:24:57,629 line:-1
+until the main thread is ready
+to process this operation.
+
+
+433
+00:24:57.629 --> 00:24:59.298 line:-1 position:50%
+But because we await it,
+
+
+434
+00:24:59,298 --> 00:25:03,702 line:-1
+we can just remove
+our completion handler,
+
+
+435
+00:25:03.702 --> 00:25:12.111 line:-1 position:50%
+[KEYSTROKES]
+
+
+436
+00:25:12.111 --> 00:25:14.613 line:-1 position:50%
+and instead, return a value.
+
+
+437
+00:25:14.613 --> 00:25:27.159 line:-1 position:50%
+[KEYSTROKES]
+
+
+438
+00:25:27,159 --> 00:25:29,695 line:-1
+OK, finally, the compiler
+is now giving me an error
+
+
+439
+00:25:29,695 --> 00:25:32,197 line:-1
+about a captured variable.
+
+
+440
+00:25:35,601 --> 00:25:38,203 line:-1
+This is a new error
+that only occurs
+
+
+441
+00:25:38.203 --> 00:25:42.174 line:-1 position:50%
+inside asynchronous functions.
+
+
+442
+00:25:42,174 --> 00:25:46,412 line:-1
+Because closures in Swift
+capture variables by reference,
+
+
+443
+00:25:46,412 --> 00:25:48,814 line:-1
+when you capture
+a mutable variable --
+
+
+444
+00:25:48.814 --> 00:25:53.552 line:-1 position:50%
+in this case,
+our newDrinks array --
+
+
+445
+00:25:53.552 --> 00:25:57.456 line:-1 position:50%
+you create the possibility
+for shared mutable state,
+
+
+446
+00:25:57,456 --> 00:26:01,427 line:-1
+and that can be the source
+of race conditions.
+
+
+447
+00:26:01,427 --> 00:26:02,594 line:-1
+So when doing this,
+
+
+448
+00:26:02,594 --> 00:26:07,833 line:-1
+you need to ensure that you're
+making a copy of this value.
+
+
+449
+00:26:07.833 --> 00:26:10.068 line:-1 position:50%
+One way to do this
+is to add newDrinks
+
+
+450
+00:26:10,068 --> 00:26:12,571 line:-1
+to the closure's capture list,
+like this.
+
+
+451
+00:26:12,571 --> 00:26:18,577 line:-1
+[KEYSTROKES]
+
+
+452
+00:26:21,580 --> 00:26:24,116 line:-1
+But often it's better
+to just avoid this problem
+
+
+453
+00:26:24.116 --> 00:26:29.021 line:-1 position:50%
+by not having mutable variables
+in the first place.
+
+
+454
+00:26:29,021 --> 00:26:34,293 line:-1
+Here, we can do this by changing
+the code above instead.
+
+
+455
+00:26:34.293 --> 00:26:40.699 line:-1 position:50%
+It's written this way
+because samples is optional.
+
+
+456
+00:26:40.699 --> 00:26:44.102 line:-1 position:50%
+But instead what we could do
+
+
+457
+00:26:44.102 --> 00:26:48.907 line:-1 position:50%
+is change newDrinks
+to an immutable value
+
+
+458
+00:26:48,907 --> 00:26:53,345 line:-1
+and either set the value here
+in the if branch
+
+
+459
+00:26:53,345 --> 00:26:56,515 line:-1
+[KEYSTROKES]
+or an add an "else"
+
+
+460
+00:26:56.515 --> 00:27:00.085 line:-1 position:50%
+to set it to the empty array.
+
+
+461
+00:27:00,085 --> 00:27:02,554 line:-1
+We could also have done this
+with a nil coalescing operator
+
+
+462
+00:27:02.554 --> 00:27:04.122 line:-1 position:50%
+if we prefer.
+
+
+463
+00:27:04,122 --> 00:27:08,827 line:-1
+Since this value is now declared
+with let instead of var,
+
+
+464
+00:27:08,827 --> 00:27:11,763 line:-1
+it's immutable
+and that resolves the issue
+
+
+465
+00:27:11.763 --> 00:27:15.267 line:-1 position:50%
+without needing to make
+an additional capture.
+
+
+466
+00:27:18.003 --> 00:27:21.907 line:-1 position:50%
+[KEYSTROKES]
+
+
+467
+00:27:21,907 --> 00:27:24,676 line:-1
+Now let's keep talking
+about the main actor
+
+
+468
+00:27:24,676 --> 00:27:26,144 line:-1
+by taking a look
+at this function
+
+
+469
+00:27:26,144 --> 00:27:30,148 line:-1
+that needed to be called
+on the main thread.
+
+
+470
+00:27:32.518 --> 00:27:34.386 line:-1 position:50%
+At the top of this function,
+
+
+471
+00:27:34,386 --> 00:27:38,090 line:-1
+there's something
+that's a really great idea:
+
+
+472
+00:27:38,090 --> 00:27:40,592 line:-1
+there's an assert
+that the function
+
+
+473
+00:27:40,592 --> 00:27:45,797 line:-1
+is correctly running
+on the main thread.
+
+
+474
+00:27:45.797 --> 00:27:48.300 line:-1 position:50%
+If you had ever made a mistake
+and called this function
+
+
+475
+00:27:48,300 --> 00:27:49,635 line:-1
+without wrapping it
+
+
+476
+00:27:49,635 --> 00:27:51,837 line:-1
+in a dispatch async
+to the main thread,
+
+
+477
+00:27:51.837 --> 00:27:53.939 line:-1 position:50%
+you'd get an error
+in your debug builds,
+
+
+478
+00:27:53,939 --> 00:27:55,741 line:-1
+and you should definitely
+adopt this practice
+
+
+479
+00:27:55,741 --> 00:27:58,944 line:-1
+in some of your existing code.
+
+
+480
+00:27:58.944 --> 00:28:01.847 line:-1 position:50%
+But this approach
+does have some limitations.
+
+
+481
+00:28:01,847 --> 00:28:03,882 line:-1
+You might forget
+to put an assert
+
+
+482
+00:28:03.882 --> 00:28:05.684 line:-1 position:50%
+everywhere it's needed,
+
+
+483
+00:28:05,684 --> 00:28:08,587 line:-1
+and you can't assert on access
+to stored properties,
+
+
+484
+00:28:08,587 --> 00:28:11,323 line:-1
+or at least not without
+lots of boilerplate.
+
+
+485
+00:28:11,323 --> 00:28:13,759 line:-1
+It's much better
+if the compiler can enforce
+
+
+486
+00:28:13,759 --> 00:28:15,561 line:-1
+some of these rules for you,
+
+
+487
+00:28:15.561 --> 00:28:19.298 line:-1 position:50%
+so you can't make mistakes
+like this at all.
+
+
+488
+00:28:19,298 --> 00:28:23,001 line:-1
+And that's how we use
+the main actor.
+
+
+489
+00:28:23.001 --> 00:28:29.007 line:-1 position:50%
+I can annotate functions
+with "@MainActor."
+
+
+490
+00:28:31,777 --> 00:28:34,479 line:-1
+And that will require
+that the caller switch
+
+
+491
+00:28:34,479 --> 00:28:37,816 line:-1
+to the main actor
+before this function is run.
+
+
+492
+00:28:42.220 --> 00:28:45.424 line:-1 position:50%
+Now that I've done this,
+I can remove the assertion
+
+
+493
+00:28:45,424 --> 00:28:48,327 line:-1
+because the compiler won't let
+this function be called anywhere
+
+
+494
+00:28:48,327 --> 00:28:50,195 line:-1
+other than on the main thread.
+
+
+495
+00:28:50,195 --> 00:28:56,935 line:-1
+[KEYSTROKES]
+
+
+496
+00:28:56,935 --> 00:28:58,770 line:-1
+We can prove
+that this is working
+
+
+497
+00:28:58.770 --> 00:29:04.176 line:-1 position:50%
+by going back to the caller
+
+
+498
+00:29:04,176 --> 00:29:13,552 line:-1
+and moving this call outside
+of this MainActor.run block.
+
+
+499
+00:29:13,552 --> 00:29:15,287 line:-1
+And you see
+the compiler tells us, no,
+
+
+500
+00:29:15.287 --> 00:29:17.656 line:-1 position:50%
+we can't call that from here
+
+
+501
+00:29:17.656 --> 00:29:20.692 line:-1 position:50%
+because we're not
+on the main actor.
+
+
+502
+00:29:20,692 --> 00:29:22,361 line:-1
+Here's a way to think
+about this feature:
+
+
+503
+00:29:22,361 --> 00:29:24,429 line:-1
+it's a lot like optional values.
+
+
+504
+00:29:24,429 --> 00:29:27,032 line:-1
+We used to have values
+like pointers
+
+
+505
+00:29:27,032 --> 00:29:28,934 line:-1
+and had to remember check
+for nil,
+
+
+506
+00:29:28,934 --> 00:29:30,502 line:-1
+but it was easy to forget,
+
+
+507
+00:29:30.502 --> 00:29:32.471 line:-1 position:50%
+and it's much better to let
+the compiler make sure
+
+
+508
+00:29:32,471 --> 00:29:34,139 line:-1
+this check always happens
+
+
+509
+00:29:34.139 --> 00:29:36.041 line:-1 position:50%
+along with some
+language syntactic sugar
+
+
+510
+00:29:36.041 --> 00:29:37.676 line:-1 position:50%
+to make it easier.
+
+
+511
+00:29:37.676 --> 00:29:39.611 line:-1 position:50%
+Here, we're doing
+a similar thing,
+
+
+512
+00:29:39,611 --> 00:29:41,913 line:-1
+only instead
+of enforcing nil checks,
+
+
+513
+00:29:41,913 --> 00:29:45,484 line:-1
+it's enforcing what actor
+you're running on.
+
+
+514
+00:29:47.819 --> 00:29:50.155 line:-1 position:50%
+Now that we've put this function
+on the main actor,
+
+
+515
+00:29:50.155 --> 00:29:54.793 line:-1 position:50%
+we don't, strictly speaking,
+need this MainActor.run anymore.
+
+
+516
+00:29:54,793 --> 00:29:56,662 line:-1
+If you're outside of an actor,
+
+
+517
+00:29:56,662 --> 00:30:01,033 line:-1
+you can always run functions
+on that actor by awaiting them.
+
+
+518
+00:30:01,033 --> 00:30:03,902 line:-1
+And in fact, that's what
+the compiler is telling us here.
+
+
+519
+00:30:03,902 --> 00:30:06,371 line:-1
+It's saying that we need
+an await keyword
+
+
+520
+00:30:06,371 --> 00:30:08,473 line:-1
+in order to make the switch
+over to the main actor
+
+
+521
+00:30:08.473 --> 00:30:10.008 line:-1 position:50%
+to run this function.
+
+
+522
+00:30:10.008 --> 00:30:11.209 line:-1 position:50%
+So if we add it,
+
+
+523
+00:30:11.209 --> 00:30:15.347 line:-1 position:50%
+[KEYSTROKES]
+
+
+524
+00:30:15.347 --> 00:30:16.748 line:-1 position:50%
+then the code will compile
+
+
+525
+00:30:16.748 --> 00:30:22.421 line:-1 position:50%
+even without this call
+being inside the run block.
+
+
+526
+00:30:22.421 --> 00:30:25.757 line:-1 position:50%
+Here, we're using await
+on a synchronous function --
+
+
+527
+00:30:25.757 --> 00:30:27.726 line:-1 position:50%
+updateModel is synchronous --
+
+
+528
+00:30:27,726 --> 00:30:30,796 line:-1
+but the await indicates
+that the function we're in
+
+
+529
+00:30:30.796 --> 00:30:35.300 line:-1 position:50%
+may need to suspend to get
+itself onto the main actor.
+
+
+530
+00:30:35,300 --> 00:30:36,768 line:-1
+Think of this
+as similar to making
+
+
+531
+00:30:36.768 --> 00:30:40.472 line:-1 position:50%
+a DispatchQueue.sync call,
+except with await,
+
+
+532
+00:30:40,472 --> 00:30:43,341 line:-1
+your function suspends
+instead of blocking
+
+
+533
+00:30:43,341 --> 00:30:47,546 line:-1
+and then resumes after the call
+to the main thread is complete.
+
+
+534
+00:30:51.683 --> 00:30:53.151 line:-1 position:50%
+So, we don't need it here
+anymore,
+
+
+535
+00:30:53,151 --> 00:30:55,654 line:-1
+but this MainActor.run technique
+
+
+536
+00:30:55.654 --> 00:30:59.624 line:-1 position:50%
+is still important
+for another reason.
+
+
+537
+00:30:59,624 --> 00:31:00,826 line:-1
+At each await,
+
+
+538
+00:31:00.826 --> 00:31:05.030 line:-1 position:50%
+your function might suspend
+and other code might run.
+
+
+539
+00:31:05,030 --> 00:31:06,398 line:-1
+That's the point of awaiting:
+
+
+540
+00:31:06.398 --> 00:31:10.702 line:-1 position:50%
+to let other code run
+instead of blocking.
+
+
+541
+00:31:10,702 --> 00:31:14,306 line:-1
+In this case, we only had
+one function to await,
+
+
+542
+00:31:14,306 --> 00:31:15,841 line:-1
+so it doesn't really matter,
+
+
+543
+00:31:15.841 --> 00:31:18.810 line:-1 position:50%
+but sometimes you might want
+to run multiple calls
+
+
+544
+00:31:18,810 --> 00:31:21,246 line:-1
+on the main thread.
+
+
+545
+00:31:21.246 --> 00:31:24.583 line:-1 position:50%
+For example, if you're working
+on UI updates,
+
+
+546
+00:31:24.583 --> 00:31:27.552 line:-1 position:50%
+such as updating entries
+in a table view,
+
+
+547
+00:31:27,552 --> 00:31:29,321 line:-1
+you might not want
+the main run loop
+
+
+548
+00:31:29,321 --> 00:31:36,294 line:-1
+to turn in between
+the operations you perform.
+
+
+549
+00:31:36,294 --> 00:31:39,431 line:-1
+In that case, you would want
+to use MainActor.run
+
+
+550
+00:31:39,431 --> 00:31:42,167 line:-1
+to group together multiple calls
+to the main actor
+
+
+551
+00:31:42.167 --> 00:31:43.735 line:-1 position:50%
+to ensure that each ran
+
+
+552
+00:31:43.735 --> 00:31:47.205 line:-1 position:50%
+without any possible suspensions
+in between.
+
+
+553
+00:31:58,283 --> 00:32:00,952 line:-1
+So, we're now using
+the main actor
+
+
+554
+00:32:00,952 --> 00:32:05,724 line:-1
+to protect the code that needs
+to run on the main thread.
+
+
+555
+00:32:05,724 --> 00:32:08,727 line:-1
+But what about other code
+in this class?
+
+
+556
+00:32:10.829 --> 00:32:14.065 line:-1 position:50%
+In particular, the code
+that mutates local variables,
+
+
+557
+00:32:14,065 --> 00:32:17,068 line:-1
+like the query anchor
+that we saw assigned to here.
+
+
+558
+00:32:20.205 --> 00:32:25.243 line:-1 position:50%
+How can we guarantee those
+are free from race conditions?
+
+
+559
+00:32:25.243 --> 00:32:28.647 line:-1 position:50%
+Or one way would be
+to just put everything
+
+
+560
+00:32:28,647 --> 00:32:32,951 line:-1
+in the HealthKitController
+on the main actor.
+
+
+561
+00:32:32,951 --> 00:32:36,288 line:-1
+If I go to the HealthKit
+controller definition,
+
+
+562
+00:32:36,288 --> 00:32:39,291 line:-1
+[KEYSTROKES]
+
+
+563
+00:32:39,291 --> 00:32:43,762 line:-1
+and just write "@MainActor"
+
+
+564
+00:32:43,762 --> 00:32:46,965 line:-1
+here on the class instead
+of on individual methods,
+
+
+565
+00:32:46,965 --> 00:32:50,135 line:-1
+that would protect every method
+on this type,
+
+
+566
+00:32:50.135 --> 00:32:53.171 line:-1 position:50%
+and every stored property on it
+would be coordinated
+
+
+567
+00:32:53,171 --> 00:32:57,242 line:-1
+on the main thread.
+
+
+568
+00:32:57,242 --> 00:32:59,544 line:-1
+And for a simple application
+like this one,
+
+
+569
+00:32:59,544 --> 00:33:02,414 line:-1
+that would probably be
+an OK choice.
+
+
+570
+00:33:02,414 --> 00:33:04,583 line:-1
+But that also seems
+a little bit wrong.
+
+
+571
+00:33:04.583 --> 00:33:08.620 line:-1 position:50%
+This HealthKitController is
+really the back end of our app;
+
+
+572
+00:33:08.620 --> 00:33:11.423 line:-1 position:50%
+it seems unnecessary
+to be doing all of its work
+
+
+573
+00:33:11.423 --> 00:33:13.058 line:-1 position:50%
+on the main thread.
+
+
+574
+00:33:13.058 --> 00:33:14.659 line:-1 position:50%
+We want to leave that thread
+
+
+575
+00:33:14,659 --> 00:33:19,664 line:-1
+free to do
+UI-focused activities.
+
+
+576
+00:33:19.664 --> 00:33:22.667 line:-1 position:50%
+So instead,
+we can change this class
+
+
+577
+00:33:22.667 --> 00:33:25.103 line:-1 position:50%
+to, itself, be an actor.
+
+
+578
+00:33:25,103 --> 00:33:31,376 line:-1
+[KEYSTROKES]
+
+
+579
+00:33:31,376 --> 00:33:35,313 line:-1
+Unlike the main actor,
+which is a global actor,
+
+
+580
+00:33:35.313 --> 00:33:38.917 line:-1 position:50%
+this actor type can be
+instantiated multiple times.
+
+
+581
+00:33:38,917 --> 00:33:41,720 line:-1
+In my project, I'm still only
+going to create one of them,
+
+
+582
+00:33:41,720 --> 00:33:43,622 line:-1
+but there are many
+other uses of actors
+
+
+583
+00:33:43.622 --> 00:33:44.956 line:-1 position:50%
+where you might instantiate
+
+
+584
+00:33:44.956 --> 00:33:47.425 line:-1 position:50%
+multiple copies
+of the same actor.
+
+
+585
+00:33:47.425 --> 00:33:50.095 line:-1 position:50%
+For example, you might make
+each room in a chat server
+
+
+586
+00:33:50.095 --> 00:33:52.764 line:-1 position:50%
+be its own actor.
+
+
+587
+00:33:52,764 --> 00:33:55,700 line:-1
+So now that we've made
+this class into an actor,
+
+
+588
+00:33:55,700 --> 00:33:59,671 line:-1
+let's see what
+the compiler says.
+
+
+589
+00:33:59,671 --> 00:34:04,342 line:-1
+OK. So we're getting
+some compilation errors.
+
+
+590
+00:34:04,342 --> 00:34:08,847 line:-1
+Now let's take a pause here
+and talk about compiler errors.
+
+
+591
+00:34:08.847 --> 00:34:12.550 line:-1 position:50%
+These errors are guiding you
+towards the places in your code
+
+
+592
+00:34:12.550 --> 00:34:14.853 line:-1 position:50%
+you need to update
+when you're migrating code
+
+
+593
+00:34:14,853 --> 00:34:18,189 line:-1
+to the new concurrency model.
+
+
+594
+00:34:18.189 --> 00:34:19.624 line:-1 position:50%
+When you get these errors,
+
+
+595
+00:34:19.624 --> 00:34:22.661 line:-1 position:50%
+make sure you understand
+what they're telling you.
+
+
+596
+00:34:22.661 --> 00:34:25.397 line:-1 position:50%
+Resist the temptation
+to mash the fix-it button
+
+
+597
+00:34:25,397 --> 00:34:30,468 line:-1
+when you're not sure
+how or why it'll fix the issue.
+
+
+598
+00:34:30.468 --> 00:34:32.037 line:-1 position:50%
+One thing to be wary of
+
+
+599
+00:34:32,037 --> 00:34:34,272 line:-1
+is getting into a cascade
+of errors.
+
+
+600
+00:34:34.272 --> 00:34:36.374 line:-1 position:50%
+Sometimes you'll make
+a change --
+
+
+601
+00:34:36.374 --> 00:34:38.109 line:-1 position:50%
+like converting a class
+to be an actor
+
+
+602
+00:34:38.109 --> 00:34:40.745 line:-1 position:50%
+like we just did,
+or making a method async --
+
+
+603
+00:34:40.745 --> 00:34:43.481 line:-1 position:50%
+and it'll generate
+some compiler errors.
+
+
+604
+00:34:43,481 --> 00:34:45,483 line:-1
+So you go to the site
+of those errors,
+
+
+605
+00:34:45,483 --> 00:34:48,119 line:-1
+and it's tempting to make more
+changes to fix those errors,
+
+
+606
+00:34:48,119 --> 00:34:52,324 line:-1
+like making that method async
+or putting it on the main actor.
+
+
+607
+00:34:52,324 --> 00:34:54,826 line:-1
+The trouble is that this
+can lead to even more errors,
+
+
+608
+00:34:54,826 --> 00:34:58,263 line:-1
+and quickly, you can feel
+overwhelmed.
+
+
+609
+00:34:58.263 --> 00:35:01.232 line:-1 position:50%
+Instead, use techniques
+like we're using here
+
+
+610
+00:35:01.232 --> 00:35:02.767 line:-1 position:50%
+in this walk-through,
+
+
+611
+00:35:02,767 --> 00:35:04,703 line:-1
+and try and keep
+the change isolated
+
+
+612
+00:35:04,703 --> 00:35:08,573 line:-1
+and done one step at a time
+with your project compiling
+
+
+613
+00:35:08.573 --> 00:35:11.476 line:-1 position:50%
+and running in between.
+
+
+614
+00:35:11.476 --> 00:35:14.546 line:-1 position:50%
+Add shims to allow your old code
+to keep working,
+
+
+615
+00:35:14,546 --> 00:35:17,782 line:-1
+even though you might end up
+deleting them later.
+
+
+616
+00:35:17.782 --> 00:35:20.485 line:-1 position:50%
+That way, you can gradually
+move out from a point,
+
+
+617
+00:35:20,485 --> 00:35:23,655 line:-1
+tidying up the code as you go.
+
+
+618
+00:35:23,655 --> 00:35:27,258 line:-1
+Incidentally, what I did here
+is first convert
+
+
+619
+00:35:27,258 --> 00:35:29,794 line:-1
+the HealthKitController's
+methods to async
+
+
+620
+00:35:29,794 --> 00:35:31,930 line:-1
+and then make it into an actor.
+
+
+621
+00:35:31.930 --> 00:35:35.533 line:-1 position:50%
+And I find it works out easiest
+if you do it that way around,
+
+
+622
+00:35:35.533 --> 00:35:40.372 line:-1 position:50%
+rather than starting
+with the actor conversion.
+
+
+623
+00:35:40,372 --> 00:35:45,243 line:-1
+OK, so let's look at these
+errors by jumping down to them.
+
+
+624
+00:35:45.243 --> 00:35:46.644 line:-1 position:50%
+They're down here
+on the function
+
+
+625
+00:35:46,644 --> 00:35:49,547 line:-1
+we put on the main actor.
+
+
+626
+00:35:49.547 --> 00:35:52.083 line:-1 position:50%
+And this makes sense,
+because in this function,
+
+
+627
+00:35:52.083 --> 00:35:54.185 line:-1 position:50%
+we're touching a stored property
+
+
+628
+00:35:54,185 --> 00:35:56,988 line:-1
+of our new
+HealthKitController actor,
+
+
+629
+00:35:56,988 --> 00:35:58,390 line:-1
+the model property.
+
+
+630
+00:35:58,390 --> 00:36:01,526 line:-1
+The actor protects its state
+and won't let functions,
+
+
+631
+00:36:01.526 --> 00:36:04.295 line:-1 position:50%
+not on the actor --
+such as this function
+
+
+632
+00:36:04.295 --> 00:36:07.032 line:-1 position:50%
+that we've explicitly put
+on the main actor --
+
+
+633
+00:36:07.032 --> 00:36:09.501 line:-1 position:50%
+touch its stored properties.
+
+
+634
+00:36:09.501 --> 00:36:10.902 line:-1 position:50%
+Now looking at this function,
+
+
+635
+00:36:10,902 --> 00:36:15,473 line:-1
+it looks like the only state
+on the actor that it touches
+
+
+636
+00:36:15.473 --> 00:36:18.143 line:-1 position:50%
+is the model object.
+
+
+637
+00:36:18,143 --> 00:36:21,346 line:-1
+Everything else is passed in
+as a function argument.
+
+
+638
+00:36:21,346 --> 00:36:22,147 line:-1
+And to me,
+
+
+639
+00:36:22,147 --> 00:36:27,318 line:-1
+this suggests that this function
+belongs on the model;
+
+
+640
+00:36:27,318 --> 00:36:30,055 line:-1
+that the model here
+actually ought to be self.
+
+
+641
+00:36:30,055 --> 00:36:33,625 line:-1
+So let's move it to the model.
+
+
+642
+00:36:33.625 --> 00:36:38.730 line:-1 position:50%
+So we can take this function,
+cut it,
+
+
+643
+00:36:38.730 --> 00:36:43.601 line:-1 position:50%
+go over
+to our CoffeeData UI model,
+
+
+644
+00:36:43,601 --> 00:36:45,003 line:-1
+and paste it in.
+
+
+645
+00:36:47.639 --> 00:36:50.642 line:-1 position:50%
+It's going to be internal
+rather than private,
+
+
+646
+00:36:50,642 --> 00:36:54,112 line:-1
+so it can be called
+from the HealthKitController.
+
+
+647
+00:36:54,112 --> 00:36:55,447 line:-1
+And we just need to go through
+
+
+648
+00:36:55,447 --> 00:36:57,615 line:-1
+and remove all references
+to the model
+
+
+649
+00:36:57.615 --> 00:36:59.084 line:-1 position:50%
+because that's now self.
+
+
+650
+00:36:59,084 --> 00:37:07,292 line:-1
+[KEYSTROKES]
+
+
+651
+00:37:07.292 --> 00:37:11.196 line:-1 position:50%
+Finally, we need to go
+to where it was being called...
+
+
+652
+00:37:11.196 --> 00:37:15.633 line:-1 position:50%
+[KEYSTROKES]
+
+
+653
+00:37:15,633 --> 00:37:20,071 position:50%
+...and replace self here
+with a call to the model.
+
+
+654
+00:37:20,071 --> 00:37:24,075 position:50%
+So now, this HealthKitController
+file compiles,
+
+
+655
+00:37:24,075 --> 00:37:28,113 line:0
+and I get a new set
+of errors from other files.
+
+
+656
+00:37:28,113 --> 00:37:30,615 line:0
+Let's look at those errors.
+
+
+657
+00:37:30.615 --> 00:37:34.452 line:-1 position:50%
+So here we're calling into
+those completion handler shims
+
+
+658
+00:37:34,452 --> 00:37:36,254 line:-1
+that we called earlier
+
+
+659
+00:37:36.254 --> 00:37:39.457 line:-1 position:50%
+to allow us to keep passing
+in the completion handler
+
+
+660
+00:37:39,457 --> 00:37:42,627 line:-1
+even though we've rewritten
+this function to the async.
+
+
+661
+00:37:42,627 --> 00:37:44,762 line:-1
+These functions are now
+being protected by the actor
+
+
+662
+00:37:44,762 --> 00:37:48,032 line:-1
+so I can't call them directly.
+
+
+663
+00:37:48,032 --> 00:37:51,202 line:-1
+But they don't touch any
+other part of the actor's state
+
+
+664
+00:37:51.202 --> 00:37:55.173 line:-1 position:50%
+if we look at them.
+
+
+665
+00:37:55.173 --> 00:37:58.276 line:-1 position:50%
+All they're doing
+is spinning off a task
+
+
+666
+00:37:58.276 --> 00:38:02.747 line:-1 position:50%
+and then awaiting a call to the
+async version of the function.
+
+
+667
+00:38:02.747 --> 00:38:06.317 line:-1 position:50%
+Since they don't touch any part
+of the actor's internal state,
+
+
+668
+00:38:06,317 --> 00:38:10,955 line:-1
+I can mark them
+as what's called "nonisolated."
+
+
+669
+00:38:10,955 --> 00:38:15,059 line:-1
+[KEYSTROKES]
+
+
+670
+00:38:15,059 --> 00:38:16,895 line:-1
+Do the same down here.
+
+
+671
+00:38:16,895 --> 00:38:22,333 line:0
+[KEYSTROKES]
+
+
+672
+00:38:22,333 --> 00:38:26,504 line:0
+Marking something as nonisolated
+tells the compiler
+
+
+673
+00:38:26,504 --> 00:38:28,640 position:50%
+that you're not going to touch
+any of the isolated state,
+
+
+674
+00:38:28,640 --> 00:38:31,442 position:50%
+and therefore, this function
+can be called from anywhere.
+
+
+675
+00:38:31,442 --> 00:38:34,979 position:50%
+The switch over to the actor is
+actually happening automatically
+
+
+676
+00:38:34,979 --> 00:38:41,553 line:0
+when we await the call into the
+async version of the function.
+
+
+677
+00:38:41,553 --> 00:38:43,087 line:0
+Note that the compiler
+will check
+
+
+678
+00:38:43,087 --> 00:38:47,358 position:50%
+that this nonisolated claim
+is true.
+
+
+679
+00:38:47,358 --> 00:38:50,595 line:0
+If I were to try and access
+some state of the actor --
+
+
+680
+00:38:50,595 --> 00:38:53,631 line:0
+such as, for example,
+
+
+681
+00:38:53,631 --> 00:38:56,634 line:0
+printing out
+the authorization status --
+
+
+682
+00:38:59,804 --> 00:39:01,806 position:50%
+the compiler will stop me.
+
+
+683
+00:39:10,181 --> 00:39:12,083 position:50%
+So now, I've completed my work
+
+
+684
+00:39:12,083 --> 00:39:14,018 line:0
+converting
+the HealthKitController
+
+
+685
+00:39:14,018 --> 00:39:16,754 position:50%
+into an actor that protects
+its internal state
+
+
+686
+00:39:16,754 --> 00:39:19,591 line:0
+from race conditions.
+
+
+687
+00:39:19,591 --> 00:39:22,427 line:0
+Next, let's follow
+those deprecation breadcrumbs
+
+
+688
+00:39:22,427 --> 00:39:24,162 position:50%
+to the next file to work on,
+
+
+689
+00:39:24,162 --> 00:39:30,068 line:0
+which is our CoffeeData
+model type.
+
+
+690
+00:39:30.068 --> 00:39:34.172 line:-1 position:50%
+Now this class implements
+ObservableObject,
+
+
+691
+00:39:34.172 --> 00:39:39.244 line:-1 position:50%
+and it has a Published property.
+
+
+692
+00:39:39,244 --> 00:39:43,248 line:0
+Any updates to properties that
+are published to a SwiftUI View
+
+
+693
+00:39:43,248 --> 00:39:47,318 line:0
+must be done on the main thread,
+
+
+694
+00:39:47,318 --> 00:39:50,521 position:50%
+so this class is probably
+a good candidate
+
+
+695
+00:39:50,521 --> 00:39:52,857 position:50%
+to put on the main actor.
+
+
+696
+00:39:56.160 --> 00:40:02.400 line:-1 position:50%
+But there's also
+this background DispatchQueue
+
+
+697
+00:40:02,400 --> 00:40:04,702 line:-1
+for doing some work
+in the background.
+
+
+698
+00:40:04.702 --> 00:40:06.971 line:-1 position:50%
+Let's have a look
+at how that's used.
+
+
+699
+00:40:11,876 --> 00:40:15,647 position:50%
+And it's just in two functions:
+load and save.
+
+
+700
+00:40:15,647 --> 00:40:17,682 position:50%
+That makes sense;
+you probably don't want
+
+
+701
+00:40:17,682 --> 00:40:23,354 position:50%
+to do your loading and saving
+on the main thread.
+
+
+702
+00:40:23,354 --> 00:40:25,390 line:0
+When you see
+a pattern like this --
+
+
+703
+00:40:25,390 --> 00:40:27,258 position:50%
+where a queue is being used
+
+
+704
+00:40:27,258 --> 00:40:30,561 position:50%
+to coordinate
+some specific activities,
+
+
+705
+00:40:30,561 --> 00:40:34,265 line:0
+but the rest of the class needs
+to be on the main thread --
+
+
+706
+00:40:34,265 --> 00:40:37,235 line:0
+that's a sign that you want
+to factor that background code
+
+
+707
+00:40:37,235 --> 00:40:41,272 position:50%
+out into a separate actor.
+
+
+708
+00:40:41,272 --> 00:40:43,374 line:0
+So let's do that.
+
+
+709
+00:40:43,374 --> 00:40:47,412 line:-1
+So let's go to the top
+of the file and create
+
+
+710
+00:40:47.412 --> 00:40:49.847 line:-1 position:50%
+a new private actor...
+
+
+711
+00:40:49,847 --> 00:40:52,417 line:-1
+[KEYSTROKES]
+
+
+712
+00:40:52,417 --> 00:40:54,285 line:-1
+...which we'll call
+"CoffeeDataStore."
+
+
+713
+00:40:54,285 --> 00:41:00,858 line:-1
+[KEYSTROKES]
+
+
+714
+00:41:00,858 --> 00:41:04,462 line:-1
+And let's open CoffeeData
+in another window.
+
+
+715
+00:41:04,462 --> 00:41:07,665 line:-1
+and start moving code across
+into our new actor.
+
+
+716
+00:41:07.665 --> 00:41:11.169 line:-1 position:50%
+So we can give it
+its own logger.
+
+
+717
+00:41:13,504 --> 00:41:14,672 line:-1
+And let's tweak the category
+
+
+718
+00:41:14,672 --> 00:41:17,208 line:-1
+so we can tell
+when the actor is in use.
+
+
+719
+00:41:17,208 --> 00:41:21,546 position:50%
+And next, instead of
+this DispatchQueue,
+
+
+720
+00:41:21,546 --> 00:41:25,183 line:0
+we're going to instantiate
+a copy of our new actor.
+
+
+721
+00:41:25,183 --> 00:41:33,658 line:0
+[KEYSTROKES]
+
+
+722
+00:41:33,658 --> 00:41:36,594 line:0
+Next, let's go
+to the save operation,
+
+
+723
+00:41:36,594 --> 00:41:38,029 position:50%
+and move that over.
+
+
+724
+00:41:38,029 --> 00:41:40,431 line:-1
+So we can take this function...
+
+
+725
+00:41:42,533 --> 00:41:45,536 line:-1
+...cut it from here,
+and move it into the actor.
+
+
+726
+00:41:47,839 --> 00:41:52,043 line:-1
+Let's start by compiling
+and seeing what issues come up.
+
+
+727
+00:41:52,043 --> 00:41:56,848 line:-1
+So first, there's
+this currentDrinks property.
+
+
+728
+00:41:56.848 --> 00:41:58.683 line:-1 position:50%
+This was a property
+of the model type
+
+
+729
+00:41:58,683 --> 00:42:02,754 line:-1
+before we moved this method
+out of the model into its actor.
+
+
+730
+00:42:02,754 --> 00:42:05,590 line:-1
+So how can we access it now?
+
+
+731
+00:42:05,590 --> 00:42:08,426 line:-1
+Well, the way actors
+relay information
+
+
+732
+00:42:08.426 --> 00:42:12.130 line:-1 position:50%
+is they pass values
+between each other.
+
+
+733
+00:42:12,130 --> 00:42:14,065 line:-1
+So we should have this function
+
+
+734
+00:42:14,065 --> 00:42:17,402 line:-1
+take currentDrinks
+as an argument.
+
+
+735
+00:42:17,402 --> 00:42:24,108 line:-1
+[KEYSTROKES]
+
+
+736
+00:42:24.108 --> 00:42:25.643 line:-1 position:50%
+This argument to save
+
+
+737
+00:42:25.643 --> 00:42:29.113 line:-1 position:50%
+receives the list
+of currentDrinks to save
+
+
+738
+00:42:29,113 --> 00:42:32,083 line:-1
+that's passed in
+by the model type.
+
+
+739
+00:42:32,083 --> 00:42:34,085 line:-1
+So that resolves that.
+
+
+740
+00:42:35,520 --> 00:42:38,322 line:-1
+Next, savedDrinks.
+
+
+741
+00:42:38,322 --> 00:42:41,692 line:-1
+This is a copy of the values
+last saved
+
+
+742
+00:42:41,692 --> 00:42:46,898 line:-1
+to avoid saving unnecessarily
+when nothing has changed.
+
+
+743
+00:42:46,898 --> 00:42:49,767 line:-1
+This value is mutated
+by both the save
+
+
+744
+00:42:49.767 --> 00:42:51.002 line:-1 position:50%
+and the load function,
+
+
+745
+00:42:51,002 --> 00:42:56,073 line:-1
+so it definitely needs
+protecting by the actor.
+
+
+746
+00:42:56,073 --> 00:42:58,476 line:-1
+So let's find it in our model...
+
+
+747
+00:42:58.476 --> 00:43:05.483 line:-1 position:50%
+[KEYSTROKES]
+
+
+748
+00:43:05,483 --> 00:43:07,485 line:-1
+...and move it over.
+
+
+749
+00:43:09,687 --> 00:43:11,355 line:-1
+OK, what's next?
+
+
+750
+00:43:13,624 --> 00:43:15,726 line:-1
+All right,
+this property dataURL,
+
+
+751
+00:43:15,726 --> 00:43:19,497 line:-1
+that's actually being used just
+by the load and save operation,
+
+
+752
+00:43:19.497 --> 00:43:25.303 line:-1 position:50%
+so we can just move it over
+to be a private helper
+
+
+753
+00:43:25,303 --> 00:43:26,804 line:-1
+on the actor.
+
+
+754
+00:43:33,845 --> 00:43:36,547 line:-1
+OK, last issues to resolve.
+
+
+755
+00:43:36,547 --> 00:43:40,084 line:-1
+Now, here we're getting errors,
+and if we look,
+
+
+756
+00:43:40,084 --> 00:43:41,819 line:-1
+it appears
+that there's a closure
+
+
+757
+00:43:41,819 --> 00:43:45,389 line:-1
+that's capturing some state
+from the actor,
+
+
+758
+00:43:45,389 --> 00:43:48,559 line:-1
+so we need to fix that.
+
+
+759
+00:43:48.559 --> 00:43:50.862 line:-1 position:50%
+So why is there a closure here?
+
+
+760
+00:43:50,862 --> 00:43:53,664 position:50%
+Well, if you look down,
+
+
+761
+00:43:53,664 --> 00:43:56,067 position:50%
+it's because
+the same piece of code
+
+
+762
+00:43:56,067 --> 00:44:01,272 position:50%
+is getting called in two places.
+
+
+763
+00:44:01,272 --> 00:44:03,007 line:0
+And it turns out
+the compiler has flagged
+
+
+764
+00:44:03,007 --> 00:44:06,777 position:50%
+something really
+interesting for us.
+
+
+765
+00:44:06,777 --> 00:44:10,882 position:50%
+What this code is doing is
+checking if the watch extension
+
+
+766
+00:44:10,882 --> 00:44:13,718 position:50%
+is running
+in the background.
+
+
+767
+00:44:13,718 --> 00:44:17,388 position:50%
+And the idea is, if it's running
+in the background already,
+
+
+768
+00:44:17,388 --> 00:44:20,391 line:0
+then don't go into
+the background queue;
+
+
+769
+00:44:20,391 --> 00:44:22,126 position:50%
+just stay on the main thread
+
+
+770
+00:44:22,126 --> 00:44:27,698 line:0
+and perform the task
+of saving synchronously.
+
+
+771
+00:44:27,698 --> 00:44:29,467 line:0
+But this doesn't seem right.
+
+
+772
+00:44:29,467 --> 00:44:31,402 line:0
+You should never block
+the main thread
+
+
+773
+00:44:31,402 --> 00:44:34,338 position:50%
+to perform an I/O operation
+like saving,
+
+
+774
+00:44:34,338 --> 00:44:39,210 line:0
+even when your app is running
+in the background.
+
+
+775
+00:44:39,210 --> 00:44:40,511 line:0
+Why does the app do this?
+
+
+776
+00:44:40,511 --> 00:44:42,046 line:0
+Well, we can trace it back
+
+
+777
+00:44:42,046 --> 00:44:46,050 line:0
+to where the save operation
+is being called.
+
+
+778
+00:44:52,189 --> 00:44:54,992 line:-1
+It's being called from a didSet
+
+
+779
+00:44:54.992 --> 00:44:58.462 line:-1 position:50%
+down here
+on currentDrinks.
+
+
+780
+00:44:58,462 --> 00:45:02,600 line:-1
+And that fires so that whenever
+the property is assigned,
+
+
+781
+00:45:02,600 --> 00:45:06,404 line:-1
+it saves the new values.
+
+
+782
+00:45:06,404 --> 00:45:08,973 line:-1
+Now, didSets
+are super convenient,
+
+
+783
+00:45:08,973 --> 00:45:12,643 line:-1
+but they can be
+a little too tempting.
+
+
+784
+00:45:12.643 --> 00:45:16.380 line:-1 position:50%
+Let's look at all of the callers
+of the currentDrinks property.
+
+
+785
+00:45:16,380 --> 00:45:19,383 line:-1
+If we drill in
+all the way down here...
+
+
+786
+00:45:25,823 --> 00:45:27,692 line:-1
+...we find
+that the save operation
+
+
+787
+00:45:27,692 --> 00:45:29,193 line:-1
+is ultimately synchronous
+
+
+788
+00:45:29,193 --> 00:45:33,130 line:-1
+because of the way it's being
+called from this function
+
+
+789
+00:45:33,130 --> 00:45:37,468 line:-1
+which is the call
+to handle background tasks
+
+
+790
+00:45:37,468 --> 00:45:41,372 line:-1
+from the WatchKit extension.
+
+
+791
+00:45:41,372 --> 00:45:45,076 line:-1
+Now this handle API
+has a contract.
+
+
+792
+00:45:45,076 --> 00:45:48,346 line:-1
+You're supposed to do
+all of your work, and then,
+
+
+793
+00:45:48,346 --> 00:45:51,882 line:-1
+when all your work is done,
+call this
+
+
+794
+00:45:51.882 --> 00:45:57.154 line:-1 position:50%
+setTaskCompletedWithSnapshot
+method.
+
+
+795
+00:45:57,154 --> 00:46:00,091 line:-1
+And you must guarantee
+all your work is done
+
+
+796
+00:46:00,091 --> 00:46:01,459 line:-1
+when you call this
+
+
+797
+00:46:01,459 --> 00:46:04,562 line:-1
+because your watch app
+will be suspended.
+
+
+798
+00:46:04.562 --> 00:46:06.764 line:-1 position:50%
+You can't have
+some I/O operation,
+
+
+799
+00:46:06.764 --> 00:46:08.299 line:-1 position:50%
+like our save operation,
+
+
+800
+00:46:08.299 --> 00:46:11.702 line:-1 position:50%
+still running when you say
+that you're done.
+
+
+801
+00:46:11,702 --> 00:46:14,572 line:0
+This is a perfect example
+of how asynchrony
+
+
+802
+00:46:14,572 --> 00:46:18,409 line:0
+forces global reasoning
+throughout your code.
+
+
+803
+00:46:18,409 --> 00:46:21,579 line:0
+Let's visualize
+what's happening here.
+
+
+804
+00:46:21,579 --> 00:46:24,715 position:50%
+We start in
+handle(backgroundTasks:)
+
+
+805
+00:46:24,715 --> 00:46:28,586 line:0
+which calls the load
+from HealthKit function.
+
+
+806
+00:46:28,586 --> 00:46:31,122 line:0
+This takes a completion handler.
+
+
+807
+00:46:31,122 --> 00:46:33,858 line:0
+But then we switch
+to updateModel(),
+
+
+808
+00:46:33,858 --> 00:46:36,794 position:50%
+which is performed
+synchronously,
+
+
+809
+00:46:36,794 --> 00:46:39,530 line:0
+and so synchronously
+calls didSet,
+
+
+810
+00:46:39,530 --> 00:46:42,633 line:0
+which synchronously saves.
+
+
+811
+00:46:42,633 --> 00:46:46,237 line:0
+Once this is done,
+the completion handler is called
+
+
+812
+00:46:46,237 --> 00:46:50,741 line:-1
+and that notifies WatchKit
+that it's all done.
+
+
+813
+00:46:50.741 --> 00:46:53.277 line:-1 position:50%
+It's the synchronous parts
+that force us to perform
+
+
+814
+00:46:53.277 --> 00:46:56.747 line:-1 position:50%
+synchronous I/O
+on the main thread.
+
+
+815
+00:46:56.747 --> 00:46:59.417 line:-1 position:50%
+How can we fix this?
+
+
+816
+00:46:59.417 --> 00:47:01.452 line:-1 position:50%
+To fix it
+with completion handlers,
+
+
+817
+00:47:01.452 --> 00:47:04.822 line:-1 position:50%
+you'd have to update each
+currently synchronous method
+
+
+818
+00:47:04,822 --> 00:47:08,426 line:-1
+to now take
+a completion handler.
+
+
+819
+00:47:08.426 --> 00:47:10.695 line:-1 position:50%
+But you can't do that
+with a didSet;
+
+
+820
+00:47:10,695 --> 00:47:13,597 line:-1
+it doesn't take arguments,
+it just fires automatically
+
+
+821
+00:47:13,597 --> 00:47:16,767 line:-1
+when you update the property.
+
+
+822
+00:47:16.767 --> 00:47:19.303 line:-1 position:50%
+But the good news is that
+all our async refactoring
+
+
+823
+00:47:19.303 --> 00:47:21.772 line:-1 position:50%
+is going to pay off now,
+because updating functions
+
+
+824
+00:47:21,772 --> 00:47:27,745 line:-1
+from synchronous
+to be async is way easier.
+
+
+825
+00:47:27,745 --> 00:47:29,046 line:-1
+So first, let's go
+
+
+826
+00:47:29.046 --> 00:47:32.416 line:-1 position:50%
+to the published property,
+currentDrinks,
+
+
+827
+00:47:32,416 --> 00:47:34,351 line:-1
+[KEYSTROKES]
+
+
+828
+00:47:36.554 --> 00:47:39.056 line:-1 position:50%
+and let's change it
+to a private(set)
+
+
+829
+00:47:39.056 --> 00:47:42.593 line:-1 position:50%
+so that we know all mutation is
+happening only from this file.
+
+
+830
+00:47:42,593 --> 00:47:47,465 line:-1
+[KEYSTROKES]
+
+
+831
+00:47:50,167 --> 00:47:55,272 line:-1
+And then let's take
+this didSet operation
+
+
+832
+00:47:55,272 --> 00:48:00,478 line:-1
+and instead move that logic
+into a new function...
+
+
+833
+00:48:00,478 --> 00:48:01,979 line:-1
+[KEYSTROKES]
+
+
+834
+00:48:01.979 --> 00:48:03.714 line:-1 position:50%
+...called "drinksUpdated()."
+
+
+835
+00:48:03.714 --> 00:48:06.283 line:-1 position:50%
+[KEYSTROKES]
+
+
+836
+00:48:06,283 --> 00:48:07,351 line:-1
+We'll make it async,
+
+
+837
+00:48:07,351 --> 00:48:11,155 line:-1
+because it's going to call
+our save operation on our actor.
+
+
+838
+00:48:11,155 --> 00:48:17,027 line:-1
+[KEYSTROKES]
+
+
+839
+00:48:17.027 --> 00:48:19.864 line:-1 position:50%
+And that needs to be an await...
+
+
+840
+00:48:19,864 --> 00:48:22,466 line:-1
+[KEYSTROKES]
+
+
+841
+00:48:22,466 --> 00:48:24,101 line:-1
+...on the CoffeeData store,
+
+
+842
+00:48:24,101 --> 00:48:27,538 line:-1
+into which we're going to pass
+the new currentDrinks value.
+
+
+843
+00:48:27.538 --> 00:48:30.941 line:-1 position:50%
+[KEYSTROKES]
+
+
+844
+00:48:34.245 --> 00:48:38.983 line:-1 position:50%
+Then, we need to go to where
+currentDrinks is updated
+
+
+845
+00:48:38.983 --> 00:48:41.685 line:-1 position:50%
+and ensure we call
+drinksUpdated afterwards.
+
+
+846
+00:48:41,685 --> 00:49:12,650 line:-1
+[KEYSTROKES]
+
+
+847
+00:49:12,650 --> 00:49:16,620 line:-1
+Now in this function,
+there's one thing to note.
+
+
+848
+00:49:16,620 --> 00:49:19,356 line:-1
+It's important
+that this operation --
+
+
+849
+00:49:19.356 --> 00:49:21.959 line:-1 position:50%
+that takes a copy
+of currentDrinks,
+
+
+850
+00:49:21,959 --> 00:49:25,696 line:-1
+mutates it,
+and then writes it back --
+
+
+851
+00:49:25,696 --> 00:49:29,133 line:-1
+all happens atomically.
+
+
+852
+00:49:29.133 --> 00:49:32.236 line:-1 position:50%
+And this is why
+the await keyword is vital;
+
+
+853
+00:49:32,236 --> 00:49:37,575 line:-1
+it indicates that at this point,
+this operation might suspend,
+
+
+854
+00:49:37,575 --> 00:49:38,943 line:-1
+and other functions --
+
+
+855
+00:49:38,943 --> 00:49:43,147 line:-1
+functions that might also update
+currentDrinks -- could run.
+
+
+856
+00:49:43.147 --> 00:49:46.483 line:-1 position:50%
+So we need to make sure
+that our entire mutation
+
+
+857
+00:49:46.483 --> 00:49:51.789 line:-1 position:50%
+and writeback happens
+before any awaits,
+
+
+858
+00:49:51.789 --> 00:49:53.624 line:-1 position:50%
+otherwise,
+other functions coming
+
+
+859
+00:49:53,624 --> 00:49:58,229 line:-1
+and mutating currentDrinks could
+lead to an inconsistent state.
+
+
+860
+00:50:01.198 --> 00:50:04.134 line:-1 position:50%
+So this function needs
+to be async.
+
+
+861
+00:50:04,134 --> 00:50:07,137 line:-1
+[KEYSTROKES]
+
+
+862
+00:50:08.839 --> 00:50:11.542 line:-1 position:50%
+We can go to our save operation
+and eliminate
+
+
+863
+00:50:11.542 --> 00:50:17.014 line:-1 position:50%
+this unnecessary background
+and foreground branch
+
+
+864
+00:50:17,014 --> 00:50:21,518 line:-1
+and just do the operation
+on the actor every time.
+
+
+865
+00:50:26.090 --> 00:50:30.094 line:-1 position:50%
+[KEYSTROKES]
+
+
+866
+00:50:35,599 --> 00:50:39,803 line:-1
+OK. Finally, let's look
+at the load operation.
+
+
+867
+00:50:39,803 --> 00:50:42,506 line:-1
+Now here, the logic is split
+
+
+868
+00:50:42,506 --> 00:50:47,311 line:-1
+between code that needs to run
+in the background
+
+
+869
+00:50:47,311 --> 00:50:51,315 line:0
+and code that needs to run
+on the main thread.
+
+
+870
+00:50:54.718 --> 00:50:57.187 line:-1 position:50%
+So let's first take
+the first half --
+
+
+871
+00:50:57.187 --> 00:51:00.824 line:-1 position:50%
+the background portion --
+and move that into the actor.
+
+
+872
+00:51:06.997 --> 00:51:11.335 line:-1 position:50%
+Now doing this, we notice
+another possible race condition.
+
+
+873
+00:51:14,705 --> 00:51:19,076 line:-1
+savedValues here was being
+mutated on the main queue,
+
+
+874
+00:51:19.076 --> 00:51:21.078 line:-1 position:50%
+but if you remember
+the save operation,
+
+
+875
+00:51:21.078 --> 00:51:25.716 line:-1 position:50%
+it was both read and written
+from the background queue.
+
+
+876
+00:51:25,716 --> 00:51:28,319 line:-1
+Now, as it happens,
+the way the app was constructed,
+
+
+877
+00:51:28,319 --> 00:51:31,388 line:-1
+the load only ever happened
+on startup, so this was fine.
+
+
+878
+00:51:31.388 --> 00:51:34.959 line:-1 position:50%
+But again, that's relying
+on global reasoning,
+
+
+879
+00:51:34.959 --> 00:51:37.895 line:-1 position:50%
+and it's the kind of assumption
+that can break in subtle ways
+
+
+880
+00:51:37,895 --> 00:51:40,197 line:-1
+when you make future changes.
+
+
+881
+00:51:40,197 --> 00:51:42,666 line:-1
+It's much better to let
+the actor ensure the program
+
+
+882
+00:51:42.666 --> 00:51:44.601 line:-1 position:50%
+will always be correct.
+
+
+883
+00:51:46,337 --> 00:51:47,571 line:-1
+So we're going to fix that now.
+
+
+884
+00:51:47,571 --> 00:51:51,075 line:-1
+So first, let's remove
+this queue management...
+
+
+885
+00:51:54,278 --> 00:51:58,148 line:-1
+...reindent the function, remove
+this other queue management.
+
+
+886
+00:51:58.148 --> 00:52:01.318 line:-1 position:50%
+[KEYSTROKES]
+
+
+887
+00:52:01,318 --> 00:52:03,153 line:-1
+And just like with save,
+
+
+888
+00:52:03,153 --> 00:52:07,358 line:-1
+we need a way to pass back
+the loaded values,
+
+
+889
+00:52:07.358 --> 00:52:09.526 line:-1 position:50%
+which we do just
+by returning a value
+
+
+890
+00:52:09.526 --> 00:52:12.096 line:-1 position:50%
+from this load function
+on the actor.
+
+
+891
+00:52:12,096 --> 00:52:20,938 line:-1
+[KEYSTROKES]
+
+
+892
+00:52:21,939 --> 00:52:25,476 line:-1
+So now, let's hop back
+to the original load.
+
+
+893
+00:52:27,745 --> 00:52:32,916 line:-1
+And we've moved this logic,
+so we can just delete it...
+
+
+894
+00:52:36,253 --> 00:52:40,090 line:-1
+and replace it
+with a call to await...
+
+
+895
+00:52:40,090 --> 00:52:50,367 line:-1
+[KEYSTROKES]
+
+
+896
+00:52:50.367 --> 00:52:53.537 line:-1 position:50%
+...loading the drinks
+from the actor.
+
+
+897
+00:52:59.076 --> 00:53:03.313 line:-1 position:50%
+Now, because we're awaiting
+the actor,
+
+
+898
+00:53:03.313 --> 00:53:06.116 line:-1 position:50%
+that means this function
+needs to be async.
+
+
+899
+00:53:06.116 --> 00:53:09.520 line:-1 position:50%
+[KEYSTROKES]
+
+
+900
+00:53:12,289 --> 00:53:16,727 line:-1
+And while we're here,
+
+
+901
+00:53:16,727 --> 00:53:19,997 line:-1
+we can clean up
+these deprecation warnings.
+
+
+902
+00:53:19,997 --> 00:53:44,688 line:-1
+[KEYSTROKES]
+
+
+903
+00:53:44,688 --> 00:53:47,925 line:-1
+And finally,
+because this load is now async,
+
+
+904
+00:53:47,925 --> 00:53:50,094 line:-1
+we need to await it here.
+
+
+905
+00:53:50,094 --> 00:53:52,596 line:-1
+[KEYSTROKES]
+
+
+906
+00:53:55,866 --> 00:53:57,668 line:-1
+And because
+we're awaiting it here,
+
+
+907
+00:53:57.668 --> 00:53:59.169 line:-1 position:50%
+we need to create a task.
+
+
+908
+00:53:59,169 --> 00:54:02,506 line:-1
+[KEYSTROKES]
+
+
+909
+00:54:05,209 --> 00:54:09,446 line:-1
+But at this point,
+if we just used an async task,
+
+
+910
+00:54:09.446 --> 00:54:13.517 line:-1 position:50%
+we're potentially introducing
+a new race condition.
+
+
+911
+00:54:13,517 --> 00:54:16,987 line:-1
+Remember, outside of an actor,
+
+
+912
+00:54:16,987 --> 00:54:21,158 line:-1
+this new task just runs
+on an arbitrary thread.
+
+
+913
+00:54:21,158 --> 00:54:23,393 line:-1
+We shouldn't mutate
+shared state,
+
+
+914
+00:54:23,393 --> 00:54:26,396 line:-1
+like currentDrinks,
+from an arbitrary thread.
+
+
+915
+00:54:28.832 --> 00:54:30.734 line:-1 position:50%
+Now, one way to resolve this
+
+
+916
+00:54:30.734 --> 00:54:34.738 line:-1 position:50%
+would be to put the load
+function on the main actor,
+
+
+917
+00:54:34,738 --> 00:54:38,976 line:-1
+But it's much better to move
+the entire of model type
+
+
+918
+00:54:38,976 --> 00:54:40,177 line:-1
+to the main actor.
+
+
+919
+00:54:40.177 --> 00:54:53.290 line:-1 position:50%
+[KEYSTROKES]
+
+
+920
+00:54:53,290 --> 00:54:55,592 line:-1
+So we go to
+our CoffeeModel definition
+
+
+921
+00:54:55,592 --> 00:55:01,365 line:-1
+and add "MainActor"
+to our model type.
+
+
+922
+00:55:01.365 --> 00:55:04.234 line:-1 position:50%
+By putting the model
+on the main actor,
+
+
+923
+00:55:04,234 --> 00:55:06,603 line:-1
+we're now guaranteeing
+that all access
+
+
+924
+00:55:06,603 --> 00:55:08,338 line:-1
+to CoffeeData's properties
+
+
+925
+00:55:08.338 --> 00:55:12.376 line:-1 position:50%
+are going to be made
+from the main thread.
+
+
+926
+00:55:12,376 --> 00:55:15,179 line:-1
+And this is good because,
+as we noted earlier,
+
+
+927
+00:55:15,179 --> 00:55:23,320 line:-1
+it's an observable object
+and it has a published property.
+
+
+928
+00:55:23,320 --> 00:55:25,155 line:-1
+And properties
+published to SwiftUI
+
+
+929
+00:55:25,155 --> 00:55:29,993 line:-1
+must only be updated
+on the main thread.
+
+
+930
+00:55:29,993 --> 00:55:33,664 line:-1
+It also means any calls
+to async from the actor
+
+
+931
+00:55:33,664 --> 00:55:36,033 line:-1
+will also run on the actor.
+
+
+932
+00:55:36,033 --> 00:55:40,537 line:-1
+so we can remove any other
+"MainActor" annotations
+
+
+933
+00:55:40.537 --> 00:55:42.839 line:-1 position:50%
+such as the one
+we added earlier.
+
+
+934
+00:55:42.839 --> 00:55:50.847 line:-1 position:50%
+[KEYSTROKES]
+
+
+935
+00:55:55.619 --> 00:55:59.256 line:-1 position:50%
+So now you might notice
+that when we compile
+
+
+936
+00:55:59,256 --> 00:56:01,325 line:-1
+we don't hit
+any compilation errors,
+
+
+937
+00:56:01,325 --> 00:56:03,760 line:-1
+unlike when we moved
+other things
+
+
+938
+00:56:03.760 --> 00:56:06.630 line:-1 position:50%
+into an actor earlier.
+
+
+939
+00:56:06,630 --> 00:56:09,900 line:-1
+And that's because the places
+we're calling into our model
+
+
+940
+00:56:09.900 --> 00:56:12.736 line:-1 position:50%
+are things like SwiftUI views.
+
+
+941
+00:56:15,772 --> 00:56:17,708 line:-1
+For example,
+let's go to DrinkListView.
+
+
+942
+00:56:17.708 --> 00:56:21.178 line:-1 position:50%
+[KEYSTROKES]
+
+
+943
+00:56:21,178 --> 00:56:26,049 line:-1
+Now, this type displays
+a list of buttons on the screen.
+
+
+944
+00:56:26.049 --> 00:56:30.587 line:-1 position:50%
+And then it calls addDrink,
+which is on our model type.
+
+
+945
+00:56:30,587 --> 00:56:35,559 line:-1
+But this DrinkListView is itself
+also on the main actor.
+
+
+946
+00:56:35.559 --> 00:56:37.694 line:-1 position:50%
+And so its methods...
+
+
+947
+00:56:40,931 --> 00:56:47,104 line:-1
+...can call into the CoffeeData
+model without an await.
+
+
+948
+00:56:47,104 --> 00:56:48,338 line:-1
+What is it that determines
+
+
+949
+00:56:48.338 --> 00:56:52.509 line:-1 position:50%
+that this SwiftUI view
+is on the main actor?
+
+
+950
+00:56:52,509 --> 00:56:58,448 line:-1
+Well, it's inferred from its use
+of EnvironmentObject here.
+
+
+951
+00:56:58.448 --> 00:57:02.252 line:-1 position:50%
+Any SwiftUI view
+that accesses shared state --
+
+
+952
+00:57:02.252 --> 00:57:05.422 line:-1 position:50%
+such as environmental objects
+or an observed object --
+
+
+953
+00:57:05.422 --> 00:57:08.292 line:-1 position:50%
+will always be
+on the main actor.
+
+
+954
+00:57:11,361 --> 00:57:12,863 line:-1
+Elsewhere...
+
+
+955
+00:57:15,532 --> 00:57:17,334 line:-1
+...we're also accessing
+our model
+
+
+956
+00:57:17.334 --> 00:57:20.570 line:-1 position:50%
+from this extension
+delegate call.
+
+
+957
+00:57:25,208 --> 00:57:28,312 line:-1
+Since this extension delegate
+
+
+958
+00:57:28.312 --> 00:57:31.248 line:-1 position:50%
+is guaranteed to be called
+on the main thread,
+
+
+959
+00:57:31,248 --> 00:57:35,952 line:-1
+it's been annotated by WatchKit
+as running on the main actor,
+
+
+960
+00:57:35.952 --> 00:57:39.790 line:-1 position:50%
+and so it can also call
+into our model type directly.
+
+
+961
+00:57:43,327 --> 00:57:48,899 line:-1
+Finally, now that we're here,
+let's refactor this method
+
+
+962
+00:57:48,899 --> 00:57:53,103 line:-1
+and get rid of this deprecated
+completion handler usage.
+
+
+963
+00:57:53,103 --> 00:57:59,109 line:-1
+We can instead wrap this section
+in a new asynchronous task.
+
+
+964
+00:58:01,678 --> 00:58:05,949 line:-1
+Remember, this handler
+is running on the main thread,
+
+
+965
+00:58:05.949 --> 00:58:08.819 line:-1 position:50%
+so when we create a task,
+
+
+966
+00:58:08,819 --> 00:58:12,322 line:-1
+that task will also be running
+on the main thread.
+
+
+967
+00:58:17,527 --> 00:58:22,132 line:-1
+And inside this new task,
+we can now await...
+
+
+968
+00:58:22.132 --> 00:58:28.839 line:-1 position:50%
+[KEYSTROKES]
+
+
+969
+00:58:28,839 --> 00:58:31,641 line:-1
+...our call to load new data
+from HealthKit.
+
+
+970
+00:58:31,641 --> 00:58:36,646 line:-1
+[KEYSTROKES]
+
+
+971
+00:58:41.518 --> 00:58:42.652 line:-1 position:50%
+And a really nice thing about
+
+
+972
+00:58:42.652 --> 00:58:46.390 line:-1 position:50%
+getting rid of
+completion handlers
+
+
+973
+00:58:46,390 --> 00:58:49,025 line:-1
+is you can now compose
+functions together.
+
+
+974
+00:58:49,025 --> 00:58:52,529 line:-1
+So if you wanted,
+you could just move this await
+
+
+975
+00:58:52.529 --> 00:58:55.699 line:-1 position:50%
+directly into
+the if statement.
+
+
+976
+00:58:58,468 --> 00:59:01,338 line:-1
+Once this function call returns,
+
+
+977
+00:59:01,338 --> 00:59:05,308 line:-1
+we know that all our work
+is complete because, inside it,
+
+
+978
+00:59:05,308 --> 00:59:08,612 line:-1
+we will awaiting
+the save operation.
+
+
+979
+00:59:08,612 --> 00:59:10,514 line:-1
+And so, we can now
+confidently call
+
+
+980
+00:59:10,514 --> 00:59:14,084 line:-1
+background.Task.setTaskCompleted
+
+
+981
+00:59:14.084 --> 00:59:19.122 line:-1 position:50%
+knowing that we finished
+all of our I/O operations.
+
+
+982
+00:59:19,122 --> 00:59:22,192 line:-1
+We now have this nice,
+structured, top-down approach
+
+
+983
+00:59:22.192 --> 00:59:24.494 line:-1 position:50%
+to waiting
+for an asynchronous operation
+
+
+984
+00:59:24,494 --> 00:59:28,632 line:-1
+before completing any more work.
+
+
+985
+00:59:28.632 --> 00:59:31.835 line:-1 position:50%
+Incidentally, this structured
+approach to concurrency
+
+
+986
+00:59:31,835 --> 00:59:35,839 line:-1
+is another really important part
+of Swift's concurrency feature.
+
+
+987
+00:59:35,839 --> 00:59:38,775 line:0
+To learn more,
+watch the associated talk,
+
+
+988
+00:59:38,775 --> 00:59:41,778 line:0
+which covers how you can
+take advantage of this feature
+
+
+989
+00:59:41,778 --> 00:59:43,880 position:50%
+to structure
+more complex examples,
+
+
+990
+00:59:43,880 --> 00:59:46,416 line:0
+such as waiting on multiple
+asynchronous operations
+
+
+991
+00:59:46,416 --> 00:59:49,419 line:0
+to complete before continuing.
+
+
+992
+00:59:50,754 --> 00:59:52,355 position:50%
+If, while you watch this talk,
+
+
+993
+00:59:52,355 --> 00:59:55,225 position:50%
+you wondered exactly how some
+of these new features work,
+
+
+994
+00:59:55,225 --> 00:59:57,327 line:0
+check out
+our under-the-hood talk
+
+
+995
+00:59:57,327 --> 01:00:01,498 position:50%
+that explores some
+of the technology in detail.
+
+
+996
+01:00:01,498 --> 01:00:03,400 line:0
+So let's recap.
+
+
+997
+01:00:03,400 --> 01:00:07,170 line:0
+We've taken some code
+that had sound type architecture
+
+
+998
+01:00:07,170 --> 01:00:09,706 position:50%
+but complex
+concurrency architecture
+
+
+999
+01:00:09,706 --> 01:00:11,341 position:50%
+that had some hidden
+race conditions
+
+
+1000
+01:00:11,341 --> 01:00:14,678 line:0
+that were really hard to spot.
+
+
+1001
+01:00:14,678 --> 01:00:16,947 position:50%
+And with the help
+of the new concurrency features,
+
+
+1002
+01:00:16,947 --> 01:00:19,850 line:0
+we've rearchitected it
+so that the concurrency
+
+
+1003
+01:00:19,850 --> 01:00:23,153 position:50%
+and type architecture
+are nicely aligned.
+
+
+1004
+01:00:23,153 --> 01:00:24,421 line:0
+And the compiler helped us find
+
+
+1005
+01:00:24,421 --> 01:00:27,557 position:50%
+some hidden potential
+race conditions along the way.
+
+
+1006
+01:00:27,557 --> 01:00:31,194 line:-1
+There's a lot more to Swift 5.5
+we haven't covered,
+
+
+1007
+01:00:31,194 --> 01:00:33,563 line:-1
+like structured concurrency
+with task groups,
+
+
+1008
+01:00:33.563 --> 01:00:35.131 line:-1 position:50%
+async sequences,
+
+
+1009
+01:00:35,131 --> 01:00:39,803 line:-1
+and some great new
+asynchronous APIs in the SDK.
+
+
+1010
+01:00:39,803 --> 01:00:42,539 line:-1
+There's also a few more
+refactorings
+
+
+1011
+01:00:42.539 --> 01:00:43.773 line:-1 position:50%
+we didn't do in this project
+
+
+1012
+01:00:43,773 --> 01:00:46,309 line:-1
+that you might want
+to try yourself.
+
+
+1013
+01:00:46.309 --> 01:00:48.178 line:-1 position:50%
+The best way to learn
+these techniques
+
+
+1014
+01:00:48,178 --> 01:00:50,413 line:-1
+is to try them out
+in your own apps,
+
+
+1015
+01:00:50.413 --> 01:00:53.750 line:-1 position:50%
+so have fun and enjoy these
+cleaner, safer ways to code.
+
+
+1016
+01:00:53,750 --> 01:00:56,820 align:right position:90% line:0
+♪
+

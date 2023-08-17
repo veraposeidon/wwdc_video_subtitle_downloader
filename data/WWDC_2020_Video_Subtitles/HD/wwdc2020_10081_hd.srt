@@ -1,0 +1,1464 @@
+1
+00:00:03,804 --> 00:00:06,473 line:-1
+Hello and welcome to WWDC.
+
+
+2
+00:00:08,475 --> 00:00:10,878 line:0
+Hi, everyone. My name is Phil Azar.
+
+
+3
+00:00:10,943 --> 00:00:13,947 line:0
+And I'm a software engineer
+on the Power and Performance Tools team.
+
+
+4
+00:00:14,014 --> 00:00:16,717 line:-2
+Today I'm delighted
+to be able to share with you
+
+
+5
+00:00:16,783 --> 00:00:19,553 line:-1
+what's new in MetricKit on iOS 14.
+
+
+6
+00:00:19,620 --> 00:00:22,489 line:-2
+Your apps are a pivotal part
+of the software experience,
+
+
+7
+00:00:22,556 --> 00:00:25,025 line:-2
+and your apps are being used
+more than ever before.
+
+
+8
+00:00:25,092 --> 00:00:29,029 line:-2
+When your app is great for battery life
+and has good performance,
+
+
+9
+00:00:29,096 --> 00:00:30,497 line:-1
+it delights your users
+
+
+10
+00:00:30,564 --> 00:00:33,534 line:-2
+and contributes to the overall health
+of the software experience.
+
+
+11
+00:00:33,600 --> 00:00:36,737 line:-2
+Our team is committed
+to providing you powerful tools
+
+
+12
+00:00:36,803 --> 00:00:40,974 line:-2
+to improve the battery life and
+performance footprint of your application.
+
+
+13
+00:00:41,041 --> 00:00:44,745 line:-2
+Last year we introduced a number
+of these tools to help you do this,
+
+
+14
+00:00:44,811 --> 00:00:46,079 line:-1
+including MetricKit,
+
+
+15
+00:00:46,146 --> 00:00:50,350 line:-2
+an on-device framework for collecting
+battery life and performance metrics.
+
+
+16
+00:00:50,951 --> 00:00:54,721 line:-2
+Today I'm excited to share with you what's
+coming in the next version of MetricKit.
+
+
+17
+00:00:55,155 --> 00:00:57,991 line:-2
+We'll start with a quick recap
+on how to use MetricKit.
+
+
+18
+00:00:58,492 --> 00:01:02,829 line:-2
+Then, we'll move into a discussion of
+some powerful new metrics and diagnostics,
+
+
+19
+00:01:02,896 --> 00:01:05,933 line:-2
+followed by a deep dive
+into those new interfaces.
+
+
+20
+00:01:05,999 --> 00:01:08,068 line:-1
+Then, we'll wrap up with a quick summary.
+
+
+21
+00:01:09,269 --> 00:01:12,472 line:-2
+Let's get started with some review
+on how to use MetricKit today.
+
+
+22
+00:01:13,440 --> 00:01:16,210 line:0
+MetricKit as a framework
+was designed from the ground up
+
+
+23
+00:01:16,276 --> 00:01:19,046 line:0
+to provide you data
+in phases of the development cycle
+
+
+24
+00:01:19,112 --> 00:01:21,582 line:0
+where you typically do not have
+direct access
+
+
+25
+00:01:21,648 --> 00:01:24,551 line:0
+to the users
+or devices that are running your app.
+
+
+26
+00:01:25,352 --> 00:01:28,822 line:0
+These phases include
+during an external beta like TestFlight
+
+
+27
+00:01:28,889 --> 00:01:30,991 line:0
+or once you've shipped to the App Store.
+
+
+28
+00:01:31,625 --> 00:01:33,527 line:-1
+This means, for you as a developer,
+
+
+29
+00:01:33,594 --> 00:01:36,997 line:-2
+MetricKit is a powerful tool
+when leveraged in these phases,
+
+
+30
+00:01:37,064 --> 00:01:39,132 line:-1
+as it provides you real access
+
+
+31
+00:01:39,199 --> 00:01:42,769 line:-2
+to performance data about your application
+from a large audience
+
+
+32
+00:01:42,836 --> 00:01:46,139 line:-2
+and can help you find trends and patterns
+in performance regressions.
+
+
+33
+00:01:46,673 --> 00:01:50,077 line:-2
+In order to use MetricKit,
+you need to follow three easy steps.
+
+
+34
+00:01:50,611 --> 00:01:54,248 line:-2
+The first is to link and import
+the MetricKit framework into your code.
+
+
+35
+00:01:55,315 --> 00:01:57,885 line:-2
+The second step
+is to instantiate a shared instance
+
+
+36
+00:01:57,951 --> 00:01:59,686 line:-1
+of what we call the MetricManager,
+
+
+37
+00:01:59,753 --> 00:02:03,123 line:-2
+which is a class that serves as
+your point of contact with the framework.
+
+
+38
+00:02:04,358 --> 00:02:08,061 line:0
+Finally, you need to implement
+a provided subscriber delegate protocol
+
+
+39
+00:02:08,127 --> 00:02:10,430 line:0
+to start receiving
+metrics from the framework.
+
+
+40
+00:02:11,231 --> 00:02:14,168 line:0
+Here's an example
+of the previous steps in code.
+
+
+41
+00:02:14,234 --> 00:02:18,639 line:0
+For this example, we've implemented
+a custom class called MySubscriber
+
+
+42
+00:02:18,705 --> 00:02:20,507 line:0
+to help keep your code clean.
+
+
+43
+00:02:21,475 --> 00:02:23,577 line:0
+After we link the MetricKit framework,
+
+
+44
+00:02:23,644 --> 00:02:26,480 line:0
+we'll conform this new class
+to our subscriber protocol,
+
+
+45
+00:02:27,147 --> 00:02:30,184 line:0
+instantiate an instance
+of our shared MetricManager
+
+
+46
+00:02:30,250 --> 00:02:33,820 line:0
+and add a reference
+to the new custom class to the manager.
+
+
+47
+00:02:34,888 --> 00:02:39,226 line:0
+We recommend you remove that reference
+to the custom class on deinitialization.
+
+
+48
+00:02:40,594 --> 00:02:41,795 line:-1
+Once you've done that,
+
+
+49
+00:02:41,862 --> 00:02:45,766 line:-2
+the final step is to implement
+the didReceive protocol method.
+
+
+50
+00:02:45,832 --> 00:02:48,135 line:-2
+This will allow you
+to receive metric payloads.
+
+
+51
+00:02:49,403 --> 00:02:51,271 line:-1
+Let's review how the system aggregates
+
+
+52
+00:02:51,338 --> 00:02:54,408 line:-2
+and deliver these payloads
+to your application through MetricKit.
+
+
+53
+00:02:55,442 --> 00:02:56,844 line:-1
+Over the course of the day,
+
+
+54
+00:02:56,910 --> 00:03:00,681 line:-2
+the operating system is passively
+aggregating performance data for your app
+
+
+55
+00:03:00,747 --> 00:03:02,282 line:-1
+as it is used.
+
+
+56
+00:03:02,349 --> 00:03:05,786 line:-2
+This data is anonymized
+and designed to protect user privacy.
+
+
+57
+00:03:06,653 --> 00:03:10,891 line:0
+At the end of the day, that data
+is bundled into a 24-hour payload
+
+
+58
+00:03:10,958 --> 00:03:13,360 line:0
+which we know as the MetricKit payload.
+
+
+59
+00:03:13,427 --> 00:03:16,897 line:0
+Metric payloads are strongly typed
+by the MetricKit interface.
+
+
+60
+00:03:17,497 --> 00:03:21,201 line:-2
+Let's take a look into what sorts of data
+that payload contains.
+
+
+61
+00:03:21,602 --> 00:03:24,338 line:-2
+MetricKit payloads
+contain a wide variety of data,
+
+
+62
+00:03:24,404 --> 00:03:28,041 line:-2
+including launch times,
+CPU time, memory and more.
+
+
+63
+00:03:28,475 --> 00:03:32,546 line:-2
+Here, we've taken a MetricKit payload and
+converted it to a human-readable format.
+
+
+64
+00:03:33,146 --> 00:03:35,916 line:-2
+This makes it easier for us to see
+that the data is split up
+
+
+65
+00:03:35,983 --> 00:03:37,851 line:-1
+into three types of aggregation--
+
+
+66
+00:03:38,619 --> 00:03:41,855 line:-1
+cumulative, averaged and bucketized data.
+
+
+67
+00:03:42,723 --> 00:03:45,492 line:-2
+Post-process,
+this data is extremely useful
+
+
+68
+00:03:45,559 --> 00:03:49,596 line:-2
+in identifying performance regressions
+build-to-build in your application
+
+
+69
+00:03:49,663 --> 00:03:52,099 line:-2
+and can be used
+in conjunction with local context
+
+
+70
+00:03:52,165 --> 00:03:54,535 line:-1
+to tackle challenging problems.
+
+
+71
+00:03:54,601 --> 00:03:55,903 line:-1
+In some areas, however,
+
+
+72
+00:03:55,969 --> 00:03:58,405 line:-2
+the metrics we have today
+may not be enough
+
+
+73
+00:03:58,472 --> 00:04:00,374 line:-1
+to fully characterize a regression.
+
+
+74
+00:04:01,408 --> 00:04:03,510 line:-2
+Let's take a look
+at a common example of this--
+
+
+75
+00:04:03,577 --> 00:04:05,145 line:-1
+our launch performance data.
+
+
+76
+00:04:05,779 --> 00:04:08,549 line:-2
+We see here
+that the number of cold launches,
+
+
+77
+00:04:08,615 --> 00:04:13,620 line:-2
+i.e. when our app is being launched
+from scratch with no resources in memory,
+
+
+78
+00:04:13,687 --> 00:04:15,656 line:-1
+far exceeds the number of resumes.
+
+
+79
+00:04:16,490 --> 00:04:18,458 line:-1
+In a typically well-performing app,
+
+
+80
+00:04:18,524 --> 00:04:22,196 line:-2
+we would expect our resumes to be
+much more prevalent than our launches.
+
+
+81
+00:04:22,262 --> 00:04:24,231 line:-1
+Something seems to be amiss here.
+
+
+82
+00:04:24,298 --> 00:04:27,301 line:-2
+Another common case
+is our cumulative CPU time.
+
+
+83
+00:04:28,068 --> 00:04:30,704 line:-2
+Notice how
+our cumulative CPU time is far smaller
+
+
+84
+00:04:30,771 --> 00:04:32,573 line:-1
+than our cumulative foreground time.
+
+
+85
+00:04:33,207 --> 00:04:36,109 line:-2
+This might seem like a good thing,
+but it isn't clear
+
+
+86
+00:04:36,176 --> 00:04:39,947 line:-2
+if this level of work is indicative
+of a performance regression or improvement
+
+
+87
+00:04:40,013 --> 00:04:43,083 line:-2
+because the CPU time
+is bound by clock frequency.
+
+
+88
+00:04:43,817 --> 00:04:48,822 line:-2
+As developers, our first instinct might be
+to quantify this more precisely.
+
+
+89
+00:04:48,889 --> 00:04:52,125 line:-2
+And as it stands right now,
+that's not a straightforward problem.
+
+
+90
+00:04:52,860 --> 00:04:54,962 line:-1
+There's a clear area for growth here.
+
+
+91
+00:04:55,028 --> 00:04:58,498 line:-2
+We need more details
+to dig deeper into these problems.
+
+
+92
+00:04:58,565 --> 00:05:01,001 line:-1
+This year, with MetricKit 2.0,
+
+
+93
+00:05:01,068 --> 00:05:03,504 line:-2
+we're going to be providing you
+some new metrics
+
+
+94
+00:05:03,570 --> 00:05:06,740 line:-2
+that we think will help you dig deeper
+into these common problem cases.
+
+
+95
+00:05:07,207 --> 00:05:10,177 line:-2
+Our team has worked hard
+to expand a subset of metrics
+
+
+96
+00:05:10,244 --> 00:05:13,113 line:-2
+to provide further clarity
+into application workload,
+
+
+97
+00:05:13,180 --> 00:05:15,282 line:-1
+performance and stability.
+
+
+98
+00:05:16,049 --> 00:05:21,021 line:0
+These include CPU instructions,
+scroll hitches and application exits.
+
+
+99
+00:05:21,088 --> 00:05:24,091 line:0
+Let's start by reviewing
+CPU instructions first.
+
+
+100
+00:05:24,758 --> 00:05:29,396 line:-2
+CPU instructions in MetricKit are
+a new addition to the MXCPUMetric class.
+
+
+101
+00:05:30,297 --> 00:05:33,066 line:-2
+This metric summarizes
+daily cumulative instructions
+
+
+102
+00:05:33,133 --> 00:05:34,801 line:-1
+retired by your application.
+
+
+103
+00:05:35,536 --> 00:05:37,938 line:-1
+CPU instructions are an absolute metric
+
+
+104
+00:05:38,005 --> 00:05:40,774 line:-2
+for the work
+that your application does on the CPU.
+
+
+105
+00:05:40,841 --> 00:05:43,410 line:-2
+It is both hardware
+and frequency independent.
+
+
+106
+00:05:44,011 --> 00:05:46,413 line:-2
+This is going to enable you
+to more precisely quantify
+
+
+107
+00:05:46,480 --> 00:05:48,282 line:-1
+the total workload of your application.
+
+
+108
+00:05:48,348 --> 00:05:51,018 line:0
+Next up, let's talk about scroll hitches.
+
+
+109
+00:05:51,084 --> 00:05:54,054 line:-2
+Scroll hitches are a new metric
+we're providing you this year
+
+
+110
+00:05:54,121 --> 00:05:58,225 line:-2
+to help you give insights into
+your application's graphical performance.
+
+
+111
+00:05:58,292 --> 00:06:01,261 line:-2
+A scroll hitch is when
+a rendered frame does not end up on screen
+
+
+112
+00:06:01,328 --> 00:06:03,430 line:-1
+at its expected time during scrolling.
+
+
+113
+00:06:03,997 --> 00:06:06,266 line:-1
+This usually causes frames to be dropped,
+
+
+114
+00:06:06,333 --> 00:06:09,736 line:-2
+causing a user-perceptible interruption
+of animation smoothness.
+
+
+115
+00:06:10,571 --> 00:06:12,873 line:-2
+In MetricKit,
+we'll be providing you a ratio
+
+
+116
+00:06:12,940 --> 00:06:16,877 line:-2
+of time that your application spends
+hitching to the time spent scrolling
+
+
+117
+00:06:16,944 --> 00:06:18,512 line:-1
+with UIScrollViews.
+
+
+118
+00:06:19,780 --> 00:06:22,149 line:0
+To dive deeper into
+the technical details of hitches,
+
+
+119
+00:06:22,216 --> 00:06:25,285 line:0
+I encourage you to watch our talk
+this year covering scroll hitches
+
+
+120
+00:06:25,352 --> 00:06:27,955 line:0
+and how to measure them
+using XCTest metrics.
+
+
+121
+00:06:28,589 --> 00:06:31,725 line:0
+Last but not least,
+we have application exit reasons.
+
+
+122
+00:06:32,292 --> 00:06:36,864 line:-2
+This year, we're providing metrics
+around application exits and terminations.
+
+
+123
+00:06:36,930 --> 00:06:39,600 line:-2
+You'll receive a daily summary
+of reasons and counts
+
+
+124
+00:06:39,666 --> 00:06:43,537 line:-2
+of why your application exited
+in both the foreground and the background.
+
+
+125
+00:06:44,204 --> 00:06:46,840 line:-2
+We think this is going to be helpful
+in assisting you track down
+
+
+126
+00:06:46,907 --> 00:06:51,411 line:-2
+common problems associated with app launch
+and using background runtime frameworks.
+
+
+127
+00:06:52,312 --> 00:06:54,948 line:-2
+For a deeper dive
+into how you can leverage these metrics
+
+
+128
+00:06:55,015 --> 00:06:56,717 line:-1
+and employ best practices,
+
+
+129
+00:06:56,783 --> 00:06:59,586 line:-2
+I encourage you to watch our talk
+on app terminations this year,
+
+
+130
+00:06:59,653 --> 00:07:02,055 line:0
+entitled "Why Did My App Get Killed?"
+
+
+131
+00:07:02,556 --> 00:07:04,591 line:-2
+And so those are our new metrics
+this year.
+
+
+132
+00:07:04,658 --> 00:07:07,528 line:-2
+We think they're gonna provide you
+an extra degree of certainty
+
+
+133
+00:07:07,594 --> 00:07:10,030 line:-2
+when looking for regressions
+in your MetricKit data.
+
+
+134
+00:07:10,797 --> 00:07:14,268 line:-2
+Let's look back at our metric payload
+more closely and focus on one area
+
+
+135
+00:07:14,334 --> 00:07:17,304 line:-2
+where we still weren't able to determine
+what's going on.
+
+
+136
+00:07:18,071 --> 00:07:20,507 line:-2
+In our application
+hang duration histogram,
+
+
+137
+00:07:20,574 --> 00:07:22,709 line:-1
+we see some entries that are alarming
+
+
+138
+00:07:22,776 --> 00:07:25,712 line:-2
+and could be a serious interruption
+in your user's experience.
+
+
+139
+00:07:26,413 --> 00:07:29,416 line:-2
+As it stands right now,
+this is definitely a regression.
+
+
+140
+00:07:29,483 --> 00:07:32,119 line:-2
+But we can't determine
+the root cause from metrics alone.
+
+
+141
+00:07:32,719 --> 00:07:35,055 line:-1
+We need some additional diagnostic data,
+
+
+142
+00:07:35,122 --> 00:07:37,224 line:-1
+like a backtrace at the time of the hang,
+
+
+143
+00:07:37,291 --> 00:07:38,692 line:-1
+to figure out what happened.
+
+
+144
+00:07:39,293 --> 00:07:42,196 line:-2
+That brings us to our next big feature
+this year for MetricKit
+
+
+145
+00:07:42,262 --> 00:07:45,699 line:-2
+that's going to help you get to the bottom
+of another class of regressions--
+
+
+146
+00:07:45,766 --> 00:07:47,401 line:-1
+MetricKit diagnostics.
+
+
+147
+00:07:48,068 --> 00:07:51,038 line:-2
+MetricKit 2.0 is going to be providing
+a new interface
+
+
+148
+00:07:51,104 --> 00:07:54,241 line:-2
+that enables you access
+to targeted diagnostic information.
+
+
+149
+00:07:54,875 --> 00:07:58,779 line:-2
+This diagnostic information is actionable
+for various types of regressions,
+
+
+150
+00:07:58,846 --> 00:08:03,383 line:0
+including hangs, crashes,
+disk write exceptions and CPU exceptions.
+
+
+151
+00:08:04,418 --> 00:08:07,554 line:-2
+To start receiving
+diagnostics in MetricKit 2.0,
+
+
+152
+00:08:07,621 --> 00:08:12,392 line:-2
+all you need to do is implement a new
+MetricManagerSubscriber protocol method.
+
+
+153
+00:08:12,459 --> 00:08:13,660 line:-1
+That's it!
+
+
+154
+00:08:14,494 --> 00:08:16,530 line:-1
+This new protocol looks almost identical
+
+
+155
+00:08:16,597 --> 00:08:19,399 line:-2
+to last year's didReceive metric payloads
+delegate method,
+
+
+156
+00:08:19,466 --> 00:08:22,803 line:-2
+and we expect that many of you
+will be able to use the same pipelines
+
+
+157
+00:08:22,870 --> 00:08:24,705 line:-1
+you've already built for MetricKit.
+
+
+158
+00:08:25,272 --> 00:08:27,741 line:-2
+This protocol, however,
+doesn't just look the same.
+
+
+159
+00:08:27,808 --> 00:08:29,243 line:-1
+It also functions the same.
+
+
+160
+00:08:29,943 --> 00:08:31,011 line:-1
+Semantically,
+
+
+161
+00:08:31,078 --> 00:08:35,148 line:-2
+MetricKit diagnostics functions
+almost identically to MetricKit metrics.
+
+
+162
+00:08:35,716 --> 00:08:38,352 line:-2
+If we take another look
+at our timeline from earlier,
+
+
+163
+00:08:38,418 --> 00:08:41,989 line:0
+as your app is used throughout the day,
+in addition to metrics,
+
+
+164
+00:08:42,054 --> 00:08:46,126 line:0
+the MetricKit system will now
+passively collect diagnostic information
+
+
+165
+00:08:46,193 --> 00:08:48,762 line:0
+about regressions that occur during use.
+
+
+166
+00:08:49,263 --> 00:08:54,268 line:0
+Then, the system bundles them
+into a parallel daily diagnostic payload
+
+
+167
+00:08:54,334 --> 00:08:57,271 line:0
+that can be used
+alongside your daily metric payload.
+
+
+168
+00:08:57,337 --> 00:09:00,507 line:-2
+Now, when you see
+a regression in a metric like hangs,
+
+
+169
+00:09:00,574 --> 00:09:04,678 line:-2
+you'll be able to reference, if present,
+the associated diagnostic payload
+
+
+170
+00:09:04,745 --> 00:09:07,181 line:-2
+that came at the same time
+as the metric payload.
+
+
+171
+00:09:07,781 --> 00:09:10,984 line:-2
+This diagnostic payload
+effectively maps one-to-one
+
+
+172
+00:09:11,051 --> 00:09:12,653 line:-1
+to its companion metric payload.
+
+
+173
+00:09:13,453 --> 00:09:16,523 line:-2
+Let's switch gears and take a deeper look
+into this new interface
+
+
+174
+00:09:16,590 --> 00:09:18,392 line:-1
+and get familiar with its capabilities.
+
+
+175
+00:09:18,458 --> 00:09:21,862 line:-2
+The new diagnostic interface
+mirrors the old metric interface
+
+
+176
+00:09:21,929 --> 00:09:24,031 line:-2
+insofar that we have
+a few new base classes--
+
+
+177
+00:09:24,097 --> 00:09:28,569 line:-2
+MXDiagnostic, the base class
+that all diagnostics inherit from,
+
+
+178
+00:09:28,635 --> 00:09:30,470 line:-1
+MXDiagnosticPayload,
+
+
+179
+00:09:30,537 --> 00:09:34,441 line:-2
+the carrier class which contains
+all diagnostics at the end of the day,
+
+
+180
+00:09:34,508 --> 00:09:36,343 line:-1
+and MXCallStackTree,
+
+
+181
+00:09:36,410 --> 00:09:40,047 line:-2
+a new data class that encapsulates
+regression time backtraces
+
+
+182
+00:09:40,113 --> 00:09:41,515 line:-1
+for off-device use.
+
+
+183
+00:09:42,282 --> 00:09:46,019 line:-2
+MXDiagnostics, which are contained
+within MXDiagnosticPayloads,
+
+
+184
+00:09:46,086 --> 00:09:49,690 line:-2
+contain metadata of the application
+at the time a regression occurred,
+
+
+185
+00:09:49,756 --> 00:09:54,361 line:-2
+such as the specific build version
+and diagnostic-specific data.
+
+
+186
+00:09:55,462 --> 00:09:58,565 line:-2
+Diagnostic-specific data
+is a unique subset of data
+
+
+187
+00:09:58,632 --> 00:10:01,435 line:-2
+for each diagnostic subclass
+that we're providing this year.
+
+
+188
+00:10:02,102 --> 00:10:06,807 line:-2
+One part that's consistent across all
+of them, however, is MXCallStackTree.
+
+
+189
+00:10:08,375 --> 00:10:11,245 line:-2
+MXCallStackTree is a new data class
+that we're providing
+
+
+190
+00:10:11,311 --> 00:10:15,082 line:-2
+that encapsulates backtraces
+at the time a regression occurs.
+
+
+191
+00:10:15,816 --> 00:10:20,621 line:-2
+These backtraces are unsymbolicated
+and designed for off-device processing.
+
+
+192
+00:10:20,687 --> 00:10:23,557 line:-2
+And they're going to provide you
+a rich set of information
+
+
+193
+00:10:23,624 --> 00:10:27,094 line:-2
+that will help you diagnose
+and capture the essence of regressions.
+
+
+194
+00:10:28,328 --> 00:10:30,831 line:-2
+Here's an example
+of what these call stack trees look like
+
+
+195
+00:10:30,898 --> 00:10:33,600 line:-2
+after they've been converted
+to a human-readable JSON.
+
+
+196
+00:10:34,434 --> 00:10:37,638 line:-2
+We can see that everything needed
+to symbolicate individual frames
+
+
+197
+00:10:37,704 --> 00:10:40,674 line:-1
+with a tool like ATOS is present.
+
+
+198
+00:10:40,741 --> 00:10:45,646 line:-2
+That includes binary information,
+such as the UUID, offset and name,
+
+
+199
+00:10:45,712 --> 00:10:47,080 line:-1
+and the frame address.
+
+
+200
+00:10:48,081 --> 00:10:50,918 line:-2
+These new call stack tree data structures
+are highly portable
+
+
+201
+00:10:50,984 --> 00:10:53,954 line:-2
+and can be found in other performance
+tools we're shipping this year.
+
+
+202
+00:10:54,454 --> 00:10:56,857 line:0
+To learn more,
+I encourage you to watch our talk
+
+
+203
+00:10:56,924 --> 00:10:58,992 line:0
+on the new Power and Performance API.
+
+
+204
+00:10:59,760 --> 00:11:00,994 line:-1
+As we said earlier,
+
+
+205
+00:11:01,061 --> 00:11:04,531 line:-2
+we're shipping a set of four new
+subclasses of MXDiagnostic this year--
+
+
+206
+00:11:04,598 --> 00:11:09,269 line:-2
+hangs, CPU exceptions,
+disk write exceptions and crashes.
+
+
+207
+00:11:09,336 --> 00:11:11,438 line:-2
+Let's take a look
+at the unique data contained
+
+
+208
+00:11:11,505 --> 00:11:14,208 line:-2
+within each of these
+new diagnostic subclasses now,
+
+
+209
+00:11:14,274 --> 00:11:15,609 line:-1
+starting with hangs.
+
+
+210
+00:11:15,676 --> 00:11:17,144 line:-1
+Hangs are regressions that occur
+
+
+211
+00:11:17,211 --> 00:11:21,348 line:-2
+when your application is unresponsive
+to user input for long periods of time.
+
+
+212
+00:11:21,982 --> 00:11:25,352 line:-2
+This is due to your application's
+main thread being blocked or busy.
+
+
+213
+00:11:26,119 --> 00:11:28,555 line:-2
+Hang diagnostics provided
+through the MetricKit interface
+
+
+214
+00:11:28,622 --> 00:11:29,690 line:-1
+are gonna be providing you
+
+
+215
+00:11:29,756 --> 00:11:32,693 line:-2
+the time the application's main thread
+was unresponsive
+
+
+216
+00:11:32,759 --> 00:11:34,761 line:-1
+and the backtraces of the main thread.
+
+
+217
+00:11:35,329 --> 00:11:37,164 line:-1
+Next up is CPU exceptions,
+
+
+218
+00:11:37,231 --> 00:11:40,234 line:-2
+or energy logs
+as they're called in the Xcode Organizer.
+
+
+219
+00:11:40,300 --> 00:11:43,537 line:-2
+These diagnostics are going to contain
+CPU time consumed,
+
+
+220
+00:11:43,604 --> 00:11:46,206 line:-2
+total time sampled
+during the high CPU usage
+
+
+221
+00:11:46,273 --> 00:11:49,076 line:-2
+and the backtraces of the threads
+consuming CPU time.
+
+
+222
+00:11:50,043 --> 00:11:53,614 line:-2
+CPU exception diagnostics
+used in conjunction with metric payloads
+
+
+223
+00:11:53,680 --> 00:11:56,550 line:-2
+can be extremely useful
+in identifying regressions
+
+
+224
+00:11:56,617 --> 00:11:58,485 line:-1
+that may not be easy to reproduce.
+
+
+225
+00:11:59,119 --> 00:12:00,721 line:-1
+Next, we have disk writes.
+
+
+226
+00:12:01,255 --> 00:12:03,657 line:-2
+Disk write exception diagnostics
+are fairly similar
+
+
+227
+00:12:03,724 --> 00:12:05,459 line:-1
+to CPU exception diagnostics.
+
+
+228
+00:12:06,026 --> 00:12:08,962 line:-2
+Each diagnostic will contain
+the total number of writes caused
+
+
+229
+00:12:09,029 --> 00:12:10,597 line:-1
+that generated the exception
+
+
+230
+00:12:10,664 --> 00:12:13,700 line:-2
+and a backtrace of the threads
+causing excessive writes.
+
+
+231
+00:12:13,767 --> 00:12:15,235 line:-1
+These diagnostics are generated
+
+
+232
+00:12:15,302 --> 00:12:19,173 line:-2
+whenever a one-gigabyte daily threshold
+is breached by your application.
+
+
+233
+00:12:19,873 --> 00:12:22,910 line:-2
+Last but not least,
+we have crash diagnostics.
+
+
+234
+00:12:22,976 --> 00:12:24,511 line:-1
+This year, we're excited to share
+
+
+235
+00:12:24,578 --> 00:12:28,515 line:-2
+that MetricKit is going to be providing
+you a diagnostic for application crashes.
+
+
+236
+00:12:29,316 --> 00:12:31,218 line:-1
+Each time your application crashes,
+
+
+237
+00:12:31,285 --> 00:12:34,855 line:-2
+an MXCrashDiagnostic containing
+the exception information,
+
+
+238
+00:12:34,922 --> 00:12:36,423 line:-1
+termination reason,
+
+
+239
+00:12:36,490 --> 00:12:39,660 line:-2
+virtual memory region information,
+in the case of a bad access crash,
+
+
+240
+00:12:39,726 --> 00:12:44,264 line:-2
+and the backtrace will be provided to you
+via the MetricKit diagnostics interface.
+
+
+241
+00:12:44,965 --> 00:12:47,267 line:-1
+And that wraps up MetricKit diagnostics,
+
+
+242
+00:12:47,334 --> 00:12:50,904 line:-2
+a powerful new tool for you
+to get to the root cause of regressions
+
+
+243
+00:12:50,971 --> 00:12:53,240 line:-1
+in real customer use cases.
+
+
+244
+00:12:53,774 --> 00:12:56,410 line:-2
+Let's wrap up with a summary
+of what we talked about today.
+
+
+245
+00:12:57,044 --> 00:12:59,279 line:-1
+MetricKit 2.0 is packed with new features
+
+
+246
+00:12:59,346 --> 00:13:03,083 line:-2
+that are going to help you take your
+optimization efforts to the next level.
+
+
+247
+00:13:03,150 --> 00:13:06,854 line:-2
+We're providing new metrics for you to
+dive deeper into understanding regressions
+
+
+248
+00:13:06,920 --> 00:13:10,023 line:-2
+that occur in your customer
+and beta populations.
+
+
+249
+00:13:10,090 --> 00:13:12,359 line:-2
+We're also providing you
+targeted diagnostics
+
+
+250
+00:13:12,426 --> 00:13:14,862 line:-2
+to enable you to catch
+harder-to-reproduce regressions
+
+
+251
+00:13:14,928 --> 00:13:16,396 line:-1
+in those populations.
+
+
+252
+00:13:17,164 --> 00:13:20,033 line:-2
+And finally, we're doing this
+all at very little cost to you
+
+
+253
+00:13:20,100 --> 00:13:21,635 line:-1
+by providing these new features
+
+
+254
+00:13:21,702 --> 00:13:24,972 line:-2
+through easy-to-implement interfaces
+and existing interfaces.
+
+
+255
+00:13:26,306 --> 00:13:28,375 line:0
+We have a ton of great new content
+this year
+
+
+256
+00:13:28,442 --> 00:13:31,645 line:0
+and useful older content
+that I encourage you to check out.
+
+
+257
+00:13:31,712 --> 00:13:36,450 line:-2
+Thanks again for tuning in,
+and enjoy the rest of your WWDC 2020.
+

@@ -1,0 +1,2328 @@
+2
+00:00:00.334 --> 00:00:06.340 line:-1 align:center
+[upbeat music]
+
+
+3
+00:00:09.009 --> 00:00:14.014 line:-2 align:center
+Benjamin Poulain: Hi everyone, and welcome
+to our session about virtualization.
+
+
+4
+00:00:14.047 --> 00:00:17.451 line:-2 align:center
+This is what we are going
+to do together today.
+
+
+5
+00:00:17.484 --> 00:00:22.222 line:-2 align:center
+We'll see how you can run macOS
+and Linux inside virtual machines,
+
+
+6
+00:00:22.256 --> 00:00:24.258 line:-1 align:center
+on Apple silicon.
+
+
+7
+00:00:24,291 --> 00:00:28,896 line:-2
+By the end of this session, you will
+be able to do the same on your own Mac.
+
+
+8
+00:00:28.929 --> 00:00:31.798 line:-2 align:center
+This may seem a little ambitious,
+but stick with us,
+
+
+9
+00:00:31.832 --> 00:00:33.567 line:-1 align:center
+and we'll do it together.
+
+
+10
+00:00:33.600 --> 00:00:35.502 line:-1 align:center
+Here is our agenda for today.
+
+
+11
+00:00:35.536 --> 00:00:38.739 line:-2 align:center
+We will start with an overview
+of virtualization technologies,
+
+
+12
+00:00:38,772 --> 00:00:43,744 line:-2
+and we'll see how to use Virtualization
+framework to build virtual machines.
+
+
+13
+00:00:43,777 --> 00:00:47,114 line:-1
+Then we'll do a deep dive into macOS.
+
+
+14
+00:00:47.147 --> 00:00:51.919 line:-2 align:center
+We'll see how we can set up a virtual Mac
+and install macOS into it.
+
+
+15
+00:00:51,952 --> 00:00:56,423 line:-2
+And finally, we'll do a second deep dive,
+this time into Linux.
+
+
+16
+00:00:56.456 --> 00:00:58.825 line:-2 align:center
+We'll see how
+to run full Linux distributions
+
+
+17
+00:00:58,859 --> 00:01:01,261 line:-1
+and some cool new features.
+
+
+18
+00:01:01.295 --> 00:01:03.830 line:-1 align:center
+Let’s get started with the overview.
+
+
+19
+00:01:03,864 --> 00:01:08,068 line:0
+We'll first look into the stack
+that enables virtualization.
+
+
+20
+00:01:08,101 --> 00:01:10,904 align:center
+It all starts with hardware.
+
+
+21
+00:01:10,938 --> 00:01:14,608 line:0
+Apple silicon has special hardware
+that enables the virtualization
+
+
+22
+00:01:14,641 --> 00:01:16,143 align:center
+of CPUs and memory.
+
+
+23
+00:01:16,176 --> 00:01:20,848 align:center
+This means you can run multiple
+operating systems on top of a single SoC.
+
+
+24
+00:01:20,881 --> 00:01:24,084 align:center
+Next, we need software
+to take advantage of this hardware.
+
+
+25
+00:01:24,117 --> 00:01:27,421 line:0
+And this is built right
+into the macOS kernel.
+
+
+26
+00:01:27,454 --> 00:01:30,424 line:0
+You no longer need to write
+kernel extensions, or KEXTs.
+
+
+27
+00:01:30,457 --> 00:01:32,993 line:0
+It's all built in.
+
+
+28
+00:01:33,026 --> 00:01:35,162 align:center
+To use those capabilities
+from your application,
+
+
+29
+00:01:35,195 --> 00:01:37,698 align:center
+you can use Hypervisor framework.
+
+
+30
+00:01:37,731 --> 00:01:43,537 align:center
+Hypervisor framework is a low-level API
+that lets you virtualize CPUs and memory.
+
+
+31
+00:01:43,570 --> 00:01:46,206 align:center
+But, because it's
+a low-level framework,
+
+
+32
+00:01:46,240 --> 00:01:50,377 align:center
+you need to write every single detail
+of the virtual environment.
+
+
+33
+00:01:50,410 --> 00:01:53,547 align:center
+Oftentimes,
+we want to run full operating systems.
+
+
+34
+00:01:53,580 --> 00:01:58,919 line:0
+For this, there is a higher-level API,
+which is Virtualization framework.
+
+
+35
+00:01:58,952 --> 00:02:02,022 align:center
+Virtualization framework enables
+the creation of virtual machines
+
+
+36
+00:02:02,055 --> 00:02:08,061 line:0
+running macOS on Apple silicon
+or Linux on both Apple silicon and Intel.
+
+
+37
+00:02:08,095 --> 00:02:11,064 align:center
+Today, our session will focus
+on Virtualization framework.
+
+
+38
+00:02:11,098 --> 00:02:14,668 align:center
+When using Virtualization framework,
+we'll deal with two kinds of objects.
+
+
+39
+00:02:14.701 --> 00:02:17.070 line:-1 align:center
+The first kind are configuration objects.
+
+
+40
+00:02:17,104 --> 00:02:20,107 line:-2
+They define all the properties
+of our virtual machines.
+
+
+41
+00:02:20,140 --> 00:02:22,743 line:-2
+The second kind
+are virtual machine objects.
+
+
+42
+00:02:22.776 --> 00:02:27.548 line:-2 align:center
+Those objects abstract virtual machines
+and how to interact with them.
+
+
+43
+00:02:27,581 --> 00:02:31,185 line:-2
+We'll start
+with looking at the configuration.
+
+
+44
+00:02:31.218 --> 00:02:34.221 line:-1 align:center
+The configuration defines the hardware.
+
+
+45
+00:02:34,254 --> 00:02:38,425 line:-2
+Creating a configuration is
+like configuring a Mac on the Apple Store.
+
+
+46
+00:02:38.458 --> 00:02:42.863 line:-2 align:center
+We define how many CPUs we want,
+how much memory, what kind of devices.
+
+
+47
+00:02:42.896 --> 00:02:45.532 line:-1 align:center
+We can start from a simple configuration.
+
+
+48
+00:02:45,566 --> 00:02:47,801 line:-2
+We can add a display,
+and we get to see the content.
+
+
+49
+00:02:47.835 --> 00:02:50.404 line:-1 align:center
+We can add a keyboard, and we can type.
+
+
+50
+00:02:50,437 --> 00:02:53,707 line:-2
+We can add a trackpad,
+and we can interact with the UI.
+
+
+51
+00:02:53,740 --> 00:02:57,211 line:-2
+Configuring a virtual machine
+is just like that.
+
+
+52
+00:02:57.244 --> 00:02:59.313 line:-2 align:center
+But since we are dealing
+with virtual machines,
+
+
+53
+00:02:59.346 --> 00:03:01.515 line:-1 align:center
+we'll do this in code.
+
+
+54
+00:03:01.548 --> 00:03:05.319 line:-2 align:center
+Let’s see how we can write
+the configuration in Swift.
+
+
+55
+00:03:05.352 --> 00:03:07.921 line:-1 align:center
+Defining the hardware is very simple.
+
+
+56
+00:03:07.955 --> 00:03:12.025 line:-2 align:center
+We start with an object of type
+VZVirtualMachineConfiguration.
+
+
+57
+00:03:12,059 --> 00:03:15,762 line:-2
+This is the root object
+of all configurations.
+
+
+58
+00:03:15.796 --> 00:03:19.700 line:-2 align:center
+Next, we define how many CPUs
+our machine should have.
+
+
+59
+00:03:19.733 --> 00:03:22.102 line:-1 align:center
+Here we give four CPUs.
+
+
+60
+00:03:22,135 --> 00:03:24,571 line:-1
+Then, we set how much memory we want.
+
+
+61
+00:03:24,605 --> 00:03:27,975 line:-2
+In this case,
+we give four gigabytes of memory.
+
+
+62
+00:03:28.008 --> 00:03:31.578 line:-2 align:center
+Finally, we define the devices
+our machine will have.
+
+
+63
+00:03:31,612 --> 00:03:34,515 line:-2
+In this example,
+we set a single storage device,
+
+
+64
+00:03:34,548 --> 00:03:38,952 line:-2
+the disk to boot from,
+and a pointing device, like a mouse.
+
+
+65
+00:03:38.986 --> 00:03:40.721 line:-1 align:center
+There are many devices available.
+
+
+66
+00:03:40,754 --> 00:03:44,558 line:-2
+The ones you set up depend
+on the problem you want to solve.
+
+
+67
+00:03:44,591 --> 00:03:46,059 line:-1
+Now we've seen the configuration.
+
+
+68
+00:03:46,093 --> 00:03:48,629 line:-2
+It starts
+with VZVirtualMachineConfiguration,
+
+
+69
+00:03:48.662 --> 00:03:53.333 line:-2 align:center
+on which we add the CPUs,
+the memory, and the devices.
+
+
+70
+00:03:53,367 --> 00:03:56,970 line:-2
+Next, we'll look
+into the virtual machine objects.
+
+
+71
+00:03:58,205 --> 00:04:00,874 line:-2
+After we have configured our Mac,
+we get it by the mail.
+
+
+72
+00:04:00.908 --> 00:04:03.677 line:-1 align:center
+It's time to unbox it and start it.
+
+
+73
+00:04:03.710 --> 00:04:06.079 line:-2 align:center
+But since we are dealing
+with virtual machine,
+
+
+74
+00:04:06,113 --> 00:04:08,515 line:-1
+we need to do that in code.
+
+
+75
+00:04:08.549 --> 00:04:11.585 line:-1 align:center
+Let’s see how we can do it in Swift.
+
+
+76
+00:04:11.618 --> 00:04:14.688 line:-2 align:center
+First, we'll create an instance
+of VZVirtualMachine
+
+
+77
+00:04:14,721 --> 00:04:16,223 line:-1
+from our configuration.
+
+
+78
+00:04:16.256 --> 00:04:20.627 line:-2 align:center
+A VZVirtualMachine abstracts
+an instance of the virtual hardware.
+
+
+79
+00:04:20,661 --> 00:04:23,397 line:-2
+Now that we have the virtual machine,
+we can operate on it.
+
+
+80
+00:04:23.430 --> 00:04:27.901 line:-2 align:center
+For example, in this case,
+we call start() to start it.
+
+
+81
+00:04:27,935 --> 00:04:30,237 line:-2
+We'll often want to interact
+with our virtual machines.
+
+
+82
+00:04:30.270 --> 00:04:33.507 line:-2 align:center
+For this,
+we have other objects to help us.
+
+
+83
+00:04:33,540 --> 00:04:36,410 line:-2
+For example,
+if we want to show our virtual display,
+
+
+84
+00:04:36.443 --> 00:04:39.680 line:-2 align:center
+we can use an object
+of type VZVirtualMachineView.
+
+
+85
+00:04:39.713 --> 00:04:41.648 line:-1 align:center
+We start by creating a view.
+
+
+86
+00:04:41.682 --> 00:04:45.619 line:-2 align:center
+Then we set our virtual machine as
+the virtualMachine property on the view,
+
+
+87
+00:04:45.652 --> 00:04:47.154 line:-1 align:center
+and it's ready.
+
+
+88
+00:04:47.187 --> 00:04:51.525 line:-2 align:center
+Now we can use this VZVirtualMachineView
+object like any NSView.
+
+
+89
+00:04:51,558 --> 00:04:55,395 line:-2
+We can integrate it in our app
+to see the content of the virtual machine.
+
+
+90
+00:04:56.964 --> 00:04:59.967 line:-2 align:center
+To wrap up,
+we've seen the configuration.
+
+
+91
+00:05:00.000 --> 00:05:03.770 line:-2 align:center
+The configuration starts
+with VZVirtualMachineConfiguration,
+
+
+92
+00:05:03.804 --> 00:05:08.208 line:-2 align:center
+from which we define the CPUs,
+memory, and our devices.
+
+
+93
+00:05:08,242 --> 00:05:10,878 line:-2
+From the configuration,
+we will create a virtual machine,
+
+
+94
+00:05:10.911 --> 00:05:13.480 line:-1 align:center
+and we will use virtual machine objects.
+
+
+95
+00:05:13.514 --> 00:05:17.651 line:-2 align:center
+We've seen VZVirtualMachine
+to abstract the VM itself,
+
+
+96
+00:05:17,684 --> 00:05:20,554 line:-1
+VZVirtualMachineView to display content,
+
+
+97
+00:05:20.587 --> 00:05:23.624 line:-2 align:center
+and there are other objects
+that can help us use the VM.
+
+
+98
+00:05:23,657 --> 00:05:26,927 line:-2
+We have seen that the configuration
+gives a lot of flexibility
+
+
+99
+00:05:26.960 --> 00:05:29.162 line:-1 align:center
+in how we define virtual machines.
+
+
+100
+00:05:29,196 --> 00:05:33,667 line:-2
+Unfortunately, there are
+too many features to cover in one session.
+
+
+101
+00:05:33,700 --> 00:05:37,437 line:-2
+In this session, we will look
+into some of the core capabilities.
+
+
+102
+00:05:37,471 --> 00:05:39,873 line:-2
+For everything else,
+we have documentation,
+
+
+103
+00:05:39,907 --> 00:05:42,943 line:-1
+and I invite you to check it out.
+
+
+104
+00:05:42.976 --> 00:05:46.647 line:-2 align:center
+In the overview,
+we just saw how to build virtual machines.
+
+
+105
+00:05:46.680 --> 00:05:50.684 line:-2 align:center
+Now it is time to look into how we can
+run a full operating system in them.
+
+
+106
+00:05:50.717 --> 00:05:52.953 line:-1 align:center
+And we will start with macOS.
+
+
+107
+00:05:52.986 --> 00:05:56.790 line:-2 align:center
+Virtualization framework supports macOS
+on Apple silicon.
+
+
+108
+00:05:56.823 --> 00:05:59.126 line:-2 align:center
+When we built Virtualization framework
+on Apple silicon,
+
+
+109
+00:05:59.159 --> 00:06:03.163 line:-2 align:center
+we've developed macOS
+and Virtualization framework together.
+
+
+110
+00:06:03.197 --> 00:06:05.966 line:-2 align:center
+What this gives us
+is incredible efficiency
+
+
+111
+00:06:05.999 --> 00:06:08.735 line:-2 align:center
+when running macOS
+inside virtual machines.
+
+
+112
+00:06:08,769 --> 00:06:11,038 line:-1
+Here is what we are going to see:
+
+
+113
+00:06:11,071 --> 00:06:12,973 line:-1
+First, we will look into what we need
+
+
+114
+00:06:13.006 --> 00:06:16.376 line:-2 align:center
+to turn a virtual machine
+into a virtual Mac.
+
+
+115
+00:06:16,410 --> 00:06:20,914 line:-2
+Then we'll look into the steps
+to install macOS on our virtual Mac.
+
+
+116
+00:06:20.948 --> 00:06:25.352 line:-2 align:center
+Next, we'll see some
+of the special devices we have for macOS.
+
+
+117
+00:06:25.385 --> 00:06:28.822 line:-2 align:center
+And finally, we will look
+into a very important use case,
+
+
+118
+00:06:28.856 --> 00:06:32.826 line:-2 align:center
+which is sharing files between
+the host system and the virtual Mac.
+
+
+119
+00:06:34,261 --> 00:06:36,830 line:-1
+Let’s start with the configuration.
+
+
+120
+00:06:36,864 --> 00:06:40,167 line:-2
+We have seen before how
+to build a generic virtual machine.
+
+
+121
+00:06:40,200 --> 00:06:45,706 line:-2
+Now we want to add the special properties
+that will make a virtual machine a Mac.
+
+
+122
+00:06:45.739 --> 00:06:48.976 line:-1 align:center
+So how do we make a virtual Mac?
+
+
+123
+00:06:49.009 --> 00:06:51.879 line:-1 align:center
+First, we will define a special platform.
+
+
+124
+00:06:51,912 --> 00:06:55,315 line:-2
+A platform is an object
+that holds all the properties
+
+
+125
+00:06:55.349 --> 00:06:57.684 line:-1 align:center
+of a particular type of virtual machine.
+
+
+126
+00:06:57.718 --> 00:07:02.122 line:-2 align:center
+There are three properties that are unique
+to the virtual Mac hardware.
+
+
+127
+00:07:02.155 --> 00:07:04.358 line:-1 align:center
+First, we have the hardware model.
+
+
+128
+00:07:04,391 --> 00:07:09,196 line:-2
+The hardware model specifies
+which version of the virtual Mac we want.
+
+
+129
+00:07:09.229 --> 00:07:11.265 line:-1 align:center
+Second, there is the auxiliary storage.
+
+
+130
+00:07:11.298 --> 00:07:15.969 line:-2 align:center
+The auxiliary storage is a form
+of non-volatile memory used by the system.
+
+
+131
+00:07:16,003 --> 00:07:19,239 line:-2
+And third,
+there is the machine identifier.
+
+
+132
+00:07:19.273 --> 00:07:22.676 line:-2 align:center
+The machine identifier is
+a unique number representing the machine,
+
+
+133
+00:07:22,709 --> 00:07:26,113 line:-2
+just like a physical Mac
+has a unique serial number.
+
+
+134
+00:07:26.146 --> 00:07:29.883 line:-2 align:center
+Once we have the platform, we have
+all the pieces to describe the hardware,
+
+
+135
+00:07:29.917 --> 00:07:34.621 line:-2 align:center
+but we need one more piece,
+which is a way to boot macOS.
+
+
+136
+00:07:34.655 --> 00:07:36.890 line:-2 align:center
+For this, we will use
+a special boot loader,
+
+
+137
+00:07:36,924 --> 00:07:39,126 line:-1
+the macOS boot loader.
+
+
+138
+00:07:39.159 --> 00:07:43.063 line:-1 align:center
+Let’s see how to do all of this in Swift.
+
+
+139
+00:07:43.096 --> 00:07:44.932 line:-1 align:center
+We start from the same base as before.
+
+
+140
+00:07:44.965 --> 00:07:48.635 line:-2 align:center
+This code is what
+we have seen in the overview.
+
+
+141
+00:07:48,669 --> 00:07:52,506 line:-2
+Then we create
+a VZMacPlatformConfiguration.
+
+
+142
+00:07:52.539 --> 00:07:56.043 line:-2 align:center
+This is our platform object
+for virtual Macs.
+
+
+143
+00:07:56.076 --> 00:07:58.011 line:-1 align:center
+We need a hardware model for this Mac.
+
+
+144
+00:07:58.045 --> 00:08:01.315 line:-1 align:center
+Here we use one we previously saved.
+
+
+145
+00:08:01,348 --> 00:08:03,650 line:-2
+In virtual machines,
+the auxiliary storage is backed
+
+
+146
+00:08:03,684 --> 00:08:06,119 line:-1
+by a file on the local filesystem.
+
+
+147
+00:08:06.153 --> 00:08:09.957 line:-2 align:center
+Here, we initialize our auxiliary storage
+from a file URL.
+
+
+148
+00:08:09.990 --> 00:08:13.760 line:-2 align:center
+For the unique identifier,
+we initialize a VZMacMachineIdentifier
+
+
+149
+00:08:13.794 --> 00:08:15.762 line:-1 align:center
+from one we previously saved.
+
+
+150
+00:08:15.796 --> 00:08:19.633 line:-2 align:center
+For a new install,
+we can also create a new identifier.
+
+
+151
+00:08:19,666 --> 00:08:23,470 line:-2
+We have set all three properties.
+Our platform is ready.
+
+
+152
+00:08:23,504 --> 00:08:27,107 line:-2
+All we have to do is set it
+on the configuration object.
+
+
+153
+00:08:27.140 --> 00:08:31.011 line:-2 align:center
+This gives us the hardware.
+Next we need a way to boot it.
+
+
+154
+00:08:31,912 --> 00:08:36,383 line:-2
+To do that, we set up the boot loader
+with VZMacBootLoader.
+
+
+155
+00:08:36,416 --> 00:08:38,719 line:-1
+Now our machine is ready to boot.
+
+
+156
+00:08:38,752 --> 00:08:43,123 line:-2
+What we have done so far is define
+the virtual Mac and how to start it.
+
+
+157
+00:08:43.156 --> 00:08:45.125 line:-1 align:center
+But we still need to get software on it,
+
+
+158
+00:08:45.158 --> 00:08:48.395 line:-1 align:center
+which brings us to the installation.
+
+
+159
+00:08:48.428 --> 00:08:51.265 line:-1 align:center
+Installing macOS is done in three steps.
+
+
+160
+00:08:51,298 --> 00:08:54,501 line:-2
+First, we need to download
+a restore image with the version
+
+
+161
+00:08:54,535 --> 00:08:56,703 line:-1
+of macOS we want to install.
+
+
+162
+00:08:56,737 --> 00:08:58,939 line:-1
+Then we need to create a configuration
+
+
+163
+00:08:58,972 --> 00:09:01,942 line:-2
+that is compatible
+with that version of macOS.
+
+
+164
+00:09:01.975 --> 00:09:04.645 line:-2 align:center
+And finally,
+we’ll install our restore image
+
+
+165
+00:09:04,678 --> 00:09:07,114 line:-1
+in the compatible virtual machine.
+
+
+166
+00:09:07.147 --> 00:09:10.117 line:-2 align:center
+So first,
+we need to download a restore image.
+
+
+167
+00:09:10,150 --> 00:09:12,753 line:-2
+You can download restore images
+from the developer website,
+
+
+168
+00:09:12.786 --> 00:09:15.989 line:-1 align:center
+but Virtualization can also help us.
+
+
+169
+00:09:16.023 --> 00:09:19.927 line:-2 align:center
+You can call
+VZMacOSRestoreImage.latestSupported
+
+
+170
+00:09:19.960 --> 00:09:25.032 line:-2 align:center
+to get a restore image object
+for the latest stable version of macOS.
+
+
+171
+00:09:25,065 --> 00:09:29,570 line:-2
+This object has a URL property
+that we can use to download the file.
+
+
+172
+00:09:29.603 --> 00:09:32.739 line:-2 align:center
+Then we want to create a virtual machine
+that is compatible
+
+
+173
+00:09:32.773 --> 00:09:35.409 line:-1 align:center
+with the version of macOS we downloaded.
+
+
+174
+00:09:35.442 --> 00:09:37.811 line:-1 align:center
+Virtualization can also help us here.
+
+
+175
+00:09:37.845 --> 00:09:42.249 line:-2 align:center
+We can ask the restore image object
+for the configuration requirements.
+
+
+176
+00:09:42,282 --> 00:09:44,985 line:-2
+If the restore image can be run
+on the current system,
+
+
+177
+00:09:45.018 --> 00:09:47.888 line:-1 align:center
+we get an object listing the requirements.
+
+
+178
+00:09:47,921 --> 00:09:50,858 line:-2
+From the requirements,
+we can obtain the hardware model needed
+
+
+179
+00:09:50,891 --> 00:09:52,993 line:-1
+needed to run this version of macOS.
+
+
+180
+00:09:53.026 --> 00:09:55.929 line:-2 align:center
+We have seen previously how
+to restore a hardware model.
+
+
+181
+00:09:55.963 --> 00:09:58.665 line:-1 align:center
+This is how we obtain a new one.
+
+
+182
+00:09:59,800 --> 00:10:03,470 line:-2
+The requirements
+also contain two useful properties.
+
+
+183
+00:10:03,504 --> 00:10:07,808 line:-2
+The object can tell us how many CPUs
+and how much memory is required
+
+
+184
+00:10:07.841 --> 00:10:10.410 line:-1 align:center
+to run this version of macOS.
+
+
+185
+00:10:11.345 --> 00:10:14.348 line:-2 align:center
+Finally, we are ready
+to start installation.
+
+
+186
+00:10:14.381 --> 00:10:18.218 line:-2 align:center
+We start by creating a new virtual machine
+from our configuration.
+
+
+187
+00:10:18,252 --> 00:10:20,354 line:-1
+Then we create an installer.
+
+
+188
+00:10:20.387 --> 00:10:22.789 line:-1 align:center
+The installer takes two arguments,
+
+
+189
+00:10:22,823 --> 00:10:25,392 line:-1
+the compatible virtual machine we created
+
+
+190
+00:10:25,425 --> 00:10:28,662 line:-2
+and the path
+to the restore image we downloaded.
+
+
+191
+00:10:28.695 --> 00:10:32.933 line:-2 align:center
+Now we can just call install(),
+and voilà, we are ready to run macOS.
+
+
+192
+00:10:33.901 --> 00:10:37.104 line:-2 align:center
+Now that we can set up a virtual Mac
+and install macOS,
+
+
+193
+00:10:37,137 --> 00:10:41,241 line:-2
+let’s see some
+of the special devices for the Mac.
+
+
+194
+00:10:41,275 --> 00:10:44,912 line:-2
+A first cool capability
+is GPU acceleration.
+
+
+195
+00:10:44,945 --> 00:10:48,582 line:-2
+We have built a graphic device
+that exposes the GPU capabilities
+
+
+196
+00:10:48.615 --> 00:10:50.184 line:-1 align:center
+to the virtual Mac.
+
+
+197
+00:10:50.217 --> 00:10:53.020 line:-2 align:center
+This means you can run Metal
+in the virtual machine,
+
+
+198
+00:10:53,053 --> 00:10:56,156 line:-2
+and get great graphics performance
+in macOS.
+
+
+199
+00:10:56,190 --> 00:10:58,125 line:-1
+Let’s see how to set it up.
+
+
+200
+00:10:59.626 --> 00:11:02.496 line:-2 align:center
+We start by creating
+the graphics device configuration.
+
+
+201
+00:11:02.529 --> 00:11:06.333 line:-2 align:center
+Here, we will use
+the VZMacGraphicsDeviceConfiguration.
+
+
+202
+00:11:06,366 --> 00:11:08,402 line:-1
+Next, we want to give it a display.
+
+
+203
+00:11:08.435 --> 00:11:13.040 line:-2 align:center
+We set up the display
+by defining its size and pixel density.
+
+
+204
+00:11:13,073 --> 00:11:15,342 line:-1
+Now our device configuration is ready.
+
+
+205
+00:11:15.375 --> 00:11:18.712 line:-2 align:center
+As usual, we set it
+on the main configuration object.
+
+
+206
+00:11:18,745 --> 00:11:22,249 line:-2
+We set it as the graphics device
+for our virtual machine.
+
+
+207
+00:11:23,383 --> 00:11:26,553 align:center
+Next, we have a new device
+for interacting with the Mac.
+
+
+208
+00:11:26,587 --> 00:11:29,890 align:center
+In macOS Ventura,
+we are adding the Mac trackpad support
+
+
+209
+00:11:29,923 --> 00:11:31,558 line:0
+to the virtual Mac.
+
+
+210
+00:11:31,592 --> 00:11:34,127 line:0
+With the new trackpad,
+it is possible to use gestures
+
+
+211
+00:11:34,161 --> 00:11:37,431 align:center
+like rotation, pinch to zoom, and so on.
+
+
+212
+00:11:37,464 --> 00:11:40,300 line:0
+This new device uses new drivers in macOS.
+
+
+213
+00:11:40,334 --> 00:11:42,236 line:-2
+So to use it,
+you will need macOS 13
+
+
+214
+00:11:42.269 --> 00:11:45.572 line:-2 align:center
+both on the host system
+and in the virtual machine.
+
+
+215
+00:11:45.606 --> 00:11:48.208 line:-1 align:center
+Let’s see how to set it up.
+
+
+216
+00:11:48,242 --> 00:11:50,210 line:-1
+It’s very easy.
+
+
+217
+00:11:50.244 --> 00:11:54.181 line:-2 align:center
+We create a new object
+of type VZMacTrackpadConfiguration.
+
+
+218
+00:11:54.214 --> 00:11:58.218 line:-2 align:center
+Then we set it as the pointing device
+on the virtual machine.
+
+
+219
+00:11:58.252 --> 00:12:03.557 line:-2 align:center
+Now when we’ll use the view
+with our virtual Mac, we can use gestures.
+
+
+220
+00:12:03,590 --> 00:12:06,627 line:-2
+Finally, let’s look into a common use case
+for many of us,
+
+
+221
+00:12:06,660 --> 00:12:10,998 line:-2
+sharing files between the host system
+and the virtual machine.
+
+
+222
+00:12:11.031 --> 00:12:14.635 line:-2 align:center
+In macOS 12,
+we introduced the Virtio file-system device
+
+
+223
+00:12:14,668 --> 00:12:16,637 line:-1
+to share files on Linux.
+
+
+224
+00:12:16,670 --> 00:12:20,407 line:-2
+In macOS Ventura,
+we are adding support for macOS.
+
+
+225
+00:12:20.440 --> 00:12:23.744 line:-2 align:center
+You can now pick folders that you want
+to share with the virtual machine.
+
+
+226
+00:12:23.777 --> 00:12:26.980 line:-2 align:center
+Any change you make from the host system
+is instantly reflected
+
+
+227
+00:12:27.014 --> 00:12:29.850 line:-2 align:center
+within the virtual machine
+and vice versa.
+
+
+228
+00:12:29.883 --> 00:12:32.152 line:-1 align:center
+Let’s see how to set it up.
+
+
+229
+00:12:32,186 --> 00:12:37,324 line:-2
+First, we create a VZShareDirectory
+with a directory we want to share.
+
+
+230
+00:12:37.357 --> 00:12:39.726 line:-1 align:center
+Then we create a share object.
+
+
+231
+00:12:39.760 --> 00:12:43.931 line:-2 align:center
+Here we'll use VZSingleDirectoryShare
+to share a single directory.
+
+
+232
+00:12:43,964 --> 00:12:48,802 line:-2
+You can also share multiple directories
+by using VZMultipleDirectoryShare.
+
+
+233
+00:12:48,836 --> 00:12:51,438 line:-2
+Now that we have the share,
+we need to create a device.
+
+
+234
+00:12:51.471 --> 00:12:54.241 line:-1 align:center
+But we will start we something special.
+
+
+235
+00:12:54,274 --> 00:12:56,810 line:-2
+File system devices
+are identified by a tag.
+
+
+236
+00:12:56.844 --> 00:12:59.913 line:-2 align:center
+In macOS Ventura,
+we have added a special tag
+
+
+237
+00:12:59.947 --> 00:13:03.217 line:-2 align:center
+to tell the virtual machine
+to automount this device.
+
+
+238
+00:13:03,250 --> 00:13:07,521 line:-2
+Here, we take this special tag,
+macOSGuestAutomountTag.
+
+
+239
+00:13:07.554 --> 00:13:11.325 line:-2 align:center
+Then we create the device
+and use our special tag.
+
+
+240
+00:13:11.358 --> 00:13:14.995 line:-2 align:center
+We set the share
+from the single directory we configured.
+
+
+241
+00:13:15.028 --> 00:13:19.266 line:-2 align:center
+And finally, we add the device
+to the configuration as usual.
+
+
+242
+00:13:19.299 --> 00:13:23.737 line:-2 align:center
+Finally, let’s look
+at everything together in a demo.
+
+
+243
+00:13:23,770 --> 00:13:26,273 line:-1
+We start from a basic configuration.
+
+
+244
+00:13:26.306 --> 00:13:28.342 line:-1 align:center
+We have a VZVirtualMachineConfiguration
+
+
+245
+00:13:28.375 --> 00:13:33.814 line:-2 align:center
+with just CPU,
+memory, a keyboard, and a disk.
+
+
+246
+00:13:33,847 --> 00:13:35,449 line:-1
+We want a virtual Mac.
+
+
+247
+00:13:35,482 --> 00:13:39,086 line:-2
+To do that, we need to start
+by setting up the platform.
+
+
+248
+00:13:39.119 --> 00:13:43.524 line:-2 align:center
+We'll use createMacPlatform
+that is defined above to do that.
+
+
+249
+00:13:43.557 --> 00:13:46.426 line:-2 align:center
+The second piece
+of a virtual Mac is the boot loader.
+
+
+250
+00:13:46,460 --> 00:13:49,997 line:-2
+We need a boot loader
+that knows how to boot macOS.
+
+
+251
+00:13:50,030 --> 00:13:52,699 line:-2
+To get that,
+we set the platform's boot loader
+
+
+252
+00:13:52.733 --> 00:13:55.536 line:-1 align:center
+to VZMacOSBootLoader().
+
+
+253
+00:13:55,569 --> 00:13:58,238 line:-1
+Next, we want to set up the devices.
+
+
+254
+00:13:58.272 --> 00:14:00.507 line:-1 align:center
+We want accelerated graphics.
+
+
+255
+00:14:00,541 --> 00:14:04,711 line:-2
+To get it, we will set up
+a VZMacGraphicsConfiguration.
+
+
+256
+00:14:04.745 --> 00:14:06.413 line:-1 align:center
+We create the object,
+
+
+257
+00:14:06.446 --> 00:14:09.383 line:-1 align:center
+define the display size and pixel density,
+
+
+258
+00:14:09,416 --> 00:14:12,186 line:-1
+and we add it to the configuration.
+
+
+259
+00:14:12,219 --> 00:14:14,755 line:-1
+Next, we want to use the new trackpad.
+
+
+260
+00:14:14,788 --> 00:14:17,224 line:-2
+All we need to do
+is set the pointing device
+
+
+261
+00:14:17.257 --> 00:14:19.426 line:-1 align:center
+to VZMacTrackpadConfiguration.
+
+
+262
+00:14:19,459 --> 00:14:20,694 line:-1
+That's it.
+
+
+263
+00:14:20.727 --> 00:14:24.765 line:-2 align:center
+Now, we could start the VM,
+but let's add the cherry on top.
+
+
+264
+00:14:24.798 --> 00:14:27.134 line:-1 align:center
+We have seen how we can share directories.
+
+
+265
+00:14:27,167 --> 00:14:29,169 line:-1
+Let's do it here.
+
+
+266
+00:14:29.203 --> 00:14:32.406 line:-2 align:center
+We start by creating
+the filesystem device configuration.
+
+
+267
+00:14:32.439 --> 00:14:37.010 line:-2 align:center
+Here, notice we use the special tag
+to automount it into macOS.
+
+
+268
+00:14:37.044 --> 00:14:38.879 line:-1 align:center
+Then we define our share.
+
+
+269
+00:14:38.912 --> 00:14:42.649 line:-2 align:center
+Here we use a single directory share
+from a path on the file system.
+
+
+270
+00:14:42,683 --> 00:14:46,019 line:-2
+Here, we will share this project
+we are editing right now.
+
+
+271
+00:14:47,254 --> 00:14:50,457 line:-2
+We add the device to our configuration,
+and we are done.
+
+
+272
+00:14:51.391 --> 00:14:55.128 line:-2 align:center
+Everything is ready.
+We launch our app.
+
+
+273
+00:14:55,162 --> 00:14:57,598 align:center
+Since we configured
+the Mac graphics device,
+
+
+274
+00:14:57,631 --> 00:15:01,101 align:center
+the VZVirtualMachineView
+can show the content.
+
+
+275
+00:15:01,134 --> 00:15:04,271 line:-1
+This is what you see here in the window.
+
+
+276
+00:15:04,304 --> 00:15:08,008 line:-2
+And here it is.
+We have configured macOS from scratch.
+
+
+277
+00:15:08,041 --> 00:15:11,678 line:-2
+We can see the shared directory
+and the project we were editing right now.
+
+
+278
+00:15:11.712 --> 00:15:14.915 line:-1 align:center
+Finally, we will turn our eyes onto Linux.
+
+
+279
+00:15:14,948 --> 00:15:17,150 line:-2
+Virtualization framework has
+supported Linux
+
+
+280
+00:15:17.184 --> 00:15:20.020 line:-1 align:center
+since the very beginning in macOS Big Sur.
+
+
+281
+00:15:20,053 --> 00:15:23,357 line:-2
+In macOS Ventura, we have
+added some pretty cool new features,
+
+
+282
+00:15:23,390 --> 00:15:25,359 line:-2
+and we want
+to share some of them with you.
+
+
+283
+00:15:26,660 --> 00:15:29,830 line:-2
+First, we will see how we can
+install full Linux distributions,
+
+
+284
+00:15:29.863 --> 00:15:33.066 line:-2 align:center
+completely unmodified,
+in virtual machines.
+
+
+285
+00:15:33,100 --> 00:15:37,604 line:-2
+Then we will look at a new device
+we are adding to show UI from Linux.
+
+
+286
+00:15:37.638 --> 00:15:41.375 line:-2 align:center
+And finally, we will look at how
+we can take advantage of Rosetta 2
+
+
+287
+00:15:41,408 --> 00:15:44,878 line:-1
+to run Linux binaries in virtual machines.
+
+
+288
+00:15:44,912 --> 00:15:47,181 line:-1
+Let’s start with installation.
+
+
+289
+00:15:47,214 --> 00:15:49,616 line:-2
+If we wanted to install Linux
+on a physical machine,
+
+
+290
+00:15:49.650 --> 00:15:52.819 line:-2 align:center
+we'd start by downloading an ISO file
+with the installer.
+
+
+291
+00:15:52,853 --> 00:15:55,923 line:-2
+Then we'd erase a flash drive
+with the ISO.
+
+
+292
+00:15:55.956 --> 00:15:59.893 line:-2 align:center
+And finally, we'd plug the drive
+in the computer and boot from it.
+
+
+293
+00:15:59,927 --> 00:16:03,363 line:-2
+When dealing with virtual machines,
+we will go through the same flow.
+
+
+294
+00:16:03.397 --> 00:16:07.868 line:-2 align:center
+But instead of using a physical USB drive,
+we will use a virtual one.
+
+
+295
+00:16:07.901 --> 00:16:09.970 line:-1 align:center
+Let’s see how it works.
+
+
+296
+00:16:10.003 --> 00:16:14.775 line:-2 align:center
+We start by creating an URL from the path
+to the ISO file we downloaded.
+
+
+297
+00:16:14.808 --> 00:16:18.779 line:-2 align:center
+Then we create a disk image attachment
+from the file.
+
+
+298
+00:16:18.812 --> 00:16:24.651 line:-2 align:center
+A disk image attachment represents a piece
+of storage that we can attach to a device.
+
+
+299
+00:16:24,685 --> 00:16:28,155 line:-2
+Next, we configure
+a virtual storage device.
+
+
+300
+00:16:28,188 --> 00:16:30,624 line:-1
+In this case, we want USB storage,
+
+
+301
+00:16:30,657 --> 00:16:35,028 line:-2
+so we use
+VZUSBMassStorageDeviceConfiguration.
+
+
+302
+00:16:35.062 --> 00:16:37.030 line:-1 align:center
+Finally, as always,
+
+
+303
+00:16:37.064 --> 00:16:39.533 line:-2 align:center
+we add our device
+in the main configuration.
+
+
+304
+00:16:39,566 --> 00:16:42,736 line:-2
+Here, the USB device appears
+next to another storage device,
+
+
+305
+00:16:42.769 --> 00:16:45.706 line:-2 align:center
+the main disk
+on which we will install Linux.
+
+
+306
+00:16:45,739 --> 00:16:49,343 line:-2
+Now we have a USB drive,
+but we need a way to boot from it.
+
+
+307
+00:16:50.310 --> 00:16:54.081 line:-2 align:center
+In macOS Ventura,
+we have added support for EFI.
+
+
+308
+00:16:54.114 --> 00:16:58.952 line:-2 align:center
+EFI is an industry standard
+for booting both ARM and Intel hardware.
+
+
+309
+00:16:58,986 --> 00:17:02,556 line:-2
+We are bringing the same support
+to virtual machines.
+
+
+310
+00:17:02.589 --> 00:17:05.259 line:-1 align:center
+EFI has a boot discovery mechanism.
+
+
+311
+00:17:05.292 --> 00:17:09.496 line:-2 align:center
+What this will allow is discovering
+the installer on our USB drive.
+
+
+312
+00:17:09.530 --> 00:17:13.100 line:-2 align:center
+EFI looks at each drive
+for one that can be booted.
+
+
+313
+00:17:13.133 --> 00:17:16.003 line:-2 align:center
+It will find the installer
+and start from there.
+
+
+314
+00:17:16.036 --> 00:17:19.373 line:-2 align:center
+The installer itself will
+tell EFI what drive to use next.
+
+
+315
+00:17:19.406 --> 00:17:23.577 line:-2 align:center
+After the installation,
+EFI can then start the Linux distribution.
+
+
+316
+00:17:23,610 --> 00:17:26,847 line:-1
+Let’s see how to set up EFI in code.
+
+
+317
+00:17:26,880 --> 00:17:31,018 line:-2
+First, we create a boot loader
+of type VZEFIBootLoader.
+
+
+318
+00:17:31.051 --> 00:17:35.355 line:-2 align:center
+EFI requires non-volatile memory
+to store information between boots.
+
+
+319
+00:17:35.389 --> 00:17:38.258 line:-1 align:center
+This is called the EFI variable store.
+
+
+320
+00:17:38,292 --> 00:17:40,761 line:-2
+With virtual machines,
+we can back such storage
+
+
+321
+00:17:40,794 --> 00:17:42,863 line:-1
+by a file on the filesystem.
+
+
+322
+00:17:42.896 --> 00:17:46.033 line:-2 align:center
+Here, we create
+a new variable store from scratch.
+
+
+323
+00:17:46,066 --> 00:17:47,568 line:-1
+Now EFI is ready.
+
+
+324
+00:17:47.601 --> 00:17:51.705 line:-2 align:center
+We just need to set it
+as the boot loader on the configuration.
+
+
+325
+00:17:51,738 --> 00:17:57,010 line:-2
+Next, we will look into a new capability
+for Linux VMs, graphics.
+
+
+326
+00:17:57.044 --> 00:18:01.515 line:-2 align:center
+In macOS Ventura,
+we have added support for Virtio GPU 2D.
+
+
+327
+00:18:01.548 --> 00:18:05.285 line:-2 align:center
+Virtio GPU 2D is a paravirtualized device
+that allows Linux
+
+
+328
+00:18:05,319 --> 00:18:08,455 line:-1
+to provide surfaces to the host macOS.
+
+
+329
+00:18:08.488 --> 00:18:11.325 line:-2 align:center
+Linux renders the content,
+gives the rendered frame
+
+
+330
+00:18:11,358 --> 00:18:14,494 line:-2
+to Virtualization framework,
+which can then display it.
+
+
+331
+00:18:14.528 --> 00:18:18.765 line:-2 align:center
+You can now show this content
+in your app with VZVirtualMachineView
+
+
+332
+00:18:18,799 --> 00:18:21,201 line:-1
+just like on macOS.
+
+
+333
+00:18:21,235 --> 00:18:23,237 line:-1
+Let’s see how to set it up.
+
+
+334
+00:18:24,571 --> 00:18:28,542 line:-2
+Setting up the device is similar
+to what we did for macOS.
+
+
+335
+00:18:28,575 --> 00:18:32,946 line:-2
+We start by creating
+a VZVirtioGraphicsDeviceConfiguration.
+
+
+336
+00:18:32,980 --> 00:18:36,149 line:-2
+We need to define the size
+of our virtual display.
+
+
+337
+00:18:36,183 --> 00:18:39,953 line:-2
+In Virtio terminology,
+a virtual display is a "scanout."
+
+
+338
+00:18:39,987 --> 00:18:44,892 line:-2
+So we create one scanout
+with the size of the display.
+
+
+339
+00:18:44,925 --> 00:18:48,262 line:-2
+Finally, we set the new device
+as the graphics device
+
+
+340
+00:18:48.295 --> 00:18:49.963 line:-1 align:center
+of our configuration.
+
+
+341
+00:18:49,997 --> 00:18:54,168 line:-2
+Now our VM is ready to display content
+with VZVirtualMachineView.
+
+
+342
+00:18:54,201 --> 00:18:58,405 line:-2
+Next, let’s see everything
+together in a demo.
+
+
+343
+00:18:58.438 --> 00:19:00.040 line:-1 align:center
+We start from where we left off.
+
+
+344
+00:19:00.073 --> 00:19:03.143 line:-2 align:center
+Let's delete the code
+that is specific to the Mac.
+
+
+345
+00:19:03.177 --> 00:19:05.479 line:-2 align:center
+Then let's change the disk
+we are booting from.
+
+
+346
+00:19:05.512 --> 00:19:09.950 line:-2 align:center
+We'll swap the path
+from our Mac drive to our Linux drive.
+
+
+347
+00:19:09,983 --> 00:19:12,386 line:-1
+Next, we need a boot loader.
+
+
+348
+00:19:12,419 --> 00:19:16,156 line:-1
+We set up EFI with VZEFIBootLoader.
+
+
+349
+00:19:16.924 --> 00:19:19.326 line:-2 align:center
+We first create
+the EFI boot loader object.
+
+
+350
+00:19:19.359 --> 00:19:22.129 line:-2 align:center
+Then we load
+the variable store from its file.
+
+
+351
+00:19:22,162 --> 00:19:27,401 line:-2
+And finally, we set EFI
+as the boot loader on our configuration.
+
+
+352
+00:19:27.434 --> 00:19:31.238 line:-2 align:center
+Now we can boot,
+but it'd be nice to show the UI.
+
+
+353
+00:19:31.271 --> 00:19:35.008 line:-1 align:center
+Let's add Virtio GPU to our configuration.
+
+
+354
+00:19:35,042 --> 00:19:36,643 line:-1
+We simply create a graphics device
+
+
+355
+00:19:36,677 --> 00:19:40,013 line:-2
+of type
+VZVirtioGraphicsDeviceConfiguration.
+
+
+356
+00:19:40.047 --> 00:19:43.884 line:-2 align:center
+Then we define a scanout
+with the size of the virtual display.
+
+
+357
+00:19:43.917 --> 00:19:49.389 line:-2 align:center
+And we set the Virtio GPU as
+a graphics device on our configuration.
+
+
+358
+00:19:49.423 --> 00:19:52.993 line:-2 align:center
+The last touch
+is getting the mouse to work.
+
+
+359
+00:19:53,026 --> 00:19:56,330 line:-2
+We just use a virtual
+USB screen coordinate pointer device,
+
+
+360
+00:19:56.363 --> 00:19:58.665 line:-1 align:center
+and we'll have a mouse in Linux.
+
+
+361
+00:19:58.699 --> 00:20:01.335 line:-2 align:center
+That's it.
+We can run the project.
+
+
+362
+00:20:01,368 --> 00:20:04,471 align:center
+EFI looks at the disk
+and finds it bootable.
+
+
+363
+00:20:04.505 --> 00:20:09.977 line:-2 align:center
+Then Linux shows the content of the UI
+through the Virtio GPU device.
+
+
+364
+00:20:10.010 --> 00:20:12.946 line:-2 align:center
+And we can use the mouse
+to interact with Linux.
+
+
+365
+00:20:12,980 --> 00:20:15,983 line:-2
+Last but not least,
+we'll see how we can take advantage
+
+
+366
+00:20:16.016 --> 00:20:19.119 line:-1 align:center
+of the Rosetta 2 technology inside Linux.
+
+
+367
+00:20:20.053 --> 00:20:23.490 line:-2 align:center
+For many of us,
+we love developing services on our Mac,
+
+
+368
+00:20:23,524 --> 00:20:25,025 line:-1
+but once our work is ready,
+
+
+369
+00:20:25.058 --> 00:20:29.162 line:-2 align:center
+the binaries we create may need
+to run on x86 servers.
+
+
+370
+00:20:29.196 --> 00:20:32.332 line:-2 align:center
+x86 instruction emulation
+has been great for this,
+
+
+371
+00:20:32,366 --> 00:20:35,035 line:-1
+but we can do better.
+
+
+372
+00:20:35,068 --> 00:20:37,204 line:-2
+In macOS Ventura,
+we are bringing the power
+
+
+373
+00:20:37,237 --> 00:20:39,673 line:-1
+of Rosetta 2 to Linux binaries.
+
+
+374
+00:20:40.807 --> 00:20:44.378 line:-2 align:center
+What Rosetta 2 does is translate
+the Linux x86-64 binaries
+
+
+375
+00:20:44.411 --> 00:20:46.446 line:-1 align:center
+inside your virtual machine.
+
+
+376
+00:20:46,480 --> 00:20:49,750 line:-2
+This means you can run
+your favorite ARM Linux distribution,
+
+
+377
+00:20:49.783 --> 00:20:53.253 line:-1 align:center
+and its x86-64 apps can run with Rosetta.
+
+
+378
+00:20:53.287 --> 00:20:54.755 line:-1 align:center
+And it's fast.
+
+
+379
+00:20:54.788 --> 00:20:57.658 line:-2 align:center
+It's the same technology
+we have been using on the Mac,
+
+
+380
+00:20:57,691 --> 00:21:00,460 line:-2
+which means
+we have incredible performance.
+
+
+381
+00:21:00.494 --> 00:21:03.530 line:-1 align:center
+Let’s see how to use it.
+
+
+382
+00:21:03,564 --> 00:21:07,000 line:-2
+First, we need
+to give Linux access to Rosetta.
+
+
+383
+00:21:07,034 --> 00:21:11,705 line:-2
+To do this, we use the same file sharing
+technology we have seen on macOS.
+
+
+384
+00:21:11.738 --> 00:21:15.175 line:-2 align:center
+Instead of sharing a folder,
+we use a special kind of object,
+
+
+385
+00:21:15.209 --> 00:21:18.912 line:-1 align:center
+a VZLinuxRosettaDirectoryShare.
+
+
+386
+00:21:18,946 --> 00:21:24,151 line:-2
+Then we create a sharing device
+and set up Rosetta directory share.
+
+
+387
+00:21:24.184 --> 00:21:28.455 line:-2 align:center
+Finally, we set up our device
+on the configuration as usual.
+
+
+388
+00:21:28.488 --> 00:21:32.059 line:-2 align:center
+Now our virtual machine
+is ready to use Rosetta.
+
+
+389
+00:21:32,092 --> 00:21:35,696 line:-2
+Next, let’s see how Linux
+can take advantage of it.
+
+
+390
+00:21:36,930 --> 00:21:41,335 line:-2
+In Linux, we start by mounting
+the shared directory in the file system.
+
+
+391
+00:21:41,368 --> 00:21:46,240 line:-2
+What we see from Linux is a Rosetta binary
+that can translate applications.
+
+
+392
+00:21:46,273 --> 00:21:50,511 line:-2
+Then we can use update-binfmts
+to tell the system to use Rosetta
+
+
+393
+00:21:50.544 --> 00:21:53.847 line:-1 align:center
+to handle any x86-64 binary.
+
+
+394
+00:21:53.881 --> 00:21:55.849 line:-2 align:center
+Don’t worry
+about remembering this command.
+
+
+395
+00:21:55,883 --> 00:21:58,685 line:-1
+It's all in the documentation.
+
+
+396
+00:21:58.719 --> 00:22:00.921 line:-1 align:center
+Now Linux is ready.
+
+
+397
+00:22:00,954 --> 00:22:05,926 line:-2
+Every x86-64 binary launched
+will be translated by Rosetta.
+
+
+398
+00:22:07.361 --> 00:22:11.832 line:-2 align:center
+Before we end our Linux section,
+let’s see everything together.
+
+
+399
+00:22:11.865 --> 00:22:15.602 line:-2 align:center
+Here, we have a full Linux
+distribution installed from scratch.
+
+
+400
+00:22:15.636 --> 00:22:18.705 line:-1 align:center
+We can show its UI with Virtio GPU 2D.
+
+
+401
+00:22:18.739 --> 00:22:22.776 line:-2 align:center
+From within the VM,
+we run a PHP server with Rosetta.
+
+
+402
+00:22:22,809 --> 00:22:26,079 line:-2
+And we can just connect
+to it from macOS host.
+
+
+403
+00:22:27.381 --> 00:22:31.518 line:-2 align:center
+We've seen that creating
+virtual machines has never been simpler.
+
+
+404
+00:22:31,552 --> 00:22:34,488 line:-2
+With Virtualization framework,
+you can get virtual machines running
+
+
+405
+00:22:34,521 --> 00:22:37,191 line:-1
+with just a few lines of code.
+
+
+406
+00:22:37.224 --> 00:22:42.062 line:-2 align:center
+We have also seen that virtual machines
+are ridiculously fast on macOS.
+
+
+407
+00:22:42.095 --> 00:22:43.931 line:-1 align:center
+To learn more about Virtualization,
+
+
+408
+00:22:43,964 --> 00:22:47,534 line:-2
+I invite you to check out
+the code samples and documentation.
+
+
+409
+00:22:47.568 --> 00:22:49.603 line:-2 align:center
+And on behalf of the team,
+we cannot wait
+
+
+410
+00:22:49.636 --> 00:22:51.772 line:-2 align:center
+to see what you will do next
+with this technology.
+
+
+411
+00:22:51.805 --> 00:22:57.110 line:-1 align:center
+[upbeat music]
+

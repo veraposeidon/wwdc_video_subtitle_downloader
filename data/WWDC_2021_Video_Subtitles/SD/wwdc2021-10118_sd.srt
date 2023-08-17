@@ -1,0 +1,1564 @@
+2
+00:00:02,069 --> 00:00:09,009 line:-1
+[music]
+
+
+3
+00:00:10,043 --> 00:00:11,879 line:-1
+[Rusty] Hi, I'm Rusty.
+
+
+4
+00:00:11,912 --> 00:00:14,047 line:-2
+I'm an engineer
+on the CloudKit team,
+
+
+5
+00:00:14,081 --> 00:00:17,084 line:-2
+and I'm excited to introduce
+a new CloudKit developer tool,
+
+
+6
+00:00:17.117 --> 00:00:19.553 line:-2 align:center
+as well as a brand-new
+CloudKit schema language.
+
+
+7
+00:00:19.586 --> 00:00:20.487 line:-1 align:center
+In this session,
+
+
+8
+00:00:20.521 --> 00:00:22.422 line:-2 align:center
+I'll talk about
+why integration testing
+
+
+9
+00:00:22.456 --> 00:00:24.324 line:-2 align:center
+can be challenging
+for an application
+
+
+10
+00:00:24,358 --> 00:00:26,360 line:-1
+that integrates with the cloud.
+
+
+11
+00:00:26,393 --> 00:00:28,161 line:-1
+Then, I'll demonstrate cktool,
+
+
+12
+00:00:28.195 --> 00:00:30.464 line:-2 align:center
+our new command line
+developer tool for CloudKit.
+
+
+13
+00:00:30,497 --> 00:00:32,232 line:-2
+You'll find out how
+cktool can be used
+
+
+14
+00:00:32,266 --> 00:00:35,302 line:-2
+inside of Xcode
+to automate test setup.
+
+
+15
+00:00:35,335 --> 00:00:38,238 line:-2
+You'll learn about CloudKit's
+new declarative schema language.
+
+
+16
+00:00:38,272 --> 00:00:40,707 line:-2
+And then, I'll wrap things up
+with next steps.
+
+
+17
+00:00:40.741 --> 00:00:41.742 line:-1 align:center
+Let's get started.
+
+
+18
+00:00:43,110 --> 00:00:45,779 line:-2
+When you write applications
+that depend on cloud services,
+
+
+19
+00:00:45,812 --> 00:00:47,214 line:-1
+there are explicit contracts
+
+
+20
+00:00:47,247 --> 00:00:48,448 line:-1
+between your application
+
+
+21
+00:00:48,482 --> 00:00:50,417 line:-1
+and the services you depend on.
+
+
+22
+00:00:50,450 --> 00:00:52,286 line:-2
+Integration tests
+can help you validate
+
+
+23
+00:00:52,319 --> 00:00:54,121 line:-2
+how you interact with these
+services,
+
+
+24
+00:00:54,154 --> 00:00:55,455 line:-1
+but properly automating setup
+
+
+25
+00:00:55.489 --> 00:00:57.191 line:-2 align:center
+of these integration tests
+can be challenging
+
+
+26
+00:00:57,224 --> 00:00:58,458 line:-1
+for a few reasons.
+
+
+27
+00:00:58,492 --> 00:01:00,961 line:-2
+First, it's not always easy
+to keep the server
+
+
+28
+00:01:00,994 --> 00:01:02,396 line:-2
+up to date
+with the data model
+
+
+29
+00:01:02.429 --> 00:01:03.730 line:-1 align:center
+your app is using.
+
+
+30
+00:01:03,764 --> 00:01:04,965 line:-1
+As you iterate on your schema
+
+
+31
+00:01:04.998 --> 00:01:06.533 line:-1 align:center
+during development of your app,
+
+
+32
+00:01:06.567 --> 00:01:08.268 line:-2 align:center
+it's important
+that the schema on the server
+
+
+33
+00:01:08,302 --> 00:01:10,604 line:-2
+exactly matches the schema
+your app is using
+
+
+34
+00:01:10,637 --> 00:01:11,872 line:-1
+when your tests run.
+
+
+35
+00:01:11,905 --> 00:01:12,973 line:-1
+Also, it can be difficult
+
+
+36
+00:01:13,006 --> 00:01:14,308 line:-2
+to ensure that your tests
+are running
+
+
+37
+00:01:14,341 --> 00:01:16,443 line:-2
+against a consistent set
+of sample data in the cloud
+
+
+38
+00:01:16,476 --> 00:01:18,011 line:-1
+each time the tests run,
+
+
+39
+00:01:18,045 --> 00:01:19,913 line:-2
+particularly if your tests
+modify that data
+
+
+40
+00:01:19,947 --> 00:01:21,215 line:-1
+as part of the test.
+
+
+41
+00:01:21.248 --> 00:01:24.718 line:-2 align:center
+The CloudKit team has just
+made all of this easier for you.
+
+
+42
+00:01:24,751 --> 00:01:27,654 line:-2
+With the new CloudKit schema
+language we've just introduced,
+
+
+43
+00:01:27.688 --> 00:01:29.223 line:-2 align:center
+you can declare
+your CloudKit schema
+
+
+44
+00:01:29,256 --> 00:01:31,925 line:-2
+in a file right alongside
+your application code,
+
+
+45
+00:01:31,959 --> 00:01:33,527 line:-2
+and then check it
+into version control
+
+
+46
+00:01:33,560 --> 00:01:34,695 line:-1
+so that you can track changes
+
+
+47
+00:01:34,728 --> 00:01:36,897 line:-2
+along with all other changes
+in your project,
+
+
+48
+00:01:36,930 --> 00:01:38,866 line:-2
+and always ensure
+that your app's data model
+
+
+49
+00:01:38,899 --> 00:01:41,034 line:-2
+is consistent
+with your CloudKit schema.
+
+
+50
+00:01:41,068 --> 00:01:43,604 line:-2
+And with the new cktool
+command line developer tool,
+
+
+51
+00:01:43.637 --> 00:01:44.838 line:-1 align:center
+you can easily automate
+
+
+52
+00:01:44.872 --> 00:01:46.707 line:-2 align:center
+the process of sending
+this schema declaration
+
+
+53
+00:01:46,740 --> 00:01:47,908 line:-1
+to the CloudKit server,
+
+
+54
+00:01:47,941 --> 00:01:50,577 line:-2
+while also creating
+a consistent set of sample data
+
+
+55
+00:01:50.611 --> 00:01:53.013 line:-2 align:center
+on the server
+right before you run your tests.
+
+
+56
+00:01:53,046 --> 00:01:55,983 line:-2
+Let me jump right in
+and start using cktool.
+
+
+57
+00:01:56.016 --> 00:01:59.386 line:-2 align:center
+First, cktool
+is installed with Xcode 13.
+
+
+58
+00:01:59.419 --> 00:02:00.954 line:-1 align:center
+Once you install Xcode 13,
+
+
+59
+00:02:00.988 --> 00:02:04.157 line:-2 align:center
+you can start using cktool
+from the Terminal right away.
+
+
+60
+00:02:04.191 --> 00:02:07.194 line:-1 align:center
+cktool is invoked with xcrun.
+
+
+61
+00:02:07.227 --> 00:02:08.962 line:-1 align:center
+It offers several commands.
+
+
+62
+00:02:08.996 --> 00:02:09.830 line:-1 align:center
+For example,
+
+
+63
+00:02:09.863 --> 00:02:12.065 line:-2 align:center
+it can create records
+on the CloudKit server,
+
+
+64
+00:02:12,099 --> 00:02:14,668 line:-2
+query records that
+already exist on the server,
+
+
+65
+00:02:14,701 --> 00:02:17,704 line:-2
+import and export
+the new schema language files,
+
+
+66
+00:02:17.738 --> 00:02:21.542 line:-2 align:center
+manage authorization
+for the tool itself, and more.
+
+
+67
+00:02:21,575 --> 00:02:23,010 line:-1
+Before using cktool,
+
+
+68
+00:02:23,043 --> 00:02:24,378 line:-2
+there are a few things
+to understand
+
+
+69
+00:02:24.411 --> 00:02:26.847 line:-2 align:center
+about authorization
+with CloudKit.
+
+
+70
+00:02:26.880 --> 00:02:28.315 line:-2 align:center
+Since cktool
+communicates directly
+
+
+71
+00:02:28,348 --> 00:02:29,816 line:-1
+with the CloudKit server,
+
+
+72
+00:02:29.850 --> 00:02:32.486 line:-2 align:center
+it's necessary to first
+get the tool authorized.
+
+
+73
+00:02:32,519 --> 00:02:34,454 line:-2
+You can choose
+to only authorize cktool
+
+
+74
+00:02:34,488 --> 00:02:37,791 line:-2
+to perform container-management
+functions like schema import,
+
+
+75
+00:02:37,824 --> 00:02:39,660 line:-2
+or you can additionally
+authorize the tool
+
+
+76
+00:02:39,693 --> 00:02:41,628 line:-2
+to access data
+in your container.
+
+
+77
+00:02:41.662 --> 00:02:42.763 line:-1 align:center
+CloudKit has introduced
+
+
+78
+00:02:42,796 --> 00:02:44,965 line:-2
+two new concepts
+for this purpose.
+
+
+79
+00:02:44.998 --> 00:02:46.800 line:-2 align:center
+The first is called
+a "management token,"
+
+
+80
+00:02:46,834 --> 00:02:48,001 line:-1
+which is used by cktool
+
+
+81
+00:02:48.035 --> 00:02:49.903 line:-2 align:center
+to manage
+your CloudKit container.
+
+
+82
+00:02:49,937 --> 00:02:52,306 line:-2
+The management token is tied
+to a single developer account
+
+
+83
+00:02:52,339 --> 00:02:54,474 line:-2
+and can be used
+across developer teams
+
+
+84
+00:02:54,508 --> 00:02:57,044 line:-2
+if that developer is
+a member of multiple teams.
+
+
+85
+00:02:57,077 --> 00:02:58,178 line:-2
+A management token
+is intended
+
+
+86
+00:02:58,212 --> 00:03:00,247 line:-2
+for configuration use
+cases only,
+
+
+87
+00:03:00.280 --> 00:03:02.349 line:-1 align:center
+like schema import and export.
+
+
+88
+00:03:02.382 --> 00:03:03.917 line:-2 align:center
+This token doesn't provide
+any access
+
+
+89
+00:03:03.951 --> 00:03:05.586 line:-1 align:center
+to data in the container.
+
+
+90
+00:03:05.619 --> 00:03:08.222 line:-2 align:center
+So, we've also introduced
+a user token,
+
+
+91
+00:03:08.255 --> 00:03:10.524 line:-2 align:center
+which can be used to authorize
+the tool to write data
+
+
+92
+00:03:10.557 --> 00:03:12.893 line:-2 align:center
+into the user's private database
+of an app's container
+
+
+93
+00:03:12.926 --> 00:03:15.529 line:-2 align:center
+or to the public database
+of an app's container.
+
+
+94
+00:03:15,562 --> 00:03:16,697 line:-1
+I can get a management token
+
+
+95
+00:03:16.730 --> 00:03:19.566 line:-2 align:center
+and also a user token
+from the CloudKit Console.
+
+
+96
+00:03:19,600 --> 00:03:21,535 line:-2
+For more information
+on the CloudKit Console,
+
+
+97
+00:03:21,568 --> 00:03:23,570 line:-2
+you can check out
+"Meet CloudKit Console,"
+
+
+98
+00:03:23.604 --> 00:03:26.306 line:-1 align:center
+another WWDC21 session.
+
+
+99
+00:03:26.340 --> 00:03:28.375 line:-2 align:center
+Now that I've obtained
+both a management token
+
+
+100
+00:03:28.408 --> 00:03:30.944 line:-2 align:center
+for my developer account
+and also a user token,
+
+
+101
+00:03:30,978 --> 00:03:32,279 line:-1
+I can add them to the tool,
+
+
+102
+00:03:32.312 --> 00:03:34.815 line:-2 align:center
+which will store them securely
+in my macOS Keychain,
+
+
+103
+00:03:34.848 --> 00:03:36.517 line:-1 align:center
+and I'm ready to proceed.
+
+
+104
+00:03:36,550 --> 00:03:38,452 line:-2
+I can now start doing
+some interesting things.
+
+
+105
+00:03:38,485 --> 00:03:40,220 line:-1
+For example, I'll ask for a list
+
+
+106
+00:03:40,254 --> 00:03:42,289 line:-2
+of my Apple developer
+team memberships.
+
+
+107
+00:03:42,322 --> 00:03:43,557 line:-2
+And I get back
+a list of teams
+
+
+108
+00:03:43.590 --> 00:03:45.392 line:-1 align:center
+that I'm a member of. Great.
+
+
+109
+00:03:45,425 --> 00:03:47,194 line:-2
+Now let's say
+that I have a database schema
+
+
+110
+00:03:47,227 --> 00:03:48,695 line:-1
+defined in my container,
+
+
+111
+00:03:48.729 --> 00:03:50.998 line:-2 align:center
+and I want to commit it
+to my source code repository
+
+
+112
+00:03:51,031 --> 00:03:52,633 line:-1
+prior to making changes.
+
+
+113
+00:03:52.666 --> 00:03:54.902 line:-1 align:center
+With cktool, that's easy to do.
+
+
+114
+00:03:54,935 --> 00:03:56,970 line:-2
+Using this
+export-schema command,
+
+
+115
+00:03:57,004 --> 00:03:58,639 line:-2
+I can pull down
+my development schema
+
+
+116
+00:03:58.672 --> 00:04:01.708 line:-1 align:center
+to a file called “schema.ckdb.”
+
+
+117
+00:04:01,742 --> 00:04:03,177 line:-2
+This file is formatted
+in the new
+
+
+118
+00:04:03.210 --> 00:04:05.379 line:-2 align:center
+CloudKit schema language
+I mentioned earlier,
+
+
+119
+00:04:05,412 --> 00:04:08,081 line:-2
+and we'll explore this file
+in detail in just a minute.
+
+
+120
+00:04:08,115 --> 00:04:11,251 line:-2
+With cktool, I can add data
+to my container, too.
+
+
+121
+00:04:11.285 --> 00:04:13.754 line:-2 align:center
+Here, if I have sample values
+expressed as JSON,
+
+
+122
+00:04:13,787 --> 00:04:15,789 line:-2
+like for this
+sample Book record here,
+
+
+123
+00:04:15,822 --> 00:04:17,991 line:-2
+I can use that JSON
+as input to the tool,
+
+
+124
+00:04:18,025 --> 00:04:19,826 line:-2
+just like this,
+to create a record
+
+
+125
+00:04:19.860 --> 00:04:21.728 line:-1 align:center
+in my public database.
+
+
+126
+00:04:21.762 --> 00:04:23.864 line:-2 align:center
+Okay, so now that you have a
+basic sense
+
+
+127
+00:04:23.897 --> 00:04:25.265 line:-1 align:center
+of how the tool operates,
+
+
+128
+00:04:25,299 --> 00:04:27,234 line:-2
+I'll make
+a simple three-step script
+
+
+129
+00:04:27,267 --> 00:04:29,603 line:-2
+to delete all the data from the
+development environment
+
+
+130
+00:04:29,636 --> 00:04:31,438 line:-1
+of my app's CloudKit container,
+
+
+131
+00:04:31,471 --> 00:04:33,740 line:-2
+then send my schema
+declaration to the server,
+
+
+132
+00:04:33,774 --> 00:04:35,943 line:-2
+and finally,
+load some test data.
+
+
+133
+00:04:35,976 --> 00:04:37,211 line:-1
+That way, I can run this script
+
+
+134
+00:04:37,244 --> 00:04:39,646 line:-2
+as part of a test pre-action in
+Xcode
+
+
+135
+00:04:39,680 --> 00:04:41,081 line:-2
+and ensure
+that my CloudKit container
+
+
+136
+00:04:41,114 --> 00:04:42,649 line:-1
+is always in a consistent state,
+
+
+137
+00:04:42,683 --> 00:04:44,818 line:-2
+with the exact schema my
+application is using
+
+
+138
+00:04:44.852 --> 00:04:47.521 line:-2 align:center
+before each time
+that I run my tests.
+
+
+139
+00:04:47,554 --> 00:04:49,623 line:-1
+So, here in Xcode,
+
+
+140
+00:04:49.656 --> 00:04:52.326 line:-2 align:center
+I'll edit the scheme
+for my project's application
+
+
+141
+00:04:52.359 --> 00:04:55.362 line:-2 align:center
+and choose Pre-actions
+in the Test phase.
+
+
+142
+00:04:55,395 --> 00:04:58,732 line:-2
+Now, I can add
+a New Run Script Action.
+
+
+143
+00:04:58,765 --> 00:05:01,335 line:-2
+I'll provide build settings
+for my app target,
+
+
+144
+00:05:01.368 --> 00:05:03.804 line:-2 align:center
+so that the script
+has a path to the schema file
+
+
+145
+00:05:03,837 --> 00:05:05,339 line:-1
+in my project.
+
+
+146
+00:05:05,372 --> 00:05:08,208 line:-2
+Right here,
+I'll paste a cktool command
+
+
+147
+00:05:08,242 --> 00:05:10,143 line:-1
+to reset my container,
+
+
+148
+00:05:10.177 --> 00:05:12.246 line:-1 align:center
+and then, one to import schema
+
+
+149
+00:05:12.279 --> 00:05:14.948 line:-2 align:center
+from the file
+in my application project,
+
+
+150
+00:05:14,982 --> 00:05:17,751 line:-2
+and finally, one to create an
+example record
+
+
+151
+00:05:17,784 --> 00:05:19,186 line:-2
+in my container's
+public database.
+
+
+152
+00:05:20,053 --> 00:05:21,822 line:-2
+Note that since these
+commands are synchronous,
+
+
+153
+00:05:21.855 --> 00:05:23.624 line:-2 align:center
+they will execute
+one after another,
+
+
+154
+00:05:23,657 --> 00:05:25,659 line:-2
+and any failure
+will stop execution,
+
+
+155
+00:05:25.692 --> 00:05:27.861 line:-2 align:center
+just in case something
+doesn't go as expected.
+
+
+156
+00:05:27.895 --> 00:05:30.030 line:-2 align:center
+In that case,
+I can take care to resolve
+
+
+157
+00:05:30,063 --> 00:05:31,231 line:-1
+any pre-test issues
+
+
+158
+00:05:31,265 --> 00:05:32,833 line:-2
+before actually
+running my tests.
+
+
+159
+00:05:32.866 --> 00:05:33.967 line:-1 align:center
+That's it.
+
+
+160
+00:05:34.001 --> 00:05:36.170 line:-1 align:center
+Now, when I run my Xcode tests,
+
+
+161
+00:05:36,203 --> 00:05:38,238 line:-2
+cktool will prepare my CloudKit
+container
+
+
+162
+00:05:38,272 --> 00:05:39,473 line:-1
+right before they run.
+
+
+163
+00:05:39.506 --> 00:05:40.374 line:-1 align:center
+Perfect.
+
+
+164
+00:05:40,941 --> 00:05:42,209 line:-1
+So, what if I need to change
+
+
+165
+00:05:42.242 --> 00:05:44.178 line:-2 align:center
+the data model
+for my application?
+
+
+166
+00:05:44,211 --> 00:05:46,680 line:-2
+Let's talk more about
+CloudKit schema language.
+
+
+167
+00:05:46,713 --> 00:05:50,250 line:-2
+In fact, let's examine
+that schema.ckdb file
+
+
+168
+00:05:50,284 --> 00:05:51,885 line:-1
+that I downloaded earlier.
+
+
+169
+00:05:51.919 --> 00:05:52.986 line:-1 align:center
+Inside the file
+
+
+170
+00:05:53.020 --> 00:05:54.688 line:-2 align:center
+is the new CloudKit
+schema language,
+
+
+171
+00:05:54,721 --> 00:05:56,323 line:-2
+which is a powerful way
+to describe
+
+
+172
+00:05:56.356 --> 00:05:58.158 line:-1 align:center
+the record types in my schema.
+
+
+173
+00:05:58,192 --> 00:05:59,593 line:-1
+It's easy to read and write,
+
+
+174
+00:05:59.626 --> 00:06:01.295 line:-2 align:center
+and to include right here in my
+project
+
+
+175
+00:06:01.328 --> 00:06:02.930 line:-1 align:center
+with my application code.
+
+
+176
+00:06:02,963 --> 00:06:04,331 line:-1
+Here inside the schema section,
+
+
+177
+00:06:04.364 --> 00:06:06.033 line:-1 align:center
+there are record types.
+
+
+178
+00:06:06.066 --> 00:06:07.968 line:-2 align:center
+These exactly mirror
+the record types
+
+
+179
+00:06:08.001 --> 00:06:10.504 line:-2 align:center
+as shown for my container
+in the CloudKit Console.
+
+
+180
+00:06:10,537 --> 00:06:12,606 line:-2
+Each record type
+has multiple fields,
+
+
+181
+00:06:12.639 --> 00:06:15.943 line:-2 align:center
+and each field
+has a name and data type.
+
+
+182
+00:06:15.976 --> 00:06:18.645 line:-2 align:center
+The triple-underscore
+field names are system fields,
+
+
+183
+00:06:18.679 --> 00:06:21.415 line:-2 align:center
+which are created by CloudKit
+for every record type.
+
+
+184
+00:06:21.448 --> 00:06:23.817 line:-2 align:center
+Below these system fields
+are my custom fields,
+
+
+185
+00:06:23.851 --> 00:06:25.853 line:-2 align:center
+which represent
+my custom application data
+
+
+186
+00:06:25,886 --> 00:06:27,521 line:-2
+for this record type
+in CloudKit.
+
+
+187
+00:06:27.554 --> 00:06:29.423 line:-2 align:center
+I can create
+an index for a field,
+
+
+188
+00:06:29,456 --> 00:06:32,826 line:-2
+like a Queryable,
+Searchable, or Sortable index,
+
+
+189
+00:06:32,860 --> 00:06:34,895 line:-2
+just like I can do
+in the CloudKit Console.
+
+
+190
+00:06:35.329 --> 00:06:36.930 line:-2 align:center
+I do this in CloudKit
+schema language
+
+
+191
+00:06:36,964 --> 00:06:38,232 line:-1
+by declaring the index
+
+
+192
+00:06:38,265 --> 00:06:40,367 line:-2
+right after the data type
+for the field,
+
+
+193
+00:06:40,400 --> 00:06:42,135 line:-2
+like for this
+"title" custom field
+
+
+194
+00:06:42,169 --> 00:06:43,871 line:-1
+in my Book record type here.
+
+
+195
+00:06:43,904 --> 00:06:45,138 line:-1
+Below the field definitions
+
+
+196
+00:06:45,172 --> 00:06:47,574 line:-2
+are the security role settings
+for the record type.
+
+
+197
+00:06:47.608 --> 00:06:49.243 line:-2 align:center
+This is where
+permissions can be granted
+
+
+198
+00:06:49.276 --> 00:06:51.044 line:-1 align:center
+to each named security role,
+
+
+199
+00:06:51.078 --> 00:06:52.346 line:-2 align:center
+like for each
+of these three built-in
+
+
+200
+00:06:52,379 --> 00:06:54,214 line:-1
+system security roles here.
+
+
+201
+00:06:54,248 --> 00:06:57,251 line:-2
+“_creator" includes only the user
+that created the record,
+
+
+202
+00:06:57.284 --> 00:06:59.586 line:-1 align:center
+“_world" includes all users,
+
+
+203
+00:06:59,620 --> 00:07:02,556 line:-2
+and “_icloud" includes
+any authenticated user.
+
+
+204
+00:07:02.589 --> 00:07:03.991 line:-2 align:center
+Note that in CloudKit
+schema language,
+
+
+205
+00:07:04,024 --> 00:07:06,159 line:-2
+you can include both
+single and multi-line comments
+
+
+206
+00:07:06,193 --> 00:07:08,228 line:-2
+to make the schema files
+even more readable
+
+
+207
+00:07:08,262 --> 00:07:09,296 line:-1
+for you and your team.
+
+
+208
+00:07:09.329 --> 00:07:11.198 line:-2 align:center
+Comments will be ignored
+by the CloudKit server
+
+
+209
+00:07:11,231 --> 00:07:12,432 line:-1
+when the file is processed,
+
+
+210
+00:07:12.466 --> 00:07:14.902 line:-2 align:center
+so feel free to put comments
+wherever you'd like.
+
+
+211
+00:07:14,935 --> 00:07:16,069 line:-2
+Now that CloudKit
+schema language
+
+
+212
+00:07:16,103 --> 00:07:17,871 line:-2
+provides developers
+a fast, flexible way
+
+
+213
+00:07:17.905 --> 00:07:19.840 line:-1 align:center
+to declare and modify schemas,
+
+
+214
+00:07:19,873 --> 00:07:21,909 line:-2
+it's important to remember
+a few core concepts
+
+
+215
+00:07:21.942 --> 00:07:24.645 line:-2 align:center
+around CloudKit
+schema evolution.
+
+
+216
+00:07:24.678 --> 00:07:27.481 line:-2 align:center
+First, you have full control
+over record types
+
+
+217
+00:07:27,514 --> 00:07:29,516 line:-2
+in the development environment
+of your container.
+
+
+218
+00:07:29,550 --> 00:07:31,852 line:-2
+You can add and remove
+record types in development,
+
+
+219
+00:07:31,885 --> 00:07:33,987 line:-2
+and also add and remove
+custom fields
+
+
+220
+00:07:34.021 --> 00:07:37.224 line:-2 align:center
+inside those record types,
+with no limitations.
+
+
+221
+00:07:37,257 --> 00:07:38,559 line:-1
+Of course, new record types
+
+
+222
+00:07:38.592 --> 00:07:40.127 line:-2 align:center
+can always be promoted
+to production,
+
+
+223
+00:07:40,160 --> 00:07:42,930 line:-2
+and new fields can be added
+to existing record types
+
+
+224
+00:07:42.963 --> 00:07:44.498 line:-1 align:center
+in production, as well.
+
+
+225
+00:07:44,531 --> 00:07:45,832 line:-2
+But once record types
+have been promoted
+
+
+226
+00:07:45.866 --> 00:07:47.668 line:-2 align:center
+to the production environment
+of your container,
+
+
+227
+00:07:47.701 --> 00:07:49.903 line:-2 align:center
+they can't be deleted or
+renamed,
+
+
+228
+00:07:49,937 --> 00:07:51,638 line:-2
+and custom fields inside record
+types
+
+
+229
+00:07:51,672 --> 00:07:53,006 line:-2
+that have been
+promoted to production
+
+
+230
+00:07:53.040 --> 00:07:55.042 line:-2 align:center
+cannot be deleted
+or renamed, either.
+
+
+231
+00:07:55,075 --> 00:07:56,410 line:-1
+The reason for this
+
+
+232
+00:07:56.443 --> 00:07:58.078 line:-2 align:center
+is to ensure that
+the CloudKit server
+
+
+233
+00:07:58,111 --> 00:08:00,514 line:-2
+always understands
+record types and fields,
+
+
+234
+00:08:00,547 --> 00:08:03,450 line:-2
+which older versions of your app
+might still be using.
+
+
+235
+00:08:03.483 --> 00:08:04.818 line:-1 align:center
+This means that while you can
+
+
+236
+00:08:04.852 --> 00:08:06.920 line:-2 align:center
+make destructive changes
+to your schema declaration
+
+
+237
+00:08:06.954 --> 00:08:08.655 line:-2 align:center
+in the development environment
+of your container,
+
+
+238
+00:08:08.689 --> 00:08:09.990 line:-1 align:center
+you will not be able to promote
+
+
+239
+00:08:10.023 --> 00:08:12.025 line:-2 align:center
+these destructive changes
+to production.
+
+
+240
+00:08:12.059 --> 00:08:13.927 line:-2 align:center
+Note that it is possible
+to add and remove
+
+
+241
+00:08:13,961 --> 00:08:15,562 line:-1
+indexes in production,
+
+
+242
+00:08:15.596 --> 00:08:18.131 line:-2 align:center
+and security role settings can
+be modified, too.
+
+
+243
+00:08:18,165 --> 00:08:19,967 line:-2
+All of these
+schema promotion concepts
+
+
+244
+00:08:20.000 --> 00:08:21.869 line:-1 align:center
+are not new to CloudKit,
+
+
+245
+00:08:21,902 --> 00:08:23,570 line:-1
+but the flexibility you get
+
+
+246
+00:08:23,604 --> 00:08:25,639 line:-2
+from this new file-based
+schema declaration
+
+
+247
+00:08:25,672 --> 00:08:28,242 line:-2
+means that it's important
+to review and understand them.
+
+
+248
+00:08:28.675 --> 00:08:31.378 line:-2 align:center
+Now that you've gotten a sense
+of what cktool can do
+
+
+249
+00:08:31.411 --> 00:08:33.413 line:-2 align:center
+and how CloudKit
+schema language works,
+
+
+250
+00:08:33.447 --> 00:08:36.250 line:-2 align:center
+I encourage you to try out both
+in your own projects.
+
+
+251
+00:08:36,283 --> 00:08:38,285 line:-2
+Authorize cktool
+with a management token
+
+
+252
+00:08:38.318 --> 00:08:40.354 line:-2 align:center
+and user token
+from the CloudKit Console,
+
+
+253
+00:08:40.387 --> 00:08:42.656 line:-1 align:center
+and explore its commands.
+
+
+254
+00:08:42.689 --> 00:08:44.558 line:-2 align:center
+Export your existing
+CloudKit schema
+
+
+255
+00:08:44,591 --> 00:08:46,260 line:-2
+into a CloudKit
+schema language file,
+
+
+256
+00:08:46.293 --> 00:08:47.528 line:-1 align:center
+and add it to your project,
+
+
+257
+00:08:47,561 --> 00:08:49,062 line:-2
+making sure to check it
+into version control
+
+
+258
+00:08:49.096 --> 00:08:50.497 line:-1 align:center
+with the rest of your project.
+
+
+259
+00:08:51,031 --> 00:08:53,233 line:-2
+Compose some setup steps
+for your integration tests
+
+
+260
+00:08:53.267 --> 00:08:55.369 line:-1 align:center
+using cktool,
+
+
+261
+00:08:55,402 --> 00:08:57,271 line:-2
+and add the script
+as a test pre-action
+
+
+262
+00:08:57.304 --> 00:08:58.305 line:-1 align:center
+to your Xcode scheme.
+
+
+263
+00:08:58,772 --> 00:09:00,707 line:-2
+The ability to administer
+certain elements
+
+
+264
+00:09:00.741 --> 00:09:02.609 line:-2 align:center
+of your CloudKit container
+from the command line
+
+
+265
+00:09:02.643 --> 00:09:04.578 line:-1 align:center
+can be really powerful.
+
+
+266
+00:09:04.611 --> 00:09:06.713 line:-2 align:center
+Maintaining a declaration
+of your CloudKit schema
+
+
+267
+00:09:06.747 --> 00:09:09.983 line:-2 align:center
+in a file, right alongside all
+of your other application code,
+
+
+268
+00:09:10.017 --> 00:09:12.052 line:-2 align:center
+can help you keep it
+consistent with your data model
+
+
+269
+00:09:12.085 --> 00:09:14.154 line:-2 align:center
+throughout your development
+life cycle,
+
+
+270
+00:09:14,188 --> 00:09:16,123 line:-1
+and tying all of this together
+
+
+271
+00:09:16,156 --> 00:09:18,659 line:-2
+to automate cloud setup
+of your integration tests
+
+
+272
+00:09:18.692 --> 00:09:20.060 line:-1 align:center
+is even better.
+
+
+273
+00:09:20,093 --> 00:09:21,028 line:-1
+We're excited to find out
+
+
+274
+00:09:21,061 --> 00:09:23,063 line:-2
+what you do
+with these new tools.
+
+
+275
+00:09:23.096 --> 00:09:25.365 line:-2 align:center
+Thanks for taking the time
+to learn more about CloudKit,
+
+
+276
+00:09:25.399 --> 00:09:27.935 line:-1 align:center
+and for your interest in WWDC21.
+
+
+277
+00:09:27.968 --> 00:09:31.038 line:-1 align:center
+[music]
+

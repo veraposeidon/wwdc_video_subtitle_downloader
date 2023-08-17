@@ -1,0 +1,1625 @@
+1
+00:00:03,836 --> 00:00:07,107 line:-1
+Hello and welcome to WWDC.
+
+
+2
+00:00:08,675 --> 00:00:10,511 line:0
+Hello, my name is Paul Borokhov,
+
+
+3
+00:00:10,577 --> 00:00:13,380 line:0
+and I'm a software localization engineer
+at Apple.
+
+
+4
+00:00:13,447 --> 00:00:17,284 line:0
+Today, I will discuss how to build
+localization-friendly layouts using Xcode.
+
+
+5
+00:00:17,784 --> 00:00:21,421 line:-2
+We will go over some common patterns to
+accomplish this goal and things to avoid
+
+
+6
+00:00:21,488 --> 00:00:25,058 line:-2
+and discuss the tools that are
+at your disposal to make your job easier.
+
+
+7
+00:00:25,125 --> 00:00:28,061 line:-2
+First, let's take a look
+at some common design patterns
+
+
+8
+00:00:28,128 --> 00:00:31,899 line:-2
+that you want to follow in your apps
+to make them localization friendly.
+
+
+9
+00:00:31,965 --> 00:00:35,802 line:-2
+Crucially, these patterns are applicable
+no matter what platform you develop on
+
+
+10
+00:00:35,869 --> 00:00:39,373 line:-2
+or whether you employ manual layout,
+auto layout or SwiftUI
+
+
+11
+00:00:39,439 --> 00:00:41,608 line:-1
+to implement your designs.
+
+
+12
+00:00:41,675 --> 00:00:45,245 line:-2
+First and foremost, you want to avoid
+using fixed widths or frames
+
+
+13
+00:00:45,312 --> 00:00:47,581 line:-1
+on any controls containing text.
+
+
+14
+00:00:47,648 --> 00:00:50,551 line:-2
+In a practical sense,
+this means remembering to call sizeToFit
+
+
+15
+00:00:50,617 --> 00:00:51,952 line:-1
+with manual layouts,
+
+
+16
+00:00:52,019 --> 00:00:54,421 line:-2
+avoiding fixed width constraints
+with auto layout
+
+
+17
+00:00:54,488 --> 00:00:57,257 line:-2
+and not setting explicit frames
+in SwiftUI.
+
+
+18
+00:00:57,958 --> 00:01:01,195 line:-2
+As an example,
+consider this button on macOS.
+
+
+19
+00:01:01,261 --> 00:01:04,298 line:-2
+While in English it looks good,
+when we translate it into Greek,
+
+
+20
+00:01:04,364 --> 00:01:06,900 line:-2
+which tends to use longer strings
+for the same words,
+
+
+21
+00:01:06,967 --> 00:01:09,536 line:-2
+you can see that we clip the word
+midway through a character,
+
+
+22
+00:01:09,603 --> 00:01:12,172 line:-1
+and the ellipsis is missing completely.
+
+
+23
+00:01:12,239 --> 00:01:15,275 line:-2
+In most cases,
+you can simply remove the fixed width
+
+
+24
+00:01:15,342 --> 00:01:17,678 line:-2
+or change it to a greater-than
+or equal-to constraint
+
+
+25
+00:01:17,744 --> 00:01:19,913 line:-1
+to allow the text to show fully.
+
+
+26
+00:01:20,280 --> 00:01:23,016 line:-2
+Next,
+you want to avoid having fixed spacing
+
+
+27
+00:01:23,083 --> 00:01:24,818 line:-1
+when it is between two distant objects.
+
+
+28
+00:01:25,886 --> 00:01:27,855 line:-1
+Consider the example below.
+
+
+29
+00:01:27,921 --> 00:01:31,091 line:-2
+There is a bunch of free space
+between the Publish and Cancel buttons.
+
+
+30
+00:01:31,158 --> 00:01:34,194 line:0
+While this looks good in English,
+when we translate to Greek,
+
+
+31
+00:01:34,261 --> 00:01:35,996 line:0
+you can see that the entire window grows
+
+
+32
+00:01:36,063 --> 00:01:38,832 line:0
+because the translations
+for Publish and Cancel are longer.
+
+
+33
+00:01:39,900 --> 00:01:42,536 line:0
+But a more pleasant design
+would allow the wider buttons
+
+
+34
+00:01:42,603 --> 00:01:44,738 line:0
+to simply eat into the space between them,
+
+
+35
+00:01:44,805 --> 00:01:46,807 line:0
+keeping the window width the same.
+
+
+36
+00:01:46,874 --> 00:01:51,078 line:0
+We can accomplish this with stacks
+or greater-than or equal-to constraints.
+
+
+37
+00:01:51,612 --> 00:01:53,480 line:-2
+On all platforms,
+you will want to make sure
+
+
+38
+00:01:53,547 --> 00:01:56,950 line:-2
+that text is allowed to wrap to multiple
+lines when it makes sense to do so.
+
+
+39
+00:01:57,818 --> 00:01:59,953 line:-1
+Consider the following example on iOS,
+
+
+40
+00:02:00,020 --> 00:02:02,956 line:-2
+where UILabel is restricted
+to one line of text by default.
+
+
+41
+00:02:03,690 --> 00:02:06,426 line:-2
+This looks fine in English
+on an iPhone 11 Pro.
+
+
+42
+00:02:06,493 --> 00:02:09,463 line:-2
+To get a sense of how it might look
+in other languages that are longer,
+
+
+43
+00:02:09,530 --> 00:02:11,365 line:-1
+we can use double strings mode.
+
+
+44
+00:02:11,431 --> 00:02:15,502 line:-2
+This feature, which can be enabled
+both in the preview and at runtime,
+
+
+45
+00:02:15,569 --> 00:02:18,906 line:-2
+simply doubles the text
+inside every control and label.
+
+
+46
+00:02:18,972 --> 00:02:21,308 line:-1
+Testing out this UI in double strings mode
+
+
+47
+00:02:21,375 --> 00:02:25,445 line:-2
+shows that the text no longer fits
+on one line and truncates as a result.
+
+
+48
+00:02:25,512 --> 00:02:29,883 line:-2
+Setting the number of lines to 0
+will allow this text to wrap properly.
+
+
+49
+00:02:29,950 --> 00:02:33,453 line:-2
+Finally, try to avoid placing
+too many controls in a fixed space
+
+
+50
+00:02:33,520 --> 00:02:35,155 line:-2
+with no affordance
+for an alternate layout.
+
+
+51
+00:02:35,889 --> 00:02:38,825 line:-2
+Consider this example,
+where I have four buttons side by side.
+
+
+52
+00:02:38,892 --> 00:02:40,994 line:-1
+As you can see, in double strings mode,
+
+
+53
+00:02:41,061 --> 00:02:44,097 line:-2
+they no longer fit on a single line
+and end up truncating.
+
+
+54
+00:02:44,164 --> 00:02:46,200 line:-2
+This can be
+particularly problematic in bars,
+
+
+55
+00:02:46,266 --> 00:02:48,769 line:-2
+where you cannot easily provide
+an alternate layout.
+
+
+56
+00:02:48,836 --> 00:02:52,506 line:-2
+We will see in the demo one of the ways
+we can work around this problem.
+
+
+57
+00:02:52,573 --> 00:02:55,409 line:-2
+Now let's jump into Xcode
+to see these patterns in action
+
+
+58
+00:02:55,475 --> 00:02:57,411 line:-2
+and how we can apply them
+in a typical app.
+
+
+59
+00:02:58,045 --> 00:02:59,880 line:-1
+Here I have a simple iOS app
+
+
+60
+00:02:59,947 --> 00:03:02,149 line:-2
+that prompts the user
+to pick their favorite food.
+
+
+61
+00:03:02,683 --> 00:03:07,421 line:-2
+We have a title label, a regular label
+and a bunch of buttons to make the choice.
+
+
+62
+00:03:07,487 --> 00:03:11,091 line:-2
+I'm going to go ahead
+and open the document preview.
+
+
+63
+00:03:13,060 --> 00:03:15,562 line:0
+I will then click English
+at the bottom right
+
+
+64
+00:03:15,629 --> 00:03:17,364 line:0
+and choose Double-Length Pseudolanguage
+
+
+65
+00:03:17,431 --> 00:03:21,635 line:-2
+to see what my UI might look like
+when I go to localize my app.
+
+
+66
+00:03:21,702 --> 00:03:26,640 line:-2
+Immediately, I see that my labels should
+have their number of lines set to 0
+
+
+67
+00:03:26,707 --> 00:03:28,942 line:-1
+so that they are allowed to wrap.
+
+
+68
+00:03:30,310 --> 00:03:34,314 line:-2
+Once I fix that in the attributes
+inspector, the labels look good,
+
+
+69
+00:03:34,381 --> 00:03:36,016 line:-1
+but the buttons are still truncating.
+
+
+70
+00:03:36,583 --> 00:03:40,087 line:-2
+Before I go and address that,
+let me add a comment to my translator
+
+
+71
+00:03:40,153 --> 00:03:42,556 line:-2
+explaining the context
+for the title label.
+
+
+72
+00:03:42,623 --> 00:03:47,127 line:-2
+I will select the title,
+switch over to the identity inspector
+
+
+73
+00:03:47,194 --> 00:03:50,864 line:-2
+and provide a helpful comment
+in the Localizer Hint field.
+
+
+74
+00:03:50,931 --> 00:03:54,401 line:-2
+Now, to address the truncated buttons,
+I have a couple of options.
+
+
+75
+00:03:55,068 --> 00:03:57,171 line:-2
+Perhaps instead of using strings
+in these buttons,
+
+
+76
+00:03:57,237 --> 00:04:00,741 line:-2
+I could use pictures of the food
+so that they're all the same size.
+
+
+77
+00:04:00,807 --> 00:04:02,309 line:-1
+The approach we will cover today
+
+
+78
+00:04:02,376 --> 00:04:05,345 line:-2
+will be to change the layout
+of the buttons from horizontal to vertical
+
+
+79
+00:04:05,412 --> 00:04:09,416 line:-2
+when there is not sufficient space
+to display them all side by side.
+
+
+80
+00:04:09,483 --> 00:04:12,352 line:-2
+You can do this by placing the buttons
+in a horizontal stack view
+
+
+81
+00:04:12,419 --> 00:04:14,154 line:-1
+and then querying its layout fitting size
+
+
+82
+00:04:14,221 --> 00:04:17,457 line:-2
+to determine whether it has sufficient
+space to display all of its content.
+
+
+83
+00:04:17,524 --> 00:04:20,327 line:-2
+If it doesn't, we will change
+its orientation to vertical.
+
+
+84
+00:04:21,261 --> 00:04:24,498 line:-2
+Conveniently, I already have
+a custom class written to do just that,
+
+
+85
+00:04:24,565 --> 00:04:27,034 line:-2
+so I will simply set it
+in the storyboard...
+
+
+86
+00:04:28,902 --> 00:04:32,239 line:-2
+and make a connection to the leading
+constraint of the stack view.
+
+
+87
+00:04:36,276 --> 00:04:39,713 line:-2
+If you want to see the details of how
+this dynamic behavior is implemented,
+
+
+88
+00:04:39,780 --> 00:04:43,283 line:-2
+go ahead and download the companion
+sample project below this video.
+
+
+89
+00:04:43,350 --> 00:04:47,020 line:-2
+Since this is a code change, I will not
+be able to see its effects in the preview,
+
+
+90
+00:04:47,087 --> 00:04:49,356 line:-1
+and I will need to build and run the app.
+
+
+91
+00:04:49,423 --> 00:04:52,192 line:-2
+First,
+let's just try running it in English.
+
+
+92
+00:04:52,259 --> 00:04:54,261 line:-1
+As you can see, the layout hasn't changed
+
+
+93
+00:04:54,328 --> 00:04:56,830 line:-2
+from what I have defined
+in Interface Builder.
+
+
+94
+00:04:56,897 --> 00:04:59,733 line:-2
+Now let's try running it again
+in double strings mode.
+
+
+95
+00:04:59,800 --> 00:05:03,937 line:-2
+I will go into the scheme editor,
+go into the Options tab...
+
+
+96
+00:05:05,205 --> 00:05:09,309 line:0
+and select Double-Length Pseudolanguage
+from the app language pop-up.
+
+
+97
+00:05:10,644 --> 00:05:13,847 line:-2
+Since I haven't changed the app,
+I will run it with Command-Control-R
+
+
+98
+00:05:13,914 --> 00:05:16,049 line:-1
+to relaunch the already-built version.
+
+
+99
+00:05:16,116 --> 00:05:18,685 line:-2
+You can see that the labels
+have wrapped as we expect
+
+
+100
+00:05:18,752 --> 00:05:21,455 line:-2
+and our stack view has also changed
+its orientation to vertical
+
+
+101
+00:05:21,522 --> 00:05:23,524 line:-1
+to accommodate the longer buttons.
+
+
+102
+00:05:23,590 --> 00:05:26,793 line:-2
+Now, I have also set up
+a first-generation iPhone SE here
+
+
+103
+00:05:27,261 --> 00:05:30,063 line:-2
+with the largest non-accessibility
+dynamic typeset.
+
+
+104
+00:05:31,365 --> 00:05:33,400 line:-1
+You can see that even in English,
+
+
+105
+00:05:33,467 --> 00:05:37,504 line:-2
+the layout gracefully adjusts to
+accommodate the narrower screen width.
+
+
+106
+00:05:38,005 --> 00:05:41,008 line:-2
+I can open the Accessibility Inspector
+from Xcode
+
+
+107
+00:05:41,074 --> 00:05:43,744 line:-2
+to change the dynamic type settings
+to the default.
+
+
+108
+00:05:45,379 --> 00:05:49,850 line:-2
+And as you can see, the layout reverts
+back to the horizontal layout as expected.
+
+
+109
+00:05:50,484 --> 00:05:53,487 line:-2
+I can also use Xcode's
+Environment Overrides feature...
+
+
+110
+00:05:54,688 --> 00:05:56,190 line:-1
+to do the same thing.
+
+
+111
+00:05:57,324 --> 00:06:00,561 line:-2
+We just saw a lot of the design
+best practices applied in the demo,
+
+
+112
+00:06:00,627 --> 00:06:02,996 line:-2
+as well as some tools
+that Xcode provides for you
+
+
+113
+00:06:03,063 --> 00:06:05,232 line:-2
+to make it easy
+to test your app in other languages
+
+
+114
+00:06:05,299 --> 00:06:08,035 line:-1
+and validate that the layout works well.
+
+
+115
+00:06:08,101 --> 00:06:10,437 line:-2
+Let's recap some of the tools
+that we used in the demo
+
+
+116
+00:06:10,504 --> 00:06:12,539 line:-1
+to achieve a localization-friendly layout
+
+
+117
+00:06:12,606 --> 00:06:15,242 line:-2
+and see additional ones
+that are at your disposal.
+
+
+118
+00:06:16,076 --> 00:06:18,779 line:-2
+As we saw in the demo,
+the document preview allows you
+
+
+119
+00:06:18,846 --> 00:06:23,183 line:-2
+to preview your UI adjustments immediately
+without having to build and run your app.
+
+
+120
+00:06:23,250 --> 00:06:24,852 line:-1
+It supports the pseudolanguages,
+
+
+121
+00:06:24,918 --> 00:06:27,788 line:-2
+as well as any localizations
+that you have in your application,
+
+
+122
+00:06:27,855 --> 00:06:29,756 line:-1
+as we will see shortly.
+
+
+123
+00:06:29,823 --> 00:06:33,160 line:-2
+Scheme options allow you to runtime test
+your app in specific languages,
+
+
+124
+00:06:33,227 --> 00:06:35,529 line:-1
+including the numerous pseudolanguages.
+
+
+125
+00:06:36,697 --> 00:06:38,532 line:-1
+To quickly change dynamic type settings
+
+
+126
+00:06:38,599 --> 00:06:41,168 line:-2
+and verify that your app
+adapts to them accordingly,
+
+
+127
+00:06:41,235 --> 00:06:44,371 line:-2
+you can add the dynamic type widget
+to Control Center on iOS,
+
+
+128
+00:06:44,438 --> 00:06:48,509 line:-2
+as well as use the Accessibility Inspector
+and Xcode's Environment Overrides feature
+
+
+129
+00:06:48,575 --> 00:06:50,777 line:-2
+with devices
+that are attached to your Mac.
+
+
+130
+00:06:51,245 --> 00:06:53,480 line:-2
+There are additional tools
+that Xcode provides
+
+
+131
+00:06:53,547 --> 00:06:57,084 line:-2
+to make your job even easier
+when implementing your layouts.
+
+
+132
+00:06:57,150 --> 00:07:00,153 line:-2
+Just like in your source code,
+Interface Builder provides fix-its
+
+
+133
+00:07:00,220 --> 00:07:02,022 line:-1
+with quick solutions to common problems
+
+
+134
+00:07:02,089 --> 00:07:06,226 line:-2
+like suboptimal or missing constraints
+when using auto layout.
+
+
+135
+00:07:06,293 --> 00:07:08,462 line:-2
+The "Embed in" feature
+in Interface Builder
+
+
+136
+00:07:08,529 --> 00:07:11,865 line:-2
+allows you to adopt modern container views
+for multiple controls
+
+
+137
+00:07:11,932 --> 00:07:14,001 line:-2
+that automatically provide
+the correct constraints
+
+
+138
+00:07:14,067 --> 00:07:15,969 line:-1
+for a wider variety of scenarios,
+
+
+139
+00:07:16,036 --> 00:07:18,338 line:-1
+including stack views and grid views.
+
+
+140
+00:07:18,839 --> 00:07:22,276 line:-2
+Now let's jump into Xcode
+to see auto layout fix-its
+
+
+141
+00:07:22,342 --> 00:07:24,611 line:-2
+and the "Embed in" functionality
+in action.
+
+
+142
+00:07:24,678 --> 00:07:26,513 line:-1
+Here I have a xib for a Mac app
+
+
+143
+00:07:26,580 --> 00:07:29,950 line:-2
+in which I have not added
+any auto layout constraints yet.
+
+
+144
+00:07:30,017 --> 00:07:33,520 line:-2
+You can immediately see that there is
+a warning icon in the document sidebar
+
+
+145
+00:07:33,587 --> 00:07:35,489 line:-1
+for the top-level window.
+
+
+146
+00:07:35,556 --> 00:07:38,292 line:-2
+If I click it,
+I will see multiple localization issues
+
+
+147
+00:07:38,358 --> 00:07:40,961 line:-1
+being reported about missing constraints.
+
+
+148
+00:07:41,028 --> 00:07:43,297 line:0
+If we open up the document preview
+
+
+149
+00:07:43,363 --> 00:07:45,699 line:0
+and choose
+the Double-Length Pseudolanguage,
+
+
+150
+00:07:45,766 --> 00:07:49,770 line:0
+we can see that none of the controls
+grow to accommodate the longer text.
+
+
+151
+00:07:49,837 --> 00:07:52,439 line:0
+If we build and run the app,
+we can also see
+
+
+152
+00:07:52,506 --> 00:07:54,875 line:0
+that the UI does not flip in Arabic.
+
+
+153
+00:07:56,310 --> 00:07:58,378 line:-1
+Going back to the list of issues,
+
+
+154
+00:07:58,445 --> 00:08:00,714 line:-2
+perhaps seeing so many at once
+is a bit overwhelming,
+
+
+155
+00:08:00,781 --> 00:08:03,750 line:-2
+and I want a quick way
+to resolve them all.
+
+
+156
+00:08:03,817 --> 00:08:06,887 line:0
+If I click
+the "Resolve Auto Layout Options" button
+
+
+157
+00:08:06,954 --> 00:08:08,689 line:0
+in the bottom right of the canvas,
+
+
+158
+00:08:08,755 --> 00:08:11,925 line:0
+there is an option to Add Missing
+Constraints for all views in the window,
+
+
+159
+00:08:11,992 --> 00:08:13,493 line:0
+so let me try that.
+
+
+160
+00:08:14,428 --> 00:08:16,496 line:-1
+Now all the controls have constraints,
+
+
+161
+00:08:16,563 --> 00:08:19,099 line:-2
+but I still have
+a bunch of localization warnings.
+
+
+162
+00:08:19,166 --> 00:08:21,401 line:-2
+Let's look at the one
+about the Publish button.
+
+
+163
+00:08:22,970 --> 00:08:24,738 line:-2
+We don't really need
+this fixed width at all,
+
+
+164
+00:08:24,805 --> 00:08:27,374 line:-2
+and it was added because the button
+happened to be a little larger
+
+
+165
+00:08:27,441 --> 00:08:28,976 line:-1
+than its intrinsic content size,
+
+
+166
+00:08:29,042 --> 00:08:32,613 line:-2
+the natural size of the view
+that takes only its contents into account.
+
+
+167
+00:08:32,679 --> 00:08:35,482 line:-2
+I can go ahead
+and click the yellow triangle
+
+
+168
+00:08:35,549 --> 00:08:39,620 line:-2
+and choose the Remove Constraint fix-it
+to resolve this issue.
+
+
+169
+00:08:39,686 --> 00:08:42,956 line:-2
+Next, I have the OK button
+with a width of 70.
+
+
+170
+00:08:43,991 --> 00:08:46,627 line:-2
+In some languages, the word for OK
+could be much longer,
+
+
+171
+00:08:46,693 --> 00:08:49,096 line:-2
+so we do not want
+to restrict the width here.
+
+
+172
+00:08:49,162 --> 00:08:52,266 line:-2
+However, for languages like English
+with very short translations,
+
+
+173
+00:08:52,332 --> 00:08:54,501 line:-1
+we don't want a tiny button either.
+
+
+174
+00:08:54,568 --> 00:08:58,639 line:-2
+Conveniently, the fix-it pop-over provides
+an option to do just what we want--
+
+
+175
+00:08:58,705 --> 00:09:02,376 line:-2
+choose the Set Constraint Greater Than
+or Equal to Minimum Width
+
+
+176
+00:09:02,442 --> 00:09:04,778 line:-2
+to get appropriate behavior
+for all languages.
+
+
+177
+00:09:05,812 --> 00:09:10,284 line:-2
+Next, let's make sure that the Cancel and
+Publish buttons can't overrun each other.
+
+
+178
+00:09:10,350 --> 00:09:13,387 line:-2
+This is highlighted by the
+"Trailing constraint is missing" warning
+
+
+179
+00:09:13,453 --> 00:09:14,855 line:-1
+for the Publish button.
+
+
+180
+00:09:15,556 --> 00:09:19,793 line:-2
+We can choose the Fixed Leading and
+Resizing Trailing Constraint option here,
+
+
+181
+00:09:19,860 --> 00:09:23,830 line:-2
+as we want the space to the right
+of the button to be flexible in this case.
+
+
+182
+00:09:23,897 --> 00:09:26,633 line:-2
+Finally, we can resolve
+all of the misplaced views
+
+
+183
+00:09:26,700 --> 00:09:28,669 line:0
+by clicking the windows content view
+
+
+184
+00:09:28,735 --> 00:09:32,673 line:0
+and clicking the Update Frames button
+in the lower right of the canvas.
+
+
+185
+00:09:32,739 --> 00:09:35,309 line:-2
+Now I'm down
+to just three localization warnings.
+
+
+186
+00:09:35,375 --> 00:09:38,512 line:-2
+I could go ahead and resolve them here,
+but I will take the opportunity
+
+
+187
+00:09:38,579 --> 00:09:41,715 line:-2
+to illustrate the "Embed in" functionality
+in Xcode instead.
+
+
+188
+00:09:41,782 --> 00:09:45,285 line:-2
+The entire top part of this dialogue
+looks a lot like a spreadsheet,
+
+
+189
+00:09:45,352 --> 00:09:47,187 line:-1
+so let's try embedding it in a grid view,
+
+
+190
+00:09:47,254 --> 00:09:50,357 line:-2
+which is specifically tailored
+for these kinds of layouts.
+
+
+191
+00:09:50,424 --> 00:09:54,094 line:0
+Before we start, I will fix the width
+and height of the icon
+
+
+192
+00:09:54,161 --> 00:09:56,430 line:0
+because I do not want it to change size.
+
+
+193
+00:09:57,264 --> 00:10:00,033 line:-2
+Let's also add a height constraint
+to the description input field
+
+
+194
+00:10:00,100 --> 00:10:02,469 line:-2
+since we always want it
+to be two lines tall.
+
+
+195
+00:10:03,237 --> 00:10:06,306 line:-2
+We will do this by control-click
+and dragging over the text field...
+
+
+196
+00:10:07,674 --> 00:10:10,277 line:-1
+and choosing Height from the pop-up menu.
+
+
+197
+00:10:10,344 --> 00:10:13,914 line:-2
+Finally, the vertical constraint
+between the image and the Publish button
+
+
+198
+00:10:13,981 --> 00:10:16,550 line:-1
+is no longer needed, so we can delete it.
+
+
+199
+00:10:18,352 --> 00:10:22,456 line:-2
+Now let's select all the text fields
+and the checkbox,
+
+
+200
+00:10:22,523 --> 00:10:25,025 line:0
+click "Embed in" at the bottom right
+
+
+201
+00:10:25,092 --> 00:10:26,660 line:0
+and choose Grid View.
+
+
+202
+00:10:27,194 --> 00:10:30,497 line:-2
+The layout of the controls
+is now managed entirely by the grid view,
+
+
+203
+00:10:30,564 --> 00:10:32,666 line:-2
+so they don't need
+any explicit constraints.
+
+
+204
+00:10:33,800 --> 00:10:36,470 line:0
+Of course, I must still constrain
+the grid view to its siblings,
+
+
+205
+00:10:36,537 --> 00:10:41,275 line:0
+so let me do that by adding standard
+space constraints on the top,
+
+
+206
+00:10:41,341 --> 00:10:43,911 line:0
+leading and trailing edges...
+
+
+207
+00:10:45,078 --> 00:10:47,481 line:0
+and set the bottom space to 27.
+
+
+208
+00:10:49,283 --> 00:10:51,952 line:-2
+Using standard space gives me spacing
+recommended
+
+
+209
+00:10:52,019 --> 00:10:53,687 line:-1
+by the Human Interface Guidelines,
+
+
+210
+00:10:53,754 --> 00:10:55,989 line:-2
+which automatically changes
+based on the context,
+
+
+211
+00:10:56,056 --> 00:10:58,425 line:-1
+avoiding the need for hard-coded values.
+
+
+212
+00:10:58,492 --> 00:11:01,562 line:-2
+The bottom space of 27
+was given to me by my designer,
+
+
+213
+00:11:01,628 --> 00:11:03,730 line:-1
+so that's what I will use.
+
+
+214
+00:11:03,797 --> 00:11:07,301 line:-2
+Our OK button used to be trailing
+aligned with the text field above it,
+
+
+215
+00:11:07,367 --> 00:11:09,970 line:-2
+and that went away
+when we put it in the grid view,
+
+
+216
+00:11:10,037 --> 00:11:12,472 line:-2
+so let's add it back
+by control-click and dragging
+
+
+217
+00:11:12,539 --> 00:11:14,508 line:-1
+from the OK button in the canvas
+
+
+218
+00:11:14,575 --> 00:11:16,677 line:-2
+to the grid view
+in the document sidebar...
+
+
+219
+00:11:17,978 --> 00:11:21,248 line:-2
+and choosing Trailing
+from the menu that appears.
+
+
+220
+00:11:22,449 --> 00:11:26,119 line:-2
+Next, I need to merge the cells
+in the first row
+
+
+221
+00:11:26,186 --> 00:11:28,155 line:-1
+so that the title can span both columns
+
+
+222
+00:11:28,222 --> 00:11:31,892 line:-2
+and move the Ignore Alerts checkbox
+from the first column to the second.
+
+
+223
+00:11:31,959 --> 00:11:35,229 line:-2
+First, let me select the top two cells
+in the document sidebar
+
+
+224
+00:11:35,295 --> 00:11:37,798 line:-2
+by holding down the Command key
+as I click them,
+
+
+225
+00:11:37,865 --> 00:11:41,768 line:-2
+then choose Merge Cells
+from the row options menu in the canvas.
+
+
+226
+00:11:43,270 --> 00:11:47,774 line:-2
+To move the checkbox, I will simply drag
+and drop it from one cell into the other.
+
+
+227
+00:11:48,709 --> 00:11:50,544 line:-1
+The basic structure is now done,
+
+
+228
+00:11:50,611 --> 00:11:52,546 line:-2
+but the layout doesn't quite match
+what I want.
+
+
+229
+00:11:53,180 --> 00:11:56,483 line:-2
+First, let's adjust the grid view
+attributes to match our expectations.
+
+
+230
+00:11:56,550 --> 00:12:01,221 line:-2
+I will select the grid view
+and then show the attributes inspector.
+
+
+231
+00:12:01,288 --> 00:12:03,190 line:-1
+Since we have text in our grid view,
+
+
+232
+00:12:03,257 --> 00:12:06,827 line:-2
+we should set our row alignment attribute
+to First Baseline.
+
+
+233
+00:12:06,894 --> 00:12:09,763 line:-2
+We also want to set
+the X placement to "Fill"
+
+
+234
+00:12:09,830 --> 00:12:14,234 line:-2
+so that all the available space
+is taken up by the content inside.
+
+
+235
+00:12:14,301 --> 00:12:16,470 line:-1
+The spacing should match standard spacing,
+
+
+236
+00:12:16,537 --> 00:12:20,674 line:-2
+implying row spacing of 12
+and column spacing of 8.
+
+
+237
+00:12:22,609 --> 00:12:26,280 line:-2
+And we still have an unnecessary
+width constraint on the Name label,
+
+
+238
+00:12:26,346 --> 00:12:28,148 line:-1
+so let's go ahead and remove that.
+
+
+239
+00:12:29,883 --> 00:12:33,220 line:-2
+We also don't want the first column
+to be any wider than it needs to be,
+
+
+240
+00:12:33,720 --> 00:12:35,789 line:-2
+so let's set
+the horizontal hugging priority
+
+
+241
+00:12:35,856 --> 00:12:39,259 line:-1
+of the Name and Description labels to 749,
+
+
+242
+00:12:39,793 --> 00:12:42,596 line:-2
+causing the grid view's column
+to hug them tightly.
+
+
+243
+00:12:42,663 --> 00:12:44,331 line:-1
+We choose 749
+
+
+244
+00:12:44,398 --> 00:12:48,235 line:-2
+because it is lower than the labels'
+default compression priority of 750,
+
+
+245
+00:12:48,302 --> 00:12:51,872 line:-2
+but higher than the window's
+holding priority of 500.
+
+
+246
+00:12:52,639 --> 00:12:57,678 line:0
+Finally, set the vertical content
+hugging priority of the grid view to 600
+
+
+247
+00:12:57,744 --> 00:13:00,681 line:0
+so that our window
+cannot be resized vertically.
+
+
+248
+00:13:00,747 --> 00:13:02,683 line:-1
+Looks like we have misplaced views again,
+
+
+249
+00:13:02,749 --> 00:13:05,986 line:0
+but we can quickly resolve that
+by clicking the window's content view
+
+
+250
+00:13:06,053 --> 00:13:09,890 line:0
+and then clicking the Update Frames button
+in the lower right of the canvas.
+
+
+251
+00:13:09,957 --> 00:13:12,226 line:-1
+Now let's open up the document preview
+
+
+252
+00:13:12,292 --> 00:13:14,761 line:-2
+and see how our app looks
+in different languages.
+
+
+253
+00:13:15,429 --> 00:13:16,430 line:0
+Greek...
+
+
+254
+00:13:18,298 --> 00:13:19,366 line:0
+Chinese...
+
+
+255
+00:13:21,001 --> 00:13:23,370 line:0
+and Double-Length Pseudolanguage.
+
+
+256
+00:13:23,437 --> 00:13:24,805 line:0
+All look great.
+
+
+257
+00:13:24,872 --> 00:13:27,674 line:-2
+Now let's do a quick runtime test
+in Arabic as well.
+
+
+258
+00:13:29,343 --> 00:13:31,278 line:-1
+No issues. Looks perfect.
+
+
+259
+00:13:32,513 --> 00:13:36,016 line:-2
+Before we wrap up, I wanted to call out
+the importance of user testing
+
+
+260
+00:13:36,083 --> 00:13:38,519 line:-2
+for delivering
+a high-quality localized app.
+
+
+261
+00:13:39,286 --> 00:13:42,422 line:-2
+Of course, no amount of automation
+and scrupulous testing
+
+
+262
+00:13:42,489 --> 00:13:45,392 line:-2
+can replace human-driven testing
+by native language speakers.
+
+
+263
+00:13:46,293 --> 00:13:48,462 line:-2
+These testers
+will be able to immediately spot
+
+
+264
+00:13:48,529 --> 00:13:50,330 line:-1
+glaring issues in your application,
+
+
+265
+00:13:50,397 --> 00:13:53,066 line:-2
+such as inconsistencies
+with OS terminology,
+
+
+266
+00:13:53,133 --> 00:13:56,937 line:-2
+truncated and clipped text which might
+not be obvious to a non-native speaker,
+
+
+267
+00:13:57,004 --> 00:13:58,906 line:-1
+as well as out-of-context translations,
+
+
+268
+00:13:58,972 --> 00:14:02,009 line:-2
+which no automation or fix-its
+can determine.
+
+
+269
+00:14:02,075 --> 00:14:03,944 line:-1
+This testing is particularly critical
+
+
+270
+00:14:04,011 --> 00:14:08,115 line:-2
+if you're adding new localizations
+or making big UI changes to your app.
+
+
+271
+00:14:08,182 --> 00:14:10,350 line:-2
+Customers will be very excited
+to see their app
+
+
+272
+00:14:10,417 --> 00:14:12,819 line:-2
+is finally localized
+into their native language.
+
+
+273
+00:14:12,886 --> 00:14:15,122 line:0
+And making a good first impression
+will do wonders
+
+
+274
+00:14:15,189 --> 00:14:17,257 line:0
+for building a good relationship
+and reputation
+
+
+275
+00:14:17,324 --> 00:14:19,326 line:0
+for your brand in a new market.
+
+
+276
+00:14:20,327 --> 00:14:24,631 line:-2
+In summary, as international customers
+are the majority of your customers,
+
+
+277
+00:14:24,698 --> 00:14:27,534 line:-2
+it is important that you are aware
+of the impact localization will have
+
+
+278
+00:14:27,601 --> 00:14:29,870 line:-1
+on the design and layout of your app.
+
+
+279
+00:14:29,937 --> 00:14:32,239 line:-2
+By following the localization-friendly
+design patterns
+
+
+280
+00:14:32,306 --> 00:14:34,308 line:-1
+that we have discussed and demonstrated,
+
+
+281
+00:14:34,374 --> 00:14:38,946 line:-2
+you can make nondisruptive adjustments
+to your app to make it truly world ready.
+
+
+282
+00:14:39,012 --> 00:14:42,816 line:-2
+Finally, UI testing by native speakers
+of the localizations
+
+
+283
+00:14:42,883 --> 00:14:46,253 line:-2
+can make a significant impact
+in the quality of your localized apps
+
+
+284
+00:14:46,320 --> 00:14:48,388 line:-1
+and the impression they leave on users.
+
+
+285
+00:14:49,756 --> 00:14:51,258 line:-1
+Thanks for watching.
+

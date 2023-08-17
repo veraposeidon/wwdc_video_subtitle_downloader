@@ -1,0 +1,2232 @@
+2
+00:00:00,067 --> 00:00:02,202 line:-1
+[MAC STARTUP CHIME]
+
+
+3
+00:00:02.202 --> 00:00:05.806 line:-1 position:50%
+♪ Bass music playing ♪
+
+
+4
+00:00:05.806 --> 00:00:07.274 line:-1 position:50%
+[KEYSTROKES]
+
+
+5
+00:00:07,274 --> 00:00:09,943 size:2% position:89% align:center
+♪
+
+
+6
+00:00:09.943 --> 00:00:11.511 line:-1 position:50%
+Adam Sonnanstine:
+Hello! my name is Adam,
+
+
+7
+00:00:11.511 --> 00:00:15.415 line:-1 position:50%
+and I'm here today to show you
+what's new in AVFoundation.
+
+
+8
+00:00:15.415 --> 00:00:17.651 line:-1 position:50%
+We have three new features
+to discuss today.
+
+
+9
+00:00:17,651 --> 00:00:19,653 line:-1
+We're going to spend
+most of our time talking about
+
+
+10
+00:00:19.653 --> 00:00:23.056 line:-1 position:50%
+what's new in the world
+of AVAsset inspection,
+
+
+11
+00:00:23.056 --> 00:00:24.791 line:-1 position:50%
+and then we'll give
+a quick introduction
+
+
+12
+00:00:24.791 --> 00:00:26.560 line:-1 position:50%
+to two other features:
+
+
+13
+00:00:26,560 --> 00:00:30,998 line:-1
+video compositing with metadata
+and caption file authoring.
+
+
+14
+00:00:30.998 --> 00:00:33.934 line:-1 position:50%
+So without further ado,
+let's jump into our first topic,
+
+
+15
+00:00:33,934 --> 00:00:37,004 line:-1
+which is AVAsset
+async Inspection.
+
+
+16
+00:00:37,004 --> 00:00:38,872 line:-1
+But first, a little bit
+of background,
+
+
+17
+00:00:38,872 --> 00:00:42,342 line:-1
+starting with a refresher
+on AVAsset.
+
+
+18
+00:00:42.342 --> 00:00:45.212 line:-1 position:50%
+AVAsset is AVFoundation's
+core model object
+
+
+19
+00:00:45.212 --> 00:00:47.948 line:-1 position:50%
+for representing things
+like movie files
+
+
+20
+00:00:47,948 --> 00:00:49,616 line:-1
+stored on the user's device;
+
+
+21
+00:00:49.616 --> 00:00:53.020 line:-1 position:50%
+movie files stored elsewhere,
+such as a remote server;
+
+
+22
+00:00:53.020 --> 00:00:55.222 line:-1 position:50%
+and other forms
+of audiovisual content,
+
+
+23
+00:00:55,222 --> 00:00:58,692 line:-1
+such as HTTP Live Streams
+and compositions.
+
+
+24
+00:00:58,692 --> 00:01:02,562 line:0
+And when you have an asset,
+you most often want to play it,
+
+
+25
+00:01:02,562 --> 00:01:05,365 position:50%
+but just as often, you're going
+to want to inspect it.
+
+
+26
+00:01:05,365 --> 00:01:08,101 position:50%
+You want to ask it questions
+like, what's its duration
+
+
+27
+00:01:08,101 --> 00:01:11,738 line:0
+or what are the formats of audio
+and video it contains?
+
+
+28
+00:01:11.738 --> 00:01:13.607 line:-1 position:50%
+And that's what we're really
+going to be talking about
+
+
+29
+00:01:13.607 --> 00:01:16.810 line:-1 position:50%
+in this topic: asset inspection.
+
+
+30
+00:01:16.810 --> 00:01:18.812 line:-1 position:50%
+And whenever you're inspecting
+an asset,
+
+
+31
+00:01:18,812 --> 00:01:22,683 line:-1
+there are two important things
+to keep in mind.
+
+
+32
+00:01:22.683 --> 00:01:26.253 line:-1 position:50%
+The first is that asset
+inspection happens on demand.
+
+
+33
+00:01:26.253 --> 00:01:29.589 line:-1 position:50%
+This is mainly because
+movie files can be quite large.
+
+
+34
+00:01:29,589 --> 00:01:32,759 line:-1
+A feature-length film could be
+several gigabytes in size.
+
+
+35
+00:01:32,759 --> 00:01:33,961 line:-1
+You wouldn't want the asset
+
+
+36
+00:01:33,961 --> 00:01:36,129 line:-1
+to eagerly download
+the entire file,
+
+
+37
+00:01:36.129 --> 00:01:38.932 line:-1 position:50%
+just in case you ask
+for its duration later.
+
+
+38
+00:01:38.932 --> 00:01:40.567 line:-1 position:50%
+Instead, the asset waits
+
+
+39
+00:01:40.567 --> 00:01:42.803 line:-1 position:50%
+until you ask it
+to load a property value,
+
+
+40
+00:01:42.803 --> 00:01:45.072 line:-1 position:50%
+then it downloads
+just the information it needs
+
+
+41
+00:01:45.072 --> 00:01:47.507 line:-1 position:50%
+to give you that value.
+
+
+42
+00:01:47,507 --> 00:01:50,243 line:-1
+The second thing to keep in mind
+is that asset inspection
+
+
+43
+00:01:50.243 --> 00:01:52.446 line:-1 position:50%
+is an asynchronous process.
+
+
+44
+00:01:52.446 --> 00:01:55.816 line:-1 position:50%
+This is really important because
+network I/O can take some time.
+
+
+45
+00:01:55.816 --> 00:01:58.018 line:-1 position:50%
+If the asset is stored
+across the network,
+
+
+46
+00:01:58,018 --> 00:02:00,587 line:-1
+you wouldn't want your app's
+main thread to be blocked
+
+
+47
+00:02:00.587 --> 00:02:03.924 line:-1 position:50%
+while AVAsset issues
+a synchronous network request.
+
+
+48
+00:02:03.924 --> 00:02:06.259 line:-1 position:50%
+Instead, AVAsset
+will asynchronously
+
+
+49
+00:02:06,259 --> 00:02:08,829 line:-1
+deliver the result
+when it's ready.
+
+
+50
+00:02:08,829 --> 00:02:11,365 line:-1
+With these two things in mind,
+we have a new API
+
+
+51
+00:02:11.365 --> 00:02:12.933 line:-1 position:50%
+for inspecting asset properties,
+
+
+52
+00:02:12,933 --> 00:02:16,403 line:-1
+and it looks a little bit
+like this.
+
+
+53
+00:02:16.403 --> 00:02:18.739 line:-1 position:50%
+The main thing to notice is
+this new load method,
+
+
+54
+00:02:18,739 --> 00:02:20,774 line:-1
+which takes in
+a property identifier --
+
+
+55
+00:02:20,774 --> 00:02:22,142 line:-1
+in this case .duration --
+
+
+56
+00:02:22,142 --> 00:02:25,412 line:-1
+in order for you to tell it
+which property value to load.
+
+
+57
+00:02:25.412 --> 00:02:28.448 line:-1 position:50%
+Each property identifier
+is associated with a result type
+
+
+58
+00:02:28.448 --> 00:02:29.883 line:-1 position:50%
+at compile time,
+
+
+59
+00:02:29.883 --> 00:02:33.820 line:-1 position:50%
+which determines the return type
+of the load method.
+
+
+60
+00:02:33,820 --> 00:02:36,023 line:-1
+In this case,
+the duration is a CMTime,
+
+
+61
+00:02:36,023 --> 00:02:38,458 line:-1
+so the result is a CMTime.
+
+
+62
+00:02:38.458 --> 00:02:42.129 line:-1 position:50%
+One thing you may not have seen
+before is this await keyword.
+
+
+63
+00:02:42,129 --> 00:02:44,698 line:-1
+This is a new feature in Swift,
+and it's used to mark,
+
+
+64
+00:02:44.698 --> 00:02:48.668 line:-1 position:50%
+at the call site, that the load
+method is asynchronous.
+
+
+65
+00:02:48,668 --> 00:02:50,937 position:50%
+For all the details
+on async/await
+
+
+66
+00:02:50,937 --> 00:02:53,340 position:50%
+and the broader concurrency
+effort in Swift,
+
+
+67
+00:02:53,340 --> 00:02:55,375 line:0
+I encourage you to check out
+the session called
+
+
+68
+00:02:55,375 --> 00:02:58,011 position:50%
+"Meet async/await in Swift."
+
+
+69
+00:02:58,011 --> 00:02:59,946 line:-1
+For now, as a quick
+way of understanding
+
+
+70
+00:02:59.946 --> 00:03:02.749 line:-1 position:50%
+how to use our new
+property loading method,
+
+
+71
+00:03:02,749 --> 00:03:04,317 line:-1
+I like to think
+of the await keyword
+
+
+72
+00:03:04.317 --> 00:03:07.487 line:-1 position:50%
+as dividing the calling function
+into two parts.
+
+
+73
+00:03:07,487 --> 00:03:08,989 line:-1
+First, there's the part
+that happens
+
+
+74
+00:03:08,989 --> 00:03:11,625 line:-1
+before the asynchronous
+operation begins.
+
+
+75
+00:03:11.625 --> 00:03:15.162 line:-1 position:50%
+In this case, we create an asset
+and ask it to load its duration.
+
+
+76
+00:03:15,162 --> 00:03:17,998 line:-1
+At this point, the asset
+goes off and does the I/O
+
+
+77
+00:03:17.998 --> 00:03:20.600 line:-1 position:50%
+and parsing necessary
+to determine its duration
+
+
+78
+00:03:20.600 --> 00:03:22.903 line:-1 position:50%
+and we await its result.
+
+
+79
+00:03:22,903 --> 00:03:25,705 line:-1
+While we're waiting, the calling
+function is suspended,
+
+
+80
+00:03:25,705 --> 00:03:27,707 line:-1
+which means the code
+written after the await
+
+
+81
+00:03:27.707 --> 00:03:30.110 line:-1 position:50%
+doesn't execute right away.
+
+
+82
+00:03:30,110 --> 00:03:33,346 line:-1
+However, the thread we were
+running on isn't blocked.
+
+
+83
+00:03:33.346 --> 00:03:36.716 line:-1 position:50%
+Instead, it's free to do
+more work while we're waiting.
+
+
+84
+00:03:36.716 --> 00:03:39.319 line:-1 position:50%
+Once the asynchronous
+duration loading has finished,
+
+
+85
+00:03:39,319 --> 00:03:42,789 line:-1
+then the second half of the
+function is scheduled to be run.
+
+
+86
+00:03:42,789 --> 00:03:45,759 line:-1
+In this case, if the duration
+loading was successful,
+
+
+87
+00:03:45.759 --> 00:03:48.395 line:-1 position:50%
+we store the duration
+into a local constant
+
+
+88
+00:03:48.395 --> 00:03:50.464 line:-1 position:50%
+and send it off
+to another function.
+
+
+89
+00:03:50,464 --> 00:03:53,733 line:-1
+Or, if the operation failed,
+an error will be thrown
+
+
+90
+00:03:53.733 --> 00:03:56.403 line:-1 position:50%
+once the calling function
+resumes.
+
+
+91
+00:03:56,403 --> 00:04:00,140 line:-1
+So that's the basics of loading
+a property value asynchronously.
+
+
+92
+00:04:00,140 --> 00:04:03,643 line:-1
+You can also load the values
+of multiple properties at once,
+
+
+93
+00:04:03.643 --> 00:04:04.678 line:-1 position:50%
+and you do this simply
+
+
+94
+00:04:04,678 --> 00:04:07,414 line:-1
+by passing in more
+than one property identifier
+
+
+95
+00:04:07.414 --> 00:04:08.949 line:-1 position:50%
+to the load method.
+
+
+96
+00:04:08.949 --> 00:04:11.518 line:-1 position:50%
+In this case, we're loading
+both the duration and the tracks
+
+
+97
+00:04:11,518 --> 00:04:13,120 line:-1
+at the same time.
+
+
+98
+00:04:13,120 --> 00:04:16,823 line:-1
+This is not only convenient, but
+it can also be more efficient.
+
+
+99
+00:04:16,823 --> 00:04:19,593 line:-1
+If the asset knows all the
+properties you're interested in,
+
+
+100
+00:04:19,593 --> 00:04:23,063 line:-1
+it can batch up the work
+required to load their values.
+
+
+101
+00:04:23.063 --> 00:04:26.566 line:-1 position:50%
+The result of loading multiple
+property values is a tuple,
+
+
+102
+00:04:26.566 --> 00:04:28.902 line:-1 position:50%
+with the loaded values
+in the same order you used
+
+
+103
+00:04:28.902 --> 00:04:30.937 line:-1 position:50%
+for the property
+identifiers.
+
+
+104
+00:04:30,937 --> 00:04:33,106 line:-1
+Just like loading
+a single property value,
+
+
+105
+00:04:33.106 --> 00:04:34.708 line:-1 position:50%
+this is type safe.
+
+
+106
+00:04:34.708 --> 00:04:38.445 line:-1 position:50%
+In this case, the first element
+of the result tuple is a CMTime
+
+
+107
+00:04:38,445 --> 00:04:42,149 line:-1
+and the second element
+is an array of AVAssetTracks.
+
+
+108
+00:04:42.149 --> 00:04:44.751 line:-1 position:50%
+And of course, just like
+with loading a single value,
+
+
+109
+00:04:44,751 --> 00:04:47,287 line:-1
+this is an asynchronous
+operation.
+
+
+110
+00:04:47.287 --> 00:04:50.257 line:-1 position:50%
+In addition to asynchronously
+loading property values,
+
+
+111
+00:04:50.257 --> 00:04:52.959 line:-1 position:50%
+you can also check the status
+of a property
+
+
+112
+00:04:52.959 --> 00:04:54.427 line:-1 position:50%
+without waiting
+for the value to load
+
+
+113
+00:04:54.427 --> 00:04:58.031 line:-1 position:50%
+at any time using the new
+status(of: ) method.
+
+
+114
+00:04:58,031 --> 00:04:59,866 line:-1
+You pass in the same
+property identifier
+
+
+115
+00:04:59.866 --> 00:05:01.501 line:-1 position:50%
+that you use
+for the load method,
+
+
+116
+00:05:01.501 --> 00:05:04.804 line:-1 position:50%
+and this'll return an enum
+with four possible cases.
+
+
+117
+00:05:04.804 --> 00:05:07.741 line:-1 position:50%
+Each property starts off
+as .notYetLoaded.
+
+
+118
+00:05:07.741 --> 00:05:10.844 line:-1 position:50%
+Remember that asset inspection
+happens on demand,
+
+
+119
+00:05:10.844 --> 00:05:14.047 line:-1 position:50%
+so until you ask to load
+a property value,
+
+
+120
+00:05:14,047 --> 00:05:16,983 line:-1
+the asset won't have done
+any work to load it.
+
+
+121
+00:05:16,983 --> 00:05:18,418 line:-1
+If you happen
+to check the status
+
+
+122
+00:05:18.418 --> 00:05:20.086 line:-1 position:50%
+while the loading
+is in progress,
+
+
+123
+00:05:20.086 --> 00:05:21.555 line:-1 position:50%
+you'll get the .loading case.
+
+
+124
+00:05:21.555 --> 00:05:23.857 line:-1 position:50%
+Or, if the property
+is already loaded,
+
+
+125
+00:05:23,857 --> 00:05:26,059 line:-1
+you'll get the .loaded case,
+which comes bundled
+
+
+126
+00:05:26,059 --> 00:05:29,796 line:-1
+with the value that was loaded
+as an associated value.
+
+
+127
+00:05:29.796 --> 00:05:31.565 line:-1 position:50%
+Finally,
+if a failure occurred --
+
+
+128
+00:05:31.565 --> 00:05:33.633 line:-1 position:50%
+perhaps because
+the network went down --
+
+
+129
+00:05:33.633 --> 00:05:35.902 line:-1 position:50%
+you'll get the .failed case,
+which comes bundled
+
+
+130
+00:05:35.902 --> 00:05:38.805 line:-1 position:50%
+with an error to describe
+what went wrong.
+
+
+131
+00:05:38.805 --> 00:05:41.107 line:-1 position:50%
+Note that this'll be
+the same error that was thrown
+
+
+132
+00:05:41.107 --> 00:05:43.410 line:-1 position:50%
+by the invocation
+of the load method
+
+
+133
+00:05:43,410 --> 00:05:46,213 line:-1
+that initiated
+the failed loading request.
+
+
+134
+00:05:46,213 --> 00:05:49,282 line:-1
+So that's the new API for
+loading asynchronous properties
+
+
+135
+00:05:49.282 --> 00:05:51.184 line:-1 position:50%
+and checking their status.
+
+
+136
+00:05:51,184 --> 00:05:53,119 line:0
+AVAsset has quite
+a few properties
+
+
+137
+00:05:53,119 --> 00:05:56,089 line:0
+whose values can be loaded
+asynchronously.
+
+
+138
+00:05:56,089 --> 00:05:58,358 position:50%
+Most of these vend
+a self-contained value,
+
+
+139
+00:05:58,358 --> 00:06:00,327 position:50%
+but the .tracks
+and .metadata properties
+
+
+140
+00:06:00,327 --> 00:06:02,963 line:0
+vend more complex objects
+you can use
+
+
+141
+00:06:02,963 --> 00:06:06,666 position:50%
+to descend into the hierarchical
+structure of the asset.
+
+
+142
+00:06:06,666 --> 00:06:08,435 position:50%
+In the case
+of the .tracks property,
+
+
+143
+00:06:08,435 --> 00:06:10,870 position:50%
+you'll get an array
+of AVAssetTracks.
+
+
+144
+00:06:10,870 --> 00:06:13,373 line:0
+An AVAssetTrack has
+its own collection of properties
+
+
+145
+00:06:13,373 --> 00:06:15,575 line:0
+whose values can be loaded
+asynchronously
+
+
+146
+00:06:15,575 --> 00:06:18,011 position:50%
+using that same load method.
+
+
+147
+00:06:18.011 --> 00:06:20.113 line:-1 position:50%
+Similarly,
+the .metadata property
+
+
+148
+00:06:20.113 --> 00:06:22.816 line:-1 position:50%
+gives you an array
+of AVMetadataItems,
+
+
+149
+00:06:22,816 --> 00:06:25,218 line:-1
+and several AVMetadataItem
+properties
+
+
+150
+00:06:25.218 --> 00:06:27.454 line:-1 position:50%
+can also be loaded
+asynchronously
+
+
+151
+00:06:27.454 --> 00:06:29.522 line:-1 position:50%
+using the load method.
+
+
+152
+00:06:29.522 --> 00:06:31.324 line:-1 position:50%
+The last bit of new API
+in this area
+
+
+153
+00:06:31,324 --> 00:06:34,127 line:-1
+is a collection of asynchronous
+methods that you can use
+
+
+154
+00:06:34.127 --> 00:06:37.664 line:-1 position:50%
+to get at specific subsets
+of certain property values.
+
+
+155
+00:06:37.664 --> 00:06:40.233 line:-1 position:50%
+So instead of loading
+all the tracks, for example,
+
+
+156
+00:06:40.233 --> 00:06:42.068 line:-1 position:50%
+you can use one
+of these first three methods
+
+
+157
+00:06:42,068 --> 00:06:43,937 line:-1
+to load just some
+of the tracks --
+
+
+158
+00:06:43,937 --> 00:06:46,139 line:-1
+for example,
+just the audio tracks.
+
+
+159
+00:06:46.139 --> 00:06:47.807 line:-1 position:50%
+There are several
+new methods like this
+
+
+160
+00:06:47.807 --> 00:06:51.411 line:-1 position:50%
+on both AVAsset
+and AVAssetTrack.
+
+
+161
+00:06:51.411 --> 00:06:53.546 line:-1 position:50%
+So that's all
+the new API we have
+
+
+162
+00:06:53,546 --> 00:06:56,950 line:-1
+for inspecting assets
+asynchronously.
+
+
+163
+00:06:56.950 --> 00:07:00.220 line:-1 position:50%
+But at this point, I have
+a small confession to make.
+
+
+164
+00:07:00,220 --> 00:07:02,889 line:-1
+None of this functionality
+is actually new.
+
+
+165
+00:07:02,889 --> 00:07:04,157 line:-1
+The APIs are new,
+
+
+166
+00:07:04,157 --> 00:07:06,293 line:-1
+but these classes
+have always had the ability
+
+
+167
+00:07:06,293 --> 00:07:09,829 line:-1
+to load their property values
+asynchronously.
+
+
+168
+00:07:09,829 --> 00:07:11,698 line:-1
+It's just that,
+with the old APIs,
+
+
+169
+00:07:11.698 --> 00:07:14.901 line:-1 position:50%
+you would've had to write code
+more like this.
+
+
+170
+00:07:14,901 --> 00:07:16,703 line:-1
+It was a three-step process.
+
+
+171
+00:07:16.703 --> 00:07:17.804 line:-1 position:50%
+You first have to call
+
+
+172
+00:07:17,804 --> 00:07:20,073 line:-1
+the loadValuesAsynchronously
+method,
+
+
+173
+00:07:20.073 --> 00:07:23.510 line:-1 position:50%
+giving it strings to tell it
+which properties to load.
+
+
+174
+00:07:23,510 --> 00:07:25,645 line:-1
+Then you need to make sure
+that each of the properties
+
+
+175
+00:07:25,645 --> 00:07:29,015 line:-1
+actually did successfully load
+and didn't fail.
+
+
+176
+00:07:29.015 --> 00:07:31.084 line:-1 position:50%
+Then, once you've gotten
+that far,
+
+
+177
+00:07:31.084 --> 00:07:33.553 line:-1 position:50%
+you can fetch the loaded value
+either by querying
+
+
+178
+00:07:33,553 --> 00:07:35,689 line:-1
+the corresponding synchronous
+property
+
+
+179
+00:07:35,689 --> 00:07:38,858 line:-1
+or by calling one of the
+synchronous filtering methods.
+
+
+180
+00:07:38,858 --> 00:07:41,127 line:-1
+This is not only verbose
+and repetitive,
+
+
+181
+00:07:41,127 --> 00:07:43,730 line:-1
+it's also easy to misuse.
+
+
+182
+00:07:43,730 --> 00:07:45,999 line:-1
+For example,
+it's very easy to forget
+
+
+183
+00:07:45,999 --> 00:07:49,336 line:-1
+to do these essential loading
+and status-checking steps.
+
+
+184
+00:07:49,336 --> 00:07:51,771 line:-1
+What you're left with are
+these synchronous properties
+
+
+185
+00:07:51,771 --> 00:07:54,374 line:-1
+and methods that can be
+called at any time,
+
+
+186
+00:07:54,374 --> 00:07:56,042 line:-1
+but if you call them without
+first loading
+
+
+187
+00:07:56.042 --> 00:08:00.347 line:-1 position:50%
+the property values, you'll
+end up doing blocking I/O.
+
+
+188
+00:08:00,347 --> 00:08:02,082 line:-1
+If you do this
+on your main thread,
+
+
+189
+00:08:02.082 --> 00:08:04.150 line:-1 position:50%
+this means that your app
+can end up hanging
+
+
+190
+00:08:04,150 --> 00:08:06,853 line:-1
+at unpredictable times.
+
+
+191
+00:08:06,853 --> 00:08:09,389 line:0
+So in addition to the fact
+that the new APIs
+
+
+192
+00:08:09,389 --> 00:08:11,524 position:50%
+are simply easier to use,
+
+
+193
+00:08:11,524 --> 00:08:14,594 line:0
+the fact that they also
+eliminate these common misuses
+
+
+194
+00:08:14,594 --> 00:08:18,331 position:50%
+means that we plan to deprecate
+the old synchronous APIs
+
+
+195
+00:08:18,331 --> 00:08:21,234 position:50%
+for Swift clients
+in a future release.
+
+
+196
+00:08:21,234 --> 00:08:22,769 line:0
+This is an excellent time
+to move
+
+
+197
+00:08:22,769 --> 00:08:26,039 line:0
+to the new asynchronous
+versions of these interfaces,
+
+
+198
+00:08:26,039 --> 00:08:27,040 position:50%
+and to help you do that
+
+
+199
+00:08:27,040 --> 00:08:29,943 line:0
+we've prepared
+a short migration guide.
+
+
+200
+00:08:29,943 --> 00:08:33,847 line:-1
+So, if you're doing that
+trifecta of loading the value,
+
+
+201
+00:08:33.847 --> 00:08:37.417 line:-1 position:50%
+checking its status, and then
+grabbing a synchronous property,
+
+
+202
+00:08:37.417 --> 00:08:39.552 line:-1 position:50%
+now you can simply
+call the load method
+
+
+203
+00:08:39.552 --> 00:08:43.156 line:-1 position:50%
+and do that all
+in one asynchronous step.
+
+
+204
+00:08:43.156 --> 00:08:45.892 line:-1 position:50%
+Similarly, if you're doing
+that three-step process
+
+
+205
+00:08:45.892 --> 00:08:48.161 line:-1 position:50%
+but using a synchronous
+filtering method
+
+
+206
+00:08:48.161 --> 00:08:49.929 line:-1 position:50%
+instead of a property,
+
+
+207
+00:08:49,929 --> 00:08:52,132 line:-1
+you can now call the
+asynchronous equivalent
+
+
+208
+00:08:52,132 --> 00:08:55,935 line:-1
+of that filtering method
+and do that in one step.
+
+
+209
+00:08:55.935 --> 00:08:58.371 line:-1 position:50%
+If you're switching over
+the status of a property
+
+
+210
+00:08:58,371 --> 00:09:00,940 line:-1
+using the old
+statusOfValue(forKey: ) method
+
+
+211
+00:09:00,940 --> 00:09:03,376 line:-1
+and then grabbing the
+synchronous property value
+
+
+212
+00:09:03,376 --> 00:09:05,812 line:-1
+when you see
+that you're in the .loaded case,
+
+
+213
+00:09:05.812 --> 00:09:08.415 line:-1 position:50%
+now you can take advantage of
+the fact that the .loaded case
+
+
+214
+00:09:08,415 --> 00:09:11,017 line:-1
+of the new status enum
+comes bundled
+
+
+215
+00:09:11,017 --> 00:09:13,119 line:-1
+with that .loaded value.
+
+
+216
+00:09:13,119 --> 00:09:16,022 line:-1
+If your app is doing something
+a little bit more interesting,
+
+
+217
+00:09:16,022 --> 00:09:19,058 line:-1
+like loading the value of a
+property in one part of the code
+
+
+218
+00:09:19.058 --> 00:09:20.527 line:-1 position:50%
+and then fetching
+the loaded value
+
+
+219
+00:09:20,527 --> 00:09:23,196 line:-1
+in a different part of the code,
+there are a couple ways
+
+
+220
+00:09:23,196 --> 00:09:25,632 line:-1
+you could do this
+with the new interface.
+
+
+221
+00:09:25.632 --> 00:09:28.401 line:-1 position:50%
+I recommend just calling
+the load method again.
+
+
+222
+00:09:28,401 --> 00:09:30,470 line:-1
+This is the easiest
+and safest way to do it,
+
+
+223
+00:09:30,470 --> 00:09:32,405 line:-1
+and if the property
+has already been loaded,
+
+
+224
+00:09:32,405 --> 00:09:35,275 line:-1
+this won't duplicate the work
+that's already been done.
+
+
+225
+00:09:35.275 --> 00:09:38.178 line:-1 position:50%
+Instead, it'll just return
+a cached value.
+
+
+226
+00:09:38.178 --> 00:09:40.447 line:-1 position:50%
+However, there's one caveat
+to this and that is that,
+
+
+227
+00:09:40,447 --> 00:09:43,316 line:-1
+because the load method
+is an async method,
+
+
+228
+00:09:43.316 --> 00:09:46.953 line:-1 position:50%
+it can only be called
+from an async context.
+
+
+229
+00:09:46,953 --> 00:09:49,489 position:50%
+So if you really need
+to get the value of the property
+
+
+230
+00:09:49,489 --> 00:09:51,291 line:0
+from a pure synchronous context,
+
+
+231
+00:09:51,291 --> 00:09:54,127 line:0
+you can do something like
+get the status of the property
+
+
+232
+00:09:54,127 --> 00:09:55,662 position:50%
+and assert that it's loaded
+
+
+233
+00:09:55,662 --> 00:09:58,898 line:0
+in order to grab the value
+of the property synchronously.
+
+
+234
+00:09:58,898 --> 00:10:00,767 position:50%
+Still, you have to be careful
+doing this,
+
+
+235
+00:10:00,767 --> 00:10:03,870 line:0
+because it's possible
+for a property to become failed
+
+
+236
+00:10:03,870 --> 00:10:06,606 position:50%
+even after
+it's already been loaded.
+
+
+237
+00:10:06,606 --> 00:10:08,508 line:0
+Finally, if you're skipping
+the loading
+
+
+238
+00:10:08,508 --> 00:10:10,477 position:50%
+and status-checking steps
+
+
+239
+00:10:10,477 --> 00:10:12,779 line:0
+and just relying on the current
+behavior of the properties
+
+
+240
+00:10:12,779 --> 00:10:16,249 position:50%
+and methods in that they block
+until the result is available,
+
+
+241
+00:10:16,249 --> 00:10:18,485 position:50%
+well, we're actually
+not providing a replacement
+
+
+242
+00:10:18,485 --> 00:10:19,652 line:0
+for this.
+
+
+243
+00:10:19,652 --> 00:10:22,689 line:0
+This has never been the
+recommended way to use the API,
+
+
+244
+00:10:22,689 --> 00:10:24,991 position:50%
+and so we've always
+discouraged it.
+
+
+245
+00:10:24,991 --> 00:10:27,160 line:0
+We designed the new
+property-loading APIs
+
+
+246
+00:10:27,160 --> 00:10:30,630 position:50%
+to be just about as easy to use
+as fetching a simple property,
+
+
+247
+00:10:30,630 --> 00:10:35,101 line:0
+so migrating to the new APIs
+should be straightforward.
+
+
+248
+00:10:35,101 --> 00:10:38,104 line:-1
+And with that,
+that's all for our first topic.
+
+
+249
+00:10:38.104 --> 00:10:40.807 line:-1 position:50%
+I'm really excited about
+our new way to inspect assets,
+
+
+250
+00:10:40,807 --> 00:10:42,842 line:-1
+using Swift's
+new async features,
+
+
+251
+00:10:42,842 --> 00:10:46,379 line:-1
+and I hope you'll enjoy
+using them as much as I have.
+
+
+252
+00:10:46.379 --> 00:10:49.649 line:-1 position:50%
+Now let's move on to the first
+of our two shorter topics:
+
+
+253
+00:10:49.649 --> 00:10:52.752 line:-1 position:50%
+video compositing with metadata.
+
+
+254
+00:10:52.752 --> 00:10:54.621 line:-1 position:50%
+Here we're talking
+about video compositing,
+
+
+255
+00:10:54.621 --> 00:10:57.390 line:-1 position:50%
+which is the process
+of taking multiple video tracks
+
+
+256
+00:10:57,390 --> 00:11:01,461 line:-1
+and composing them into a
+single stream of video frames.
+
+
+257
+00:11:01.461 --> 00:11:02.629 line:-1 position:50%
+And in particular,
+
+
+258
+00:11:02.629 --> 00:11:05.798 line:-1 position:50%
+we have an enhancement
+for custom video compositors,
+
+
+259
+00:11:05.798 --> 00:11:07.400 line:-1 position:50%
+which is where
+you provide the code
+
+
+260
+00:11:07.400 --> 00:11:10.303 line:-1 position:50%
+that does the compositing.
+
+
+261
+00:11:10.303 --> 00:11:12.772 line:-1 position:50%
+New this year, you can
+get per-frame metadata
+
+
+262
+00:11:12,772 --> 00:11:13,773 line:-1
+delivered to you
+
+
+263
+00:11:13,773 --> 00:11:17,176 line:-1
+in your custom compositor's
+frame composition callback.
+
+
+264
+00:11:17.176 --> 00:11:20.813 line:-1 position:50%
+As an example, let's say
+you have a sequence of GPS data,
+
+
+265
+00:11:20.813 --> 00:11:22.982 line:-1 position:50%
+and that data is time-stamped
+and synchronized
+
+
+266
+00:11:22.982 --> 00:11:25.652 line:-1 position:50%
+with your video, and you want
+to use that GPS data
+
+
+267
+00:11:25,652 --> 00:11:29,222 line:-1
+in order to influence how your
+frames are composed together.
+
+
+268
+00:11:29.222 --> 00:11:31.658 line:-1 position:50%
+You can do that now,
+and the first step is to write
+
+
+269
+00:11:31,658 --> 00:11:36,095 line:-1
+the GPS data to a timed metadata
+track in your source movie.
+
+
+270
+00:11:36,095 --> 00:11:38,331 line:-1
+In order do to this
+with AVAssetWriter,
+
+
+271
+00:11:38.331 --> 00:11:39.933 line:-1 position:50%
+check out the existing class,
+
+
+272
+00:11:39,933 --> 00:11:43,002 line:-1
+AVAssetWriter
+InputMetadataAdaptor.
+
+
+273
+00:11:43,002 --> 00:11:46,172 line:-1
+Now let's take a look
+at the new API.
+
+
+274
+00:11:46,172 --> 00:11:48,274 line:-1
+Let's say you're starting
+with a source movie
+
+
+275
+00:11:48.274 --> 00:11:51.010 line:-1 position:50%
+that has a certain collection
+of tracks.
+
+
+276
+00:11:51,010 --> 00:11:53,846 line:-1
+Perhaps it has an audio track,
+two video tracks,
+
+
+277
+00:11:53,846 --> 00:11:56,082 line:-1
+and three timed metadata tracks.
+
+
+278
+00:11:56,082 --> 00:11:58,818 line:-1
+But let's say that tracks four
+and five contain metadata
+
+
+279
+00:11:58,818 --> 00:12:01,087 line:-1
+that's useful
+for your video compositing,
+
+
+280
+00:12:01.087 --> 00:12:04.090 line:-1 position:50%
+but track six is unrelated.
+
+
+281
+00:12:04.090 --> 00:12:06.759 line:-1 position:50%
+You have two setup steps
+to perform, and the first
+
+
+282
+00:12:06.759 --> 00:12:10.396 line:-1 position:50%
+is to use the new source
+SampleDataTrackIDs property
+
+
+283
+00:12:10.396 --> 00:12:13.066 line:-1 position:50%
+to tell your
+video composition object
+
+
+284
+00:12:13,066 --> 00:12:14,867 line:-1
+the IDs of all
+the timed metadata tracks
+
+
+285
+00:12:14.867 --> 00:12:18.838 line:-1 position:50%
+that are relevant for
+the entire video composition.
+
+
+286
+00:12:18,838 --> 00:12:20,440 line:0
+Once you've done that,
+the second step
+
+
+287
+00:12:20,440 --> 00:12:23,276 line:0
+is to take each of your video
+composition instructions
+
+
+288
+00:12:23,276 --> 00:12:25,812 line:0
+and do something similar,
+but this time you set
+
+
+289
+00:12:25,812 --> 00:12:28,781 position:50%
+the requiredSourceSampleData
+TrackIDs property
+
+
+290
+00:12:28,781 --> 00:12:31,317 line:0
+to tell it the track ID --
+or IDs --
+
+
+291
+00:12:31,317 --> 00:12:34,487 line:0
+that are relevant
+for that particular instruction.
+
+
+292
+00:12:34,487 --> 00:12:36,889 position:50%
+It's important that you do
+both of these setup steps
+
+
+293
+00:12:36,889 --> 00:12:39,058 position:50%
+or you simply won't get
+any metadata
+
+
+294
+00:12:39,058 --> 00:12:41,527 line:0
+in your composition
+callback.
+
+
+295
+00:12:41,527 --> 00:12:44,631 position:50%
+Now let's move over
+to the callback itself.
+
+
+296
+00:12:44,631 --> 00:12:47,533 line:-1
+When you get your asynchronous
+video composition request object
+
+
+297
+00:12:47,533 --> 00:12:50,336 line:-1
+in your callback, there are
+two new APIs that you use
+
+
+298
+00:12:50.336 --> 00:12:54.307 line:-1 position:50%
+in order to get the metadata
+for your video composition.
+
+
+299
+00:12:54,307 --> 00:12:57,510 line:-1
+The first is the source
+SampleDataTrackIDs property,
+
+
+300
+00:12:57,510 --> 00:13:00,179 line:-1
+which replays the track IDs
+for the metadata tracks
+
+
+301
+00:13:00.179 --> 00:13:02.815 line:-1 position:50%
+that are relevant
+to that request.
+
+
+302
+00:13:02,815 --> 00:13:05,184 line:-1
+Then for each of the track IDs,
+you can use the
+
+
+303
+00:13:05,184 --> 00:13:07,854 line:-1
+sourceTimedMetadata(byTrackID :)
+method
+
+
+304
+00:13:07,854 --> 00:13:10,223 line:-1
+in order to get the current
+timed metadata group
+
+
+305
+00:13:10,223 --> 00:13:12,392 line:-1
+for that track.
+
+
+306
+00:13:12,392 --> 00:13:15,695 line:-1
+Now, AVTimedMetadataGroup
+is a high-level representation
+
+
+307
+00:13:15.695 --> 00:13:17.697 line:-1 position:50%
+of the metadata,
+with the value parsed
+
+
+308
+00:13:17.697 --> 00:13:22.101 line:-1 position:50%
+into a string, date,
+or other high-level object.
+
+
+309
+00:13:22.101 --> 00:13:24.704 line:-1 position:50%
+If you'd rather work with the
+raw bytes of the metadata,
+
+
+310
+00:13:24,704 --> 00:13:26,873 line:-1
+you can use the
+sourceSampleBuffer(byTrackID: )
+
+
+311
+00:13:26.873 --> 00:13:29.142 line:-1 position:50%
+method
+to get a CMSampleBuffer
+
+
+312
+00:13:29,142 --> 00:13:32,245 line:-1
+instead of an
+AVTimedMetadataGroup.
+
+
+313
+00:13:32.245 --> 00:13:34.247 line:-1 position:50%
+Once you have
+the metadata in hand,
+
+
+314
+00:13:34,247 --> 00:13:37,450 line:-1
+you can use the metadata along
+with your source video frames
+
+
+315
+00:13:37.450 --> 00:13:39.719 line:-1 position:50%
+to generate
+your output video frame
+
+
+316
+00:13:39,719 --> 00:13:42,188 line:-1
+and finish off the request.
+
+
+317
+00:13:42,188 --> 00:13:44,290 line:-1
+So that's all it takes
+to get metadata
+
+
+318
+00:13:44,290 --> 00:13:47,093 line:-1
+into your custom video
+compositor callback
+
+
+319
+00:13:47.093 --> 00:13:48.594 line:-1 position:50%
+so you can do more
+interesting things
+
+
+320
+00:13:48.594 --> 00:13:52.265 line:-1 position:50%
+with your video compositions.
+
+
+321
+00:13:52,265 --> 00:13:57,070 line:-1
+Now onto our final topic,
+which is caption file authoring.
+
+
+322
+00:13:57,070 --> 00:13:58,838 line:-1
+New this year for macOS,
+
+
+323
+00:13:58,838 --> 00:14:02,442 line:-1
+AVFoundation is adding support
+for two file formats.
+
+
+324
+00:14:02.442 --> 00:14:06.079 line:-1 position:50%
+First, we have iTunes Timed
+Text, or .itt files,
+
+
+325
+00:14:06,079 --> 00:14:07,880 line:-1
+which contain subtitles.
+
+
+326
+00:14:07.880 --> 00:14:10.516 line:-1 position:50%
+The other file format
+is Scenarist Closed Captions --
+
+
+327
+00:14:10,516 --> 00:14:14,220 line:-1
+or .scc files --
+which contain closed captions.
+
+
+328
+00:14:14,220 --> 00:14:15,822 line:0
+AVFoundation is adding support
+
+
+329
+00:14:15,822 --> 00:14:18,157 position:50%
+for authoring
+these two file formats,
+
+
+330
+00:14:18,157 --> 00:14:20,993 line:0
+ingesting captions
+from these types of files,
+
+
+331
+00:14:20,993 --> 00:14:23,663 line:0
+and also for previewing captions
+at runtime
+
+
+332
+00:14:23,663 --> 00:14:26,099 line:0
+to see what they'll look like
+during playback.
+
+
+333
+00:14:26,099 --> 00:14:28,434 line:-1
+On the authoring side,
+we have some new APIs,
+
+
+334
+00:14:28,434 --> 00:14:30,203 line:-1
+starting with AVCaption,
+
+
+335
+00:14:30.203 --> 00:14:33.773 line:-1 position:50%
+which is the model object that
+represents a single caption.
+
+
+336
+00:14:33,773 --> 00:14:36,976 line:-1
+It has properties for things
+like the text, position,
+
+
+337
+00:14:36.976 --> 00:14:40.480 line:-1 position:50%
+styling, and other attributes
+of a single caption.
+
+
+338
+00:14:40,480 --> 00:14:42,381 line:-1
+You can create
+AVCaptions yourself
+
+
+339
+00:14:42.381 --> 00:14:45.284 line:-1 position:50%
+and use an
+AVAssetWriterInputCaptionAdaptor
+
+
+340
+00:14:45.284 --> 00:14:49.756 line:-1 position:50%
+in order to write them to one
+of these two file formats.
+
+
+341
+00:14:49.756 --> 00:14:51.924 line:-1 position:50%
+In addition, we have
+a new validation service
+
+
+342
+00:14:51.924 --> 00:14:54.861 line:-1 position:50%
+in the AVCaptionConversion
+Validator class,
+
+
+343
+00:14:54,861 --> 00:14:56,829 line:-1
+which helps you make sure
+the captions you're writing
+
+
+344
+00:14:56.829 --> 00:15:00.366 line:-1 position:50%
+are actually compatible with
+the file format you've chosen.
+
+
+345
+00:15:00,366 --> 00:15:04,303 line:-1
+As an example of why this is
+important, consider .scc files.
+
+
+346
+00:15:04.303 --> 00:15:06.706 line:-1 position:50%
+They contain CEA-608 captions,
+
+
+347
+00:15:06,706 --> 00:15:09,642 line:-1
+which is a format that has
+very specific limitations
+
+
+348
+00:15:09,642 --> 00:15:13,246 line:-1
+about how many captions you can
+have in a given amount of time,
+
+
+349
+00:15:13,246 --> 00:15:15,648 line:-1
+all the way down
+to having a fixed bit budget
+
+
+350
+00:15:15.648 --> 00:15:18.184 line:-1 position:50%
+for the data representing
+the individual characters
+
+
+351
+00:15:18.184 --> 00:15:19.919 line:-1 position:50%
+and their styling.
+
+
+352
+00:15:19,919 --> 00:15:21,954 line:-1
+So the validator will help you
+not only ensure
+
+
+353
+00:15:21,954 --> 00:15:25,358 line:-1
+that your stream of captions is
+compatible with the file format,
+
+
+354
+00:15:25,358 --> 00:15:28,294 line:-1
+it'll also suggest tweaks
+you can make to your captions,
+
+
+355
+00:15:28.294 --> 00:15:30.129 line:-1 position:50%
+such as adjusting
+their time stamps,
+
+
+356
+00:15:30.129 --> 00:15:33.166 line:-1 position:50%
+in order to make them
+compatible.
+
+
+357
+00:15:33.166 --> 00:15:35.201 line:-1 position:50%
+The new API
+for ingesting captions
+
+
+358
+00:15:35,201 --> 00:15:38,104 line:-1
+is AVAssetReader
+OutputCaptionAdaptor
+
+
+359
+00:15:38.104 --> 00:15:40.039 line:-1 position:50%
+which allows you to take
+one of these files
+
+
+360
+00:15:40,039 --> 00:15:43,843 line:-1
+and read in AVCaption objects
+from it.
+
+
+361
+00:15:43.843 --> 00:15:46.679 line:-1 position:50%
+Finally, we have an
+AVCaptionRenderer class,
+
+
+362
+00:15:46,679 --> 00:15:48,781 line:-1
+which allows you
+to take a single caption
+
+
+363
+00:15:48.781 --> 00:15:51.951 line:-1 position:50%
+or a group of captions
+and render them to a CGContext
+
+
+364
+00:15:51.951 --> 00:15:54.120 line:-1 position:50%
+in order to get a preview
+of what they'll look like
+
+
+365
+00:15:54,120 --> 00:15:56,255 line:-1
+during playback.
+
+
+366
+00:15:56.255 --> 00:15:57.757 line:-1 position:50%
+So that's just
+the tip of the iceberg
+
+
+367
+00:15:57,757 --> 00:16:00,960 line:-1
+for our new caption file
+authoring APIs.
+
+
+368
+00:16:00.960 --> 00:16:02.628 line:-1 position:50%
+If you're interested
+in adopting them,
+
+
+369
+00:16:02,628 --> 00:16:04,297 line:-1
+we encourage you
+to get in touch with us --
+
+
+370
+00:16:04.297 --> 00:16:06.899 line:-1 position:50%
+either in the forums
+or in the conference labs --
+
+
+371
+00:16:06.899 --> 00:16:10.236 line:-1 position:50%
+and we can help answer
+any questions that you have.
+
+
+372
+00:16:10.236 --> 00:16:14.106 line:-1 position:50%
+And that was our final topic,
+so let's wrap up.
+
+
+373
+00:16:14,106 --> 00:16:17,743 line:-1
+Our big topic for the day was
+inspecting AVAsset properties,
+
+
+374
+00:16:17.743 --> 00:16:21.747 line:-1 position:50%
+the importance of doing so
+on demand and asynchronously,
+
+
+375
+00:16:21.747 --> 00:16:23.716 line:-1 position:50%
+the new APIs in this area,
+
+
+376
+00:16:23,716 --> 00:16:26,819 line:-1
+and some tips for migrating
+from the old APIs.
+
+
+377
+00:16:26,819 --> 00:16:28,888 line:-1
+We then talked about
+using timed metadata
+
+
+378
+00:16:28,888 --> 00:16:32,558 line:-1
+to further customize
+your custom video compositions.
+
+
+379
+00:16:32,558 --> 00:16:34,493 position:50%
+Finally, I gave
+a brief introduction
+
+
+380
+00:16:34,493 --> 00:16:38,731 line:0
+to caption file authoring
+and the new APIs in that area.
+
+
+381
+00:16:38,731 --> 00:16:40,166 line:0
+That's all for today.
+
+
+382
+00:16:40,166 --> 00:16:44,437 line:0
+Thank you very much for watching
+and enjoy WWDC21.
+
+
+383
+00:16:44,437 --> 00:16:49,442 line:0 align:center size:2%
+♪
+

@@ -1,0 +1,1278 @@
+2
+00:00:01.468 --> 00:00:07.474 line:-1 align:center
+[spacey music]
+
+
+3
+00:00:09.977 --> 00:00:11.578 line:-2 align:center
+Yann Ly-Gagnon: Hi.
+my name is Yann.
+
+
+4
+00:00:11,612 --> 00:00:13,146 line:-1
+I'm a core Bluetooth engineer.
+
+
+5
+00:00:13.180 --> 00:00:15.349 line:-2 align:center
+Today, I want to talk to you
+about timely alerts
+
+
+6
+00:00:15.382 --> 00:00:17.484 line:-1 align:center
+for your Bluetooth devices on Apple Watch.
+
+
+7
+00:00:18.752 --> 00:00:22.022 line:-2 align:center
+First, we will review how to update
+a complication
+
+
+8
+00:00:22,055 --> 00:00:24,124 line:-2
+while your watchOS App
+is in the background.
+
+
+9
+00:00:26.026 --> 00:00:30.664 line:-2 align:center
+Then, we will dive into how to listen
+for timely alerts on your watchOS App.
+
+
+10
+00:00:32,833 --> 00:00:36,203 line:-2
+We will also see new ways
+you can discover peripherals
+
+
+11
+00:00:36.236 --> 00:00:37.504 line:-1 align:center
+on watchOS 9.
+
+
+12
+00:00:39.606 --> 00:00:43.076 line:-2 align:center
+Finally, we will provide best practices
+and recommendations
+
+
+13
+00:00:43,110 --> 00:00:45,312 line:-2
+to help you design
+your Bluetooth accessory.
+
+
+14
+00:00:47,748 --> 00:00:49,950 line:-1
+Let's jump into our first topic:
+
+
+15
+00:00:49.983 --> 00:00:53.520 line:-2 align:center
+how to update a complication
+in the background for your watchOS App.
+
+
+16
+00:00:54.288 --> 00:00:57.758 line:-2 align:center
+Last year, in watchOS 8,
+we introduced a way
+
+
+17
+00:00:57.791 --> 00:01:00.060 line:-2 align:center
+to update complications
+with your Bluetooth accessory
+
+
+18
+00:01:00.093 --> 00:01:01.595 line:-1 align:center
+during Background app refresh.
+
+
+19
+00:01:03.163 --> 00:01:06.266 line:-2 align:center
+This is great for data
+that can be updated periodically,
+
+
+20
+00:01:06.300 --> 00:01:09.036 line:-2 align:center
+like in this example showing me
+the current air temperature.
+
+
+21
+00:01:12,506 --> 00:01:17,411 line:-2
+As a quick refresher, last year watchOS
+allows you to update your complication
+
+
+22
+00:01:17,444 --> 00:01:21,548 line:-2
+and use Background app refresh,
+which runs periodically in the background.
+
+
+23
+00:01:21.582 --> 00:01:24.985 line:-2 align:center
+Whenever Background app refresh happens,
+it allows your app to reconnect
+
+
+24
+00:01:25.018 --> 00:01:26.320 line:-1 align:center
+to your Bluetooth peripheral,
+
+
+25
+00:01:26,353 --> 00:01:29,156 line:-2
+retrieves data,
+and then disconnects from your peripheral.
+
+
+26
+00:01:30,090 --> 00:01:32,993 align:center
+For more details about this,
+watch the video called
+
+
+27
+00:01:33,026 --> 00:01:35,429 align:center
+"Connect Bluetooth devices
+to Apple Watch."
+
+
+28
+00:01:37,564 --> 00:01:40,834 line:-2
+But what if a time-sensitive event
+happens on your Bluetooth peripheral
+
+
+29
+00:01:40.868 --> 00:01:42.336 line:-1 align:center
+that the user wants to know about?
+
+
+30
+00:01:43,637 --> 00:01:47,407 line:-2
+In watchOS 9,
+we are introducing a way to listen
+
+
+31
+00:01:47,441 --> 00:01:50,177 line:-2
+for alerts from your Bluetooth
+accessories in the background.
+
+
+32
+00:01:52,312 --> 00:01:54,147 line:-1
+Here's how it works.
+
+
+33
+00:01:54,181 --> 00:01:56,884 line:-2
+You will connect your device
+when your app is running,
+
+
+34
+00:01:56.917 --> 00:01:58.652 line:-1 align:center
+and start monitoring a characteristic.
+
+
+35
+00:02:00,621 --> 00:02:03,624 line:-2
+When your app stops running,
+Core Bluetooth maintains the connection
+
+
+36
+00:02:03,657 --> 00:02:06,126 line:-2
+to your device on your behalf,
+and continues
+
+
+37
+00:02:06.159 --> 00:02:08.161 line:-2 align:center
+listening
+for changes to your characteristic.
+
+
+38
+00:02:09.630 --> 00:02:12.666 line:-2 align:center
+When your device changes
+the value of that characteristic,
+
+
+39
+00:02:12,699 --> 00:02:15,769 line:-2
+your app will get runtime
+to process that event.
+
+
+40
+00:02:15,802 --> 00:02:20,340 line:-2
+You could post a local notification
+or send a network request, for example.
+
+
+41
+00:02:20,374 --> 00:02:23,544 line:-2
+This is intended to provide users
+with time-sensitive information
+
+
+42
+00:02:23,577 --> 00:02:24,811 line:-1
+they care about.
+
+
+43
+00:02:26.613 --> 00:02:29.216 line:-1 align:center
+Let's say I have a food thermometer.
+
+
+44
+00:02:29.249 --> 00:02:32.486 line:-2 align:center
+I can set a desired cook temperature
+to get alerted
+
+
+45
+00:02:32,519 --> 00:02:34,588 line:-2
+when I should remove my food
+from the oven.
+
+
+46
+00:02:35.656 --> 00:02:38.559 line:-2 align:center
+As the temperature approaches
+the desired temperature,
+
+
+47
+00:02:38.592 --> 00:02:41.361 line:-2 align:center
+the thermometer changes
+a characteristic's value,
+
+
+48
+00:02:41,395 --> 00:02:44,698 line:-2
+and the app posts a local notification
+that the food is almost ready.
+
+
+49
+00:02:46,200 --> 00:02:49,269 line:-2
+When the food is done,
+I receive the desired notification.
+
+
+50
+00:02:51,205 --> 00:02:55,275 line:-2
+And if the temperature keeps rising,
+I get one final notification.
+
+
+51
+00:02:58,445 --> 00:03:02,049 line:-2
+First, let's review how
+to configure the Background modes.
+
+
+52
+00:03:03.350 --> 00:03:08.689 line:-2 align:center
+Add Bluetooth-central to UIBackgroundModes
+in your Watch app's Info.plist.
+
+
+53
+00:03:10.324 --> 00:03:14.528 line:-2 align:center
+In Xcode it's called
+"Required background modes,"
+
+
+54
+00:03:14.561 --> 00:03:17.931 line:-2 align:center
+and you should add
+"App communicates using CoreBluetooth."
+
+
+55
+00:03:19.099 --> 00:03:25.472 line:-2 align:center
+Note that those Info.plist entries
+are the same as your app has for iOS
+
+
+56
+00:03:25.506 --> 00:03:27.841 line:-2 align:center
+if you want to use
+background execution as a central.
+
+
+57
+00:03:29.910 --> 00:03:33.480 line:-2 align:center
+You will need to edit
+your watchApp info.plist manually
+
+
+58
+00:03:33,514 --> 00:03:37,150 line:-2
+and not rely on the iOS
+"Signing capabilities."
+
+
+59
+00:03:38,619 --> 00:03:40,320 line:-1
+Let's look at the code.
+
+
+60
+00:03:40,354 --> 00:03:43,590 line:-2
+Assuming you're already connected,
+you found a GATT service
+
+
+61
+00:03:43,624 --> 00:03:46,593 line:-1
+and just discovered a GATT characteristic.
+
+
+62
+00:03:46.627 --> 00:03:50.664 line:-2 align:center
+You will get
+the didDiscoverCharacteristicFor callback.
+
+
+63
+00:03:53.200 --> 00:03:54.535 line:-1 align:center
+Inside the callback,
+
+
+64
+00:03:54,568 --> 00:03:57,871 line:-2
+you can decide to get notifications
+every time the value changes.
+
+
+65
+00:03:58,972 --> 00:04:02,009 line:-1
+This is the same API as in watchOS 8,
+
+
+66
+00:04:02,042 --> 00:04:05,979 line:-2
+with the difference that it will also work
+while your app is in the background.
+
+
+67
+00:04:08,282 --> 00:04:11,485 line:-2
+Then implement the delegate method
+to handle changes
+
+
+68
+00:04:11.518 --> 00:04:15.322 line:-2 align:center
+to the characteristic's value
+with didUpdateValueFor.
+
+
+69
+00:04:17,691 --> 00:04:22,563 line:-2
+Once the characteristic changes,
+you can post a local notification here,
+
+
+70
+00:04:22.596 --> 00:04:26.433 line:-2 align:center
+send a network request,
+or whatever makes sense for your app.
+
+
+71
+00:04:27.267 --> 00:04:31.438 line:-2 align:center
+This method will be called both
+in the foreground and in the background,
+
+
+72
+00:04:31.471 --> 00:04:35.309 line:-2 align:center
+so make sure you perform
+the correct action in both cases.
+
+
+73
+00:04:37.044 --> 00:04:40.848 line:-2 align:center
+Now, let's talk about some situations
+you need to consider.
+
+
+74
+00:04:42.216 --> 00:04:45.285 line:-2 align:center
+First, on the topic
+of Bluetooth reconnections.
+
+
+75
+00:04:45.319 --> 00:04:48.689 line:-2 align:center
+If your device goes out of range,
+the Bluetooth connection
+
+
+76
+00:04:48.722 --> 00:04:50.557 line:-1 align:center
+will disconnect after a timeout.
+
+
+77
+00:04:51.725 --> 00:04:55.696 line:-2 align:center
+If this happens, your app
+will briefly get background runtime
+
+
+78
+00:04:55,729 --> 00:05:00,367 line:-2
+to call "connectPeripheral"
+in order to attempt reconnection.
+
+
+79
+00:05:00,400 --> 00:05:03,871 line:-1
+This is the same as what happens on iOS.
+
+
+80
+00:05:03,904 --> 00:05:08,075 line:-2
+As soon as the device is in range again,
+Core Bluetooth will reconnect to it.
+
+
+81
+00:05:09.710 --> 00:05:12.246 line:-1 align:center
+Now, let's talk about some limits.
+
+
+82
+00:05:12,279 --> 00:05:15,449 line:-2
+These limits are important
+to maintain optimal battery life
+
+
+83
+00:05:15.482 --> 00:05:17.017 line:-1 align:center
+for Apple Watch users.
+
+
+84
+00:05:19,987 --> 00:05:23,423 line:-2
+If your device is on the edge
+of Bluetooth range
+
+
+85
+00:05:23,457 --> 00:05:27,461 line:-2
+and repeatedly disconnects
+while in Background BLE connection,
+
+
+86
+00:05:27,494 --> 00:05:30,097 line:-1
+the reconnection range will be reduced.
+
+
+87
+00:05:30,130 --> 00:05:34,201 line:-2
+This means only devices close
+to the Apple Watch will reconnect.
+
+
+88
+00:05:35,869 --> 00:05:39,373 line:-2
+Those limits are counted
+on a rolling window of 24 hours
+
+
+89
+00:05:39.406 --> 00:05:42.476 line:-2 align:center
+and are reset whenever
+the user interacts on your App.
+
+
+90
+00:05:43.544 --> 00:05:47.381 line:-2 align:center
+Another limitation is regarding the number
+of background runtime opportunities
+
+
+91
+00:05:47.414 --> 00:05:48.682 line:-1 align:center
+for timely alerts.
+
+
+92
+00:05:50.250 --> 00:05:53.053 line:-2 align:center
+Only monitor characteristics
+that will change
+
+
+93
+00:05:53.086 --> 00:05:56.123 line:-2 align:center
+when something critical to the user
+happens.
+
+
+94
+00:05:56,156 --> 00:05:59,526 line:-2
+If you need to gather
+periodical data from your device,
+
+
+95
+00:05:59.560 --> 00:06:01.295 line:-2 align:center
+this should be done
+with Background app refresh.
+
+
+96
+00:06:03,564 --> 00:06:07,501 line:0
+When your app is about to exceed
+the limit, the notification
+
+
+97
+00:06:07,534 --> 00:06:12,806 line:0
+LeGattNearBackgroundNotificationLimit
+will be posted.
+
+
+98
+00:06:12,840 --> 00:06:16,109 line:0
+It is a good practice for your app
+to monitor that error
+
+
+99
+00:06:16,143 --> 00:06:18,912 align:center
+and realize that the user
+isn't interacting with the watchOS app.
+
+
+100
+00:06:20,147 --> 00:06:23,650 line:-2
+If this alert is important,
+it might be the right time
+
+
+101
+00:06:23.684 --> 00:06:25.986 line:-2 align:center
+to find another way to communicate
+with your user,
+
+
+102
+00:06:26.019 --> 00:06:28.856 line:-1 align:center
+such as through a network request
+
+
+103
+00:06:28,889 --> 00:06:31,425 line:-2
+or UI changes
+on your Bluetooth peripheral.
+
+
+104
+00:06:34,728 --> 00:06:38,966 line:0
+After the limit is exceeded,
+the notification called
+
+
+105
+00:06:38,999 --> 00:06:43,837 align:center
+LeGattExceededBackgroundNotificationLimit
+will be posted.
+
+
+106
+00:06:45,005 --> 00:06:49,510 align:center
+After this point, your app
+will no longer receive background runtime
+
+
+107
+00:06:49.543 --> 00:06:52.546 line:-1 align:center
+and will revert back to watchOS 8 behavior,
+
+
+108
+00:06:52,579 --> 00:06:54,815 line:-2
+where there will be
+no background connection
+
+
+109
+00:06:54,848 --> 00:06:56,617 line:-1
+and only background app refresh.
+
+
+110
+00:06:57,951 --> 00:07:00,053 line:-1
+You can retrieve those two notifications
+
+
+111
+00:07:00.087 --> 00:07:03.757 line:-2 align:center
+in the error field
+of the GATT Notification Update.
+
+
+112
+00:07:03,790 --> 00:07:06,026 line:-1
+For background BLE connection,
+
+
+113
+00:07:06,059 --> 00:07:07,761 line:-1
+we recommend using the error
+
+
+114
+00:07:07.794 --> 00:07:09.229 line:-1 align:center
+to know when the limit is reached
+
+
+115
+00:07:09.263 --> 00:07:10.597 line:-1 align:center
+instead of counting down.
+
+
+116
+00:07:11.632 --> 00:07:16.737 line:-2 align:center
+For watchOS 9,
+the background runtime limit is set to 5.
+
+
+117
+00:07:16,770 --> 00:07:21,175 line:-2
+Both of these limits are reset
+whenever the user interacts with your app.
+
+
+118
+00:07:21.208 --> 00:07:24.778 line:-2 align:center
+They also reset 24 hours
+after the limit was reached
+
+
+119
+00:07:24.811 --> 00:07:28.715 line:-2 align:center
+in case there has been no user interaction
+with your app.
+
+
+120
+00:07:28.749 --> 00:07:33.820 line:-2 align:center
+Note: These limits only apply
+to Bluetooth Background LE connections.
+
+
+121
+00:07:33.854 --> 00:07:37.090 line:-2 align:center
+Background app refresh will continue
+to happen if your complication
+
+
+122
+00:07:37.124 --> 00:07:40.327 line:-2 align:center
+is on the active watch face,
+regardless of these limits.
+
+
+123
+00:07:41.595 --> 00:07:45.699 line:-2 align:center
+The amount of time you get
+to process each event is very short.
+
+
+124
+00:07:45.732 --> 00:07:49.269 line:-2 align:center
+There may not be enough time
+to do extremely complex processing,
+
+
+125
+00:07:49.303 --> 00:07:51.939 line:-2 align:center
+but enough to alert the user
+something important is happening.
+
+
+126
+00:07:52.873 --> 00:07:55.843 line:-2 align:center
+Finally, listening for timely alerts
+in the background
+
+
+127
+00:07:55,876 --> 00:07:59,079 line:-1
+requires Apple Watch Series 6 or later.
+
+
+128
+00:07:59,112 --> 00:08:03,250 line:-2
+Listening for alerts isn't the only thing
+you can do in the background.
+
+
+129
+00:08:03.283 --> 00:08:07.487 line:-2 align:center
+In watchOS 9, you can discover peripherals
+while your app is in the background.
+
+
+130
+00:08:09,823 --> 00:08:13,660 line:-2
+Let's say
+I have a Bluetooth medical device
+
+
+131
+00:08:13,694 --> 00:08:16,930 line:-2
+and a watchOS app that detects
+any timely alerts from it.
+
+
+132
+00:08:17.698 --> 00:08:21.268 line:-2 align:center
+To conserve power,
+the peripheral doesn't advertise
+
+
+133
+00:08:21,301 --> 00:08:23,103 line:-1
+until it detects a serious condition.
+
+
+134
+00:08:24,705 --> 00:08:29,243 line:-2
+Therefore, there's no connection
+between the device and Apple Watch yet.
+
+
+135
+00:08:30,077 --> 00:08:34,948 line:-2
+Here, the watchOS App will scan
+for a unique Service UUID
+
+
+136
+00:08:34.982 --> 00:08:36.183 line:-1 align:center
+from the medical device.
+
+
+137
+00:08:37,451 --> 00:08:41,388 line:-2
+Now, when the medical device detects
+something is serious,
+
+
+138
+00:08:41.421 --> 00:08:43.457 line:-1 align:center
+it starts advertising.
+
+
+139
+00:08:43,490 --> 00:08:47,828 line:-2
+The Apple Watch discovers this peripheral
+and launches the app in the background.
+
+
+140
+00:08:49,363 --> 00:08:52,065 line:-2
+The app can then alert
+the user of the condition detected.
+
+
+141
+00:08:54.701 --> 00:08:56.003 line:-1 align:center
+Here's how it works:
+
+
+142
+00:08:56,937 --> 00:09:00,374 line:0
+The Watch app will initiate
+a scan for peripherals,
+
+
+143
+00:09:00,407 --> 00:09:03,043 line:0
+and Core Bluetooth will continue
+scanning in the background.
+
+
+144
+00:09:05,579 --> 00:09:08,515 align:center
+Once the peripheral's
+advertisement is detected,
+
+
+145
+00:09:08,549 --> 00:09:12,319 align:center
+the app is given background runtime
+and can initiate a connection.
+
+
+146
+00:09:15,088 --> 00:09:18,692 line:-2
+Let's dive into the code
+to make this happen.
+
+
+147
+00:09:18.725 --> 00:09:21.662 line:-1 align:center
+The API hasn't changed from watchOS 8,
+
+
+148
+00:09:21,695 --> 00:09:25,299 line:-2
+but the scan will be honored
+even the app is in the background.
+
+
+149
+00:09:26.533 --> 00:09:28.969 line:-1 align:center
+Call "scanForPeripherals"
+
+
+150
+00:09:29,002 --> 00:09:32,306 line:-2
+with the service UUID
+you want to watch for.
+
+
+151
+00:09:32,339 --> 00:09:36,009 line:-2
+You can do this while your app
+is in foreground, and it will continue
+
+
+152
+00:09:36,043 --> 00:09:38,779 line:-1
+while the app is in the background.
+
+
+153
+00:09:38.812 --> 00:09:42.649 line:-2 align:center
+Note that if you ask for the option
+"allowDuplicatesKey,"
+
+
+154
+00:09:42,683 --> 00:09:45,419 line:-2
+it will only be available
+when the app is in foreground.
+
+
+155
+00:09:46,253 --> 00:09:47,621 line:-1
+Now, let's talk about some limits.
+
+
+156
+00:09:48,622 --> 00:09:51,358 line:-2
+There is a limit on the number
+of times your app will be given
+
+
+157
+00:09:51.391 --> 00:09:54.261 line:-1 align:center
+background runtime between app launches.
+
+
+158
+00:09:54,294 --> 00:09:55,495 line:-1
+This limit is combined
+
+
+159
+00:09:55.529 --> 00:09:57.598 line:-2 align:center
+with the background runtime
+we saw previously
+
+
+160
+00:09:57,631 --> 00:10:00,367 line:-1
+when a GATT characteristic changes.
+
+
+161
+00:10:00.400 --> 00:10:02.970 line:-2 align:center
+Also, scanning for peripherals
+in the background
+
+
+162
+00:10:03,003 --> 00:10:05,372 line:-1
+requires Apple Watch Series 6 or later.
+
+
+163
+00:10:06,974 --> 00:10:10,177 line:-2
+In summary, we can now scan
+for a limited number
+
+
+164
+00:10:10.210 --> 00:10:14.715 line:-2 align:center
+of Bluetooth service UUID while
+the watch is scanning in the background.
+
+
+165
+00:10:15.716 --> 00:10:19.052 line:-2 align:center
+Now let's talk about how to design
+your accessory
+
+
+166
+00:10:19,086 --> 00:10:20,821 line:-1
+to make the most of these features.
+
+
+167
+00:10:23,557 --> 00:10:25,259 line:-2
+There is a power tradeoff
+you need to consider
+
+
+168
+00:10:25,292 --> 00:10:27,060 line:-2
+when designing
+your Bluetooth accessory.
+
+
+169
+00:10:30.230 --> 00:10:33.700 line:-2 align:center
+If power consumption is a concern,
+you should opt for a topology
+
+
+170
+00:10:33.734 --> 00:10:35.969 line:-1 align:center
+where your device can go into deep sleep
+
+
+171
+00:10:36,003 --> 00:10:38,138 line:-1
+and only advertise relevant information
+
+
+172
+00:10:38,172 --> 00:10:39,873 line:-1
+when an alert happens.
+
+
+173
+00:10:39.907 --> 00:10:44.611 line:-2 align:center
+The tradeoff is, you will have extra
+latency with the Bluetooth discovery time
+
+
+174
+00:10:44,645 --> 00:10:48,215 line:-2
+at every timely alerts,
+but you will be able to save more power.
+
+
+175
+00:10:49.316 --> 00:10:53.020 line:-2 align:center
+This is the topology provided
+in the example with the medical device.
+
+
+176
+00:10:54.855 --> 00:10:56.256 line:-1 align:center
+On the other hand,
+
+
+177
+00:10:56.290 --> 00:10:58.025 line:-1 align:center
+if you need low latency
+
+
+178
+00:10:58.058 --> 00:10:59.259 line:-1 align:center
+for your timely alerts,
+
+
+179
+00:10:59.293 --> 00:11:01.295 line:-1 align:center
+but the power is not so much a concern,
+
+
+180
+00:11:01.328 --> 00:11:03.096 line:-1 align:center
+you can consider using
+
+
+181
+00:11:03.130 --> 00:11:04.965 line:-1 align:center
+Background LE connection
+
+
+182
+00:11:04.998 --> 00:11:05.999 line:-1 align:center
+and send your alerts
+
+
+183
+00:11:06,033 --> 00:11:07,301 line:-1
+with GATT indications.
+
+
+184
+00:11:07,868 --> 00:11:11,305 line:-2
+Note that there is a limit
+of two Bluetooth connections for each app.
+
+
+185
+00:11:12.806 --> 00:11:16.243 line:-2 align:center
+This is the topology we saw in the example
+for temperature sensor.
+
+
+186
+00:11:17.611 --> 00:11:22.816 line:-2 align:center
+In order for your users to have
+the best experience with timely alerts,
+
+
+187
+00:11:22,850 --> 00:11:27,287 line:-2
+consider adding as much processing
+and intelligence on your peripheral
+
+
+188
+00:11:27,321 --> 00:11:30,791 line:-2
+to filter the data that is time critical
+versus non-time critical.
+
+
+189
+00:11:32.159 --> 00:11:36.930 line:-2 align:center
+Coming back to our temperature example,
+instead of transmitting every temperature,
+
+
+190
+00:11:36,964 --> 00:11:40,667 line:-2
+you can send only the relevant events
+or when the temperature changes.
+
+
+191
+00:11:41,568 --> 00:11:44,204 line:-2
+The benefit of this approach is,
+if you properly separate
+
+
+192
+00:11:44.238 --> 00:11:47.140 line:-2 align:center
+the time-critical events
+from periodic data,
+
+
+193
+00:11:47.174 --> 00:11:49.943 line:-2 align:center
+both your peripheral
+and the Apple Watch user
+
+
+194
+00:11:49,977 --> 00:11:53,847 line:-2
+will save on power,
+thus an overall better experience.
+
+
+195
+00:11:56.016 --> 00:11:59.152 line:-2 align:center
+When your device disconnects,
+we recommend advertising
+
+
+196
+00:11:59.186 --> 00:12:00.954 line:-1 align:center
+to re-establish the connection.
+
+
+197
+00:12:01.822 --> 00:12:04.057 line:-2 align:center
+The advertisement interval depends
+on the requirement
+
+
+198
+00:12:04,091 --> 00:12:06,693 line:-1
+of your Bluetooth peripheral,
+
+
+199
+00:12:06,727 --> 00:12:12,332 line:-2
+such as how fast it needs to reconnect,
+battery life, et cetera.
+
+
+200
+00:12:12,366 --> 00:12:16,837 line:-2
+In the accessory guidelines, we offer
+a few different values you can use.
+
+
+201
+00:12:17.738 --> 00:12:20.974 line:-2 align:center
+For example,
+if your device is battery constrained,
+
+
+202
+00:12:21.008 --> 00:12:25.846 line:-2 align:center
+you can use a value
+of 1022.5 milliseconds.
+
+
+203
+00:12:27,114 --> 00:12:30,717 line:-2
+Another example: if you advertise
+at a rate of 20 milliseconds,
+
+
+204
+00:12:30,751 --> 00:12:34,788 line:-2
+it should allow for a detection
+within a second in ideal conditions.
+
+
+205
+00:12:36,156 --> 00:12:40,127 line:-2
+You could design such that
+this high advertisement rate can be used
+
+
+206
+00:12:40,160 --> 00:12:42,996 line:-1
+only while a critical event happens.
+
+
+207
+00:12:44,965 --> 00:12:48,235 line:-1
+Now let's talk about connection interval.
+
+
+208
+00:12:48,268 --> 00:12:52,973 line:-2
+If you opt for a topology where your device
+remains connected in the background,
+
+
+209
+00:12:53,006 --> 00:12:55,409 line:-2
+we highly recommend using
+a long connection interval,
+
+
+210
+00:12:55,442 --> 00:12:58,645 line:-1
+such as at least 150 milliseconds.
+
+
+211
+00:12:58,679 --> 00:13:00,981 line:-2
+This will allow to save battery
+on your peripheral
+
+
+212
+00:13:01.014 --> 00:13:03.717 line:-2 align:center
+and provides best user experience
+on Apple Watch.
+
+
+213
+00:13:04,751 --> 00:13:09,656 line:-2
+Bluetooth 5.3 is coming to Apple Watch,
+along with connection sub-rating.
+
+
+214
+00:13:09,690 --> 00:13:12,259 line:-2
+This would allow to increase
+the connection interval
+
+
+215
+00:13:12.292 --> 00:13:14.428 line:-1 align:center
+while the Bluetooth peripheral is idle
+
+
+216
+00:13:14.461 --> 00:13:17.064 line:-2 align:center
+and quickly change
+to smaller connection interval
+
+
+217
+00:13:17,097 --> 00:13:18,532 line:-1
+when you need lower latency.
+
+
+218
+00:13:19,900 --> 00:13:24,071 line:-2
+Here is a table showing
+the differences between platforms.
+
+
+219
+00:13:24.104 --> 00:13:28.876 line:-2 align:center
+These are the currently supported
+configurations for Bluetooth Low Energy.
+
+
+220
+00:13:28.909 --> 00:13:32.946 line:-2 align:center
+Last year we introduced
+Background app refresh for watchOS
+
+
+221
+00:13:32.980 --> 00:13:35.449 line:-1 align:center
+as a new background execution mode.
+
+
+222
+00:13:35.482 --> 00:13:38.685 line:-2 align:center
+This year,
+if you own a Series 6 and above,
+
+
+223
+00:13:38.719 --> 00:13:42.422 line:-2 align:center
+we improved the background execution
+with timely alerts as we described today.
+
+
+224
+00:13:44,057 --> 00:13:45,359 line:-1
+Thanks for watching!
+
+
+225
+00:13:46,693 --> 00:13:48,662 line:-1
+[spacey music]
+

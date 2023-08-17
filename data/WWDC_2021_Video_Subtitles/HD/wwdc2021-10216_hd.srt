@@ -1,0 +1,2295 @@
+2
+00:00:00.100 --> 00:00:02.069 line:-1 position:50%
+[MAC STARTUP CHIME]
+
+
+3
+00:00:02.069 --> 00:00:05.639 line:-1 position:50%
+♪ Bass music playing ♪
+
+
+4
+00:00:05.639 --> 00:00:07.274 line:-1 position:50%
+[KEYSTROKES]
+
+
+5
+00:00:07,274 --> 00:00:09,309 position:89% line:0 size:2%
+♪
+
+
+6
+00:00:09.309 --> 00:00:12.079 line:-1 position:50%
+Meghana Gupta: Hi,
+my name is Meghana.
+
+
+7
+00:00:12,079 --> 00:00:16,216 line:-1
+Today, I'll be talking to you
+about ARC in Swift.
+
+
+8
+00:00:16,216 --> 00:00:20,354 line:-1
+Swift provides powerful value
+types like structs and enums.
+
+
+9
+00:00:20.354 --> 00:00:23.190 line:-1 position:50%
+You should prefer to use
+value types when possible
+
+
+10
+00:00:23.190 --> 00:00:26.126 line:-1 position:50%
+to avoid the dangers
+of unintended sharing
+
+
+11
+00:00:26,126 --> 00:00:28,495 line:-1
+that comes with reference types.
+
+
+12
+00:00:28.495 --> 00:00:31.098 line:-1 position:50%
+Classes are reference types
+in Swift,
+
+
+13
+00:00:31,098 --> 00:00:32,999 line:-1
+and if you decide to use them,
+
+
+14
+00:00:32.999 --> 00:00:36.870 line:-1 position:50%
+Swift manages its memory via
+Automatic Reference Counting,
+
+
+15
+00:00:36,870 --> 00:00:38,305 line:-1
+or ARC.
+
+
+16
+00:00:38.305 --> 00:00:40.207 line:-1 position:50%
+In order to write
+effective Swift,
+
+
+17
+00:00:40,207 --> 00:00:43,477 line:-1
+it is important to understand
+how ARC works.
+
+
+18
+00:00:43,477 --> 00:00:46,346 line:-1
+In this session,
+we’ll do just that.
+
+
+19
+00:00:46,346 --> 00:00:49,149 line:-1
+I’ll start with a review
+of object lifetimes
+
+
+20
+00:00:49,149 --> 00:00:51,518 line:-1
+and ARC in Swift.
+
+
+21
+00:00:51,518 --> 00:00:56,023 line:-1
+Then, I’ll describe what
+observable object lifetimes are.
+
+
+22
+00:00:56.023 --> 00:00:57.624 line:-1 position:50%
+I'll explain in detail
+
+
+23
+00:00:57.624 --> 00:01:01.628 line:-1 position:50%
+what language features make
+object lifetimes observable,
+
+
+24
+00:01:01.628 --> 00:01:05.565 line:-1 position:50%
+consequences of relying
+on observed object lifetimes,
+
+
+25
+00:01:05,565 --> 00:01:08,335 line:-1
+and some safe techniques
+to fix them.
+
+
+26
+00:01:08,335 --> 00:01:10,070 line:-1
+Let’s begin.
+
+
+27
+00:01:10.070 --> 00:01:14.074 line:-1 position:50%
+An object’s lifetime in Swift
+begins at initialization
+
+
+28
+00:01:14,074 --> 00:01:16,443 line:-1
+and ends at last use.
+
+
+29
+00:01:16,443 --> 00:01:18,712 line:-1
+ARC automatically
+manages memory,
+
+
+30
+00:01:18.712 --> 00:01:22.783 line:-1 position:50%
+by deallocating an object
+after its lifetime ends.
+
+
+31
+00:01:22,783 --> 00:01:25,085 line:-1
+It determines
+an object’s lifetime
+
+
+32
+00:01:25,085 --> 00:01:28,288 line:-1
+by keeping track
+of its reference counts.
+
+
+33
+00:01:28.288 --> 00:01:31.191 line:-1 position:50%
+ARC is mainly driven
+by the Swift compiler
+
+
+34
+00:01:31,191 --> 00:01:34,895 line:-1
+which inserts retain
+and release operations.
+
+
+35
+00:01:34.895 --> 00:01:38.165 line:-1 position:50%
+At runtime, retain increments
+the reference count
+
+
+36
+00:01:38.165 --> 00:01:40.801 line:-1 position:50%
+and release decrements it.
+
+
+37
+00:01:40.801 --> 00:01:43.036 line:-1 position:50%
+When the reference count
+drops to zero,
+
+
+38
+00:01:43.036 --> 00:01:45.672 line:-1 position:50%
+the object will be deallocated.
+
+
+39
+00:01:45.672 --> 00:01:49.376 line:-1 position:50%
+Let’s see how it works
+with an example.
+
+
+40
+00:01:49.376 --> 00:01:52.579 line:-1 position:50%
+Imagine we want to build
+a travel app.
+
+
+41
+00:01:52,579 --> 00:01:56,750 line:-1
+To represent a traveler,
+let’s write a class with name
+
+
+42
+00:01:56,750 --> 00:02:00,620 line:-1
+and an optional
+destination property.
+
+
+43
+00:02:00.620 --> 00:02:02.356 line:-1 position:50%
+In the test() function,
+
+
+44
+00:02:02.356 --> 00:02:05.292 line:-1 position:50%
+first, a Traveler object
+is created,
+
+
+45
+00:02:05,292 --> 00:02:07,861 line:-1
+then its reference is copied,
+
+
+46
+00:02:07,861 --> 00:02:11,598 line:-1
+and finally, its destination
+is updated.
+
+
+47
+00:02:11,598 --> 00:02:13,700 line:-1
+In order to automatically manage
+
+
+48
+00:02:13.700 --> 00:02:15.836 line:-1 position:50%
+the memory
+of the Traveler object,
+
+
+49
+00:02:15,836 --> 00:02:19,072 line:-1
+the Swift compiler
+inserts a retain operation
+
+
+50
+00:02:19.072 --> 00:02:22.409 line:-1 position:50%
+when a reference begins
+and a release operation
+
+
+51
+00:02:22,409 --> 00:02:25,245 line:-1
+after the last use
+of the reference.
+
+
+52
+00:02:25.245 --> 00:02:29.049 line:-1 position:50%
+traveler1 is the first reference
+to the Traveler object,
+
+
+53
+00:02:29.049 --> 00:02:32.119 line:-1 position:50%
+and its last use is the copy.
+
+
+54
+00:02:32.119 --> 00:02:36.256 line:-1 position:50%
+Here, the Swift compiler
+inserts a release operation
+
+
+55
+00:02:36,256 --> 00:02:40,594 line:-1
+immediately after the last use
+of the traveler1 reference.
+
+
+56
+00:02:40.594 --> 00:02:43.163 line:-1 position:50%
+It does not insert
+a retain operation
+
+
+57
+00:02:43,163 --> 00:02:44,765 line:-1
+when the reference begins,
+
+
+58
+00:02:44.765 --> 00:02:49.269 line:-1 position:50%
+because initialization
+sets the reference count to one.
+
+
+59
+00:02:49.269 --> 00:02:53.507 line:-1 position:50%
+traveler2 is another reference
+to the Traveler object,
+
+
+60
+00:02:53,507 --> 00:02:57,444 line:-1
+and its last use
+is the destination update.
+
+
+61
+00:02:57.444 --> 00:03:01.515 line:-1 position:50%
+Here, the Swift compiler
+inserts a retain operation
+
+
+62
+00:03:01,515 --> 00:03:04,751 line:-1
+when the reference begins
+and a release operation
+
+
+63
+00:03:04,751 --> 00:03:08,355 line:-1
+immediately after the last use
+of the reference.
+
+
+64
+00:03:08.355 --> 00:03:14.294 line:-1 position:50%
+Let's step through the code and
+see what happens at runtime.
+
+
+65
+00:03:14.294 --> 00:03:17.864 line:-1 position:50%
+First, the Traveler object
+is created on the heap
+
+
+66
+00:03:17,864 --> 00:03:22,202 line:-1
+and initialized
+with a reference count of one.
+
+
+67
+00:03:22,202 --> 00:03:25,072 line:-1
+Then in preparation
+of the new reference,
+
+
+68
+00:03:25.072 --> 00:03:26.773 line:-1 position:50%
+retain operation executes,
+
+
+69
+00:03:26.773 --> 00:03:31.044 line:-1 position:50%
+incrementing
+the reference count to two.
+
+
+70
+00:03:31.044 --> 00:03:34.014 line:-1 position:50%
+Now traveler2
+is also a reference
+
+
+71
+00:03:34.014 --> 00:03:36.850 line:-1 position:50%
+to the Traveler object.
+
+
+72
+00:03:36.850 --> 00:03:40.087 line:-1 position:50%
+After the last use
+of the traveler1 reference,
+
+
+73
+00:03:40.087 --> 00:03:42.222 line:-1 position:50%
+the release operation executes,
+
+
+74
+00:03:42,222 --> 00:03:46,293 line:-1
+decrementing the reference count
+to one.
+
+
+75
+00:03:46.293 --> 00:03:49.096 line:-1 position:50%
+Then the destination
+of the Traveler object
+
+
+76
+00:03:49.096 --> 00:03:52.766 line:-1 position:50%
+is updated to Big Sur.
+
+
+77
+00:03:52.766 --> 00:03:56.169 line:-1 position:50%
+Since that was the last use
+of the traveler2 reference,
+
+
+78
+00:03:56.169 --> 00:03:57.838 line:-1 position:50%
+release operation executes,
+
+
+79
+00:03:57,838 --> 00:04:01,708 line:-1
+decrementing the reference count
+to zero.
+
+
+80
+00:04:01,708 --> 00:04:03,977 line:-1
+Once the reference count
+drops to zero,
+
+
+81
+00:04:03.977 --> 00:04:09.349 line:-1 position:50%
+the object can be deallocated.
+
+
+82
+00:04:09,349 --> 00:04:13,086 line:-1
+Object lifetimes in Swift
+are use-based.
+
+
+83
+00:04:13.086 --> 00:04:15.555 line:-1 position:50%
+An object's guaranteed
+minimum lifetime
+
+
+84
+00:04:15.555 --> 00:04:20.060 line:-1 position:50%
+begins at initialization
+and ends at last use.
+
+
+85
+00:04:20,060 --> 00:04:23,697 line:-1
+This is different
+from languages like C++,
+
+
+86
+00:04:23,697 --> 00:04:26,867 line:-1
+in which an object’s lifetime
+is guaranteed to end
+
+
+87
+00:04:26.867 --> 00:04:29.703 line:-1 position:50%
+at the closing brace.
+
+
+88
+00:04:29.703 --> 00:04:33.240 line:-1 position:50%
+In this example, we saw
+the object was deallocated
+
+
+89
+00:04:33,240 --> 00:04:36,910 line:-1
+immediately
+after the last use.
+
+
+90
+00:04:36,910 --> 00:04:40,747 line:-1
+However, in practice,
+object lifetimes are determined
+
+
+91
+00:04:40,747 --> 00:04:42,849 line:-1
+by the retain and release
+operations
+
+
+92
+00:04:42,849 --> 00:04:45,819 line:-1
+inserted by the Swift compiler.
+
+
+93
+00:04:45.819 --> 00:04:49.422 line:-1 position:50%
+And depending on the ARC
+optimizations that kick in,
+
+
+94
+00:04:49.422 --> 00:04:52.125 line:-1 position:50%
+the observed object lifetimes
+may differ
+
+
+95
+00:04:52.125 --> 00:04:54.494 line:-1 position:50%
+from their guaranteed minimum,
+
+
+96
+00:04:54,494 --> 00:04:57,898 line:-1
+ending beyond the last use
+of the object.
+
+
+97
+00:04:57.898 --> 00:05:02.169 line:-1 position:50%
+In such cases, the object is
+deallocated at a program point
+
+
+98
+00:05:02.169 --> 00:05:04.704 line:-1 position:50%
+beyond its last use.
+
+
+99
+00:05:04.704 --> 00:05:07.541 line:-1 position:50%
+In most cases,
+it doesn’t really matter
+
+
+100
+00:05:07,541 --> 00:05:10,911 line:-1
+what the exact lifetime
+of an object is.
+
+
+101
+00:05:10.911 --> 00:05:15.182 line:-1 position:50%
+However, with language features
+like weak and unowned references
+
+
+102
+00:05:15.182 --> 00:05:17.317 line:-1 position:50%
+and deinitializer side effects,
+
+
+103
+00:05:17.317 --> 00:05:21.321 line:-1 position:50%
+it is possible
+to observe object lifetimes.
+
+
+104
+00:05:21.321 --> 00:05:23.023 line:-1 position:50%
+And if you have programs
+
+
+105
+00:05:23,023 --> 00:05:25,825 line:-1
+that rely on observed
+object lifetimes
+
+
+106
+00:05:25,825 --> 00:05:28,061 line:-1
+instead of guaranteed
+object lifetimes,
+
+
+107
+00:05:28.061 --> 00:05:31.231 line:-1 position:50%
+you can end up with problems
+in the future.
+
+
+108
+00:05:31,231 --> 00:05:33,733 line:-1
+Because relying
+on observed object lifetimes
+
+
+109
+00:05:33,733 --> 00:05:37,971 line:-1
+may work today,
+but it is only a coincidence.
+
+
+110
+00:05:37.971 --> 00:05:41.675 line:-1 position:50%
+Observed object lifetimes
+are an emergent property
+
+
+111
+00:05:41.675 --> 00:05:44.344 line:-1 position:50%
+of the Swift compiler
+and can change
+
+
+112
+00:05:44.344 --> 00:05:46.913 line:-1 position:50%
+as implementation
+details change.
+
+
+113
+00:05:46.913 --> 00:05:50.250 line:-1 position:50%
+Such bugs may not be discovered
+during development
+
+
+114
+00:05:50.250 --> 00:05:53.119 line:-1 position:50%
+and may remain hidden
+for a long time,
+
+
+115
+00:05:53,119 --> 00:05:56,256 line:-1
+only to be uncovered
+by a compiler update
+
+
+116
+00:05:56.256 --> 00:06:00.560 line:-1 position:50%
+with improved ARC optimizations
+or unrelated source changes
+
+
+117
+00:06:00.560 --> 00:06:04.731 line:-1 position:50%
+that enable a previously limited
+ARC optimization.
+
+
+118
+00:06:04,731 --> 00:06:06,900 line:-1
+I’ll go over
+the language features
+
+
+119
+00:06:06.900 --> 00:06:09.736 line:-1 position:50%
+that make object lifetimes
+observable,
+
+
+120
+00:06:09.736 --> 00:06:11.371 line:-1 position:50%
+walk through what can happen
+
+
+121
+00:06:11.371 --> 00:06:14.374 line:-1 position:50%
+if we rely only
+on observed object lifetimes,
+
+
+122
+00:06:14.374 --> 00:06:17.510 line:-1 position:50%
+and some safe techniques
+to fix them.
+
+
+123
+00:06:17,510 --> 00:06:20,914 line:-1
+Unlike default references
+that are strong references,
+
+
+124
+00:06:20.914 --> 00:06:23.817 line:-1 position:50%
+weak and unowned references
+do not participate
+
+
+125
+00:06:23.817 --> 00:06:26.886 line:-1 position:50%
+in reference counting,
+and for this reason,
+
+
+126
+00:06:26.886 --> 00:06:30.724 line:-1 position:50%
+they are commonly used
+to break reference cycles.
+
+
+127
+00:06:30.724 --> 00:06:32.692 line:-1 position:50%
+Before I get into their details,
+
+
+128
+00:06:32.692 --> 00:06:36.096 line:-1 position:50%
+let’s see
+what reference cycles are.
+
+
+129
+00:06:36,096 --> 00:06:39,032 line:-1
+This is an extension
+of our Travel app.
+
+
+130
+00:06:39,032 --> 00:06:42,636 line:-1
+We now want to introduce
+an optional points system.
+
+
+131
+00:06:42.636 --> 00:06:47.240 line:-1 position:50%
+A traveler can have an account
+and accumulate points in it.
+
+
+132
+00:06:47,240 --> 00:06:50,176 line:-1
+To represent this,
+we have a new Account class
+
+
+133
+00:06:50.176 --> 00:06:51.945 line:-1 position:50%
+with points property.
+
+
+134
+00:06:51.945 --> 00:06:54.914 line:-1 position:50%
+The Account class refers
+to the Traveler class,
+
+
+135
+00:06:54,914 --> 00:06:58,985 line:-1
+and the Traveler class refers
+back to the Account class.
+
+
+136
+00:06:58,985 --> 00:07:03,256 position:50%
+In the test() function, we create
+Traveler and Account objects,
+
+
+137
+00:07:03,256 --> 00:07:05,525 line:0
+and then call
+the printSummary() function
+
+
+138
+00:07:05,525 --> 00:07:07,827 position:50%
+via the traveler reference.
+
+
+139
+00:07:07.827 --> 00:07:12.532 line:-1 position:50%
+Let’s step through the code
+and see what happens with ARC.
+
+
+140
+00:07:12.532 --> 00:07:15.568 line:-1 position:50%
+First, Traveler object
+is created on the heap
+
+
+141
+00:07:15,568 --> 00:07:18,505 line:-1
+with a reference count of one.
+
+
+142
+00:07:18.505 --> 00:07:21.408 line:-1 position:50%
+Then Account object
+is created on the heap
+
+
+143
+00:07:21,408 --> 00:07:24,110 line:-1
+with a reference count of one.
+
+
+144
+00:07:24.110 --> 00:07:27.347 line:-1 position:50%
+Since the Account object refers
+to the Traveler object,
+
+
+145
+00:07:27.347 --> 00:07:32.185 line:-1 position:50%
+the reference count of the Traveler
+object is incremented to two.
+
+
+146
+00:07:32.185 --> 00:07:36.923 line:-1 position:50%
+Now the Traveler object starts
+referring to the Account object,
+
+
+147
+00:07:36.923 --> 00:07:39.292 line:-1 position:50%
+so the reference count
+of the Account object
+
+
+148
+00:07:39,292 --> 00:07:43,196 line:-1
+is also incremented to two.
+
+
+149
+00:07:43,196 --> 00:07:46,800 line:-1
+This is the last use
+of the account reference.
+
+
+150
+00:07:46.800 --> 00:07:49.269 line:-1 position:50%
+After this, the account
+reference goes away
+
+
+151
+00:07:49,269 --> 00:07:51,938 line:-1
+and reference count
+of the Account object
+
+
+152
+00:07:51.938 --> 00:07:55.275 line:-1 position:50%
+is decremented to one.
+
+
+153
+00:07:55,275 --> 00:07:57,677 line:-1
+Then, printSummary() function
+is called
+
+
+154
+00:07:57,677 --> 00:08:00,613 line:-1
+to print name and points.
+
+
+155
+00:08:00,613 --> 00:08:04,017 line:-1
+This is the last use
+of the Traveler reference.
+
+
+156
+00:08:04.017 --> 00:08:06.586 line:-1 position:50%
+After this, the Traveler
+reference goes away
+
+
+157
+00:08:06,586 --> 00:08:09,022 line:-1
+and the reference count
+of the Traveler object
+
+
+158
+00:08:09.022 --> 00:08:12.292 line:-1 position:50%
+is decremented to one.
+
+
+159
+00:08:12,292 --> 00:08:15,795 line:-1
+Even after all the references
+that make the objects reachable
+
+
+160
+00:08:15,795 --> 00:08:20,033 line:-1
+go away, the reference count
+of the objects remain one.
+
+
+161
+00:08:20.033 --> 00:08:22.969 line:-1 position:50%
+This is because
+of the reference cycle.
+
+
+162
+00:08:22.969 --> 00:08:26.506 line:-1 position:50%
+As a result, the objects
+are never deallocated,
+
+
+163
+00:08:26,506 --> 00:08:29,642 line:-1
+causing a memory leak.
+
+
+164
+00:08:29.642 --> 00:08:31.578 line:-1 position:50%
+You may break
+the reference cycle
+
+
+165
+00:08:31.578 --> 00:08:34.547 line:-1 position:50%
+with a weak
+or unowned reference.
+
+
+166
+00:08:34.547 --> 00:08:37.250 line:-1 position:50%
+Because they don’t participate
+in reference counting,
+
+
+167
+00:08:37,250 --> 00:08:40,086 line:-1
+the referred object
+may be deallocated
+
+
+168
+00:08:40.086 --> 00:08:43.890 line:-1 position:50%
+while a weak or unowned
+reference is in use.
+
+
+169
+00:08:43.890 --> 00:08:45.225 line:-1 position:50%
+When this happens,
+
+
+170
+00:08:45,225 --> 00:08:49,129 line:-1
+the Swift runtime safely turns
+access to weak references
+
+
+171
+00:08:49.129 --> 00:08:54.367 line:-1 position:50%
+as nil, and access
+to unowned references as traps.
+
+
+172
+00:08:54.367 --> 00:08:57.237 line:-1 position:50%
+Any reference participating
+in the reference cycle
+
+
+173
+00:08:57.237 --> 00:09:01.641 line:-1 position:50%
+can be marked as weak or unowned
+to break the reference cycle.
+
+
+174
+00:09:01.641 --> 00:09:04.277 line:-1 position:50%
+It depends on the application.
+
+
+175
+00:09:04.277 --> 00:09:07.514 line:-1 position:50%
+In our example, let’s mark
+the traveler reference
+
+
+176
+00:09:07.514 --> 00:09:10.183 line:-1 position:50%
+in the Account class as weak.
+
+
+177
+00:09:10.183 --> 00:09:12.552 line:-1 position:50%
+Because weak reference
+does not participate
+
+
+178
+00:09:12.552 --> 00:09:14.220 line:-1 position:50%
+in reference counting,
+
+
+179
+00:09:14.220 --> 00:09:16.923 line:-1 position:50%
+after the last use
+of the Traveler object,
+
+
+180
+00:09:16,923 --> 00:09:20,193 line:-1
+its reference count
+drops to zero.
+
+
+181
+00:09:20,193 --> 00:09:23,430 line:-1
+Once the reference count
+of the Traveler object is zero,
+
+
+182
+00:09:23.430 --> 00:09:26.166 line:-1 position:50%
+it can be deallocated.
+
+
+183
+00:09:26,166 --> 00:09:28,401 line:-1
+When the Traveler object
+goes away,
+
+
+184
+00:09:28.401 --> 00:09:31.037 line:-1 position:50%
+its reference
+to the Account object goes away,
+
+
+185
+00:09:31.037 --> 00:09:34.140 line:-1 position:50%
+making its reference count zero.
+
+
+186
+00:09:34.140 --> 00:09:37.844 line:-1 position:50%
+Now the Account object
+can be deallocated.
+
+
+187
+00:09:37.844 --> 00:09:40.747 line:-1 position:50%
+In this example, we used
+the weak reference
+
+
+188
+00:09:40.747 --> 00:09:43.683 line:-1 position:50%
+to only break
+the reference cycle.
+
+
+189
+00:09:43.683 --> 00:09:47.253 line:-1 position:50%
+If a weak reference is used
+to access an object
+
+
+190
+00:09:47,253 --> 00:09:50,356 line:-1
+while its guaranteed object
+lifetime has ended,
+
+
+191
+00:09:50,356 --> 00:09:53,092 line:-1
+and you are relying
+on observed object lifetime
+
+
+192
+00:09:53,092 --> 00:09:55,628 line:-1
+for the object to be available,
+
+
+193
+00:09:55.628 --> 00:09:58.431 line:-1 position:50%
+you can end up with bugs
+in the future
+
+
+194
+00:09:58.431 --> 00:10:00.633 line:-1 position:50%
+when the observed object
+lifetime changes
+
+
+195
+00:10:00,633 --> 00:10:03,169 line:-1
+for unrelated reasons.
+
+
+196
+00:10:03.169 --> 00:10:05.505 line:-1 position:50%
+Let’s see an example.
+
+
+197
+00:10:05,505 --> 00:10:07,807 line:-1
+Here, the printSummary()
+function
+
+
+198
+00:10:07,807 --> 00:10:11,144 line:-1
+is moved from the Traveler class
+to the Account class.
+
+
+199
+00:10:11.144 --> 00:10:12.512 line:-1 position:50%
+And the test() function
+
+
+200
+00:10:12,512 --> 00:10:14,614 line:-1
+now calls
+the printSummary() function
+
+
+201
+00:10:14.614 --> 00:10:17.884 line:-1 position:50%
+via the Account reference.
+
+
+202
+00:10:17.884 --> 00:10:19.419 line:-1 position:50%
+What exactly happens
+
+
+203
+00:10:19.419 --> 00:10:22.489 line:-1 position:50%
+when printSummary() function
+is called?
+
+
+204
+00:10:22.489 --> 00:10:25.291 line:-1 position:50%
+It may print the traveler’s name
+and points today,
+
+
+205
+00:10:25.291 --> 00:10:29.395 line:-1 position:50%
+but this is only a coincidence.
+
+
+206
+00:10:29.395 --> 00:10:32.899 line:-1 position:50%
+This is because the last use
+of the Traveler object
+
+
+207
+00:10:32,899 --> 00:10:36,302 line:-1
+is before the call
+to the printSummary() function.
+
+
+208
+00:10:36,302 --> 00:10:39,739 line:-1
+After this, the reference count
+of the Traveler object
+
+
+209
+00:10:39,739 --> 00:10:43,977 line:-1
+can drop to zero if the compiler
+inserted a release
+
+
+210
+00:10:43,977 --> 00:10:48,147 line:-1
+immediately after the last use.
+
+
+211
+00:10:48.147 --> 00:10:50.650 line:-1 position:50%
+If the reference count
+has dropped to zero,
+
+
+212
+00:10:50,650 --> 00:10:53,887 line:-1
+access to the Traveler object
+via the weak reference
+
+
+213
+00:10:53.887 --> 00:10:55.188 line:-1 position:50%
+will be nil,
+
+
+214
+00:10:55.188 --> 00:10:59.158 line:-1 position:50%
+and the Traveler object
+may be deallocated.
+
+
+215
+00:10:59.158 --> 00:11:02.028 line:-1 position:50%
+So when the printSummary()
+function is called,
+
+
+216
+00:11:02,028 --> 00:11:05,765 line:-1
+the force unwrap of the weak
+Traveler reference will trap,
+
+
+217
+00:11:05.765 --> 00:11:07.734 line:-1 position:50%
+causing a crash.
+
+
+218
+00:11:07.734 --> 00:11:09.102 line:-1 position:50%
+You may be wondering
+
+
+219
+00:11:09,102 --> 00:11:12,171 line:-1
+if the force unwrap is the
+reason for the crash here,
+
+
+220
+00:11:12,171 --> 00:11:16,009 line:-1
+and optional binding
+may have prevented it.
+
+
+221
+00:11:16.009 --> 00:11:19.779 line:-1 position:50%
+Optional binding
+actually worsens the problem.
+
+
+222
+00:11:19.779 --> 00:11:23.082 line:-1 position:50%
+Without an obvious crash,
+it creates a silent bug
+
+
+223
+00:11:23,082 --> 00:11:26,719 line:-1
+that may go unnoticed when the
+observed object lifetime changes
+
+
+224
+00:11:26.719 --> 00:11:29.522 line:-1 position:50%
+for unrelated reasons.
+
+
+225
+00:11:29.522 --> 00:11:30.957 line:-1 position:50%
+There are different techniques
+
+
+226
+00:11:30,957 --> 00:11:34,394 line:-1
+to safely handle weak
+and unowned references,
+
+
+227
+00:11:34.394 --> 00:11:36.596 line:-1 position:50%
+each of them
+with varying degrees
+
+
+228
+00:11:36.596 --> 00:11:38.565 line:-1 position:50%
+of upfront implementation cost
+
+
+229
+00:11:38.565 --> 00:11:41.267 line:-1 position:50%
+versus continuous
+maintenance cost.
+
+
+230
+00:11:41.267 --> 00:11:44.871 line:-1 position:50%
+Let’s explore them one by one
+with our example.
+
+
+231
+00:11:44.871 --> 00:11:48.007 line:-1 position:50%
+Swift provides
+withExtendedLifetime() utility
+
+
+232
+00:11:48,007 --> 00:11:52,211 line:-1
+that can explicitly extend
+the lifetime of an object.
+
+
+233
+00:11:52.211 --> 00:11:55.148 line:-1 position:50%
+Using withExtendedLifetime(),
+it is possible
+
+
+234
+00:11:55,148 --> 00:11:58,685 line:-1
+to safely extend the lifetime
+of the Traveler object,
+
+
+235
+00:11:58.685 --> 00:12:01.788 line:-1 position:50%
+while the printSummary()
+function is being called,
+
+
+236
+00:12:01,788 --> 00:12:04,958 line:-1
+preventing potential bugs.
+
+
+237
+00:12:04,958 --> 00:12:09,128 line:-1
+The same effect can be achieved
+by placing an empty call
+
+
+238
+00:12:09.128 --> 00:12:14.367 line:-1 position:50%
+to withExtendedLifetime() at
+the end of the existing scope.
+
+
+239
+00:12:14,367 --> 00:12:17,804 line:-1
+For more complex cases,
+we can ask the compiler
+
+
+240
+00:12:17,804 --> 00:12:20,239 line:-1
+to extend the lifetime
+of an object
+
+
+241
+00:12:20.239 --> 00:12:24.911 line:-1 position:50%
+to the end of the current scope
+using defer.
+
+
+242
+00:12:24.911 --> 00:12:28.715 line:-1 position:50%
+withExtendedLifetime() may
+look like an easy way out
+
+
+243
+00:12:28.715 --> 00:12:30.817 line:-1 position:50%
+of object lifetimes bugs.
+
+
+244
+00:12:30.817 --> 00:12:33.586 line:-1 position:50%
+However, this technique
+is fragile,
+
+
+245
+00:12:33,586 --> 00:12:38,057 line:-1
+and transfers the responsibility
+of correctness on you.
+
+
+246
+00:12:38,057 --> 00:12:39,392 line:-1
+With this approach,
+
+
+247
+00:12:39,392 --> 00:12:42,662 line:-1
+you should ensure
+withExtendedLifetime() is used
+
+
+248
+00:12:42.662 --> 00:12:47.300 line:-1 position:50%
+every time a weak reference
+has a potential to cause bugs.
+
+
+249
+00:12:47,300 --> 00:12:48,835 line:-1
+If not controlled,
+
+
+250
+00:12:48.835 --> 00:12:52.505 line:-1 position:50%
+withExtendedLifetime() can
+creep up all over the codebase,
+
+
+251
+00:12:52.505 --> 00:12:55.008 line:-1 position:50%
+increasing maintenance cost.
+
+
+252
+00:12:55,008 --> 00:12:57,944 line:0
+Redesigning classes
+with better APIs
+
+
+253
+00:12:57,944 --> 00:13:01,414 line:0
+is a much more
+principled approach.
+
+
+254
+00:13:01,414 --> 00:13:04,417 position:50%
+Object lifetime surprises
+can be prevented,
+
+
+255
+00:13:04,417 --> 00:13:07,553 line:0
+if access to the object
+can be limited
+
+
+256
+00:13:07,553 --> 00:13:10,056 line:0
+to strong references only.
+
+
+257
+00:13:10,056 --> 00:13:13,559 position:50%
+Here, the printSummary()
+function is moved back
+
+
+258
+00:13:13,559 --> 00:13:15,361 position:50%
+to the Traveler class,
+
+
+259
+00:13:15,361 --> 00:13:19,532 position:50%
+and the weak reference
+in Account class is hidden.
+
+
+260
+00:13:19,532 --> 00:13:23,036 position:50%
+Tests are now forced to call
+the printSummary() function
+
+
+261
+00:13:23,036 --> 00:13:25,238 position:50%
+via a strong reference,
+
+
+262
+00:13:25,238 --> 00:13:28,374 position:50%
+eliminating potential bugs.
+
+
+263
+00:13:28.374 --> 00:13:31.144 line:-1 position:50%
+In addition to carrying
+a performance cost,
+
+
+264
+00:13:31,144 --> 00:13:34,313 line:-1
+weak and unowned references
+can expose bugs
+
+
+265
+00:13:34,313 --> 00:13:37,684 line:-1
+if you are not careful
+with class design.
+
+
+266
+00:13:37.684 --> 00:13:40.420 line:-1 position:50%
+It is important
+to pause and think,
+
+
+267
+00:13:40.420 --> 00:13:44.123 line:-1 position:50%
+why are weak and unowned
+references needed?
+
+
+268
+00:13:44,123 --> 00:13:47,660 line:-1
+Are they used only
+to break reference cycles?
+
+
+269
+00:13:47.660 --> 00:13:50.496 line:-1 position:50%
+What if you avoid
+creating reference cycles
+
+
+270
+00:13:50.496 --> 00:13:52.699 line:-1 position:50%
+in the first place?
+
+
+271
+00:13:52,699 --> 00:13:57,303 line:-1
+Reference cycles can often be
+avoided by rethinking algorithms
+
+
+272
+00:13:57,303 --> 00:14:00,306 line:-1
+and transforming cyclic
+class relationships
+
+
+273
+00:14:00,306 --> 00:14:02,275 line:-1
+to tree structures.
+
+
+274
+00:14:02.275 --> 00:14:03.676 line:-1 position:50%
+In our example,
+
+
+275
+00:14:03,676 --> 00:14:07,413 line:-1
+Traveler class needs to refer
+to the Account class.
+
+
+276
+00:14:07.413 --> 00:14:10.283 line:-1 position:50%
+It is not really necessary
+for the Account class
+
+
+277
+00:14:10.283 --> 00:14:12.852 line:-1 position:50%
+to refer to the Traveler class.
+
+
+278
+00:14:12,852 --> 00:14:15,121 line:-1
+Account class only needs access
+
+
+279
+00:14:15.121 --> 00:14:18.925 line:-1 position:50%
+to the traveler’s
+personal information.
+
+
+280
+00:14:18,925 --> 00:14:21,661 line:0
+We can move the traveler’s
+personal information
+
+
+281
+00:14:21,661 --> 00:14:25,098 line:0
+into a new class
+called PersonalInfo.
+
+
+282
+00:14:25,098 --> 00:14:28,668 line:0
+Both Traveler class
+and Account class can refer
+
+
+283
+00:14:28,668 --> 00:14:33,039 line:0
+to the PersonalInfo class,
+avoiding the cycle.
+
+
+284
+00:14:33,039 --> 00:14:36,743 line:-1
+Avoiding the need for weak
+and unowned references
+
+
+285
+00:14:36.743 --> 00:14:39.645 line:-1 position:50%
+may have additional
+implementation cost,
+
+
+286
+00:14:39,645 --> 00:14:41,848 line:-1
+but this is a definite way
+
+
+287
+00:14:41.848 --> 00:14:46.018 line:-1 position:50%
+to eliminate all potential
+object lifetime bugs.
+
+
+288
+00:14:46,018 --> 00:14:47,687 line:-1
+Another language feature
+
+
+289
+00:14:47.687 --> 00:14:50.022 line:-1 position:50%
+that makes object lifetimes
+observable
+
+
+290
+00:14:50.022 --> 00:14:53.192 line:-1 position:50%
+are deinitializer side effects.
+
+
+291
+00:14:53.192 --> 00:14:56.763 line:-1 position:50%
+A deinitializer runs
+before deallocation
+
+
+292
+00:14:56.763 --> 00:14:58.898 line:-1 position:50%
+and its side effects
+can be observed
+
+
+293
+00:14:58,898 --> 00:15:01,601 line:-1
+by external program effects.
+
+
+294
+00:15:01.601 --> 00:15:05.505 line:-1 position:50%
+If you write code to sequence
+deinitializer side effects
+
+
+295
+00:15:05,505 --> 00:15:07,673 line:-1
+with external program effects,
+
+
+296
+00:15:07.673 --> 00:15:11.144 line:-1 position:50%
+it can lead to hidden bugs,
+which are uncovered
+
+
+297
+00:15:11,144 --> 00:15:13,880 line:-1
+only when the observed
+object lifetime changes
+
+
+298
+00:15:13,880 --> 00:15:16,382 line:-1
+due to unrelated reasons.
+
+
+299
+00:15:16.382 --> 00:15:19.519 line:-1 position:50%
+Before I get into how such bugs
+can come up,
+
+
+300
+00:15:19.519 --> 00:15:22.688 line:-1 position:50%
+let’s see
+what a deinitializer is.
+
+
+301
+00:15:22,688 --> 00:15:25,591 line:-1
+This is a repeat
+of the first example,
+
+
+302
+00:15:25,591 --> 00:15:28,127 line:-1
+now with a deinitializer.
+
+
+303
+00:15:28,127 --> 00:15:30,997 line:-1
+The deinitializer
+has a global side effect:
+
+
+304
+00:15:30.997 --> 00:15:34.667 line:-1 position:50%
+printing a message
+on the console.
+
+
+305
+00:15:34.667 --> 00:15:36.969 line:-1 position:50%
+Today the deinitializer may run
+
+
+306
+00:15:36.969 --> 00:15:40.840 line:-1 position:50%
+after "Done traveling"
+is printed.
+
+
+307
+00:15:40.840 --> 00:15:43.509 line:-1 position:50%
+But since the last use
+of the Traveler object
+
+
+308
+00:15:43.509 --> 00:15:47.547 line:-1 position:50%
+is the destination update,
+the deinitializer can run
+
+
+309
+00:15:47,547 --> 00:15:50,349 line:-1
+before "Done traveling"
+is printed,
+
+
+310
+00:15:50,349 --> 00:15:54,520 line:-1
+depending on the ARC
+optimizations that kick in.
+
+
+311
+00:15:54,520 --> 00:15:55,955 line:-1
+In this example,
+
+
+312
+00:15:55,955 --> 00:16:00,626 line:-1
+deinitializer side effects were
+observable but not relied upon.
+
+
+313
+00:16:00.626 --> 00:16:02.995 line:-1 position:50%
+Let’s look at a more
+complex example,
+
+
+314
+00:16:02.995 --> 00:16:06.332 line:-1 position:50%
+where deinitializer side effects
+are relied upon
+
+
+315
+00:16:06.332 --> 00:16:09.368 line:-1 position:50%
+by external program effects.
+
+
+316
+00:16:09,368 --> 00:16:13,673 position:50%
+We now introduce travel metrics
+to the Traveler class.
+
+
+317
+00:16:13,673 --> 00:16:15,808 position:50%
+Whenever a destination
+is updated,
+
+
+318
+00:16:15,808 --> 00:16:19,745 position:50%
+it is recorded
+in the TravelMetrics class.
+
+
+319
+00:16:19,745 --> 00:16:23,149 position:50%
+Eventually when deinitializing
+the Traveler object,
+
+
+320
+00:16:23,149 --> 00:16:26,752 line:0
+metrics get published
+to a global record.
+
+
+321
+00:16:26,752 --> 00:16:30,156 position:50%
+Metrics published
+are the traveler’s anonymous ID,
+
+
+322
+00:16:30,156 --> 00:16:32,124 position:50%
+number of destinations
+looked up,
+
+
+323
+00:16:32,124 --> 00:16:35,862 position:50%
+and a computed travel
+interest category.
+
+
+324
+00:16:35.862 --> 00:16:37.597 line:-1 position:50%
+In the test() function,
+
+
+325
+00:16:37.597 --> 00:16:41.467 line:-1 position:50%
+first, a Traveler object
+is created,
+
+
+326
+00:16:41,467 --> 00:16:44,103 line:-1
+then reference
+to the travelMetrics
+
+
+327
+00:16:44,103 --> 00:16:47,840 line:-1
+is copied
+from the Traveler object.
+
+
+328
+00:16:47.840 --> 00:16:51.244 line:-1 position:50%
+The traveler’s destination
+is updated to Big Sur,
+
+
+329
+00:16:51,244 --> 00:16:55,047 line:-1
+which records Big Sur
+in TravelMetrics.
+
+
+330
+00:16:55,047 --> 00:16:58,718 line:-1
+The traveler’s destination
+is updated to Catalina,
+
+
+331
+00:16:58.718 --> 00:17:02.855 line:-1 position:50%
+which records Catalina
+in TravelMetrics.
+
+
+332
+00:17:02.855 --> 00:17:06.125 line:-1 position:50%
+Then the travel interest
+category is computed
+
+
+333
+00:17:06,125 --> 00:17:10,162 line:-1
+by looking at
+the recorded destinations.
+
+
+334
+00:17:10.162 --> 00:17:12.098 line:-1 position:50%
+Today the deinitializer
+may run
+
+
+335
+00:17:12.098 --> 00:17:14.367 line:-1 position:50%
+after computing
+travel interest,
+
+
+336
+00:17:14.367 --> 00:17:19.739 line:-1 position:50%
+publishing the interested
+category as Nature.
+
+
+337
+00:17:19,739 --> 00:17:22,174 line:-1
+But the last use
+of the Traveler object
+
+
+338
+00:17:22,174 --> 00:17:25,077 line:-1
+is the destination update
+to Catalina,
+
+
+339
+00:17:25.077 --> 00:17:29.749 line:-1 position:50%
+immediately after which
+the deinitializer can run.
+
+
+340
+00:17:29.749 --> 00:17:31.450 line:-1 position:50%
+Since the deinitializer runs
+
+
+341
+00:17:31.450 --> 00:17:35.454 line:-1 position:50%
+before computing the travel
+interest, nil gets published,
+
+
+342
+00:17:35.454 --> 00:17:37.990 line:-1 position:50%
+causing a bug.
+
+
+343
+00:17:37.990 --> 00:17:40.760 line:-1 position:50%
+Just like weak
+and unowned references,
+
+
+344
+00:17:40.760 --> 00:17:42.261 line:-1 position:50%
+there are different techniques
+
+
+345
+00:17:42,261 --> 00:17:45,898 line:-1
+to safely handle
+deinitializer side effects.
+
+
+346
+00:17:45.898 --> 00:17:48.134 line:-1 position:50%
+Each of them
+with varying degrees
+
+
+347
+00:17:48.134 --> 00:17:50.403 line:-1 position:50%
+of upfront implementation cost
+
+
+348
+00:17:50.403 --> 00:17:53.172 line:-1 position:50%
+versus continuous
+maintenance cost.
+
+
+349
+00:17:53,172 --> 00:17:55,508 line:-1
+Let’s look at them
+one by one.
+
+
+350
+00:17:55,508 --> 00:17:57,910 line:-1
+withExtendedLifetime()
+can be used
+
+
+351
+00:17:57,910 --> 00:18:01,714 line:-1
+to explicitly extend the
+lifetime of the Traveler object
+
+
+352
+00:18:01,714 --> 00:18:05,117 line:-1
+until the travel interest
+category is computed,
+
+
+353
+00:18:05.117 --> 00:18:08.187 line:-1 position:50%
+preventing potential bugs.
+
+
+354
+00:18:08,187 --> 00:18:09,755 line:-1
+As discussed before,
+
+
+355
+00:18:09.755 --> 00:18:14.226 line:-1 position:50%
+this transfers responsibility
+of correctness on you.
+
+
+356
+00:18:14.226 --> 00:18:15.461 line:-1 position:50%
+With this approach,
+
+
+357
+00:18:15,461 --> 00:18:18,230 line:-1
+you should ensure
+withExtendedLifetime
+
+
+358
+00:18:18,230 --> 00:18:20,866 line:-1
+is used every time
+there is a potential
+
+
+359
+00:18:20.866 --> 00:18:24.804 line:-1 position:50%
+of incorrect interaction between
+deinitializer side effects
+
+
+360
+00:18:24,804 --> 00:18:29,742 line:-1
+and external program effects,
+increasing maintenance cost.
+
+
+361
+00:18:29,742 --> 00:18:32,745 line:-1
+Deinitializer side effects
+cannot be observed
+
+
+362
+00:18:32,745 --> 00:18:35,581 line:-1
+if the effects are all local.
+
+
+363
+00:18:35.581 --> 00:18:38.918 line:-1 position:50%
+Redesigning class API
+by limiting the visibility
+
+
+364
+00:18:38,918 --> 00:18:44,090 line:-1
+of internal class details can
+prevent object lifetime bugs.
+
+
+365
+00:18:44,090 --> 00:18:47,460 line:-1
+Here, TravelMetrics
+is marked private,
+
+
+366
+00:18:47,460 --> 00:18:50,429 line:-1
+hiding it from external access.
+
+
+367
+00:18:50.429 --> 00:18:52.698 line:-1 position:50%
+The deinitializer now computes
+
+
+368
+00:18:52.698 --> 00:18:55.468 line:-1 position:50%
+the most interested
+travel category
+
+
+369
+00:18:55.468 --> 00:18:58.037 line:-1 position:50%
+and publishes the metrics.
+
+
+370
+00:18:58,037 --> 00:18:59,271 line:-1
+This works,
+
+
+371
+00:18:59,271 --> 00:19:02,408 line:-1
+but a more principled
+approach is to get rid
+
+
+372
+00:19:02,408 --> 00:19:07,246 line:-1
+of the deinitializer
+side effects altogether.
+
+
+373
+00:19:07,246 --> 00:19:11,183 line:0
+Here, defer is used
+instead of the deinitializer
+
+
+374
+00:19:11,183 --> 00:19:12,952 line:0
+to publish metrics,
+
+
+375
+00:19:12,952 --> 00:19:17,690 position:50%
+and the deinitializer
+only performs verification.
+
+
+376
+00:19:17,690 --> 00:19:20,393 position:50%
+By removing
+deinitializer side effects,
+
+
+377
+00:19:20,393 --> 00:19:25,464 position:50%
+we can eliminate all potential
+object lifetime bugs.
+
+
+378
+00:19:25.464 --> 00:19:28.834 line:-1 position:50%
+We explored our educational
+Travel app example
+
+
+379
+00:19:28.834 --> 00:19:30.169 line:-1 position:50%
+to learn about ARC,
+
+
+380
+00:19:30,169 --> 00:19:34,507 line:-1
+weak and unowned references,
+and deinitializer side effects.
+
+
+381
+00:19:34,507 --> 00:19:38,177 line:-1
+It is important to thoroughly
+understand the language features
+
+
+382
+00:19:38.177 --> 00:19:41.180 line:-1 position:50%
+that make object lifetimes
+observable
+
+
+383
+00:19:41,180 --> 00:19:44,183 line:-1
+and eliminate potentially
+incorrect reliance
+
+
+384
+00:19:44.183 --> 00:19:46.252 line:-1 position:50%
+on observed object lifetimes,
+
+
+385
+00:19:46,252 --> 00:19:50,389 line:-1
+so that we don’t uncover bugs
+at surprising times.
+
+
+386
+00:19:50.389 --> 00:19:54.060 line:-1 position:50%
+With Xcode 13, a new
+experimental build setting
+
+
+387
+00:19:54,060 --> 00:19:56,262 line:-1
+called
+"Optimize Object Lifetimes"
+
+
+388
+00:19:56,262 --> 00:19:59,432 line:-1
+is available
+for the Swift compiler.
+
+
+389
+00:19:59.432 --> 00:20:04.703 line:-1 position:50%
+This enables powerful lifetime
+shortening ARC optimizations.
+
+
+390
+00:20:04.703 --> 00:20:06.739 line:-1 position:50%
+With this build setting
+turned on,
+
+
+391
+00:20:06,739 --> 00:20:09,508 line:-1
+you may see objects
+being deallocated
+
+
+392
+00:20:09,508 --> 00:20:13,846 line:-1
+immediately after last use
+much more consistently,
+
+
+393
+00:20:13.846 --> 00:20:16.115 line:-1 position:50%
+bringing observed
+object lifetimes
+
+
+394
+00:20:16.115 --> 00:20:19.218 line:-1 position:50%
+closer to their
+guaranteed minimum.
+
+
+395
+00:20:19.218 --> 00:20:22.154 line:-1 position:50%
+This may expose
+hidden object lifetime bugs,
+
+
+396
+00:20:22.154 --> 00:20:24.957 line:-1 position:50%
+similar to the examples
+discussed.
+
+
+397
+00:20:24.957 --> 00:20:26.826 line:-1 position:50%
+You can follow
+the safe techniques
+
+
+398
+00:20:26,826 --> 00:20:31,230 line:-1
+discussed in this session
+to eliminate all such bugs.
+
+
+399
+00:20:31.230 --> 00:20:33.399 line:-1 position:50%
+I hope you enjoyed this session.
+
+
+400
+00:20:33.399 --> 00:20:35.134 line:-1 position:50%
+Thanks for watching.
+
+
+401
+00:20:35,134 --> 00:20:39,271 align:center size:2% position:89%
+♪
+

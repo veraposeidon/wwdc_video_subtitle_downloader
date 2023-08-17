@@ -1,0 +1,3474 @@
+1
+00:00:03,871 --> 00:00:07,074 line:-1
+Hello and welcome to WWDC.
+
+
+2
+00:00:08,575 --> 00:00:10,177 line:0
+Hello, everyone.
+My name is Philip Simmons,
+
+
+3
+00:00:10,244 --> 00:00:11,478 line:0
+a designer here at Apple.
+
+
+4
+00:00:11,545 --> 00:00:13,981 line:0
+Thank you so much for taking the time
+to tune in for my talk
+
+
+5
+00:00:14,047 --> 00:00:15,649 line:0
+on the artist's AR toolkit.
+
+
+6
+00:00:16,116 --> 00:00:18,485 line:-2
+So today my talk is gonna focus on
+the artist's journey
+
+
+7
+00:00:18,552 --> 00:00:22,122 line:-2
+of creating compliant USDZs
+for use in Reality Composer.
+
+
+8
+00:00:22,189 --> 00:00:25,893 line:-2
+This will cover what file formats
+you should export from your DCC,
+
+
+9
+00:00:25,959 --> 00:00:28,462 line:-2
+how to bring those assets
+into Reality Converter,
+
+
+10
+00:00:28,529 --> 00:00:30,264 line:-1
+and make them into USDZs.
+
+
+11
+00:00:30,330 --> 00:00:33,800 line:-2
+Later, we'll look at using our assets
+inside Reality Composer
+
+
+12
+00:00:33,867 --> 00:00:37,337 line:0
+and setting up some complex behaviors
+to create rich experiences.
+
+
+13
+00:00:37,404 --> 00:00:42,442 line:0
+Lastly we'll send all this data to device
+and view our newly created AR project.
+
+
+14
+00:00:43,477 --> 00:00:44,678 line:0
+So what does all this look like?
+
+
+15
+00:00:44,745 --> 00:00:47,881 line:0
+So from a high level,
+this is the journey we're gonna take.
+
+
+16
+00:00:47,948 --> 00:00:52,019 line:0
+It is a straight line from your DCC
+of choice into Reality Converter,
+
+
+17
+00:00:52,085 --> 00:00:56,123 line:0
+then Reality Composer, and, lastly,
+onto device for viewing and sharing.
+
+
+18
+00:00:57,424 --> 00:01:00,260 line:0
+So Reality Converter is a major step
+in this process,
+
+
+19
+00:01:00,327 --> 00:01:04,531 line:0
+and we need to know a few things before
+we can begin pushing data through it.
+
+
+20
+00:01:04,598 --> 00:01:06,333 line:-1
+So the primary things to note are gonna be
+
+
+21
+00:01:06,400 --> 00:01:10,137 line:-2
+geometry types that can be imported
+and the texture types that are supported.
+
+
+22
+00:01:11,038 --> 00:01:16,176 line:0
+So for geometry, we're gonna have
+FBX, OBJ, USD and GLTF.
+
+
+23
+00:01:16,243 --> 00:01:18,812 line:0
+For textures, we have PNGs and JPEGs.
+
+
+24
+00:01:18,879 --> 00:01:23,684 line:0
+So these inputs combined allow
+Reality Converter to output a valid USDZ.
+
+
+25
+00:01:24,218 --> 00:01:27,254 line:-2
+Since Reality Composer
+only accepts USDZ files,
+
+
+26
+00:01:27,321 --> 00:01:32,125 line:-2
+Apple has provided the tools necessary for
+developers to generate and inspect USDZs.
+
+
+27
+00:01:32,593 --> 00:01:35,262 line:-2
+So last year, Apple offered
+a suite of Python-based tools
+
+
+28
+00:01:35,329 --> 00:01:37,865 line:-2
+so developers could get started
+making their own content.
+
+
+29
+00:01:37,931 --> 00:01:40,801 line:-2
+This year, we're proud to be including
+Reality Converter
+
+
+30
+00:01:40,868 --> 00:01:42,903 line:-1
+as a next generation in that tooling.
+
+
+31
+00:01:43,437 --> 00:01:47,374 line:0
+So both Reality Converter
+and the USDZ tools are available today
+
+
+32
+00:01:47,441 --> 00:01:49,643 line:0
+through the developer.apple website.
+
+
+33
+00:01:50,477 --> 00:01:53,313 line:-2
+All right. So let's get started
+generating some content.
+
+
+34
+00:01:53,380 --> 00:01:56,083 line:-2
+We're going to look at a few examples
+in different DCCs
+
+
+35
+00:01:56,149 --> 00:01:58,719 line:-2
+and send all that data over
+to Reality Converter.
+
+
+36
+00:01:59,553 --> 00:02:03,023 line:-2
+So here, we're gonna begin by taking
+a look at an asset inside Houdini
+
+
+37
+00:02:03,090 --> 00:02:06,326 line:-2
+and exporting it out as a USD for use
+in Reality Converter.
+
+
+38
+00:02:06,393 --> 00:02:09,663 line:-2
+Now Houdini is known for
+its powerful simulation tool set,
+
+
+39
+00:02:09,729 --> 00:02:11,231 line:-1
+and in this demonstration,
+
+
+40
+00:02:11,298 --> 00:02:14,101 line:-2
+I will be scratching the absolute surface
+of that toolset
+
+
+41
+00:02:14,168 --> 00:02:17,304 line:-2
+to show you how we can take one asset,
+instance it around,
+
+
+42
+00:02:17,371 --> 00:02:21,642 line:-2
+and export those instances out
+as individuals in a hierarchy.
+
+
+43
+00:02:21,708 --> 00:02:23,210 line:-1
+Now this is an important distinction,
+
+
+44
+00:02:23,277 --> 00:02:26,446 line:-2
+because later I'm gonna show you
+how to reach into that USDZ hierarchy
+
+
+45
+00:02:26,513 --> 00:02:28,582 line:-2
+and apply behaviors
+directly to individuals
+
+
+46
+00:02:28,649 --> 00:02:30,384 line:-1
+instead of the asset as a whole.
+
+
+47
+00:02:32,052 --> 00:02:34,021 line:-2
+So let's take a look at
+what I've set up here.
+
+
+48
+00:02:34,087 --> 00:02:35,689 line:-1
+Here I have the cloud geometry.
+
+
+49
+00:02:35,756 --> 00:02:37,991 line:0
+You can see it in the viewport
+as we tumble around.
+
+
+50
+00:02:38,058 --> 00:02:41,461 line:0
+Now when we jump into the geometry node,
+you can see what I've actually created.
+
+
+51
+00:02:41,528 --> 00:02:43,330 line:0
+Here I'm bringing the geometry
+on the left,
+
+
+52
+00:02:43,397 --> 00:02:45,332 line:0
+and down the right-hand side
+I've built a graph.
+
+
+53
+00:02:45,399 --> 00:02:48,502 line:0
+Now this graph is essentially
+building a volume,
+
+
+54
+00:02:48,569 --> 00:02:50,170 line:0
+scattering particles throughout it,
+
+
+55
+00:02:50,237 --> 00:02:53,240 line:0
+and then instancing our cloud
+at each one of those points.
+
+
+56
+00:02:53,307 --> 00:02:56,243 line:0
+So if we look further down the chain
+what our combined result is,
+
+
+57
+00:02:56,310 --> 00:02:59,146 line:0
+I have clouds scattered
+through this volume.
+
+
+58
+00:02:59,213 --> 00:03:01,481 line:0
+Now this is a live graph,
+so I can jump back in
+
+
+59
+00:03:01,548 --> 00:03:04,551 line:0
+and update the scatter node
+to have more or less points.
+
+
+60
+00:03:04,618 --> 00:03:07,020 line:0
+Here I'll drop the count
+from ten to eight.
+
+
+61
+00:03:07,087 --> 00:03:09,556 line:0
+So, all together,
+we can go ahead and start exporting.
+
+
+62
+00:03:09,623 --> 00:03:12,226 line:0
+So for export,
+I'll jump over to the staging area.
+
+
+63
+00:03:12,292 --> 00:03:14,328 line:0
+Here I've set up a USD rot node.
+
+
+64
+00:03:14,394 --> 00:03:17,664 line:0
+This is being fed our instance geometry
+and our particles.
+
+
+65
+00:03:17,731 --> 00:03:21,401 line:0
+Now I'm combining these in such a way
+that keeps the instances in a hierarchy,
+
+
+66
+00:03:21,468 --> 00:03:24,438 line:0
+as opposed to merging it
+as a solid piece of geometry.
+
+
+67
+00:03:24,505 --> 00:03:27,875 line:0
+So with my rot node set,
+I can go ahead and save this to disk.
+
+
+68
+00:03:30,043 --> 00:03:32,179 line:-1
+So with our newly-exported asset,
+
+
+69
+00:03:32,246 --> 00:03:36,216 line:-2
+now is the perfect time to fire up
+Reality Converter and get to know the app.
+
+
+70
+00:03:36,283 --> 00:03:38,485 line:-2
+We will go ahead
+and begin with our cloud asset
+
+
+71
+00:03:38,552 --> 00:03:40,888 line:-2
+and get a feel
+for how Converter's gonna work,
+
+
+72
+00:03:40,954 --> 00:03:44,525 line:-2
+and then we'll loop back and gather
+the other asset types for conversion.
+
+
+73
+00:03:46,159 --> 00:03:47,794 line:-1
+So here we are with Converter loaded up.
+
+
+74
+00:03:48,328 --> 00:03:50,864 line:-2
+In Converter,
+it starts with a blank scene,
+
+
+75
+00:03:50,931 --> 00:03:52,499 line:-1
+and it's asking you to drop the files.
+
+
+76
+00:03:52,566 --> 00:03:53,567 line:-1
+So let's do that.
+
+
+77
+00:03:53,634 --> 00:03:57,538 line:-2
+We'll navigate on disk
+and find our cloud USD that we've created.
+
+
+78
+00:03:57,604 --> 00:04:00,674 line:-2
+Now we can simply drag and drop this
+into the viewport
+
+
+79
+00:04:00,741 --> 00:04:03,110 line:-1
+and Converter will load up our asset.
+
+
+80
+00:04:03,177 --> 00:04:04,178 line:-1
+And here we are.
+
+
+81
+00:04:05,045 --> 00:04:06,280 line:-1
+With this asset loaded up,
+
+
+82
+00:04:06,346 --> 00:04:08,615 line:-2
+now is a great time
+to take a tour through the software
+
+
+83
+00:04:08,682 --> 00:04:10,884 line:-2
+and get a feel for everything
+it has to offer.
+
+
+84
+00:04:11,885 --> 00:04:14,588 line:-2
+So first and foremost,
+we're in the 3D viewport.
+
+
+85
+00:04:14,655 --> 00:04:17,423 line:-1
+You can rotate, you can pan, you can zoom.
+
+
+86
+00:04:17,958 --> 00:04:20,560 line:-2
+Now down the left-hand side,
+we're gonna have the Models tab.
+
+
+87
+00:04:20,627 --> 00:04:24,398 line:-2
+The Models tab will fill up
+as you drag in more geometries.
+
+
+88
+00:04:24,464 --> 00:04:27,034 line:-2
+So once we fill this in
+with our other geometries later on,
+
+
+89
+00:04:27,100 --> 00:04:28,836 line:-1
+you'll see how we can toggle between them.
+
+
+90
+00:04:29,670 --> 00:04:33,040 line:-2
+Now this is a 3D viewport, and sometimes
+you can lose where you're at.
+
+
+91
+00:04:33,106 --> 00:04:36,710 line:-2
+So if you're playing around and you happen
+to zoom away from where you want to be,
+
+
+92
+00:04:36,777 --> 00:04:38,979 line:-2
+we've given you a framing icon
+to give it back.
+
+
+93
+00:04:40,047 --> 00:04:43,250 line:-2
+Now down the right-hand side is where
+you're gonna do most of your work.
+
+
+94
+00:04:43,317 --> 00:04:46,887 line:-2
+Now the Environments tab is the tab
+where we're giving you preloaded IBLs.
+
+
+95
+00:04:46,954 --> 00:04:48,622 line:-1
+That's image-based lighting.
+
+
+96
+00:04:48,689 --> 00:04:52,426 line:-2
+This is the lighting environments
+that make your image look how they do.
+
+
+97
+00:04:52,492 --> 00:04:56,997 line:-2
+You can simply toggle between them,
+and find ones that suit your needs.
+
+
+98
+00:04:57,064 --> 00:04:58,732 line:-1
+Now if they're too light or too dark,
+
+
+99
+00:04:58,799 --> 00:05:00,934 line:-2
+we're giving you exposure controls
+down the bottom
+
+
+100
+00:05:01,001 --> 00:05:02,669 line:-2
+where you can
+make adjustments accordingly.
+
+
+101
+00:05:03,637 --> 00:05:06,640 line:-2
+In addition, we're giving you
+grid and environment views.
+
+
+102
+00:05:06,707 --> 00:05:09,576 line:-2
+Grid is perfect for knowing
+how large your asset is
+
+
+103
+00:05:09,643 --> 00:05:11,612 line:-1
+in relation to a certain scale.
+
+
+104
+00:05:11,678 --> 00:05:13,914 line:-2
+So, example,
+our grid units here are set to one meter.
+
+
+105
+00:05:13,981 --> 00:05:16,984 line:-2
+You can see that each checkbox
+is going to be a meter large.
+
+
+106
+00:05:17,618 --> 00:05:19,052 line:-1
+You can also see the environment.
+
+
+107
+00:05:19,119 --> 00:05:21,255 line:-1
+This is representing what the IBL is.
+
+
+108
+00:05:21,321 --> 00:05:23,023 line:-1
+So the IBL looks like this,
+
+
+109
+00:05:23,090 --> 00:05:26,059 line:-2
+and in the 3D viewport,
+it's gonna look like this.
+
+
+110
+00:05:26,126 --> 00:05:28,028 line:-2
+If you find that distracting,
+you can simply turn it off
+
+
+111
+00:05:28,095 --> 00:05:29,496 line:-1
+and get back to a solid color.
+
+
+112
+00:05:31,064 --> 00:05:34,434 line:-2
+The Materials tab is where you're gonna
+hook up all your materials and textures.
+
+
+113
+00:05:35,369 --> 00:05:37,371 line:-2
+Here you can see
+we have two materials noted,
+
+
+114
+00:05:37,437 --> 00:05:40,140 line:-2
+but only one of them
+I actually assigned to my DCC.
+
+
+115
+00:05:41,508 --> 00:05:45,445 line:-2
+Converter is giving you a default material
+as a fallback nicety,
+
+
+116
+00:05:45,512 --> 00:05:49,149 line:-2
+so if you download something or you build
+something and forget to assign a material,
+
+
+117
+00:05:49,216 --> 00:05:53,020 line:-2
+we've given you the fallback material
+that will automatically assign on import.
+
+
+118
+00:05:53,687 --> 00:05:56,890 line:-2
+Now I've set up a material,
+so I know I'm ready to go.
+
+
+119
+00:05:56,957 --> 00:06:00,060 line:-2
+We can simply add our textures
+by dragging them from disk as well.
+
+
+120
+00:06:00,627 --> 00:06:01,828 line:-1
+So if we navigate the disk,
+
+
+121
+00:06:01,895 --> 00:06:05,199 line:-2
+we can find our base color
+and drop it on our base color input.
+
+
+122
+00:06:06,400 --> 00:06:07,401 line:-1
+There we have it.
+
+
+123
+00:06:07,467 --> 00:06:08,735 line:-2
+We can go ahead
+and fill in the rest of them.
+
+
+124
+00:06:08,802 --> 00:06:11,538 line:-2
+We have a normal map,
+and we also have an ambient occlusion.
+
+
+125
+00:06:14,274 --> 00:06:17,811 line:-2
+And that's it. Our material is set up,
+and our textures are added.
+
+
+126
+00:06:17,878 --> 00:06:20,047 line:-2
+So let's go ahead
+and look at our last tab.
+
+
+127
+00:06:20,113 --> 00:06:21,448 line:-1
+Our Properties tab is important.
+
+
+128
+00:06:21,515 --> 00:06:23,584 line:-2
+This is where you're gonna add
+your copyright information
+
+
+129
+00:06:23,650 --> 00:06:25,419 line:-1
+and also set up your base units.
+
+
+130
+00:06:25,485 --> 00:06:26,653 line:-1
+So for copyright information,
+
+
+131
+00:06:26,720 --> 00:06:29,223 line:-2
+you want to let the world know
+who made this asset.
+
+
+132
+00:06:29,289 --> 00:06:31,291 line:-2
+So we'll go ahead and tell them
+Apple made it.
+
+
+133
+00:06:31,358 --> 00:06:33,994 line:-1
+Now base units is an important feature.
+
+
+134
+00:06:34,061 --> 00:06:37,598 line:-2
+I know because this asset came
+from Houdini, it was built in meters.
+
+
+135
+00:06:37,664 --> 00:06:40,834 line:-2
+So I want Converter
+to also export it in meters.
+
+
+136
+00:06:40,901 --> 00:06:44,204 line:-2
+Later on, we'll see assets
+that were constructed in centimeters,
+
+
+137
+00:06:44,271 --> 00:06:46,874 line:-2
+and we'll go ahead and change it here
+to be centimeters for export.
+
+
+138
+00:06:47,708 --> 00:06:48,809 line:-1
+So with that all set,
+
+
+139
+00:06:48,876 --> 00:06:52,145 line:-2
+we can jump back to our DCCs
+and grab the rest of our assets.
+
+
+140
+00:06:52,913 --> 00:06:56,383 line:-2
+So now let's take a look at
+an animated asset inside Maya
+
+
+141
+00:06:56,450 --> 00:06:58,352 line:-1
+and export it out as an FBX.
+
+
+142
+00:06:59,353 --> 00:07:00,787 line:-1
+So here we have a taxi.
+
+
+143
+00:07:01,588 --> 00:07:05,893 line:-2
+This asset has been modeled, textured
+and animated inside Maya by an artist.
+
+
+144
+00:07:05,959 --> 00:07:09,563 line:-2
+So we accept both transform animation
+as well as skinned animation.
+
+
+145
+00:07:09,630 --> 00:07:13,967 line:-2
+So this particular animation has been done
+by keyframing directly on the geometry,
+
+
+146
+00:07:14,034 --> 00:07:16,403 line:-1
+so no rig or skin is actually needed.
+
+
+147
+00:07:17,104 --> 00:07:18,505 line:-1
+There we have it. We can hit play,
+
+
+148
+00:07:18,572 --> 00:07:20,541 line:-2
+and we can see it
+bumbling around the viewport.
+
+
+149
+00:07:20,607 --> 00:07:22,576 line:-2
+Now let's take a moment
+to talk about materials.
+
+
+150
+00:07:22,643 --> 00:07:26,313 line:-2
+Here in my viewport, you can see
+I have assigned a shader with textures.
+
+
+151
+00:07:26,380 --> 00:07:29,349 line:-2
+We can look at the graph and see
+where I've actually put that all together.
+
+
+152
+00:07:29,416 --> 00:07:32,352 line:-2
+Reality Converter doesn't care about
+your texture inputs here.
+
+
+153
+00:07:32,419 --> 00:07:35,355 line:-2
+It cares about material names
+and material assignments.
+
+
+154
+00:07:35,422 --> 00:07:39,593 line:-2
+So that I've hooked up textures here
+is just a nicety for me in my own DCC.
+
+
+155
+00:07:39,660 --> 00:07:43,430 line:-2
+So long way of saying you don't need
+to set up textures in your viewport
+
+
+156
+00:07:43,497 --> 00:07:45,732 line:-1
+to get a valid build in Converter.
+
+
+157
+00:07:46,333 --> 00:07:48,302 line:-2
+So with all this set
+and we're happy with our asset,
+
+
+158
+00:07:48,368 --> 00:07:51,371 line:-2
+we can go ahead and export
+as an FBX to disk.
+
+
+159
+00:07:51,705 --> 00:07:55,642 line:-2
+So on a quick technical note,
+when using FBX you will need two things.
+
+
+160
+00:07:56,476 --> 00:07:59,046 line:-2
+So first you're gonna need
+to have the FBX plug-ins enabled
+
+
+161
+00:07:59,112 --> 00:08:01,048 line:-1
+in your Maya plug-in preferences,
+
+
+162
+00:08:01,114 --> 00:08:03,951 line:-2
+and second, you're gonna have to have
+the FBX Python bindings
+
+
+163
+00:08:04,017 --> 00:08:05,619 line:-1
+installed to your machine.
+
+
+164
+00:08:05,686 --> 00:08:10,123 line:-2
+Now those bindings are available for free
+on the Autodesk website, seen here.
+
+
+165
+00:08:10,724 --> 00:08:14,728 line:-2
+So jumping back to our DCCs,
+next we're gonna look at a static asset.
+
+
+166
+00:08:14,795 --> 00:08:17,865 line:-2
+Static assets are the most common
+type of asset you will encounter,
+
+
+167
+00:08:17,931 --> 00:08:22,603 line:-2
+and OBJ is a very popular file format
+to save static assets to.
+
+
+168
+00:08:22,669 --> 00:08:25,806 line:-2
+So nearly every DCC
+is going to export to OBJ.
+
+
+169
+00:08:25,873 --> 00:08:29,409 line:-2
+And that's why you will often find this
+as the available file type
+
+
+170
+00:08:29,476 --> 00:08:31,512 line:-1
+when downloading from online sources.
+
+
+171
+00:08:32,379 --> 00:08:35,249 line:-2
+So here inside Blender
+we can take a look at a static asset.
+
+
+172
+00:08:35,315 --> 00:08:39,586 line:-2
+This school asset is comprised of
+geometry, materials, and textures.
+
+
+173
+00:08:39,653 --> 00:08:42,188 line:-2
+So here in the viewport,
+we can see the geometry.
+
+
+174
+00:08:42,256 --> 00:08:46,026 line:0
+Down below, we can see I have a material
+hooked up with my texture inputs.
+
+
+175
+00:08:46,093 --> 00:08:49,329 line:-2
+And lastly, here are the UVs
+that the textures are being powered by.
+
+
+176
+00:08:49,396 --> 00:08:52,733 line:-2
+So all that combined gives our final look
+in the viewport.
+
+
+177
+00:08:52,799 --> 00:08:54,168 line:-1
+So, happy with our asset,
+
+
+178
+00:08:54,234 --> 00:08:57,771 line:-2
+we can go ahead and export this as an OBJ
+and save it to disk.
+
+
+179
+00:08:57,838 --> 00:09:01,475 line:-2
+GLTF is our final geometry format
+that we accept.
+
+
+180
+00:09:01,542 --> 00:09:05,512 line:-2
+More and more DCCs are starting
+to pick it up as an export option,
+
+
+181
+00:09:05,579 --> 00:09:07,181 line:-1
+and KeyShot is one such app.
+
+
+182
+00:09:07,247 --> 00:09:09,049 line:-1
+So for our off-line render community,
+
+
+183
+00:09:09,116 --> 00:09:14,755 line:-2
+you can now easily move your data to
+a real-time format through GLTF and USDZ.
+
+
+184
+00:09:17,090 --> 00:09:19,359 line:-2
+So here in KeyShot,
+you can see the clock tower.
+
+
+185
+00:09:19,426 --> 00:09:22,763 line:-2
+Now like the OBJ example,
+this is a static asset.
+
+
+186
+00:09:22,829 --> 00:09:26,800 line:-2
+So it'll have the same geometry,
+materials and texture setup as before.
+
+
+187
+00:09:26,867 --> 00:09:28,936 line:-2
+Here we can select the geometry
+in the hierarchy
+
+
+188
+00:09:29,002 --> 00:09:32,005 line:-2
+and see further down
+I've assigned the material.
+
+
+189
+00:09:32,072 --> 00:09:35,242 line:-2
+So this material,
+I have base colors and roughness assigned.
+
+
+190
+00:09:35,309 --> 00:09:36,877 line:-1
+Now if we inspect the material itself,
+
+
+191
+00:09:36,944 --> 00:09:39,179 line:-2
+you can see where
+I've plugged in those textures,
+
+
+192
+00:09:39,246 --> 00:09:42,249 line:-2
+and all of this combined
+is what's giving us our final render.
+
+
+193
+00:09:42,316 --> 00:09:43,650 line:-1
+So, happy with our asset again,
+
+
+194
+00:09:43,717 --> 00:09:47,221 line:-2
+we can go ahead and export this out
+as a GLTF and save it to disk.
+
+
+195
+00:09:50,591 --> 00:09:53,093 line:-2
+So last topic before we go back
+to Reality Converter
+
+
+196
+00:09:53,160 --> 00:09:54,795 line:-1
+is about downloaded content.
+
+
+197
+00:09:54,862 --> 00:09:59,466 line:-2
+As you can see, using DCCs is a complex
+and specialized skill set.
+
+
+198
+00:09:59,533 --> 00:10:02,236 line:-2
+So for developers
+that don't want to learn a DCC,
+
+
+199
+00:10:02,302 --> 00:10:05,839 line:-2
+or don't want to make their own art,
+online resources are available.
+
+
+200
+00:10:06,473 --> 00:10:10,143 line:-2
+Some have even started offering USDZs
+as a downloadable file type,
+
+
+201
+00:10:10,210 --> 00:10:12,579 line:-2
+which is perfect for use
+in Reality Composer,
+
+
+202
+00:10:12,646 --> 00:10:14,448 line:-1
+Sketchfab being one such site.
+
+
+203
+00:10:14,515 --> 00:10:16,917 line:-2
+But for those times that you find
+an asset online,
+
+
+204
+00:10:16,984 --> 00:10:19,386 line:-1
+and it's not offered in USDZ format,
+
+
+205
+00:10:19,453 --> 00:10:22,222 line:-2
+you now have the capability
+to make it one yourself.
+
+
+206
+00:10:23,724 --> 00:10:24,791 line:-1
+So with our new content,
+
+
+207
+00:10:24,858 --> 00:10:27,861 line:-2
+let's get back into Reality Converter
+and make some USDZs.
+
+
+208
+00:10:28,762 --> 00:10:31,298 line:-2
+So Converter's still up,
+loaded and waiting for us.
+
+
+209
+00:10:31,365 --> 00:10:34,535 line:-2
+We can go ahead and navigate on disk
+and find our assets.
+
+
+210
+00:10:34,601 --> 00:10:36,236 line:-1
+Now, the first time we did this,
+
+
+211
+00:10:36,303 --> 00:10:39,239 line:-2
+we dragged in the geometry
+and in the texture separately.
+
+
+212
+00:10:39,306 --> 00:10:40,307 line:-1
+That was the long way.
+
+
+213
+00:10:40,374 --> 00:10:41,775 line:-1
+I'm gonna show you a faster way
+
+
+214
+00:10:41,842 --> 00:10:43,644 line:-2
+to get through this software
+and get it done.
+
+
+215
+00:10:44,378 --> 00:10:47,981 line:-2
+So if you select at the folder level,
+you can see I've exported out our geometry
+
+
+216
+00:10:48,048 --> 00:10:49,683 line:-1
+and our associated textures.
+
+
+217
+00:10:50,551 --> 00:10:52,986 line:-2
+Now if we just grab things
+at the folder level,
+
+
+218
+00:10:53,053 --> 00:10:55,422 line:-2
+we can drag and drop that
+directly into Converter,
+
+
+219
+00:10:55,489 --> 00:10:57,224 line:-1
+and it'll hook it all up for us.
+
+
+220
+00:10:57,291 --> 00:10:58,292 line:-1
+So let's do that.
+
+
+221
+00:11:03,764 --> 00:11:07,668 line:-2
+So here we can see, we have our taxi,
+our clock tower and our schoolhouse.
+
+
+222
+00:11:07,734 --> 00:11:09,303 line:-1
+You can see down at the Models tab here
+
+
+223
+00:11:09,369 --> 00:11:11,538 line:-2
+that we've given affordance
+for animated assets.
+
+
+224
+00:11:11,605 --> 00:11:13,507 line:-2
+So if you bring in an asset
+that has animation,
+
+
+225
+00:11:13,574 --> 00:11:15,442 line:-2
+it's gonna get
+this little running man icon.
+
+
+226
+00:11:15,509 --> 00:11:18,478 line:-2
+That's how you'll know at a glance
+which one has animation.
+
+
+227
+00:11:18,545 --> 00:11:20,681 line:-1
+So to that end, in the viewport,
+
+
+228
+00:11:20,747 --> 00:11:26,119 line:-2
+we're gonna give you the ability to play,
+pause and stop the animation.
+
+
+229
+00:11:26,186 --> 00:11:29,156 line:-2
+So if you hit play,
+it'll simply loop endlessly.
+
+
+230
+00:11:30,090 --> 00:11:32,826 line:-2
+Now same as before, you can toggle through
+your environment lightings
+
+
+231
+00:11:32,893 --> 00:11:35,229 line:-2
+if you want to view it
+in different lighting setups.
+
+
+232
+00:11:35,295 --> 00:11:37,064 line:-1
+You can show the environment and grid.
+
+
+233
+00:11:37,130 --> 00:11:39,299 line:-1
+That also works. Same as before.
+
+
+234
+00:11:39,867 --> 00:11:42,903 line:-2
+So over to the important part,
+we'll look at our properties.
+
+
+235
+00:11:42,970 --> 00:11:44,805 line:-1
+Properties, like we spoke about before,
+
+
+236
+00:11:44,872 --> 00:11:48,075 line:-2
+is where you add copyright information
+and you set your base units.
+
+
+237
+00:11:48,141 --> 00:11:52,980 line:-2
+Now this important because we exported in
+centimeters from our last DCC packages.
+
+
+238
+00:11:53,480 --> 00:11:56,216 line:-2
+Here in Converter,
+we need to have that reflected.
+
+
+239
+00:11:56,283 --> 00:11:58,252 line:-2
+So we'll go ahead
+and change him to centimeters,
+
+
+240
+00:11:58,318 --> 00:12:01,154 line:-2
+and we'll do the same
+for the clock tower and the schoolhouse.
+
+
+241
+00:12:07,027 --> 00:12:08,028 line:-1
+Perfect.
+
+
+242
+00:12:08,095 --> 00:12:10,864 line:-2
+So there we go.
+All our assets are in Converter,
+
+
+243
+00:12:10,931 --> 00:12:13,367 line:-2
+materials are hooked up,
+textures are applied,
+
+
+244
+00:12:13,433 --> 00:12:15,769 line:-2
+all our units are set
+and our copyrights are set.
+
+
+245
+00:12:15,836 --> 00:12:17,704 line:-1
+We can go ahead and export.
+
+
+246
+00:12:17,771 --> 00:12:20,674 line:-2
+Now you could export one at a time
+and save it out to disk,
+
+
+247
+00:12:20,741 --> 00:12:22,009 line:-1
+but there's a faster way.
+
+
+248
+00:12:22,075 --> 00:12:25,679 line:-2
+We'll give you the affordance
+to simply go file, export all,
+
+
+249
+00:12:25,746 --> 00:12:27,948 line:-1
+and you can do it all in one big push.
+
+
+250
+00:12:28,015 --> 00:12:31,418 line:-2
+So we'll find a nice place on disk
+and hit export.
+
+
+251
+00:12:31,485 --> 00:12:32,753 line:-1
+Now once the export is complete,
+
+
+252
+00:12:32,819 --> 00:12:35,522 line:-2
+you'll get a little check mark
+next to each one of the icons,
+
+
+253
+00:12:35,589 --> 00:12:37,891 line:-2
+and you'll know that
+that process has been done.
+
+
+254
+00:12:37,958 --> 00:12:40,093 line:-1
+We can verify that by jumping to Finder,
+
+
+255
+00:12:40,627 --> 00:12:42,963 line:-2
+and we can now see our assets
+here on disk.
+
+
+256
+00:12:44,364 --> 00:12:46,633 line:-1
+So with all our content in USDZ form,
+
+
+257
+00:12:46,700 --> 00:12:48,635 line:-2
+we're now good to go
+with Reality Composer.
+
+
+258
+00:12:48,702 --> 00:12:52,773 line:-2
+We can simply spin up a project,
+drag in our assets to be used.
+
+
+259
+00:12:52,840 --> 00:12:54,074 line:-1
+So let's start.
+
+
+260
+00:12:54,575 --> 00:12:56,443 line:-1
+Jumping over to Reality Composer,
+
+
+261
+00:12:56,510 --> 00:13:00,447 line:-2
+we can bring up Finder and drag in
+those assets that we just created.
+
+
+262
+00:13:00,514 --> 00:13:02,149 line:-1
+So here's where you would know immediately
+
+
+263
+00:13:02,216 --> 00:13:05,185 line:-2
+if your unit scales
+were not set correctly in Converter.
+
+
+264
+00:13:05,919 --> 00:13:07,688 line:-2
+Everything is sitting nicely
+with each other,
+
+
+265
+00:13:07,754 --> 00:13:10,190 line:-2
+and it's the right scale and proportion
+to each other.
+
+
+266
+00:13:10,257 --> 00:13:12,426 line:-1
+If it wasn't exported at the right scale,
+
+
+267
+00:13:12,492 --> 00:13:16,163 line:-2
+some would be larger by 100X
+or smaller by 100X.
+
+
+268
+00:13:16,763 --> 00:13:18,866 line:-2
+Here we can visually see
+that everything is working fine.
+
+
+269
+00:13:19,800 --> 00:13:24,271 line:-2
+Now our schoolhouse and our clock tower
+are static assets.
+
+
+270
+00:13:24,338 --> 00:13:27,007 line:-2
+So all we have to verify for them
+is that they look nice.
+
+
+271
+00:13:27,474 --> 00:13:31,178 line:-2
+So we can go ahead and view them,
+scroll around, and everything looks great.
+
+
+272
+00:13:32,579 --> 00:13:36,850 line:-2
+Now for our taxi, if we remember,
+this is an animated asset.
+
+
+273
+00:13:36,917 --> 00:13:39,086 line:-2
+Now as we saw in Converter,
+you can hit play,
+
+
+274
+00:13:39,152 --> 00:13:42,456 line:-2
+or in preview you can hit space bar,
+and it'll automatically animate.
+
+
+275
+00:13:43,023 --> 00:13:45,792 line:-2
+In Composer,
+we don't automatically animate for you.
+
+
+276
+00:13:45,859 --> 00:13:47,928 line:-1
+You tell it when you want it to animate.
+
+
+277
+00:13:47,995 --> 00:13:49,630 line:-1
+So let's take a look at how that works.
+
+
+278
+00:13:50,464 --> 00:13:52,032 line:-1
+We zoom in to our taxi.
+
+
+279
+00:13:52,099 --> 00:13:53,934 line:-2
+We'll make it a little bit larger
+so we can see it.
+
+
+280
+00:13:55,836 --> 00:13:58,172 line:0
+With our taxi,
+we're gonna need to use behaviors.
+
+
+281
+00:13:58,238 --> 00:13:59,773 line:0
+So let's make a new behavior.
+
+
+282
+00:14:03,510 --> 00:14:06,213 line:0
+So there's a plus sign, go to Custom.
+
+
+283
+00:14:06,280 --> 00:14:07,281 line:0
+We'll give it a trigger.
+
+
+284
+00:14:07,347 --> 00:14:10,584 line:0
+So I'm gonna tell it,
+on Scene Start, do something.
+
+
+285
+00:14:10,651 --> 00:14:12,085 line:0
+So we'll select Scene Start,
+
+
+286
+00:14:12,653 --> 00:14:16,056 line:0
+and in our sequence,
+we'll tell it to use a USDZ animation.
+
+
+287
+00:14:17,057 --> 00:14:18,458 line:0
+Now we need to target it.
+
+
+288
+00:14:18,525 --> 00:14:21,428 line:0
+Since I already had the taxi selected
+when I built this behavior,
+
+
+289
+00:14:21,495 --> 00:14:24,031 line:0
+it automatically applied it
+to the behavior.
+
+
+290
+00:14:24,097 --> 00:14:26,600 line:0
+So we don't even really need to target it.
+
+
+291
+00:14:26,667 --> 00:14:28,802 line:0
+Now we can hit space bar and simulate,
+
+
+292
+00:14:28,869 --> 00:14:30,470 line:-1
+and there we have our taxi moving.
+
+
+293
+00:14:30,904 --> 00:14:34,074 line:-2
+Now, by default, it goes one time
+through the animation and stops.
+
+
+294
+00:14:34,741 --> 00:14:36,243 line:0
+I want this to loop endlessly.
+
+
+295
+00:14:36,310 --> 00:14:38,512 line:0
+So I'm gonna go ahead up here
+at the action sequence,
+
+
+296
+00:14:38,579 --> 00:14:40,013 line:0
+and tell it to loop endlessly.
+
+
+297
+00:14:40,080 --> 00:14:41,548 line:-1
+Now, if we simulate again...
+
+
+298
+00:14:42,716 --> 00:14:44,885 line:-1
+our taxi's running, endlessly animating.
+
+
+299
+00:14:46,587 --> 00:14:47,588 line:0
+Perfect.
+
+
+300
+00:14:47,955 --> 00:14:49,823 line:0
+So let's take a look at our clouds.
+
+
+301
+00:14:49,890 --> 00:14:52,359 line:-2
+Our cloud asset, if we remember,
+we set up specifically
+
+
+302
+00:14:52,426 --> 00:14:54,394 line:-2
+so we could get
+at the individual entities.
+
+
+303
+00:14:54,862 --> 00:14:56,496 line:-1
+So let me show you how to do that.
+
+
+304
+00:14:56,897 --> 00:14:59,266 line:0
+If you select your clouds,
+you can right-click
+
+
+305
+00:14:59,333 --> 00:15:00,767 line:0
+and get at Hierarchy Select.
+
+
+306
+00:15:01,335 --> 00:15:04,471 line:0
+Here's where you can expand the USD scene
+that we've created.
+
+
+307
+00:15:04,905 --> 00:15:07,608 line:0
+And this is how you can get at
+the individuals inside
+
+
+308
+00:15:07,674 --> 00:15:09,243 line:0
+and do individual things.
+
+
+309
+00:15:09,776 --> 00:15:12,679 line:0
+So with right-clicking
+and doing Hierarchy Select,
+
+
+310
+00:15:12,980 --> 00:15:15,249 line:0
+I can move things around,
+I can scale them,
+
+
+311
+00:15:15,315 --> 00:15:18,318 line:0
+and, more importantly,
+I can apply behaviors to them.
+
+
+312
+00:15:22,656 --> 00:15:23,724 line:0
+Great.
+
+
+313
+00:15:24,291 --> 00:15:25,392 line:-1
+So with that understanding,
+
+
+314
+00:15:25,459 --> 00:15:29,530 line:-2
+let's take this all over and use it
+in context of a real AR experience.
+
+
+315
+00:15:30,264 --> 00:15:32,699 line:0
+So if we go to our scenes,
+I've already put one together.
+
+
+316
+00:15:34,902 --> 00:15:37,738 line:-2
+So here's a little town I put together
+using our assets,
+
+
+317
+00:15:37,804 --> 00:15:39,206 line:-1
+in a more contextual way.
+
+
+318
+00:15:39,806 --> 00:15:42,976 line:-2
+If we hit simulate, you can see I've
+already given it some ambient behaviors.
+
+
+319
+00:15:48,882 --> 00:15:51,485 line:-2
+So let's take a look at our taxi asset
+to begin with.
+
+
+320
+00:15:52,286 --> 00:15:54,054 line:-1
+This particular taxi asset
+
+
+321
+00:15:54,521 --> 00:15:56,657 line:-2
+is slowly approaching,
+driving down the street,
+
+
+322
+00:15:56,723 --> 00:15:57,824 line:-1
+and then disappearing.
+
+
+323
+00:15:58,258 --> 00:15:59,893 line:-2
+Now, what's really happening
+under the hood
+
+
+324
+00:15:59,960 --> 00:16:01,395 line:-1
+is what this other one is doing.
+
+
+325
+00:16:01,695 --> 00:16:04,364 line:-2
+This other taxi is moving
+from point A to point B,
+
+
+326
+00:16:04,431 --> 00:16:06,433 line:-1
+and then rewinding and doing it again.
+
+
+327
+00:16:07,167 --> 00:16:08,669 line:-1
+But that doesn't look so great.
+
+
+328
+00:16:08,735 --> 00:16:11,138 line:-2
+So let me show you
+how to add those extra niceties
+
+
+329
+00:16:11,205 --> 00:16:14,107 line:-2
+to make this look
+like a real smooth transition in,
+
+
+330
+00:16:14,174 --> 00:16:17,845 line:-2
+transition out, and a loop,
+so as if it were ambient taxis
+
+
+331
+00:16:17,911 --> 00:16:19,646 line:-1
+coming and going through your scene.
+
+
+332
+00:16:20,681 --> 00:16:22,883 line:0
+So let's jump down to the Behaviors
+and take a look.
+
+
+333
+00:16:26,854 --> 00:16:29,523 line:0
+In our sequence,
+you can see I'm doing a move-to.
+
+
+334
+00:16:29,590 --> 00:16:32,192 line:0
+This is moving a taxi
+from point A to point B.
+
+
+335
+00:16:32,693 --> 00:16:35,462 line:0
+Now, after that,
+I'm simply giving it another move-to
+
+
+336
+00:16:35,529 --> 00:16:37,564 line:0
+to tell it to go back
+to where it started from.
+
+
+337
+00:16:37,631 --> 00:16:41,101 line:0
+So we need to add a couple more cards here
+to smooth out that transition.
+
+
+338
+00:16:41,702 --> 00:16:44,638 line:0
+So if we hit the plus sign,
+we can pick a Show,
+
+
+339
+00:16:45,239 --> 00:16:46,640 line:0
+we can also pick a Hide.
+
+
+340
+00:16:48,575 --> 00:16:50,944 line:-2
+Now, behaviors are evaluated
+left to right.
+
+
+341
+00:16:51,245 --> 00:16:53,413 line:-2
+So we're going to need to
+move these cards into position
+
+
+342
+00:16:53,480 --> 00:16:54,915 line:-1
+so that they function correctly.
+
+
+343
+00:16:54,982 --> 00:16:57,484 line:0
+So I'll select my Show card,
+and move it to the beginning,
+
+
+344
+00:16:57,551 --> 00:16:59,753 line:0
+'cause that's the first thing
+I want it to do.
+
+
+345
+00:16:59,820 --> 00:17:03,457 line:0
+Of course, we'll choose our asset
+that we want it to be triggered at.
+
+
+346
+00:17:03,524 --> 00:17:05,224 line:0
+We're also going to want to hide it.
+
+
+347
+00:17:05,291 --> 00:17:09,596 line:0
+So our Hide is not the last thing we do.
+It's actually the third to last thing.
+
+
+348
+00:17:09,663 --> 00:17:11,198 line:0
+So we're going to put it in place.
+
+
+349
+00:17:11,865 --> 00:17:14,768 line:0
+Then again, choose,
+and assign it to the taxi.
+
+
+350
+00:17:15,169 --> 00:17:17,171 line:-2
+Now, let's take a look
+at what that did for us.
+
+
+351
+00:17:17,871 --> 00:17:19,839 line:-1
+Fades in, it drives,
+
+
+352
+00:17:19,906 --> 00:17:22,009 line:-2
+and once it gets to the end
+it's going to fade out,
+
+
+353
+00:17:22,075 --> 00:17:23,277 line:-1
+and rewind itself.
+
+
+354
+00:17:23,343 --> 00:17:25,045 line:-2
+But it doesn't quite
+look like the other one.
+
+
+355
+00:17:25,746 --> 00:17:30,250 line:0
+That is because Show and Hide cards
+have different ways of showing and hiding.
+
+
+356
+00:17:30,317 --> 00:17:32,019 line:0
+And that's an important distinction.
+
+
+357
+00:17:32,085 --> 00:17:34,521 line:0
+So let's scroll down a bit further
+and check out their options.
+
+
+358
+00:17:34,988 --> 00:17:36,156 line:0
+If we give it a motion type,
+
+
+359
+00:17:36,223 --> 00:17:38,926 line:0
+we can tell at what direction
+we want it to appear from.
+
+
+360
+00:17:39,626 --> 00:17:41,361 line:0
+So let's try Move from Front.
+
+
+361
+00:17:41,762 --> 00:17:44,264 line:0
+Now, I don't actually know
+what direction that's going to go,
+
+
+362
+00:17:44,331 --> 00:17:45,832 line:0
+so that's why we have
+these little play buttons.
+
+
+363
+00:17:45,899 --> 00:17:49,369 line:0
+And we can check and see
+what this card does in context.
+
+
+364
+00:17:49,636 --> 00:17:50,771 line:0
+So I hit Play.
+
+
+365
+00:17:51,438 --> 00:17:52,439 line:0
+And it got lucky.
+
+
+366
+00:17:52,873 --> 00:17:54,041 line:0
+So let's take it.
+
+
+367
+00:17:54,107 --> 00:17:57,144 line:0
+So we can change the duration for how long
+we want it to take to show up.
+
+
+368
+00:17:57,211 --> 00:17:58,345 line:0
+Let's say two seconds.
+
+
+369
+00:17:58,779 --> 00:18:02,416 line:0
+We can also tell it how far
+we want it to go to show up.
+
+
+370
+00:18:02,482 --> 00:18:04,885 line:0
+So let's say something
+like 25 centimeters.
+
+
+371
+00:18:07,788 --> 00:18:10,591 line:0
+And again, we can preview it
+to see if that looks about right.
+
+
+372
+00:18:10,657 --> 00:18:11,658 line:0
+And perfect.
+
+
+373
+00:18:12,292 --> 00:18:13,894 line:-1
+So last note on the card,
+
+
+374
+00:18:13,961 --> 00:18:15,662 line:-2
+we're going to want to change
+the animation type.
+
+
+375
+00:18:15,729 --> 00:18:18,165 line:-2
+We don't want to ease in
+and come to a stop
+
+
+376
+00:18:18,232 --> 00:18:19,833 line:-1
+before the next card takes over.
+
+
+377
+00:18:19,900 --> 00:18:23,971 line:-2
+We want it to ease in and then continue on
+into the next animated card.
+
+
+378
+00:18:24,037 --> 00:18:27,207 line:0
+So we're going to change its easing type
+to simply be Ease In.
+
+
+379
+00:18:27,608 --> 00:18:30,310 line:0
+And then, we're going to let the next card
+have no easing type.
+
+
+380
+00:18:30,377 --> 00:18:33,447 line:0
+So it just smoothly transitions
+across the whole thing.
+
+
+381
+00:18:34,248 --> 00:18:36,517 line:0
+For the Hide Out,
+we're going to do the exact same thing.
+
+
+382
+00:18:36,583 --> 00:18:39,553 line:0
+Whereas this one was Move to Front,
+this one will be Move to Rear.
+
+
+383
+00:18:40,754 --> 00:18:42,623 line:0
+We'll change it to have the same time.
+
+
+384
+00:18:43,257 --> 00:18:44,558 line:0
+And the same distance.
+
+
+385
+00:18:49,830 --> 00:18:50,831 line:0
+There we go.
+
+
+386
+00:18:50,898 --> 00:18:52,399 line:0
+And on this easing type,
+we'll do Ease Out,
+
+
+387
+00:18:52,466 --> 00:18:54,334 line:0
+since it's slowly leaving the scene.
+
+
+388
+00:18:55,035 --> 00:18:57,604 line:0
+Now if we hit Play, we should have
+something a little more similar
+
+
+389
+00:18:57,671 --> 00:18:59,840 line:-2
+to what the other taxis are already
+set up and doing.
+
+
+390
+00:19:02,176 --> 00:19:03,177 line:-1
+It gets to the end.
+
+
+391
+00:19:03,911 --> 00:19:06,346 line:-1
+It will smoothly drive off and disappear.
+
+
+392
+00:19:06,680 --> 00:19:08,882 line:-2
+It will then rewind itself,
+and begin again.
+
+
+393
+00:19:09,750 --> 00:19:10,751 line:-1
+Perfect.
+
+
+394
+00:19:10,817 --> 00:19:13,654 line:-2
+So that's the basic concept
+of making something show,
+
+
+395
+00:19:14,021 --> 00:19:16,223 line:-1
+move, hide, and repeat itself.
+
+
+396
+00:19:16,590 --> 00:19:20,627 line:-2
+We can build on these basic concepts to
+make something a little bit more complex.
+
+
+397
+00:19:20,694 --> 00:19:22,329 line:0
+Let's take a look at this police car.
+
+
+398
+00:19:22,829 --> 00:19:25,766 line:-1
+This police car shows up, and moves.
+
+
+399
+00:19:26,266 --> 00:19:27,634 line:-1
+Exactly how we did our taxi.
+
+
+400
+00:19:28,302 --> 00:19:31,271 line:-2
+Now, when we get to the end of the street,
+he's going to make a turn.
+
+
+401
+00:19:32,139 --> 00:19:34,608 line:-2
+This turn is a little bit more complex
+to set up
+
+
+402
+00:19:34,675 --> 00:19:36,476 line:-2
+than just telling it to go
+from point A to point B,
+
+
+403
+00:19:36,543 --> 00:19:39,446 line:-2
+because that would be a linear move,
+and we want it to do an arc.
+
+
+404
+00:19:39,813 --> 00:19:40,814 line:0
+So let's check it out.
+
+
+405
+00:19:41,281 --> 00:19:43,784 line:0
+If we scroll down here
+to the police car's sequence,
+
+
+406
+00:19:43,851 --> 00:19:47,487 line:0
+we can see I'm doing a show, a move,
+just like we had before,
+
+
+407
+00:19:47,554 --> 00:19:49,523 line:-2
+now, I'm going to do an orbit
+and another move.
+
+
+408
+00:19:49,590 --> 00:19:50,757 line:-1
+Now, what am I orbiting?
+
+
+409
+00:19:50,824 --> 00:19:55,028 line:0
+I'm orbiting a tiny piece of geometry
+that I have hidden inside another area.
+
+
+410
+00:19:55,529 --> 00:19:58,398 line:0
+So an Orbit card is going to require you
+to have an affected object,
+
+
+411
+00:19:58,465 --> 00:19:59,833 line:0
+and a center object.
+
+
+412
+00:20:00,100 --> 00:20:02,369 line:0
+So if I move this building,
+you can take a quick look,
+
+
+413
+00:20:02,436 --> 00:20:04,571 line:0
+I have a pill hidden inside this building.
+
+
+414
+00:20:04,638 --> 00:20:07,541 line:0
+That is what I'm using
+as its area to orbit.
+
+
+415
+00:20:08,442 --> 00:20:10,177 line:0
+Let's go ahead and put our building back.
+
+
+416
+00:20:10,244 --> 00:20:11,879 line:0
+And you can see how that works.
+
+
+417
+00:20:13,180 --> 00:20:15,916 line:-2
+The car drives,
+once it gets to the end of the street,
+
+
+418
+00:20:15,983 --> 00:20:20,420 line:-2
+he's going to then orbit that pill .25,
+because I don't want to do a full circle,
+
+
+419
+00:20:20,487 --> 00:20:21,755 line:-1
+just a simple turn.
+
+
+420
+00:20:22,189 --> 00:20:24,591 line:-2
+And then, another Move To card
+is going to take over.
+
+
+421
+00:20:24,658 --> 00:20:28,328 line:-2
+And we'll have a Hide card at the end
+to make it disappear, same as the taxi.
+
+
+422
+00:20:29,530 --> 00:20:31,865 line:-2
+So that's an easy way
+to take a simple behavior
+
+
+423
+00:20:31,932 --> 00:20:34,001 line:-2
+such as, like, showing,
+and moving, and hiding,
+
+
+424
+00:20:34,067 --> 00:20:36,236 line:-2
+and giving a couple extra cards
+in the middle
+
+
+425
+00:20:36,303 --> 00:20:39,206 line:-2
+to create a more rich
+and convincing environment.
+
+
+426
+00:20:39,540 --> 00:20:41,108 line:-1
+So let's take a look at our clouds.
+
+
+427
+00:20:41,441 --> 00:20:44,178 line:-2
+Like we did before,
+we can select individual clouds
+
+
+428
+00:20:44,244 --> 00:20:45,646 line:-1
+and make them do different things.
+
+
+429
+00:20:45,712 --> 00:20:47,047 line:-1
+This would look a little funny
+
+
+430
+00:20:47,114 --> 00:20:49,616 line:-2
+if all the clouds simply moved
+on their own.
+
+
+431
+00:20:49,683 --> 00:20:51,418 line:-1
+So let's check out what I've built.
+
+
+432
+00:20:53,921 --> 00:20:57,090 line:0
+In this behavior, I'm using
+the same gimmick of Show and Hide
+
+
+433
+00:20:57,157 --> 00:21:01,728 line:0
+where I'm telling it to show a cloud,
+come in on a slow transition,
+
+
+434
+00:21:01,795 --> 00:21:03,597 line:-1
+and then hide out on a slow transition.
+
+
+435
+00:21:04,498 --> 00:21:07,601 line:0
+And if we view this sequence,
+we can see our clouds are doing just that.
+
+
+436
+00:21:10,137 --> 00:21:12,439 line:0
+Now, that's great
+and looks very convincing.
+
+
+437
+00:21:12,506 --> 00:21:13,974 line:0
+But I want them all to do it.
+
+
+438
+00:21:14,041 --> 00:21:16,443 line:0
+So let's hit Stop,
+and let's apply more behaviors.
+
+
+439
+00:21:17,311 --> 00:21:18,679 line:0
+Now, where I want them all to do it,
+
+
+440
+00:21:18,745 --> 00:21:20,948 line:0
+I want them all to do it
+at different rates.
+
+
+441
+00:21:21,014 --> 00:21:23,483 line:0
+So instead of building a new behavior
+over and over again,
+
+
+442
+00:21:23,550 --> 00:21:25,519 line:0
+we can simply duplicate a behavior...
+
+
+443
+00:21:28,255 --> 00:21:30,757 line:0
+and re-target the cards
+to different clouds.
+
+
+444
+00:21:30,824 --> 00:21:34,294 line:0
+So let's go ahead and do a Choose,
+and instead of targeting these again,
+
+
+445
+00:21:34,628 --> 00:21:36,463 line:0
+we'll pick this guy here in the back.
+
+
+446
+00:21:37,564 --> 00:21:40,033 line:0
+And of course,
+we'll do it again for the Hide.
+
+
+447
+00:21:42,970 --> 00:21:46,106 line:0
+And we can change its timing
+to be something a little bit longer.
+
+
+448
+00:21:46,440 --> 00:21:48,242 line:0
+Maybe 15, and 15.
+
+
+449
+00:21:51,245 --> 00:21:53,013 line:0
+And let's simulate and see what that did.
+
+
+450
+00:21:54,681 --> 00:21:57,084 line:-2
+So now you can see my groups of clouds
+coming and going.
+
+
+451
+00:21:57,150 --> 00:22:00,387 line:-2
+I have three different cloud behaviors
+targeting different groups of clouds,
+
+
+452
+00:22:00,454 --> 00:22:02,756 line:-2
+and they're moving and going
+at different rates.
+
+
+453
+00:22:04,992 --> 00:22:05,993 line:-1
+Perfect.
+
+
+454
+00:22:07,227 --> 00:22:10,297 line:0
+So with all that set up,
+now's a good time to talk about context.
+
+
+455
+00:22:10,364 --> 00:22:13,500 line:-1
+Viewing AR is great in context.
+
+
+456
+00:22:13,567 --> 00:22:15,335 line:-1
+So we need to know how big are things?
+
+
+457
+00:22:15,402 --> 00:22:18,605 line:-2
+Are things moving quickly or slowly
+in your actual world?
+
+
+458
+00:22:19,039 --> 00:22:21,375 line:-1
+So this is where we have the iOS Handoff.
+
+
+459
+00:22:21,775 --> 00:22:25,112 line:-1
+So here, on Mac OS, I can hit Edit on iOS
+
+
+460
+00:22:25,179 --> 00:22:27,481 line:-1
+and I can drop this project to my iPad.
+
+
+461
+00:22:27,548 --> 00:22:32,419 line:-2
+Then, on my iPad, make edits in context
+and drop it back to my Mac OS.
+
+
+462
+00:22:32,486 --> 00:22:33,720 line:-1
+So let's give that a shot.
+
+
+463
+00:22:38,859 --> 00:22:41,528 line:-2
+So here on the Mac OS,
+we can simply do Edit on iOS...
+
+
+464
+00:22:42,763 --> 00:22:45,832 line:-2
+and with Reality Composer launched,
+you'll see our iPad show up.
+
+
+465
+00:22:46,166 --> 00:22:47,634 line:-1
+Now, we can do the Handoff.
+
+
+466
+00:22:48,368 --> 00:22:49,937 line:-1
+So we'll simply click ourselves,
+
+
+467
+00:22:50,437 --> 00:22:51,738 line:-1
+and Accept on the iPad.
+
+
+468
+00:22:52,005 --> 00:22:53,574 line:-1
+Now, it's transferring the project
+
+
+469
+00:22:53,640 --> 00:22:56,143 line:-2
+all the way over to my iPad
+for me to make edits.
+
+
+470
+00:22:56,210 --> 00:22:58,345 line:-2
+So we'll simply wait for it to sync,
+and we'll be good to go.
+
+
+471
+00:22:59,713 --> 00:23:00,714 line:-1
+So here we go.
+
+
+472
+00:23:00,781 --> 00:23:02,482 line:-2
+We've transferred our file
+over to our iPad.
+
+
+473
+00:23:02,549 --> 00:23:04,685 line:-2
+Now, we can view
+and edit things in context.
+
+
+474
+00:23:04,751 --> 00:23:08,555 line:-2
+So here on iPad, we can see
+we have the Reality Composer app running,
+
+
+475
+00:23:08,622 --> 00:23:09,690 line:-1
+and our project loaded.
+
+
+476
+00:23:09,756 --> 00:23:11,692 line:-1
+We can simulate here in the View port,
+
+
+477
+00:23:11,758 --> 00:23:13,727 line:-2
+and we can see everything
+that we had set up on the Mac
+
+
+478
+00:23:13,794 --> 00:23:15,295 line:-1
+is working here on the iOS.
+
+
+479
+00:23:16,396 --> 00:23:19,600 line:-2
+Now, the power of working on iOS
+is that we can drop this into our world,
+
+
+480
+00:23:19,666 --> 00:23:21,068 line:-1
+and edit in real time.
+
+
+481
+00:23:21,134 --> 00:23:23,537 line:-2
+So let's go ahead and hit
+the AR affordance here in the corner.
+
+
+482
+00:23:24,438 --> 00:23:26,940 line:-2
+And we can target our table
+and drop our scene down.
+
+
+483
+00:23:28,041 --> 00:23:29,910 line:-2
+Now, with our scene placed
+in the real world,
+
+
+484
+00:23:29,977 --> 00:23:31,545 line:-1
+we can hit Play again,
+
+
+485
+00:23:31,612 --> 00:23:33,480 line:-1
+and we can view things in context.
+
+
+486
+00:23:33,547 --> 00:23:35,115 line:-1
+There goes our little police car.
+
+
+487
+00:23:35,182 --> 00:23:37,150 line:-1
+And here are our clouds coming and going.
+
+
+488
+00:23:37,217 --> 00:23:38,652 line:-1
+And there's our taxis moving.
+
+
+489
+00:23:40,187 --> 00:23:42,523 line:-2
+Now, let's say I'm not happy
+with the rate something is moving.
+
+
+490
+00:23:42,589 --> 00:23:46,293 line:-2
+I can simply hit Stop,
+and I can jump over to the Behaviors tab.
+
+
+491
+00:23:46,360 --> 00:23:48,061 line:-1
+Let's grab our taxi here.
+
+
+492
+00:23:48,128 --> 00:23:50,430 line:0
+And we can change
+the rate at which things show up.
+
+
+493
+00:23:50,497 --> 00:23:52,399 line:0
+And let's say on taxi number two,
+
+
+494
+00:23:52,466 --> 00:23:55,035 line:0
+I would like it to show up
+a little bit slower.
+
+
+495
+00:23:55,369 --> 00:23:57,704 line:-1
+I can change that from two to five.
+
+
+496
+00:23:59,406 --> 00:24:01,441 line:-1
+And we're set. We can hit Play again.
+
+
+497
+00:24:01,708 --> 00:24:04,278 line:-2
+And we'll view that that takes now
+five seconds for it to show up
+
+
+498
+00:24:04,344 --> 00:24:05,779 line:-1
+at a very slow pace.
+
+
+499
+00:24:06,680 --> 00:24:08,415 line:-2
+Now, happy with the changes
+that we've made,
+
+
+500
+00:24:08,482 --> 00:24:10,050 line:-1
+we can stop simulating,
+
+
+501
+00:24:10,117 --> 00:24:11,318 line:-1
+drop out of AR mode,
+
+
+502
+00:24:11,385 --> 00:24:13,420 line:-1
+and simply hit Done in the top corner.
+
+
+503
+00:24:13,487 --> 00:24:16,456 line:-2
+That passes the project back
+to your Mac OS.
+
+
+504
+00:24:16,523 --> 00:24:20,427 line:-2
+Once back in Mac OS,
+we can view that our behavior is updated
+
+
+505
+00:24:20,494 --> 00:24:23,030 line:-2
+with the changes that we made
+on our iOS project.
+
+
+506
+00:24:23,096 --> 00:24:25,933 line:-2
+So if we navigate here,
+and see that that five-second change
+
+
+507
+00:24:25,999 --> 00:24:28,101 line:-1
+translated across for us smoothly.
+
+
+508
+00:24:28,168 --> 00:24:31,004 line:-2
+Once happy, you can save it
+and export it all out.
+
+
+509
+00:24:31,738 --> 00:24:34,007 line:-2
+Let's hit one more topic
+before we export all this.
+
+
+510
+00:24:34,074 --> 00:24:36,310 line:-2
+I want to teach you how
+to make a splash page
+
+
+511
+00:24:36,376 --> 00:24:37,678 line:-1
+for your AR experience.
+
+
+512
+00:24:38,011 --> 00:24:39,513 line:-1
+Now, when using AR Quick Look,
+
+
+513
+00:24:39,580 --> 00:24:42,049 line:-2
+there is a load time
+while it syncs and anchors.
+
+
+514
+00:24:42,115 --> 00:24:45,485 line:-2
+While that's happening,
+you view a scene of your content.
+
+
+515
+00:24:45,552 --> 00:24:47,988 line:-2
+I'm going to teach you how to make
+a nice scene there
+
+
+516
+00:24:48,055 --> 00:24:50,457 line:-2
+for people to see
+while they wait for it to load.
+
+
+517
+00:24:50,791 --> 00:24:53,293 line:-2
+Now, the fastest way in Reality Composer
+to do that
+
+
+518
+00:24:53,360 --> 00:24:54,895 line:-1
+is to duplicate everything,
+
+
+519
+00:24:54,962 --> 00:24:56,763 line:0
+and remove what you don't want seen.
+
+
+520
+00:24:56,830 --> 00:24:58,498 line:0
+Let me show you how that works.
+
+
+521
+00:24:58,565 --> 00:25:00,367 line:0
+Here, we can do a Select All.
+
+
+522
+00:25:01,001 --> 00:25:02,002 line:0
+And Copy.
+
+
+523
+00:25:02,503 --> 00:25:05,138 line:0
+Now, on our Scenes tab,
+we'll go ahead and make a new scene.
+
+
+524
+00:25:05,472 --> 00:25:07,341 line:-1
+So we'll go ahead and remove this one.
+
+
+525
+00:25:07,975 --> 00:25:09,176 line:-1
+We'll build a new one.
+
+
+526
+00:25:14,948 --> 00:25:15,949 line:-1
+There we go.
+
+
+527
+00:25:16,016 --> 00:25:18,418 line:-2
+Now, with a clean scene,
+we can just Paste,
+
+
+528
+00:25:18,819 --> 00:25:21,688 line:-2
+and all our geometry is coming
+from our other scene into this one.
+
+
+529
+00:25:22,556 --> 00:25:24,791 line:-2
+Now, what did not come along
+is the behaviors.
+
+
+530
+00:25:25,125 --> 00:25:27,294 line:0
+So if we look at the behaviors,
+everything is gone.
+
+
+531
+00:25:27,361 --> 00:25:29,029 line:0
+We simply have a static scene.
+
+
+532
+00:25:29,963 --> 00:25:31,798 line:0
+And that's fine. That is what we want.
+
+
+533
+00:25:32,232 --> 00:25:34,535 line:0
+So here,
+I'm going to give it one behavior.
+
+
+534
+00:25:34,868 --> 00:25:36,537 line:0
+So let's go ahead and do a Custom,
+
+
+535
+00:25:37,337 --> 00:25:38,405 line:0
+On Scene Start...
+
+
+536
+00:25:40,574 --> 00:25:42,409 line:0
+and we're going to give it a Change Scene.
+
+
+537
+00:25:43,877 --> 00:25:46,113 line:0
+We'll choose our completed scene,
+and we're good to go.
+
+
+538
+00:25:46,980 --> 00:25:49,950 line:-2
+So what this is doing is,
+when the scene is loading,
+
+
+539
+00:25:50,317 --> 00:25:51,618 line:-1
+this is what you view.
+
+
+540
+00:25:51,685 --> 00:25:54,821 line:-2
+But when it drops down on your table,
+and the scene actually starts,
+
+
+541
+00:25:54,888 --> 00:25:58,125 line:-2
+it immediately jumps over to our scene
+with the animated traffic,
+
+
+542
+00:25:58,192 --> 00:25:59,393 line:-1
+and the moving clouds.
+
+
+543
+00:25:59,459 --> 00:26:01,728 line:-2
+So this, in a sense,
+is making a splash page
+
+
+544
+00:26:01,795 --> 00:26:04,331 line:-2
+for people to look at
+while your content is loading.
+
+
+545
+00:26:05,065 --> 00:26:07,568 line:0
+So while we're here,
+if we don't want to view certain things,
+
+
+546
+00:26:07,634 --> 00:26:10,871 line:0
+like I don't want to view the taxi,
+or I don't want to view the clouds,
+
+
+547
+00:26:10,938 --> 00:26:14,308 line:0
+you can simply remove them,
+and that comes off the splash page.
+
+
+548
+00:26:14,374 --> 00:26:17,678 line:-2
+But when we simulate,
+it immediately jumps to the page,
+
+
+549
+00:26:17,744 --> 00:26:20,214 line:-2
+that has all the actual behaviors
+and animations.
+
+
+550
+00:26:21,982 --> 00:26:22,983 line:0
+Perfect.
+
+
+551
+00:26:23,317 --> 00:26:24,885 line:-1
+So our project is essentially done.
+
+
+552
+00:26:24,952 --> 00:26:27,554 line:-2
+Now, let's talk about exporting
+and sending to device.
+
+
+553
+00:26:28,155 --> 00:26:30,490 line:-2
+New to Reality Composer,
+we're going to give you the option
+
+
+554
+00:26:30,557 --> 00:26:32,559 line:-1
+to export out as a USDZ.
+
+
+555
+00:26:32,626 --> 00:26:35,429 line:-2
+Now, where before we were only giving you
+the Reality Export,
+
+
+556
+00:26:35,495 --> 00:26:37,231 line:-1
+this is a new option for you
+
+
+557
+00:26:37,297 --> 00:26:39,666 line:-2
+that you'll need to enable
+in your preferences.
+
+
+558
+00:26:42,636 --> 00:26:43,904 line:-1
+So if we open our Preferences tab,
+
+
+559
+00:26:43,971 --> 00:26:47,074 line:-2
+you can see Enable USDZ Export
+as an option.
+
+
+560
+00:26:48,642 --> 00:26:50,277 line:-2
+Now, you're asking,
+"What's the difference?"
+
+
+561
+00:26:50,344 --> 00:26:51,912 line:-1
+The difference is going to be contextual
+
+
+562
+00:26:51,979 --> 00:26:54,314 line:-2
+based on what you want to do
+with your project.
+
+
+563
+00:26:54,381 --> 00:26:56,583 line:-2
+So if you're looking to embed it
+in a website,
+
+
+564
+00:26:56,650 --> 00:26:58,418 line:-1
+or put it in a News article,
+
+
+565
+00:26:58,485 --> 00:27:00,454 line:-1
+you're going to want to use a USD export.
+
+
+566
+00:27:00,854 --> 00:27:03,690 line:-2
+Now, if you want to use it
+in an Xcode project,
+
+
+567
+00:27:03,757 --> 00:27:05,192 line:-1
+or you want to use it with AR Quick Look,
+
+
+568
+00:27:05,259 --> 00:27:07,694 line:-2
+you're going to want to
+stick with the Reality export.
+
+
+569
+00:27:07,761 --> 00:27:09,663 line:-1
+Now, I want to view this in AR Quick Look,
+
+
+570
+00:27:09,730 --> 00:27:12,099 line:-2
+so I'm going to stick
+with the Reality export.
+
+
+571
+00:27:12,933 --> 00:27:14,034 line:-1
+Let's do a File.
+
+
+572
+00:27:14,101 --> 00:27:15,102 line:-1
+Export,
+
+
+573
+00:27:15,169 --> 00:27:17,571 line:-2
+and we'll save this to disk
+as a Reality File.
+
+
+574
+00:27:23,377 --> 00:27:25,979 line:-2
+So with our new exported file,
+we can go ahead and AirDrop that
+
+
+575
+00:27:26,046 --> 00:27:28,081 line:-1
+onto our device for viewing and sharing.
+
+
+576
+00:27:28,148 --> 00:27:29,249 line:-1
+So let's do that.
+
+
+577
+00:27:29,716 --> 00:27:32,986 line:-2
+I can select my Reality export,
+I can right-click and do Share,
+
+
+578
+00:27:33,353 --> 00:27:34,488 line:-1
+AirDrop.
+
+
+579
+00:27:37,291 --> 00:27:40,360 line:-2
+Now, once our device comes up,
+we can send it to ourselves.
+
+
+580
+00:27:45,332 --> 00:27:47,668 line:-2
+Great.
+So we see it pop up here on our iPad.
+
+
+581
+00:27:47,734 --> 00:27:50,437 line:-2
+We can go ahead and accept it,
+and save it to our files.
+
+
+582
+00:27:50,838 --> 00:27:52,239 line:-1
+Now, with it saved in our files,
+
+
+583
+00:27:52,306 --> 00:27:54,641 line:-2
+it'll automatically launch
+in AR Quick Look,
+
+
+584
+00:27:54,708 --> 00:27:56,276 line:-1
+and drop it onto our desk.
+
+
+585
+00:27:58,278 --> 00:28:00,614 line:-2
+And once it loads,
+our town should be here.
+
+
+586
+00:28:05,018 --> 00:28:06,019 line:-1
+Perfect.
+
+
+587
+00:28:09,122 --> 00:28:12,793 line:-2
+So that's the overall workflow using
+Reality Converter and Reality Composer.
+
+
+588
+00:28:13,360 --> 00:28:16,630 line:0
+We have seen how we can take geometries
+from a variety of DCCs
+
+
+589
+00:28:16,697 --> 00:28:20,133 line:0
+and using Reality Converter
+make them into USDZs.
+
+
+590
+00:28:20,200 --> 00:28:23,737 line:0
+We then took those USDZs into Composer
+and created an AR experience
+
+
+591
+00:28:23,804 --> 00:28:25,239 line:0
+with simple behavior set ups.
+
+
+592
+00:28:25,572 --> 00:28:27,774 line:0
+From that, we sent it all over
+to AR Quick Look
+
+
+593
+00:28:27,841 --> 00:28:29,476 line:0
+to view, enjoy, and share.
+
+
+594
+00:28:29,776 --> 00:28:33,113 line:-2
+Now, this is all in service
+of building great AR experiences
+
+
+595
+00:28:33,180 --> 00:28:35,015 line:-1
+that are lightweight and easily shareable.
+
+
+596
+00:28:35,282 --> 00:28:36,283 line:-1
+So with these tools,
+
+
+597
+00:28:36,350 --> 00:28:38,485 line:-2
+you now can create
+even more compelling content
+
+
+598
+00:28:38,552 --> 00:28:40,287 line:-1
+for your experience.
+
+
+599
+00:28:40,654 --> 00:28:43,290 line:-2
+Moving forward from this talk,
+you might find yourself with questions,
+
+
+600
+00:28:43,357 --> 00:28:45,726 line:-2
+or wanting to know more
+on topics that I touched on.
+
+
+601
+00:28:46,360 --> 00:28:48,996 line:0
+Here are some great resources
+to help you dive deeper
+
+
+602
+00:28:49,062 --> 00:28:50,531 line:0
+on the topics we discussed.
+
+
+603
+00:28:50,597 --> 00:28:52,432 line:0
+If you are new to Reality Composer,
+
+
+604
+00:28:52,499 --> 00:28:55,135 line:0
+I encourage you to check out
+the Apple YouTube video
+
+
+605
+00:28:55,202 --> 00:28:57,137 line:0
+that gives an overview of the software.
+
+
+606
+00:28:57,204 --> 00:28:59,139 line:0
+Now, for Reality Converter,
+you can download the app
+
+
+607
+00:28:59,206 --> 00:29:02,042 line:0
+from the developer's site
+and check out the documentation.
+
+
+608
+00:29:02,109 --> 00:29:05,045 line:0
+And for Xcode projects
+that leverage Reality Composer
+
+
+609
+00:29:05,112 --> 00:29:07,948 line:0
+you can view the samples
+under the RealityKit section.
+
+
+610
+00:29:09,049 --> 00:29:11,718 line:-2
+Thank you so much
+for taking the time to view my talk today.
+
+
+611
+00:29:11,785 --> 00:29:15,355 line:-2
+I really hope you found it fun,
+informative, and inspiring.
+
+
+612
+00:29:15,422 --> 00:29:17,224 line:-2
+So I look forward to seeing
+all the great content
+
+
+613
+00:29:17,291 --> 00:29:19,927 line:-2
+and experiences Reality Converter
+and Reality Composer
+
+
+614
+00:29:19,993 --> 00:29:21,295 line:-1
+will enable you to create.
+
+
+615
+00:29:21,361 --> 00:29:22,362 line:-1
+I am Philip Simmons,
+
+
+616
+00:29:22,429 --> 00:29:24,765 line:-2
+and this has been a look
+at the Artist AR Toolkit.
+
+
+617
+00:29:24,831 --> 00:29:26,266 line:-1
+Thank you. Bye-bye.
+

@@ -1,0 +1,1613 @@
+2
+00:00:00,000 --> 00:00:03,003 line:-1
+♪ Mellow instrumental
+hip-hip music ♪
+
+
+3
+00:00:03,003 --> 00:00:10,143 line:1 size:2% position:90%
+♪
+
+
+4
+00:00:10.143 --> 00:00:14.348 line:-1 position:50%
+Hi, I am Vidhi Goel,
+and in this video,
+
+
+5
+00:00:14.348 --> 00:00:19.052 line:-1 position:50%
+I will talk about how to reduce
+networking delays in your apps
+
+
+6
+00:00:19.052 --> 00:00:21.722 line:-1 position:50%
+and make them more responsive.
+
+
+7
+00:00:21.722 --> 00:00:25.959 line:-1 position:50%
+First, I will explain why
+reducing latency is crucial
+
+
+8
+00:00:25,959 --> 00:00:29,563 line:-1
+in making your apps responsive.
+
+
+9
+00:00:29.563 --> 00:00:31.832 line:-1 position:50%
+Next, I will go over a list
+
+
+10
+00:00:31.832 --> 00:00:34.902 line:-1 position:50%
+of things that you can do
+in your app
+
+
+11
+00:00:34,902 --> 00:00:40,240 line:-1
+and on your server to get rid of
+unnecessary delays.
+
+
+12
+00:00:40.240 --> 00:00:44.177 line:-1 position:50%
+Finally, I will show what
+you can do to reduce delays
+
+
+13
+00:00:44.177 --> 00:00:47.948 line:-1 position:50%
+in the network itself.
+
+
+14
+00:00:47,948 --> 00:00:51,451 line:-1
+Network latency
+is the time it takes for data
+
+
+15
+00:00:51.451 --> 00:00:55.055 line:-1 position:50%
+to get from
+one endpoint to another.
+
+
+16
+00:00:55.055 --> 00:00:58.725 line:-1 position:50%
+It determines how quickly
+content can be delivered
+
+
+17
+00:00:58,725 --> 00:01:01,028 line:-1
+to your app.
+
+
+18
+00:01:01,028 --> 00:01:04,531 line:-1
+All apps that use networking
+can be affected
+
+
+19
+00:01:04.531 --> 00:01:06.767 line:-1 position:50%
+by slow network transactions
+
+
+20
+00:01:06.767 --> 00:01:11.138 line:-1 position:50%
+that result in
+a poor app experience.
+
+
+21
+00:01:11,138 --> 00:01:15,676 line:1
+For example,
+video calls can sometimes freeze
+
+
+22
+00:01:15,676 --> 00:01:20,380 line:1
+or become laggy,
+which can interrupt meetings.
+
+
+23
+00:01:20,380 --> 00:01:23,550 line:1
+To address this,
+people often call up
+
+
+24
+00:01:23,550 --> 00:01:27,421 position:50%
+their service provider
+to upgrade their bandwidth,
+
+
+25
+00:01:27,421 --> 00:01:31,792 position:50%
+and yet,
+the problem still exists.
+
+
+26
+00:01:31.792 --> 00:01:34.594 line:-1 position:50%
+To get to the root cause
+of this problem,
+
+
+27
+00:01:34.594 --> 00:01:38.265 line:-1 position:50%
+you need to understand
+how your app's packets
+
+
+28
+00:01:38,265 --> 00:01:40,767 line:-1
+travel in a network.
+
+
+29
+00:01:40.767 --> 00:01:44.805 line:-1 position:50%
+When your app or framework
+requests data from a server,
+
+
+30
+00:01:44.805 --> 00:01:48.675 line:-1 position:50%
+packets are sent
+out by the networking stack.
+
+
+31
+00:01:48,675 --> 00:01:52,079 line:-1
+It is often assumed
+that the packets go directly
+
+
+32
+00:01:52,079 --> 00:01:56,216 line:-1
+to the server with no delays
+in the network.
+
+
+33
+00:01:56,216 --> 00:01:59,920 position:50%
+But, in reality,
+the slowest link of the network
+
+
+34
+00:01:59,920 --> 00:02:05,592 line:1
+usually has a large queue
+of packets to process.
+
+
+35
+00:02:05,592 --> 00:02:07,561 position:50%
+So, the packet from your app
+
+
+36
+00:02:07,561 --> 00:02:10,864 position:50%
+actually waits behind
+this large queue
+
+
+37
+00:02:10,864 --> 00:02:16,036 position:50%
+until the packets ahead of it
+are processed.
+
+
+38
+00:02:16.036 --> 00:02:19.840 line:-1 position:50%
+This queuing at the slowest link
+increases the duration
+
+
+39
+00:02:19,840 --> 00:02:24,745 line:-1
+of each round trip between
+your app and your server.
+
+
+40
+00:02:24,745 --> 00:02:29,916 line:-1
+This problem is aggravated when
+it takes multiple round trips
+
+
+41
+00:02:29,916 --> 00:02:34,855 line:-1
+to get the first response
+for your app's request.
+
+
+42
+00:02:34,855 --> 00:02:39,159 line:-1
+For example, the time to get
+the first response packet
+
+
+43
+00:02:39.159 --> 00:02:43.830 line:-1 position:50%
+when using TLS 1.2 over TCP
+
+
+44
+00:02:43.830 --> 00:02:46.400 line:-1 position:50%
+is the duration
+of each round trip
+
+
+45
+00:02:46,400 --> 00:02:50,871 line:-1
+multiplied by four trips.
+
+
+46
+00:02:50.871 --> 00:02:54.541 line:-1 position:50%
+Given that each round-trip time
+is already inflated
+
+
+47
+00:02:54,541 --> 00:02:56,810 line:-1
+by queuing in the network,
+
+
+48
+00:02:56.810 --> 00:03:02.215 line:-1 position:50%
+the resulting total time
+is simply too long.
+
+
+49
+00:03:02.215 --> 00:03:05.152 line:-1 position:50%
+There are two factors
+that multiply together
+
+
+50
+00:03:05,152 --> 00:03:09,156 line:-1
+to determine
+your app's responsiveness:
+
+
+51
+00:03:09.156 --> 00:03:15.128 line:-1 position:50%
+the duration of each round trip
+and the number of round trips.
+
+
+52
+00:03:15,128 --> 00:03:18,865 line:-1
+Reducing these will lower
+your app's latency,
+
+
+53
+00:03:18.865 --> 00:03:24.071 line:-1 position:50%
+and increase your app's
+responsiveness.
+
+
+54
+00:03:24,071 --> 00:03:26,606 position:50%
+There was a study
+examining the impact
+
+
+55
+00:03:26,606 --> 00:03:30,677 line:1
+of increasing bandwidth
+versus decreasing latency
+
+
+56
+00:03:30,677 --> 00:03:33,680 position:50%
+on page load time.
+
+
+57
+00:03:33,680 --> 00:03:37,484 line:1
+In the first test,
+latency is kept fixed
+
+
+58
+00:03:37,484 --> 00:03:44,224 position:50%
+and bandwidth is increased
+incrementally from 1 to 10Mbps.
+
+
+59
+00:03:44,224 --> 00:03:49,129 position:50%
+At first, increasing the
+bandwidth from 1 to 2Mbps
+
+
+60
+00:03:49,129 --> 00:03:53,767 position:50%
+reduces page load time
+by almost 40 percent,
+
+
+61
+00:03:53,767 --> 00:03:56,036 line:1
+which is great.
+
+
+62
+00:03:56.036 --> 00:04:01.441 line:-1 position:50%
+But after 4Mbps,
+each incremental increase
+
+
+63
+00:04:01.441 --> 00:04:07.180 line:-1 position:50%
+results in almost no improvement
+in the page load time.
+
+
+64
+00:04:07,180 --> 00:04:11,618 line:-1
+This is why apps can be slow
+even after upgrading
+
+
+65
+00:04:11,618 --> 00:04:14,187 line:-1
+to Gigabit Internet.
+
+
+66
+00:04:14,187 --> 00:04:19,226 line:1
+On the other hand, the results
+for the latency test show
+
+
+67
+00:04:19,226 --> 00:04:24,097 position:50%
+that for every 20 millisecond
+decrease in latency,
+
+
+68
+00:04:24,097 --> 00:04:28,869 line:1
+there is a linear improvement
+in page load time.
+
+
+69
+00:04:28,869 --> 00:04:33,473 position:50%
+And these results apply
+to all network activity
+
+
+70
+00:04:33,473 --> 00:04:35,642 position:50%
+in your apps.
+
+
+71
+00:04:35,642 --> 00:04:40,413 position:50%
+Now, I will go over a few
+simple actions you can take
+
+
+72
+00:04:40,413 --> 00:04:45,285 line:-1
+to reduce latency and make
+your app more responsive.
+
+
+73
+00:04:45,285 --> 00:04:48,221 line:-1
+You can reduce
+your app's latency significantly
+
+
+74
+00:04:48,221 --> 00:04:50,624 line:-1
+by adopting modern protocols
+
+
+75
+00:04:50,624 --> 00:04:57,097 line:-1
+such as IPv6, TLS 1.3
+and HTTP/3.
+
+
+76
+00:04:57,097 --> 00:05:01,067 line:1
+And all you need to do
+is use URLSession
+
+
+77
+00:05:01,067 --> 00:05:04,371 line:1
+and Network.framework APIs
+in your app
+
+
+78
+00:05:04,371 --> 00:05:07,741 line:1
+and these protocols
+will be used automatically
+
+
+79
+00:05:07,741 --> 00:05:12,879 position:50%
+once they are enabled
+on your server.
+
+
+80
+00:05:12.879 --> 00:05:17.350 line:-1 position:50%
+Since its rollout,
+we have seen a constant increase
+
+
+81
+00:05:17.350 --> 00:05:22.355 line:-1 position:50%
+in HTTP/3 usage,
+and within just a year,
+
+
+82
+00:05:22.355 --> 00:05:28.261 line:-1 position:50%
+20 percent of web traffic
+already uses HTTP/3,
+
+
+83
+00:05:28.261 --> 00:05:32.499 line:-1 position:50%
+and it continues to grow.
+
+
+84
+00:05:32.499 --> 00:05:37.604 line:-1 position:50%
+Comparing Safari traffic
+for different HTTP versions,
+
+
+85
+00:05:37,604 --> 00:05:42,876 line:-1
+HTTP/3 is the fastest
+of them all.
+
+
+86
+00:05:42,876 --> 00:05:47,847 line:-1
+HTTP/3 requests take
+a little over half the time
+
+
+87
+00:05:47.847 --> 00:05:50.550 line:-1 position:50%
+as compared to HTTP/1,
+
+
+88
+00:05:50,550 --> 00:05:53,720 line:-1
+when looking at median
+request completion time
+
+
+89
+00:05:53.720 --> 00:05:57.557 line:-1 position:50%
+as a multiple
+of round-trip time.
+
+
+90
+00:05:57.557 --> 00:06:03.663 line:-1 position:50%
+This means your app's requests
+will complete much faster.
+
+
+91
+00:06:03,663 --> 00:06:07,100 line:-1
+When a device moves
+from Wi-Fi to cellular,
+
+
+92
+00:06:07.100 --> 00:06:11.071 line:-1 position:50%
+it takes time to reestablish
+new connections
+
+
+93
+00:06:11.071 --> 00:06:15.275 line:-1 position:50%
+and that can make
+your application stall.
+
+
+94
+00:06:15,275 --> 00:06:20,614 line:-1
+Using connection migration
+eliminates those stalls.
+
+
+95
+00:06:20,614 --> 00:06:24,684 line:-1
+To opt in, set the
+multipathServiceType property
+
+
+96
+00:06:24,684 --> 00:06:28,888 line:-1
+to .handover on your URLSession
+configuration,
+
+
+97
+00:06:28,888 --> 00:06:32,325 line:-1
+or on your NWParameters.
+
+
+98
+00:06:32.325 --> 00:06:39.232 line:-1 position:50%
+Enable this option and make sure
+it works with your app.
+
+
+99
+00:06:39.232 --> 00:06:44.337 line:-1 position:50%
+If you design your own protocol
+that uses UDP directly,
+
+
+100
+00:06:44,337 --> 00:06:49,809 line:-1
+iOS 16 and macOS Ventura
+introduce a better way
+
+
+101
+00:06:49.809 --> 00:06:52.445 line:-1 position:50%
+to send datagrams.
+
+
+102
+00:06:52.445 --> 00:06:57.584 line:-1 position:50%
+QUIC datagrams provide
+many benefits over plain UDP,
+
+
+103
+00:06:57,584 --> 00:07:00,787 line:-1
+the most important being
+that QUIC datagrams
+
+
+104
+00:07:00,787 --> 00:07:03,023 line:-1
+react to congestion
+in the network
+
+
+105
+00:07:03.023 --> 00:07:07.894 line:-1 position:50%
+which keeps the round-trip time
+low and reduces packet loss.
+
+
+106
+00:07:07.894 --> 00:07:10.030 line:-1 position:50%
+To opt in on the client,
+
+
+107
+00:07:10.030 --> 00:07:13.733 line:-1 position:50%
+set isDatagram to true
+on your QUIC options
+
+
+108
+00:07:13.733 --> 00:07:19.606 line:-1 position:50%
+and set the maximum datagram
+frame size you want to use.
+
+
+109
+00:07:19,606 --> 00:07:22,409 line:-1
+After creating
+the datagram flow,
+
+
+110
+00:07:22.409 --> 00:07:27.714 line:-1 position:50%
+you can send and receive on it
+just like any other QUIC stream.
+
+
+111
+00:07:27.714 --> 00:07:30.216 line:-1 position:50%
+Now you know
+what to do in your app
+
+
+112
+00:07:30.216 --> 00:07:32.519 line:-1 position:50%
+to reduce latency.
+
+
+113
+00:07:32,519 --> 00:07:36,156 line:-1
+Next, I will explain
+how servers impact
+
+
+114
+00:07:36,156 --> 00:07:39,392 line:-1
+your app's responsiveness.
+
+
+115
+00:07:39,392 --> 00:07:42,762 line:-1
+Despite often running
+on top-of-the-line hardware,
+
+
+116
+00:07:42.762 --> 00:07:46.666 line:-1 position:50%
+it is possible that your server
+actually becomes the reason
+
+
+117
+00:07:46.666 --> 00:07:49.302 line:-1 position:50%
+for slowness in your app.
+
+
+118
+00:07:49,302 --> 00:07:54,307 line:-1
+We introduced the network
+quality tool in macOS Monterey,
+
+
+119
+00:07:54.307 --> 00:07:56.443 line:-1 position:50%
+and you can use this tool
+
+
+120
+00:07:56.443 --> 00:08:00.480 line:-1 position:50%
+to measure buffer bloat in
+your service provider's network
+
+
+121
+00:08:00,480 --> 00:08:03,183 line:-1
+as well as on your server.
+
+
+122
+00:08:03,183 --> 00:08:06,886 line:-1
+You need to configure your
+server to act as a destination
+
+
+123
+00:08:06.886 --> 00:08:09.622 line:-1 position:50%
+for the network quality tool.
+
+
+124
+00:08:09,622 --> 00:08:14,394 line:-1
+Once you have done that,
+run the networkQuality tool,
+
+
+125
+00:08:14,394 --> 00:08:17,597 line:-1
+first against
+Apple's default server
+
+
+126
+00:08:17.597 --> 00:08:22.569 line:-1 position:50%
+and then against
+your own configured server.
+
+
+127
+00:08:22.569 --> 00:08:26.406 line:-1 position:50%
+If the tool scores well
+using the default server,
+
+
+128
+00:08:26,406 --> 00:08:30,543 line:-1
+but not so well when talking
+to your own server,
+
+
+129
+00:08:30,543 --> 00:08:33,580 line:-1
+there may be room to improve
+the responsiveness
+
+
+130
+00:08:33,580 --> 00:08:35,949 line:-1
+of your server.
+
+
+131
+00:08:35,949 --> 00:08:40,887 line:-1
+Now, I will show you an example
+where we used this technique
+
+
+132
+00:08:40.887 --> 00:08:45.792 line:-1 position:50%
+to improve something that all
+of you are doing right now --
+
+
+133
+00:08:45,792 --> 00:08:48,695 line:-1
+streaming video.
+
+
+134
+00:08:50.397 --> 00:08:52.399 line:-1 position:50%
+You may have had the experience
+
+
+135
+00:08:52.399 --> 00:08:55.869 line:-1 position:50%
+where you skip ahead
+to a different place in a video
+
+
+136
+00:08:55.869 --> 00:09:01.808 line:-1 position:50%
+and you end up waiting
+a long time while it rebuffers.
+
+
+137
+00:09:01.808 --> 00:09:05.512 line:-1 position:50%
+So, we investigated
+the reason for this slowness
+
+
+138
+00:09:05.512 --> 00:09:08.281 line:-1 position:50%
+in random access.
+
+
+139
+00:09:08,281 --> 00:09:10,583 line:-1
+We used the network quality tool
+
+
+140
+00:09:10.583 --> 00:09:13.820 line:-1 position:50%
+to test the behavior
+of a streaming server
+
+
+141
+00:09:13,820 --> 00:09:18,758 line:-1
+and we found that the
+responsiveness score was poor.
+
+
+142
+00:09:18.758 --> 00:09:23.897 line:-1 position:50%
+On the right side,
+I streamed a WWDC video.
+
+
+143
+00:09:23.897 --> 00:09:26.900 line:-1 position:50%
+Then, I skipped ahead
+in the video.
+
+
+144
+00:09:26,900 --> 00:09:28,835 line:-1
+The screen
+didn't display anything
+
+
+145
+00:09:28,835 --> 00:09:32,205 line:-1
+while the video rebuffered.
+
+
+146
+00:09:32,205 --> 00:09:36,309 line:-1
+After a few seconds,
+the video showed up.
+
+
+147
+00:09:36.309 --> 00:09:38.678 line:-1 position:50%
+With the help of detailed output
+
+
+148
+00:09:38,678 --> 00:09:41,948 line:-1
+from the network quality tool
+on macOS,
+
+
+149
+00:09:41,948 --> 00:09:46,920 line:-1
+we found that there was
+huge queuing at the server.
+
+
+150
+00:09:46.920 --> 00:09:52.225 line:-1 position:50%
+So we took a look at
+the server configuration.
+
+
+151
+00:09:52,225 --> 00:09:58,865 position:50%
+Specifically we looked at TCP,
+TLS, and HTTP buffer sizes,
+
+
+152
+00:09:58,865 --> 00:10:09,142 line:1
+which were configured to 4MB,
+256KB, and 4MB, respectively.
+
+
+153
+00:10:09.142 --> 00:10:14.013 line:-1 position:50%
+The buffers were huge
+because RAM is plentiful.
+
+
+154
+00:10:14.013 --> 00:10:17.450 line:-1 position:50%
+But just because
+some buffering is good,
+
+
+155
+00:10:17,450 --> 00:10:22,155 line:-1
+doesn't always mean
+that more buffering is better.
+
+
+156
+00:10:22.155 --> 00:10:27.427 line:-1 position:50%
+Our responsiveness measurements
+highlighted this exact issue --
+
+
+157
+00:10:27.427 --> 00:10:32.065 line:-1 position:50%
+a newly generated packet
+was queued behind stale data
+
+
+158
+00:10:32.065 --> 00:10:34.167 line:-1 position:50%
+in these large buffers,
+
+
+159
+00:10:34.167 --> 00:10:37.237 line:-1 position:50%
+and this created a lot
+of additional delay
+
+
+160
+00:10:37.237 --> 00:10:41.241 line:-1 position:50%
+in delivering
+the most recent packet.
+
+
+161
+00:10:41,241 --> 00:10:47,981 position:50%
+So, we reduced the buffer size
+to 256KB for HTTP,
+
+
+162
+00:10:47,981 --> 00:10:54,854 position:50%
+16KB for TLS,
+and 128KB for TCP.
+
+
+163
+00:10:57,690 --> 00:11:01,327 position:50%
+This is the config file
+for Apache Traffic Server
+
+
+164
+00:11:01,327 --> 00:11:05,398 position:50%
+which shows the options
+that were configured.
+
+
+165
+00:11:05,398 --> 00:11:10,870 line:1
+TCP not-sent low-water mark
+was set to 128KB
+
+
+166
+00:11:10,870 --> 00:11:16,976 position:50%
+along with other options that
+were enabled to lower buffering.
+
+
+167
+00:11:16,976 --> 00:11:21,748 position:50%
+For TLS, we enabled
+dynamic record sizes
+
+
+168
+00:11:21,748 --> 00:11:26,753 position:50%
+and for HTTP/2,
+we reduced the low-water mark
+
+
+169
+00:11:26,753 --> 00:11:28,788 position:50%
+and buffer block size.
+
+
+170
+00:11:28,788 --> 00:11:31,724 line:-1
+We recommend
+using these configurations
+
+
+171
+00:11:31.724 --> 00:11:34.627 line:-1 position:50%
+for your Apache Traffic Server,
+
+
+172
+00:11:34.627 --> 00:11:38.031 line:-1 position:50%
+and if you are using
+a different web server,
+
+
+173
+00:11:38.031 --> 00:11:41.301 line:-1 position:50%
+look for its equivalent options.
+
+
+174
+00:11:41.301 --> 00:11:43.736 line:-1 position:50%
+After making these changes,
+
+
+175
+00:11:43,736 --> 00:11:47,540 line:-1
+we ran the network
+quality tool again.
+
+
+176
+00:11:47,540 --> 00:11:52,645 line:-1
+And this time we got
+a high RPM score!
+
+
+177
+00:11:52,645 --> 00:11:56,249 line:-1
+On the right,
+I streamed the same video,
+
+
+178
+00:11:56,249 --> 00:11:58,918 line:-1
+but this time
+when I skipped ahead,
+
+
+179
+00:11:58,918 --> 00:12:03,590 line:-1
+the video resumed instantly.
+
+
+180
+00:12:03.590 --> 00:12:07.594 line:-1 position:50%
+By getting rid of unnecessary
+queuing at the server,
+
+
+181
+00:12:07.594 --> 00:12:11.698 line:-1 position:50%
+we made random access
+much more responsive.
+
+
+182
+00:12:11.698 --> 00:12:15.868 line:-1 position:50%
+Regardless of how your app
+uses networking,
+
+
+183
+00:12:15,868 --> 00:12:20,840 line:-1
+these changes on your server can
+make your app more responsive
+
+
+184
+00:12:20.840 --> 00:12:24.877 line:-1 position:50%
+and deliver
+a better user experience.
+
+
+185
+00:12:24.877 --> 00:12:29.916 line:-1 position:50%
+That's how to improve your app
+and update your server.
+
+
+186
+00:12:29.916 --> 00:12:34.854 line:-1 position:50%
+There is a third factor that
+affects responsiveness greatly;
+
+
+187
+00:12:34.854 --> 00:12:37.223 line:-1 position:50%
+the network itself.
+
+
+188
+00:12:37,223 --> 00:12:41,527 line:-1
+Apple introduced the
+network quality tool in iOS 15
+
+
+189
+00:12:41.527 --> 00:12:44.364 line:-1 position:50%
+and macOS Monterey.
+
+
+190
+00:12:44,364 --> 00:12:48,401 line:-1
+Since then, others have used
+the same methodology
+
+
+191
+00:12:48.401 --> 00:12:52.972 line:-1 position:50%
+to develop
+network quality tests.
+
+
+192
+00:12:52,972 --> 00:12:56,976 line:-1
+Waveform has launched
+a Bufferbloat test.
+
+
+193
+00:12:56,976 --> 00:12:59,245 line:-1
+There's an open source
+implementation
+
+
+194
+00:12:59,245 --> 00:13:03,983 line:-1
+of the responsiveness test,
+written in Go.
+
+
+195
+00:13:03,983 --> 00:13:07,854 position:50%
+And Ookla has added
+a responsiveness measurement
+
+
+196
+00:13:07,854 --> 00:13:11,524 position:50%
+to their Speedtest app.
+
+
+197
+00:13:11,524 --> 00:13:15,395 line:1
+Ookla's app shows
+round trip time in milliseconds,
+
+
+198
+00:13:15,395 --> 00:13:18,965 position:50%
+and if you divide 60,000
+by that number,
+
+
+199
+00:13:18,965 --> 00:13:24,103 position:50%
+you get the number of
+round trips per minute, or RPM.
+
+
+200
+00:13:24.103 --> 00:13:26.673 line:-1 position:50%
+You can use these tools
+to measure
+
+
+201
+00:13:26.673 --> 00:13:30.943 line:-1 position:50%
+how well your own network
+is performing.
+
+
+202
+00:13:30.943 --> 00:13:34.113 line:-1 position:50%
+The best way to understand
+delays in a network
+
+
+203
+00:13:34.113 --> 00:13:37.750 line:-1 position:50%
+is with a delay-sensitive
+application.
+
+
+204
+00:13:37,750 --> 00:13:41,054 line:-1
+So, I will show you
+my screen sharing experience
+
+
+205
+00:13:41.054 --> 00:13:43.823 line:-1 position:50%
+to a remote machine.
+
+
+206
+00:13:43,823 --> 00:13:45,558 line:-1
+I set up network conditions
+
+
+207
+00:13:45,558 --> 00:13:48,828 line:-1
+to mimic a representative
+access network,
+
+
+208
+00:13:48.828 --> 00:13:54.233 line:-1 position:50%
+with traffic from other devices
+sharing that network.
+
+
+209
+00:13:54.233 --> 00:13:59.105 line:-1 position:50%
+Here, I logged on to my remote
+machine using Screen Sharing.
+
+
+210
+00:14:01,174 --> 00:14:04,377 line:-1
+I clicked on different
+Finder menus
+
+
+211
+00:14:04.377 --> 00:14:09.148 line:-1 position:50%
+but the display of each menu
+was very sluggish.
+
+
+212
+00:14:09.148 --> 00:14:12.552 line:-1 position:50%
+To check how much
+this interaction was delayed,
+
+
+213
+00:14:12,552 --> 00:14:16,823 line:-1
+I launched an app that displays
+time on my local machine,
+
+
+214
+00:14:16,823 --> 00:14:21,360 line:-1
+and I launched the same app
+on my remote machine.
+
+
+215
+00:14:21.360 --> 00:14:25.832 line:-1 position:50%
+Even though time on these
+computers is synchronized,
+
+
+216
+00:14:25.832 --> 00:14:29.702 line:-1 position:50%
+my remote screen
+didn't update regularly
+
+
+217
+00:14:29.702 --> 00:14:34.907 line:-1 position:50%
+and showed time delayed
+by a few seconds.
+
+
+218
+00:14:34.907 --> 00:14:37.343 line:-1 position:50%
+The reason
+for this delayed update
+
+
+219
+00:14:37,343 --> 00:14:39,979 line:-1
+was the presence
+of a large queue
+
+
+220
+00:14:39.979 --> 00:14:42.782 line:-1 position:50%
+at the slowest link
+of the network
+
+
+221
+00:14:42.782 --> 00:14:45.485 line:-1 position:50%
+and packets from
+the Screen Sharing app
+
+
+222
+00:14:45.485 --> 00:14:48.821 line:-1 position:50%
+were stuck in this large queue.
+
+
+223
+00:14:50,823 --> 00:14:53,259 line:-1
+To solve this queuing issue,
+
+
+224
+00:14:53.259 --> 00:14:56.028 line:-1 position:50%
+Apple is working with
+the networking community
+
+
+225
+00:14:56.028 --> 00:14:59.899 line:-1 position:50%
+on a new technology called L4S.
+
+
+226
+00:14:59,899 --> 00:15:06,773 position:50%
+It is available as a beta
+in iOS 16 and macOS Ventura.
+
+
+227
+00:15:06,773 --> 00:15:10,109 position:50%
+L4S reduces
+queuing delay significantly
+
+
+228
+00:15:10,109 --> 00:15:14,747 line:1
+and also achieves
+zero congestion loss.
+
+
+229
+00:15:14.747 --> 00:15:17.550 line:-1 position:50%
+To keep a consistently
+short queue,
+
+
+230
+00:15:17.550 --> 00:15:20.419 line:-1 position:50%
+the network explicitly
+signals congestion
+
+
+231
+00:15:20.419 --> 00:15:22.622 line:-1 position:50%
+instead of dropping packets,
+
+
+232
+00:15:22,622 --> 00:15:25,491 line:-1
+and the sender adjusts
+its sending rate
+
+
+233
+00:15:25,491 --> 00:15:29,529 line:-1
+based on the congestion feedback
+from the network.
+
+
+234
+00:15:29.529 --> 00:15:34.133 line:-1 position:50%
+This makes it possible to keep
+very low queuing in the network
+
+
+235
+00:15:34,133 --> 00:15:37,069 line:-1
+without any packet loss,
+
+
+236
+00:15:37,069 --> 00:15:41,874 line:-1
+and that will make your app
+highly responsive.
+
+
+237
+00:15:41,874 --> 00:15:48,281 line:-1
+Now, let's look at how L4S
+improved Screen Sharing.
+
+
+238
+00:15:48.281 --> 00:15:52.585 line:-1 position:50%
+Here, I used the same machines
+and the same network
+
+
+239
+00:15:52.585 --> 00:15:57.557 line:-1 position:50%
+except this time,
+I enabled L4S.
+
+
+240
+00:15:57.557 --> 00:16:00.359 line:-1 position:50%
+When I clicked on
+different Finder menus,
+
+
+241
+00:16:00.359 --> 00:16:02.895 line:-1 position:50%
+they opened immediately.
+
+
+242
+00:16:02.895 --> 00:16:06.899 line:-1 position:50%
+I launched the Time app
+on both the machines.
+
+
+243
+00:16:06.899 --> 00:16:09.769 line:-1 position:50%
+And now, time on both
+the remote screen
+
+
+244
+00:16:09,769 --> 00:16:16,943 line:-1
+and the local machine
+is almost perfectly in sync.
+
+
+245
+00:16:16.943 --> 00:16:21.380 line:-1 position:50%
+This technology is not just
+for screen sharing.
+
+
+246
+00:16:21.380 --> 00:16:25.484 line:-1 position:50%
+L4S improves
+all of today's apps,
+
+
+247
+00:16:25,484 --> 00:16:28,120 line:-1
+and opens the door
+for future apps
+
+
+248
+00:16:28.120 --> 00:16:31.958 line:-1 position:50%
+that wouldn't even
+be possible today.
+
+
+249
+00:16:31,958 --> 00:16:36,229 line:-1
+This chart plots the observed
+average round trip time
+
+
+250
+00:16:36.229 --> 00:16:39.165 line:-1 position:50%
+of packets from
+the Screen Sharing app
+
+
+251
+00:16:39.165 --> 00:16:41.534 line:-1 position:50%
+which was running
+concurrently with traffic
+
+
+252
+00:16:41.534 --> 00:16:46.005 line:-1 position:50%
+from other devices
+sharing the same network.
+
+
+253
+00:16:46,005 --> 00:16:49,508 position:50%
+Comparing classic queuing
+versus L4S
+
+
+254
+00:16:49,508 --> 00:16:52,712 line:1
+shows that there
+is a massive reduction
+
+
+255
+00:16:52,712 --> 00:16:56,415 position:50%
+in round trip time with L4S.
+
+
+256
+00:16:56,415 --> 00:17:00,386 line:1
+This is the primary reason
+for the dramatic improvement
+
+
+257
+00:17:00,386 --> 00:17:05,157 line:1
+in my screen-sharing experience.
+
+
+258
+00:17:05.157 --> 00:17:11.130 line:-1 position:50%
+Test your app that uses
+HTTP/3 or QUIC with L4S.
+
+
+259
+00:17:11.130 --> 00:17:16.969 line:-1 position:50%
+You can enable L4S in iOS 16
+inside Developer settings
+
+
+260
+00:17:16,969 --> 00:17:22,808 line:-1
+or on macOS Ventura
+via a defaults write.
+
+
+261
+00:17:22,808 --> 00:17:25,611 line:-1
+To test using a Linux server,
+
+
+262
+00:17:25,611 --> 00:17:30,082 line:-1
+your QUIC implementation
+needs to support accurate ECN
+
+
+263
+00:17:30,082 --> 00:17:34,520 line:-1
+and a scalable congestion
+control algorithm.
+
+
+264
+00:17:34,520 --> 00:17:36,622 line:1
+To ensure that you are ready
+
+
+265
+00:17:36,622 --> 00:17:40,226 line:1
+when L4S-capable networks
+are deployed,
+
+
+266
+00:17:40,226 --> 00:17:44,263 line:1
+test your app
+for compatibility with L4S,
+
+
+267
+00:17:44,263 --> 00:17:50,503 position:50%
+and provide feedback with any
+issues you might encounter.
+
+
+268
+00:17:50.503 --> 00:17:54.440 line:-1 position:50%
+Now you know that
+reducing latency is crucial
+
+
+269
+00:17:54,440 --> 00:17:58,044 line:-1
+to improve your app's
+responsiveness.
+
+
+270
+00:17:58.044 --> 00:18:02.381 line:-1 position:50%
+So, adopt HTTP/3 and QUIC,
+
+
+271
+00:18:02.381 --> 00:18:04.717 line:-1 position:50%
+to reduce the number
+of round trips
+
+
+272
+00:18:04.717 --> 00:18:09.822 line:-1 position:50%
+and for faster delivery
+of content to your app.
+
+
+273
+00:18:09,822 --> 00:18:13,459 line:-1
+Eliminate unnecessary queuing
+on your server
+
+
+274
+00:18:13.459 --> 00:18:17.363 line:-1 position:50%
+to provide a more
+responsive interaction.
+
+
+275
+00:18:17.363 --> 00:18:21.701 line:-1 position:50%
+Test your app's compatibility
+with L4S by enabling it
+
+
+276
+00:18:21,701 --> 00:18:25,938 line:-1
+in Developer settings
+and provide feedback.
+
+
+277
+00:18:25,938 --> 00:18:29,041 line:-1
+And finally,
+talk to your server provider
+
+
+278
+00:18:29.041 --> 00:18:32.878 line:-1 position:50%
+about enabling L4S support.
+
+
+279
+00:18:32.878 --> 00:18:34.747 line:-1 position:50%
+Thanks for watching!
+
+
+280
+00:18:34,747 --> 00:18:39,118 align:right size:2% position:90%
+♪
+

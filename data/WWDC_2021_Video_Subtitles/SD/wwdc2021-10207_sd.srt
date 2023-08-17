@@ -1,0 +1,1414 @@
+2
+00:00:00,100 --> 00:00:01,969 line:-1
+[MAC STARTUP CHIME]
+
+
+3
+00:00:01,969 --> 00:00:05,505 line:-1
+♪ Bass music playing ♪
+
+
+4
+00:00:05.505 --> 00:00:07.207 line:-1 position:50%
+[KEYSTROKES]
+
+
+5
+00:00:07,207 --> 00:00:09,343 align:right position:90% size:2%
+♪
+
+
+6
+00:00:09,343 --> 00:00:10,811 line:-1
+Wil Addario-Turner:
+Hi, welcome to
+
+
+7
+00:00:10,811 --> 00:00:13,914 line:-1
+"Embrace Expected
+Failures in XCTest."
+
+
+8
+00:00:13,914 --> 00:00:15,649 line:-1
+My name is Wil,
+and in this session,
+
+
+9
+00:00:15.649 --> 00:00:18.652 line:-1 position:50%
+I'm going to discuss ways
+of improving the data you get
+
+
+10
+00:00:18,652 --> 00:00:21,355 line:-1
+when you run
+your project's tests.
+
+
+11
+00:00:21,355 --> 00:00:22,522 line:-1
+To begin with,
+
+
+12
+00:00:22.522 --> 00:00:25.759 line:-1 position:50%
+let's consider why we test
+our code in the first place.
+
+
+13
+00:00:25.759 --> 00:00:27.294 line:-1 position:50%
+Of course, at a high level,
+
+
+14
+00:00:27.294 --> 00:00:29.930 line:-1 position:50%
+it's how we ensure
+the quality of the product.
+
+
+15
+00:00:29.930 --> 00:00:31.365 line:-1 position:50%
+But in more concrete terms,
+
+
+16
+00:00:31,365 --> 00:00:33,467 line:-1
+I would say
+it's to discover bugs
+
+
+17
+00:00:33,467 --> 00:00:37,571 line:-1
+before we ship
+and not afterwards.
+
+
+18
+00:00:37.571 --> 00:00:39.506 line:-1 position:50%
+Now, testing is an investment.
+
+
+19
+00:00:39.506 --> 00:00:44.211 line:-1 position:50%
+It takes resources to create,
+run, and maintain tests.
+
+
+20
+00:00:44,211 --> 00:00:45,746 line:-1
+As with any investment,
+
+
+21
+00:00:45,746 --> 00:00:50,150 line:-1
+we want to maximize our returns
+while minimizing our cost.
+
+
+22
+00:00:50.150 --> 00:00:52.786 line:-1 position:50%
+This session focuses on tools
+
+
+23
+00:00:52,786 --> 00:00:54,955 line:-1
+for reducing
+the maintenance cost.
+
+
+24
+00:00:54,955 --> 00:00:56,189 line:-1
+By maintenance,
+
+
+25
+00:00:56,189 --> 00:00:58,859 line:-1
+I'm primarily referring
+to how you handle failures
+
+
+26
+00:00:58,859 --> 00:01:02,095 line:-1
+when they occur
+in your test suites.
+
+
+27
+00:01:02.095 --> 00:01:05.065 line:-1 position:50%
+When a test that's been passing
+begins to fail,
+
+
+28
+00:01:05,065 --> 00:01:07,768 line:-1
+that's a valuable piece
+of new information.
+
+
+29
+00:01:07,768 --> 00:01:10,437 line:-1
+This indicates
+either a flaw in the product,
+
+
+30
+00:01:10.437 --> 00:01:12.472 line:-1 position:50%
+a problem in the test itself,
+
+
+31
+00:01:12,472 --> 00:01:15,242 line:-1
+or some issue in
+one of the dependencies --
+
+
+32
+00:01:15,242 --> 00:01:18,011 line:-1
+that is, all of the frameworks
+and subsystems
+
+
+33
+00:01:18,011 --> 00:01:21,715 line:-1
+on top of which
+the product sits.
+
+
+34
+00:01:21,715 --> 00:01:23,717 line:-1
+Regardless of the type
+of problem,
+
+
+35
+00:01:23,717 --> 00:01:25,919 line:-1
+once that failure
+has been registered,
+
+
+36
+00:01:25,919 --> 00:01:28,055 line:-1
+subsequent reports
+of the same failure
+
+
+37
+00:01:28,055 --> 00:01:30,257 line:-1
+are significantly less valuable,
+
+
+38
+00:01:30,257 --> 00:01:31,925 line:-1
+because they represent
+information
+
+
+39
+00:01:31.925 --> 00:01:34.294 line:-1 position:50%
+that you already have.
+
+
+40
+00:01:34,294 --> 00:01:38,565 line:-1
+Ideally, any new failure
+is triaged and fixed quickly.
+
+
+41
+00:01:38,565 --> 00:01:41,034 line:-1
+However, your team may not
+be able to resolve a problem
+
+
+42
+00:01:41.034 --> 00:01:44.438 line:-1 position:50%
+right away, which means
+that the failure quickly goes
+
+
+43
+00:01:44,438 --> 00:01:46,873 line:-1
+from being a valuable piece
+of new information
+
+
+44
+00:01:46.873 --> 00:01:50.544 line:-1 position:50%
+to a noisy distraction.
+
+
+45
+00:01:50,544 --> 00:01:52,346 line:-1
+Given a known failure
+in your tests
+
+
+46
+00:01:52,346 --> 00:01:54,548 line:-1
+that cannot be
+immediately resolved,
+
+
+47
+00:01:54,548 --> 00:01:58,018 line:-1
+what tools are available
+for managing the noise?
+
+
+48
+00:01:58,018 --> 00:02:00,087 line:-1
+Two approaches
+that might come to mind
+
+
+49
+00:02:00,087 --> 00:02:03,023 line:-1
+are disabling and skipping.
+
+
+50
+00:02:03,023 --> 00:02:05,092 line:-1
+Let's consider the tradeoffs
+for these
+
+
+51
+00:02:05.092 --> 00:02:06.960 line:-1 position:50%
+and then we'll talk
+about the best tool --
+
+
+52
+00:02:06,960 --> 00:02:13,400 line:-1
+and the topic of this session --
+XCTest's ExpectedFailures API.
+
+
+53
+00:02:13,400 --> 00:02:17,237 line:-1
+Xcode lets you disable tests
+in the test plan or scheme.
+
+
+54
+00:02:17.237 --> 00:02:19.673 line:-1 position:50%
+You can use this
+for known test failures,
+
+
+55
+00:02:19,673 --> 00:02:21,308 line:-1
+and one advantage is
+that your test code
+
+
+56
+00:02:21,308 --> 00:02:23,343 line:-1
+will continue to be compiled.
+
+
+57
+00:02:23,343 --> 00:02:25,545 line:-1
+However, since the code
+won't execute,
+
+
+58
+00:02:25.545 --> 00:02:27.914 line:-1 position:50%
+you won't see it
+in the test report.
+
+
+59
+00:02:27,914 --> 00:02:30,684 line:-1
+This reduced visibility
+makes it harder to track
+
+
+60
+00:02:30,684 --> 00:02:34,454 line:-1
+as an issue that
+needs to be resolved.
+
+
+61
+00:02:34.454 --> 00:02:35.655 line:-1 position:50%
+Where this feature --
+
+
+62
+00:02:35,655 --> 00:02:39,092 line:-1
+the ability to choose which
+tests are enabled or disabled --
+
+
+63
+00:02:39,092 --> 00:02:42,295 line:-1
+really shines is for curating
+collections of tests
+
+
+64
+00:02:42.295 --> 00:02:44.164 line:-1 position:50%
+for specific purposes.
+
+
+65
+00:02:44.164 --> 00:02:49.603 line:-1 position:50%
+But it's rarely the best way
+to handle a known failure.
+
+
+66
+00:02:49.603 --> 00:02:54.007 line:-1 position:50%
+XCTSkip is another way you might
+manage a failing test.
+
+
+67
+00:02:54.007 --> 00:02:56.410 line:-1 position:50%
+With this approach,
+not only does the code
+
+
+68
+00:02:56.410 --> 00:02:58.545 line:-1 position:50%
+continue to get built
+with your tests,
+
+
+69
+00:02:58,545 --> 00:03:03,050 line:-1
+it also executes up until the
+point where XCTSkip is called.
+
+
+70
+00:03:03,050 --> 00:03:05,819 line:-1
+This means that it's included
+in the test report,
+
+
+71
+00:03:05.819 --> 00:03:10.190 line:-1 position:50%
+giving you much better
+visibility of the issue.
+
+
+72
+00:03:10,190 --> 00:03:12,692 line:-1
+However, it doesn't
+execute all of your test,
+
+
+73
+00:03:12,692 --> 00:03:16,229 line:-1
+which means you lose out on
+potentially useful information
+
+
+74
+00:03:16.229 --> 00:03:21.535 line:-1 position:50%
+in the form of new issues and
+changes to the existing issue.
+
+
+75
+00:03:21,535 --> 00:03:24,071 line:-1
+XCTSkip is a great tool
+for managing
+
+
+76
+00:03:24.071 --> 00:03:27.174 line:-1 position:50%
+configuration-based limitations
+on your test,
+
+
+77
+00:03:27.174 --> 00:03:31.411 line:-1 position:50%
+such as requiring a specific
+OS version or device type.
+
+
+78
+00:03:31.411 --> 00:03:32.712 line:-1 position:50%
+In the example here,
+
+
+79
+00:03:32.712 --> 00:03:37.217 line:-1 position:50%
+the test will be skipped
+if it's not running on an iPad.
+
+
+80
+00:03:37.217 --> 00:03:40.253 line:-1 position:50%
+This brings us to
+XCTExpectFailure,
+
+
+81
+00:03:40.253 --> 00:03:42.422 line:-1 position:50%
+a set of functions in XCTest
+
+
+82
+00:03:42,422 --> 00:03:46,293 line:-1
+specifically designed
+for managing known failures.
+
+
+83
+00:03:46.293 --> 00:03:48.462 line:-1 position:50%
+In Swift,
+it has a number of overloads
+
+
+84
+00:03:48.462 --> 00:03:50.097 line:-1 position:50%
+for different use cases,
+
+
+85
+00:03:50.097 --> 00:03:52.499 line:-1 position:50%
+and Objective-C provides
+the same capabilities
+
+
+86
+00:03:52.499 --> 00:03:55.035 line:-1 position:50%
+with several distinct functions.
+
+
+87
+00:03:55,035 --> 00:03:58,071 line:-1
+With this API,
+your test executes normally,
+
+
+88
+00:03:58,071 --> 00:04:01,441 line:-1
+but the results are changed
+as follows:
+
+
+89
+00:04:01,441 --> 00:04:05,946 line:-1
+Failure in the test will be
+reported as an expected failure.
+
+
+90
+00:04:05,946 --> 00:04:08,915 line:0
+Failure in the test suite
+containing that test
+
+
+91
+00:04:08,915 --> 00:04:11,017 line:0
+will be reported as a pass,
+
+
+92
+00:04:11,017 --> 00:04:15,055 line:0
+unless of course
+some other test in it fails.
+
+
+93
+00:04:15,055 --> 00:04:18,291 line:0
+This eliminates the noise
+generated by the failure,
+
+
+94
+00:04:18,291 --> 00:04:21,261 line:0
+making it easier to see whether
+there are any other issues
+
+
+95
+00:04:21,261 --> 00:04:23,430 position:50%
+in your tests.
+
+
+96
+00:04:23.430 --> 00:04:24.965 line:-1 position:50%
+Of course,
+suppressing the noise
+
+
+97
+00:04:24,965 --> 00:04:27,267 line:-1
+doesn't solve
+the underlying issue.
+
+
+98
+00:04:27,267 --> 00:04:31,304 line:-1
+So to help you keep track of it,
+the API takes a failure reason.
+
+
+99
+00:04:31.304 --> 00:04:34.274 line:-1 position:50%
+This string documents
+the problem in your code
+
+
+100
+00:04:34,274 --> 00:04:40,447 line:-1
+and you can even embed a URL
+for your issue-tracking system.
+
+
+101
+00:04:40.447 --> 00:04:43.817 line:-1 position:50%
+Xcode's test report UI
+shows expected failures
+
+
+102
+00:04:43,817 --> 00:04:47,020 line:-1
+just as it does normal failures
+or skipped tests.
+
+
+103
+00:04:47.020 --> 00:04:50.457 line:-1 position:50%
+When you hover, if the failure
+reason contains a URL,
+
+
+104
+00:04:50,457 --> 00:04:52,526 line:-1
+an issue-tracking button appears
+
+
+105
+00:04:52.526 --> 00:04:56.730 line:-1 position:50%
+that lets you jump out
+to the link.
+
+
+106
+00:04:56.730 --> 00:04:59.065 line:-1 position:50%
+So let's see how this works!
+
+
+107
+00:04:59.065 --> 00:05:02.102 line:-1 position:50%
+I have here a simple project
+with some unit tests
+
+
+108
+00:05:02.102 --> 00:05:04.738 line:-1 position:50%
+for my VendorAccount class.
+
+
+109
+00:05:04,738 --> 00:05:08,208 line:-1
+I'm going to run the tests,
+and when they finish,
+
+
+110
+00:05:08.208 --> 00:05:12.212 line:-1 position:50%
+we'll see that one is failing
+while the other is passing.
+
+
+111
+00:05:12,212 --> 00:05:14,848 line:-1
+You can see
+three test result icons,
+
+
+112
+00:05:14.848 --> 00:05:16.349 line:-1 position:50%
+one for each test.
+
+
+113
+00:05:16.349 --> 00:05:18.351 line:-1 position:50%
+A red X for the failing test
+
+
+114
+00:05:18,351 --> 00:05:20,654 line:-1
+and a green check
+for the passing test,
+
+
+115
+00:05:20,654 --> 00:05:22,389 line:-1
+and one for the test suite;
+
+
+116
+00:05:22.389 --> 00:05:26.226 line:-1 position:50%
+a red X because one of the tests
+in the suite has failed,
+
+
+117
+00:05:26.226 --> 00:05:29.129 line:-1 position:50%
+so we consider the suite itself
+to have failed.
+
+
+118
+00:05:29,129 --> 00:05:35,802 line:-1
+Now I'm going to add a call
+to XCTExpectFailure
+
+
+119
+00:05:35,802 --> 00:05:37,971 line:-1
+at the beginning of
+the failing test.
+
+
+120
+00:05:37,971 --> 00:05:40,740 line:-1
+You can see the failure reason
+begins with a URL
+
+
+121
+00:05:40.740 --> 00:05:42.842 line:-1 position:50%
+that references
+the bug I've filed
+
+
+122
+00:05:42.842 --> 00:05:45.712 line:-1 position:50%
+to keep track of this failure.
+
+
+123
+00:05:45.712 --> 00:05:47.447 line:-1 position:50%
+Now I'll rerun the tests
+
+
+124
+00:05:47,447 --> 00:05:50,016 line:-1
+and we'll see how this
+affects the outcome.
+
+
+125
+00:05:50,016 --> 00:05:53,787 line:-1
+OK, so the red X icon
+for the failing test
+
+
+126
+00:05:53.787 --> 00:05:55.722 line:-1 position:50%
+has changed to a gray X,
+
+
+127
+00:05:55.722 --> 00:05:58.491 line:-1 position:50%
+which is the indicator
+for an expected failure.
+
+
+128
+00:05:58.491 --> 00:06:01.728 line:-1 position:50%
+What's even more interesting
+is that the test suite icon
+
+
+129
+00:06:01.728 --> 00:06:05.098 line:-1 position:50%
+has changed from a red X
+to a green dash.
+
+
+130
+00:06:05.098 --> 00:06:08.068 line:-1 position:50%
+This icon indicates
+that the test suite has passed
+
+
+131
+00:06:08.068 --> 00:06:09.836 line:-1 position:50%
+with a mixed state,
+
+
+132
+00:06:09.836 --> 00:06:12.839 line:-1 position:50%
+meaning that one or more
+of its tests did not pass,
+
+
+133
+00:06:12.839 --> 00:06:17.944 line:-1 position:50%
+but was either a skip
+or an expected failure.
+
+
+134
+00:06:17.944 --> 00:06:21.248 line:-1 position:50%
+So that's how easy it is to use
+XCTExpectFailure
+
+
+135
+00:06:21.248 --> 00:06:22.983 line:-1 position:50%
+to handle a failing test.
+
+
+136
+00:06:22.983 --> 00:06:26.386 line:-1 position:50%
+Now let's take a closer look
+at the API.
+
+
+137
+00:06:29.956 --> 00:06:32.826 line:-1 position:50%
+The first consideration
+when using XCTExpectFailure
+
+
+138
+00:06:32,826 --> 00:06:35,495 line:-1
+is which API variant to call.
+
+
+139
+00:06:35,495 --> 00:06:36,796 line:-1
+There are two approaches:
+
+
+140
+00:06:36,796 --> 00:06:40,400 line:-1
+a stateful approach where
+you call XCTExpectFailure
+
+
+141
+00:06:40,400 --> 00:06:44,971 line:-1
+and any subsequent failure in
+the test is treated as expected;
+
+
+142
+00:06:44,971 --> 00:06:47,607 line:-1
+alternatively, you can use
+the scoped approach,
+
+
+143
+00:06:47.607 --> 00:06:50.610 line:-1 position:50%
+in which you wrap
+the failing code in a closure
+
+
+144
+00:06:50,610 --> 00:06:52,812 line:-1
+passed to XCTExpectFailure.
+
+
+145
+00:06:52.812 --> 00:06:55.782 line:-1 position:50%
+Let's look at some examples.
+
+
+146
+00:06:55,782 --> 00:06:58,184 line:-1
+Here's a very simple test
+that calls some function
+
+
+147
+00:06:58.184 --> 00:06:59.786 line:-1 position:50%
+in my project.
+
+
+148
+00:06:59.786 --> 00:07:01.221 line:-1 position:50%
+The test begins to fail
+
+
+149
+00:07:01,221 --> 00:07:04,724 line:-1
+because the function
+is no longer returning true.
+
+
+150
+00:07:04,724 --> 00:07:05,959 line:-1
+Here's what it looks like
+
+
+151
+00:07:05,959 --> 00:07:08,628 line:-1
+to use the stateful expected
+failure approach,
+
+
+152
+00:07:08.628 --> 00:07:11.931 line:-1 position:50%
+just as we did in the demo.
+
+
+153
+00:07:11,931 --> 00:07:14,334 line:-1
+Alternatively, we could use
+the scoped approach
+
+
+154
+00:07:14,334 --> 00:07:16,603 line:-1
+by wrapping the failing code
+in a closure
+
+
+155
+00:07:16,603 --> 00:07:19,606 line:-1
+trailing the call
+to XCTExpectFailure.
+
+
+156
+00:07:19,606 --> 00:07:22,809 line:-1
+This means any failure
+in the code outside the closure
+
+
+157
+00:07:22.809 --> 00:07:25.578 line:-1 position:50%
+will be reported normally.
+
+
+158
+00:07:25,578 --> 00:07:28,915 line:-1
+The API also supports nesting.
+
+
+159
+00:07:28.915 --> 00:07:32.852 line:-1 position:50%
+In other words, you can call the
+API more than once in a test,
+
+
+160
+00:07:32.852 --> 00:07:36.156 line:-1 position:50%
+including inside the closure
+from another call.
+
+
+161
+00:07:36,156 --> 00:07:37,857 line:-1
+This is an important
+consideration
+
+
+162
+00:07:37,857 --> 00:07:41,027 line:-1
+when using the API
+in test library code.
+
+
+163
+00:07:41.027 --> 00:07:44.297 line:-1 position:50%
+For example, if a common
+utility function begins to fail,
+
+
+164
+00:07:44,297 --> 00:07:46,266 line:-1
+many tests could be impacted,
+
+
+165
+00:07:46.266 --> 00:07:49.703 line:-1 position:50%
+some of which might already
+be using XCTExpectFailure
+
+
+166
+00:07:49,703 --> 00:07:53,206 line:-1
+for different issues.
+
+
+167
+00:07:53,206 --> 00:07:56,409 line:-1
+When a failure occurs
+in the context of nested calls
+
+
+168
+00:07:56.409 --> 00:07:58.144 line:-1 position:50%
+to XCTExpectFailure,
+
+
+169
+00:07:58.144 --> 00:08:01.448 line:-1 position:50%
+the issue is matched against
+the nearest call site first,
+
+
+170
+00:08:01.448 --> 00:08:03.283 line:-1 position:50%
+and if rejected by the matcher,
+
+
+171
+00:08:03,283 --> 00:08:06,486 line:-1
+will be passed on
+to the next call and so on
+
+
+172
+00:08:06.486 --> 00:08:11.224 line:-1 position:50%
+with stack semantics for
+the calls to XCTExpectFailure.
+
+
+173
+00:08:11.224 --> 00:08:13.360 line:-1 position:50%
+For this reason,
+with shared code,
+
+
+174
+00:08:13.360 --> 00:08:16.262 line:-1 position:50%
+it's best to use
+the closure-based API
+
+
+175
+00:08:16.262 --> 00:08:19.899 line:-1 position:50%
+to limit the effects
+on test state.
+
+
+176
+00:08:19.899 --> 00:08:21.401 line:-1 position:50%
+The next thing to consider
+
+
+177
+00:08:21.401 --> 00:08:24.504 line:-1 position:50%
+is how precisely
+to match the issue.
+
+
+178
+00:08:24.504 --> 00:08:27.707 line:-1 position:50%
+By default, any failure
+in the affected scope is caught,
+
+
+179
+00:08:27,707 --> 00:08:29,242 line:-1
+but you can be more selective
+
+
+180
+00:08:29,242 --> 00:08:32,479 line:-1
+by specifying
+an issue-matching filter.
+
+
+181
+00:08:32,479 --> 00:08:34,614 line:-1
+In this example,
+we construct an object
+
+
+182
+00:08:34.614 --> 00:08:38.685 line:-1 position:50%
+of type
+XCTExpectedFailure.Options
+
+
+183
+00:08:38,685 --> 00:08:41,121 line:-1
+and define its issueMatcher.
+
+
+184
+00:08:41,121 --> 00:08:44,023 line:-1
+The matcher is passed
+the XCTIssue object
+
+
+185
+00:08:44,023 --> 00:08:45,592 line:-1
+with the failure details,
+
+
+186
+00:08:45,592 --> 00:08:48,027 line:-1
+so you have full access
+to that information
+
+
+187
+00:08:48.027 --> 00:08:50.463 line:-1 position:50%
+in determining
+whether or not to match.
+
+
+188
+00:08:50,463 --> 00:08:52,399 line:-1
+If the matcher
+rejects the failure,
+
+
+189
+00:08:52,399 --> 00:08:55,435 line:-1
+then it won't be handled
+as an expected failure.
+
+
+190
+00:08:55.435 --> 00:08:58.338 line:-1 position:50%
+This can be useful in detecting
+when new problems show up
+
+
+191
+00:08:58,338 --> 00:09:01,508 line:-1
+in the code being tested.
+
+
+192
+00:09:01.508 --> 00:09:03.643 line:-1 position:50%
+The options object
+also has a property
+
+
+193
+00:09:03,643 --> 00:09:06,079 line:-1
+that can be used to disable
+the expected failure
+
+
+194
+00:09:06.079 --> 00:09:07.881 line:-1 position:50%
+in certain configurations.
+
+
+195
+00:09:07.881 --> 00:09:10.817 line:-1 position:50%
+For example,
+my test may be passing on macOS
+
+
+196
+00:09:10,817 --> 00:09:15,555 line:-1
+but failing on iOS, so I only
+want to expect failures on iOS.
+
+
+197
+00:09:15.555 --> 00:09:17.090 line:-1 position:50%
+To achieve that,
+
+
+198
+00:09:17,090 --> 00:09:19,893 line:-1
+I disable the expected failure
+via the options,
+
+
+199
+00:09:19,893 --> 00:09:23,630 line:-1
+but only for platforms
+where I don't need it.
+
+
+200
+00:09:23,630 --> 00:09:27,233 line:-1
+So what happens when your
+expected failures stop failing?
+
+
+201
+00:09:27.233 --> 00:09:29.202 line:-1 position:50%
+Usually this means
+the underlying issue
+
+
+202
+00:09:29,202 --> 00:09:31,604 line:-1
+has been resolved,
+which is great.
+
+
+203
+00:09:31,604 --> 00:09:34,574 line:-1
+But how does
+XCTExpectFailure behave?
+
+
+204
+00:09:34.574 --> 00:09:38.077 line:-1 position:50%
+If you're still calling the API
+and no failure is occurring,
+
+
+205
+00:09:38,077 --> 00:09:41,815 line:-1
+it will generate
+a new and distinct failure.
+
+
+206
+00:09:41.815 --> 00:09:44.851 line:-1 position:50%
+We call this an
+"unmatched expected failure"
+
+
+207
+00:09:44,851 --> 00:09:47,687 line:-1
+and it's part of the strict
+behavior that is the default
+
+
+208
+00:09:47,687 --> 00:09:50,323 line:-1
+for XCTExpectFailure.
+
+
+209
+00:09:50,323 --> 00:09:52,692 line:-1
+This behavior helps you
+maintain your code
+
+
+210
+00:09:52.692 --> 00:09:57.964 line:-1 position:50%
+by prompting you to remove
+unnecessary calls to the API.
+
+
+211
+00:09:57,964 --> 00:10:02,368 line:-1
+But what about tests
+that only fail some of the time?
+
+
+212
+00:10:02.368 --> 00:10:05.038 line:-1 position:50%
+There are cases in which
+a test might fail sometimes
+
+
+213
+00:10:05,038 --> 00:10:06,840 line:-1
+but not other times.
+
+
+214
+00:10:06.840 --> 00:10:08.741 line:-1 position:50%
+These fall into two categories,
+
+
+215
+00:10:08,741 --> 00:10:10,643 line:-1
+the first of which
+is deterministic
+
+
+216
+00:10:10,643 --> 00:10:13,947 line:-1
+and includes environmental
+or other knowable conditions
+
+
+217
+00:10:13,947 --> 00:10:15,281 line:-1
+such as the earlier example
+
+
+218
+00:10:15.281 --> 00:10:19.185 line:-1 position:50%
+of a test that only fails
+on certain platforms.
+
+
+219
+00:10:19.185 --> 00:10:23.223 line:-1 position:50%
+On the other hand, some failures
+are inherently nondeterministic.
+
+
+220
+00:10:23.223 --> 00:10:25.525 line:-1 position:50%
+These might be caused
+by timing issues,
+
+
+221
+00:10:25.525 --> 00:10:27.494 line:-1 position:50%
+unreliable ordering
+dependencies,
+
+
+222
+00:10:27.494 --> 00:10:29.262 line:-1 position:50%
+or concurrency bugs.
+
+
+223
+00:10:29.262 --> 00:10:31.164 line:-1 position:50%
+For nondeterministic failures,
+
+
+224
+00:10:31,164 --> 00:10:33,166 line:-1
+the strict behavior
+isn't helpful;
+
+
+225
+00:10:33,166 --> 00:10:36,436 line:-1
+it just generates noise.
+
+
+226
+00:10:36,436 --> 00:10:40,373 line:-1
+Once again, the options object
+provides a way to control this.
+
+
+227
+00:10:40.373 --> 00:10:43.276 line:-1 position:50%
+The isStrict flag,
+which defaults to true,
+
+
+228
+00:10:43,276 --> 00:10:45,111 line:-1
+can be turned off.
+
+
+229
+00:10:45.111 --> 00:10:48.181 line:-1 position:50%
+Then, if XCTExpectFailure
+does not catch a failure,
+
+
+230
+00:10:48.181 --> 00:10:51.651 line:-1 position:50%
+it will still allow the test to pass.
+
+
+231
+00:10:51.651 --> 00:10:55.088 line:-1 position:50%
+In Swift, you can also specify
+the strict behavior
+
+
+232
+00:10:55,088 --> 00:10:58,791 line:-1
+as a direct parameter
+to XCTExpectFailure.
+
+
+233
+00:10:58,791 --> 00:11:01,828 line:-1
+Disabling strict behavior
+is great way to handle flaky
+
+
+234
+00:11:01,828 --> 00:11:04,998 line:-1
+or nondeterministic tests
+in your project.
+
+
+235
+00:11:04,998 --> 00:11:05,965 line:-1
+As an aside,
+
+
+236
+00:11:05.965 --> 00:11:08.968 line:-1 position:50%
+when you need to investigate
+a nondeterministic failure,
+
+
+237
+00:11:08.968 --> 00:11:11.971 line:-1 position:50%
+Xcode makes it easy
+to run a test multiple times,
+
+
+238
+00:11:11,971 --> 00:11:15,375 line:-1
+stopping when it fails
+or some other condition is met.
+
+
+239
+00:11:15,375 --> 00:11:17,944 line:-1
+This can be really helpful
+in tracking down failures
+
+
+240
+00:11:17,944 --> 00:11:19,746 line:-1
+in flaky tests.
+
+
+241
+00:11:19,746 --> 00:11:21,981 line:-1
+For more about this,
+watch the session
+
+
+242
+00:11:21,981 --> 00:11:25,718 line:0
+"Diagnose Unreliable Code
+with Test Repetitions."
+
+
+243
+00:11:25,718 --> 00:11:27,754 line:-1
+So that's XCTExpectFailure --
+
+
+244
+00:11:27,754 --> 00:11:31,357 line:-1
+APIs in XCTest for improving
+the signal-to-noise
+
+
+245
+00:11:31.357 --> 00:11:33.459 line:-1 position:50%
+in your test suite results.
+
+
+246
+00:11:33.459 --> 00:11:36.563 line:-1 position:50%
+This helps you identify
+new issues more efficiently,
+
+
+247
+00:11:36,563 --> 00:11:38,765 line:-1
+leading to higher-quality code.
+
+
+248
+00:11:38,765 --> 00:11:40,767 line:-1
+Thanks for watching!
+
+
+249
+00:11:40,767 --> 00:11:43,970 size:2% align:right position:90%
+♪
+

@@ -1,0 +1,2985 @@
+2
+00:00:02.369 --> 00:00:07.374 line:-1 align:center
+[music]
+
+
+3
+00:00:09.543 --> 00:00:10.244 line:-1 align:center
+[Nick] Hi.
+
+
+4
+00:00:10.277 --> 00:00:12.446 line:-2 align:center
+I'm Nick Gillett,
+an engineer here at Apple
+
+
+5
+00:00:12,479 --> 00:00:14,014 line:-1
+on the Core Data team.
+
+
+6
+00:00:14.047 --> 00:00:15.082 line:-1 align:center
+In this session,
+
+
+7
+00:00:15.115 --> 00:00:17.351 line:-2 align:center
+I'll show you how to easily
+build applications
+
+
+8
+00:00:17.384 --> 00:00:19.820 line:-2 align:center
+that use
+NSPersistentCloudKitContainer
+
+
+9
+00:00:19,853 --> 00:00:20,854 line:-1
+to share data
+
+
+10
+00:00:20,888 --> 00:00:22,689 line:-1
+with multiple iCloud users.
+
+
+11
+00:00:23.290 --> 00:00:24.057 line:-1 align:center
+First,
+
+
+12
+00:00:24,091 --> 00:00:25,692 line:-1
+we'll discuss what sharing means
+
+
+13
+00:00:25.726 --> 00:00:27.995 line:-2 align:center
+with
+NSPersistentCloudKitContainer
+
+
+14
+00:00:28.028 --> 00:00:32.332 line:-2 align:center
+and how that affects the types
+of experiences you can build.
+
+
+15
+00:00:32,366 --> 00:00:37,070 line:-2
+Next, we'll take a deep dive
+into the mechanics of sharing.
+
+
+16
+00:00:37,104 --> 00:00:38,338 line:-1
+And finally,
+
+
+17
+00:00:38.372 --> 00:00:39.706 line:-1 align:center
+we'll briefly discuss how
+
+
+18
+00:00:39,740 --> 00:00:41,675 line:-1
+NSPersistentCloudKitContainer
+
+
+19
+00:00:41.708 --> 00:00:44.111 line:-2 align:center
+can help you enable
+some additional protection
+
+
+20
+00:00:44.144 --> 00:00:46.914 line:-2 align:center
+for sensitive data
+stored in iCloud.
+
+
+21
+00:00:46.947 --> 00:00:49.650 line:-1 align:center
+Let's get started with sharing.
+
+
+22
+00:00:50,450 --> 00:00:52,019 line:-1
+For the sake of discussion,
+
+
+23
+00:00:52.052 --> 00:00:54.288 line:-2 align:center
+let's imagine I want
+to share this photo
+
+
+24
+00:00:54,321 --> 00:00:55,989 line:-1
+with some friends of mine.
+
+
+25
+00:00:56.023 --> 00:00:57.591 line:-1 align:center
+How might I do that?
+
+
+26
+00:00:57.624 --> 00:01:00.060 line:-2 align:center
+On Apple platforms,
+there are a number of ways
+
+
+27
+00:01:00,093 --> 00:01:03,864 line:-2
+we can share the data
+our applications create.
+
+
+28
+00:01:03.897 --> 00:01:06.133 line:-2 align:center
+Photos implements
+a system control
+
+
+29
+00:01:06,166 --> 00:01:07,501 line:-1
+here in the lower left
+
+
+30
+00:01:07.534 --> 00:01:10.270 line:-2 align:center
+that allows me to call up
+an Action sheet.
+
+
+31
+00:01:10.304 --> 00:01:13.240 line:-2 align:center
+It has a wide variety
+of actions I can take,
+
+
+32
+00:01:13.273 --> 00:01:16.410 line:-2 align:center
+including a number of ways
+to share.
+
+
+33
+00:01:16.443 --> 00:01:17.845 line:-1 align:center
+For example,
+
+
+34
+00:01:17,878 --> 00:01:22,082 line:-2
+I can send it to my friends
+as an iMessage or email.
+
+
+35
+00:01:22,115 --> 00:01:25,185 line:-2
+But ideally,
+we would have a single place
+
+
+36
+00:01:25.219 --> 00:01:26.920 line:-1 align:center
+directly in the Photos app
+
+
+37
+00:01:26,954 --> 00:01:31,325 line:-2
+where my friends and I can share
+our photos with each other.
+
+
+38
+00:01:31.358 --> 00:01:33.260 line:-1 align:center
+When I'm signed in to iCloud,
+
+
+39
+00:01:33,293 --> 00:01:36,096 line:-2
+Photos supports
+another option for sharing:
+
+
+40
+00:01:36.129 --> 00:01:37.998 line:-1 align:center
+a shared album.
+
+
+41
+00:01:38.031 --> 00:01:41.802 line:-2 align:center
+Photos shared albums create
+a shared collection of images
+
+
+42
+00:01:41.835 --> 00:01:46.874 line:-2 align:center
+that other users can view and,
+if desired, contribute to.
+
+
+43
+00:01:46,907 --> 00:01:49,042 line:-2
+I simply give
+the new album a title
+
+
+44
+00:01:49.076 --> 00:01:50.511 line:-1 align:center
+and then tap Next
+
+
+45
+00:01:50.544 --> 00:01:53.213 line:-2 align:center
+to choose
+the set of participants.
+
+
+46
+00:01:53,247 --> 00:01:56,717 line:-2
+Here I've chosen four friends
+to share the photo with.
+
+
+47
+00:01:56,750 --> 00:02:01,388 line:-2
+Heather, Jermaine, Percy,
+and Mary are all test accounts
+
+
+48
+00:02:01,421 --> 00:02:05,592 line:-2
+I regularly work with when
+I'm building sharing features.
+
+
+49
+00:02:05.626 --> 00:02:06.960 line:-1 align:center
+When I tap Next,
+
+
+50
+00:02:06,994 --> 00:02:10,697 line:-2
+I can see my new album
+with the photo I shared.
+
+
+51
+00:02:10,731 --> 00:02:13,734 line:-2
+Photos also allows me to view
+the participants on the album
+
+
+52
+00:02:13.767 --> 00:02:17.137 line:-2 align:center
+by tapping this person icon
+in the upper right.
+
+
+53
+00:02:17,171 --> 00:02:21,542 line:-2
+Tapping that brings up
+the set of participants.
+
+
+54
+00:02:21.575 --> 00:02:24.011 line:-2 align:center
+Here I can see
+their invitation status
+
+
+55
+00:02:24.044 --> 00:02:27.381 line:-2 align:center
+and some of the permissions
+on the shared album.
+
+
+56
+00:02:27.414 --> 00:02:30.083 line:-2 align:center
+How might we build
+an experience like this?
+
+
+57
+00:02:30,117 --> 00:02:31,652 line:-1
+And more importantly,
+
+
+58
+00:02:31,685 --> 00:02:32,886 line:-1
+how would such an experience
+
+
+59
+00:02:32,920 --> 00:02:35,322 line:-2
+change
+the applications we build?
+
+
+60
+00:02:35,355 --> 00:02:37,491 line:-1
+Well, let me show you.
+
+
+61
+00:02:37.524 --> 00:02:39.293 line:-1 align:center
+To demonstrate how sharing works
+
+
+62
+00:02:39.326 --> 00:02:41.828 line:-2 align:center
+with
+NSPersistentCloudKitContainer,
+
+
+63
+00:02:41,862 --> 00:02:44,264 line:-2
+I'm going to be using
+our sample application,
+
+
+64
+00:02:44,298 --> 00:02:47,000 line:-2
+Syncing a Core Data Store
+with the Cloud.
+
+
+65
+00:02:47,034 --> 00:02:49,436 line:-2
+I've already modified it
+to support sharing posts
+
+
+66
+00:02:49,469 --> 00:02:51,238 line:-1
+with different iCloud users.
+
+
+67
+00:02:51.271 --> 00:02:52.506 line:-1 align:center
+And here on the table,
+
+
+68
+00:02:52.539 --> 00:02:54.808 line:-2 align:center
+I have a small pool
+of devices with me,
+
+
+69
+00:02:54,842 --> 00:02:56,710 line:-2
+each logged in
+to an iCloud account
+
+
+70
+00:02:56,743 --> 00:03:00,347 line:-2
+belonging to Heather,
+Jermaine, or Mary.
+
+
+71
+00:03:00,380 --> 00:03:02,883 line:-2
+I'm going to start
+by launching my application
+
+
+72
+00:03:02.916 --> 00:03:04.751 line:-1 align:center
+on Jermaine's device
+
+
+73
+00:03:04.785 --> 00:03:07.521 line:-2 align:center
+and tapping this plus(+) sign
+in the upper-right corner
+
+
+74
+00:03:07,554 --> 00:03:09,389 line:-1
+to create a new post.
+
+
+75
+00:03:09,423 --> 00:03:12,926 line:-2
+I'll give it a simple title--
+"Sharing demos are great"--
+
+
+76
+00:03:12.960 --> 00:03:14.428 line:-1 align:center
+and tap Done.
+
+
+77
+00:03:17,698 --> 00:03:20,200 line:-2
+And then I'll tap
+this new Action button
+
+
+78
+00:03:20,234 --> 00:03:22,736 line:-2
+that I've added to bring up
+the sharing controller.
+
+
+79
+00:03:22.769 --> 00:03:24.438 line:-2 align:center
+I want to send each
+person an invite
+
+
+80
+00:03:24.471 --> 00:03:26.840 line:-2 align:center
+to work on this post
+with me via email.
+
+
+81
+00:03:26,874 --> 00:03:31,245 line:-2
+So I'll tap Mail and then enter
+the information for my friends.
+
+
+82
+00:03:31.278 --> 00:03:34.314 line:-2 align:center
+I've already saved Heather
+and Mary in my address book,
+
+
+83
+00:03:34,348 --> 00:03:36,216 line:-1
+so they're easy to find.
+
+
+84
+00:03:36,250 --> 00:03:39,620 line:-2
+Finally, I'll tap Send
+to send the email.
+
+
+85
+00:03:40,654 --> 00:03:42,689 line:-1
+Now, on Heather's device,
+
+
+86
+00:03:42,723 --> 00:03:46,126 line:-2
+I'll open Mail and tap the link
+inside the email I sent,
+
+
+87
+00:03:46.159 --> 00:03:48.228 line:-1 align:center
+which opens up my application.
+
+
+88
+00:03:48,262 --> 00:03:49,963 line:-1
+After a short wait,
+
+
+89
+00:03:49.997 --> 00:03:52.299 line:-2 align:center
+the post I created
+on Jermaine's device
+
+
+90
+00:03:52.332 --> 00:03:54.735 line:-1 align:center
+is now visible on this device.
+
+
+91
+00:03:59,106 --> 00:04:00,674 line:-1
+On Mary's device,
+
+
+92
+00:04:00.707 --> 00:04:04.178 line:-2 align:center
+I'll open Mail and tap the link
+inside the email I sent,
+
+
+93
+00:04:04,211 --> 00:04:06,079 line:-1
+which opens up my application.
+
+
+94
+00:04:07.014 --> 00:04:08.682 line:-1 align:center
+After a short wait,
+
+
+95
+00:04:08,715 --> 00:04:10,717 line:-2
+the post I created
+on Jermaine's device
+
+
+96
+00:04:10.751 --> 00:04:14.254 line:-2 align:center
+is now visible
+on this device as well.
+
+
+97
+00:04:14.288 --> 00:04:16.256 line:-1 align:center
+But how does all of this work?
+
+
+98
+00:04:16,290 --> 00:04:18,292 line:-2
+And exactly how much
+did I have to change
+
+
+99
+00:04:18,325 --> 00:04:20,527 line:-1
+in the sample application?
+
+
+100
+00:04:20.561 --> 00:04:23.363 line:-1 align:center
+The answer is, "Not much."
+
+
+101
+00:04:23,397 --> 00:04:26,500 line:-2
+Sharing is by far
+the most complicated feature
+
+
+102
+00:04:26,533 --> 00:04:29,469 line:-2
+we have built in to
+NSPersistentCloudKitContainer.
+
+
+103
+00:04:29.503 --> 00:04:32.573 line:-2 align:center
+It brings together a huge
+amount of domain knowledge
+
+
+104
+00:04:32.606 --> 00:04:34.708 line:-1 align:center
+about how CloudKit works
+
+
+105
+00:04:34,741 --> 00:04:37,578 line:-2
+and how to operate
+on records and objects.
+
+
+106
+00:04:37.611 --> 00:04:39.146 line:-1 align:center
+Naturally,
+
+
+107
+00:04:39.179 --> 00:04:40.914 line:-2 align:center
+this domain knowledge
+is reflected
+
+
+108
+00:04:40,948 --> 00:04:42,549 line:-1
+in the APIs we have built
+
+
+109
+00:04:42.583 --> 00:04:45.018 line:-2 align:center
+for
+NSPersistentCloudKitContainer.
+
+
+110
+00:04:45,052 --> 00:04:47,154 line:-2
+So let's
+take a look at exactly how
+
+
+111
+00:04:47.187 --> 00:04:49.990 line:-2 align:center
+NSPersistentCloudKitContainer
+shares objects.
+
+
+112
+00:04:51,725 --> 00:04:53,026 line:-1
+In my brief demo,
+
+
+113
+00:04:53,060 --> 00:04:54,995 line:-2
+I showed an application
+that makes use
+
+
+114
+00:04:55,028 --> 00:04:57,397 line:-1
+of two CloudKit databases,
+
+
+115
+00:04:57.431 --> 00:05:00.300 line:-2 align:center
+the .private and the .shared
+database.
+
+
+116
+00:05:00,334 --> 00:05:02,936 line:-2
+Each of these is mirrored
+to a persistent store
+
+
+117
+00:05:02,970 --> 00:05:04,471 line:-1
+in my application,
+
+
+118
+00:05:04,505 --> 00:05:06,573 line:-2
+one using the .private
+database scope
+
+
+119
+00:05:06.607 --> 00:05:09.910 line:-2 align:center
+and the other using
+the .shared database scope.
+
+
+120
+00:05:09.943 --> 00:05:12.479 line:-2 align:center
+Using a single managed
+object context,
+
+
+121
+00:05:12.513 --> 00:05:16.517 line:-2 align:center
+my application can access
+data in both stores.
+
+
+122
+00:05:16.550 --> 00:05:21.088 line:-2 align:center
+Let's look at that change
+in a bit more detail.
+
+
+123
+00:05:21,121 --> 00:05:23,090 line:-2
+The first change
+I had to make
+
+
+124
+00:05:23.123 --> 00:05:25.659 line:-2 align:center
+was to tell
+NSPersistentCloudKitContainer
+
+
+125
+00:05:25.692 --> 00:05:28.061 line:-2 align:center
+to mirror the .shared
+CloudKit database
+
+
+126
+00:05:28.095 --> 00:05:30.664 line:-1 align:center
+to a new persistent store.
+
+
+127
+00:05:30.697 --> 00:05:33.800 line:-2 align:center
+I did this by modifying
+the CoreDataStack,
+
+
+128
+00:05:33,834 --> 00:05:35,969 line:-2
+adding a new persistent store
+description--
+
+
+129
+00:05:36.003 --> 00:05:38.739 line:-2 align:center
+here just a copy of the one
+for the .private store
+
+
+130
+00:05:38,772 --> 00:05:41,175 line:-1
+with a different URL.
+
+
+131
+00:05:41.208 --> 00:05:44.244 line:-2 align:center
+Then, I set its
+CloudKit container options’
+
+
+132
+00:05:44.278 --> 00:05:46.947 line:-2 align:center
+databaseScope property
+to .shared.
+
+
+133
+00:05:46.980 --> 00:05:49.116 line:-1 align:center
+This is new iOS 15
+
+
+134
+00:05:49,149 --> 00:05:51,685 line:-2
+and allows
+NSPersistentCloudKitContainer
+
+
+135
+00:05:51,718 --> 00:05:54,188 line:-2
+to be configured to mirror
+persistent stores
+
+
+136
+00:05:54.221 --> 00:05:56.256 line:-1 align:center
+to the .shared CloudKit database.
+
+
+137
+00:05:56,290 --> 00:05:58,058 line:-1
+To complete the demo,
+
+
+138
+00:05:58,091 --> 00:06:00,027 line:-1
+I had to make two other changes.
+
+
+139
+00:06:01.595 --> 00:06:05.165 line:-2 align:center
+I adopted a new method
+on NSPersistentCloudKitContainer
+
+
+140
+00:06:05,199 --> 00:06:06,667 line:-1
+to create the share.
+
+
+141
+00:06:06,700 --> 00:06:10,003 line:-2
+share(_ managedObjects: to share:
+completion:)
+
+
+142
+00:06:10.037 --> 00:06:11.171 line:-1 align:center
+is a new method
+
+
+143
+00:06:11.205 --> 00:06:15.709 line:-2 align:center
+designed to pair directly
+with UICloudSharingController.
+
+
+144
+00:06:15.742 --> 00:06:17.978 line:-1 align:center
+I simply added a button action
+
+
+145
+00:06:18.011 --> 00:06:21.615 line:-2 align:center
+to instantiate an instance
+of UICloudSharingController.
+
+
+146
+00:06:21,648 --> 00:06:24,751 line:-2
+share(_ managedObjects: to
+share: completion:)
+
+
+147
+00:06:24.785 --> 00:06:27.321 line:-2 align:center
+is meant to be invoked
+in the create-share phase
+
+
+148
+00:06:27,354 --> 00:06:30,324 line:-2
+of UICloudSharingController's
+workflow.
+
+
+149
+00:06:30.357 --> 00:06:32.559 line:-2 align:center
+It does a lot of work
+under the covers
+
+
+150
+00:06:32,593 --> 00:06:34,228 line:-1
+to identify all of the objects
+
+
+151
+00:06:34,261 --> 00:06:37,464 line:-2
+that need to be shared
+and to create a share
+
+
+152
+00:06:37.497 --> 00:06:40.000 line:-1 align:center
+for them if needed.
+
+
+153
+00:06:40,033 --> 00:06:41,235 line:-1
+Finally,
+
+
+154
+00:06:41.268 --> 00:06:43.237 line:-2 align:center
+I invoke
+UICloudSharingController's
+
+
+155
+00:06:43.270 --> 00:06:45.472 line:-2 align:center
+completion block
+with the results
+
+
+156
+00:06:45,506 --> 00:06:48,375 line:-2
+provided by
+NSPersistentCloudKitContainer,
+
+
+157
+00:06:48,408 --> 00:06:52,279 line:-2
+which tells it I'm ready
+to continue the sharing flow.
+
+
+158
+00:06:52.312 --> 00:06:54.348 line:-2 align:center
+This means
+that you can share objects
+
+
+159
+00:06:54.381 --> 00:06:56.450 line:-2 align:center
+using
+NSPersistentCloudKitContainer
+
+
+160
+00:06:56,483 --> 00:06:58,652 line:-1
+in just a few lines of code.
+
+
+161
+00:06:59.419 --> 00:07:01.154 line:-1 align:center
+The last change I had to make
+
+
+162
+00:07:01,188 --> 00:07:04,291 line:-2
+was to be able
+to accept share invitations,
+
+
+163
+00:07:04.324 --> 00:07:06.226 line:-1 align:center
+which I do using this new method
+
+
+164
+00:07:06,260 --> 00:07:08,629 line:-2
+on
+NSPersistentCloudKitContainer:
+
+
+165
+00:07:08.662 --> 00:07:13.901 line:-2 align:center
+acceptShareInvitations(from
+metadata: into persistentStore:
+
+
+166
+00:07:13,934 --> 00:07:17,804 line:-2
+I used this method in
+the AppDelegeate's application
+
+
+167
+00:07:17,838 --> 00:07:21,041 line:-2
+userDidAcceptCloudKitShare(
+with metadata:) method
+
+
+168
+00:07:21.074 --> 00:07:24.044 line:-2 align:center
+to simply pass the incoming
+share metadata
+
+
+169
+00:07:24.077 --> 00:07:27.447 line:-2 align:center
+directly to
+NSPersistentCloudKitContainer.
+
+
+170
+00:07:27,481 --> 00:07:29,550 line:-1
+This method accepts the share
+
+
+171
+00:07:29,583 --> 00:07:32,553 line:-2
+with the CloudKit server
+in the container associated
+
+
+172
+00:07:32,586 --> 00:07:34,955 line:-2
+with the persistent store
+I provide--
+
+
+173
+00:07:34,988 --> 00:07:38,125 line:-2
+here, the shared store
+for my application.
+
+
+174
+00:07:38,158 --> 00:07:40,194 line:-1
+After the share is accepted,
+
+
+175
+00:07:40.227 --> 00:07:43.497 line:-2 align:center
+NSPersistentCloudKitContainer
+automatically syncs
+
+
+176
+00:07:43.530 --> 00:07:46.900 line:-2 align:center
+all of the shared objects
+into the local store.
+
+
+177
+00:07:46.934 --> 00:07:49.903 line:-2 align:center
+So that's how we use
+NSPersistentCloudKitContainer
+
+
+178
+00:07:49.937 --> 00:07:52.940 line:-2 align:center
+to combine the .private
+and .shared databases,
+
+
+179
+00:07:52.973 --> 00:07:57.177 line:-2 align:center
+create shares for objects,
+and accept sharing invitations.
+
+
+180
+00:07:57,211 --> 00:07:59,580 line:-2
+But our applications
+are usually designed
+
+
+181
+00:07:59,613 --> 00:08:02,516 line:-2
+to manage large collections
+of data.
+
+
+182
+00:08:02.549 --> 00:08:04.451 line:-2 align:center
+To make it easy to build
+applications
+
+
+183
+00:08:04,484 --> 00:08:06,153 line:-1
+that use this shared data,
+
+
+184
+00:08:06,186 --> 00:08:10,023 line:-2
+NSPersistentCloudKitContainer
+has to also help us make sense
+
+
+185
+00:08:10,057 --> 00:08:12,659 line:-2
+of all of these objects
+so that we can build
+
+
+186
+00:08:12.693 --> 00:08:15.362 line:-2 align:center
+informative user interfaces
+for our users.
+
+
+187
+00:08:16.029 --> 00:08:18.599 line:-2 align:center
+To understand these challenges
+a bit more clearly,
+
+
+188
+00:08:18.632 --> 00:08:22.369 line:-2 align:center
+we need to identify two crucial
+concepts for sharing.
+
+
+189
+00:08:24,671 --> 00:08:28,175 line:-2
+The first is the notion
+of a set of actors.
+
+
+190
+00:08:28.208 --> 00:08:31.612 line:-2 align:center
+We call them the owner
+and the participants.
+
+
+191
+00:08:31.645 --> 00:08:35.649 line:-2 align:center
+The owner is the iCloud account
+that actually owns an object.
+
+
+192
+00:08:35,682 --> 00:08:40,454 line:-2
+Owners create and share objects
+with a set of participants.
+
+
+193
+00:08:40.487 --> 00:08:43.991 line:-2 align:center
+A participant is any
+other iCloud account
+
+
+194
+00:08:44.024 --> 00:08:47.694 line:-2 align:center
+that is allowed to operate
+on those objects in some way.
+
+
+195
+00:08:47,728 --> 00:08:51,398 line:-2
+Participants can have
+different roles and permissions
+
+
+196
+00:08:51.431 --> 00:08:55.602 line:-2 align:center
+that constrain how they can act
+on a particular set of objects,
+
+
+197
+00:08:55.636 --> 00:08:58.772 line:-2 align:center
+which brings us
+to the second key concept:
+
+
+198
+00:08:58,805 --> 00:09:01,208 line:-2
+how
+NSPersistentCloudKitContainer
+
+
+199
+00:09:01,241 --> 00:09:04,945 line:-2
+and CloudKit
+structure these shared objects.
+
+
+200
+00:09:05.913 --> 00:09:07.080 line:-1 align:center
+In Core Data,
+
+
+201
+00:09:07,114 --> 00:09:10,884 line:-2
+we think of our objects
+in terms of NSManagedObject.
+
+
+202
+00:09:10.918 --> 00:09:14.855 line:-2 align:center
+NSPersistentCloudKitContainer
+turns those managed objects
+
+
+203
+00:09:14,888 --> 00:09:19,493 line:-2
+into instances of CKRecord
+that are stored in CloudKit.
+
+
+204
+00:09:19,526 --> 00:09:21,728 line:-2
+If you've worked
+with sharing before,
+
+
+205
+00:09:21.762 --> 00:09:24.364 line:-2 align:center
+you're probably familiar
+with hierarchical sharing,
+
+
+206
+00:09:24,398 --> 00:09:26,733 line:-2
+where these records
+are associated
+
+
+207
+00:09:26.767 --> 00:09:29.570 line:-2 align:center
+with a root record
+called the share.
+
+
+208
+00:09:29,603 --> 00:09:30,737 line:-1
+But this isn't how
+
+
+209
+00:09:30,771 --> 00:09:33,841 line:-2
+NSPersistentCloudKitContainer
+works.
+
+
+210
+00:09:33.874 --> 00:09:38.212 line:-2 align:center
+NSPersistentCloudKitContainer
+uses a new feature in CloudKit
+
+
+211
+00:09:38,245 --> 00:09:41,882 line:-2
+called Record Zone Sharing,
+covered in more detail
+
+
+212
+00:09:41,915 --> 00:09:44,885 line:-2
+in the session
+"What's New in CloudKit."
+
+
+213
+00:09:44,918 --> 00:09:48,755 line:-2
+But let's take a look at how
+NSPersistentCloudKitContainer
+
+
+214
+00:09:48.789 --> 00:09:52.993 line:-2 align:center
+uses Record Zone Sharing
+to share managed objects.
+
+
+215
+00:09:53.026 --> 00:09:54.828 line:-1 align:center
+In a CloudKit database--
+
+
+216
+00:09:54.862 --> 00:09:56.930 line:-2 align:center
+for example,
+the .private database--
+
+
+217
+00:09:56,964 --> 00:10:01,368 line:-2
+NSPersistentCloudKitContainer
+typically manages a private zone
+
+
+218
+00:10:01,401 --> 00:10:04,838 line:-2
+to store the objects
+an application creates.
+
+
+219
+00:10:04.872 --> 00:10:06.607 line:-1 align:center
+In Record Zone Sharing,
+
+
+220
+00:10:06,640 --> 00:10:11,745 line:-2
+shared CKRecords are contained
+inside a shared CKRecordZone.
+
+
+221
+00:10:11,778 --> 00:10:14,882 line:-2
+Shared record zones
+are identified by the presence
+
+
+222
+00:10:14,915 --> 00:10:17,317 line:-1
+of a single CKShare record.
+
+
+223
+00:10:17.351 --> 00:10:19.386 line:-1 align:center
+As with hierarchical sharing,
+
+
+224
+00:10:19,419 --> 00:10:22,789 line:-2
+this record contains
+all of the information necessary
+
+
+225
+00:10:22,823 --> 00:10:24,925 line:-2
+to work with the zone,
+like the owner,
+
+
+226
+00:10:24,958 --> 00:10:29,029 line:-2
+the participants,
+and their permissions and roles.
+
+
+227
+00:10:29,062 --> 00:10:31,965 line:-2
+NSPersistentCloudKitContainer
+manages these zones
+
+
+228
+00:10:31.999 --> 00:10:35.602 line:-2 align:center
+and automatically assigns
+records to them.
+
+
+229
+00:10:35.636 --> 00:10:37.538 line:-1 align:center
+Because there's no root record,
+
+
+230
+00:10:37,571 --> 00:10:40,908 line:-2
+NSPersistentCloudKitContainer
+also has to understand
+
+
+231
+00:10:40,941 --> 00:10:44,578 line:-2
+how the concepts of owners
+and participants apply
+
+
+232
+00:10:44,611 --> 00:10:46,980 line:-1
+to the entire record zone.
+
+
+233
+00:10:47,848 --> 00:10:50,250 line:-2
+Let's imagine I have
+a collection of people
+
+
+234
+00:10:50,284 --> 00:10:52,219 line:-1
+I want to share with.
+
+
+235
+00:10:52.252 --> 00:10:54.922 line:-2 align:center
+Sharing with one other
+person is interesting,
+
+
+236
+00:10:54,955 --> 00:10:56,924 line:-2
+but
+NSPersistentCloudKitContainer
+
+
+237
+00:10:56.957 --> 00:10:58.692 line:-2 align:center
+is designed
+to facilitate sharing
+
+
+238
+00:10:58.725 --> 00:11:02.196 line:-1 align:center
+for much larger populations.
+
+
+239
+00:11:02.229 --> 00:11:05.165 line:-2 align:center
+Each of these participants
+will be able to access
+
+
+240
+00:11:05.199 --> 00:11:08.068 line:-2 align:center
+and operate on the objects
+I share with them.
+
+
+241
+00:11:08,101 --> 00:11:10,237 line:-1
+And I will be able to access
+
+
+242
+00:11:10,270 --> 00:11:11,738 line:-1
+and operate on the objects
+
+
+243
+00:11:11.772 --> 00:11:14.374 line:-1 align:center
+that they share with me.
+
+
+244
+00:11:14,408 --> 00:11:17,344 line:-2
+Each participant will also
+have their own collection
+
+
+245
+00:11:17.377 --> 00:11:18.979 line:-1 align:center
+of devices.
+
+
+246
+00:11:19.012 --> 00:11:21.114 line:-2 align:center
+With
+NSPersistentCloudKitContainer,
+
+
+247
+00:11:21.148 --> 00:11:23.684 line:-2 align:center
+applications can operate
+on shared objects
+
+
+248
+00:11:23.717 --> 00:11:26.553 line:-1 align:center
+from any Apple device.
+
+
+249
+00:11:26.587 --> 00:11:28.322 line:-1 align:center
+For each participant,
+
+
+250
+00:11:28,355 --> 00:11:30,257 line:-1
+NSPersistentCloudKitContainer
+
+
+251
+00:11:30,290 --> 00:11:34,094 line:-2
+manages objects
+in two CloudKit databases,
+
+
+252
+00:11:34.127 --> 00:11:37.598 line:-2 align:center
+the .private
+and the .shared database.
+
+
+253
+00:11:37.631 --> 00:11:39.399 line:-1 align:center
+In my .private database,
+
+
+254
+00:11:39,433 --> 00:11:42,603 line:-2
+I would see records
+and zones that I own
+
+
+255
+00:11:42,636 --> 00:11:45,272 line:-2
+whether or not
+those zones are shared.
+
+
+256
+00:11:45.305 --> 00:11:46.340 line:-1 align:center
+For example,
+
+
+257
+00:11:46.373 --> 00:11:47.207 line:-1 align:center
+the zone that
+
+
+258
+00:11:47.241 --> 00:11:50.143 line:-2 align:center
+NSPersistentCloudKitContainer
+manages.
+
+
+259
+00:11:50,177 --> 00:11:51,612 line:-1
+With sharing,
+
+
+260
+00:11:51.645 --> 00:11:53.447 line:-1 align:center
+NSPersistentCloudKitContainer
+
+
+261
+00:11:53,480 --> 00:11:56,283 line:-2
+will also create shared zones
+for me
+
+
+262
+00:11:56,316 --> 00:11:58,585 line:-1
+with a CKShare record
+
+
+263
+00:11:58,619 --> 00:12:02,990 line:-2
+that controls who can access
+these zones that I own.
+
+
+264
+00:12:03.023 --> 00:12:07.594 line:-2 align:center
+I and, if allowed,
+other participants can add
+
+
+265
+00:12:07.628 --> 00:12:11.532 line:-2 align:center
+and modify records
+in these shared zones.
+
+
+266
+00:12:11,565 --> 00:12:13,200 line:-1
+In my .shared database,
+
+
+267
+00:12:13.233 --> 00:12:14.735 line:-1 align:center
+I would see record zones
+
+
+268
+00:12:14.768 --> 00:12:17.371 line:-2 align:center
+that other users
+have shared with me.
+
+
+269
+00:12:17.404 --> 00:12:20.941 line:-2 align:center
+If I'm allowed to,
+I can add records that I own
+
+
+270
+00:12:20,974 --> 00:12:22,609 line:-1
+to any of those zones
+
+
+271
+00:12:22.643 --> 00:12:25.546 line:-2 align:center
+just as they can
+in the zones that I own.
+
+
+272
+00:12:27,481 --> 00:12:30,817 line:-2
+Another user will see
+a different set of zones
+
+
+273
+00:12:30,851 --> 00:12:33,420 line:-2
+in their .private and .shared
+databases,
+
+
+274
+00:12:33,453 --> 00:12:37,257 line:-2
+depending on whether or not they
+are the owner of those zones.
+
+
+275
+00:12:37,291 --> 00:12:40,994 line:-2
+For example, this user
+may have a private zone
+
+
+276
+00:12:41,028 --> 00:12:45,599 line:-2
+and a shared zone that they own
+in their .private database.
+
+
+277
+00:12:45,632 --> 00:12:46,967 line:-1
+In addition,
+
+
+278
+00:12:47,000 --> 00:12:50,704 line:-2
+they would see my two zones
+that I share with them
+
+
+279
+00:12:50.737 --> 00:12:53.874 line:-2 align:center
+and any other zones
+they are a participant on
+
+
+280
+00:12:53.907 --> 00:12:56.844 line:-1 align:center
+in their .shared database.
+
+
+281
+00:12:56,877 --> 00:13:00,013 line:-2
+So how does
+NSPersistentCloudKitContainer
+
+
+282
+00:13:00.047 --> 00:13:02.382 line:-1 align:center
+know where to keep your records?
+
+
+283
+00:13:02,416 --> 00:13:03,717 line:-1
+In many cases,
+
+
+284
+00:13:03,750 --> 00:13:05,986 line:-2
+it can infer
+where records belong
+
+
+285
+00:13:06.019 --> 00:13:09.456 line:-2 align:center
+based on the relationship
+they have to other objects.
+
+
+286
+00:13:09,489 --> 00:13:11,291 line:-1
+But you can also tell
+
+
+287
+00:13:11,325 --> 00:13:14,127 line:-2
+share(_ managedObjects:
+to share: completion:)
+
+
+288
+00:13:14.161 --> 00:13:17.030 line:-2 align:center
+to store objects
+in a specific shared zone
+
+
+289
+00:13:17.064 --> 00:13:20.701 line:-1 align:center
+by passing it a non-nil CKShare.
+
+
+290
+00:13:20,734 --> 00:13:21,735 line:-1
+For example,
+
+
+291
+00:13:21,768 --> 00:13:25,672 line:-2
+if I change this line of code
+to use an existing share,
+
+
+292
+00:13:25.706 --> 00:13:28.876 line:-2 align:center
+NSPersistentCloudKitContainer
+will attempt to assign
+
+
+293
+00:13:28,909 --> 00:13:32,145 line:-2
+the provided post object
+to that share.
+
+
+294
+00:13:32,179 --> 00:13:36,350 line:-2
+These are all the changes
+I had to make for my first demo,
+
+
+295
+00:13:36.383 --> 00:13:39.786 line:-2 align:center
+but my application also needs
+to effectively communicate
+
+
+296
+00:13:39,820 --> 00:13:42,990 line:-2
+what objects are shared,
+who they're shared with,
+
+
+297
+00:13:43,023 --> 00:13:45,893 line:-2
+and what
+those participants can do.
+
+
+298
+00:13:45,926 --> 00:13:48,262 line:-2
+Our users need
+all of that information
+
+
+299
+00:13:48,295 --> 00:13:50,497 line:-2
+so that they can make
+good decisions
+
+
+300
+00:13:50,531 --> 00:13:53,367 line:-2
+about the objects they
+choose to share.
+
+
+301
+00:13:53,400 --> 00:13:55,869 line:-2
+So let's look at how I've
+changed my application
+
+
+302
+00:13:55,903 --> 00:13:58,805 line:-2
+to communicate
+these states and privileges.
+
+
+303
+00:13:58,839 --> 00:14:01,175 line:-2
+Returning
+to the sample application,
+
+
+304
+00:14:01,208 --> 00:14:02,376 line:-1
+I can see the data
+
+
+305
+00:14:02.409 --> 00:14:04.478 line:-2 align:center
+from the first demo
+is now displayed
+
+
+306
+00:14:04.511 --> 00:14:06.513 line:-2 align:center
+with some new
+user interface decorations
+
+
+307
+00:14:06.547 --> 00:14:08.882 line:-2 align:center
+to indicate
+that the post is shared.
+
+
+308
+00:14:08,916 --> 00:14:11,985 line:-2
+If I tap on it, I can also see
+the participants
+
+
+309
+00:14:12,019 --> 00:14:14,321 line:-2
+displayed at the bottom
+of the detail view controller
+
+
+310
+00:14:14,354 --> 00:14:18,192 line:-2
+with their role, permissions,
+and acceptance state.
+
+
+311
+00:14:18,225 --> 00:14:20,360 line:-2
+We can see here
+that Jermaine is the owner
+
+
+312
+00:14:20.394 --> 00:14:22.930 line:-2 align:center
+of the share
+that contains the post
+
+
+313
+00:14:22.963 --> 00:14:25.699 line:-2 align:center
+and Heather
+is a private participant.
+
+
+314
+00:14:25.732 --> 00:14:30.571 line:-2 align:center
+Now I'm going to add a new post,
+give it a title, and tap Done.
+
+
+315
+00:14:37,211 --> 00:14:40,447 line:-2
+I'll tap the Action button to
+bring up the sharing controller,
+
+
+316
+00:14:40,480 --> 00:14:43,717 line:-2
+but this time,
+I want the share to be read-only
+
+
+317
+00:14:43,750 --> 00:14:46,854 line:-2
+so that the participants
+can't edit or modify
+
+
+318
+00:14:46.887 --> 00:14:48.555 line:-1 align:center
+the contents of the share.
+
+
+319
+00:14:48,589 --> 00:14:52,960 line:-2
+So I'll change the share options
+to mark the share as View Only.
+
+
+320
+00:14:52,993 --> 00:14:56,830 line:-2
+Next, I'll tap Mail and
+invite Jermaine and Mary.
+
+
+321
+00:14:59.032 --> 00:15:01.468 line:-1 align:center
+Finally, I'll send the email.
+
+
+322
+00:15:03,270 --> 00:15:04,905 line:-1
+On Mary's device,
+
+
+323
+00:15:04.938 --> 00:15:06.940 line:-1 align:center
+I'll accept the new share,
+
+
+324
+00:15:06,974 --> 00:15:08,709 line:-1
+and now I can see the new post.
+
+
+325
+00:15:08.742 --> 00:15:10.043 line:-1 align:center
+If I tap on it,
+
+
+326
+00:15:10,077 --> 00:15:12,412 line:-2
+I can see that the Edit button
+is disabled
+
+
+327
+00:15:12.446 --> 00:15:15.249 line:-2 align:center
+and the participants entry
+for Mary shows
+
+
+328
+00:15:15.282 --> 00:15:17.117 line:-2 align:center
+that she is
+a Read-Only participant
+
+
+329
+00:15:17.150 --> 00:15:18.819 line:-1 align:center
+on the share.
+
+
+330
+00:15:18,852 --> 00:15:22,256 line:-2
+Likewise, I can't swipe
+to delete this post,
+
+
+331
+00:15:22.289 --> 00:15:24.725 line:-2 align:center
+and if I put the table view
+in editing mode
+
+
+332
+00:15:24,758 --> 00:15:28,262 line:-2
+by tapping the Edit button,
+I can't delete this post.
+
+
+333
+00:15:30.898 --> 00:15:34.401 line:-2 align:center
+On Jermaine's device now,
+I'll accept the new share.
+
+
+334
+00:15:37,771 --> 00:15:42,376 line:-1
+And now I can see the new post.
+
+
+335
+00:15:42.409 --> 00:15:43.644 line:-1 align:center
+If I tap on it,
+
+
+336
+00:15:43.677 --> 00:15:46.313 line:-2 align:center
+I can see that the Edit
+button is disabled
+
+
+337
+00:15:46,346 --> 00:15:49,316 line:-2
+and the participants
+entry for Jermaine shows
+
+
+338
+00:15:49.349 --> 00:15:53.120 line:-2 align:center
+that he is a Read-Only
+participant on the share.
+
+
+339
+00:15:56,924 --> 00:15:58,992 line:-2
+Even in this humble
+sample application,
+
+
+340
+00:15:59,026 --> 00:16:01,995 line:-2
+I've had to make a number
+of changes to the user interface
+
+
+341
+00:16:02.029 --> 00:16:05.933 line:-2 align:center
+to present information
+about shared objects.
+
+
+342
+00:16:05,966 --> 00:16:08,335 line:-2
+I had to decorate
+the post table cells
+
+
+343
+00:16:08,368 --> 00:16:10,604 line:-2
+to indicate
+which ones are shared.
+
+
+344
+00:16:10.637 --> 00:16:12.506 line:-1 align:center
+I also had to add logic
+
+
+345
+00:16:12.539 --> 00:16:15.209 line:-2 align:center
+to enable or disable
+editing controls,
+
+
+346
+00:16:15.242 --> 00:16:17.044 line:-2 align:center
+depending on the permissions
+assigned
+
+
+347
+00:16:17.077 --> 00:16:19.479 line:-1 align:center
+to the current user participant.
+
+
+348
+00:16:19,513 --> 00:16:20,514 line:-1
+And finally,
+
+
+349
+00:16:20.547 --> 00:16:23.250 line:-2 align:center
+I had to build new
+user interface elements
+
+
+350
+00:16:23,283 --> 00:16:26,019 line:-2
+to display information
+about the participants
+
+
+351
+00:16:26,053 --> 00:16:28,255 line:-1
+on an individual share.
+
+
+352
+00:16:28,288 --> 00:16:31,425 line:-2
+All of this work required
+accessing some metadata
+
+
+353
+00:16:31.458 --> 00:16:35.329 line:-2 align:center
+about the CKShare
+a specific post resides in.
+
+
+354
+00:16:35,362 --> 00:16:38,232 line:-2
+NSPersistentCloudKitContainer
+includes
+
+
+355
+00:16:38.265 --> 00:16:42.503 line:-2 align:center
+a number of API methods to align
+with each of these concerns.
+
+
+356
+00:16:42,536 --> 00:16:46,640 line:-2
+fetchShares(matching objectIDs:)
+is new in iOS 15
+
+
+357
+00:16:46.673 --> 00:16:50.777 line:-2 align:center
+and allows me to get the CKShare
+for a specific post.
+
+
+358
+00:16:50,811 --> 00:16:54,248 line:-2
+But these three methods
+for conditionalizing editing
+
+
+359
+00:16:54,281 --> 00:16:57,150 line:-2
+were introduced alongside our
+.public database support
+
+
+360
+00:16:57.184 --> 00:17:00.287 line:-1 align:center
+at WWDC in 2020.
+
+
+361
+00:17:00.320 --> 00:17:02.489 line:-2 align:center
+You can use these methods
+in your applications
+
+
+362
+00:17:02,523 --> 00:17:05,826 line:-2
+wherever you need to customize
+your user interfaces.
+
+
+363
+00:17:05,859 --> 00:17:10,230 line:-2
+But in my application, I took
+a slightly different approach.
+
+
+364
+00:17:10.264 --> 00:17:13.667 line:-2 align:center
+Instead of invoking methods
+on NSPersistentCloudKitContainer
+
+
+365
+00:17:13.700 --> 00:17:14.968 line:-1 align:center
+directly,
+
+
+366
+00:17:15,002 --> 00:17:17,104 line:-1
+I built a protocol that exposes
+
+
+367
+00:17:17.137 --> 00:17:21.675 line:-2 align:center
+a specific method
+for each customization I needed.
+
+
+368
+00:17:21.708 --> 00:17:23.710 line:-1 align:center
+It's called the SharingProvider.
+
+
+369
+00:17:23,744 --> 00:17:25,979 line:-2
+The SharingProvider
+has methods for binding
+
+
+370
+00:17:26.013 --> 00:17:29.550 line:-2 align:center
+directly to specific call sites
+in my application.
+
+
+371
+00:17:29.583 --> 00:17:30.817 line:-1 align:center
+For example,
+
+
+372
+00:17:30,851 --> 00:17:34,154 line:-2
+I might need to know whether
+or not an object is shared.
+
+
+373
+00:17:34.188 --> 00:17:35.422 line:-1 align:center
+If it is shared,
+
+
+374
+00:17:35,455 --> 00:17:37,658 line:-1
+I may need to fetch the CKShare
+
+
+375
+00:17:37,691 --> 00:17:40,460 line:-2
+or the participants
+for that object
+
+
+376
+00:17:40.494 --> 00:17:43.997 line:-2 align:center
+to display more information
+in my user interface.
+
+
+377
+00:17:44.031 --> 00:17:44.932 line:-1 align:center
+Finally,
+
+
+378
+00:17:44.965 --> 00:17:47.401 line:-2 align:center
+an object may not always be
+mutable
+
+
+379
+00:17:47.434 --> 00:17:50.771 line:-2 align:center
+and individual participants can
+have different permissions
+
+
+380
+00:17:50,804 --> 00:17:52,573 line:-1
+on the same object.
+
+
+381
+00:17:52,606 --> 00:17:54,474 line:-1
+This protocol makes it easy
+
+
+382
+00:17:54.508 --> 00:17:58.145 line:-2 align:center
+to add specific logic
+to my application code.
+
+
+383
+00:17:58.178 --> 00:18:00.647 line:-2 align:center
+And I'd like to show you
+one specific call site
+
+
+384
+00:18:00.681 --> 00:18:01.915 line:-1 align:center
+in the MainViewController,
+
+
+385
+00:18:01.949 --> 00:18:05.652 line:-2 align:center
+where I needed to know whether
+or not an object is shared.
+
+
+386
+00:18:05,686 --> 00:18:08,455 line:-1
+Here I used isShared to decide
+
+
+387
+00:18:08.488 --> 00:18:10.791 line:-2 align:center
+whether or not
+to convert the title of a post
+
+
+388
+00:18:10,824 --> 00:18:13,293 line:-2
+to an attributed string
+and prefix it
+
+
+389
+00:18:13,327 --> 00:18:15,295 line:-1
+with the person.circle symbol
+
+
+390
+00:18:15.329 --> 00:18:18.098 line:-2 align:center
+to show that the post
+is part of a share.
+
+
+391
+00:18:18.131 --> 00:18:21.168 line:-2 align:center
+Customizations like this
+necessarily require
+
+
+392
+00:18:21,201 --> 00:18:26,206 line:-2
+more complicated code than if
+I chose not to support sharing.
+
+
+393
+00:18:26,240 --> 00:18:28,909 line:-2
+After adding a few
+of these customizations,
+
+
+394
+00:18:28,942 --> 00:18:30,210 line:-1
+it became obvious
+
+
+395
+00:18:30.244 --> 00:18:33.447 line:-2 align:center
+I needed a way to ensure
+they all work correctly,
+
+
+396
+00:18:33,480 --> 00:18:34,515 line:-1
+which brings me to
+
+
+397
+00:18:34.548 --> 00:18:38.752 line:-2 align:center
+the main reason the
+SharingProvider exists: testing.
+
+
+398
+00:18:38.785 --> 00:18:41.054 line:-2 align:center
+The SharingProvider protocol
+makes it easy
+
+
+399
+00:18:41,088 --> 00:18:44,791 line:-2
+to test these decision points
+by injection.
+
+
+400
+00:18:44.825 --> 00:18:47.895 line:-2 align:center
+This snippet of code is part
+of a test case I wrote
+
+
+401
+00:18:47,928 --> 00:18:49,463 line:-1
+for the MainViewController
+
+
+402
+00:18:49.496 --> 00:18:52.332 line:-2 align:center
+to ensure that its table cells
+correctly indicate
+
+
+403
+00:18:52,366 --> 00:18:54,401 line:-1
+if a post is shared.
+
+
+404
+00:18:54.434 --> 00:18:57.804 line:-2 align:center
+I left off the scaffolding
+for creating the sample data,
+
+
+405
+00:18:57.838 --> 00:19:01.241 line:-2 align:center
+but the test crafts a mixed set
+of managed objects
+
+
+406
+00:19:01.275 --> 00:19:04.611 line:-2 align:center
+that it identifies as shared
+or not shared
+
+
+407
+00:19:04,645 --> 00:19:08,515 line:-2
+by the presence
+of their objectID in this set.
+
+
+408
+00:19:08.549 --> 00:19:13.487 line:-2 align:center
+Next, I configure an instance
+of the BlockBasedShareProvider,
+
+
+409
+00:19:13,520 --> 00:19:16,456 line:-2
+a class written
+specifically for testing,
+
+
+410
+00:19:16.490 --> 00:19:19.593 line:-2 align:center
+which allows me to trivially
+inject custom logic
+
+
+411
+00:19:19,626 --> 00:19:23,197 line:-2
+into the sharingProvider
+the MainViewController uses.
+
+
+412
+00:19:23,230 --> 00:19:26,266 line:-2
+Here I'm setting
+the isSharedBlock
+
+
+413
+00:19:26.300 --> 00:19:30.204 line:-2 align:center
+to call the contains method
+of the set I created.
+
+
+414
+00:19:30,237 --> 00:19:33,674 line:-2
+This is a cute trick in Swift
+that allows me to simply check
+
+
+415
+00:19:33.707 --> 00:19:38.111 line:-2 align:center
+if the provided objectID
+is in sharedObjectIDs.
+
+
+416
+00:19:38.145 --> 00:19:39.046 line:-1 align:center
+Then,
+
+
+417
+00:19:39,079 --> 00:19:42,015 line:-2
+I set the BlockBasedProvider
+as the provider
+
+
+418
+00:19:42.049 --> 00:19:45.686 line:-2 align:center
+for the view controller,
+completing the injection.
+
+
+419
+00:19:45,719 --> 00:19:49,223 line:-2
+Finally, this test asks
+the MainViewController
+
+
+420
+00:19:49.256 --> 00:19:50.991 line:-1 align:center
+for its table cells,
+
+
+421
+00:19:51,024 --> 00:19:52,826 line:-2
+verifying that
+the ones I've included
+
+
+422
+00:19:52.860 --> 00:19:56.663 line:-2 align:center
+in the sharedObjectIDs set
+have the expected prefix
+
+
+423
+00:19:56,697 --> 00:20:02,035 line:-2
+and the cells that correspond
+to unshared objects don't.
+
+
+424
+00:20:02,069 --> 00:20:04,438 line:-2
+The actual implementation
+for isShared
+
+
+425
+00:20:04.471 --> 00:20:06.240 line:-1 align:center
+is in the CoreDataStack,
+
+
+426
+00:20:06,273 --> 00:20:08,942 line:-2
+which manages
+the persistent CloudKit container
+
+
+427
+00:20:08,976 --> 00:20:10,744 line:-1
+for my application.
+
+
+428
+00:20:10,777 --> 00:20:12,913 line:-2
+And you can see
+it's a bit more complicated
+
+
+429
+00:20:12,946 --> 00:20:16,116 line:-2
+than the simple injection
+I used in the test.
+
+
+430
+00:20:16,149 --> 00:20:18,719 line:-2
+Now, I could go through
+this implementation
+
+
+431
+00:20:18.752 --> 00:20:20.354 line:-1 align:center
+line by line,
+
+
+432
+00:20:20,387 --> 00:20:22,589 line:-2
+but that's
+not what's important here.
+
+
+433
+00:20:22,623 --> 00:20:25,926 line:-2
+What's important is that
+it's way more complicated
+
+
+434
+00:20:25,959 --> 00:20:27,828 line:-1
+than I can easily exercise
+
+
+435
+00:20:27,861 --> 00:20:31,598 line:-2
+every time I want to verify
+a change to the table view,
+
+
+436
+00:20:31,632 --> 00:20:34,434 line:-2
+and trying to do so
+would add a lot of friction
+
+
+437
+00:20:34.468 --> 00:20:36.770 line:-1 align:center
+to the development process.
+
+
+438
+00:20:36,803 --> 00:20:38,172 line:-1
+On the other hand,
+
+
+439
+00:20:38,205 --> 00:20:40,040 line:-1
+this injection technique
+
+
+440
+00:20:40.073 --> 00:20:43.110 line:-2 align:center
+makes it easy and fast
+to test different configurations
+
+
+441
+00:20:43.143 --> 00:20:47.814 line:-2 align:center
+of shared objects without ever
+talking to the CloudKit server.
+
+
+442
+00:20:47.848 --> 00:20:49.716 line:-2 align:center
+It's a little bit more code
+up front
+
+
+443
+00:20:49,750 --> 00:20:53,353 line:-2
+to write all of these tests
+and structure the application
+
+
+444
+00:20:53,387 --> 00:20:56,823 line:-2
+in a way that facilitates
+this type of injection,
+
+
+445
+00:20:56.857 --> 00:21:01.595 line:-2 align:center
+but the resulting confidence and
+reliability are well worth it.
+
+
+446
+00:21:01,628 --> 00:21:04,431 line:-2
+As I mentioned,
+the SharingProvider includes
+
+
+447
+00:21:04,464 --> 00:21:06,366 line:-2
+a number
+of other important methods
+
+
+448
+00:21:06,400 --> 00:21:08,335 line:-1
+for the sample application,
+
+
+449
+00:21:08,368 --> 00:21:10,871 line:-2
+and I encourage you to check out
+their implementations
+
+
+450
+00:21:10,904 --> 00:21:12,472 line:-1
+and the tests I wrote
+
+
+451
+00:21:12.506 --> 00:21:15.375 line:-2 align:center
+for how they impact
+the user interface.
+
+
+452
+00:21:15,409 --> 00:21:16,510 line:-1
+In all,
+
+
+453
+00:21:16.543 --> 00:21:19.880 line:-2 align:center
+I added a little over
+1200 lines of test code,
+
+
+454
+00:21:19.913 --> 00:21:22.416 line:-2 align:center
+and I hope these examples
+make it really easy
+
+
+455
+00:21:22.449 --> 00:21:25.719 line:-2 align:center
+for you to build tests
+in your own applications.
+
+
+456
+00:21:25.752 --> 00:21:28.222 line:-2 align:center
+The final topic
+I'd like to cover today
+
+
+457
+00:21:28.255 --> 00:21:31.358 line:-2 align:center
+is support for another
+new feature in CloudKit:
+
+
+458
+00:21:31,391 --> 00:21:34,161 line:-1
+encrypted CKRecord values.
+
+
+459
+00:21:35,028 --> 00:21:38,665 line:-2
+These values are stored in
+a new payload on CKRecord
+
+
+460
+00:21:38,699 --> 00:21:40,434 line:-1
+called encryptedValues,
+
+
+461
+00:21:40,467 --> 00:21:44,071 line:-2
+introduced in the "What's
+New in CloudKit" session.
+
+
+462
+00:21:44,104 --> 00:21:47,641 line:-2
+This new payload on CKRecord
+allows values
+
+
+463
+00:21:47.674 --> 00:21:49.610 line:-2 align:center
+to be encrypted
+using key material
+
+
+464
+00:21:49.643 --> 00:21:51.912 line:-1 align:center
+from the user's keychain.
+
+
+465
+00:21:51,945 --> 00:21:54,681 line:-2
+These values are decrypted
+locally on device
+
+
+466
+00:21:54,715 --> 00:21:57,251 line:-2
+after they're downloaded
+from the CloudKit server,
+
+
+467
+00:21:57,284 --> 00:22:00,187 line:-2
+and they're encrypted
+locally on device
+
+
+468
+00:22:00.220 --> 00:22:03.724 line:-2 align:center
+before they are uploaded
+to the CloudKit server.
+
+
+469
+00:22:03.757 --> 00:22:06.093 line:-2 align:center
+We've enabled adoption
+of encrypted values
+
+
+470
+00:22:06.126 --> 00:22:08.996 line:-2 align:center
+with just a single click
+in Xcode.
+
+
+471
+00:22:09,029 --> 00:22:10,464 line:-1
+Let's see that in action.
+
+
+472
+00:22:13.400 --> 00:22:16.670 line:-2 align:center
+Here in Xcode, I've opened
+our sample application,
+
+
+473
+00:22:16,703 --> 00:22:19,273 line:-2
+Syncing a Core Data Store
+with the Cloud.
+
+
+474
+00:22:19.306 --> 00:22:21.341 line:-2 align:center
+I'll open
+the CoreDataCloudKitDemo
+
+
+475
+00:22:21,375 --> 00:22:23,610 line:-1
+managed object model,
+
+
+476
+00:22:23,644 --> 00:22:26,713 line:-2
+and there's a specific property
+on the post entity
+
+
+477
+00:22:26,747 --> 00:22:29,950 line:-2
+I want to show you
+called location.
+
+
+478
+00:22:29,983 --> 00:22:32,219 line:-2
+If I select
+the location attribute,
+
+
+479
+00:22:32.252 --> 00:22:35.422 line:-2 align:center
+I can see its configuration
+in the data model inspector
+
+
+480
+00:22:35,455 --> 00:22:36,957 line:-1
+on the right.
+
+
+481
+00:22:36.990 --> 00:22:37.891 line:-1 align:center
+I've configured it
+
+
+482
+00:22:37.925 --> 00:22:40.460 line:-2 align:center
+to be an optional Transformable
+attribute
+
+
+483
+00:22:40,494 --> 00:22:41,461 line:-1
+and checked
+
+
+484
+00:22:41,495 --> 00:22:44,631 line:-2
+this new Allows Cloud Encryption
+checkbox.
+
+
+485
+00:22:44,665 --> 00:22:48,135 line:-2
+This new checkbox tells
+NSPersistentCloudKitContainer
+
+
+486
+00:22:48.168 --> 00:22:50.137 line:-2 align:center
+that the value
+for this attribute
+
+
+487
+00:22:50.170 --> 00:22:53.106 line:-2 align:center
+should be stored
+in the encryptedValues payload
+
+
+488
+00:22:53,140 --> 00:22:55,542 line:-1
+of the resulting CKRecord.
+
+
+489
+00:22:55,576 --> 00:22:58,178 line:-2
+If you prefer to read
+the matrix as code,
+
+
+490
+00:22:58,212 --> 00:23:01,081 line:-2
+there's a new boolean--
+allowsCloudEncryption--
+
+
+491
+00:23:01,114 --> 00:23:03,083 line:-1
+on NSAttributeDescription
+
+
+492
+00:23:03.116 --> 00:23:05.385 line:-2 align:center
+that you can use
+to configure this property
+
+
+493
+00:23:05,419 --> 00:23:07,821 line:-1
+in your model code.
+
+
+494
+00:23:07,855 --> 00:23:09,923 line:-1
+Now, encryption with CloudKit
+
+
+495
+00:23:09.957 --> 00:23:12.993 line:-2 align:center
+is an at-introduction
+time decision.
+
+
+496
+00:23:13,026 --> 00:23:15,662 line:-2
+That means we can't
+change our mind later
+
+
+497
+00:23:15,696 --> 00:23:17,397 line:-1
+and choose to encrypt fields
+
+
+498
+00:23:17,431 --> 00:23:20,767 line:-2
+that aren't already encrypted
+today in production.
+
+
+499
+00:23:20.801 --> 00:23:21.835 line:-1 align:center
+Likewise,
+
+
+500
+00:23:21.869 --> 00:23:24.071 line:-2 align:center
+you can't choose to unencrypt
+a field
+
+
+501
+00:23:24.104 --> 00:23:26.206 line:-1 align:center
+that is already encrypted.
+
+
+502
+00:23:26,240 --> 00:23:29,109 line:-2
+Once the CloudKit schema
+is pushed to production,
+
+
+503
+00:23:29,142 --> 00:23:32,045 line:-2
+we can't change
+any of the field types.
+
+
+504
+00:23:32.079 --> 00:23:35.249 line:-2 align:center
+So be sure to use
+NSPersistentCloudKitContainer's
+
+
+505
+00:23:35,282 --> 00:23:36,950 line:-1
+initializeSchema method
+
+
+506
+00:23:36,984 --> 00:23:39,219 line:-2
+to ensure that
+all your fields are present
+
+
+507
+00:23:39,253 --> 00:23:40,587 line:-1
+and correctly typed
+
+
+508
+00:23:40,621 --> 00:23:43,123 line:-2
+before deploying your schema
+to production.
+
+
+509
+00:23:44,858 --> 00:23:47,094 line:-2
+It's been my pleasure
+to introduce
+
+
+510
+00:23:47.127 --> 00:23:48.929 line:-2 align:center
+just some of the changes
+we've made
+
+
+511
+00:23:48,962 --> 00:23:52,399 line:-2
+to NSPersistentCloudKitContainer
+to support sharing.
+
+
+512
+00:23:52.432 --> 00:23:54.868 line:-2 align:center
+There's a lot of new API
+to learn about.
+
+
+513
+00:23:54,902 --> 00:23:57,104 line:-2
+So we've updated
+our sample application
+
+
+514
+00:23:57.137 --> 00:23:58.572 line:-1 align:center
+and the documentation
+
+
+515
+00:23:58.605 --> 00:24:02.442 line:-2 align:center
+to demonstrate how you can
+use it in your own applications,
+
+
+516
+00:24:02,476 --> 00:24:05,579 line:-2
+including how you can
+write tests to verify
+
+
+517
+00:24:05.612 --> 00:24:07.848 line:-1 align:center
+how your application responds
+
+
+518
+00:24:07,881 --> 00:24:09,883 line:-2
+to the different states
+objects can be in
+
+
+519
+00:24:09.917 --> 00:24:11.919 line:-1 align:center
+when working with CloudKit.
+
+
+520
+00:24:11.952 --> 00:24:14.955 line:-2 align:center
+And be sure to let us
+know if you run into any issues
+
+
+521
+00:24:14,988 --> 00:24:17,958 line:-2
+by filing bugs
+with Feedback Assistant.
+
+
+522
+00:24:17,991 --> 00:24:19,226 line:-1
+As always,
+
+
+523
+00:24:19,259 --> 00:24:20,827 line:-2
+I can't wait to see
+what you build
+
+
+524
+00:24:20.861 --> 00:24:22.963 line:-2 align:center
+with
+NSPersistentCloudKitContainer.
+
+
+525
+00:24:22.996 --> 00:24:28.135 line:-2 align:center
+Stay active, close your rings,
+and have a great WWDC 2021.
+
+
+526
+00:24:28,168 --> 00:24:30,838 line:-1
+[music]
+

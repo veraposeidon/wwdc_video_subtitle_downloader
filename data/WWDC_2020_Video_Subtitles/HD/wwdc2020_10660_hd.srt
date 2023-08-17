@@ -1,0 +1,3139 @@
+1
+00:00:03,804 --> 00:00:06,773 line:-1
+Hello and welcome to WWDC.
+
+
+2
+00:00:09,176 --> 00:00:11,612 line:0
+Hello there. I'm Ilya Veygman.
+
+
+3
+00:00:11,678 --> 00:00:13,814 line:0
+I'm a software engineer
+with Core Location.
+
+
+4
+00:00:13,881 --> 00:00:16,082 line:0
+Today I'll be telling you
+about all the cool new stuff
+
+
+5
+00:00:16,149 --> 00:00:17,417 line:0
+in Core Location this year.
+
+
+6
+00:00:18,085 --> 00:00:20,654 line:-2
+We'll be primarily covering
+location authorization,
+
+
+7
+00:00:20,721 --> 00:00:23,757 line:-2
+and we will also discuss some new features
+from this year's release,
+
+
+8
+00:00:23,824 --> 00:00:26,193 line:-1
+App Clips and widgets.
+
+
+9
+00:00:26,260 --> 00:00:28,662 line:-1
+Let's start with location authorization.
+
+
+10
+00:00:29,563 --> 00:00:33,166 line:-2
+I want to begin by talking about
+the state of the world in iOS 13.
+
+
+11
+00:00:33,233 --> 00:00:35,102 line:-1
+As of the most recent major release,
+
+
+12
+00:00:35,169 --> 00:00:38,405 line:-2
+there are basically three ways
+a user can control the circumstances
+
+
+13
+00:00:38,472 --> 00:00:40,941 line:-2
+under which an app
+can access their location.
+
+
+14
+00:00:41,008 --> 00:00:43,944 line:-2
+A user can respond to a location prompt
+or go to Settings
+
+
+15
+00:00:44,011 --> 00:00:45,179 line:-1
+and set one of these options,
+
+
+16
+00:00:45,245 --> 00:00:48,849 line:0
+which means that an app can get
+their location information at no time...
+
+
+17
+00:00:50,350 --> 00:00:52,219 line:0
+only while it's in use
+
+
+18
+00:00:52,286 --> 00:00:54,254 line:0
+or at any time.
+
+
+19
+00:00:55,022 --> 00:00:58,292 line:-2
+As user privacy is and has been
+a major priority for Apple,
+
+
+20
+00:00:58,358 --> 00:01:01,662 line:-2
+we thought, are there any other controls
+we can give the user
+
+
+21
+00:01:01,728 --> 00:01:04,932 line:-2
+which will allow them to regulate access
+to their sensitive location data?
+
+
+22
+00:01:04,998 --> 00:01:07,067 line:-2
+To do so,
+we asked ourselves this question:
+
+
+23
+00:01:08,035 --> 00:01:11,738 line:-2
+What does this app really need
+to know about me in order to do its job?
+
+
+24
+00:01:12,406 --> 00:01:16,009 line:-2
+A privacy-conscious user is likely
+to ask themselves this same question.
+
+
+25
+00:01:16,076 --> 00:01:18,345 line:-2
+And one way the user will ask this
+is not just,
+
+
+26
+00:01:18,412 --> 00:01:21,181 line:-2
+is this app getting my location
+when I don't want it to?
+
+
+27
+00:01:21,248 --> 00:01:24,418 line:-2
+They will also ask whether the app
+needs to know exactly where they are,
+
+
+28
+00:01:24,484 --> 00:01:26,386 line:-2
+as opposed to
+approximately where they are?
+
+
+29
+00:01:26,887 --> 00:01:29,756 line:-2
+There are certain classes of apps
+where a user may not see the need
+
+
+30
+00:01:29,823 --> 00:01:31,425 line:-1
+to give their exact location
+
+
+31
+00:01:31,491 --> 00:01:35,195 line:-2
+and would be satisfied with the app
+knowing just approximately where they are.
+
+
+32
+00:01:35,262 --> 00:01:39,132 line:-2
+Does this dating app, for example, really
+need to know anything other than my town?
+
+
+33
+00:01:39,199 --> 00:01:42,369 line:-2
+Does this local events app
+have to know what hotel I'm staying in?
+
+
+34
+00:01:42,436 --> 00:01:45,539 line:-2
+Does this social media app
+need to know exactly where I've been?
+
+
+35
+00:01:45,606 --> 00:01:49,142 line:-2
+In fact, they might prefer to give only
+minimal information and nothing more.
+
+
+36
+00:01:49,710 --> 00:01:52,613 line:-2
+There are certainly use cases
+where exact location is preferred,
+
+
+37
+00:01:52,679 --> 00:01:54,114 line:-1
+if not necessary.
+
+
+38
+00:01:54,181 --> 00:01:56,583 line:-2
+For example,
+if you want to use a navigation app
+
+
+39
+00:01:56,650 --> 00:01:59,086 line:-2
+to get turn-by-turn directions
+from wherever you may be
+
+
+40
+00:01:59,152 --> 00:02:00,320 line:-1
+to your destination,
+
+
+41
+00:02:00,387 --> 00:02:02,589 line:-2
+you would need the app to know
+exactly where you are.
+
+
+42
+00:02:02,656 --> 00:02:04,191 line:-1
+But there are other classes of apps
+
+
+43
+00:02:04,258 --> 00:02:07,127 line:-2
+where sharing just a little bit
+of location information makes sense
+
+
+44
+00:02:07,194 --> 00:02:09,263 line:-1
+for the app's expected functionality.
+
+
+45
+00:02:09,329 --> 00:02:12,232 line:-2
+In the case of a dating app
+or a local events app, for example,
+
+
+46
+00:02:12,299 --> 00:02:15,169 line:-2
+it's certainly possible to make
+hyper-targeted recommendations
+
+
+47
+00:02:15,235 --> 00:02:18,172 line:-2
+or matches to a user
+if you have their exact location.
+
+
+48
+00:02:18,605 --> 00:02:20,274 line:-1
+This is a great feature for some,
+
+
+49
+00:02:20,340 --> 00:02:22,743 line:-2
+but others may not be interested
+in that level of detail
+
+
+50
+00:02:22,809 --> 00:02:25,145 line:-2
+and would prefer
+to not share location at all
+
+
+51
+00:02:25,212 --> 00:02:27,347 line:-1
+rather than to access that functionality.
+
+
+52
+00:02:27,414 --> 00:02:30,083 line:-2
+In cases like these,
+approximate location might, in fact,
+
+
+53
+00:02:30,150 --> 00:02:31,718 line:-1
+be good enough for many users.
+
+
+54
+00:02:31,785 --> 00:02:36,123 line:-2
+In iOS 13, a user getting an initial
+prompt for location authorization
+
+
+55
+00:02:36,190 --> 00:02:37,858 line:-1
+would see something like this.
+
+
+56
+00:02:38,859 --> 00:02:41,862 line:-2
+Starting in iOS 14,
+and as you saw in the keynote,
+
+
+57
+00:02:41,929 --> 00:02:44,898 line:-2
+a new option will appear
+in the prompt for users, "Precise."
+
+
+58
+00:02:45,699 --> 00:02:48,635 line:-2
+This option lets the user grant an app
+only their approximate
+
+
+59
+00:02:48,702 --> 00:02:50,170 line:-1
+rather than their exact location.
+
+
+60
+00:02:51,004 --> 00:02:53,173 line:-2
+This will also be visible to users
+under Settings.
+
+
+61
+00:02:53,807 --> 00:02:55,876 line:-1
+By disabling the Precise Location switch,
+
+
+62
+00:02:55,943 --> 00:02:59,179 line:-2
+the user can choose to grant
+only approximate location to the app.
+
+
+63
+00:02:59,646 --> 00:03:02,316 line:-2
+As a result of this,
+the user now has two dimensions
+
+
+64
+00:03:02,382 --> 00:03:05,786 line:-2
+upon which to specify how much location
+access they would like to grant an app.
+
+
+65
+00:03:06,353 --> 00:03:09,089 line:0
+There's the "what circumstances"
+of an app accessing location,
+
+
+66
+00:03:09,756 --> 00:03:13,060 line:0
+and there's now also the "how much"
+dimension of location access.
+
+
+67
+00:03:13,126 --> 00:03:16,597 line:0
+Now, instead of just the one notion
+of location authorization, we have two.
+
+
+68
+00:03:17,297 --> 00:03:19,800 line:0
+Users can do all sorts of things
+with authorization now.
+
+
+69
+00:03:19,867 --> 00:03:22,302 line:0
+Initially grant while using
+with reduced accuracy,
+
+
+70
+00:03:22,369 --> 00:03:23,737 line:0
+upgrade that to full accuracy,
+
+
+71
+00:03:23,804 --> 00:03:26,240 line:0
+and even do things like change
+the authorization to "Always"
+
+
+72
+00:03:26,306 --> 00:03:28,375 line:0
+and then downgrade the accuracy
+to "reduced" again.
+
+
+73
+00:03:29,109 --> 00:03:32,579 line:-2
+Now, one thing that should be made
+very clear before we continue--
+
+
+74
+00:03:32,646 --> 00:03:34,515 line:-1
+apps cannot opt out of this new feature.
+
+
+75
+00:03:35,015 --> 00:03:37,484 line:-2
+This functionality
+is controlled entirely by the user.
+
+
+76
+00:03:37,551 --> 00:03:39,753 line:-2
+It's another form of authorization,
+after all,
+
+
+77
+00:03:39,820 --> 00:03:43,490 line:-2
+and the user decides whether they grant
+or revoke authorization at any time.
+
+
+78
+00:03:43,991 --> 00:03:47,160 line:-2
+You, the app,
+must adapt to this new world,
+
+
+79
+00:03:47,227 --> 00:03:50,964 line:-2
+where users can decide not to give the app
+exact location information at all times.
+
+
+80
+00:03:51,632 --> 00:03:54,468 line:-2
+Given that, I think it's time to talk
+about the tools we're providing you
+
+
+81
+00:03:54,535 --> 00:03:55,869 line:-1
+to adopt this new feature.
+
+
+82
+00:03:56,336 --> 00:03:57,938 line:-1
+First, we're deprecating
+
+
+83
+00:03:58,005 --> 00:04:00,641 line:-2
+the CLLocationManager class method
+for authorization status
+
+
+84
+00:04:00,707 --> 00:04:03,911 line:-2
+and replacing it with a property that
+delivers the app's authorization status
+
+
+85
+00:04:03,977 --> 00:04:05,045 line:-1
+just like before.
+
+
+86
+00:04:06,313 --> 00:04:08,549 line:-1
+We also introduce a new instance property
+
+
+87
+00:04:08,615 --> 00:04:11,685 line:-2
+that indicates how accurately
+the app can know user location.
+
+
+88
+00:04:11,752 --> 00:04:14,688 line:-2
+There are two options for this enum,
+full and reduced.
+
+
+89
+00:04:15,189 --> 00:04:17,991 line:-2
+Full is the sort of default
+from the pre-iOS 14 world,
+
+
+90
+00:04:18,058 --> 00:04:19,625 line:-1
+while reduced is the new scenario.
+
+
+91
+00:04:20,260 --> 00:04:23,463 line:-2
+To further accommodate these new notions
+of location authorization,
+
+
+92
+00:04:23,530 --> 00:04:27,301 line:-2
+we're further changing up the
+authorization status delegate callback.
+
+
+93
+00:04:27,367 --> 00:04:30,971 line:-2
+We're deprecating the old
+didChangeAuthorization status callback
+
+
+94
+00:04:31,038 --> 00:04:32,573 line:-1
+and replacing it with a new
+
+
+95
+00:04:32,639 --> 00:04:35,309 line:-2
+locationManagerDidChangeAuthorization
+callback method.
+
+
+96
+00:04:36,243 --> 00:04:39,780 line:-2
+This new method is invoked
+whenever either the authorization status
+
+
+97
+00:04:39,847 --> 00:04:42,349 line:-2
+or accuracy authorization
+property values change.
+
+
+98
+00:04:43,183 --> 00:04:45,686 line:-2
+Here's how you might want to implement
+the new delegate callback method.
+
+
+99
+00:04:46,820 --> 00:04:49,723 line:-2
+You will need to check the values
+of both the authorization status
+
+
+100
+00:04:50,324 --> 00:04:52,726 line:-2
+and the accuracy
+to determine how to proceed.
+
+
+101
+00:04:53,360 --> 00:04:55,963 line:-2
+Now, a few notes
+on how these are delivered.
+
+
+102
+00:04:57,598 --> 00:04:59,766 line:-1
+Reduced-accuracy fixes are still delivered
+
+
+103
+00:04:59,833 --> 00:05:02,469 line:-2
+to the didUpdateLocations delegate,
+just like before,
+
+
+104
+00:05:03,170 --> 00:05:05,739 line:-2
+and they're still expressed
+as CLLocation objects,
+
+
+105
+00:05:05,806 --> 00:05:08,742 line:-2
+with a CLLocation Coordinate 2D
+center point
+
+
+106
+00:05:08,809 --> 00:05:11,211 line:-1
+and a large value for horizontal accuracy.
+
+
+107
+00:05:12,246 --> 00:05:14,781 line:-2
+These locations are recomputed
+about four times per hour,
+
+
+108
+00:05:15,449 --> 00:05:17,951 line:-2
+so if you have some time-out logic
+in your application,
+
+
+109
+00:05:18,018 --> 00:05:21,355 line:-2
+you should make sure to inform it
+using the value of accuracy authorization.
+
+
+110
+00:05:22,356 --> 00:05:25,959 line:-2
+Finally, while these are represented
+as CLLocation objects,
+
+
+111
+00:05:26,026 --> 00:05:29,596 line:-2
+you should not treat them like you would
+a typical location with full accuracy.
+
+
+112
+00:05:29,663 --> 00:05:33,734 line:-2
+Instead, you should consider them
+to contain the user's true position.
+
+
+113
+00:05:34,535 --> 00:05:37,437 line:-2
+Now, let's have a look at a case study
+of a top-notch adoption
+
+
+114
+00:05:37,504 --> 00:05:38,772 line:-1
+of this new feature in Maps.
+
+
+115
+00:05:39,273 --> 00:05:41,175 line:0
+The Maps team
+have worked closely with ours
+
+
+116
+00:05:41,241 --> 00:05:43,377 line:0
+to bring you what you can see in iOS 14
+
+
+117
+00:05:43,443 --> 00:05:47,281 line:0
+and have done an amazing job of adopting
+the new accuracy authorization API.
+
+
+118
+00:05:47,915 --> 00:05:50,517 line:0
+Please check out their talk
+on designing for location privacy,
+
+
+119
+00:05:50,584 --> 00:05:53,654 line:0
+which will cover some topics that are very
+relevant to what we will discuss here.
+
+
+120
+00:05:54,788 --> 00:05:57,958 line:-1
+New, in iOS 14, when Maps, or any app,
+
+
+121
+00:05:58,025 --> 00:05:59,760 line:-1
+asks for location for the first time,
+
+
+122
+00:05:59,826 --> 00:06:02,529 line:-2
+they would see this prompt,
+just like you saw before,
+
+
+123
+00:06:02,596 --> 00:06:05,666 line:-2
+which will show an inset map
+with their location on it.
+
+
+124
+00:06:07,034 --> 00:06:09,770 line:-2
+Let's toggle the "Precise: On" pill
+to see what happens.
+
+
+125
+00:06:09,837 --> 00:06:11,972 line:-2
+This will show you
+what the underlying app would get
+
+
+126
+00:06:12,039 --> 00:06:15,008 line:-2
+if you gave it full
+versus reduced accuracy.
+
+
+127
+00:06:15,843 --> 00:06:18,345 line:-2
+This will be immediately obvious
+by seeing the big circle
+
+
+128
+00:06:18,412 --> 00:06:21,415 line:-2
+indicating the user's
+approximate location in the app
+
+
+129
+00:06:21,481 --> 00:06:23,050 line:-1
+rather than the familiar blue dot.
+
+
+130
+00:06:24,117 --> 00:06:27,221 line:-2
+Let's see how this looks when you grant
+authorization to the app and launch it.
+
+
+131
+00:06:28,222 --> 00:06:30,691 line:-2
+As you'd expect,
+the UI will show a large circle
+
+
+132
+00:06:30,757 --> 00:06:32,759 line:-1
+indicating the user's approximate location
+
+
+133
+00:06:32,826 --> 00:06:35,262 line:-2
+rather than the blue dot
+that you're probably used to.
+
+
+134
+00:06:35,329 --> 00:06:38,398 line:-2
+Again, this circle contains
+the user's true position.
+
+
+135
+00:06:39,099 --> 00:06:43,337 line:-2
+Maps also does a really good thing here
+by placing a banner at the top of the UI,
+
+
+136
+00:06:43,403 --> 00:06:46,874 line:-2
+which clearly indicates to the user that
+they have reduced accuracy for this app.
+
+
+137
+00:06:47,541 --> 00:06:50,277 line:-2
+This is a good thing to consider
+when you're designing your own app
+
+
+138
+00:06:50,344 --> 00:06:51,345 line:-1
+to adopt this feature,
+
+
+139
+00:06:51,945 --> 00:06:55,549 line:-2
+how to reflect this reduced accuracy
+authorization back to the user.
+
+
+140
+00:06:56,316 --> 00:06:59,720 line:-2
+Now, looking at where we are
+isn't the only thing we use Maps for.
+
+
+141
+00:06:59,786 --> 00:07:02,289 line:-2
+We also like to use it
+to navigate to places.
+
+
+142
+00:07:02,356 --> 00:07:05,225 line:-2
+I'm going to look up directions
+to my favorite museum after work.
+
+
+143
+00:07:06,660 --> 00:07:10,097 line:-2
+Swipe up here,
+tap on California Academy of Sciences,
+
+
+144
+00:07:10,998 --> 00:07:13,233 line:-1
+and-- Okay, we see something new here.
+
+
+145
+00:07:13,300 --> 00:07:16,803 line:-2
+Maps is informing us that getting
+directions from where I am to the museum
+
+
+146
+00:07:16,870 --> 00:07:19,373 line:-2
+needs my exact location
+with full accuracy.
+
+
+147
+00:07:19,439 --> 00:07:21,575 line:-2
+If you have a feature
+that needs exact location,
+
+
+148
+00:07:21,642 --> 00:07:24,311 line:-2
+but you don't have full accuracy
+authorized, what do you do?
+
+
+149
+00:07:24,745 --> 00:07:26,280 line:-1
+So let's pause and talk about that.
+
+
+150
+00:07:26,980 --> 00:07:28,649 line:-1
+What do you, the developer, do
+
+
+151
+00:07:28,715 --> 00:07:31,451 line:-2
+if the user is only sharing
+approximate location with your app,
+
+
+152
+00:07:31,518 --> 00:07:33,854 line:-2
+but you have a feature
+that needs exact location?
+
+
+153
+00:07:33,921 --> 00:07:35,088 line:-1
+Well, you've got two options here.
+
+
+154
+00:07:35,689 --> 00:07:37,858 line:-1
+First, you can send the user to Settings
+
+
+155
+00:07:37,925 --> 00:07:40,494 line:-2
+and ask them to upgrade you
+to full accuracy permanently.
+
+
+156
+00:07:41,061 --> 00:07:43,230 line:-1
+This may not be attractive to all users,
+
+
+157
+00:07:43,297 --> 00:07:45,499 line:-2
+and some might prefer
+to simply not use that feature
+
+
+158
+00:07:45,566 --> 00:07:47,568 line:-1
+or even stop using your app entirely
+
+
+159
+00:07:47,634 --> 00:07:50,170 line:-2
+rather than to grant you more access
+than they want.
+
+
+160
+00:07:50,237 --> 00:07:53,807 line:-2
+Fortunately, the other option is far more
+attractive to these kinds of users,
+
+
+161
+00:07:53,874 --> 00:07:56,176 line:-1
+temporarily granting full accuracy.
+
+
+162
+00:07:56,810 --> 00:07:58,278 line:-1
+Here's how you would do that.
+
+
+163
+00:07:58,345 --> 00:08:00,514 line:-1
+We have a new method on CLLocationManager
+
+
+164
+00:08:00,581 --> 00:08:03,717 line:-2
+that allows you to prompt the user
+for temporary full accuracy.
+
+
+165
+00:08:03,784 --> 00:08:05,619 line:-1
+In this example, the user is prompted
+
+
+166
+00:08:05,686 --> 00:08:08,188 line:-2
+to upgrade
+their location accuracy authorization
+
+
+167
+00:08:08,255 --> 00:08:09,923 line:-1
+if they do not have full accuracy.
+
+
+168
+00:08:10,657 --> 00:08:13,293 line:-2
+After they respond,
+this completion block is called,
+
+
+169
+00:08:13,360 --> 00:08:17,197 line:-2
+which calls start navigation
+if we got the needed response.
+
+
+170
+00:08:18,365 --> 00:08:20,567 line:-1
+Now, we must set a purpose key
+
+
+171
+00:08:20,634 --> 00:08:23,604 line:-2
+when requesting this temporary accuracy
+authorization upgrade.
+
+
+172
+00:08:23,670 --> 00:08:25,506 line:-2
+This is a very important point
+to remember.
+
+
+173
+00:08:25,572 --> 00:08:28,075 line:-2
+You have to explain to the user
+why you need this upgrade,
+
+
+174
+00:08:28,141 --> 00:08:30,811 line:-2
+and this purpose key will show them
+what that reason is.
+
+
+175
+00:08:30,878 --> 00:08:32,946 line:-1
+So let's talk about how to specify these.
+
+
+176
+00:08:34,014 --> 00:08:37,049 line:-2
+To ask for temporary full accuracy,
+you must specify a purpose key
+
+
+177
+00:08:37,116 --> 00:08:39,152 line:-1
+like you just saw in the previous slide.
+
+
+178
+00:08:39,219 --> 00:08:41,255 line:-1
+These strings must be within a dictionary
+
+
+179
+00:08:41,321 --> 00:08:45,225 line:-2
+keyed off NSLocationTemporary
+UsageDescriptionDictionary
+
+
+180
+00:08:45,292 --> 00:08:47,594 line:-2
+in your Info.plist
+like you see in this example.
+
+
+181
+00:08:48,295 --> 00:08:51,665 line:-2
+Make sure you explain clearly to the user
+why you want their exact location
+
+
+182
+00:08:51,732 --> 00:08:53,934 line:-2
+to ensure
+they grant you the access needed.
+
+
+183
+00:08:54,635 --> 00:08:56,170 line:-1
+Following on the previous slide,
+
+
+184
+00:08:56,236 --> 00:09:00,340 line:-2
+Core Location will select the string under
+"WantsToNavigate" to display to the user.
+
+
+185
+00:09:01,341 --> 00:09:03,777 line:-2
+It's important that you put these strings
+under this dictionary,
+
+
+186
+00:09:03,844 --> 00:09:07,181 line:-2
+as Core Location will only look
+under this path for your purpose keys.
+
+
+187
+00:09:08,115 --> 00:09:11,185 line:-2
+The prompt a user sees
+will ultimately look something like this.
+
+
+188
+00:09:11,985 --> 00:09:14,922 line:-2
+Note that the purpose key is shown
+to the user just above the map inset
+
+
+189
+00:09:14,988 --> 00:09:17,624 line:-2
+and explains why the app
+wants their exact location.
+
+
+190
+00:09:19,459 --> 00:09:22,196 line:-2
+Temporary location accuracy upgrades
+work a lot like things do
+
+
+191
+00:09:22,262 --> 00:09:25,065 line:-2
+with the "Allow Once" behavior
+introduced in iOS 13.
+
+
+192
+00:09:25,132 --> 00:09:28,569 line:-2
+That is to say, your user will be prompted
+for an accuracy upgrade
+
+
+193
+00:09:28,635 --> 00:09:30,470 line:-1
+the next time they relaunch your app
+
+
+194
+00:09:30,537 --> 00:09:34,007 line:-2
+and trigger the feature that requires
+a temporary accuracy upgrade.
+
+
+195
+00:09:34,708 --> 00:09:37,444 line:-2
+This upgrade lasts as long
+as a user keeps using the app.
+
+
+196
+00:09:37,511 --> 00:09:40,347 line:-2
+So as long as they don't close it,
+you won't have to ask for it again.
+
+
+197
+00:09:41,415 --> 00:09:44,051 line:-2
+Okay, let's bring all this together
+and see how it works.
+
+
+198
+00:09:46,453 --> 00:09:49,756 line:-2
+Your user sees a prompt indicating
+what location info the app would get,
+
+
+199
+00:09:49,823 --> 00:09:51,358 line:-1
+were they to grant exact location.
+
+
+200
+00:09:52,025 --> 00:09:54,061 line:-2
+Upon allowing this,
+the app can now proceed
+
+
+201
+00:09:54,127 --> 00:09:57,764 line:-2
+to give navigation instructions from
+their exact location to their destination.
+
+
+202
+00:09:58,866 --> 00:10:01,668 line:-2
+So, just a few takeaways to consider
+before we move on.
+
+
+203
+00:10:02,469 --> 00:10:04,471 line:-2
+You should make sure your app's
+location-based features
+
+
+204
+00:10:04,538 --> 00:10:07,508 line:-2
+are able to deal with not having
+been granted full location accuracy.
+
+
+205
+00:10:07,574 --> 00:10:09,409 line:-1
+Maps is a really good example of this.
+
+
+206
+00:10:09,476 --> 00:10:13,113 line:-2
+They might seem like an app that would
+always require full accuracy location,
+
+
+207
+00:10:13,180 --> 00:10:14,982 line:-1
+but they deliver a great user experience
+
+
+208
+00:10:15,048 --> 00:10:17,851 line:-2
+in both full and reduced
+accuracy authorization.
+
+
+209
+00:10:17,918 --> 00:10:21,255 line:-2
+When they lack full accuracy,
+it's reflected in the UI to the user
+
+
+210
+00:10:21,321 --> 00:10:24,625 line:-2
+with both the large position circle
+and the status bar at the top of the UI.
+
+
+211
+00:10:25,359 --> 00:10:28,428 line:-2
+This UI reflection is worth a strong
+consideration when making your own app.
+
+
+212
+00:10:28,862 --> 00:10:31,732 line:-2
+Sometimes, however,
+full accuracy is needed,
+
+
+213
+00:10:32,232 --> 00:10:36,303 line:-2
+and at that point, it's perfectly fine
+to ask the user to grant full accuracy.
+
+
+214
+00:10:36,770 --> 00:10:38,739 line:-2
+Maps does this well
+by showing in the search bar
+
+
+215
+00:10:38,805 --> 00:10:40,040 line:-1
+that it needs exact location
+
+
+216
+00:10:40,107 --> 00:10:43,110 line:-2
+to navigate from the user's location
+to their destination
+
+
+217
+00:10:43,177 --> 00:10:45,779 line:-2
+and will then prompt for it
+if the user selects this option.
+
+
+218
+00:10:46,813 --> 00:10:49,683 line:-2
+Asking for full accuracy
+only when it's actually needed
+
+
+219
+00:10:49,750 --> 00:10:52,586 line:-2
+makes users more likely
+to give you what you need.
+
+
+220
+00:10:52,653 --> 00:10:55,455 line:-2
+It shows that you're not asking
+for more information than is necessary.
+
+
+221
+00:10:56,123 --> 00:10:58,025 line:-2
+Following on this,
+you should also make sure
+
+
+222
+00:10:58,091 --> 00:10:59,927 line:-2
+to use purpose strings
+for accuracy upgrades
+
+
+223
+00:10:59,993 --> 00:11:02,529 line:-2
+just like you would
+with location authorization in general.
+
+
+224
+00:11:02,596 --> 00:11:05,098 line:-1
+Explain to the user why it's necessary.
+
+
+225
+00:11:05,165 --> 00:11:08,302 line:-2
+You can have more than one feature per app
+that needs full accuracy,
+
+
+226
+00:11:08,368 --> 00:11:11,972 line:-2
+so you can have as many such purpose
+strings in your Info.plist as you need.
+
+
+227
+00:11:12,539 --> 00:11:13,974 line:-1
+When asking for full accuracy,
+
+
+228
+00:11:14,041 --> 00:11:16,510 line:-2
+it's often better to use
+a temporary upgrade prompt,
+
+
+229
+00:11:16,577 --> 00:11:19,746 line:-2
+rather than to send the user to Settings
+whenever that's possible for you.
+
+
+230
+00:11:20,314 --> 00:11:24,351 line:-2
+Now, let's talk a bit about how to
+consider background location updates
+
+
+231
+00:11:24,418 --> 00:11:26,286 line:-2
+in light of this new
+accuracy authorization.
+
+
+232
+00:11:26,854 --> 00:11:29,690 line:-2
+Let's start with significant
+location change monitoring.
+
+
+233
+00:11:29,756 --> 00:11:32,292 line:-2
+This monitoring adapts well
+to reduced accuracy.
+
+
+234
+00:11:32,359 --> 00:11:36,163 line:-2
+You'll get updates no more often than
+you would didUpdateLocation results--
+
+
+235
+00:11:36,763 --> 00:11:37,998 line:-1
+about four times per hour.
+
+
+236
+00:11:38,398 --> 00:11:40,767 line:-2
+Similarly, we do not deliver
+duplicate locations
+
+
+237
+00:11:40,834 --> 00:11:42,603 line:-1
+if your position has not changed enough
+
+
+238
+00:11:42,669 --> 00:11:45,205 line:-2
+to have also changed
+your reduced accuracy location.
+
+
+239
+00:11:46,006 --> 00:11:48,108 line:-1
+When accuracy authorization is reduced,
+
+
+240
+00:11:48,175 --> 00:11:51,178 line:-2
+visit monitoring API
+is still accurate in time.
+
+
+241
+00:11:51,245 --> 00:11:54,548 line:-2
+It is only the spatial information
+which is reduced in accuracy.
+
+
+242
+00:11:54,615 --> 00:11:56,183 line:-1
+Let me explain what this means.
+
+
+243
+00:11:56,717 --> 00:11:59,286 line:-2
+Let's say I arrive at work
+bright and early in the morning.
+
+
+244
+00:12:00,120 --> 00:12:02,389 line:-1
+If I have two apps monitoring for visits,
+
+
+245
+00:12:02,456 --> 00:12:05,792 line:0
+one receiving full accuracy,
+one receiving reduced accuracy,
+
+
+246
+00:12:05,859 --> 00:12:09,162 line:0
+then the full accuracy app
+will receive a visit notification
+
+
+247
+00:12:09,229 --> 00:12:12,299 line:0
+that I arrived at coordinates
+within Apple Park at 10:08.
+
+
+248
+00:12:12,366 --> 00:12:15,435 line:0
+But the reduced accuracy app
+will receive a visit notification
+
+
+249
+00:12:15,502 --> 00:12:20,140 line:0
+that I arrived at coordinates somewhere
+within Cupertino, but still at 10:08.
+
+
+250
+00:12:20,607 --> 00:12:22,609 line:-1
+Finally, beacons and regions.
+
+
+251
+00:12:23,243 --> 00:12:26,547 line:-2
+Region entry and exit notifications
+will not be delivered for apps
+
+
+252
+00:12:26,613 --> 00:12:29,249 line:-1
+that are not authorized for full accuracy.
+
+
+253
+00:12:29,316 --> 00:12:32,085 line:-2
+You will need to get full accuracy
+to use this feature.
+
+
+254
+00:12:32,152 --> 00:12:33,787 line:-1
+More on this in just a bit.
+
+
+255
+00:12:34,721 --> 00:12:37,191 line:-2
+We know that there are many apps
+which use region monitoring
+
+
+256
+00:12:37,257 --> 00:12:38,959 line:-1
+to deliver features to users.
+
+
+257
+00:12:39,026 --> 00:12:41,295 line:-2
+Let's look at one popular example,
+Reminders.
+
+
+258
+00:12:41,361 --> 00:12:42,996 line:-1
+As you probably know,
+
+
+259
+00:12:43,063 --> 00:12:46,033 line:-2
+Reminders can deliver
+location-based reminders to the user
+
+
+260
+00:12:46,099 --> 00:12:48,268 line:-2
+by setting a perimeter
+around some location.
+
+
+261
+00:12:48,836 --> 00:12:52,105 line:-2
+Let's see how they adopted
+the new accuracy authorization API.
+
+
+262
+00:12:53,273 --> 00:12:56,143 line:-2
+I have a reminder set for myself
+to buy some tuna for my cats,
+
+
+263
+00:12:56,210 --> 00:12:58,478 line:-2
+and I want to be reminded of this
+when I'm leaving work
+
+
+264
+00:12:58,545 --> 00:13:00,647 line:-2
+so I don't forget
+this incredibly important task.
+
+
+265
+00:13:01,381 --> 00:13:04,351 line:-2
+Let's see how this works in the canonical
+example with full accuracy.
+
+
+266
+00:13:05,352 --> 00:13:08,589 line:-1
+Now, I can authorize, tap on the reminder,
+
+
+267
+00:13:09,323 --> 00:13:11,291 line:-2
+and then go set a location
+for this reminder.
+
+
+268
+00:13:12,593 --> 00:13:14,962 line:-2
+Here, I'll be able to set a region
+around my office
+
+
+269
+00:13:15,629 --> 00:13:17,865 line:-2
+such that I'll be notified
+when I leave work.
+
+
+270
+00:13:21,468 --> 00:13:22,736 line:-1
+Okay. So, great.
+
+
+271
+00:13:22,803 --> 00:13:26,306 line:-2
+I'll be reminded to buy some tasty tuna
+for my cats as I leave work.
+
+
+272
+00:13:26,840 --> 00:13:30,077 line:-2
+Let's see this again,
+but this time with reduced accuracy.
+
+
+273
+00:13:31,044 --> 00:13:33,247 line:-2
+You remember how I told you
+that region monitoring
+
+
+274
+00:13:33,313 --> 00:13:35,015 line:-1
+won't work in this configuration?
+
+
+275
+00:13:36,216 --> 00:13:39,953 line:-2
+This time, Reminders prompts me to go
+to Settings to turn on full accuracy.
+
+
+276
+00:13:40,420 --> 00:13:42,422 line:-2
+It's correct for Reminders
+to do this here,
+
+
+277
+00:13:42,489 --> 00:13:44,825 line:-2
+rather than to ask
+for a temporary upgrade,
+
+
+278
+00:13:44,892 --> 00:13:47,361 line:-2
+because this app needs full accuracy
+at all times
+
+
+279
+00:13:47,427 --> 00:13:50,063 line:-2
+to deliver
+timely location-based reminders.
+
+
+280
+00:13:50,831 --> 00:13:53,767 line:-2
+Now, the user can choose
+not to grant full accuracy here
+
+
+281
+00:13:53,834 --> 00:13:55,802 line:-1
+and still set a location for the reminder,
+
+
+282
+00:13:55,869 --> 00:13:59,273 line:-2
+but this location-based reminder
+won't fire on any device
+
+
+283
+00:13:59,339 --> 00:14:01,742 line:-2
+where the user has not granted
+full accuracy access.
+
+
+284
+00:14:03,076 --> 00:14:06,246 line:-2
+So a few key takeaways
+for background location updates.
+
+
+285
+00:14:06,313 --> 00:14:08,682 line:-1
+Region monitoring requires full accuracy,
+
+
+286
+00:14:08,749 --> 00:14:12,386 line:-2
+so apps needing it will have to have
+full accuracy granted to them.
+
+
+287
+00:14:12,452 --> 00:14:14,788 line:-2
+While it might be tempting
+to always check at launch
+
+
+288
+00:14:14,855 --> 00:14:16,490 line:-1
+if your app has full accuracy
+
+
+289
+00:14:16,557 --> 00:14:18,458 line:-2
+and then send the user to Settings
+if you don't,
+
+
+290
+00:14:18,525 --> 00:14:21,562 line:-2
+you should think carefully
+about whether that's actually necessary.
+
+
+291
+00:14:21,628 --> 00:14:25,232 line:-2
+Not every app needs the user
+to grant them full accuracy at all times.
+
+
+292
+00:14:25,299 --> 00:14:27,434 line:-2
+When it's possible,
+design your app in a way
+
+
+293
+00:14:27,501 --> 00:14:29,102 line:-1
+that will let the user interact with it
+
+
+294
+00:14:29,169 --> 00:14:31,471 line:-2
+without having to increase
+the authorized accuracy.
+
+
+295
+00:14:32,139 --> 00:14:34,474 line:-2
+This will make for
+an overall better user experience
+
+
+296
+00:14:34,541 --> 00:14:37,211 line:-2
+and make the user more likely
+to keep using your app.
+
+
+297
+00:14:37,277 --> 00:14:39,379 line:-1
+As I mentioned at the start of this talk,
+
+
+298
+00:14:39,446 --> 00:14:41,348 line:-1
+there exists a set of applications
+
+
+299
+00:14:41,415 --> 00:14:44,051 line:-2
+that really do not need more
+than reduced accuracy locations.
+
+
+300
+00:14:44,551 --> 00:14:46,820 line:-2
+I previously talked about
+how to get full accuracy
+
+
+301
+00:14:46,887 --> 00:14:48,322 line:-1
+when you only have reduced.
+
+
+302
+00:14:48,388 --> 00:14:50,224 line:-1
+So now let's talk about the inverse case.
+
+
+303
+00:14:51,158 --> 00:14:53,427 line:-2
+Even though you might be authorized
+for full accuracy,
+
+
+304
+00:14:53,493 --> 00:14:55,395 line:-2
+it doesn't mean
+you should get full accuracy locations
+
+
+305
+00:14:55,462 --> 00:14:57,164 line:-1
+if you don't actually need them.
+
+
+306
+00:14:57,231 --> 00:15:01,368 line:-2
+Luckily, you can set your location manager
+to get only reduced accuracy locations,
+
+
+307
+00:15:01,435 --> 00:15:02,903 line:-1
+when that makes sense.
+
+
+308
+00:15:02,970 --> 00:15:05,572 line:-2
+We introduced
+a new CLLocationAccuracy constant
+
+
+309
+00:15:05,639 --> 00:15:08,275 line:-2
+that you can use to put
+your location manager into this mode.
+
+
+310
+00:15:09,409 --> 00:15:11,178 line:-1
+You can also change your app's behavior
+
+
+311
+00:15:11,245 --> 00:15:13,413 line:-2
+to request reduced accuracy locations
+by default
+
+
+312
+00:15:13,480 --> 00:15:15,215 line:-1
+when asking for authorization
+
+
+313
+00:15:15,282 --> 00:15:17,784 line:-1
+by setting this key in your Info.plist.
+
+
+314
+00:15:18,919 --> 00:15:21,688 line:-2
+Note that there is no "Precise: On" pill
+in the map this time.
+
+
+315
+00:15:22,222 --> 00:15:23,924 line:-1
+This is another effect of this key.
+
+
+316
+00:15:23,991 --> 00:15:26,660 line:-2
+It prevents the user from accidentally
+giving more location access
+
+
+317
+00:15:26,727 --> 00:15:27,728 line:-1
+than they intend.
+
+
+318
+00:15:28,829 --> 00:15:32,232 line:-2
+In some cases, the user may want
+to go back and change their mind
+
+
+319
+00:15:32,299 --> 00:15:34,968 line:-2
+about having granted reduced accuracy
+to their app,
+
+
+320
+00:15:35,035 --> 00:15:37,070 line:-2
+and they can do so
+simply by going to Settings
+
+
+321
+00:15:37,137 --> 00:15:38,805 line:-1
+and toggling the "Precise: On" switch.
+
+
+322
+00:15:39,973 --> 00:15:41,475 line:-1
+This is still going to be available
+
+
+323
+00:15:41,542 --> 00:15:43,610 line:-2
+despite the mentioned Info.plist key
+being set.
+
+
+324
+00:15:44,344 --> 00:15:46,213 line:-1
+Let's have a look at an example app
+
+
+325
+00:15:46,280 --> 00:15:48,715 line:-2
+that does request reduced accuracy
+locations by default--
+
+
+326
+00:15:48,782 --> 00:15:49,983 line:-1
+TV.
+
+
+327
+00:15:50,050 --> 00:15:52,819 line:-2
+Many of us are familiar with
+region-locking for streaming content
+
+
+328
+00:15:52,886 --> 00:15:55,389 line:-2
+as well as television blackouts
+for sporting events
+
+
+329
+00:15:55,455 --> 00:15:57,057 line:-1
+and pairing with local affiliates.
+
+
+330
+00:15:58,025 --> 00:16:00,093 line:-2
+With the proliferation
+of content streaming services,
+
+
+331
+00:16:00,160 --> 00:16:01,528 line:-1
+like Apple's TV app,
+
+
+332
+00:16:01,595 --> 00:16:03,630 line:-1
+there is a legitimate business need
+
+
+333
+00:16:03,697 --> 00:16:06,967 line:-2
+for video streaming applications
+to know the locations of their users.
+
+
+334
+00:16:07,034 --> 00:16:08,869 line:-1
+But, like we discussed before,
+
+
+335
+00:16:08,936 --> 00:16:11,772 line:-2
+that doesn't mean the app needs to collect
+more information about the user
+
+
+336
+00:16:11,839 --> 00:16:13,207 line:-1
+than is actually necessary.
+
+
+337
+00:16:14,374 --> 00:16:17,444 line:-2
+TV only asks for location
+when it actually needs it,
+
+
+338
+00:16:17,511 --> 00:16:20,914 line:-2
+and when it does,
+it only asks for approximate location.
+
+
+339
+00:16:20,981 --> 00:16:24,184 line:-2
+If I feel like watching some sports,
+I would go to the Sports tab,
+
+
+340
+00:16:24,251 --> 00:16:26,286 line:-1
+then find a game and tap it to watch.
+
+
+341
+00:16:26,887 --> 00:16:30,157 line:-2
+If I click on one of these games,
+TV verifies my location,
+
+
+342
+00:16:30,224 --> 00:16:33,760 line:-2
+and after granting location access,
+it only gets my approximate location.
+
+
+343
+00:16:34,228 --> 00:16:37,431 line:-2
+By taking this approach,
+TV still respects broadcast rules
+
+
+344
+00:16:37,497 --> 00:16:41,001 line:-2
+while minimizing how much information
+it has to collect about the user.
+
+
+345
+00:16:41,969 --> 00:16:46,106 line:-2
+So, by now you've probably wondered
+how exactly these locations work.
+
+
+346
+00:16:46,707 --> 00:16:50,077 line:-2
+You're probably thinking that desired
+accuracy was doing this for you all along.
+
+
+347
+00:16:50,143 --> 00:16:51,712 line:-1
+So I'd like to talk about that for a bit.
+
+
+348
+00:16:51,778 --> 00:16:54,848 line:0
+Desired accuracy is a property
+that we introduced to encourage you
+
+
+349
+00:16:54,915 --> 00:16:56,884 line:0
+to only use as much accuracy as you need.
+
+
+350
+00:16:56,950 --> 00:16:58,352 line:0
+There were many reasons for this,
+
+
+351
+00:16:58,418 --> 00:17:00,921 line:0
+but the foremost was
+to allow iOS to save battery life.
+
+
+352
+00:17:00,988 --> 00:17:05,224 line:-2
+Now, this is different from what we now
+have with reduced accuracy in two ways.
+
+
+353
+00:17:05,726 --> 00:17:08,060 line:0
+First, there wasn't actually a guarantee
+
+
+354
+00:17:08,127 --> 00:17:10,329 line:0
+that you would get
+the desired accuracy you asked for,
+
+
+355
+00:17:10,396 --> 00:17:12,665 line:0
+either because there was a lack
+of a GPS signal
+
+
+356
+00:17:12,733 --> 00:17:15,636 line:0
+or because there could be another app
+running simultaneously
+
+
+357
+00:17:15,702 --> 00:17:17,704 line:0
+which was receiving
+more accurate locations
+
+
+358
+00:17:17,771 --> 00:17:20,641 line:0
+that we would then opportunistically
+deliver to your app.
+
+
+359
+00:17:20,707 --> 00:17:24,511 line:0
+Second, there was not an effective way
+to surface this information to the user.
+
+
+360
+00:17:24,578 --> 00:17:26,880 line:0
+That is, the user really had no control
+
+
+361
+00:17:26,946 --> 00:17:29,049 line:0
+over how much information
+an app would get.
+
+
+362
+00:17:29,816 --> 00:17:32,386 line:-1
+So, what does this new API actually do?
+
+
+363
+00:17:32,953 --> 00:17:35,656 line:-2
+It might be tempting to think
+that reduced accuracy locations
+
+
+364
+00:17:35,722 --> 00:17:38,158 line:-2
+are simply your true location
+with some noise added in,
+
+
+365
+00:17:38,225 --> 00:17:39,793 line:-1
+but that is not the case.
+
+
+366
+00:17:39,860 --> 00:17:42,829 line:-2
+Simply adding some random noise
+on top of the user's true location
+
+
+367
+00:17:42,896 --> 00:17:44,498 line:-1
+is actually not that secure
+
+
+368
+00:17:44,565 --> 00:17:47,167 line:-2
+against someone who might wish
+to disambiguate the true location.
+
+
+369
+00:17:47,234 --> 00:17:50,437 line:-2
+Instead, it's better to think
+of what happens under the hood
+
+
+370
+00:17:50,504 --> 00:17:51,972 line:-1
+as a quantization of sorts.
+
+
+371
+00:17:52,539 --> 00:17:53,874 line:-1
+Let me explain further.
+
+
+372
+00:17:54,708 --> 00:17:56,376 line:-1
+Let's look at an example area.
+
+
+373
+00:17:56,443 --> 00:17:58,278 line:-1
+Consider different users going on a drive
+
+
+374
+00:17:58,345 --> 00:18:00,948 line:-2
+in the vicinity of El Paso, Texas
+and Juárez, Mexico.
+
+
+375
+00:18:01,748 --> 00:18:03,851 line:-2
+Note that this is near
+an international boundary,
+
+
+376
+00:18:03,917 --> 00:18:06,019 line:-2
+with the US being
+in the northern half of the map
+
+
+377
+00:18:06,086 --> 00:18:07,821 line:-1
+and Mexico being in the southern half,
+
+
+378
+00:18:07,888 --> 00:18:09,890 line:-1
+bordered by this pink line you see here.
+
+
+379
+00:18:10,424 --> 00:18:13,327 line:-2
+The true position of the user
+is represented by the cars,
+
+
+380
+00:18:13,393 --> 00:18:14,628 line:-1
+while their reported position,
+
+
+381
+00:18:14,695 --> 00:18:17,998 line:-2
+that is to say, what an app would see
+if it had reduced accuracy,
+
+
+382
+00:18:18,065 --> 00:18:19,333 line:-1
+will be shown by a circle.
+
+
+383
+00:18:19,399 --> 00:18:21,935 line:-2
+Again, as I mentioned earlier
+in this presentation,
+
+
+384
+00:18:22,503 --> 00:18:26,039 line:-2
+these reported locations
+will contain the users' true location.
+
+
+385
+00:18:26,740 --> 00:18:28,909 line:-1
+As these users drive down Interstate 10,
+
+
+386
+00:18:28,976 --> 00:18:32,980 line:-2
+their location "snaps" to within different
+quantized regions of varying sizes.
+
+
+387
+00:18:33,046 --> 00:18:36,250 line:-2
+Both the red and yellow users
+are going to be quantized or "snapped"
+
+
+388
+00:18:36,316 --> 00:18:39,286 line:0
+into the same regions
+as they drive along the road,
+
+
+389
+00:18:39,353 --> 00:18:41,522 line:0
+but the amount of snapping will vary.
+
+
+390
+00:18:41,588 --> 00:18:43,090 line:0
+In denser urban areas,
+
+
+391
+00:18:43,156 --> 00:18:45,659 line:-2
+this amount of quantization
+can be a couple kilometers,
+
+
+392
+00:18:45,726 --> 00:18:47,761 line:-2
+but in less dense places,
+like rural areas,
+
+
+393
+00:18:47,828 --> 00:18:49,963 line:-1
+it can be ten kilometers or a bit more.
+
+
+394
+00:18:50,564 --> 00:18:54,368 line:-2
+A typical value for this quantization
+radius is around five kilometers.
+
+
+395
+00:18:54,434 --> 00:18:57,638 line:-2
+Note that, despite the cars
+continuously driving along the road,
+
+
+396
+00:18:57,704 --> 00:19:01,475 line:-2
+the region to which the true position
+quantizes will not continuously update.
+
+
+397
+00:19:01,542 --> 00:19:05,712 line:-2
+This is because reduced accuracy locations
+are recomputed about four times per hour,
+
+
+398
+00:19:05,779 --> 00:19:08,248 line:-2
+so depending on exactly
+how fast these cars are moving,
+
+
+399
+00:19:08,315 --> 00:19:10,450 line:-2
+there might be some lag
+between quantized "snaps."
+
+
+400
+00:19:11,451 --> 00:19:13,387 line:-1
+The actual semantics of the quantization
+
+
+401
+00:19:13,453 --> 00:19:15,923 line:-2
+are intended to replicate
+what the user would expect to hear
+
+
+402
+00:19:15,989 --> 00:19:19,760 line:-2
+if they were to ask for an approximate
+answer to the question, "Where am I?"
+
+
+403
+00:19:20,427 --> 00:19:22,996 line:-2
+We try to ensure that the resultant
+reduced accuracy location
+
+
+404
+00:19:23,063 --> 00:19:26,433 line:-2
+is still going to be somewhere
+that the user actually expects to be.
+
+
+405
+00:19:27,234 --> 00:19:29,102 line:-1
+We use the location we have for you
+
+
+406
+00:19:29,169 --> 00:19:32,439 line:-2
+to place your approximate location on
+the appropriate side of the border here.
+
+
+407
+00:19:32,506 --> 00:19:34,107 line:-1
+Again, though, remember
+
+
+408
+00:19:34,174 --> 00:19:36,910 line:-2
+that the center point does not represent
+the location of the user.
+
+
+409
+00:19:36,977 --> 00:19:41,014 line:-2
+It only represents the center of a region
+where they approximately are.
+
+
+410
+00:19:41,081 --> 00:19:44,785 line:-2
+Approximate location snapping, however,
+might put you in a neighboring city,
+
+
+411
+00:19:44,852 --> 00:19:46,887 line:-2
+especially if there are cities
+close together.
+
+
+412
+00:19:46,954 --> 00:19:49,756 line:0
+To reiterate the bit
+about quantization around borders,
+
+
+413
+00:19:49,823 --> 00:19:53,126 line:0
+let's see what happens to someone driving
+on the other side of the border in Juarez
+
+
+414
+00:19:53,193 --> 00:19:54,695 line:0
+and what they might expect to see.
+
+
+415
+00:19:54,761 --> 00:19:56,864 line:0
+Note that the blue car
+is quantized into regions
+
+
+416
+00:19:56,930 --> 00:19:59,499 line:0
+whose centers are
+on the Mexican side of the border.
+
+
+417
+00:20:00,267 --> 00:20:03,670 line:-2
+This new reduced accuracy API
+is available on iOS and watchOS.
+
+
+418
+00:20:04,438 --> 00:20:06,807 line:-2
+An app's accuracy authorization status
+is synced
+
+
+419
+00:20:06,874 --> 00:20:09,409 line:-2
+between companion apps
+on paired phones and watches,
+
+
+420
+00:20:09,476 --> 00:20:11,678 line:-2
+just like the canonical
+authorization status.
+
+
+421
+00:20:12,546 --> 00:20:14,681 line:-2
+We've also made an improvement
+to WatchConnectivity
+
+
+422
+00:20:14,748 --> 00:20:16,850 line:-2
+for sharing
+your app's authorization status.
+
+
+423
+00:20:16,917 --> 00:20:20,721 line:-2
+We introduced this capability in iOS 9,
+and we've made an improvement this year.
+
+
+424
+00:20:20,787 --> 00:20:24,358 line:-2
+Now, you'll be able to share apps'
+temporary authorization status,
+
+
+425
+00:20:24,424 --> 00:20:26,994 line:-2
+as well as In-Useness state,
+across both platforms.
+
+
+426
+00:20:27,528 --> 00:20:31,465 line:-2
+This means that if a user selects
+"Allow Once" on your companion watch app,
+
+
+427
+00:20:31,532 --> 00:20:33,734 line:-1
+or does a temporary accuracy upgrade,
+
+
+428
+00:20:33,800 --> 00:20:36,803 line:-2
+your phone app will be able
+to benefit from that decision.
+
+
+429
+00:20:36,870 --> 00:20:40,007 line:-2
+No more needing to ask for permanent
+authorization when you don't need it.
+
+
+430
+00:20:40,741 --> 00:20:42,876 line:-1
+In summary, this new API brings with it
+
+
+431
+00:20:42,943 --> 00:20:45,212 line:-2
+a whole new dimension
+of location authorization,
+
+
+432
+00:20:45,279 --> 00:20:47,948 line:-2
+and with it you will need to consider
+how your app should change
+
+
+433
+00:20:48,015 --> 00:20:51,018 line:-2
+to accommodate the user
+giving you only reduced accuracy.
+
+
+434
+00:20:51,084 --> 00:20:53,687 line:-2
+If you have features
+that do require full accuracy,
+
+
+435
+00:20:53,754 --> 00:20:57,324 line:-2
+then think carefully about whether
+you really need permanent full accuracy
+
+
+436
+00:20:57,391 --> 00:20:59,693 line:-2
+or whether you can use
+a temporary upgrade API.
+
+
+437
+00:21:00,527 --> 00:21:04,698 line:-2
+Whether your app uses background location
+updates will help to inform this decision.
+
+
+438
+00:21:05,332 --> 00:21:09,837 line:-2
+Finally, consider whether your application
+could utilize reduced accuracy by default.
+
+
+439
+00:21:09,903 --> 00:21:13,273 line:-2
+There's no need to get more information
+from the user than is actually necessary.
+
+
+440
+00:21:13,874 --> 00:21:16,376 line:-1
+A few more things about CLLocationManager.
+
+
+441
+00:21:16,443 --> 00:21:20,581 line:-2
+First, we'd like to address the changes we
+made in iOS 13 for Always authorization.
+
+
+442
+00:21:21,348 --> 00:21:24,451 line:-2
+For some apps, we made some
+improvements in a recent release.
+
+
+443
+00:21:25,719 --> 00:21:28,388 line:-2
+You may recognize this diagram
+from last year's presentation,
+
+
+444
+00:21:28,455 --> 00:21:30,824 line:-2
+and that it was not possible
+to get Always authorization
+
+
+445
+00:21:30,891 --> 00:21:33,627 line:-2
+without first going through
+the provisional Always state.
+
+
+446
+00:21:34,761 --> 00:21:37,998 line:-2
+The idea behind this was to help the user
+understand Always authorization
+
+
+447
+00:21:38,065 --> 00:21:39,967 line:-2
+by asking them to grant it
+within the context
+
+
+448
+00:21:40,033 --> 00:21:42,035 line:-1
+of where it was actually being used.
+
+
+449
+00:21:42,102 --> 00:21:44,505 line:-2
+But for some apps,
+this made it tricky to know
+
+
+450
+00:21:44,571 --> 00:21:47,174 line:-2
+when location updates
+would actually be delivered.
+
+
+451
+00:21:47,241 --> 00:21:50,544 line:-2
+Asking for Always permission
+when authorized WhenInUse
+
+
+452
+00:21:51,278 --> 00:21:53,881 line:-2
+would put you
+into the provisional Always state,
+
+
+453
+00:21:53,947 --> 00:21:56,750 line:-2
+just like it would had you asked for it
+from notDetermined.
+
+
+454
+00:21:56,817 --> 00:21:58,752 line:-2
+We've changed this up
+in the latest releases
+
+
+455
+00:21:58,819 --> 00:22:00,821 line:-2
+to better balance
+functionality and privacy.
+
+
+456
+00:22:02,022 --> 00:22:05,192 line:-2
+Starting in iOS 13.4,
+we slightly changed this state diagram
+
+
+457
+00:22:05,259 --> 00:22:08,595 line:-2
+to provide a more deterministic path
+to Always authorization.
+
+
+458
+00:22:08,662 --> 00:22:11,999 line:-2
+An app which has previously asked
+only for WhenInUse authorization,
+
+
+459
+00:22:12,065 --> 00:22:14,768 line:-2
+and got it,
+may now request Always authorization
+
+
+460
+00:22:14,835 --> 00:22:17,804 line:-2
+and have the user immediately
+be prompted to consider granting it,
+
+
+461
+00:22:17,871 --> 00:22:19,606 line:-1
+without leaving the app's context.
+
+
+462
+00:22:21,141 --> 00:22:23,210 line:-2
+If you need to know exactly
+when Always authorization
+
+
+463
+00:22:23,277 --> 00:22:25,846 line:-2
+has been granted to your app,
+please consider this.
+
+
+464
+00:22:25,913 --> 00:22:28,282 line:-1
+Don't ask the user for Always right away.
+
+
+465
+00:22:28,348 --> 00:22:32,019 line:-2
+Instead, ask for WhenInUse the
+first time they access location features.
+
+
+466
+00:22:32,085 --> 00:22:35,756 line:-2
+Only ask for Always once the user
+accesses a feature that really needs it.
+
+
+467
+00:22:36,423 --> 00:22:39,526 line:-2
+If users better understand
+why your app needs this authorization,
+
+
+468
+00:22:39,593 --> 00:22:41,195 line:-1
+they're more likely to grant it.
+
+
+469
+00:22:42,095 --> 00:22:43,430 line:-1
+One last thing.
+
+
+470
+00:22:43,497 --> 00:22:46,633 line:-2
+We've had feedback from developers
+that are using activityType in their apps,
+
+
+471
+00:22:46,700 --> 00:22:49,570 line:-2
+and we wanted to rehash
+some recommendations for you.
+
+
+472
+00:22:49,636 --> 00:22:51,839 line:-2
+The activityType field
+on CLLocationManager
+
+
+473
+00:22:51,905 --> 00:22:54,141 line:-2
+helps inform
+our underlying positioning algorithms,
+
+
+474
+00:22:54,208 --> 00:22:56,510 line:-2
+give you and your users
+a better experience,
+
+
+475
+00:22:56,577 --> 00:22:58,779 line:-1
+and it's important to use them correctly.
+
+
+476
+00:22:58,846 --> 00:23:02,449 line:-2
+Airborne should only be used for
+actual airborne activities like flying.
+
+
+477
+00:23:02,516 --> 00:23:06,220 line:-2
+Fitness should only be used if the user is
+specifically intending a workout session,
+
+
+478
+00:23:06,286 --> 00:23:08,989 line:-2
+like an outdoor run,
+a swim or some other sport.
+
+
+479
+00:23:10,090 --> 00:23:12,492 line:-2
+Automotive Navigation
+has a special case of positioning
+
+
+480
+00:23:12,559 --> 00:23:14,528 line:-2
+where you know the user
+will definitely stay on a road,
+
+
+481
+00:23:14,595 --> 00:23:16,296 line:-1
+like if they're driving a car.
+
+
+482
+00:23:16,363 --> 00:23:19,833 line:-2
+Selecting best accuracy
+for navigation here is also a good idea.
+
+
+483
+00:23:21,268 --> 00:23:23,704 line:-2
+otherNavigation is when the user
+is definitely moving,
+
+
+484
+00:23:23,770 --> 00:23:26,039 line:-1
+but not necessarily going to be on a road.
+
+
+485
+00:23:26,106 --> 00:23:28,442 line:-2
+This includes cases
+like off-road vehicles, hikes,
+
+
+486
+00:23:28,509 --> 00:23:30,177 line:-1
+boats, walking and so on.
+
+
+487
+00:23:30,978 --> 00:23:33,146 line:-2
+Other should be used
+when you don't have something
+
+
+488
+00:23:33,213 --> 00:23:35,349 line:-2
+that will neatly fit
+into one of these other buckets
+
+
+489
+00:23:35,415 --> 00:23:37,985 line:-2
+or has no clear user intention,
+like a workout.
+
+
+490
+00:23:39,186 --> 00:23:42,022 line:-2
+Okay.
+Let's talk about App Clips and widgets.
+
+
+491
+00:23:43,090 --> 00:23:46,193 line:-2
+You probably heard about App Clips
+in this year's keynote.
+
+
+492
+00:23:46,260 --> 00:23:47,661 line:-1
+These are a great new feature
+
+
+493
+00:23:47,728 --> 00:23:50,597 line:-2
+that will enable an entirely new
+experience for your users.
+
+
+494
+00:23:50,664 --> 00:23:53,667 line:-2
+I'm not going to spend too much time
+rehashing exactly what these are,
+
+
+495
+00:23:53,734 --> 00:23:57,137 line:-2
+and you can look at this talk
+to get more information on that subject.
+
+
+496
+00:23:57,204 --> 00:23:59,173 line:-1
+The key point for us to remember, though,
+
+
+497
+00:23:59,239 --> 00:24:01,141 line:-2
+is that these are essentially
+a lightweight subset
+
+
+498
+00:24:01,208 --> 00:24:03,010 line:-1
+of a corresponding app.
+
+
+499
+00:24:03,076 --> 00:24:06,246 line:-2
+This concept applies to using
+Core Location within App Clips as well.
+
+
+500
+00:24:07,047 --> 00:24:09,383 line:-2
+From our perspective,
+App Clips are more or less the same
+
+
+501
+00:24:09,449 --> 00:24:12,586 line:-2
+as their corresponding apps,
+but with two very important distinctions.
+
+
+502
+00:24:12,653 --> 00:24:15,522 line:-2
+First, they will not receive
+Always authorization.
+
+
+503
+00:24:15,589 --> 00:24:18,759 line:-2
+Second, instead of "While Using,"
+they will see this--
+
+
+504
+00:24:18,825 --> 00:24:20,627 line:-1
+"While Using Until Tomorrow."
+
+
+505
+00:24:20,694 --> 00:24:24,064 line:-2
+This means that they get While Using
+authorization only temporarily.
+
+
+506
+00:24:24,665 --> 00:24:28,869 line:-2
+The authorization is automatically cleared
+the following morning after being granted.
+
+
+507
+00:24:29,536 --> 00:24:32,105 line:-1
+So, in terms of design considerations,
+
+
+508
+00:24:32,172 --> 00:24:35,642 line:-2
+don't put any features into an App Clip
+that would require Always authorization,
+
+
+509
+00:24:35,709 --> 00:24:36,977 line:-1
+because you can't get it.
+
+
+510
+00:24:37,511 --> 00:24:40,981 line:-2
+You should also remember that App Clips'
+location authorization expires.
+
+
+511
+00:24:41,048 --> 00:24:43,717 line:-2
+Cinderella can use an App Clip
+to hire a pumpkin carriage
+
+
+512
+00:24:43,784 --> 00:24:45,385 line:-1
+and a gorgeous dress for the night,
+
+
+513
+00:24:45,452 --> 00:24:47,054 line:-1
+but just like her magical accoutrements,
+
+
+514
+00:24:47,120 --> 00:24:50,090 line:-2
+the App Clip's location authorization
+disappears by morning.
+
+
+515
+00:24:50,157 --> 00:24:53,126 line:-2
+Finally,
+I'd like to touch briefly upon WidgetKit.
+
+
+516
+00:24:53,193 --> 00:24:55,963 line:-2
+This is an awesome new feature
+in iOS 14 and the new mac OS
+
+
+517
+00:24:56,029 --> 00:24:57,931 line:-1
+that you should definitely check out.
+
+
+518
+00:24:57,998 --> 00:24:59,766 line:-1
+When making a widget that uses location,
+
+
+519
+00:24:59,833 --> 00:25:02,469 line:-2
+you have to include
+the NSWidgetWantsLocation key
+
+
+520
+00:25:02,536 --> 00:25:04,738 line:-1
+in your widget's Info.plist.
+
+
+521
+00:25:04,805 --> 00:25:08,542 line:-2
+You should also consider that widgets are
+not able to show authorization prompts.
+
+
+522
+00:25:08,609 --> 00:25:11,178 line:-2
+Their authorization will derive
+from the parent app.
+
+
+523
+00:25:11,245 --> 00:25:12,846 line:-1
+So, if you have an application
+
+
+524
+00:25:12,913 --> 00:25:15,649 line:-2
+whose experience
+will be primarily driven by its widget,
+
+
+525
+00:25:15,716 --> 00:25:18,919 line:-2
+you'll need to consider how to prompt
+for location access in the parent app,
+
+
+526
+00:25:18,986 --> 00:25:19,987 line:-1
+should you need it.
+
+
+527
+00:25:20,687 --> 00:25:23,724 line:-2
+Today we talked about some big changes
+to Location Authorization,
+
+
+528
+00:25:23,790 --> 00:25:25,859 line:-1
+a whole new conceptual dimension.
+
+
+529
+00:25:25,926 --> 00:25:29,830 line:-2
+Giving the user more control over
+their data privacy is important to Apple.
+
+
+530
+00:25:29,897 --> 00:25:33,700 line:-2
+Users are increasingly conscious
+of how different services use their data,
+
+
+531
+00:25:33,767 --> 00:25:35,402 line:-1
+and location is a prime example.
+
+
+532
+00:25:36,503 --> 00:25:39,506 line:-2
+When you design an app
+to account for reduced accuracy,
+
+
+533
+00:25:39,573 --> 00:25:42,843 line:-2
+you can deliver an amazing user experience
+and build trust with your users
+
+
+534
+00:25:42,910 --> 00:25:46,547 line:-2
+by showing them that you're not actually
+asking for more information than you need.
+
+
+535
+00:25:47,381 --> 00:25:51,018 line:-2
+We also talked about two new types
+of apps entirely, App Clips and widgets,
+
+
+536
+00:25:51,084 --> 00:25:53,587 line:-2
+and how to use Core Location
+effectively in them.
+
+
+537
+00:25:54,454 --> 00:25:57,491 line:-2
+These are great tools that were designed
+by a group of amazing engineers,
+
+
+538
+00:25:57,558 --> 00:25:59,693 line:-2
+and we hope you get the chance
+to try them out.
+
+
+539
+00:26:00,561 --> 00:26:02,429 line:-2
+If there's nothing else
+you'll take from my talk,
+
+
+540
+00:26:02,496 --> 00:26:03,797 line:-1
+then please just remember this,
+
+
+541
+00:26:03,864 --> 00:26:06,867 line:-2
+Don't ask the users for more information
+than they want to share with you
+
+
+542
+00:26:06,934 --> 00:26:08,202 line:-1
+and that you truly need.
+
+
+543
+00:26:08,268 --> 00:26:11,205 line:-2
+This isn't just for the users' benefit.
+It's for your own too.
+
+
+544
+00:26:11,271 --> 00:26:13,941 line:-2
+Users don't want to give away
+more information than they have to,
+
+
+545
+00:26:14,007 --> 00:26:16,577 line:-2
+and by minimizing what you ask for,
+you can build trust with them
+
+
+546
+00:26:16,643 --> 00:26:18,478 line:-1
+and give them a better user experience.
+
+
+547
+00:26:18,545 --> 00:26:21,148 line:-2
+Think about your features,
+think about what they do,
+
+
+548
+00:26:21,615 --> 00:26:24,384 line:-2
+and think about what can work
+with reduced accuracy.
+
+
+549
+00:26:24,451 --> 00:26:25,619 line:-1
+Thank you.
+

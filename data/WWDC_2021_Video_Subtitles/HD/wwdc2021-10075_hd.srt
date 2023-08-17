@@ -1,0 +1,3861 @@
+2
+00:00:00.000 --> 00:00:02.002 line:-1 position:50%
+[MAC STARTUP CHIME]
+
+
+3
+00:00:02,002 --> 00:00:05,706 line:-1
+♪ Bass music playing ♪
+
+
+4
+00:00:05,706 --> 00:00:07,241 line:-1
+[KEYSTROKES]
+
+
+5
+00:00:07,241 --> 00:00:09,209 position:90% line:0 size:2%
+♪
+
+
+6
+00:00:09.209 --> 00:00:11.445 line:-1 position:50%
+Courtland Idstrom: Hello,
+my name is Courtland Idstrom,
+
+
+7
+00:00:11.445 --> 00:00:14.147 line:-1 position:50%
+and I'm an engineer
+on the RealityKit team.
+
+
+8
+00:00:14,147 --> 00:00:15,816 line:-1
+In this video,
+I'm going to show you
+
+
+9
+00:00:15.816 --> 00:00:19.953 line:-1 position:50%
+how to use the new rendering
+features in RealityKit 2.
+
+
+10
+00:00:19.953 --> 00:00:20.988 line:-1 position:50%
+RealityKit is a framework
+
+
+11
+00:00:20,988 --> 00:00:24,358 line:-1
+designed to make building
+AR apps simple and intuitive.
+
+
+12
+00:00:24,358 --> 00:00:26,493 line:-1
+Rendering is a key piece
+of RealityKit,
+
+
+13
+00:00:26.493 --> 00:00:28.328 line:-1 position:50%
+centered around
+highly realistic,
+
+
+14
+00:00:28.328 --> 00:00:30.564 line:-1 position:50%
+physically based rendering.
+
+
+15
+00:00:30,564 --> 00:00:32,366 line:-1
+Since our first release in 2019,
+
+
+16
+00:00:32.366 --> 00:00:34.034 line:-1 position:50%
+we've been working
+on your feedback
+
+
+17
+00:00:34.034 --> 00:00:36.904 line:-1 position:50%
+and we're shipping
+a major update to RealityKit.
+
+
+18
+00:00:36.904 --> 00:00:38.939 line:-1 position:50%
+In the "Dive into Reality Kit 2"
+session,
+
+
+19
+00:00:38,939 --> 00:00:41,074 line:-1
+we covered the evolution
+of RealityKit,
+
+
+20
+00:00:41,074 --> 00:00:45,145 line:-1
+providing many enhancements --
+from updates to the ECS system,
+
+
+21
+00:00:45.145 --> 00:00:48.148 line:-1 position:50%
+more evolved material
+and animation capabilities,
+
+
+22
+00:00:48.148 --> 00:00:52.152 line:-1 position:50%
+and generating audio and texture
+resources at runtime.
+
+
+23
+00:00:52,152 --> 00:00:53,854 line:-1
+To showcase these
+improvements,
+
+
+24
+00:00:53.854 --> 00:00:55.622 line:-1 position:50%
+we built an app
+that turns your living room
+
+
+25
+00:00:55,622 --> 00:00:58,392 line:-1
+into an underwater aquarium.
+
+
+26
+00:00:58,392 --> 00:01:00,794 line:-1
+In this talk, we'll show some
+of the new rendering features
+
+
+27
+00:01:00.794 --> 00:01:02.763 line:-1 position:50%
+that went into the app.
+
+
+28
+00:01:02.763 --> 00:01:05.666 line:-1 position:50%
+RealityKit 2 provides
+control and flexibility
+
+
+29
+00:01:05,666 --> 00:01:07,167 line:-1
+with how objects are rendered,
+
+
+30
+00:01:07,167 --> 00:01:10,304 line:-1
+allowing you to create
+even better AR experiences.
+
+
+31
+00:01:10,304 --> 00:01:13,707 line:-1
+This year we bring advancements
+to our material system,
+
+
+32
+00:01:13,707 --> 00:01:15,575 line:-1
+enabling you
+to add your own materials
+
+
+33
+00:01:15.575 --> 00:01:18.845 line:-1 position:50%
+by authoring
+custom Metal shaders.
+
+
+34
+00:01:18.845 --> 00:01:20.314 line:-1 position:50%
+Custom post effects allow you
+
+
+35
+00:01:20,314 --> 00:01:24,084 line:-1
+to augment RealityKit's
+post effects with your own.
+
+
+36
+00:01:24.084 --> 00:01:28.055 line:-1 position:50%
+New mesh APIs allow
+mesh creation, inspection,
+
+
+37
+00:01:28.055 --> 00:01:31.224 line:-1 position:50%
+and modifications at runtime.
+
+
+38
+00:01:31.224 --> 00:01:33.193 line:-1 position:50%
+Let's start with
+the most requested feature
+
+
+39
+00:01:33,193 --> 00:01:37,431 line:-1
+in RealityKit 2,
+support for custom shaders.
+
+
+40
+00:01:37,431 --> 00:01:38,865 line:-1
+RealityKit's rendering
+centers around
+
+
+41
+00:01:38,865 --> 00:01:41,101 line:-1
+a physically based
+rendering model.
+
+
+42
+00:01:41,101 --> 00:01:43,103 line:-1
+Its built-in shaders
+make it easy to create models
+
+
+43
+00:01:43.103 --> 00:01:45.572 line:-1 position:50%
+that look natural
+next to real objects
+
+
+44
+00:01:45,572 --> 00:01:47,941 line:-1
+across a range
+of lighting conditions.
+
+
+45
+00:01:47,941 --> 00:01:50,510 line:-1
+This year, we're building on
+these physically based shaders
+
+
+46
+00:01:50.510 --> 00:01:52.813 line:-1 position:50%
+and exposing the ability
+for you to customize
+
+
+47
+00:01:52.813 --> 00:01:56.416 line:-1 position:50%
+the geometry and surface
+of models using shaders.
+
+
+48
+00:01:56,416 --> 00:01:59,753 line:-1
+The first of our shader APIs
+is geometry modifier.
+
+
+49
+00:01:59.753 --> 00:02:02.155 line:-1 position:50%
+A geometry modifier
+is a program,
+
+
+50
+00:02:02.155 --> 00:02:04.057 line:-1 position:50%
+written in the Metal Shading
+Language,
+
+
+51
+00:02:04,057 --> 00:02:05,392 line:-1
+that gives you the opportunity
+
+
+52
+00:02:05,392 --> 00:02:08,161 line:-1
+to change the vertices
+of an object every frame
+
+
+53
+00:02:08,161 --> 00:02:10,330 line:-1
+as it's rendered on the GPU.
+
+
+54
+00:02:10,330 --> 00:02:13,367 line:-1
+This includes moving them and
+customizing their attributes,
+
+
+55
+00:02:13.367 --> 00:02:16.436 line:-1 position:50%
+such as color, normal,
+or UVs.
+
+
+56
+00:02:16,436 --> 00:02:19,106 line:-1
+It's run inside of RealityKit's
+vertex shader,
+
+
+57
+00:02:19,106 --> 00:02:20,974 line:-1
+and is perfect
+for ambient animation,
+
+
+58
+00:02:20.974 --> 00:02:24.878 line:-1 position:50%
+deformation, particle systems,
+and billboards.
+
+
+59
+00:02:24.878 --> 00:02:27.848 line:-1 position:50%
+Our seaweed is a great example
+of ambient animation.
+
+
+60
+00:02:27.848 --> 00:02:29.316 line:-1 position:50%
+The seaweed is moving slowly
+
+
+61
+00:02:29.316 --> 00:02:31.618 line:-1 position:50%
+due to the movement
+of water around it.
+
+
+62
+00:02:31,618 --> 00:02:33,887 line:-1
+Let's take a closer look.
+
+
+63
+00:02:33,887 --> 00:02:35,989 line:0
+Here you can see the wireframe
+of the seaweed
+
+
+64
+00:02:35,989 --> 00:02:37,924 position:50%
+as created by our artist;
+
+
+65
+00:02:37,924 --> 00:02:41,561 position:50%
+this shows the vertices and
+triangles comprising the mesh.
+
+
+66
+00:02:41,561 --> 00:02:43,063 line:0
+We're going to write
+a shader program
+
+
+67
+00:02:43,063 --> 00:02:46,867 line:0
+that executes on each vertex
+to create our motion.
+
+
+68
+00:02:46,867 --> 00:02:49,536 position:50%
+We'll use a sine wave,
+a simple periodic function,
+
+
+69
+00:02:49,536 --> 00:02:50,871 line:0
+to create movement.
+
+
+70
+00:02:50,871 --> 00:02:52,606 position:50%
+We're simulating water currents
+
+
+71
+00:02:52,606 --> 00:02:55,642 position:50%
+so we want nearby vertices
+to behave similarly,
+
+
+72
+00:02:55,642 --> 00:02:59,246 position:50%
+regardless of their model's
+scale or orientation.
+
+
+73
+00:02:59,246 --> 00:03:02,149 position:50%
+For this reason, we use
+the vertex's world position
+
+
+74
+00:03:02,149 --> 00:03:04,484 line:0
+as an input
+to the sine function.
+
+
+75
+00:03:04,484 --> 00:03:08,722 line:0
+We include a time value as well,
+so that it moves over time.
+
+
+76
+00:03:08,722 --> 00:03:10,724 position:50%
+Our first sine wave
+is in the Y dimension
+
+
+77
+00:03:10,724 --> 00:03:12,759 line:0
+to create up-down movement.
+
+
+78
+00:03:12,759 --> 00:03:14,394 position:50%
+To control the period
+of the motion,
+
+
+79
+00:03:14,394 --> 00:03:16,430 line:0
+we'll add a spatial scale.
+
+
+80
+00:03:16,430 --> 00:03:21,134 position:50%
+And we can control the amount of
+its movement with an amplitude.
+
+
+81
+00:03:21,134 --> 00:03:24,004 line:0
+We'll apply the same function
+to the X and Z dimensions
+
+
+82
+00:03:24,004 --> 00:03:26,606 line:0
+so it moves in all three axes.
+
+
+83
+00:03:26,606 --> 00:03:30,510 line:0
+Now, let's look
+at the model as a whole.
+
+
+84
+00:03:30,510 --> 00:03:32,679 line:-1
+One thing we haven't
+yet accounted for:
+
+
+85
+00:03:32.679 --> 00:03:34.581 line:-1 position:50%
+vertices close
+to the base of the stalk
+
+
+86
+00:03:34,581 --> 00:03:36,383 line:-1
+have very little room
+for movement,
+
+
+87
+00:03:36,383 --> 00:03:39,186 line:-1
+while ones at the top have
+the highest freedom to move.
+
+
+88
+00:03:39,186 --> 00:03:42,956 position:50%
+To simulate this, we can use
+the vertex's y-coordinate
+
+
+89
+00:03:42,956 --> 00:03:45,125 position:50%
+relative to the object's origin
+
+
+90
+00:03:45,125 --> 00:03:48,228 line:0
+as a scaling factor
+for all three axes,
+
+
+91
+00:03:48,228 --> 00:03:53,800 position:50%
+which gives us
+our final formula.
+
+
+92
+00:03:53,800 --> 00:03:55,602 line:-1
+Now that we have
+a plan for our shader,
+
+
+93
+00:03:55,602 --> 00:03:58,472 line:-1
+let's take a look at where
+to find these parameters.
+
+
+94
+00:03:58,472 --> 00:04:02,142 line:-1
+Geometry parameters are
+organized into a few categories.
+
+
+95
+00:04:02.142 --> 00:04:04.478 line:-1 position:50%
+The first is uniforms,
+values that are the same
+
+
+96
+00:04:04.478 --> 00:04:07.714 line:-1 position:50%
+for every vertex of the object
+within one frame.
+
+
+97
+00:04:07.714 --> 00:04:10.650 line:-1 position:50%
+We need time for our seaweed.
+
+
+98
+00:04:10,650 --> 00:04:14,354 line:-1
+Textures contain all textures
+authored as part of the model,
+
+
+99
+00:04:14,354 --> 00:04:15,889 line:-1
+plus an additional custom slot,
+
+
+100
+00:04:15.889 --> 00:04:18.725 line:-1 position:50%
+which you can use
+as you see fit.
+
+
+101
+00:04:18,725 --> 00:04:20,927 line:-1
+Material constants
+have any parameters,
+
+
+102
+00:04:20.927 --> 00:04:23.029 line:-1 position:50%
+such as tint or opacity scale,
+
+
+103
+00:04:23,029 --> 00:04:26,533 line:-1
+authored with the object
+or set via code.
+
+
+104
+00:04:26,533 --> 00:04:28,802 line:-1
+Geometry contains
+some read-only values,
+
+
+105
+00:04:28.802 --> 00:04:32.839 line:-1 position:50%
+such as the current vertex's
+model position or vertex ID.
+
+
+106
+00:04:32,839 --> 00:04:35,208 line:-1
+We need both model
+and world positions
+
+
+107
+00:04:35.208 --> 00:04:38.712 line:-1 position:50%
+for our seaweed movement.
+
+
+108
+00:04:38,712 --> 00:04:40,947 position:50%
+Geometry also
+has read-write values,
+
+
+109
+00:04:40,947 --> 00:04:44,951 position:50%
+including normal, UVs,
+and model position offset.
+
+
+110
+00:04:44,951 --> 00:04:46,453 position:50%
+Once we have computed
+our offset,
+
+
+111
+00:04:46,453 --> 00:04:49,389 line:0
+we'll store it here
+to move our vertices.
+
+
+112
+00:04:49,389 --> 00:04:52,359 line:-1
+Let's dive into Metal shader.
+
+
+113
+00:04:52,359 --> 00:04:55,162 line:-1
+We start out
+by including RealityKit.h.
+
+
+114
+00:04:55,162 --> 00:04:59,599 line:-1
+Now we declare a function with
+the visible function attribute.
+
+
+115
+00:04:59.599 --> 00:05:01.368 line:-1 position:50%
+This instructs the compiler
+to make it available
+
+
+116
+00:05:01.368 --> 00:05:04.538 line:-1 position:50%
+separately from other functions.
+
+
+117
+00:05:04.538 --> 00:05:06.406 line:-1 position:50%
+The function takes
+a single parameter,
+
+
+118
+00:05:06.406 --> 00:05:09.176 line:-1 position:50%
+which is RealityKit's
+geometry_parameters.
+
+
+119
+00:05:09.176 --> 00:05:12.245 line:-1 position:50%
+We'll retrieve all values
+through this object.
+
+
+120
+00:05:12.245 --> 00:05:14.781 line:-1 position:50%
+Using the geometry member
+of params,
+
+
+121
+00:05:14.781 --> 00:05:18.785 line:-1 position:50%
+we'll ask for both the world
+position and model position.
+
+
+122
+00:05:18,785 --> 00:05:20,720 line:-1
+Next we calculate
+a phase offset,
+
+
+123
+00:05:20.720 --> 00:05:24.391 line:-1 position:50%
+based on the world position
+at the vertex and time.
+
+
+124
+00:05:24.391 --> 00:05:29.129 line:-1 position:50%
+Then we apply our formula to
+calculate this vertex's offset.
+
+
+125
+00:05:29,129 --> 00:05:30,897 position:50%
+We store the offset
+on geometry,
+
+
+126
+00:05:30,897 --> 00:05:34,301 line:0
+which will get added
+to the vertex's model position.
+
+
+127
+00:05:34,301 --> 00:05:35,936 line:0
+We have our geometry modifier,
+
+
+128
+00:05:35,936 --> 00:05:39,005 position:50%
+but it's not yet hooked up
+to our seaweed.
+
+
+129
+00:05:39,005 --> 00:05:43,276 line:0
+Let's switch to our ARView
+subclass, written in Swift.
+
+
+130
+00:05:43.276 --> 00:05:45.645 line:-1 position:50%
+We start by loading our app's
+default Metal library,
+
+
+131
+00:05:45.645 --> 00:05:47.514 line:-1 position:50%
+which contains our shader.
+
+
+132
+00:05:47.514 --> 00:05:50.050 line:-1 position:50%
+Next we construct
+a geometryModifier
+
+
+133
+00:05:50,050 --> 00:05:52,819 line:-1
+using our shader's
+name and library.
+
+
+134
+00:05:52.819 --> 00:05:54.554 line:-1 position:50%
+For each material
+on the seaweed,
+
+
+135
+00:05:54.554 --> 00:05:56.523 line:-1 position:50%
+we create a new custom material.
+
+
+136
+00:05:56,523 --> 00:05:57,891 line:-1
+We pass the existing material
+
+
+137
+00:05:57.891 --> 00:06:00.060 line:-1 position:50%
+as the first parameter
+to CustomMaterial,
+
+
+138
+00:06:00,060 --> 00:06:02,829 line:-1
+so that it inherits the textures
+and material properties
+
+
+139
+00:06:02.829 --> 00:06:07.901 line:-1 position:50%
+from the base material while
+adding our geometry modifier.
+
+
+140
+00:06:07,901 --> 00:06:10,437 line:-1
+It looks pretty nice!
+Since we're underwater,
+
+
+141
+00:06:10.437 --> 00:06:12.839 line:-1 position:50%
+we've kept the animation
+pretty slow.
+
+
+142
+00:06:12.839 --> 00:06:14.341 line:-1 position:50%
+By tweaking amplitude
+and phase,
+
+
+143
+00:06:14.341 --> 00:06:16.443 line:-1 position:50%
+the same effect
+can be extended to grass,
+
+
+144
+00:06:16.443 --> 00:06:19.212 line:-1 position:50%
+trees, or other foliage.
+
+
+145
+00:06:19.212 --> 00:06:21.081 line:-1 position:50%
+Now that we've shown
+how to modify geometry,
+
+
+146
+00:06:21,081 --> 00:06:23,350 line:-1
+let's talk about shading.
+
+
+147
+00:06:23.350 --> 00:06:26.553 line:-1 position:50%
+This is our octopus
+from the underwater scene,
+
+
+148
+00:06:26,553 --> 00:06:28,989 line:-1
+looking great
+with our built-in shader.
+
+
+149
+00:06:28.989 --> 00:06:29.723 line:-1 position:50%
+As they do,
+
+
+150
+00:06:29,723 --> 00:06:32,792 line:-1
+our octopus transitions
+between multiple looks.
+
+
+151
+00:06:32.792 --> 00:06:35.762 line:-1 position:50%
+The second look
+has a reddish color.
+
+
+152
+00:06:35.762 --> 00:06:38.898 line:-1 position:50%
+Our artist has authored
+two base color textures,
+
+
+153
+00:06:38,898 --> 00:06:40,667 line:-1
+one for each look.
+
+
+154
+00:06:40,667 --> 00:06:42,302 line:-1
+In addition to the color change,
+
+
+155
+00:06:42.302 --> 00:06:44.904 line:-1 position:50%
+the red octopus has
+a higher roughness value,
+
+
+156
+00:06:44.904 --> 00:06:46.840 line:-1 position:50%
+making it less reflective.
+
+
+157
+00:06:46.840 --> 00:06:49.709 line:-1 position:50%
+And, to make our octopus
+even more special,
+
+
+158
+00:06:49,709 --> 00:06:52,979 line:-1
+we wanted to create
+a nice transition between looks.
+
+
+159
+00:06:52,979 --> 00:06:56,416 line:-1
+Here you can see
+the transition in action.
+
+
+160
+00:06:56,416 --> 00:06:58,018 line:-1
+Mesmerizing.
+
+
+161
+00:06:58,018 --> 00:07:01,154 line:-1
+While each look can be described
+as a physically based material,
+
+
+162
+00:07:01.154 --> 00:07:02.956 line:-1 position:50%
+for the transition itself,
+
+
+163
+00:07:02.956 --> 00:07:05.158 line:-1 position:50%
+we need to write
+a surface shader.
+
+
+164
+00:07:05.158 --> 00:07:07.294 line:-1 position:50%
+So what is a surface shader?
+
+
+165
+00:07:07,294 --> 00:07:09,462 line:-1
+A surface shader
+allows you to define
+
+
+166
+00:07:09,462 --> 00:07:11,298 line:-1
+the appearance of an object.
+
+
+167
+00:07:11.298 --> 00:07:13.066 line:-1 position:50%
+It runs inside
+the fragment shader
+
+
+168
+00:07:13,066 --> 00:07:15,802 line:-1
+for every visible pixel
+of an object.
+
+
+169
+00:07:15.802 --> 00:07:18.672 line:-1 position:50%
+In addition to color,
+this includes surface properties
+
+
+170
+00:07:18,672 --> 00:07:22,208 line:-1
+such as normal, specular,
+and roughness.
+
+
+171
+00:07:22,208 --> 00:07:24,944 line:-1
+You can write shaders that
+enhance an object's appearance
+
+
+172
+00:07:24,944 --> 00:07:28,648 line:-1
+or replace it entirely,
+creating new effects.
+
+
+173
+00:07:28.648 --> 00:07:31.851 line:-1 position:50%
+We've seen the two base-color
+textures for our octopus.
+
+
+174
+00:07:31,851 --> 00:07:33,186 line:-1
+For the transition effect,
+
+
+175
+00:07:33,186 --> 00:07:36,089 line:-1
+our artist has encoded
+a special texture for us.
+
+
+176
+00:07:36.089 --> 00:07:38.425 line:-1 position:50%
+This texture is actually
+a combination
+
+
+177
+00:07:38,425 --> 00:07:40,060 line:-1
+of three different layers.
+
+
+178
+00:07:40.060 --> 00:07:41.528 line:-1 position:50%
+There's a noise layer on top
+
+
+179
+00:07:41,528 --> 00:07:44,764 line:-1
+creating localized transition
+patterns.
+
+
+180
+00:07:44.764 --> 00:07:46.266 line:-1 position:50%
+We have a transition layer,
+
+
+181
+00:07:46.266 --> 00:07:48.435 line:-1 position:50%
+which dictates
+the overall movement,
+
+
+182
+00:07:48.435 --> 00:07:51.671 line:-1 position:50%
+starting at the head and
+moving towards the tentacles.
+
+
+183
+00:07:51,671 --> 00:07:52,772 line:-1
+And there's a mask layer
+
+
+184
+00:07:52.772 --> 00:07:55.542 line:-1 position:50%
+for areas that we don't
+want to change color,
+
+
+185
+00:07:55.542 --> 00:07:59.746 line:-1 position:50%
+such as the eye and underside
+of the tentacles.
+
+
+186
+00:07:59,746 --> 00:08:02,215 line:-1
+These three layers are combined
+into the red, green,
+
+
+187
+00:08:02.215 --> 00:08:04.117 line:-1 position:50%
+and blue channels
+of our texture,
+
+
+188
+00:08:04.117 --> 00:08:06.753 line:-1 position:50%
+which we assign
+to the custom texture slot.
+
+
+189
+00:08:06.753 --> 00:08:07.854 line:-1 position:50%
+With our textures set up,
+
+
+190
+00:08:07,854 --> 00:08:12,025 line:-1
+let's look at how to access
+these from a surface shader.
+
+
+191
+00:08:12.025 --> 00:08:13.793 line:-1 position:50%
+Similar to
+the geometry modifier,
+
+
+192
+00:08:13,793 --> 00:08:15,962 line:-1
+the surface shader
+has access to uniforms,
+
+
+193
+00:08:15.962 --> 00:08:18.298 line:-1 position:50%
+textures,
+and material constants.
+
+
+194
+00:08:18,298 --> 00:08:21,267 line:-1
+Time is an input
+to our octopus transition.
+
+
+195
+00:08:21.267 --> 00:08:23.470 line:-1 position:50%
+We'll sample textures
+authored with our model
+
+
+196
+00:08:23,470 --> 00:08:25,505 line:-1
+and read material constants,
+
+
+197
+00:08:25.505 --> 00:08:29.008 line:-1 position:50%
+allowing our artist to make
+model-wide adjustments.
+
+
+198
+00:08:29.008 --> 00:08:32.078 line:-1 position:50%
+Geometry -- such as position,
+normal, or UVs --
+
+
+199
+00:08:32.078 --> 00:08:33.980 line:-1 position:50%
+appear in a geometry structure.
+
+
+200
+00:08:33.980 --> 00:08:37.250 line:-1 position:50%
+These are the interpolated
+outputs from the vertex shader.
+
+
+201
+00:08:37.250 --> 00:08:40.420 line:-1 position:50%
+We'll use UV0
+as our texture coordinate.
+
+
+202
+00:08:40,420 --> 00:08:42,956 line:-1
+A surface shader
+writes a surface structure.
+
+
+203
+00:08:42,956 --> 00:08:44,591 line:-1
+Properties start
+with default values,
+
+
+204
+00:08:44.591 --> 00:08:46.226 line:-1 position:50%
+and we're free
+to calculate these values
+
+
+205
+00:08:46.226 --> 00:08:48.228 line:-1 position:50%
+in any way we see fit.
+
+
+206
+00:08:48.228 --> 00:08:51.231 line:-1 position:50%
+We'll be calculating
+base color and normal.
+
+
+207
+00:08:51,231 --> 00:08:53,233 position:50%
+Then, four surface parameters:
+
+
+208
+00:08:53,233 --> 00:08:56,836 position:50%
+roughness, metallic,
+ambient occlusion, and specular.
+
+
+209
+00:08:56.836 --> 00:08:58.471 line:-1 position:50%
+Now that we know
+where our values live,
+
+
+210
+00:08:58.471 --> 00:09:00.974 line:-1 position:50%
+let's start writing our shader.
+
+
+211
+00:09:00.974 --> 00:09:02.709 line:-1 position:50%
+We'll do this in three steps.
+
+
+212
+00:09:02.709 --> 00:09:05.078 line:-1 position:50%
+First calculate
+the transition value,
+
+
+213
+00:09:05,078 --> 00:09:09,382 line:-1
+where 0 is a fully purple
+octopus and 1 is fully red.
+
+
+214
+00:09:09,382 --> 00:09:10,683 line:-1
+Using the transition value,
+
+
+215
+00:09:10,683 --> 00:09:12,452 line:-1
+we'll calculate color and normal
+
+
+216
+00:09:12.452 --> 00:09:16.189 line:-1 position:50%
+and then fine-tune by assigning
+material properties.
+
+
+217
+00:09:16,189 --> 00:09:17,724 line:-1
+Let's get started.
+
+
+218
+00:09:17.724 --> 00:09:19.592 line:-1 position:50%
+First step: transition.
+
+
+219
+00:09:19.592 --> 00:09:21.594 line:-1 position:50%
+We're building the octopus
+surface function,
+
+
+220
+00:09:21.594 --> 00:09:24.431 line:-1 position:50%
+which takes a surface_parameters
+argument.
+
+
+221
+00:09:24.431 --> 00:09:27.300 line:-1 position:50%
+Since we're using textures,
+we declare a sampler.
+
+
+222
+00:09:27,300 --> 00:09:29,269 line:-1
+On the right, you can see
+what our octopus looks like
+
+
+223
+00:09:29,269 --> 00:09:30,937 line:-1
+with an empty surface shader --
+
+
+224
+00:09:30,937 --> 00:09:33,173 line:-1
+it's gray and
+a little bit shiny.
+
+
+225
+00:09:33,173 --> 00:09:35,542 line:-1
+RealityKit puts you in complete
+control of what does
+
+
+226
+00:09:35,542 --> 00:09:38,478 line:-1
+or does not contribute
+to your model's appearance.
+
+
+227
+00:09:38.478 --> 00:09:39.946 line:-1 position:50%
+In order to compute color,
+
+
+228
+00:09:39.946 --> 00:09:41.981 line:-1 position:50%
+there's a few things
+we need to do first.
+
+
+229
+00:09:41.981 --> 00:09:44.451 line:-1 position:50%
+We'll store some convenience
+variables.
+
+
+230
+00:09:44.451 --> 00:09:46.219 line:-1 position:50%
+We access our UV0,
+
+
+231
+00:09:46.219 --> 00:09:48.621 line:-1 position:50%
+which we'll use
+as a texture coordinate.
+
+
+232
+00:09:48.621 --> 00:09:51.624 line:-1 position:50%
+Metal and USD have different
+texture coordinate systems,
+
+
+233
+00:09:51,624 --> 00:09:53,293 line:-1
+so we'll invert the y-coordinate
+
+
+234
+00:09:53.293 --> 00:09:56.429 line:-1 position:50%
+to match the textures
+loaded from USD.
+
+
+235
+00:09:56,429 --> 00:09:58,698 line:-1
+Now we'll sample
+our transition texture --
+
+
+236
+00:09:58.698 --> 00:10:01.234 line:-1 position:50%
+the three-layered texture
+our artist created.
+
+
+237
+00:10:01,234 --> 00:10:03,269 line:0
+Our artist set up
+a small function
+
+
+238
+00:10:03,269 --> 00:10:05,638 line:0
+that takes the mask value
+plus time,
+
+
+239
+00:10:05,638 --> 00:10:09,876 position:50%
+and returns 0 to 1 values
+for blend and colorBlend.
+
+
+240
+00:10:09.876 --> 00:10:13.246 line:-1 position:50%
+Second step:
+color and normal.
+
+
+241
+00:10:13.246 --> 00:10:15.682 line:-1 position:50%
+With our previously computed
+blend variable,
+
+
+242
+00:10:15.682 --> 00:10:18.151 line:-1 position:50%
+we can now calculate
+the octopus's color
+
+
+243
+00:10:18,151 --> 00:10:19,986 line:-1
+and see the transition.
+
+
+244
+00:10:19,986 --> 00:10:22,856 line:-1
+To do this, we sample
+two textures:
+
+
+245
+00:10:22,856 --> 00:10:25,291 line:-1
+the base color
+and the secondary base color,
+
+
+246
+00:10:25.291 --> 00:10:27.494 line:-1 position:50%
+which we've stored
+in emissive_color.
+
+
+247
+00:10:27.494 --> 00:10:29.662 line:-1 position:50%
+Then we blend
+between the two colors
+
+
+248
+00:10:29.662 --> 00:10:32.198 line:-1 position:50%
+using the previously computed
+colorBlend.
+
+
+249
+00:10:32.198 --> 00:10:33.900 line:-1 position:50%
+We'll multiply
+by base_color_tint --
+
+
+250
+00:10:33,900 --> 00:10:35,401 line:-1
+a value from the material --
+
+
+251
+00:10:35,401 --> 00:10:38,571 line:-1
+and set our base color
+on the surface.
+
+
+252
+00:10:38,571 --> 00:10:40,673 line:-1
+Next we'll apply
+the normal map,
+
+
+253
+00:10:40,673 --> 00:10:42,842 line:-1
+which adds surface deviations,
+
+
+254
+00:10:42.842 --> 00:10:46.412 line:-1 position:50%
+most noticeable
+on the head and tentacles.
+
+
+255
+00:10:46,412 --> 00:10:48,448 position:50%
+We sample
+the normal map texture,
+
+
+256
+00:10:48,448 --> 00:10:52,852 line:0
+unpack its value, and then
+set on the surface object.
+
+
+257
+00:10:52.852 --> 00:10:55.188 line:-1 position:50%
+Onto material properties.
+
+
+258
+00:10:55.188 --> 00:10:58.157 line:-1 position:50%
+Here's our octopus so far,
+with color and normal.
+
+
+259
+00:10:58,157 --> 00:11:01,060 line:-1
+Let's see how surface properties
+affect its look.
+
+
+260
+00:11:01.060 --> 00:11:03.396 line:-1 position:50%
+Roughness, which you'll see
+on the lower body;
+
+
+261
+00:11:03.396 --> 00:11:07.066 line:-1 position:50%
+ambient occlusion, which will
+darken up the lower portions;
+
+
+262
+00:11:07,066 --> 00:11:10,236 line:-1
+and specular, which gives us
+a nice reflection on the eye
+
+
+263
+00:11:10,236 --> 00:11:13,072 line:-1
+and some additional definition
+on the body.
+
+
+264
+00:11:13,072 --> 00:11:15,174 line:-1
+Let's add these
+to our shader.
+
+
+265
+00:11:15,174 --> 00:11:17,677 line:-1
+We sample four textures
+on the model,
+
+
+266
+00:11:17.677 --> 00:11:19.846 line:-1 position:50%
+one for each property.
+
+
+267
+00:11:19.846 --> 00:11:23.216 line:-1 position:50%
+Next we scale these values
+with material settings.
+
+
+268
+00:11:23,216 --> 00:11:25,885 line:-1
+In addition, we're also
+increasing the roughness
+
+
+269
+00:11:25,885 --> 00:11:29,088 line:-1
+as we transition
+from purple to red.
+
+
+270
+00:11:29,088 --> 00:11:32,425 position:50%
+Then we set our four values
+on the surface.
+
+
+271
+00:11:32,425 --> 00:11:36,896 position:50%
+Similar to before, we need to
+apply the shader to our model.
+
+
+272
+00:11:36,896 --> 00:11:41,100 line:0
+We assign this material to our
+model in our ARView subclass.
+
+
+273
+00:11:41.100 --> 00:11:44.137 line:-1 position:50%
+First we load
+our two additional textures,
+
+
+274
+00:11:44.137 --> 00:11:46.873 line:-1 position:50%
+then load our surface shader.
+
+
+275
+00:11:46,873 --> 00:11:48,875 position:50%
+Like before, we're constructing
+new materials
+
+
+276
+00:11:48,875 --> 00:11:50,777 line:0
+from the object's base material,
+
+
+277
+00:11:50,777 --> 00:11:55,415 position:50%
+this time with a surface shader
+and our two additional textures.
+
+
+278
+00:11:55,415 --> 00:11:57,050 line:0
+And we're done.
+
+
+279
+00:11:57.050 --> 00:11:59.719 line:-1 position:50%
+So to recap, we've shown
+the seaweed animation
+
+
+280
+00:11:59.719 --> 00:12:02.388 line:-1 position:50%
+using geometry modifiers
+and how to build
+
+
+281
+00:12:02.388 --> 00:12:05.758 line:-1 position:50%
+an octopus transition
+with surface shaders.
+
+
+282
+00:12:05.758 --> 00:12:07.594 line:-1 position:50%
+While we've demonstrated
+them separately,
+
+
+283
+00:12:07.594 --> 00:12:11.564 line:-1 position:50%
+you can combine the two for
+even more interesting effects.
+
+
+284
+00:12:11,564 --> 00:12:14,467 line:-1
+Moving on to another
+highly requested feature,
+
+
+285
+00:12:14.467 --> 00:12:18.071 line:-1 position:50%
+support for adding custom
+post processing effects.
+
+
+286
+00:12:18,071 --> 00:12:19,939 line:0
+RealityKit comes with
+a rich suite
+
+
+287
+00:12:19,939 --> 00:12:21,808 position:50%
+of camera-matched post effects
+
+
+288
+00:12:21,808 --> 00:12:29,449 line:0
+like motion blur, camera noise,
+and depth of field.
+
+
+289
+00:12:29,449 --> 00:12:32,685 line:-1
+These effects are all designed
+to make virtual and real objects
+
+
+290
+00:12:32.685 --> 00:12:35.088 line:-1 position:50%
+feel like they're part
+of the same environment.
+
+
+291
+00:12:35,088 --> 00:12:38,658 line:-1
+These are available for you
+to customize on ARView.
+
+
+292
+00:12:38,658 --> 00:12:40,960 line:-1
+This year, we're also exposing
+the ability for you
+
+
+293
+00:12:40.960 --> 00:12:43.563 line:-1 position:50%
+to create your own
+fullscreen effects.
+
+
+294
+00:12:43.563 --> 00:12:47.500 line:-1 position:50%
+This allows you to leverage
+RealityKit for photo realism,
+
+
+295
+00:12:47,500 --> 00:12:50,803 line:-1
+and add new effects to tailor
+the result for your app.
+
+
+296
+00:12:50.803 --> 00:12:52.972 line:-1 position:50%
+So what is a post process?
+
+
+297
+00:12:52,972 --> 00:12:57,310 line:-1
+A post process is a shader or
+series of shaders that execute
+
+
+298
+00:12:57.310 --> 00:13:00.146 line:-1 position:50%
+after objects have been
+rendered and lit.
+
+
+299
+00:13:00.146 --> 00:13:04.083 line:-1 position:50%
+It also occurs after
+any RealityKit post effects.
+
+
+300
+00:13:04.083 --> 00:13:09.288 line:-1 position:50%
+Its inputs are two textures:
+color and a depth buffer.
+
+
+301
+00:13:09,288 --> 00:13:11,758 line:-1
+The depth buffer is displayed
+as greyscale here;
+
+
+302
+00:13:11.758 --> 00:13:14.527 line:-1 position:50%
+it contains a distance value
+for each pixel
+
+
+303
+00:13:14.527 --> 00:13:16.262 line:-1 position:50%
+relative to the camera.
+
+
+304
+00:13:16,262 --> 00:13:17,930 line:0
+A post process
+writes its results
+
+
+305
+00:13:17,930 --> 00:13:20,366 position:50%
+to a target color texture.
+
+
+306
+00:13:20,366 --> 00:13:21,801 position:50%
+The simplest post effect
+
+
+307
+00:13:21,801 --> 00:13:25,138 line:0
+would copy source color
+into target color.
+
+
+308
+00:13:25,138 --> 00:13:27,440 line:0
+We can build these
+in a few ways.
+
+
+309
+00:13:27,440 --> 00:13:29,642 line:-1
+Apple's platforms come
+with a number of technologies
+
+
+310
+00:13:29,642 --> 00:13:31,411 line:-1
+that integrate well
+with post effects,
+
+
+311
+00:13:31.411 --> 00:13:33.112 line:-1 position:50%
+such as Core Image,
+
+
+312
+00:13:33,112 --> 00:13:36,249 line:-1
+Metal Performance Shaders,
+and SpriteKit.
+
+
+313
+00:13:36,249 --> 00:13:39,852 line:-1
+You can also write your own
+with the Metal Shading Language.
+
+
+314
+00:13:39.852 --> 00:13:42.755 line:-1 position:50%
+Let's start with
+some Core Image effects.
+
+
+315
+00:13:42,755 --> 00:13:45,725 line:0
+Core Image is an Apple framework
+for image processing.
+
+
+316
+00:13:45,725 --> 00:13:48,261 line:0
+It has hundreds of
+color-processing,
+
+
+317
+00:13:48,261 --> 00:13:50,730 position:50%
+stylization,
+and deformation effects
+
+
+318
+00:13:50,730 --> 00:13:53,633 line:0
+that you can apply
+to images and video.
+
+
+319
+00:13:53,633 --> 00:13:55,368 position:50%
+Thermal is a neat effect --
+
+
+320
+00:13:55,368 --> 00:13:58,438 position:50%
+something you might turn on
+for an underwater fish finder.
+
+
+321
+00:13:58,438 --> 00:14:01,908 position:50%
+Let's see how easy it is
+to integrate with RealityKit.
+
+
+322
+00:14:01.908 --> 00:14:04.977 line:-1 position:50%
+All of our post effects
+will follow the same pattern.
+
+
+323
+00:14:04.977 --> 00:14:09.315 line:-1 position:50%
+You set render callbacks,
+respond to prepare with device,
+
+
+324
+00:14:09,315 --> 00:14:13,052 line:-1
+and then post process
+will be called every frame.
+
+
+325
+00:14:13,052 --> 00:14:16,255 line:-1
+Render callbacks exist
+on RealityKit's ARView.
+
+
+326
+00:14:16.255 --> 00:14:18.124 line:-1 position:50%
+We want both
+the prepareWithDevice
+
+
+327
+00:14:18.124 --> 00:14:20.560 line:-1 position:50%
+and postProcess callbacks.
+
+
+328
+00:14:20,560 --> 00:14:22,228 line:-1
+Prepare with device
+will be called once
+
+
+329
+00:14:22.228 --> 00:14:24.063 line:-1 position:50%
+with the MTLDevice.
+
+
+330
+00:14:24.063 --> 00:14:26.299 line:-1 position:50%
+This is a good opportunity
+to create textures,
+
+
+331
+00:14:26,299 --> 00:14:28,434 line:-1
+load compute
+or render pipelines,
+
+
+332
+00:14:28,434 --> 00:14:30,603 line:-1
+and check device capabilities.
+
+
+333
+00:14:30,603 --> 00:14:33,506 position:50%
+This is where we create
+our Core Image context.
+
+
+334
+00:14:33.506 --> 00:14:36.609 line:-1 position:50%
+The postProcess callback
+is invoked each frame.
+
+
+335
+00:14:36,609 --> 00:14:38,544 line:-1
+We'll create a CIImage,
+
+
+336
+00:14:38,544 --> 00:14:40,747 line:-1
+referencing our
+source color texture.
+
+
+337
+00:14:40.747 --> 00:14:43.416 line:-1 position:50%
+Next we create
+our thermal filter.
+
+
+338
+00:14:43,416 --> 00:14:45,218 line:-1
+If you're using
+a different Core Image filter,
+
+
+339
+00:14:45,218 --> 00:14:48,321 line:-1
+this is where you'd configure
+its other parameters.
+
+
+340
+00:14:48.321 --> 00:14:50.289 line:-1 position:50%
+Then we create
+a render destination,
+
+
+341
+00:14:50.289 --> 00:14:52.625 line:-1 position:50%
+which targets
+our output color texture
+
+
+342
+00:14:52.625 --> 00:14:56.295 line:-1 position:50%
+and utilizes the context's
+command buffer.
+
+
+343
+00:14:56,295 --> 00:14:59,332 line:0
+We ask Core Image to preserve
+the image's orientation
+
+
+344
+00:14:59,332 --> 00:15:01,534 line:0
+and start the task.
+
+
+345
+00:15:01,534 --> 00:15:02,835 line:0
+That's it!
+
+
+346
+00:15:02,835 --> 00:15:04,437 line:0
+With Core Image, we've unlocked
+
+
+347
+00:15:04,437 --> 00:15:07,673 line:0
+hundreds of prebuilt effects
+that we can use.
+
+
+348
+00:15:07,673 --> 00:15:10,042 line:0
+Now let's see how we can
+use Metal Performance Shaders
+
+
+349
+00:15:10,042 --> 00:15:12,245 line:0
+to build new effects.
+
+
+350
+00:15:12.245 --> 00:15:13.980 line:-1 position:50%
+Let's talk about bloom.
+
+
+351
+00:15:13.980 --> 00:15:16.849 line:-1 position:50%
+Bloom is a screen space
+technique that creates a glow
+
+
+352
+00:15:16,849 --> 00:15:19,051 line:-1
+around brightly lit objects,
+
+
+353
+00:15:19.051 --> 00:15:22.088 line:-1 position:50%
+simulating a real-world
+lens effect.
+
+
+354
+00:15:22.088 --> 00:15:23.990 line:-1 position:50%
+Core Image contains
+a bloom effect,
+
+
+355
+00:15:23.990 --> 00:15:25.424 line:-1 position:50%
+but we're going to build
+our own
+
+
+356
+00:15:25.424 --> 00:15:28.194 line:-1 position:50%
+so we can control
+every step of the process.
+
+
+357
+00:15:28.194 --> 00:15:30.797 line:-1 position:50%
+We'll build the effect
+with Metal Performance Shaders,
+
+
+358
+00:15:30,797 --> 00:15:35,101 line:-1
+a collection of highly optimized
+compute and graphics shaders.
+
+
+359
+00:15:35.101 --> 00:15:36.269 line:-1 position:50%
+To build this shader,
+
+
+360
+00:15:36.269 --> 00:15:38.404 line:-1 position:50%
+we're going to construct
+a graph of filters
+
+
+361
+00:15:38.404 --> 00:15:40.573 line:-1 position:50%
+using color as the source.
+
+
+362
+00:15:40.573 --> 00:15:43.576 line:-1 position:50%
+We first want to isolate
+the areas that are bright.
+
+
+363
+00:15:43,576 --> 00:15:47,079 line:-1
+To do this, we use an operation
+called "threshold to zero."
+
+
+364
+00:15:47,079 --> 00:15:48,614 line:-1
+It converts color to luminance
+
+
+365
+00:15:48.614 --> 00:15:52.919 line:-1 position:50%
+and sets every pixel below
+a certain brightness level to 0.
+
+
+366
+00:15:52,919 --> 00:15:56,022 line:-1
+We then blur the result
+using a Gaussian blur,
+
+
+367
+00:15:56,022 --> 00:15:58,491 line:-1
+spreading light
+onto adjacent areas.
+
+
+368
+00:15:58,491 --> 00:16:00,526 line:-1
+Efficient blurs can be
+challenging to implement
+
+
+369
+00:16:00.526 --> 00:16:02.929 line:-1 position:50%
+and often require
+multiple stages.
+
+
+370
+00:16:02,929 --> 00:16:05,631 line:-1
+Metal Performance Shaders
+handles this for us.
+
+
+371
+00:16:05.631 --> 00:16:08.801 line:-1 position:50%
+Then we add this blurred texture
+to the original color,
+
+
+372
+00:16:08.801 --> 00:16:11.571 line:-1 position:50%
+adding a glow
+around bright areas.
+
+
+373
+00:16:11.571 --> 00:16:15.241 line:-1 position:50%
+Let's implement this graph
+as a post effect.
+
+
+374
+00:16:15,241 --> 00:16:18,377 line:-1
+We start by creating
+an intermediate bloomTexture.
+
+
+375
+00:16:18.377 --> 00:16:21.280 line:-1 position:50%
+Then execute our
+ThresholdToZero operation,
+
+
+376
+00:16:21.280 --> 00:16:24.517 line:-1 position:50%
+reading from sourceColor
+and writing to bloomTexture.
+
+
+377
+00:16:24.517 --> 00:16:28.187 line:-1 position:50%
+Then we perform
+a gaussianBlur in place.
+
+
+378
+00:16:28,187 --> 00:16:30,056 line:0
+Finally, we add
+our original color
+
+
+379
+00:16:30,056 --> 00:16:32,425 line:0
+and this bloomed color together.
+
+
+380
+00:16:32,425 --> 00:16:33,659 position:50%
+That's it!
+
+
+381
+00:16:33,659 --> 00:16:36,395 line:-1
+Now that we've seen a couple
+ways to create post effects,
+
+
+382
+00:16:36.395 --> 00:16:37.396 line:-1 position:50%
+let's talk about a way
+
+
+383
+00:16:37.396 --> 00:16:41.534 line:-1 position:50%
+to put effects on top of
+our output using SpriteKit.
+
+
+384
+00:16:41.534 --> 00:16:44.270 line:-1 position:50%
+SpriteKit is Apple's framework
+for high performance,
+
+
+385
+00:16:44.270 --> 00:16:46.472 line:-1 position:50%
+battery-efficient 2D games.
+
+
+386
+00:16:46.472 --> 00:16:49.942 line:-1 position:50%
+It's perfect for adding some
+effects on top of our 3D view.
+
+
+387
+00:16:49,942 --> 00:16:52,011 line:-1
+We'll use it to add
+some bubbles on the screen
+
+
+388
+00:16:52.011 --> 00:16:53.112 line:-1 position:50%
+as a post effect,
+
+
+389
+00:16:53,112 --> 00:16:57,483 line:-1
+using the same prepareWithDevice
+and postProcess callbacks.
+
+
+390
+00:16:57,483 --> 00:16:59,151 line:-1
+We have the same two steps
+as before.
+
+
+391
+00:16:59.151 --> 00:17:02.588 line:-1 position:50%
+In prepareWithDevice, we'll
+create our SpriteKit renderer
+
+
+392
+00:17:02,588 --> 00:17:04,924 line:-1
+and load the scene
+containing our bubbles.
+
+
+393
+00:17:04,924 --> 00:17:07,093 line:-1
+Then in our postProcess
+callback,
+
+
+394
+00:17:07.093 --> 00:17:09.629 line:-1 position:50%
+we'll copy our source color
+to target color,
+
+
+395
+00:17:09,629 --> 00:17:11,197 line:-1
+update our SpriteKit scene,
+
+
+396
+00:17:11.197 --> 00:17:13.900 line:-1 position:50%
+and render on top
+of the 3D content.
+
+
+397
+00:17:13.900 --> 00:17:16.502 line:-1 position:50%
+prepareWithDevice
+is pretty straightforward --
+
+
+398
+00:17:16.502 --> 00:17:20.206 line:-1 position:50%
+we create our renderer
+and load our scene from a file.
+
+
+399
+00:17:20.206 --> 00:17:22.842 line:-1 position:50%
+We'll be drawing this
+over our AR scene,
+
+
+400
+00:17:22,842 --> 00:17:26,445 line:-1
+so we need our SpriteKit
+background to be transparent.
+
+
+401
+00:17:26.445 --> 00:17:29.248 line:-1 position:50%
+In postProcess,
+we first blit the source color
+
+
+402
+00:17:29,248 --> 00:17:31,117 line:-1
+to the targetColorTexture;
+
+
+403
+00:17:31,117 --> 00:17:34,754 line:-1
+this will be the background that
+SpriteKit renders in front of.
+
+
+404
+00:17:34.754 --> 00:17:37.890 line:-1 position:50%
+Then advance our SpriteKit scene
+to the new time
+
+
+405
+00:17:37.890 --> 00:17:40.293 line:-1 position:50%
+so our bubbles move upward.
+
+
+406
+00:17:40,293 --> 00:17:44,363 position:50%
+Set up a RenderPassDescriptor
+and render onto it.
+
+
+407
+00:17:44,363 --> 00:17:45,698 line:0
+And that's it!
+
+
+408
+00:17:45,698 --> 00:17:47,867 position:50%
+We've shown how
+to utilize existing frameworks
+
+
+409
+00:17:47,867 --> 00:17:49,335 line:0
+to make post effects,
+
+
+410
+00:17:49,335 --> 00:17:53,472 line:0
+but sometimes you really do
+need to make one from scratch.
+
+
+411
+00:17:53.472 --> 00:17:55.975 line:-1 position:50%
+You can also author
+a full-screen effect
+
+
+412
+00:17:55.975 --> 00:17:58.377 line:-1 position:50%
+by writing a compute shader.
+
+
+413
+00:17:58.377 --> 00:18:01.380 line:-1 position:50%
+For our underwater demo,
+we needed a fog effect
+
+
+414
+00:18:01.380 --> 00:18:05.117 line:-1 position:50%
+that applies to virtual objects
+and camera passthrough.
+
+
+415
+00:18:05.117 --> 00:18:08.621 line:-1 position:50%
+Fog simulates the scattering
+of light through a medium;
+
+
+416
+00:18:08,621 --> 00:18:11,757 line:-1
+its intensity is proportional
+to the distance.
+
+
+417
+00:18:11,757 --> 00:18:13,893 line:-1
+To create this effect,
+we needed to know
+
+
+418
+00:18:13.893 --> 00:18:17.129 line:-1 position:50%
+how far each pixel is
+from the device.
+
+
+419
+00:18:17.129 --> 00:18:19.999 line:-1 position:50%
+Fortunately,
+ARKit and RealityKit
+
+
+420
+00:18:19,999 --> 00:18:23,336 line:-1
+both provide access
+to depth information.
+
+
+421
+00:18:23,336 --> 00:18:25,338 line:-1
+For LiDAR-enabled devices,
+
+
+422
+00:18:25,338 --> 00:18:27,740 line:-1
+ARKit provides
+access to sceneDepth,
+
+
+423
+00:18:27,740 --> 00:18:31,310 line:-1
+containing distances in meters
+from the camera.
+
+
+424
+00:18:31.310 --> 00:18:32.912 line:-1 position:50%
+These values
+are extremely accurate
+
+
+425
+00:18:32.912 --> 00:18:36.515 line:-1 position:50%
+at a lower resolution
+than the full screen.
+
+
+426
+00:18:36.515 --> 00:18:38.317 line:-1 position:50%
+We could use this depth directly
+
+
+427
+00:18:38,317 --> 00:18:40,219 line:-1
+but it doesn't include
+virtual objects,
+
+
+428
+00:18:40.219 --> 00:18:42.655 line:-1 position:50%
+so they wouldn't fog correctly.
+
+
+429
+00:18:42.655 --> 00:18:44.090 line:-1 position:50%
+In our postProcess,
+
+
+430
+00:18:44,090 --> 00:18:47,393 line:-1
+RealityKit provides access
+to depth for virtual content
+
+
+431
+00:18:47,393 --> 00:18:49,895 line:-1
+and -- when scene understanding
+is enabled --
+
+
+432
+00:18:49.895 --> 00:18:53.599 line:-1 position:50%
+approximated meshes
+for real-world objects.
+
+
+433
+00:18:53,599 --> 00:18:56,335 line:-1
+The mesh builds progressively
+as you move,
+
+
+434
+00:18:56,335 --> 00:18:59,638 line:-1
+so it contains some holes where
+we haven't currently scanned.
+
+
+435
+00:18:59,638 --> 00:19:03,275 line:-1
+These holes would show fog as if
+they were infinitely far away.
+
+
+436
+00:19:03.275 --> 00:19:05.478 line:-1 position:50%
+We'll combine data from these
+two depth textures
+
+
+437
+00:19:05.478 --> 00:19:08.681 line:-1 position:50%
+to resolve this discrepancy.
+
+
+438
+00:19:08,681 --> 00:19:11,817 line:-1
+ARKit provides depth values
+as a texture.
+
+
+439
+00:19:11,817 --> 00:19:14,286 line:-1
+Each pixel is the distance,
+in meters,
+
+
+440
+00:19:14,286 --> 00:19:16,055 line:-1
+of the sampled point.
+
+
+441
+00:19:16.055 --> 00:19:18.124 line:-1 position:50%
+Since the sensor
+is at a fixed orientation
+
+
+442
+00:19:18.124 --> 00:19:19.925 line:-1 position:50%
+on your iPhone or iPad,
+
+
+443
+00:19:19.925 --> 00:19:22.261 line:-1 position:50%
+we'll ask ARKit
+to construct a conversion
+
+
+444
+00:19:22,261 --> 00:19:26,165 line:-1
+from the sensor's orientation to
+the current screen orientation,
+
+
+445
+00:19:26.165 --> 00:19:28.367 line:-1 position:50%
+and then invert the result.
+
+
+446
+00:19:28.367 --> 00:19:31.737 line:-1 position:50%
+To read virtual content depth,
+we need a little bit of info
+
+
+447
+00:19:31.737 --> 00:19:34.507 line:-1 position:50%
+about how RealityKit
+packs depth.
+
+
+448
+00:19:34,507 --> 00:19:37,610 line:-1
+You'll notice that,
+unlike ARKit's sceneDepth,
+
+
+449
+00:19:37.610 --> 00:19:40.546 line:-1 position:50%
+brighter values are nearer
+to the camera.
+
+
+450
+00:19:40.546 --> 00:19:43.215 line:-1 position:50%
+Values are stored
+in a 0 to 1 range,
+
+
+451
+00:19:43.215 --> 00:19:46.552 line:-1 position:50%
+using an Infinite Reverse-Z
+Projection.
+
+
+452
+00:19:46.552 --> 00:19:49.555 line:-1 position:50%
+This just means that 0 means
+infinitely far away,
+
+
+453
+00:19:49,555 --> 00:19:52,525 line:-1
+and 1 is at the camera's
+near plane.
+
+
+454
+00:19:52.525 --> 00:19:54.593 line:-1 position:50%
+We can easily reverse
+this transform
+
+
+455
+00:19:54,593 --> 00:19:58,464 line:-1
+by dividing the near plane depth
+by the sampled depth.
+
+
+456
+00:19:58,464 --> 00:20:01,133 line:-1
+Let's write a helper function
+to do this.
+
+
+457
+00:20:01.133 --> 00:20:02.168 line:-1 position:50%
+We have a Metal function
+
+
+458
+00:20:02.168 --> 00:20:05.237 line:-1 position:50%
+taking the sample's depth
+and projection matrix.
+
+
+459
+00:20:05.237 --> 00:20:08.974 line:-1 position:50%
+Pixels with no virtual content
+are exactly 0.
+
+
+460
+00:20:08,974 --> 00:20:12,678 line:-1
+We'll clamp to a small epsilon
+to prevent divide by zero.
+
+
+461
+00:20:12.678 --> 00:20:14.747 line:-1 position:50%
+To undo the perspective
+division,
+
+
+462
+00:20:14.747 --> 00:20:16.849 line:-1 position:50%
+we take the last column's
+z value
+
+
+463
+00:20:16,849 --> 00:20:19,151 line:-1
+and divide by
+our sampled depth.
+
+
+464
+00:20:19.151 --> 00:20:20.086 line:-1 position:50%
+Great!
+
+
+465
+00:20:20.086 --> 00:20:21.854 line:-1 position:50%
+Now that we have
+our two depth values,
+
+
+466
+00:20:21,854 --> 00:20:23,422 line:-1
+we can use the minimum
+of the two
+
+
+467
+00:20:23.422 --> 00:20:26.592 line:-1 position:50%
+as an input to our fog function.
+
+
+468
+00:20:26,592 --> 00:20:30,463 line:0
+Our fog has a few parameters:
+a maximum distance,
+
+
+469
+00:20:30,463 --> 00:20:32,898 line:0
+a maximum intensity
+at that distance,
+
+
+470
+00:20:32,898 --> 00:20:35,234 line:0
+and a power curve exponent.
+
+
+471
+00:20:35,234 --> 00:20:38,204 line:0
+The exact values
+were chosen experimentally.
+
+
+472
+00:20:38,204 --> 00:20:42,074 position:50%
+They shape our depth value to
+achieve our desired fog density.
+
+
+473
+00:20:42,074 --> 00:20:44,743 line:-1
+Now we're ready
+to put the pieces together.
+
+
+474
+00:20:44.743 --> 00:20:46.512 line:-1 position:50%
+We have our depth value
+from ARKit,
+
+
+475
+00:20:46,512 --> 00:20:49,548 line:-1
+a linearized depth value
+from RealityKit,
+
+
+476
+00:20:49.548 --> 00:20:51.450 line:-1 position:50%
+and a function for our fog.
+
+
+477
+00:20:51.450 --> 00:20:53.919 line:-1 position:50%
+Let's write our compute shader.
+
+
+478
+00:20:53.919 --> 00:20:54.854 line:-1 position:50%
+For each pixel,
+
+
+479
+00:20:54,854 --> 00:20:57,590 line:-1
+we start by sampling
+both linear depth values.
+
+
+480
+00:20:57,590 --> 00:21:01,360 line:-1
+Then we apply our fog function
+using our tuning parameters,
+
+
+481
+00:21:01,360 --> 00:21:04,396 line:-1
+which turns linear depth
+into a 0 to 1 value.
+
+
+482
+00:21:04,396 --> 00:21:07,733 line:-1
+Then we blend between
+source color and the fog color,
+
+
+483
+00:21:07.733 --> 00:21:12.438 line:-1 position:50%
+depending on fogBlend's value,
+storing the result in outColor.
+
+
+484
+00:21:12.438 --> 00:21:16.075 line:-1 position:50%
+To recap, RealityKit's
+new post process API
+
+
+485
+00:21:16.075 --> 00:21:19.111 line:-1 position:50%
+enables a wide range
+of post effects.
+
+
+486
+00:21:19.111 --> 00:21:20.346 line:-1 position:50%
+With Core Image,
+
+
+487
+00:21:20.346 --> 00:21:23.682 line:-1 position:50%
+we've unlocked hundreds
+of ready-built effects.
+
+
+488
+00:21:23.682 --> 00:21:27.386 line:-1 position:50%
+You can easily build new ones
+with Metal Performance Shaders,
+
+
+489
+00:21:27,386 --> 00:21:30,356 line:-1
+add screen overlays
+with SpriteKit,
+
+
+490
+00:21:30,356 --> 00:21:33,526 line:-1
+and write your own from scratch
+with Metal.
+
+
+491
+00:21:33,526 --> 00:21:35,928 position:50%
+For more information
+about Core Image
+
+
+492
+00:21:35,928 --> 00:21:40,299 position:50%
+or Metal Performance Shaders,
+see the sessions listed.
+
+
+493
+00:21:40,299 --> 00:21:42,301 line:-1
+Now that we've covered
+rendering effects,
+
+
+494
+00:21:42,301 --> 00:21:46,472 line:-1
+let's move onto our next topic,
+dynamic meshes.
+
+
+495
+00:21:46.472 --> 00:21:49.775 line:-1 position:50%
+In RealityKit, mesh resources
+store mesh data.
+
+
+496
+00:21:49.775 --> 00:21:51.510 line:-1 position:50%
+Previously, this opaque type
+
+
+497
+00:21:51.510 --> 00:21:54.647 line:-1 position:50%
+allowed you to assign meshes
+to entities.
+
+
+498
+00:21:54.647 --> 00:21:57.716 line:-1 position:50%
+This year, we're providing
+the ability to inspect meshes,
+
+
+499
+00:21:57,716 --> 00:22:01,053 line:-1
+create, and update meshes
+at runtime.
+
+
+500
+00:22:01.053 --> 00:22:05.057 line:-1 position:50%
+Let's look at how we can add
+special effects to the diver.
+
+
+501
+00:22:05.057 --> 00:22:07.493 line:-1 position:50%
+In this demo, we want
+to show a spiral effect
+
+
+502
+00:22:07.493 --> 00:22:10.763 line:-1 position:50%
+where the spiral contours
+around the diver.
+
+
+503
+00:22:10,763 --> 00:22:14,433 line:-1
+You can also see how the spiral
+is changing its mesh over time
+
+
+504
+00:22:14,433 --> 00:22:16,435 line:-1
+to animate its movement.
+
+
+505
+00:22:16,435 --> 00:22:18,504 line:-1
+Let's have a look
+at how to create this
+
+
+506
+00:22:18.504 --> 00:22:20.940 line:-1 position:50%
+using our new mesh APIs.
+
+
+507
+00:22:20,940 --> 00:22:24,176 line:-1
+The effect boils down
+into three steps.
+
+
+508
+00:22:24,176 --> 00:22:27,012 line:-1
+We use mesh inspection
+to measure the model
+
+
+509
+00:22:27.012 --> 00:22:29.815 line:-1 position:50%
+by examining its vertices.
+
+
+510
+00:22:29.815 --> 00:22:33.919 line:-1 position:50%
+We then build a spiral, using
+the measurements as a guide.
+
+
+511
+00:22:33,919 --> 00:22:38,190 line:-1
+And finally, we can update
+the spiral over time.
+
+
+512
+00:22:38.190 --> 00:22:40.626 line:-1 position:50%
+Starting with mesh inspection.
+
+
+513
+00:22:40.626 --> 00:22:42.294 line:-1 position:50%
+To explain how meshes
+are stored,
+
+
+514
+00:22:42.294 --> 00:22:44.630 line:-1 position:50%
+let's look at our diver model.
+
+
+515
+00:22:44,630 --> 00:22:46,198 line:-1
+In RealityKit, the Diver's mesh
+
+
+516
+00:22:46,198 --> 00:22:48,901 line:-1
+is represented
+as a mesh resource.
+
+
+517
+00:22:48,901 --> 00:22:50,469 line:-1
+With this year's release,
+
+
+518
+00:22:50.469 --> 00:22:53.872 line:-1 position:50%
+MeshResource now contains
+a member called Contents.
+
+
+519
+00:22:53,872 --> 00:22:57,610 line:-1
+There is where all of the
+processed mesh geometry lives.
+
+
+520
+00:22:57.610 --> 00:23:02.081 line:-1 position:50%
+Contents contains a list
+of instances and models.
+
+
+521
+00:23:02.081 --> 00:23:04.416 line:-1 position:50%
+Models contain
+the raw vertex data,
+
+
+522
+00:23:04.416 --> 00:23:08.020 line:-1 position:50%
+while instances reference them
+and add a transform.
+
+
+523
+00:23:08,020 --> 00:23:09,989 line:-1
+Instances allow
+the same geometry
+
+
+524
+00:23:09,989 --> 00:23:13,592 line:-1
+to be displayed multiple times
+without copying the data.
+
+
+525
+00:23:13,592 --> 00:23:15,594 line:-1
+A model can have multiple parts.
+
+
+526
+00:23:15.594 --> 00:23:19.431 line:-1 position:50%
+A part is a group of geometry
+with one material.
+
+
+527
+00:23:19,431 --> 00:23:21,200 line:0
+Finally, each part contains
+
+
+528
+00:23:21,200 --> 00:23:23,135 line:0
+the vertex data
+we're interested in,
+
+
+529
+00:23:23,135 --> 00:23:25,471 line:0
+such as positions,
+normals,
+
+
+530
+00:23:25,471 --> 00:23:28,340 line:0
+texture coordinates,
+and indices.
+
+
+531
+00:23:28,340 --> 00:23:32,344 line:0
+Let's first look at how we would
+access this data in code.
+
+
+532
+00:23:32.344 --> 00:23:35.180 line:-1 position:50%
+We'll make an extension
+on MeshResource.Contents,
+
+
+533
+00:23:35.180 --> 00:23:38.384 line:-1 position:50%
+which calls a closure with
+the position of each vertex.
+
+
+534
+00:23:38,384 --> 00:23:41,053 line:-1
+We start by going through
+all of the instances.
+
+
+535
+00:23:41,053 --> 00:23:43,889 line:-1
+Each of these instances
+map to a model.
+
+
+536
+00:23:43.889 --> 00:23:45.057 line:-1 position:50%
+For each instance,
+
+
+537
+00:23:45.057 --> 00:23:47.860 line:-1 position:50%
+we find its transform
+relative to the entity.
+
+
+538
+00:23:47,860 --> 00:23:50,529 line:-1
+We can then go into
+each of the model's parts
+
+
+539
+00:23:50.529 --> 00:23:53.465 line:-1 position:50%
+and access
+the part's attributes.
+
+
+540
+00:23:53,465 --> 00:23:56,669 line:-1
+For this function, we're
+only interested in position.
+
+
+541
+00:23:56,669 --> 00:24:00,205 line:-1
+We can then transform the vertex
+to the entity space position
+
+
+542
+00:24:00,205 --> 00:24:02,274 line:-1
+and call our callback.
+
+
+543
+00:24:02.274 --> 00:24:04.376 line:-1 position:50%
+Now that we can
+visit the vertices,
+
+
+544
+00:24:04.376 --> 00:24:07.479 line:-1 position:50%
+let's look at how
+we want to use this data.
+
+
+545
+00:24:07,479 --> 00:24:10,349 line:-1
+We'll section our diver
+into horizontal slices.
+
+
+546
+00:24:10.349 --> 00:24:13.686 line:-1 position:50%
+For each slice, we'll find the
+bounding radius of our model,
+
+
+547
+00:24:13,686 --> 00:24:18,057 line:-1
+and do this for every slice.
+
+
+548
+00:24:18.057 --> 00:24:20.092 line:-1 position:50%
+To implement this,
+we'll start by creating
+
+
+549
+00:24:20.092 --> 00:24:23.696 line:-1 position:50%
+a zero-filled array
+with numSlices elements.
+
+
+550
+00:24:23.696 --> 00:24:26.498 line:-1 position:50%
+We then figure out the bounds
+of the mesh along the y-axis
+
+
+551
+00:24:26,498 --> 00:24:28,967 line:-1
+to create our slices.
+
+
+552
+00:24:28.967 --> 00:24:30.836 line:-1 position:50%
+Using the function
+we just created,
+
+
+553
+00:24:30,836 --> 00:24:32,338 line:-1
+for each vertex in the model,
+
+
+554
+00:24:32.338 --> 00:24:34.540 line:-1 position:50%
+we figure out
+which slice it goes in
+
+
+555
+00:24:34,540 --> 00:24:36,241 line:-1
+and we update the radius
+
+
+556
+00:24:36,241 --> 00:24:38,944 line:-1
+with the largest radius
+for that slice.
+
+
+557
+00:24:38.944 --> 00:24:41.347 line:-1 position:50%
+Finally, we return
+a Slices object
+
+
+558
+00:24:41.347 --> 00:24:44.116 line:-1 position:50%
+containing the radii and bounds.
+
+
+559
+00:24:44,116 --> 00:24:47,186 line:-1
+Now that we've analyzed
+our mesh to know how big it is,
+
+
+560
+00:24:47.186 --> 00:24:49.488 line:-1 position:50%
+let's look at how to create
+the spiral mesh.
+
+
+561
+00:24:49.488 --> 00:24:52.758 line:-1 position:50%
+The spiral is a dynamically
+generated mesh.
+
+
+562
+00:24:52,758 --> 00:24:54,226 line:-1
+To create this mesh,
+
+
+563
+00:24:54.226 --> 00:24:57.029 line:-1 position:50%
+we need to describe our data
+to RealityKit.
+
+
+564
+00:24:57.029 --> 00:24:59.598 line:-1 position:50%
+We do this
+with a mesh descriptor.
+
+
+565
+00:24:59.598 --> 00:25:02.534 line:-1 position:50%
+The mesh descriptor contains
+the positions, normals,
+
+
+566
+00:25:02,534 --> 00:25:06,138 line:-1
+texture coordinates, primitives,
+and material indices.
+
+
+567
+00:25:06.138 --> 00:25:07.706 line:-1 position:50%
+Once you have
+a mesh descriptor,
+
+
+568
+00:25:07.706 --> 00:25:09.875 line:-1 position:50%
+you can generate
+a mesh resource.
+
+
+569
+00:25:09,875 --> 00:25:12,678 line:-1
+This invokes RealityKit's
+mesh processor,
+
+
+570
+00:25:12,678 --> 00:25:14,713 line:-1
+which optimizes your mesh.
+
+
+571
+00:25:14,713 --> 00:25:17,049 line:-1
+It will merge
+duplicate vertices,
+
+
+572
+00:25:17,049 --> 00:25:19,218 line:-1
+triangulate your quads
+and polygons,
+
+
+573
+00:25:19.218 --> 00:25:21.687 line:-1 position:50%
+and represent the mesh
+in the most efficient format
+
+
+574
+00:25:21,687 --> 00:25:23,122 line:-1
+for rendering.
+
+
+575
+00:25:23,122 --> 00:25:25,791 line:-1
+The result of this processing
+gives us a mesh resource,
+
+
+576
+00:25:25,791 --> 00:25:28,127 line:-1
+which we can assign
+to an entity.
+
+
+577
+00:25:28,127 --> 00:25:30,696 line:-1
+Note that normals,
+texture coordinates,
+
+
+578
+00:25:30.696 --> 00:25:32.464 line:-1 position:50%
+and materials are optional.
+
+
+579
+00:25:32.464 --> 00:25:34.233 line:-1 position:50%
+Our mesh processor
+will automatically
+
+
+580
+00:25:34.233 --> 00:25:37.536 line:-1 position:50%
+generate correct normals
+and populate them.
+
+
+581
+00:25:37,536 --> 00:25:39,371 line:-1
+As part of the optimization
+process,
+
+
+582
+00:25:39,371 --> 00:25:43,008 line:-1
+RealityKit will regenerate
+the topology of the mesh.
+
+
+583
+00:25:43,008 --> 00:25:45,244 line:-1
+If you need a specific topology,
+
+
+584
+00:25:45.244 --> 00:25:48.547 line:-1 position:50%
+you can use
+MeshResource.Contents directly.
+
+
+585
+00:25:48,547 --> 00:25:50,315 line:-1
+Now that we know
+how creating a mesh works,
+
+
+586
+00:25:50,315 --> 00:25:52,951 line:-1
+let's look at how to create
+the spiral.
+
+
+587
+00:25:52.951 --> 00:25:56.388 line:-1 position:50%
+To model the spiral, let's take
+a closer look at a section.
+
+
+588
+00:25:58,724 --> 00:26:01,727 line:-1
+A spiral is also known
+as a helix.
+
+
+589
+00:26:01,727 --> 00:26:04,563 line:-1
+We'll build this
+in evenly spaced segments.
+
+
+590
+00:26:04,563 --> 00:26:06,465 line:-1
+We can calculate each point
+
+
+591
+00:26:06,465 --> 00:26:09,168 line:-1
+using the mathematical
+definition of a helix
+
+
+592
+00:26:09.168 --> 00:26:12.104 line:-1 position:50%
+and the radius
+from our analyzed mesh.
+
+
+593
+00:26:12.104 --> 00:26:14.606 line:-1 position:50%
+Using this function for
+each segment on the helix,
+
+
+594
+00:26:14,606 --> 00:26:17,009 line:-1
+we can define four vertices.
+
+
+595
+00:26:17,009 --> 00:26:21,580 line:-1
+P0 and P1 are exactly
+the values that p() returns.
+
+
+596
+00:26:21,580 --> 00:26:26,418 line:-1
+To calculate P2 and P3, we can
+offset P0 and P1 vertically
+
+
+597
+00:26:26.418 --> 00:26:28.520 line:-1 position:50%
+with our given thickness.
+
+
+598
+00:26:28.520 --> 00:26:31.356 line:-1 position:50%
+We're creating triangles,
+so we need a diagonal.
+
+
+599
+00:26:31.356 --> 00:26:34.693 line:-1 position:50%
+We'll make two triangles
+using these points.
+
+
+600
+00:26:34,693 --> 00:26:37,329 line:-1
+Time to put it all together.
+
+
+601
+00:26:37,329 --> 00:26:38,764 line:-1
+Our generateSpiral function
+
+
+602
+00:26:38.764 --> 00:26:41.800 line:-1 position:50%
+needs to store
+positions and indices.
+
+
+603
+00:26:41.800 --> 00:26:44.503 line:-1 position:50%
+Indices reference values
+in positions.
+
+
+604
+00:26:44.503 --> 00:26:45.904 line:-1 position:50%
+For each segment,
+
+
+605
+00:26:45,904 --> 00:26:49,808 line:-1
+we'll calculate four positions
+and store their indices --
+
+
+606
+00:26:49.808 --> 00:26:53.812 line:-1 position:50%
+i0 is the index of p0
+when it's added to the array.
+
+
+607
+00:26:53,812 --> 00:26:56,548 position:50%
+Then we add the four positions
+and six indices --
+
+
+608
+00:26:56,548 --> 00:26:59,384 line:0
+for two triangles --
+to their arrays.
+
+
+609
+00:26:59,384 --> 00:27:03,422 position:50%
+Once you have your geometry,
+creating a mesh is simple.
+
+
+610
+00:27:03.422 --> 00:27:06.058 line:-1 position:50%
+First, create a new
+MeshDescriptor.
+
+
+611
+00:27:06.058 --> 00:27:08.494 line:-1 position:50%
+Then assign positions
+and primitives.
+
+
+612
+00:27:08.494 --> 00:27:10.329 line:-1 position:50%
+We're using triangle primitives,
+
+
+613
+00:27:10,329 --> 00:27:13,732 line:-1
+but we could also choose
+quads or polygons.
+
+
+614
+00:27:13,732 --> 00:27:15,133 line:-1
+Once those two fields
+are populated,
+
+
+615
+00:27:15.133 --> 00:27:17.936 line:-1 position:50%
+we have enough
+to generate a MeshResource.
+
+
+616
+00:27:17.936 --> 00:27:21.106 line:-1 position:50%
+You can also provide other
+vertex attributes like normals,
+
+
+617
+00:27:21.106 --> 00:27:24.176 line:-1 position:50%
+textureCoordinates,
+or material assignments.
+
+
+618
+00:27:24.176 --> 00:27:26.945 line:-1 position:50%
+We've covered
+how to create the mesh.
+
+
+619
+00:27:26,945 --> 00:27:30,415 line:-1
+The last thing in our spiral
+example is mesh updates.
+
+
+620
+00:27:30,415 --> 00:27:32,184 line:-1
+We use mesh updates
+
+
+621
+00:27:32,184 --> 00:27:34,987 line:-1
+to get the spiral
+to move around the diver.
+
+
+622
+00:27:34,987 --> 00:27:37,122 line:-1
+To update the mesh,
+there's two ways.
+
+
+623
+00:27:37.122 --> 00:27:40.025 line:-1 position:50%
+We could create a new
+MeshResource each frame
+
+
+624
+00:27:40.025 --> 00:27:42.327 line:-1 position:50%
+using the MeshDescriptors
+API.
+
+
+625
+00:27:42,327 --> 00:27:45,030 line:-1
+But this is not
+an efficient route,
+
+
+626
+00:27:45,030 --> 00:27:48,333 line:-1
+as it will run through
+the mesh optimizer each frame.
+
+
+627
+00:27:48,333 --> 00:27:50,602 line:-1
+A more efficient route
+is to update the contents
+
+
+628
+00:27:50,602 --> 00:27:52,204 line:-1
+in the MeshResource.
+
+
+629
+00:27:52.204 --> 00:27:54.206 line:-1 position:50%
+You can generate
+a new MeshContents
+
+
+630
+00:27:54,206 --> 00:27:56,808 line:-1
+and use it to replace the mesh.
+
+
+631
+00:27:56.808 --> 00:27:58.677 line:-1 position:50%
+There is one caveat, however.
+
+
+632
+00:27:58,677 --> 00:28:02,147 line:-1
+If we created our original mesh
+using MeshDescriptor,
+
+
+633
+00:28:02,147 --> 00:28:05,751 line:-1
+RealityKit's mesh processor
+will have optimized the data.
+
+
+634
+00:28:05.751 --> 00:28:08.754 line:-1 position:50%
+Topology is also reduced
+to triangles.
+
+
+635
+00:28:08,754 --> 00:28:11,957 line:-1
+As a result, make sure you
+know how your mesh is affected
+
+
+636
+00:28:11.957 --> 00:28:14.259 line:-1 position:50%
+before applying any updates.
+
+
+637
+00:28:14,259 --> 00:28:17,729 line:-1
+Let's have a look at code for
+how you can update the spiral.
+
+
+638
+00:28:17.729 --> 00:28:21.366 line:-1 position:50%
+We start by storing the contents
+of the existing spiral.
+
+
+639
+00:28:21.366 --> 00:28:24.469 line:-1 position:50%
+Create a new model
+from the existing model.
+
+
+640
+00:28:24,469 --> 00:28:25,904 line:-1
+Then, for each part,
+
+
+641
+00:28:25.904 --> 00:28:29.942 line:-1 position:50%
+we replace triangleIndices
+with a subset of indices.
+
+
+642
+00:28:29,942 --> 00:28:31,610 line:-1
+Finally, with the new contents,
+
+
+643
+00:28:31.610 --> 00:28:34.780 line:-1 position:50%
+we can call replace
+on the existing MeshResource.
+
+
+644
+00:28:34.780 --> 00:28:36.949 line:-1 position:50%
+And that's it
+for dynamic meshes.
+
+
+645
+00:28:36,949 --> 00:28:40,319 line:-1
+To summarize the key things
+about dynamic meshes,
+
+
+646
+00:28:40.319 --> 00:28:43.689 line:-1 position:50%
+we've introduced a new Contents
+field in the MeshResource.
+
+
+647
+00:28:43.689 --> 00:28:46.391 line:-1 position:50%
+This container allows you
+to inspect and modify
+
+
+648
+00:28:46.391 --> 00:28:48.093 line:-1 position:50%
+a mesh's raw data.
+
+
+649
+00:28:48.093 --> 00:28:50.896 line:-1 position:50%
+You can create new meshes
+using MeshDescriptor.
+
+
+650
+00:28:50.896 --> 00:28:54.199 line:-1 position:50%
+This flexible route allows you
+to use triangles, quads,
+
+
+651
+00:28:54.199 --> 00:28:57.035 line:-1 position:50%
+or even polygons,
+and RealityKit will generate
+
+
+652
+00:28:57.035 --> 00:28:59.471 line:-1 position:50%
+an optimized mesh
+for rendering.
+
+
+653
+00:28:59.471 --> 00:29:02.474 line:-1 position:50%
+Finally, to update meshes,
+we've provided the ability
+
+
+654
+00:29:02,474 --> 00:29:04,476 line:-1
+to update a MeshResource's
+contents,
+
+
+655
+00:29:04.476 --> 00:29:07.446 line:-1 position:50%
+which is ideal
+for frequent updates.
+
+
+656
+00:29:07,446 --> 00:29:09,247 line:-1
+To wrap up,
+today we've shown off
+
+
+657
+00:29:09,247 --> 00:29:13,285 line:-1
+some of the new rendering
+features in RealityKit 2.
+
+
+658
+00:29:13,285 --> 00:29:17,089 line:-1
+Geometry modifiers let you move
+and modify vertices.
+
+
+659
+00:29:17.089 --> 00:29:19.591 line:-1 position:50%
+Surface shaders
+allow you to define
+
+
+660
+00:29:19.591 --> 00:29:21.960 line:-1 position:50%
+your model's surface appearance.
+
+
+661
+00:29:21,960 --> 00:29:24,129 line:-1
+You can use post effects
+to apply effects
+
+
+662
+00:29:24,129 --> 00:29:28,133 line:-1
+to the final frame,
+and dynamic meshes make it easy
+
+
+663
+00:29:28.133 --> 00:29:31.970 line:-1 position:50%
+to create and modify meshes
+at runtime.
+
+
+664
+00:29:31,970 --> 00:29:33,805 position:50%
+To see more
+of this year's features,
+
+
+665
+00:29:33,805 --> 00:29:36,274 position:50%
+don't miss
+"Dive into RealityKit 2."
+
+
+666
+00:29:36,274 --> 00:29:38,510 position:50%
+And for more information
+about RealityKit,
+
+
+667
+00:29:38,510 --> 00:29:41,179 line:0
+watch "Building Apps
+with RealityKit."
+
+
+668
+00:29:41.179 --> 00:29:43.115 line:-1 position:50%
+We're very excited
+about this year's release,
+
+
+669
+00:29:43,115 --> 00:29:46,251 line:-1
+and can't wait to see the
+experiences you build with it.
+
+
+670
+00:29:46,251 --> 00:29:47,753 line:-1
+Thank you.
+
+
+671
+00:29:47,753 --> 00:29:50,489 position:90% line:0 size:2%
+♪
+

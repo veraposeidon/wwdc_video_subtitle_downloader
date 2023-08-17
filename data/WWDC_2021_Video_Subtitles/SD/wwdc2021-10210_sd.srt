@@ -1,0 +1,3032 @@
+2
+00:00:00.000 --> 00:00:02.035 line:-1 position:50%
+[MAC STARTUP CHIME]
+
+
+3
+00:00:02.035 --> 00:00:05.672 line:-1 position:50%
+♪ Bass music playing ♪
+
+
+4
+00:00:05.672 --> 00:00:07.774 line:-1 position:50%
+[KEYSTROKES]
+
+
+5
+00:00:07,774 --> 00:00:09,543 position:89% line:0 size:2%
+♪
+
+
+6
+00:00:09.543 --> 00:00:11.178 line:-1 position:50%
+Jake Petroules:
+Hi, and welcome to
+
+
+7
+00:00:11,178 --> 00:00:14,481 line:-1
+"Explore advanced project
+configuration in Xcode".
+
+
+8
+00:00:14.481 --> 00:00:17.251 line:-1 position:50%
+I'm Jake, and together
+with my colleague Prachi,
+
+
+9
+00:00:17.251 --> 00:00:19.353 line:-1 position:50%
+I'll discuss strategies
+and techniques for making
+
+
+10
+00:00:19,353 --> 00:00:22,789 line:-1
+the most of your Xcode project's
+build configuration.
+
+
+11
+00:00:22.789 --> 00:00:26.126 line:-1 position:50%
+We're going to cover
+three major topic areas.
+
+
+12
+00:00:26,126 --> 00:00:29,596 line:-1
+First, Prachi will discuss
+multiplatform projects
+
+
+13
+00:00:29.596 --> 00:00:34.601 line:-1 position:50%
+and Xcode 13's new support for
+multiplatform framework targets.
+
+
+14
+00:00:34.601 --> 00:00:37.371 line:-1 position:50%
+Next, I'll cover best practices
+for modeling
+
+
+15
+00:00:37,371 --> 00:00:40,307 line:-1
+and configuring your project
+through schemes,
+
+
+16
+00:00:40,307 --> 00:00:42,276 line:-1
+target setup
+and dependency management,
+
+
+17
+00:00:42.276 --> 00:00:44.811 line:-1 position:50%
+and build phases and rules.
+
+
+18
+00:00:44,811 --> 00:00:47,281 line:-1
+And finally, Prachi will take
+you on a deep dive
+
+
+19
+00:00:47,281 --> 00:00:48,615 line:-1
+into build settings,
+
+
+20
+00:00:48,615 --> 00:00:51,084 line:-1
+where we'll cover
+their structure and behavior,
+
+
+21
+00:00:51.084 --> 00:00:52.953 line:-1 position:50%
+the project editor UI,
+
+
+22
+00:00:52.953 --> 00:00:55.389 line:-1 position:50%
+configuration settings files
+and their syntax,
+
+
+23
+00:00:55,389 --> 00:00:57,424 line:-1
+and a whole lot more!
+
+
+24
+00:00:57.424 --> 00:00:59.026 line:-1 position:50%
+Throughout this talk,
+we'll be using
+
+
+25
+00:00:59.026 --> 00:01:01.361 line:-1 position:50%
+a multiplatform
+app project called Fruta
+
+
+26
+00:01:01.361 --> 00:01:04.264 line:-1 position:50%
+to show how these techniques
+apply to a real project.
+
+
+27
+00:01:04,264 --> 00:01:06,466 line:-1
+And now I'm going
+to hand it over to Prachi,
+
+
+28
+00:01:06.466 --> 00:01:09.102 line:-1 position:50%
+who's going to talk about
+multiplatform frameworks.
+
+
+29
+00:01:09,102 --> 00:01:10,904 line:-1
+Prachi Pai Asnodkar:
+Thanks, Jake.
+
+
+30
+00:01:10,904 --> 00:01:13,707 line:-1
+One of the new features
+in Xcode 13
+
+
+31
+00:01:13.707 --> 00:01:16.576 line:-1 position:50%
+is support for
+multiplatform frameworks.
+
+
+32
+00:01:16,576 --> 00:01:19,513 line:-1
+Multiplatform frameworks
+allow us to consolidate
+
+
+33
+00:01:19.513 --> 00:01:22.082 line:-1 position:50%
+multiple frameworks into one,
+
+
+34
+00:01:22.082 --> 00:01:25.319 line:-1 position:50%
+providing us simplified
+target management,
+
+
+35
+00:01:25,319 --> 00:01:27,521 line:-1
+one set of build phases
+to manage,
+
+
+36
+00:01:27.521 --> 00:01:30.290 line:-1 position:50%
+and one set of
+build settings to manage.
+
+
+37
+00:01:30,290 --> 00:01:32,192 line:-1
+Let's take a look
+at the Fruta app
+
+
+38
+00:01:32.192 --> 00:01:35.729 line:-1 position:50%
+and update our project to take
+advantage of this feature.
+
+
+39
+00:01:35,729 --> 00:01:37,664 line:-1
+This is the Fruta app.
+
+
+40
+00:01:37.664 --> 00:01:41.335 line:-1 position:50%
+It is a multiplatform app
+that builds for macOS,
+
+
+41
+00:01:41.335 --> 00:01:43.537 line:-1 position:50%
+iOS, and watchOS.
+
+
+42
+00:01:43.537 --> 00:01:46.139 line:-1 position:50%
+It also has three
+framework targets --
+
+
+43
+00:01:46.139 --> 00:01:49.710 line:-1 position:50%
+one for each platform that
+contains a set of shared code
+
+
+44
+00:01:49,710 --> 00:01:51,578 line:-1
+used by the apps.
+
+
+45
+00:01:51,578 --> 00:01:53,947 line:-1
+Maintaining three
+separate frameworks
+
+
+46
+00:01:53,947 --> 00:01:55,449 line:-1
+can come with challenges,
+
+
+47
+00:01:55,449 --> 00:01:57,884 line:-1
+such as keeping
+build settings in sync,
+
+
+48
+00:01:57.884 --> 00:02:01.455 line:-1 position:50%
+and ensuring all of your source
+files are properly added
+
+
+49
+00:02:01.455 --> 00:02:04.157 line:-1 position:50%
+to your compile
+sources build phases.
+
+
+50
+00:02:04,157 --> 00:02:05,993 line:-1
+To tackle these challenges,
+
+
+51
+00:02:05,993 --> 00:02:08,595 line:-1
+we'll start by converting
+one of our frameworks
+
+
+52
+00:02:08,595 --> 00:02:12,899 line:-1
+to a multiplatform framework.
+
+
+53
+00:02:12.899 --> 00:02:15.369 line:-1 position:50%
+Here we have
+the three frameworks --
+
+
+54
+00:02:15.369 --> 00:02:17.604 line:-1 position:50%
+one for each platform.
+
+
+55
+00:02:17,604 --> 00:02:19,873 line:-1
+All of these targets
+are identical
+
+
+56
+00:02:19.873 --> 00:02:24.845 line:-1 position:50%
+except that one has a file
+which only builds on macOS.
+
+
+57
+00:02:24.845 --> 00:02:27.914 line:-1 position:50%
+First, let's navigate
+to the Build Settings tab
+
+
+58
+00:02:27.914 --> 00:02:34.187 line:-1 position:50%
+in the project navigator for
+the macOS framework target.
+
+
+59
+00:02:34.187 --> 00:02:36.490 line:-1 position:50%
+Next, we will configure
+the framework
+
+
+60
+00:02:36.490 --> 00:02:38.492 line:-1 position:50%
+to build for all platforms
+by going
+
+
+61
+00:02:38.492 --> 00:02:41.194 line:-1 position:50%
+to the Supported Platforms
+build setting
+
+
+62
+00:02:41,194 --> 00:02:43,663 line:-1
+and choosing Any Platform.
+
+
+63
+00:02:43.663 --> 00:02:46.867 line:-1 position:50%
+You can also see that
+Allow Multiplatform Builds
+
+
+64
+00:02:46.867 --> 00:02:49.302 line:-1 position:50%
+has been set to "Yes"
+automatically.
+
+
+65
+00:02:49.302 --> 00:02:51.938 line:-1 position:50%
+This informs the build system
+to build this target
+
+
+66
+00:02:51,938 --> 00:02:54,741 line:-1
+once for each
+of its supported platforms,
+
+
+67
+00:02:54,741 --> 00:02:56,343 line:-1
+as necessary.
+
+
+68
+00:02:56.343 --> 00:02:58.745 line:-1 position:50%
+Now that this
+is a multiplatform target,
+
+
+69
+00:02:58.745 --> 00:03:01.114 line:-1 position:50%
+recall that the original
+macOS framework
+
+
+70
+00:03:01,114 --> 00:03:03,750 line:-1
+had one additional file
+that should only build
+
+
+71
+00:03:03,750 --> 00:03:06,053 line:-1
+when building for macOS.
+
+
+72
+00:03:06,053 --> 00:03:08,755 line:-1
+In order to configure
+our framework to do this,
+
+
+73
+00:03:08.755 --> 00:03:12.059 line:-1 position:50%
+we can add a platform filter
+to specify that this file
+
+
+74
+00:03:12,059 --> 00:03:14,561 line:-1
+should only build for macOS.
+
+
+75
+00:03:14.561 --> 00:03:19.166 line:-1 position:50%
+To do this, we will first
+go to the Build Phases tab.
+
+
+76
+00:03:19.166 --> 00:03:23.570 line:-1 position:50%
+Next, expand the Compile Sources
+build phase.
+
+
+77
+00:03:23.570 --> 00:03:27.707 line:-1 position:50%
+Finally, configure
+Ingredient+macOS.swift
+
+
+78
+00:03:27.707 --> 00:03:31.578 line:-1 position:50%
+to build only for macOS
+by clicking on the Filters item
+
+
+79
+00:03:31.578 --> 00:03:36.983 line:-1 position:50%
+and unchecking everything
+but macOS.
+
+
+80
+00:03:36,983 --> 00:03:40,487 line:-1
+Now that we have our new
+multiplatform target configured,
+
+
+81
+00:03:40,487 --> 00:03:43,457 line:-1
+we can delete the other two
+variants of our framework,
+
+
+82
+00:03:43,457 --> 00:03:47,394 line:-1
+as they are no longer needed.
+
+
+83
+00:03:47.394 --> 00:03:51.131 line:-1 position:50%
+Additionally, because we have
+only one framework target,
+
+
+84
+00:03:51,131 --> 00:03:53,433 line:-1
+we will have to configure
+all of our apps
+
+
+85
+00:03:53.433 --> 00:03:56.269 line:-1 position:50%
+to link and embed
+that new target.
+
+
+86
+00:03:56,269 --> 00:03:59,039 line:-1
+The macOS app
+is already configured
+
+
+87
+00:03:59.039 --> 00:04:01.508 line:-1 position:50%
+because we have set up
+our multiplatform target
+
+
+88
+00:04:01.508 --> 00:04:03.910 line:-1 position:50%
+starting from the macOS one.
+
+
+89
+00:04:03.910 --> 00:04:08.782 line:-1 position:50%
+We can add the new framework
+to the iOS and watchOS apps
+
+
+90
+00:04:08,782 --> 00:04:12,519 line:-1
+by going to the General tab
+for each of the app targets,
+
+
+91
+00:04:12.519 --> 00:04:13.987 line:-1 position:50%
+and adding the framework
+
+
+92
+00:04:13,987 --> 00:04:20,327 position:50%
+to the Frameworks
+and Libraries build phase.
+
+
+93
+00:04:20.327 --> 00:04:23.997 line:-1 position:50%
+To summarize: we took
+our macOS framework target
+
+
+94
+00:04:23,997 --> 00:04:27,434 line:-1
+and enabled it to build
+for iOS and watchOS.
+
+
+95
+00:04:27,434 --> 00:04:30,137 line:-1
+We customized that framework
+with a platform filter
+
+
+96
+00:04:30.137 --> 00:04:32.506 line:-1 position:50%
+for our macOS-only source file.
+
+
+97
+00:04:32.506 --> 00:04:35.342 line:-1 position:50%
+And finally,
+we configured our app targets
+
+
+98
+00:04:35,342 --> 00:04:39,613 line:-1
+to link and embed the new single
+multiplatform framework target.
+
+
+99
+00:04:39,613 --> 00:04:42,616 line:-1
+And that's multiplatform targets
+in Xcode.
+
+
+100
+00:04:42.616 --> 00:04:43.750 line:-1 position:50%
+Now back to Jake,
+
+
+101
+00:04:43.750 --> 00:04:47.254 line:-1 position:50%
+who's going to dive deeper
+into project configuration.
+
+
+102
+00:04:47.254 --> 00:04:48.822 line:-1 position:50%
+Jake: Thanks, Prachi.
+
+
+103
+00:04:48.822 --> 00:04:51.558 line:-1 position:50%
+I'm going to discuss
+best practices for modeling
+
+
+104
+00:04:51.558 --> 00:04:53.627 line:-1 position:50%
+and configuring
+your Xcode project,
+
+
+105
+00:04:53.627 --> 00:04:56.396 line:-1 position:50%
+and show a few things you can do
+to improve the performance
+
+
+106
+00:04:56.396 --> 00:04:59.199 line:-1 position:50%
+and correctness of your builds.
+
+
+107
+00:04:59.199 --> 00:05:02.402 line:-1 position:50%
+First, let's have a look
+at build options for the scheme.
+
+
+108
+00:05:02,402 --> 00:05:05,005 line:-1
+I'll click the scheme picker,
+Edit Scheme,
+
+
+109
+00:05:05.005 --> 00:05:08.141 line:-1 position:50%
+then go to the Build section.
+
+
+110
+00:05:08.141 --> 00:05:10.777 line:-1 position:50%
+There's a few simple things
+I can configure here.
+
+
+111
+00:05:10.777 --> 00:05:12.045 line:-1 position:50%
+For Build Order,
+
+
+112
+00:05:12,045 --> 00:05:14,614 line:-1
+we recommend selecting
+Dependency Order,
+
+
+113
+00:05:14.614 --> 00:05:16.116 line:-1 position:50%
+which will cause
+targets in your project
+
+
+114
+00:05:16.116 --> 00:05:19.219 line:-1 position:50%
+to build in parallel according
+to the dependency graph.
+
+
+115
+00:05:19,219 --> 00:05:21,888 line:-1
+This can greatly improve
+multicore build performance
+
+
+116
+00:05:21,888 --> 00:05:23,657 line:-1
+and will also get you
+faster results
+
+
+117
+00:05:23,657 --> 00:05:25,792 line:-1
+from continuous integration.
+
+
+118
+00:05:25.792 --> 00:05:28.461 line:-1 position:50%
+In contrast, choosing
+Manual Order is deprecated
+
+
+119
+00:05:28.461 --> 00:05:30.263 line:-1 position:50%
+and is not recommended.
+
+
+120
+00:05:30.263 --> 00:05:32.465 line:-1 position:50%
+Using this option
+will slow down your build
+
+
+121
+00:05:32,465 --> 00:05:33,733 line:-1
+and can cause cycle errors
+
+
+122
+00:05:33.733 --> 00:05:35.969 line:-1 position:50%
+when the target order
+listed in the scheme
+
+
+123
+00:05:35.969 --> 00:05:39.706 line:-1 position:50%
+is inconsistent with
+your project's dependencies.
+
+
+124
+00:05:39,706 --> 00:05:42,008 line:-1
+Another important setting
+in the scheme build options
+
+
+125
+00:05:42.008 --> 00:05:44.311 line:-1 position:50%
+is Find Implicit Dependencies.
+
+
+126
+00:05:44,311 --> 00:05:46,513 line:-1
+Checking this option
+allows Xcode
+
+
+127
+00:05:46.513 --> 00:05:49.316 line:-1 position:50%
+to automatically add
+dependencies between targets
+
+
+128
+00:05:49.316 --> 00:05:51.218 line:-1 position:50%
+based on the information
+in your project,
+
+
+129
+00:05:51,218 --> 00:05:53,687 line:-1
+such as linker flags
+in build settings
+
+
+130
+00:05:53,687 --> 00:05:56,590 line:-1
+and the names of linked
+libraries in build phases.
+
+
+131
+00:05:56,590 --> 00:05:58,124 line:-1
+This can be especially useful
+
+
+132
+00:05:58,124 --> 00:06:00,360 line:-1
+when the related targets
+are in different projects
+
+
+133
+00:06:00,360 --> 00:06:04,331 line:-1
+where you can't normally add
+an explicit target dependency.
+
+
+134
+00:06:04.331 --> 00:06:06.266 line:-1 position:50%
+If you are using
+manual dependency order
+
+
+135
+00:06:06,266 --> 00:06:09,502 line:-1
+to build targets in a specific
+order due to the inability
+
+
+136
+00:06:09.502 --> 00:06:11.304 line:-1 position:50%
+to add explicit target
+dependencies
+
+
+137
+00:06:11.304 --> 00:06:13.173 line:-1 position:50%
+across different projects,
+
+
+138
+00:06:13,173 --> 00:06:15,175 line:-1
+enabling Find Implicit
+Dependencies
+
+
+139
+00:06:15,175 --> 00:06:17,410 line:-1
+in conjunction with choosing
+Dependency Order
+
+
+140
+00:06:17.410 --> 00:06:19.446 line:-1 position:50%
+is often a better solution.
+
+
+141
+00:06:19.446 --> 00:06:22.916 line:-1 position:50%
+Now I'm going to talk about
+script phases and build rules.
+
+
+142
+00:06:22,916 --> 00:06:24,517 line:-1
+I'll select
+the SmoothieKit target
+
+
+143
+00:06:24.517 --> 00:06:26.453 line:-1 position:50%
+from the project's target list,
+
+
+144
+00:06:26,453 --> 00:06:29,656 line:-1
+and then select
+the Build Phases tab.
+
+
+145
+00:06:29.656 --> 00:06:32.259 line:-1 position:50%
+Here we have a Process Recipes
+script phase
+
+
+146
+00:06:32,259 --> 00:06:34,661 line:-1
+that contains some
+custom build logic.
+
+
+147
+00:06:34,661 --> 00:06:37,030 line:-1
+One of its responsibilities
+is generating code
+
+
+148
+00:06:37,030 --> 00:06:38,865 line:-1
+from a number of recipe files
+
+
+149
+00:06:38.865 --> 00:06:42.869 line:-1 position:50%
+with one output per input,
+which we process in sequence.
+
+
+150
+00:06:42.869 --> 00:06:45.438 line:-1 position:50%
+Now, you may realize
+that these computations
+
+
+151
+00:06:45.438 --> 00:06:47.974 line:-1 position:50%
+are completely independent
+of each other.
+
+
+152
+00:06:47,974 --> 00:06:50,710 line:-1
+This presents a performance
+optimization opportunity
+
+
+153
+00:06:50.710 --> 00:06:54.080 line:-1 position:50%
+that we can take advantage
+of by running them in parallel.
+
+
+154
+00:06:54,080 --> 00:06:57,050 line:-1
+Build rules allow us
+to do just that.
+
+
+155
+00:06:57.050 --> 00:06:59.119 line:-1 position:50%
+Let's take a look at how
+we can extract this work
+
+
+156
+00:06:59.119 --> 00:07:01.254 line:-1 position:50%
+into a build rule.
+
+
+157
+00:07:01.254 --> 00:07:03.556 line:-1 position:50%
+I'll go to the Build Rules tab
+in the project editor
+
+
+158
+00:07:03,556 --> 00:07:05,725 line:-1
+for our framework
+and click the plus button
+
+
+159
+00:07:05.725 --> 00:07:08.295 line:-1 position:50%
+to add a new build rule.
+
+
+160
+00:07:08,295 --> 00:07:11,097 line:-1
+Then enter the file pattern
+"*.recipe",
+
+
+161
+00:07:11,097 --> 00:07:12,866 line:-1
+which corresponds
+to the file extension
+
+
+162
+00:07:12,866 --> 00:07:16,069 line:-1
+of the file type
+I want this rule to process.
+
+
+163
+00:07:16,069 --> 00:07:19,205 line:-1
+Next, I'll add dependencies
+to this rule.
+
+
+164
+00:07:19.205 --> 00:07:21.074 line:-1 position:50%
+I don't need to add
+any additional inputs
+
+
+165
+00:07:21,074 --> 00:07:23,209 line:-1
+to the build rule,
+because it will automatically
+
+
+166
+00:07:23.209 --> 00:07:26.846 line:-1 position:50%
+get each input file
+it processes as an input.
+
+
+167
+00:07:26.846 --> 00:07:28.682 line:-1 position:50%
+However, I do need to tell
+the build system
+
+
+168
+00:07:28.682 --> 00:07:31.651 line:-1 position:50%
+the path of the output file
+that the rule will produce
+
+
+169
+00:07:31.651 --> 00:07:33.987 line:-1 position:50%
+for each file it processes.
+
+
+170
+00:07:33.987 --> 00:07:35.155 line:-1 position:50%
+I'll click the plus button
+
+
+171
+00:07:35.155 --> 00:07:37.357 line:-1 position:50%
+to add a new output file
+and enter in
+
+
+172
+00:07:37,357 --> 00:07:39,826 line:-1
+$(DERIVED_ FILE_ DIR)/$
+(INPUT_ FILE _BASE)
+
+
+173
+00:07:39,826 --> 00:07:41,594 line:-1
+.compiledrecipe.
+
+
+174
+00:07:41,594 --> 00:07:43,697 line:-1
+It's best practice to write
+generated files
+
+
+175
+00:07:43,697 --> 00:07:45,198 line:-1
+under DERIVED_FILE_DIR
+
+
+176
+00:07:45,198 --> 00:07:47,334 line:-1
+since this will point
+to an appropriate location
+
+
+177
+00:07:47.334 --> 00:07:49.235 line:-1 position:50%
+managed by the build system.
+
+
+178
+00:07:49,235 --> 00:07:51,304 line:-1
+You should avoid
+generating output files
+
+
+179
+00:07:51.304 --> 00:07:52.872 line:-1 position:50%
+under the source root.
+
+
+180
+00:07:52.872 --> 00:07:54.841 line:-1 position:50%
+This can interfere
+with source control
+
+
+181
+00:07:54.841 --> 00:07:55.842 line:-1 position:50%
+and lead to conflicts
+
+
+182
+00:07:55.842 --> 00:07:58.878 line:-1 position:50%
+when running multiple builds
+simultaneously.
+
+
+183
+00:07:58,878 --> 00:08:01,815 line:-1
+Now we, of course, have to copy
+our script phase code
+
+
+184
+00:08:01.815 --> 00:08:03.316 line:-1 position:50%
+over to the rule.
+
+
+185
+00:08:03,316 --> 00:08:05,085 line:-1
+I'll go back
+to the script phase,
+
+
+186
+00:08:05.085 --> 00:08:10.423 line:-1 position:50%
+and copy out the code where
+we processed each of the files.
+
+
+187
+00:08:10,423 --> 00:08:15,128 line:-1
+Then I'll go back to the rule
+and paste that in.
+
+
+188
+00:08:15,128 --> 00:08:18,631 line:-1
+Remember that rules run once
+for each input they process.
+
+
+189
+00:08:18.631 --> 00:08:20.567 line:-1 position:50%
+So I'll remove the for loop,
+
+
+190
+00:08:20,567 --> 00:08:23,136 line:-1
+replace $RECIPE with
+$SCRIPT_INPUT_FILE --
+
+
+191
+00:08:23,136 --> 00:08:24,871 line:-1
+which corresponds
+to the absolute file path
+
+
+192
+00:08:24,871 --> 00:08:27,374 line:-1
+of the current input file
+being processed --
+
+
+193
+00:08:27.374 --> 00:08:31.044 line:-1 position:50%
+and replace $DERIVED_FILE_DIR/
+$RECIPE.compiledrecipe
+
+
+194
+00:08:31.044 --> 00:08:32.812 line:-1 position:50%
+with $SCRIPT_OUTPUT_FILE_0,
+
+
+195
+00:08:32,812 --> 00:08:34,981 line:-1
+which refers to the output
+file path I've entered
+
+
+196
+00:08:34,981 --> 00:08:37,751 line:-1
+in the Output Files
+section below.
+
+
+197
+00:08:37,751 --> 00:08:40,253 line:-1
+Don't forget to quote variables
+to make sure spaces
+
+
+198
+00:08:40.253 --> 00:08:42.322 line:-1 position:50%
+and other special characters
+in file paths
+
+
+199
+00:08:42,322 --> 00:08:44,591 line:-1
+are handled correctly.
+
+
+200
+00:08:44.591 --> 00:08:45.458 line:-1 position:50%
+Great.
+
+
+201
+00:08:45,458 --> 00:08:47,961 line:-1
+Now there's one more thing
+to configure in the rule.
+
+
+202
+00:08:47.961 --> 00:08:52.265 line:-1 position:50%
+I mentioned that rules run once
+for each input they process.
+
+
+203
+00:08:52.265 --> 00:08:55.235 line:-1 position:50%
+By default, they also run
+once for each architecture
+
+
+204
+00:08:55.235 --> 00:08:57.771 line:-1 position:50%
+that the target
+is compiling for.
+
+
+205
+00:08:57.771 --> 00:09:00.573 line:-1 position:50%
+For example, a rule in
+a Mac app target might run once
+
+
+206
+00:09:00.573 --> 00:09:06.045 line:-1 position:50%
+for arm64 and once for x86_64
+times each of its inputs.
+
+
+207
+00:09:06.045 --> 00:09:08.748 line:-1 position:50%
+So if there are four inputs
+times two architectures,
+
+
+208
+00:09:08,748 --> 00:09:11,618 line:-1
+the rule would be invoked
+eight times.
+
+
+209
+00:09:11,618 --> 00:09:13,520 line:-1
+This is useful when
+the output of the rule
+
+
+210
+00:09:13,520 --> 00:09:16,923 line:-1
+is architecture-dependent,
+such as object code.
+
+
+211
+00:09:16.923 --> 00:09:19.826 line:-1 position:50%
+However, in this case,
+my rule produces output
+
+
+212
+00:09:19,826 --> 00:09:23,029 line:-1
+which is independent of the
+underlying CPU architecture,
+
+
+213
+00:09:23,029 --> 00:09:28,334 line:-1
+so I'm going to uncheck
+“Run once per architecture”.
+
+
+214
+00:09:28,334 --> 00:09:31,104 line:-1
+Lastly, in order for the
+build system to propagate
+
+
+215
+00:09:31,104 --> 00:09:33,506 line:-1
+the input files
+into the build rule,
+
+
+216
+00:09:33,506 --> 00:09:35,708 line:-1
+I'll need to add
+all of the .recipe files
+
+
+217
+00:09:35,708 --> 00:09:39,946 line:-1
+into the Compile Sources build
+phase of my framework target.
+
+
+218
+00:09:39.946 --> 00:09:44.083 line:-1 position:50%
+I'll go back to Build Phases,
+expand Compile Sources,
+
+
+219
+00:09:44.083 --> 00:09:47.520 line:-1 position:50%
+and use the plus button
+to add the recipe files.
+
+
+220
+00:09:51,090 --> 00:09:53,426 line:-1
+Now let's go back
+to the script phase.
+
+
+221
+00:09:53,426 --> 00:09:55,395 line:-1
+The remaining
+piece of work this does
+
+
+222
+00:09:55,395 --> 00:09:57,797 line:-1
+is merge the contents
+of multiple text files
+
+
+223
+00:09:57.797 --> 00:10:00.066 line:-1 position:50%
+into a single file
+we can load at runtime
+
+
+224
+00:10:00.066 --> 00:10:02.802 line:-1 position:50%
+in our app more efficiently.
+
+
+225
+00:10:02.802 --> 00:10:05.638 line:-1 position:50%
+And in order to have better
+source control experience,
+
+
+226
+00:10:05,638 --> 00:10:08,274 line:-1
+I'm keeping scripts external
+to the project file
+
+
+227
+00:10:08,274 --> 00:10:11,177 line:-1
+and calling them from
+the inline script editor here.
+
+
+228
+00:10:11,177 --> 00:10:16,616 line:-1
+So let's follow the reference
+to package.sh to see the code.
+
+
+229
+00:10:16.616 --> 00:10:19.419 line:-1 position:50%
+A build rule wouldn't be
+appropriate in this case,
+
+
+230
+00:10:19,419 --> 00:10:22,088 line:-1
+since we need to process
+all the inputs at once
+
+
+231
+00:10:22,088 --> 00:10:24,457 line:-1
+to combine them into one.
+
+
+232
+00:10:24,457 --> 00:10:26,860 line:-1
+So there's no way to break it up
+into isolated units
+
+
+233
+00:10:26.860 --> 00:10:29.963 line:-1 position:50%
+which can be run in parallel
+and therefore it makes sense
+
+
+234
+00:10:29.963 --> 00:10:32.732 line:-1 position:50%
+to keep this work
+in the script phase.
+
+
+235
+00:10:32.732 --> 00:10:35.835 line:-1 position:50%
+But this brings us to one of
+the most important takeaways:
+
+
+236
+00:10:35,835 --> 00:10:39,606 line:-1
+the script has no input and
+output dependencies specified.
+
+
+237
+00:10:39,606 --> 00:10:42,675 line:-1
+This might cause build tasks
+to run in the wrong order
+
+
+238
+00:10:42,675 --> 00:10:44,077 line:-1
+and slows down the build
+
+
+239
+00:10:44.077 --> 00:10:46.312 line:-1 position:50%
+because Xcode
+has to be more conservative
+
+
+240
+00:10:46,312 --> 00:10:48,882 line:-1
+with respect to running
+other tasks in parallel,
+
+
+241
+00:10:48,882 --> 00:10:52,685 line:-1
+as it doesn't know what files
+the script phase may be using.
+
+
+242
+00:10:52.685 --> 00:10:55.655 line:-1 position:50%
+So it's important to add
+input and output dependencies
+
+
+243
+00:10:55.655 --> 00:10:58.691 line:-1 position:50%
+to ensure the work performed
+by script phases is done
+
+
+244
+00:10:58,691 --> 00:11:03,162 line:-1
+in the correct order relative
+to other tasks in the build.
+
+
+245
+00:11:03,162 --> 00:11:06,799 line:-1
+For this particular script,
+I have a large number of inputs.
+
+
+246
+00:11:06.799 --> 00:11:10.236 line:-1 position:50%
+Instead of entering these
+in the project file one by one,
+
+
+247
+00:11:10,236 --> 00:11:13,640 line:-1
+I can use an xcfilelist
+to manage this list of inputs
+
+
+248
+00:11:13,640 --> 00:11:16,042 line:-1
+via an external file.
+
+
+249
+00:11:16,042 --> 00:11:19,312 line:-1
+I'll go ahead and add one
+to the project now.
+
+
+250
+00:11:19.312 --> 00:11:21.548 line:-1 position:50%
+I'll go to File > New File,
+
+
+251
+00:11:21,548 --> 00:11:25,318 line:-1
+and choose Build Phase File List
+under the Other section.
+
+
+252
+00:11:28,388 --> 00:11:30,857 line:-1
+I'll paste the list of input
+files that will be processed
+
+
+253
+00:11:30,857 --> 00:11:34,460 line:-1
+by this script phase,
+one per line.
+
+
+254
+00:11:34,460 --> 00:11:36,796 line:-1
+If you want,
+you can even write comments
+
+
+255
+00:11:36.796 --> 00:11:38.965 line:-1 position:50%
+by beginning a line
+with the pound sign,
+
+
+256
+00:11:38,965 --> 00:11:41,868 line:-1
+which is great for adding
+additional context.
+
+
+257
+00:11:41.868 --> 00:11:44.470 line:-1 position:50%
+Now I'll reference
+this xcfilelist
+
+
+258
+00:11:44,470 --> 00:11:46,172 line:-1
+from the script phase.
+
+
+259
+00:11:46,172 --> 00:11:49,142 line:0
+I'll go back to the script phase
+and specify the path
+
+
+260
+00:11:49,142 --> 00:11:52,979 position:50%
+to the xcfilelist
+in the Input File Lists.
+
+
+261
+00:11:52,979 --> 00:11:57,483 position:50%
+[KEYSTROKES]
+
+
+262
+00:11:57,483 --> 00:12:00,286 line:0
+Lastly, I'll specify
+an output dependency
+
+
+263
+00:12:00,286 --> 00:12:01,988 position:50%
+by providing the file path
+
+
+264
+00:12:01,988 --> 00:12:04,090 line:0
+at which the output contents
+will be written,
+
+
+265
+00:12:04,090 --> 00:12:06,326 line:0
+just like I did
+for the build rule.
+
+
+266
+00:12:06,326 --> 00:12:11,130 line:0
+[KEYSTROKES]
+
+
+267
+00:12:11,130 --> 00:12:13,066 line:-1
+There's one more thing
+to mention.
+
+
+268
+00:12:13,066 --> 00:12:14,467 line:-1
+Similar to the build rule,
+
+
+269
+00:12:14.467 --> 00:12:16.235 line:-1 position:50%
+there are some crucial
+environment variables
+
+
+270
+00:12:16,235 --> 00:12:18,705 line:-1
+provided for you
+by the script phase.
+
+
+271
+00:12:18,705 --> 00:12:21,007 line:-1
+Let's navigate back
+to package.sh
+
+
+272
+00:12:21.007 --> 00:12:23.776 line:-1 position:50%
+to have a closer look.
+
+
+273
+00:12:23.776 --> 00:12:27.480 line:-1 position:50%
+In the source, I reference
+SCRIPT_INPUT_FILE_LIST_COUNT;
+
+
+274
+00:12:27.480 --> 00:12:30.483 line:-1 position:50%
+which refers to the total
+number of input file lists
+
+
+275
+00:12:30,483 --> 00:12:33,019 line:-1
+passed to our script phase,
+
+
+276
+00:12:33,019 --> 00:12:35,288 line:-1
+SCRIPT_INPUT_FILE_LIST_n;
+
+
+277
+00:12:35,288 --> 00:12:37,724 line:-1
+which refers to the resolved
+absolute file path
+
+
+278
+00:12:37,724 --> 00:12:41,127 line:-1
+of the input file list
+at the nth index,
+
+
+279
+00:12:41.127 --> 00:12:43.162 line:-1 position:50%
+and SCRIPT_OUTPUT_FILE_0;
+
+
+280
+00:12:43.162 --> 00:12:45.465 line:-1 position:50%
+which refers to the resolved
+absolute file path
+
+
+281
+00:12:45,465 --> 00:12:47,634 line:-1
+of the first --
+and in this case, only --
+
+
+282
+00:12:47.634 --> 00:12:49.235 line:-1 position:50%
+output file.
+
+
+283
+00:12:49,235 --> 00:12:51,771 line:-1
+Here is an overview of some
+of the key environment variables
+
+
+284
+00:12:51,771 --> 00:12:54,540 line:-1
+provided to script phases.
+
+
+285
+00:12:54.540 --> 00:12:56.909 line:-1 position:50%
+The build settings of the target
+are also made available
+
+
+286
+00:12:56,909 --> 00:12:59,846 line:-1
+to the script phase environment.
+
+
+287
+00:12:59.846 --> 00:13:01.781 line:-1 position:50%
+Here is an overview of some
+environment variables
+
+
+288
+00:13:01.781 --> 00:13:04.484 line:-1 position:50%
+specific to build rules,
+
+
+289
+00:13:04,484 --> 00:13:06,886 line:-1
+as well as some
+less common ones.
+
+
+290
+00:13:06.886 --> 00:13:09.122 line:-1 position:50%
+Like script phases,
+the build settings of the target
+
+
+291
+00:13:09,122 --> 00:13:12,492 line:-1
+are also made available
+to the build rule environment.
+
+
+292
+00:13:12.492 --> 00:13:15.595 line:-1 position:50%
+OK. Now, if I try
+to build the project,
+
+
+293
+00:13:15.595 --> 00:13:18.197 line:-1 position:50%
+I'll run into an issue.
+
+
+294
+00:13:23,202 --> 00:13:27,507 line:-1
+Let's go to the build log
+to take a closer look.
+
+
+295
+00:13:27.507 --> 00:13:30.376 line:-1 position:50%
+Because SmoothieKit
+is a multiplatform target,
+
+
+296
+00:13:30.376 --> 00:13:34.681 line:-1 position:50%
+it's building twice: once for
+iOS and once for watchOS,
+
+
+297
+00:13:34.681 --> 00:13:37.216 line:-1 position:50%
+and this means each of these
+builds are trying to produce
+
+
+298
+00:13:37,216 --> 00:13:40,420 line:-1
+the output of the script phase
+at the same path.
+
+
+299
+00:13:40,420 --> 00:13:42,655 line:-1
+This is not allowed
+because the build system
+
+
+300
+00:13:42.655 --> 00:13:45.858 line:-1 position:50%
+requires that only one task
+in the entire build
+
+
+301
+00:13:45.858 --> 00:13:48.428 line:-1 position:50%
+may produce the output
+at a given path.
+
+
+302
+00:13:48,428 --> 00:13:51,197 line:-1
+There are a couple different
+ways I could solve this.
+
+
+303
+00:13:51.197 --> 00:13:53.999 line:-1 position:50%
+One simple solution would be
+to change the output path
+
+
+304
+00:13:53.999 --> 00:13:56.135 line:-1 position:50%
+of the script phase
+so that it's unique
+
+
+305
+00:13:56.135 --> 00:13:58.137 line:-1 position:50%
+each time the target is built.
+
+
+306
+00:13:58.137 --> 00:14:00.873 line:-1 position:50%
+In this case, I could consider
+using a different build setting
+
+
+307
+00:14:00.873 --> 00:14:04.210 line:-1 position:50%
+like DERIVED_FILE_DIR,
+which is platform-specific,
+
+
+308
+00:14:04.210 --> 00:14:06.212 line:-1 position:50%
+and would make the path
+sufficiently unique
+
+
+309
+00:14:06.212 --> 00:14:07.680 line:-1 position:50%
+and solve the conflict.
+
+
+310
+00:14:07,680 --> 00:14:11,284 line:-1
+However, if the actual work
+that the script phase is doing
+
+
+311
+00:14:11,284 --> 00:14:14,253 line:-1
+would be identical within
+the context of each target,
+
+
+312
+00:14:14,253 --> 00:14:17,890 line:-1
+that would simply cause
+the same work to be done twice.
+
+
+313
+00:14:17.890 --> 00:14:20.293 line:-1 position:50%
+In that case,
+it can be a better option
+
+
+314
+00:14:20.293 --> 00:14:23.162 line:-1 position:50%
+to move the script phase
+to a new aggregate target
+
+
+315
+00:14:23.162 --> 00:14:26.265 line:-1 position:50%
+which the shared framework
+target depends on.
+
+
+316
+00:14:26.265 --> 00:14:28.868 line:-1 position:50%
+That's what I'm going to do
+for my project.
+
+
+317
+00:14:28,868 --> 00:14:31,037 line:0
+To get started,
+I'll click the plus button
+
+
+318
+00:14:31,037 --> 00:14:33,139 line:0
+at the bottom
+of the target list,
+
+
+319
+00:14:33.139 --> 00:14:38.478 line:-1 position:50%
+select the Other tab,
+and choose Aggregate target.
+
+
+320
+00:14:38.478 --> 00:14:42.882 line:-1 position:50%
+I'll call it Resources.
+
+
+321
+00:14:42,882 --> 00:14:45,118 line:-1
+Then I'll add
+a new script phase,
+
+
+322
+00:14:45.118 --> 00:14:48.221 line:-1 position:50%
+and copy the name,
+script source, inputs,
+
+
+323
+00:14:48,221 --> 00:14:51,324 line:-1
+and outputs from
+the framework target.
+
+
+324
+00:15:06,339 --> 00:15:08,741 line:-1
+Finally, I'll delete
+the original script phase
+
+
+325
+00:15:08,741 --> 00:15:11,811 line:-1
+from the framework target
+and then add a target dependency
+
+
+326
+00:15:11,811 --> 00:15:14,347 line:-1
+on the new aggregate target.
+
+
+327
+00:15:19.952 --> 00:15:22.955 line:-1 position:50%
+This way, the work will
+only be done once,
+
+
+328
+00:15:22,955 --> 00:15:25,091 line:-1
+there will be
+no output file conflict,
+
+
+329
+00:15:25,091 --> 00:15:28,194 line:-1
+and both the iOS and watchOS
+variants of the framework
+
+
+330
+00:15:28.194 --> 00:15:34.734 line:-1 position:50%
+will build in the correct order
+relative to that script phase.
+
+
+331
+00:15:34.734 --> 00:15:37.336 line:-1 position:50%
+Build successful.
+
+
+332
+00:15:37,336 --> 00:15:38,938 line:-1
+And now, back to Prachi,
+
+
+333
+00:15:38,938 --> 00:15:41,541 line:-1
+who's going to tell you
+all about build settings.
+
+
+334
+00:15:41.541 --> 00:15:43.009 line:-1 position:50%
+Prachi: Thank you, Jake!
+
+
+335
+00:15:43.009 --> 00:15:45.178 line:-1 position:50%
+So what is a build setting?
+
+
+336
+00:15:45,178 --> 00:15:48,414 line:-1
+It is a property you can apply
+to Xcode targets
+
+
+337
+00:15:48,414 --> 00:15:52,485 line:-1
+to configure aspects
+of how they are built.
+
+
+338
+00:15:52,485 --> 00:15:54,954 line:-1
+Xcode provides
+two main mechanisms
+
+
+339
+00:15:54.954 --> 00:15:57.323 line:-1 position:50%
+for configuring
+build settings.
+
+
+340
+00:15:57,323 --> 00:16:00,526 line:-1
+The first is through
+the build settings editor.
+
+
+341
+00:16:00,526 --> 00:16:03,462 line:-1
+The second is through
+a configuration settings file
+
+
+342
+00:16:03.462 --> 00:16:06.032 line:-1 position:50%
+or an .xcconfig file.
+
+
+343
+00:16:06.032 --> 00:16:09.001 line:-1 position:50%
+Let's start by seeing how
+the build settings editor
+
+
+344
+00:16:09.001 --> 00:16:14.173 line:-1 position:50%
+can be used to manage
+the settings within our project.
+
+
+345
+00:16:14,173 --> 00:16:17,143 line:-1
+In order to bring up
+the build settings editor,
+
+
+346
+00:16:17,143 --> 00:16:19,512 line:-1
+first you need
+to select your project
+
+
+347
+00:16:19,512 --> 00:16:21,948 line:-1
+in the Project navigator.
+
+
+348
+00:16:21.948 --> 00:16:26.886 line:-1 position:50%
+Next, make sure to select the
+target you wish to configure.
+
+
+349
+00:16:26.886 --> 00:16:30.122 line:-1 position:50%
+And finally,
+click the Build Settings tab
+
+
+350
+00:16:30.122 --> 00:16:32.124 line:-1 position:50%
+across the tab bar.
+
+
+351
+00:16:32.124 --> 00:16:35.027 line:-1 position:50%
+From here, you can add
+new build settings
+
+
+352
+00:16:35.027 --> 00:16:37.296 line:-1 position:50%
+or modify existing ones.
+
+
+353
+00:16:37,296 --> 00:16:39,799 position:50%
+You can also find out
+additional information
+
+
+354
+00:16:39,799 --> 00:16:41,534 line:0
+for the selected build setting
+
+
+355
+00:16:41,534 --> 00:16:46,105 position:50%
+by opening the
+Quick Help inspector.
+
+
+356
+00:16:46.105 --> 00:16:49.342 line:-1 position:50%
+Build settings are defined
+at multiple levels.
+
+
+357
+00:16:49.342 --> 00:16:52.645 line:-1 position:50%
+You can think of this
+as a stack of definitions.
+
+
+358
+00:16:52.645 --> 00:16:55.381 line:-1 position:50%
+In fact, these levels
+can be visualized
+
+
+359
+00:16:55,381 --> 00:16:59,118 line:-1
+by clicking on
+the Levels filter.
+
+
+360
+00:16:59.118 --> 00:17:01.587 line:-1 position:50%
+Each column represents
+a different level
+
+
+361
+00:17:01.587 --> 00:17:03.589 line:-1 position:50%
+a build setting
+can be defined in,
+
+
+362
+00:17:03.589 --> 00:17:08.227 line:-1 position:50%
+and they are evaluated
+from the right to the left.
+
+
+363
+00:17:08,227 --> 00:17:11,998 line:0
+Starting from the lowest level
+there is the default value,
+
+
+364
+00:17:11,998 --> 00:17:15,401 position:50%
+which is defined by the
+currently selected SDK,
+
+
+365
+00:17:15,401 --> 00:17:19,105 position:50%
+the project level
+configuration settings file,
+
+
+366
+00:17:19,105 --> 00:17:22,942 position:50%
+the project level settings
+from the Xcode project file,
+
+
+367
+00:17:22,942 --> 00:17:26,913 position:50%
+target settings defined in
+a configuration settings file,
+
+
+368
+00:17:26,913 --> 00:17:28,781 line:0
+the target level
+settings defined
+
+
+369
+00:17:28,781 --> 00:17:31,117 position:50%
+in your Xcode project file,
+
+
+370
+00:17:31,117 --> 00:17:35,121 position:50%
+and finally, the resolved value
+of the build setting.
+
+
+371
+00:17:35,121 --> 00:17:38,090 line:0
+Note that if you see
+a bold setting
+
+
+372
+00:17:38,090 --> 00:17:41,060 line:0
+that denotes that the level
+has an explicit value
+
+
+373
+00:17:41,060 --> 00:17:43,696 line:0
+for the build setting.
+
+
+374
+00:17:43.696 --> 00:17:46.399 line:-1 position:50%
+The other mechanism
+Xcode provides
+
+
+375
+00:17:46.399 --> 00:17:50.436 line:-1 position:50%
+for managing build settings
+are configuration setting files
+
+
+376
+00:17:50.436 --> 00:17:52.972 line:-1 position:50%
+or .xcconfig files.
+
+
+377
+00:17:52.972 --> 00:17:56.709 line:-1 position:50%
+Some of the benefits
+of an xcconfig file include:
+
+
+378
+00:17:56,709 --> 00:17:59,312 position:50%
+better source
+control management,
+
+
+379
+00:17:59,312 --> 00:18:03,082 line:0
+sharing settings across
+targets or configurations,
+
+
+380
+00:18:03,082 --> 00:18:05,851 position:50%
+advanced composition
+of build settings,
+
+
+381
+00:18:05,851 --> 00:18:09,188 line:0
+and the ability to include
+additional xcconfig files
+
+
+382
+00:18:09,188 --> 00:18:12,291 position:50%
+based on your development
+or test environment.
+
+
+383
+00:18:12.291 --> 00:18:14.961 line:-1 position:50%
+Let's take a look at how
+you can author build settings
+
+
+384
+00:18:14,961 --> 00:18:17,263 line:-1
+in an xcconfig file.
+
+
+385
+00:18:17,263 --> 00:18:19,131 line:-1
+At its most basic level,
+
+
+386
+00:18:19,131 --> 00:18:21,934 line:-1
+a build setting is made up
+of a name,
+
+
+387
+00:18:21,934 --> 00:18:27,506 line:-1
+an assignment operator,
+and a value.
+
+
+388
+00:18:27,506 --> 00:18:29,709 line:-1
+You can narrow the value
+of a build setting
+
+
+389
+00:18:29,709 --> 00:18:32,111 line:-1
+using the conditional syntax.
+
+
+390
+00:18:32,111 --> 00:18:36,649 line:-1
+Conditional settings are defined
+using square brackets.
+
+
+391
+00:18:36.649 --> 00:18:39.352 line:-1 position:50%
+Some of the supported
+conditions include
+
+
+392
+00:18:39.352 --> 00:18:44.523 line:-1 position:50%
+configuration, architecture,
+and SDK.
+
+
+393
+00:18:44,523 --> 00:18:46,692 line:-1
+As shown with the SDK condition,
+
+
+394
+00:18:46,692 --> 00:18:51,464 line:-1
+wildcards can be used
+for matching purposes.
+
+
+395
+00:18:51.464 --> 00:18:52.999 line:-1 position:50%
+Comments can be added as well
+
+
+396
+00:18:52.999 --> 00:18:57.536 line:-1 position:50%
+using the familiar
+double-slash syntax.
+
+
+397
+00:18:57,536 --> 00:18:59,638 line:-1
+A build setting
+can be set to the value
+
+
+398
+00:18:59.638 --> 00:19:03.776 line:-1 position:50%
+of another build setting by
+using the dollar-parens syntax.
+
+
+399
+00:19:03.776 --> 00:19:07.279 line:-1 position:50%
+In the example here,
+MY_OTHER_BUILD_SETTING
+
+
+400
+00:19:07,279 --> 00:19:09,315 line:-1
+has been set to YES.
+
+
+401
+00:19:09,315 --> 00:19:11,484 line:-1
+The value of
+MY_BUILD_SETTING_NAME
+
+
+402
+00:19:11,484 --> 00:19:13,986 line:-1
+uses the dollar-parens
+syntax to evaluate
+
+
+403
+00:19:13,986 --> 00:19:16,355 line:-1
+MY_OTHER_BUILD_SETTING.
+
+
+404
+00:19:16,355 --> 00:19:19,759 line:-1
+Multiple values
+can be evaluated here as well,
+
+
+405
+00:19:19,759 --> 00:19:22,228 line:-1
+like we see with MORE_SETTINGS.
+
+
+406
+00:19:22,228 --> 00:19:25,498 line:0
+And finally, existing values
+for a build setting
+
+
+407
+00:19:25,498 --> 00:19:28,501 line:0
+can be used
+with the $(inherited) value.
+
+
+408
+00:19:28,501 --> 00:19:30,636 line:0
+This allows you to append
+additional values
+
+
+409
+00:19:30,636 --> 00:19:31,904 line:0
+to a build setting
+
+
+410
+00:19:31,904 --> 00:19:34,673 line:0
+while retaining
+all of its existing values.
+
+
+411
+00:19:34,673 --> 00:19:37,410 position:50%
+This is a convenience form
+as you could also use
+
+
+412
+00:19:37,410 --> 00:19:41,947 position:50%
+the build setting name,
+APPEND_TO_EXISTING_SETTINGS.
+
+
+413
+00:19:41,947 --> 00:19:45,851 line:-1
+Another use of the build setting
+evaluation syntax
+
+
+414
+00:19:45.851 --> 00:19:47.987 line:-1 position:50%
+is to compose
+build settings together
+
+
+415
+00:19:47,987 --> 00:19:50,423 line:-1
+from a set
+of other build settings.
+
+
+416
+00:19:50,423 --> 00:19:53,492 line:-1
+First, we start with
+a control setting:
+
+
+417
+00:19:53.492 --> 00:19:55.795 line:-1 position:50%
+IS_BUILD_SETTING_ENABLED.
+
+
+418
+00:19:55.795 --> 00:19:58.798 line:-1 position:50%
+We will use the value
+of this setting as a suffix
+
+
+419
+00:19:58,798 --> 00:20:01,067 line:-1
+for two additional
+build settings,
+
+
+420
+00:20:01,067 --> 00:20:04,837 line:-1
+MY_BUILD_SETTING_NO
+and MY_BUILD_SETTING_YES.
+
+
+421
+00:20:04,837 --> 00:20:07,673 position:50%
+Lastly, we define
+MY_BUILD_SETTING
+
+
+422
+00:20:07,673 --> 00:20:11,477 line:0
+to have a value that is composed
+of both MY_BUILD_SETTING
+
+
+423
+00:20:11,477 --> 00:20:14,313 position:50%
+and IS_BUILD_SETTING_ENABLED.
+
+
+424
+00:20:14,313 --> 00:20:17,983 line:0
+Because build setting evaluation
+happens inside-out,
+
+
+425
+00:20:17,983 --> 00:20:20,186 position:50%
+the inner-most setting
+is evaluated
+
+
+426
+00:20:20,186 --> 00:20:22,621 position:50%
+and returns NO,
+which is the value of
+
+
+427
+00:20:22,621 --> 00:20:24,890 line:0
+IS_BUILD_SETTING_ENABLED.
+
+
+428
+00:20:24,890 --> 00:20:28,060 line:0
+Finally, the composed
+BUILD_SETTING_NO
+
+
+429
+00:20:28,060 --> 00:20:33,866 position:50%
+is evaluated to a value
+of -use_this_one.
+
+
+430
+00:20:33,866 --> 00:20:35,668 line:-1
+When evaluating a build setting,
+
+
+431
+00:20:35,668 --> 00:20:38,537 line:-1
+there are a set of operators
+you can use to provide
+
+
+432
+00:20:38,537 --> 00:20:41,807 line:-1
+some basic transformations
+of your value.
+
+
+433
+00:20:41.807 --> 00:20:44.910 line:-1 position:50%
+The three classifications
+of operators are:
+
+
+434
+00:20:44.910 --> 00:20:47.613 line:-1 position:50%
+string operators,
+path operators,
+
+
+435
+00:20:47.613 --> 00:20:52.218 line:-1 position:50%
+and replacement operators.
+
+
+436
+00:20:52,218 --> 00:20:55,788 line:-1
+The supported string operators
+are quote,
+
+
+437
+00:20:55,788 --> 00:20:58,757 line:-1
+which escapes the characters
+within the string;
+
+
+438
+00:20:58.757 --> 00:21:02.461 line:-1 position:50%
+lower and upper, which convert
+cases of characters;
+
+
+439
+00:21:02.461 --> 00:21:06.132 line:-1 position:50%
+and identifiers, which convert
+strings to valid identifiers
+
+
+440
+00:21:06,132 --> 00:21:09,101 line:-1
+in various formats.
+
+
+441
+00:21:09.101 --> 00:21:13.472 line:-1 position:50%
+We provide a set of path
+operators to get the directory,
+
+
+442
+00:21:13.472 --> 00:21:20.212 line:-1 position:50%
+filename, base name, suffix,
+and standardized path.
+
+
+443
+00:21:20,212 --> 00:21:23,816 line:-1
+For each path operator, there is
+a replacement counterpart
+
+
+444
+00:21:23.816 --> 00:21:26.452 line:-1 position:50%
+that allows you to replace
+part of a value.
+
+
+445
+00:21:26,452 --> 00:21:28,854 line:0
+There's also a default operator
+which provides
+
+
+446
+00:21:28,854 --> 00:21:32,458 position:50%
+the replacement value
+if the build setting is empty,
+
+
+447
+00:21:32,458 --> 00:21:36,562 position:50%
+otherwise it uses the existing
+value of the build setting.
+
+
+448
+00:21:36,562 --> 00:21:39,565 line:-1
+The last item to look at
+is the ability to include
+
+
+449
+00:21:39.565 --> 00:21:43.269 line:-1 position:50%
+xcconfig files within
+other xcconfig files.
+
+
+450
+00:21:43,269 --> 00:21:45,971 line:-1
+There are two mechanisms
+available to you.
+
+
+451
+00:21:45,971 --> 00:21:48,240 line:-1
+The first are required includes,
+
+
+452
+00:21:48,240 --> 00:21:51,710 line:-1
+which requires the xcconfig file
+to exist on disk.
+
+
+453
+00:21:51.710 --> 00:21:53.646 line:-1 position:50%
+A compiler error
+will be produced
+
+
+454
+00:21:53,646 --> 00:21:55,948 line:-1
+if the file cannot be found.
+
+
+455
+00:21:55.948 --> 00:21:58.284 line:-1 position:50%
+The second
+are optional includes,
+
+
+456
+00:21:58.284 --> 00:22:02.788 line:-1 position:50%
+which allow for including an
+xconfig file if present on disk.
+
+
+457
+00:22:02,788 --> 00:22:06,025 line:-1
+This will not fail
+if the file does not exist.
+
+
+458
+00:22:06,025 --> 00:22:08,260 line:-1
+Note that the path is relative
+
+
+459
+00:22:08,260 --> 00:22:12,731 line:-1
+from the location
+of your Xcode project file.
+
+
+460
+00:22:12.731 --> 00:22:15.167 line:-1 position:50%
+So let's take a look
+at how you might put
+
+
+461
+00:22:15,167 --> 00:22:20,639 line:-1
+all of this information together
+in a real-world scenario.
+
+
+462
+00:22:20.639 --> 00:22:21.774 line:-1 position:50%
+In this example,
+
+
+463
+00:22:21,774 --> 00:22:25,578 line:-1
+we'll be taking a look at how
+to solve the following problem.
+
+
+464
+00:22:25.578 --> 00:22:26.946 line:-1 position:50%
+On our development machines,
+
+
+465
+00:22:26.946 --> 00:22:29.982 line:-1 position:50%
+the compiler should aggressively
+warn for expressions
+
+
+466
+00:22:29,982 --> 00:22:32,585 line:-1
+that take too long
+to type check.
+
+
+467
+00:22:32.585 --> 00:22:35.454 line:-1 position:50%
+However, the CI machines
+are slower,
+
+
+468
+00:22:35,454 --> 00:22:39,491 line:-1
+so the time for expression
+checking should be increased.
+
+
+469
+00:22:39,491 --> 00:22:40,659 line:-1
+For our solution,
+
+
+470
+00:22:40.659 --> 00:22:43.462 line:-1 position:50%
+there are three
+configuration setting files:
+
+
+471
+00:22:43.462 --> 00:22:48.067 line:-1 position:50%
+debug, common, and ci.xcconfig.
+
+
+472
+00:22:48.067 --> 00:22:52.304 line:-1 position:50%
+The debug xcconfig file is used
+for our debug builds,
+
+
+473
+00:22:52,304 --> 00:22:55,241 line:-1
+and passes some additional
+flags to the Swift compiler
+
+
+474
+00:22:55.241 --> 00:22:59.011 line:-1 position:50%
+via the OTHER_SWIFT_FLAGS
+build setting.
+
+
+475
+00:22:59.011 --> 00:23:00.913 line:-1 position:50%
+The common xcconfig file
+
+
+476
+00:23:00.913 --> 00:23:04.083 line:-1 position:50%
+optionally includes
+the ci.xcconfig file.
+
+
+477
+00:23:04,083 --> 00:23:07,119 line:-1
+It also defines the
+OTHER_SWIFT_FLAGS setting
+
+
+478
+00:23:07.119 --> 00:23:09.755 line:-1 position:50%
+to control the type
+expression warning.
+
+
+479
+00:23:09,755 --> 00:23:12,691 line:-1
+It makes use of $(inherited)
+
+
+480
+00:23:12,691 --> 00:23:16,428 line:-1
+to ensure that any of the other
+flag settings are included,
+
+
+481
+00:23:16,428 --> 00:23:19,565 line:-1
+such as from
+the debug.xcconfig file
+
+
+482
+00:23:19.565 --> 00:23:23.335 line:-1 position:50%
+and a build setting evaluation
+for MAX _EXPRESSION_TIME
+
+
+483
+00:23:23,335 --> 00:23:27,940 line:-1
+that has a default value of 200.
+
+
+484
+00:23:27,940 --> 00:23:31,644 line:-1
+The ci xcconfig file
+defines an override value
+
+
+485
+00:23:31,644 --> 00:23:34,513 line:-1
+for MAX_EXPRESSION _TIME.
+
+
+486
+00:23:34,513 --> 00:23:36,649 line:-1
+Finally, Xcode needs to be told
+
+
+487
+00:23:36.649 --> 00:23:39.118 line:-1 position:50%
+how to apply
+these xcconfig files
+
+
+488
+00:23:39.118 --> 00:23:42.354 line:-1 position:50%
+to one of the supported
+configuration levels.
+
+
+489
+00:23:42.354 --> 00:23:44.623 line:-1 position:50%
+This is done through
+the project editor,
+
+
+490
+00:23:44.623 --> 00:23:47.459 line:-1 position:50%
+which is what we see here.
+
+
+491
+00:23:47.459 --> 00:23:49.461 line:-1 position:50%
+From the
+Configuration section,
+
+
+492
+00:23:49,461 --> 00:23:52,064 line:-1
+you can apply any
+of the config files
+
+
+493
+00:23:52.064 --> 00:23:55.601 line:-1 position:50%
+from your project at either
+the project or target levels,
+
+
+494
+00:23:55,601 --> 00:23:59,038 line:-1
+for any defined build
+configuration.
+
+
+495
+00:23:59.038 --> 00:24:03.008 line:-1 position:50%
+Here, you can see that
+the debug.xcconfig file
+
+
+496
+00:24:03.008 --> 00:24:05.344 line:-1 position:50%
+is being applied
+at the project level
+
+
+497
+00:24:05.344 --> 00:24:08.914 line:-1 position:50%
+for the debug configuration
+of Fruta.
+
+
+498
+00:24:08.914 --> 00:24:11.850 line:-1 position:50%
+Also, common.xcconfig file
+
+
+499
+00:24:11,850 --> 00:24:16,555 line:-1
+is set for each of the targets
+within the project.
+
+
+500
+00:24:16,555 --> 00:24:20,492 line:-1
+To recap the solution,
+the default operator was used
+
+
+501
+00:24:20.492 --> 00:24:24.496 line:-1 position:50%
+to define a default value
+for MAX_EXPRESSION_TIME.
+
+
+502
+00:24:24.496 --> 00:24:27.566 line:-1 position:50%
+The ci.xcconfig file was
+optionally included
+
+
+503
+00:24:27,566 --> 00:24:30,703 line:-1
+because it will only exist
+on the CI system.
+
+
+504
+00:24:30.703 --> 00:24:33.605 line:-1 position:50%
+And an override
+of the default value
+
+
+505
+00:24:33,605 --> 00:24:37,976 line:-1
+for MAX_EXPRESSION_TIME was used
+in the ci xcconfig file.
+
+
+506
+00:24:37.976 --> 00:24:40.679 line:-1 position:50%
+This wraps up
+our practical example.
+
+
+507
+00:24:40.679 --> 00:24:43.415 line:-1 position:50%
+Now let's go back to Jake
+to review everything
+
+
+508
+00:24:43.415 --> 00:24:44.717 line:-1 position:50%
+that we have covered.
+
+
+509
+00:24:44,717 --> 00:24:46,118 line:-1
+Jake: Thanks, Prachi.
+
+
+510
+00:24:46.118 --> 00:24:47.553 line:-1 position:50%
+Let's recap.
+
+
+511
+00:24:47,553 --> 00:24:49,855 line:-1
+You learned about
+multiplatform frameworks
+
+
+512
+00:24:49.855 --> 00:24:51.423 line:-1 position:50%
+and how they provide
+an easier way
+
+
+513
+00:24:51.423 --> 00:24:53.325 line:-1 position:50%
+to manage build settings
+and build phases
+
+
+514
+00:24:53.325 --> 00:24:55.828 line:-1 position:50%
+in multiplatform projects.
+
+
+515
+00:24:55,828 --> 00:24:58,564 line:-1
+You saw how you can improve
+your project configuration
+
+
+516
+00:24:58.564 --> 00:25:01.200 line:-1 position:50%
+and build performance
+by building targets in parallel
+
+
+517
+00:25:01,200 --> 00:25:03,202 line:-1
+according to dependency order,
+
+
+518
+00:25:03,202 --> 00:25:06,171 line:-1
+how to properly use build rules
+and build phases,
+
+
+519
+00:25:06.171 --> 00:25:10.376 line:-1 position:50%
+and the importance
+of specifying dependencies.
+
+
+520
+00:25:10,376 --> 00:25:13,278 line:-1
+Finally, you took a deep dive
+into build settings,
+
+
+521
+00:25:13.278 --> 00:25:15.381 line:-1 position:50%
+how you can use
+configuration settings files
+
+
+522
+00:25:15.381 --> 00:25:18.584 line:-1 position:50%
+to manage them more easily,
+and dived into their syntax
+
+
+523
+00:25:18.584 --> 00:25:21.854 line:-1 position:50%
+and all of the constructs
+it provides.
+
+
+524
+00:25:21.854 --> 00:25:24.790 line:-1 position:50%
+We hope these lessons provide
+you with a set of useful tools
+
+
+525
+00:25:24.790 --> 00:25:28.293 line:-1 position:50%
+to help you make the most
+of your development experience.
+
+
+526
+00:25:28,293 --> 00:25:29,928 line:-1
+Thank you for watching!
+
+
+527
+00:25:29,928 --> 00:25:33,031 line:0 size:2% position:89%
+♪
+

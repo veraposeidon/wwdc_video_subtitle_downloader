@@ -1,0 +1,1620 @@
+2
+00:00:00.501 --> 00:00:08.509 line:-1 align:center
+♪ ♪
+
+
+3
+00:00:09.810 --> 00:00:13.914 line:-2 align:center
+Ahmed: Hi, my name is Ahmed, and
+I work on the Clang and Swift compilers.
+
+
+4
+00:00:13.947 --> 00:00:17.684 line:-2 align:center
+In this session we're going to dive deep
+into changes we've made
+
+
+5
+00:00:17.718 --> 00:00:21.788 line:-2 align:center
+to make common Swift and Objective-C
+operations faster and more efficient,
+
+
+6
+00:00:21.822 --> 00:00:24.558 line:-2 align:center
+so that we can improve your app's size
+and runtime performance.
+
+
+7
+00:00:25,259 --> 00:00:27,494 line:-2
+When you write code
+in Swift or Objective-C,
+
+
+8
+00:00:27.528 --> 00:00:30.764 line:-2 align:center
+you're always really interacting
+with two major components.
+
+
+9
+00:00:30,797 --> 00:00:32,733 line:-1
+First, you build using Xcode,
+
+
+10
+00:00:32.766 --> 00:00:35.435 line:-2 align:center
+and that uses the Swift
+and Clang compilers.
+
+
+11
+00:00:35.469 --> 00:00:38.138 line:-2 align:center
+But when you run your app,
+a lot of the heavy lifting is done
+
+
+12
+00:00:38,172 --> 00:00:41,441 line:-1
+in the Swift and Objective-C Runtime.
+
+
+13
+00:00:41.475 --> 00:00:45.345 line:-2 align:center
+The runtime is embedded in the operating
+systems for all of our platforms.
+
+
+14
+00:00:45.379 --> 00:00:50.584 line:-2 align:center
+What the compiler cannot do at build time,
+the runtime does, well, at run time.
+
+
+15
+00:00:50,617 --> 00:00:52,386 line:-2
+We're going to look at several
+improvements we've made
+
+
+16
+00:00:52.419 --> 00:00:54.488 line:-1 align:center
+in both compilers and runtimes.
+
+
+17
+00:00:54.521 --> 00:00:58.192 line:-2 align:center
+Now, this session is a bit unusual;
+there are no new APIs,
+
+
+18
+00:00:58,225 --> 00:01:00,727 line:-1
+language changes, or new build settings.
+
+
+19
+00:01:00,761 --> 00:01:03,430 line:-2
+You don't have to change your code,
+so all these improvements are transparent
+
+
+20
+00:01:03,463 --> 00:01:05,632 line:-1
+to you, the developer.
+
+
+21
+00:01:05.666 --> 00:01:06.700 line:-1 align:center
+Let's dive in.
+
+
+22
+00:01:06.733 --> 00:01:08.902 line:-1 align:center
+We're going to look at four improvements.
+
+
+23
+00:01:08,936 --> 00:01:11,538 line:-2
+We've made protocol checks in Swift
+more efficient,
+
+
+24
+00:01:11,572 --> 00:01:14,708 line:-2
+we've also made Objective-C message send
+calls smaller,
+
+
+25
+00:01:14,741 --> 00:01:16,944 line:-1
+as we did retain and release calls,
+
+
+26
+00:01:16,977 --> 00:01:21,248 line:-2
+and finally, we've made autorelease
+elision faster and smaller.
+
+
+27
+00:01:21.281 --> 00:01:22.783 line:-1 align:center
+Let's take a closer look.
+
+
+28
+00:01:23,917 --> 00:01:25,953 line:-1
+Let's start with protocol checks in Swift.
+
+
+29
+00:01:27.421 --> 00:01:30.090 line:-1 align:center
+Here we have a CustomLoggable protocol.
+
+
+30
+00:01:30.123 --> 00:01:33.527 line:-2 align:center
+It has a read-only computed property
+customLogString,
+
+
+31
+00:01:33.560 --> 00:01:35.262 line:-1 align:center
+and we can use it in our log function,
+
+
+32
+00:01:35,295 --> 00:01:38,832 line:-2
+that has special handling
+for CustomLoggable objects.
+
+
+33
+00:01:38,866 --> 00:01:42,636 align:center
+Later, we're defining an Event type
+with name and date fields.
+
+
+34
+00:01:42,669 --> 00:01:45,272 line:0
+And we're conforming
+to the CustomLoggable protocol,
+
+
+35
+00:01:45,305 --> 00:01:48,809 line:0
+by defining the getter
+for the customLogString property.
+
+
+36
+00:01:49.910 --> 00:01:53.247 line:-2 align:center
+And this lets us pass
+Event objects to our 'log' function.
+
+
+37
+00:01:53.280 --> 00:01:56.450 line:-2 align:center
+When we execute this code,
+the 'log' function needs to check
+
+
+38
+00:01:56,483 --> 00:01:59,553 line:-2
+whether the value we passed
+conforms to the protocol.
+
+
+39
+00:01:59.586 --> 00:02:04.024 line:-2 align:center
+And it does that using the 'as' operator.
+You may also have seen the 'is' operator.
+
+
+40
+00:02:05.425 --> 00:02:09.930 line:-2 align:center
+Whenever possible, this check is optimized
+away at build time, in the compiler.
+
+
+41
+00:02:09,963 --> 00:02:13,767 line:-2
+However, we don't always
+have enough information yet.
+
+
+42
+00:02:13,800 --> 00:02:15,802 line:-2
+So this often needs to happen
+in the runtime,
+
+
+43
+00:02:15.836 --> 00:02:20.340 line:-2 align:center
+with the help of protocol check metadata
+we compute earlier.
+
+
+44
+00:02:20,374 --> 00:02:23,810 line:-2
+With this metadata, the runtime knows
+whether this particular object
+
+
+45
+00:02:23,844 --> 00:02:25,846 line:-1
+really does conform to the protocol,
+
+
+46
+00:02:25.879 --> 00:02:27.581 line:-1 align:center
+and the check succeeds.
+
+
+47
+00:02:29.016 --> 00:02:31.485 line:-2 align:center
+Part of the metadata is built
+at compile time,
+
+
+48
+00:02:31.518 --> 00:02:33.587 line:-2 align:center
+but a lot can only be built
+at launch time,
+
+
+49
+00:02:33.620 --> 00:02:35.656 line:-1 align:center
+particularly when using Generics.
+
+
+50
+00:02:36,390 --> 00:02:40,761 line:-2
+When you use a lot of protocols, this can
+add up to hundreds of milliseconds.
+
+
+51
+00:02:40,794 --> 00:02:45,599 line:-2
+On real-world apps, we've seen this take
+up to half of the launch time.
+
+
+52
+00:02:45.632 --> 00:02:48.869 line:-2 align:center
+With the new Swift runtime,
+we now precompute these ahead of time,
+
+
+53
+00:02:48.902 --> 00:02:51.538 line:-2 align:center
+as part of the dyld closure
+for the app executable
+
+
+54
+00:02:51,572 --> 00:02:54,074 line:-1
+and any dylib it uses at launch.
+
+
+55
+00:02:54.107 --> 00:02:56.877 line:-2 align:center
+Best of all,
+this is enabled even for existing apps
+
+
+56
+00:02:56.910 --> 00:03:01.048 line:-2 align:center
+when running on iOS 16, tvOS 16,
+or watchOS 9.
+
+
+57
+00:03:01,081 --> 00:03:03,684 line:0
+If you'd like to learn more
+about dyld and launch closures,
+
+
+58
+00:03:03,717 --> 00:03:07,521 align:center
+watch the talk "App Startup Time:
+Past, Present, and Future."
+
+
+59
+00:03:07,554 --> 00:03:09,389 line:0
+That was protocol checks in Swift.
+
+
+60
+00:03:10,791 --> 00:03:13,427 line:-1
+Let's move on to message send.
+
+
+61
+00:03:14,361 --> 00:03:17,197 line:-2
+With the new compilers
+and linker in Xcode 14,
+
+
+62
+00:03:17.231 --> 00:03:19.833 line:-2 align:center
+we've made message send calls
+up to 8 bytes smaller,
+
+
+63
+00:03:19.867 --> 00:03:22.636 line:-1 align:center
+down from 12, on ARM64.
+
+
+64
+00:03:22.669 --> 00:03:25.205 line:-2 align:center
+As we'll see in just a moment,
+message send is really everywhere,
+
+
+65
+00:03:25,239 --> 00:03:26,607 line:-1
+so this adds up,
+
+
+66
+00:03:26.640 --> 00:03:30.811 line:-2 align:center
+and we've seen up to 2% code size
+improvements on binaries.
+
+
+67
+00:03:30.844 --> 00:03:33.714 line:-2 align:center
+This is enabled automatically
+when building with Xcode 14,
+
+
+68
+00:03:33.747 --> 00:03:38.051 line:-2 align:center
+even if you use an older OS release
+as deployment target.
+
+
+69
+00:03:38.085 --> 00:03:40.854 line:-2 align:center
+It defaults to a balance
+of size win and performance,
+
+
+70
+00:03:40.888 --> 00:03:43.223 line:-2 align:center
+but you can opt into optimizing
+for size only,
+
+
+71
+00:03:43,257 --> 00:03:46,593 line:-1
+using the objc_stubs_small linker flag.
+
+
+72
+00:03:46,627 --> 00:03:49,496 line:-1
+Now let's look into what changed.
+
+
+73
+00:03:49.530 --> 00:03:50.831 line:-1 align:center
+So let's start with an example.
+
+
+74
+00:03:50.864 --> 00:03:54.168 line:-2 align:center
+Here we're trying to make an NSDate
+for the start day of the conference.
+
+
+75
+00:03:54.201 --> 00:03:56.303 line:-1 align:center
+We start by making an NSCalendar,
+
+
+76
+00:03:56.336 --> 00:03:58.205 line:-1 align:center
+then we fill out NSDateComponents,
+
+
+77
+00:03:58.238 --> 00:04:01.742 line:-2 align:center
+make a date out of that,
+and finally return it.
+
+
+78
+00:04:01.775 --> 00:04:05.012 line:-2 align:center
+Now let's look at the assembly
+the compiler generates.
+
+
+79
+00:04:05,045 --> 00:04:07,314 line:-2
+Now, the details of the assembly
+aren't super important.
+
+
+80
+00:04:07.347 --> 00:04:11.018 line:-2 align:center
+Us compiler folks stare at it all day
+so that you don't have to.
+
+
+81
+00:04:11.051 --> 00:04:13.820 line:-2 align:center
+What's important is that
+almost every line here
+
+
+82
+00:04:13.854 --> 00:04:16.690 line:-2 align:center
+ends up needing an instruction
+to call objc_msgSend,
+
+
+83
+00:04:16,723 --> 00:04:21,628 line:-2
+even when doing property accesses
+like we do for the date components.
+
+
+84
+00:04:21.662 --> 00:04:24.464 line:-2 align:center
+This is because at compile time,
+we don't know which method to call,
+
+
+85
+00:04:24,498 --> 00:04:26,834 line:-1
+and it's only the objc runtime that does.
+
+
+86
+00:04:26.867 --> 00:04:29.002 line:-2 align:center
+So we call into the runtime
+using objc_msgSend
+
+
+87
+00:04:29.036 --> 00:04:32.039 line:-1 align:center
+to ask it to find the right method.
+
+
+88
+00:04:32,072 --> 00:04:34,608 line:-1
+Let's focus on one of these calls.
+
+
+89
+00:04:34.641 --> 00:04:37.411 line:-2 align:center
+We already mentioned
+the instruction to call objc_msgSend.
+
+
+90
+00:04:37.444 --> 00:04:38.745 line:-1 align:center
+But there's more.
+
+
+91
+00:04:38.779 --> 00:04:40.614 line:-1 align:center
+To tell the runtime which method to call,
+
+
+92
+00:04:40.647 --> 00:04:44.952 line:-2 align:center
+we have to pass a selector
+to these objc_msgSend calls.
+
+
+93
+00:04:44,985 --> 00:04:48,422 line:-2
+That needs a couple more instructions
+to prepare the selector.
+
+
+94
+00:04:48.455 --> 00:04:52.292 line:-2 align:center
+When we look at the binary, each of these
+instructions takes a little bit of space.
+
+
+95
+00:04:52.326 --> 00:04:55.529 line:-1 align:center
+On ARM64, that's 4 bytes each.
+
+
+96
+00:04:55,562 --> 00:04:59,566 line:-2
+So for each of these objc_msgSend calls,
+we're using 12 bytes,
+
+
+97
+00:04:59,600 --> 00:05:01,602 line:-2
+and we need that for every single one
+of these calls;
+
+
+98
+00:05:01,635 --> 00:05:04,505 line:-1
+that really adds up.
+
+
+99
+00:05:04,538 --> 00:05:06,473 line:-1
+Let's see what we can do to improve that.
+
+
+100
+00:05:08,509 --> 00:05:09,843 line:-1
+Now, as we've seen before,
+
+
+101
+00:05:09.877 --> 00:05:13.447 line:-2 align:center
+8 of those bytes are dedicated
+to preparing the selector.
+
+
+102
+00:05:13,480 --> 00:05:17,885 line:-2
+Interesting thing is, for any given
+selector, it's always the same code.
+
+
+103
+00:05:17,918 --> 00:05:21,088 line:-2
+And this is where
+our optimization comes in.
+
+
+104
+00:05:21.121 --> 00:05:23.190 line:-2 align:center
+Since this is always the same code,
+we can share it
+
+
+105
+00:05:23.223 --> 00:05:25.292 line:-1 align:center
+and only emit it once per selector
+
+
+106
+00:05:25,325 --> 00:05:27,961 line:-2
+instead of every time
+we do a message send.
+
+
+107
+00:05:27.995 --> 00:05:30.797 line:-2 align:center
+We can take it out and put it
+into a little helper function,
+
+
+108
+00:05:30.831 --> 00:05:33.534 line:-1 align:center
+and call that function instead.
+
+
+109
+00:05:33.567 --> 00:05:35.702 line:-1 align:center
+Over many calls using the same selector,
+
+
+110
+00:05:35.736 --> 00:05:38.338 line:-1 align:center
+we can save all these instruction bytes.
+
+
+111
+00:05:38.372 --> 00:05:40.941 line:-2 align:center
+We call this helper function
+a "selector stub."
+
+
+112
+00:05:42.442 --> 00:05:45.245 line:-2 align:center
+We still need to call the real
+objc_msgSend function, though,
+
+
+113
+00:05:45,279 --> 00:05:47,681 line:-1
+so we continue onto that.
+
+
+114
+00:05:47.714 --> 00:05:51.084 line:-2 align:center
+And again, that has another,
+different, indirection to load the address
+
+
+115
+00:05:51.118 --> 00:05:53.520 line:-1 align:center
+of the function itself and call it.
+
+
+116
+00:05:53.554 --> 00:05:55.989 line:-2 align:center
+The details aren't important,
+but what's important is that we need
+
+
+117
+00:05:56,023 --> 00:05:58,192 line:-1
+another several bytes of code to do that.
+
+
+118
+00:05:59,860 --> 00:06:01,695 line:-2
+And this is where you can choose
+which mode you want,
+
+
+119
+00:06:01.728 --> 00:06:03.630 line:-1 align:center
+as I mentioned earlier.
+
+
+120
+00:06:03,664 --> 00:06:07,434 line:-2
+We can either keep these two little stub
+functions separate, like we've done here.
+
+
+121
+00:06:07.467 --> 00:06:09.636 line:-2 align:center
+We get to share the most code,
+and make these functions
+
+
+122
+00:06:09.670 --> 00:06:11.905 line:-1 align:center
+as small as possible.
+
+
+123
+00:06:11.939 --> 00:06:14.174 line:-2 align:center
+But unfortunately,
+this would do two calls back to back,
+
+
+124
+00:06:14.208 --> 00:06:17.444 line:-1 align:center
+which is not ideal for performance.
+
+
+125
+00:06:17,477 --> 00:06:20,781 line:-2
+So we can further improve this
+with an alternative version.
+
+
+126
+00:06:20,814 --> 00:06:25,652 line:-2
+We can take these two stub functions
+we've created, combine them into one.
+
+
+127
+00:06:25.686 --> 00:06:29.156 line:-2 align:center
+That way, we keep the code closer together
+and we don't need as many calls.
+
+
+128
+00:06:29,189 --> 00:06:31,124 line:-1
+And that's on the right here.
+
+
+129
+00:06:32.226 --> 00:06:33.894 line:-1 align:center
+So these are the two options.
+
+
+130
+00:06:33.927 --> 00:06:36.096 line:-2 align:center
+You can choose whether
+to optimize for size alone,
+
+
+131
+00:06:36.129 --> 00:06:38.765 line:-2 align:center
+and get the maximum
+size savings available.
+
+
+132
+00:06:38.799 --> 00:06:42.636 line:-2 align:center
+You can enable that using
+the -objc_stubs_small linker flag,
+
+
+133
+00:06:42,669 --> 00:06:45,906 line:-2
+or you can use the code generation
+that provides size benefits
+
+
+134
+00:06:45,939 --> 00:06:48,375 line:-1
+while keeping the best performance.
+
+
+135
+00:06:48.408 --> 00:06:51.345 line:-2 align:center
+And unless you're severely
+size-constrained, we recommend using this,
+
+
+136
+00:06:51.378 --> 00:06:54.181 line:-1 align:center
+and that's why it's the default.
+
+
+137
+00:06:54.214 --> 00:06:57.050 line:-2 align:center
+And that was smaller message send
+using stubs.
+
+
+138
+00:06:57,084 --> 00:07:01,488 line:-2
+Another improvement we've made
+is making retain/release cheaper.
+
+
+139
+00:07:01.522 --> 00:07:03.357 line:-1 align:center
+With the new compilers in Xcode 14,
+
+
+140
+00:07:03.390 --> 00:07:05.759 line:-2 align:center
+retain/release calls are now
+up to 4 bytes smaller,
+
+
+141
+00:07:05,792 --> 00:07:08,629 line:-1
+down from 8 on ARM64.
+
+
+142
+00:07:08.662 --> 00:07:11.131 line:-2 align:center
+As we'll see in just a moment,
+just like message send,
+
+
+143
+00:07:11.164 --> 00:07:13.000 line:-1 align:center
+retain/release is also everywhere.
+
+
+144
+00:07:13.033 --> 00:07:18.539 line:-2 align:center
+So this adds up, and we've seen up to 2%
+more code size improvements on binaries.
+
+
+145
+00:07:18.572 --> 00:07:21.775 line:-2 align:center
+Now, unlike message send stubs,
+this does need runtime support,
+
+
+146
+00:07:21,808 --> 00:07:24,545 line:-2
+so you'll get this automatically
+as you migrate to a deployment target
+
+
+147
+00:07:24,578 --> 00:07:28,248 line:-1
+of iOS 16, tvOS 16, or watchOS 9.
+
+
+148
+00:07:28.282 --> 00:07:31.018 line:-1 align:center
+Now let's look into what changed.
+
+
+149
+00:07:31.051 --> 00:07:32.853 line:-1 align:center
+Let's go back to our example.
+
+
+150
+00:07:32,886 --> 00:07:35,055 line:-1
+We talked about msgSend calls,
+
+
+151
+00:07:35,088 --> 00:07:37,591 line:-2
+but with automatic reference counting,
+or ARC,
+
+
+152
+00:07:37,624 --> 00:07:39,726 line:-2
+we also end up with a lot
+of retain/release calls
+
+
+153
+00:07:39,760 --> 00:07:42,462 line:-1
+inserted by the compiler.
+
+
+154
+00:07:42.496 --> 00:07:45.999 line:-2 align:center
+At a very high level, whenever we make
+a copy of a pointer to an object,
+
+
+155
+00:07:46.033 --> 00:07:49.102 line:-2 align:center
+we need to increment
+its retain count to keep it live.
+
+
+156
+00:07:49,136 --> 00:07:53,707 line:-2
+And here, this happens with our variables
+cal, dateComponent, and theDate.
+
+
+157
+00:07:53.740 --> 00:07:57.644 line:-2 align:center
+We do that by calling into the runtime,
+using objc_retain.
+
+
+158
+00:07:57,678 --> 00:07:59,079 line:0
+When the variables go out of scope,
+
+
+159
+00:07:59,112 --> 00:08:03,383 line:0
+we then need to decrement the retain count
+using objc_release.
+
+
+160
+00:08:03,417 --> 00:08:06,353 line:-2
+Of course, part of the benefit of ARC
+is all the compiler magic
+
+
+161
+00:08:06.386 --> 00:08:10.257 line:-2 align:center
+that eliminates a lot of these calls,
+to keep them to a minimum.
+
+
+162
+00:08:10,290 --> 00:08:13,894 line:-2
+And we're going to go into one
+of these magic tricks a little bit later.
+
+
+163
+00:08:13.927 --> 00:08:17.898 line:-2 align:center
+But even with all the magic,
+we still often need these calls.
+
+
+164
+00:08:17,931 --> 00:08:21,435 line:-2
+In this example, we end up needing
+to release our local copies of calendar
+
+
+165
+00:08:21,468 --> 00:08:23,036 line:-1
+and dateComponents.
+
+
+166
+00:08:24,605 --> 00:08:27,474 line:-2
+Under the hood,
+these objc_retain/release functions
+
+
+167
+00:08:27,508 --> 00:08:29,276 line:-1
+are just plain C functions;
+
+
+168
+00:08:29,309 --> 00:08:32,613 line:-2
+take a single argument,
+the object to be released.
+
+
+169
+00:08:32,646 --> 00:08:36,049 line:-2
+So with ARC, the compiler inserts calls
+to these C functions,
+
+
+170
+00:08:36.083 --> 00:08:38.852 line:-1 align:center
+passing the appropriate object pointers.
+
+
+171
+00:08:38.886 --> 00:08:42.189 line:-2 align:center
+Because of that, these calls
+have to respect the C calling convention,
+
+
+172
+00:08:42,222 --> 00:08:46,093 line:-2
+defined by our platform
+Application Binary Interface, or ABI.
+
+
+173
+00:08:46,126 --> 00:08:49,496 line:-2
+Concretely, what that means
+is that we need even more code
+
+
+174
+00:08:49.530 --> 00:08:53.433 line:-2 align:center
+to do these calls,
+to pass the pointer in the right register.
+
+
+175
+00:08:53.467 --> 00:08:57.037 line:-2 align:center
+So we end up with a few additional
+'move' instructions just for that.
+
+
+176
+00:08:57,070 --> 00:09:00,440 line:0
+And that's where
+our new optimization comes in.
+
+
+177
+00:09:00,474 --> 00:09:03,877 line:0
+By specializing retain/release
+with a custom calling convention,
+
+
+178
+00:09:03,911 --> 00:09:06,547 align:center
+we can opportunistically use
+the right variant
+
+
+179
+00:09:06,580 --> 00:09:09,316 align:center
+depending on where
+the object pointer already is,
+
+
+180
+00:09:09,349 --> 00:09:11,919 line:0
+so that we don't need to move it.
+
+
+181
+00:09:11,952 --> 00:09:15,455 align:center
+Concretely, what this means is,
+we get rid of a bunch of redundant code
+
+
+182
+00:09:15,489 --> 00:09:17,124 align:center
+for all these calls.
+
+
+183
+00:09:17,157 --> 00:09:18,692 align:center
+And again,
+while this may not seem like much
+
+
+184
+00:09:18,725 --> 00:09:20,494 line:0
+for these puny little instructions,
+
+
+185
+00:09:20,527 --> 00:09:23,530 align:center
+over an entire app, it really adds up.
+
+
+186
+00:09:23,564 --> 00:09:26,533 line:0
+That's how we made retain/release
+operations cheaper.
+
+
+187
+00:09:26.567 --> 00:09:29.870 line:-2 align:center
+Finally,
+let's talk about autorelease elision.
+
+
+188
+00:09:29.903 --> 00:09:32.339 line:-1 align:center
+Now this one is even more interesting.
+
+
+189
+00:09:32,372 --> 00:09:36,376 line:-2
+With objc runtime changes,
+we've made autorelease elision faster.
+
+
+190
+00:09:36.410 --> 00:09:38.512 line:-2 align:center
+That happens automatically
+for existing apps
+
+
+191
+00:09:38.545 --> 00:09:41.548 line:-1 align:center
+when you run them on the new OS releases.
+
+
+192
+00:09:41.582 --> 00:09:44.718 line:-2 align:center
+Building on top of that,
+with additional compiler changes,
+
+
+193
+00:09:44.751 --> 00:09:47.321 line:-1 align:center
+we also made the code smaller.
+
+
+194
+00:09:47,354 --> 00:09:49,323 line:-2
+And you'll get this size benefit
+automatically
+
+
+195
+00:09:49,356 --> 00:09:53,927 line:-2
+as you migrate to a deployment target
+of iOS 16, tvOS 16, or watchOS 9.
+
+
+196
+00:09:55.462 --> 00:09:59.600 line:-2 align:center
+Now this is all great, but what's
+autorelease elision in the first place?
+
+
+197
+00:09:59,633 --> 00:10:02,102 line:-1
+Let's go back to our example.
+
+
+198
+00:10:02.135 --> 00:10:05.072 line:-2 align:center
+I mentioned earlier that ARC
+already gives us a lot of compiler magic
+
+
+199
+00:10:05.105 --> 00:10:07.040 line:-1 align:center
+to optimize retains and releases.
+
+
+200
+00:10:07,074 --> 00:10:08,909 line:-1
+So let's focus on one case here:
+
+
+201
+00:10:08.942 --> 00:10:11.378 line:-1 align:center
+autoreleased return values.
+
+
+202
+00:10:11.411 --> 00:10:13.614 line:-2 align:center
+In this example,
+we made a temporary object,
+
+
+203
+00:10:13.647 --> 00:10:15.349 line:-1 align:center
+and we're returning it to our caller.
+
+
+204
+00:10:15,382 --> 00:10:17,951 line:-1
+So let's look at how that works.
+
+
+205
+00:10:17,985 --> 00:10:19,953 line:-1
+So we have our temporary theDate,
+
+
+206
+00:10:19,987 --> 00:10:21,889 line:-1
+we return it, the call completes,
+
+
+207
+00:10:21.922 --> 00:10:24.825 line:-2 align:center
+and the caller saves it
+to its own variable.
+
+
+208
+00:10:24.858 --> 00:10:28.028 line:-1 align:center
+So let's see how that works with ARC.
+
+
+209
+00:10:28.061 --> 00:10:32.232 line:-2 align:center
+ARC inserts a retain in the caller,
+and a release in the called function.
+
+
+210
+00:10:32,266 --> 00:10:35,969 line:-2
+Here, when we return our temporary object,
+we need to release it first
+
+
+211
+00:10:36.003 --> 00:10:38.972 line:-2 align:center
+in the function,
+because it's going out of scope.
+
+
+212
+00:10:39.006 --> 00:10:43.343 line:-2 align:center
+But we can't do that just yet, because
+it doesn't have any other references yet.
+
+
+213
+00:10:43.377 --> 00:10:46.547 line:-2 align:center
+If we did release it, it would be
+destroyed before we even return,
+
+
+214
+00:10:46.580 --> 00:10:48.048 line:-1 align:center
+and that's no good.
+
+
+215
+00:10:48,081 --> 00:10:51,952 line:-2
+So a special convention is used
+to be able to return the temporary.
+
+
+216
+00:10:51.985 --> 00:10:56.056 line:-2 align:center
+We autorelease it before the return
+so that the caller can then retain it.
+
+
+217
+00:10:56,089 --> 00:10:58,992 line:-2
+You've likely seen autorelease
+and autoreleasepools before:
+
+
+218
+00:10:59,026 --> 00:11:02,729 line:-2
+it's simply a way to defer a release
+until some later point.
+
+
+219
+00:11:02.763 --> 00:11:05.899 line:-2 align:center
+Runtime doesn't really make any guarantees
+as to when the release happens,
+
+
+220
+00:11:05,933 --> 00:11:09,069 line:-2
+but as long as it's not right here,
+right now, it's convenient,
+
+
+221
+00:11:09.102 --> 00:11:12.039 line:-2 align:center
+because it lets us
+return this temporary object.
+
+
+222
+00:11:12,072 --> 00:11:13,473 line:-1
+Now, this isn't free.
+
+
+223
+00:11:13.507 --> 00:11:16.276 line:-2 align:center
+There is some overhead
+to doing an autorelease.
+
+
+224
+00:11:16.310 --> 00:11:19.613 line:-2 align:center
+This is where
+autorelease elision comes in.
+
+
+225
+00:11:19,646 --> 00:11:21,014 line:-1
+So to understand how that works,
+
+
+226
+00:11:21.048 --> 00:11:24.518 line:-2 align:center
+let's look at the assembly
+and retrace this return.
+
+
+227
+00:11:24.551 --> 00:11:27.821 line:-2 align:center
+When we call autorelease,
+that goes into the objc runtime,
+
+
+228
+00:11:27,855 --> 00:11:30,824 line:-1
+and that's where the fun begins.
+
+
+229
+00:11:30,858 --> 00:11:33,126 line:-2
+The runtime tries to recognize
+what's happening:
+
+
+230
+00:11:33.160 --> 00:11:35.863 line:-2 align:center
+that we're returning
+an autoreleased value.
+
+
+231
+00:11:35.896 --> 00:11:38.332 line:-2 align:center
+To help it out, the compiler emits
+a special marker
+
+
+232
+00:11:38.365 --> 00:11:40.434 line:-1 align:center
+that we never use otherwise.
+
+
+233
+00:11:40,467 --> 00:11:45,405 line:-2
+It's there to tell the runtime that this
+is eligible for autorelease elision.
+
+
+234
+00:11:45,439 --> 00:11:48,809 line:-2
+And it's followed by the retain,
+that we will execute later.
+
+
+235
+00:11:48.842 --> 00:11:50.644 line:-2 align:center
+But right now,
+we're still in the autorelease,
+
+
+236
+00:11:50.677 --> 00:11:54.781 line:-2 align:center
+and when we do it, the runtime loads
+the special marker instruction, as data,
+
+
+237
+00:11:54.815 --> 00:11:59.253 line:-2 align:center
+and compares it to see if it is
+the special marker value it expects.
+
+
+238
+00:11:59.286 --> 00:12:02.055 line:-2 align:center
+If it is,
+that means the compiler told the runtime
+
+
+239
+00:12:02.089 --> 00:12:05.192 line:-2 align:center
+that we're returning a temporary
+that will immediately be retained.
+
+
+240
+00:12:05,225 --> 00:12:09,530 line:-2
+And this lets us elide, or remove,
+the matching autorelease and retain calls.
+
+
+241
+00:12:09.563 --> 00:12:11.498 line:-1 align:center
+And that's autorelease elision.
+
+
+242
+00:12:12.833 --> 00:12:15.335 line:-1 align:center
+However, this is not free either:
+
+
+243
+00:12:15,369 --> 00:12:18,138 line:-2
+loading code as data isn't something
+that's super common otherwise,
+
+
+244
+00:12:18,172 --> 00:12:20,174 line:-1
+so it's not optimal on the CPUs.
+
+
+245
+00:12:20.207 --> 00:12:21.909 line:-1 align:center
+We can do better.
+
+
+246
+00:12:21,942 --> 00:12:23,977 line:-2
+So let's retrace
+the return sequence again,
+
+
+247
+00:12:24.011 --> 00:12:26.747 line:-1 align:center
+this time using the new way.
+
+
+248
+00:12:26,780 --> 00:12:28,282 line:-1
+We started at the autorelease.
+
+
+249
+00:12:28,315 --> 00:12:30,817 line:-2
+That still goes
+into the Objective-C runtime.
+
+
+250
+00:12:30.851 --> 00:12:35.889 line:-2 align:center
+At this point, we actually already have
+valuable information: the return address.
+
+
+251
+00:12:35.923 --> 00:12:40.994 line:-2 align:center
+It tells us where we need to return to
+after this function completes execution.
+
+
+252
+00:12:41,028 --> 00:12:42,963 line:-1
+So we can keep track of that.
+
+
+253
+00:12:42.996 --> 00:12:45.165 line:-2 align:center
+Thankfully, getting the return address
+is very cheap.
+
+
+254
+00:12:45,199 --> 00:12:48,535 line:-2
+It's just a pointer,
+and we can store it on the side.
+
+
+255
+00:12:48,569 --> 00:12:51,371 line:-2
+We then leave
+the runtime autorelease call.
+
+
+256
+00:12:51.405 --> 00:12:52.973 line:-1 align:center
+We return to the caller,
+
+
+257
+00:12:53,006 --> 00:12:56,376 line:-2
+and we re-enter the runtime
+when doing the retain.
+
+
+258
+00:12:56.410 --> 00:12:59.947 line:-2 align:center
+And this is where
+the new bit of magic happens.
+
+
+259
+00:12:59,980 --> 00:13:01,982 line:-1
+At that point, we can look at where we are
+
+
+260
+00:13:02,015 --> 00:13:04,885 line:-2
+and get a pointer
+to our current return address.
+
+
+261
+00:13:04.918 --> 00:13:07.588 line:-2 align:center
+In the runtime,
+we can compare this pointer we just got
+
+
+262
+00:13:07.621 --> 00:13:09.990 line:-2 align:center
+while doing the retain
+with the one we saved earlier
+
+
+263
+00:13:10.023 --> 00:13:12.226 line:-1 align:center
+when we were doing the autorelease.
+
+
+264
+00:13:12.259 --> 00:13:13.660 line:-2 align:center
+And since we're
+just comparing two pointers,
+
+
+265
+00:13:13.694 --> 00:13:14.795 line:-1 align:center
+this is super cheap.
+
+
+266
+00:13:14,828 --> 00:13:17,764 line:-2
+We don't need to do
+expensive memory accesses.
+
+
+267
+00:13:17,798 --> 00:13:20,133 line:-2
+If the comparison succeeds,
+we know we can elide
+
+
+268
+00:13:20,167 --> 00:13:21,535 line:-1
+the autorelease/retain pair,
+
+
+269
+00:13:21,568 --> 00:13:24,004 line:-1
+and we get to improve some performance.
+
+
+270
+00:13:25.372 --> 00:13:27.241 line:-2 align:center
+And on top of that,
+now that we don't need to compare
+
+
+271
+00:13:27.274 --> 00:13:29.510 line:-2 align:center
+this special marker instruction
+as data anymore,
+
+
+272
+00:13:29,543 --> 00:13:32,212 line:-1
+we don't need it, so we can remove it.
+
+
+273
+00:13:32,246 --> 00:13:34,948 line:-2
+And that lets us
+save some code size as well.
+
+
+274
+00:13:34.982 --> 00:13:38.051 line:-2 align:center
+That's how we made autorelease elision
+faster and smaller.
+
+
+275
+00:13:38.685 --> 00:13:41.989 line:-2 align:center
+We went through several Swift
+and Objective-C runtime improvements.
+
+
+276
+00:13:42,022 --> 00:13:43,690 line:-1
+Let's wrap up.
+
+
+277
+00:13:43,724 --> 00:13:45,692 line:-1
+When your app is run on the new OS,
+
+
+278
+00:13:45.726 --> 00:13:47.728 line:-2 align:center
+thanks to the improvements
+in the runtimes,
+
+
+279
+00:13:47.761 --> 00:13:50.597 line:-1 align:center
+Swift protocol checks are more efficient.
+
+
+280
+00:13:50.631 --> 00:13:54.968 line:-2 align:center
+Every time we try to do
+autorelease elision, that's faster too.
+
+
+281
+00:13:55.002 --> 00:13:58.805 line:-2 align:center
+Thanks to the new compilers and linker
+in Xcode 14 and message send stubs,
+
+
+282
+00:13:58.839 --> 00:14:02.843 line:-2 align:center
+you can save up to 2% of code size
+by rebuilding your app.
+
+
+283
+00:14:02.876 --> 00:14:06.880 line:-2 align:center
+And finally, when you update
+your deployment target to iOS 16, tvOS 16,
+
+
+284
+00:14:06.914 --> 00:14:10.384 line:-2 align:center
+or watchOS 9,
+you can further save another 2%
+
+
+285
+00:14:10,417 --> 00:14:12,286 line:-1
+by making retain/release calls smaller.
+
+
+286
+00:14:12,319 --> 00:14:16,356 line:-2
+Even more, thanks to the smaller
+autorelease elision sequence.
+
+
+287
+00:14:16,390 --> 00:14:19,893 line:-2
+I hope you enjoyed this deep dive
+into the Swift and Objective-C runtimes,
+
+
+288
+00:14:19.927 --> 00:14:21.361 line:-1 align:center
+and thanks for watching.
+

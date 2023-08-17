@@ -1,0 +1,4430 @@
+2
+00:00:00,334 --> 00:00:07,341 line:-1
+[upbeat music]
+
+
+3
+00:00:09.042 --> 00:00:10.611 line:-2 align:center
+[Bharath] Hello,
+my name is Bharath,
+
+
+4
+00:00:10.644 --> 00:00:12.713 line:-2 align:center
+and I am from Apple's
+Core Audio team.
+
+
+5
+00:00:12,746 --> 00:00:14,448 line:-2
+And today,
+and I would like to talk to you
+
+
+6
+00:00:14,481 --> 00:00:17,284 line:-2
+about geometry-aware audio
+with PHASE.
+
+
+7
+00:00:17,317 --> 00:00:19,786 line:-2
+We will talk about why
+you would want to use
+
+
+8
+00:00:19.820 --> 00:00:21.688 line:-1 align:center
+the new PHASE framework.
+
+
+9
+00:00:21.722 --> 00:00:23.490 line:-2 align:center
+We will introduce you to
+some of the features
+
+
+10
+00:00:23.524 --> 00:00:25.292 line:-1 align:center
+the framework offers.
+
+
+11
+00:00:25,325 --> 00:00:28,028 line:-2
+Then, I will hand it over to
+my colleague, David Thall,
+
+
+12
+00:00:28.061 --> 00:00:30.397 line:-2 align:center
+to take you through concepts
+in some depth
+
+
+13
+00:00:30,430 --> 00:00:33,367 line:-2
+and sample use cases
+with this API.
+
+
+14
+00:00:33,400 --> 00:00:34,568 line:-1
+Let's begin.
+
+
+15
+00:00:35,235 --> 00:00:38,338 line:-2
+Audio is a critical aspect of
+any gaming experience.
+
+
+16
+00:00:38.372 --> 00:00:40.240 line:-1 align:center
+Spatial audio on headphones
+
+
+17
+00:00:40.274 --> 00:00:42.876 line:-2 align:center
+takes the overall
+gameplay to the next level
+
+
+18
+00:00:42,910 --> 00:00:44,778 line:-2
+and makes you
+feel more involved.
+
+
+19
+00:00:44,811 --> 00:00:46,346 line:-1
+In games today,
+
+
+20
+00:00:46,380 --> 00:00:49,016 line:-2
+various subsystems of the
+engine like physics,
+
+
+21
+00:00:49.049 --> 00:00:51.718 line:-2 align:center
+animation, visual effects,
+et cetera,
+
+
+22
+00:00:51,752 --> 00:00:53,720 line:-2
+all communicate
+with each other and move
+
+
+23
+00:00:53.754 --> 00:00:55.522 line:-2 align:center
+the game flow or storyline
+forward
+
+
+24
+00:00:55,556 --> 00:00:57,491 line:-1
+based on the player's actions.
+
+
+25
+00:00:57.524 --> 00:01:00.294 line:-2 align:center
+However, the audio
+subsystem is generally managed
+
+
+26
+00:01:00,327 --> 00:01:02,563 line:-2
+and driven separately
+from the rest.
+
+
+27
+00:01:02.596 --> 00:01:04.731 line:-2 align:center
+They sometimes are also
+authored through middleware
+
+
+28
+00:01:04,765 --> 00:01:06,967 line:-2
+that isn't always aware
+of the simulation.
+
+
+29
+00:01:07,734 --> 00:01:10,304 line:-2
+Audio assets
+are post-produced, pre-baked,
+
+
+30
+00:01:10.337 --> 00:01:12.973 line:-2 align:center
+hand-tuned
+to tell an audio story
+
+
+31
+00:01:13,006 --> 00:01:15,209 line:-1
+that matches the game visuals.
+
+
+32
+00:01:15,242 --> 00:01:18,178 line:-2
+As visuals evolve,
+audio system, sound design,
+
+
+33
+00:01:18.212 --> 00:01:20.714 line:-2 align:center
+and associated assets
+needs to be regenerated
+
+
+34
+00:01:20,747 --> 00:01:22,783 line:-2
+to keep audio experience
+cohesive
+
+
+35
+00:01:22.816 --> 00:01:24.918 line:-2 align:center
+on a wide range of
+platforms.
+
+
+36
+00:01:24,952 --> 00:01:27,120 line:-2
+This iterative
+development process needs to be
+
+
+37
+00:01:27,154 --> 00:01:29,756 line:-2
+accounted for during the game
+development.
+
+
+38
+00:01:29.790 --> 00:01:31.825 line:-2 align:center
+This typically leads
+to audio experiences
+
+
+39
+00:01:31.859 --> 00:01:34.261 line:-2 align:center
+lagging the visual side
+of the gameplay.
+
+
+40
+00:01:36,063 --> 00:01:38,365 line:-2
+To provide a better
+game audio experience,
+
+
+41
+00:01:38.398 --> 00:01:40.167 line:-2 align:center
+we want to bring
+the audio system
+
+
+42
+00:01:40,200 --> 00:01:42,236 line:-1
+closer to other subsystems.
+
+
+43
+00:01:42,269 --> 00:01:44,638 line:-2
+We also
+want to make it easier for you
+
+
+44
+00:01:44,671 --> 00:01:46,540 line:-2
+to write applications
+that can provide
+
+
+45
+00:01:46.573 --> 00:01:48.642 line:-2 align:center
+a consistent spatial
+audio experience
+
+
+46
+00:01:48.675 --> 00:01:50.511 line:-2 align:center
+on all these
+supported devices.
+
+
+47
+00:01:51,578 --> 00:01:52,946 line:-1
+Let us now take you through
+
+
+48
+00:01:52.980 --> 00:01:56.817 line:-2 align:center
+the new audio framework
+PHASE and its features.
+
+
+49
+00:01:56,850 --> 00:02:00,487 line:-2
+PHASE is a new framework
+that will enable you to provide
+
+
+50
+00:02:00,521 --> 00:02:02,923 line:-2
+geometry information
+to the audio engine,
+
+
+51
+00:02:02,956 --> 00:02:04,958 line:-2
+help you build a sound-design
+friendly,
+
+
+52
+00:02:04.992 --> 00:02:07.761 line:-2 align:center
+event-driven audio playback
+system,
+
+
+53
+00:02:07,794 --> 00:02:11,198 line:-2
+enable you to write applications
+that can automatically provide
+
+
+54
+00:02:11.231 --> 00:02:13.166 line:-2 align:center
+a consistent spatial audio
+experience
+
+
+55
+00:02:13.200 --> 00:02:16.470 line:-2 align:center
+across all supported devices
+and can be integrated
+
+
+56
+00:02:16,503 --> 00:02:19,873 line:-2
+with existing authoring
+solutions and pipelines.
+
+
+57
+00:02:19.907 --> 00:02:22.576 line:-2 align:center
+Before we jump into
+learning more about PHASE,
+
+
+58
+00:02:22,609 --> 00:02:26,079 line:-2
+let us review a commonly used
+game audio workflow.
+
+
+59
+00:02:26,113 --> 00:02:28,549 line:-2
+Here's an example
+outdoor scene
+
+
+60
+00:02:28,582 --> 00:02:30,817 line:-1
+with a listener, a sound source,
+
+
+61
+00:02:30.851 --> 00:02:33.987 line:-2 align:center
+a creek flowing and an occluder,
+a barn.
+
+
+62
+00:02:34,821 --> 00:02:36,223 line:-2
+Occluders are objects
+in the scene
+
+
+63
+00:02:36.256 --> 00:02:38.692 line:-2 align:center
+that could dampen the sound
+between a source
+
+
+64
+00:02:38.725 --> 00:02:40.294 line:-1 align:center
+and the listener.
+
+
+65
+00:02:40,327 --> 00:02:41,895 line:-1
+Typically, you would place
+
+
+66
+00:02:41,929 --> 00:02:44,665 line:-2
+multiple point sources
+along an area.
+
+
+67
+00:02:44,698 --> 00:02:46,266 line:-1
+As the listener moves,
+
+
+68
+00:02:46.300 --> 00:02:48.168 line:-2 align:center
+you have to use various
+techniques
+
+
+69
+00:02:48,202 --> 00:02:49,703 line:-1
+such as ray tracing
+
+
+70
+00:02:49,736 --> 00:02:52,272 line:-2
+to determine the proper
+filtering and mix ratio
+
+
+71
+00:02:52,306 --> 00:02:53,974 line:-1
+between the point sources
+
+
+72
+00:02:54,007 --> 00:02:55,676 line:-1
+and manually blend between them
+
+
+73
+00:02:55,709 --> 00:02:58,445 line:-2
+to provide a good
+audio experience.
+
+
+74
+00:02:58.478 --> 00:03:00.581 line:-2 align:center
+During the natural course
+of the game development,
+
+
+75
+00:03:00.614 --> 00:03:03.350 line:-2 align:center
+if visual scenes change,
+for example,
+
+
+76
+00:03:03,383 --> 00:03:05,052 line:-2
+the barn in the
+example scene,
+
+
+77
+00:03:05.085 --> 00:03:08.522 line:-2 align:center
+you have to update and
+hand-tune the audio experience
+
+
+78
+00:03:08,555 --> 00:03:11,058 line:-2
+to match the visual scene
+change.
+
+
+79
+00:03:11,091 --> 00:03:13,493 line:-2
+Imagine you can build
+applications
+
+
+80
+00:03:13.527 --> 00:03:15.596 line:-2 align:center
+where audio sources are
+not points
+
+
+81
+00:03:15,629 --> 00:03:17,865 line:-2
+you need to manage and mix
+based on the scene
+
+
+82
+00:03:17.898 --> 00:03:21.068 line:-2 align:center
+but rather as sound
+emanating over an area
+
+
+83
+00:03:21,101 --> 00:03:22,836 line:-1
+or volume that the audio system
+
+
+84
+00:03:22.870 --> 00:03:25.305 line:-2 align:center
+can automatically manage
+for you.
+
+
+85
+00:03:25.339 --> 00:03:27.174 line:-1 align:center
+PHASE does exactly that.
+
+
+86
+00:03:27.207 --> 00:03:29.543 line:-1 align:center
+Introducing volumetric sources.
+
+
+87
+00:03:29.576 --> 00:03:33.447 line:-2 align:center
+The new framework provides API
+that allows you to pass sound
+
+
+88
+00:03:33,480 --> 00:03:38,285 line:-2
+sources as geometric shapes
+to the underlying audio engine.
+
+
+89
+00:03:38.318 --> 00:03:40.220 line:-2 align:center
+In addition
+to volumetric sound sources,
+
+
+90
+00:03:40.254 --> 00:03:42.756 line:-1 align:center
+you can also pass occluders
+
+
+91
+00:03:42.789 --> 00:03:44.791 line:-2 align:center
+in the scene as geometric
+shapes.
+
+
+92
+00:03:44.825 --> 00:03:47.294 line:-2 align:center
+You can also choose
+acoustic material properties
+
+
+93
+00:03:47,327 --> 00:03:51,064 line:0
+from a set of presets and attach
+them to occluders.
+
+
+94
+00:03:51,098 --> 00:03:54,434 align:center
+PHASE framework also allows
+you to set medium propagation
+
+
+95
+00:03:54,468 --> 00:03:57,104 align:center
+and source directivity for
+point sources
+
+
+96
+00:03:57,137 --> 00:04:00,707 line:0
+as required by your application.
+
+
+97
+00:04:00,741 --> 00:04:02,109 line:0
+We are looking at
+an outdoor scene
+
+
+98
+00:04:02,142 --> 00:04:03,977 line:0
+as an example here.
+
+
+99
+00:04:04,011 --> 00:04:06,613 align:center
+However, if your
+application has indoor scenes,
+
+
+100
+00:04:06,647 --> 00:04:08,649 line:0
+you can choose early reflections
+
+
+101
+00:04:08,682 --> 00:04:10,584 line:0
+and late reverberation
+properties from
+
+
+102
+00:04:10,617 --> 00:04:12,219 align:center
+a library of presets.
+
+
+103
+00:04:12,252 --> 00:04:16,657 line:-2
+Once you tell the framework
+where various sound sources,
+
+
+104
+00:04:16,690 --> 00:04:18,992 line:-1
+occluders, and the listener are,
+
+
+105
+00:04:19.026 --> 00:04:21.395 line:-2 align:center
+PHASE will help
+with the heavy lifting and model
+
+
+106
+00:04:21,428 --> 00:04:24,231 line:-2
+the occlusion and spreading
+effects of various sound sources
+
+
+107
+00:04:24.264 --> 00:04:25.766 line:-1 align:center
+in the scene for you.
+
+
+108
+00:04:25,799 --> 00:04:29,636 line:-2
+Now that your application's
+audio system is geometry aware,
+
+
+109
+00:04:29,670 --> 00:04:31,939 line:-2
+it can adapt to visual scene
+changes
+
+
+110
+00:04:31,972 --> 00:04:35,275 line:-2
+much quicker
+as the game development evolves.
+
+
+111
+00:04:37.010 --> 00:04:38.645 line:-2 align:center
+In addition to geometry
+awareness,
+
+
+112
+00:04:38.679 --> 00:04:41.114 line:-2 align:center
+PHASE also provides
+an event-based
+
+
+113
+00:04:41.148 --> 00:04:43.083 line:-1 align:center
+interactive playback system.
+
+
+114
+00:04:43.116 --> 00:04:46.720 line:-2 align:center
+Sound events are basic units for
+describing audio playback events
+
+
+115
+00:04:46,753 --> 00:04:47,988 line:-1
+in PHASE.
+
+
+116
+00:04:48,021 --> 00:04:49,890 line:-2
+They encapsulate the selection,
+blending,
+
+
+117
+00:04:49,923 --> 00:04:52,059 line:-1
+and playback of audio assets.
+
+
+118
+00:04:52,092 --> 00:04:54,161 line:0
+Sound events can range
+from simple events
+
+
+119
+00:04:54,194 --> 00:04:56,163 line:0
+like one-shot playback, looping,
+
+
+120
+00:04:56,196 --> 00:04:58,732 line:0
+to complex sequences
+organized as a tree
+
+
+121
+00:04:58,765 --> 00:05:00,901 line:0
+that can blend or switch
+between subtrees
+
+
+122
+00:05:00,934 --> 00:05:02,736 line:0
+of playback events.
+
+
+123
+00:05:02,769 --> 00:05:06,340 line:-2
+Let us take a simple example of
+playing footsteps.
+
+
+124
+00:05:06,373 --> 00:05:08,709 align:center
+Here we have a random node
+
+
+125
+00:05:08,742 --> 00:05:11,144 line:0
+that will automatically
+choose between three different
+
+
+126
+00:05:11,178 --> 00:05:13,614 line:0
+sounds of a footstep on gravel.
+
+
+127
+00:05:13,647 --> 00:05:16,149 align:center
+We can have another sound event
+for cloth rustle.
+
+
+128
+00:05:16,183 --> 00:05:19,119 line:0
+Both event trees can be grafted
+onto another tree,
+
+
+129
+00:05:19,152 --> 00:05:20,954 line:0
+"near" in this example,
+
+
+130
+00:05:20,988 --> 00:05:24,224 line:0
+to play back a mix of cloth
+rustle and footsteps sounds.
+
+
+131
+00:05:24,258 --> 00:05:26,927 line:0
+We can have another tree,
+"far" in this example,
+
+
+132
+00:05:26,960 --> 00:05:28,795 line:0
+to play a different set of
+sounds
+
+
+133
+00:05:28,829 --> 00:05:30,597 line:0
+when the character is at a
+distance.
+
+
+134
+00:05:30,631 --> 00:05:32,866 line:0
+The mix of near
+and far trees
+
+
+135
+00:05:32.900 --> 00:05:37.271 line:-2 align:center
+can be now controlled by
+distance based on the gameplay.
+
+
+136
+00:05:37,304 --> 00:05:38,639 line:-1
+You can add more event trees
+
+
+137
+00:05:38,672 --> 00:05:41,241 line:-2
+like footstep on snow or grass,
+for example,
+
+
+138
+00:05:41.275 --> 00:05:43.410 line:-2 align:center
+and build a complex sequence
+of playback events
+
+
+139
+00:05:43.443 --> 00:05:47.080 line:-2 align:center
+that can be triggered by user
+interaction or by subsystems
+
+
+140
+00:05:47,114 --> 00:05:48,715 line:-1
+like physics and animation.
+
+
+141
+00:05:51.218 --> 00:05:54.021 line:-2 align:center
+With PHASE, sounds can be
+played either to a simple
+
+
+142
+00:05:54,054 --> 00:05:56,623 line:-2
+channel configuration or in a 3D
+space
+
+
+143
+00:05:56.657 --> 00:05:59.593 line:-2 align:center
+with orientation and position,
+or as ambient beds
+
+
+144
+00:05:59,626 --> 00:06:02,729 line:-2
+where the sounds have
+orientation but no position.
+
+
+145
+00:06:02,763 --> 00:06:05,165 align:center
+The underlying engine
+is built upon
+
+
+146
+00:06:05,199 --> 00:06:07,401 line:0
+our spatial
+audio rendering capabilities
+
+
+147
+00:06:07,434 --> 00:06:11,405 line:0
+already available on supported
+iOS, macOS devices,
+
+
+148
+00:06:11,438 --> 00:06:14,074 align:center
+and also Air Pods family
+of headphones.
+
+
+149
+00:06:14,107 --> 00:06:16,643 line:0
+This enables you to build
+applications
+
+
+150
+00:06:16,677 --> 00:06:19,580 line:0
+that provide a consistent
+spatial audio experience
+
+
+151
+00:06:19,613 --> 00:06:22,416 align:center
+on all the supported devices
+automatically.
+
+
+152
+00:06:22,449 --> 00:06:24,785 line:-2
+Next, I would like to invite
+David Thall
+
+
+153
+00:06:24.818 --> 00:06:27.221 line:-2 align:center
+to dive deeper
+into PHASE and talk more about
+
+
+154
+00:06:27,254 --> 00:06:30,057 line:-2
+the concepts and the API
+for some example use cases.
+
+
+155
+00:06:30.090 --> 00:06:33.493 line:-2 align:center
+[David] Hi, everyone,
+my name is David Thall,
+
+
+156
+00:06:33,527 --> 00:06:37,898 line:-2
+and I'm System Architect and
+Development Lead on PHASE.
+
+
+157
+00:06:37,931 --> 00:06:42,202 line:-2
+Today I'm going to
+walk you through the PHASE API.
+
+
+158
+00:06:42,236 --> 00:06:46,240 line:-2
+In this section, I'll introduce
+you to the general concepts.
+
+
+159
+00:06:46,273 --> 00:06:49,610 line:-2
+Following this, I'll run through
+some sample use cases
+
+
+160
+00:06:49,643 --> 00:06:51,111 line:-1
+to get you started.
+
+
+161
+00:06:51.144 --> 00:06:56.583 line:-2 align:center
+The PHASE API can be separated
+into three main concepts.
+
+
+162
+00:06:56,617 --> 00:06:59,052 line:-1
+The engine manages assets.
+
+
+163
+00:06:59.086 --> 00:07:01.188 line:-1 align:center
+Nodes control playback.
+
+
+164
+00:07:01,221 --> 00:07:04,358 line:-2
+And mixers control
+spatialization.
+
+
+165
+00:07:04,391 --> 00:07:06,960 line:-2
+The PHASE engine
+can be broken down into
+
+
+166
+00:07:06,994 --> 00:07:08,996 line:-1
+three main sections.
+
+
+167
+00:07:09.029 --> 00:07:14.334 line:-2 align:center
+The asset registry, scene graph,
+and rendering state.
+
+
+168
+00:07:14,368 --> 00:07:18,338 line:-2
+Throughout the engine life cycle
+you'll register and unregister
+
+
+169
+00:07:18.372 --> 00:07:20.674 line:-1 align:center
+assets with the engine.
+
+
+170
+00:07:20.707 --> 00:07:24.011 line:-2 align:center
+Today, PHASE supports
+registering sound assets
+
+
+171
+00:07:24.044 --> 00:07:26.847 line:-1 align:center
+and sound event assets.
+
+
+172
+00:07:26,880 --> 00:07:30,717 line:-2
+Sound assets can be loaded
+directly from an audio file
+
+
+173
+00:07:30.751 --> 00:07:34.655 line:-2 align:center
+or packed and embedded
+as raw audio data
+
+
+174
+00:07:34.688 --> 00:07:38.525 line:-2 align:center
+in your own assets and loaded
+directly into the engine.
+
+
+175
+00:07:38.559 --> 00:07:42.529 line:-2 align:center
+Sound event assets
+are a collection of one or more
+
+
+176
+00:07:42.563 --> 00:07:45.666 line:-2 align:center
+hierarchical nodes that control
+sound playback
+
+
+177
+00:07:45.699 --> 00:07:50.237 line:-2 align:center
+and downstream mixers that
+control spatialization.
+
+
+178
+00:07:50,270 --> 00:07:53,974 line:0
+The scene graph is a hierarchy
+of objects that take part
+
+
+179
+00:07:54,007 --> 00:07:55,576 align:center
+in the simulation.
+
+
+180
+00:07:55,609 --> 00:08:00,647 line:0
+This includes listeners,
+sources, and occluders.
+
+
+181
+00:08:00,681 --> 00:08:04,852 line:0
+A listener is an object that
+represents the location in space
+
+
+182
+00:08:04,885 --> 00:08:07,454 align:center
+from which
+you hear the simulation.
+
+
+183
+00:08:07,487 --> 00:08:09,389 align:center
+A source is an object
+
+
+184
+00:08:09,423 --> 00:08:12,226 align:center
+that represents
+where sound originates.
+
+
+185
+00:08:12,259 --> 00:08:14,361 line:-1
+As Bharath mentioned earlier,
+
+
+186
+00:08:14,394 --> 00:08:16,663 line:-2
+PHASE supports both
+point sources
+
+
+187
+00:08:16,697 --> 00:08:18,832 line:-1
+and volumetric sources.
+
+
+188
+00:08:18,866 --> 00:08:22,503 line:0
+An occluder is an object that
+represents the geometry
+
+
+189
+00:08:22,536 --> 00:08:25,506 line:0
+in the simulation that affects
+sound transmission
+
+
+190
+00:08:25,539 --> 00:08:28,375 line:0
+as it moves
+through the environment.
+
+
+191
+00:08:28,408 --> 00:08:31,879 align:center
+Occluders are also assigned
+materials that affect
+
+
+192
+00:08:31,912 --> 00:08:34,648 align:center
+how they absorb and transmit
+sound.
+
+
+193
+00:08:34,681 --> 00:08:38,485 line:-2
+PHASE comes with a library
+of material presets that
+
+
+194
+00:08:38,519 --> 00:08:40,320 line:-1
+can be assigned to occluders
+
+
+195
+00:08:40,354 --> 00:08:42,789 line:-2
+to simulate everything
+from cardboard boxes
+
+
+196
+00:08:42,823 --> 00:08:46,126 line:-2
+to glass windows
+to brick walls.
+
+
+197
+00:08:46.159 --> 00:08:50.163 line:-2 align:center
+As you add objects to your
+scene, you'll organize them into
+
+
+198
+00:08:50.197 --> 00:08:53.534 line:-2 align:center
+a hierarchy and attach them
+to the engine's root object,
+
+
+199
+00:08:53.567 --> 00:08:56.470 line:-1 align:center
+either directly or indirectly.
+
+
+200
+00:08:56,503 --> 00:08:59,339 line:-2
+This will ensure
+they take part in the simulation
+
+
+201
+00:08:59,373 --> 00:09:01,508 line:-1
+from frame to frame.
+
+
+202
+00:09:01,542 --> 00:09:05,212 line:-2
+The rendering state manages
+playing sound events
+
+
+203
+00:09:05,245 --> 00:09:07,848 line:-1
+and audio IO.
+
+
+204
+00:09:07,881 --> 00:09:13,153 line:-2
+When you first create the
+engine, audio IO is disabled.
+
+
+205
+00:09:13,187 --> 00:09:15,756 line:-2
+This allows you
+to register your assets,
+
+
+206
+00:09:15,789 --> 00:09:19,526 line:-2
+build your scene graph,
+construct sound events,
+
+
+207
+00:09:19,560 --> 00:09:22,196 line:-2
+and perform other engine
+operations,
+
+
+208
+00:09:22,229 --> 00:09:25,999 line:-2
+all without having to run
+audio IO.
+
+
+209
+00:09:26.033 --> 00:09:28.669 line:-2 align:center
+Once you're ready
+to play back sound events,
+
+
+210
+00:09:28,702 --> 00:09:30,704 line:-1
+you can start the engine,
+
+
+211
+00:09:30.737 --> 00:09:33.807 line:-2 align:center
+which will internally start
+the audio IO.
+
+
+212
+00:09:33,841 --> 00:09:37,244 line:-2
+Likewise, when you're finished
+playing back sound events,
+
+
+213
+00:09:37,277 --> 00:09:39,279 line:-1
+you can stop the engine.
+
+
+214
+00:09:39,313 --> 00:09:41,315 line:-1
+This will stop the audio IO
+
+
+215
+00:09:41,348 --> 00:09:45,052 line:-2
+and stop any playing
+sound events.
+
+
+216
+00:09:45.085 --> 00:09:50.824 line:-2 align:center
+Nodes in PHASE control playback
+of audio content.
+
+
+217
+00:09:50,858 --> 00:09:54,995 align:center
+Nodes are a hierarchical
+collection of objects
+
+
+218
+00:09:55,028 --> 00:09:59,499 line:0
+that either generate
+or control audio playback.
+
+
+219
+00:09:59,533 --> 00:10:02,002 line:0
+Generator nodes
+produce audio.
+
+
+220
+00:10:02,035 --> 00:10:06,206 line:0
+They are always leaf nodes
+in a node hierarchy.
+
+
+221
+00:10:06,240 --> 00:10:10,944 line:0
+Control nodes set the logic
+for how generators are selected,
+
+
+222
+00:10:10,978 --> 00:10:15,582 align:center
+mixed and parameterized
+before spatialization.
+
+
+223
+00:10:15,616 --> 00:10:18,218 line:-2
+Control nodes are
+always parent nodes
+
+
+224
+00:10:18.252 --> 00:10:20.687 line:-2 align:center
+and can be organized into
+hierarchies
+
+
+225
+00:10:20,721 --> 00:10:24,024 line:-2
+for complex sound design
+scenarios.
+
+
+226
+00:10:24,057 --> 00:10:28,228 align:center
+A sampler node is a type
+of generator node.
+
+
+227
+00:10:28,262 --> 00:10:31,932 line:0
+Samplers play back
+registered sound assets.
+
+
+228
+00:10:31,965 --> 00:10:35,235 align:center
+Once constructed, you can
+set some basic properties
+
+
+229
+00:10:35,269 --> 00:10:38,906 line:0
+on the sampler node to get it
+to play back correctly.
+
+
+230
+00:10:38,939 --> 00:10:42,976 line:0
+The playback mode determines how
+the audio file will be played.
+
+
+231
+00:10:43.010 --> 00:10:45.846 line:-2 align:center
+If you set
+the playback mode to OneShot,
+
+
+232
+00:10:45,879 --> 00:10:51,018 line:-2
+the audio file will play once
+and automatically stop itself.
+
+
+233
+00:10:51.051 --> 00:10:54.288 line:-2 align:center
+This can be used
+in "fire-and-forget" scenarios,
+
+
+234
+00:10:54,321 --> 00:10:56,957 line:-2
+such as triggering sound
+effects.
+
+
+235
+00:10:56.990 --> 00:10:59.426 line:-2 align:center
+If you set the playback mode to
+looping,
+
+
+236
+00:10:59,459 --> 00:11:01,962 line:-2
+the audio file will
+play indefinitely,
+
+
+237
+00:11:01.995 --> 00:11:05.265 line:-2 align:center
+until you explicitly stop the
+sampler.
+
+
+238
+00:11:05,299 --> 00:11:08,702 line:-2
+The cull option
+tells PHASE what to do
+
+
+239
+00:11:08,735 --> 00:11:10,904 line:-2
+when the sound becomes
+inaudible.
+
+
+240
+00:11:10,938 --> 00:11:13,540 line:-2
+If you set the cull
+option to terminate,
+
+
+241
+00:11:13.574 --> 00:11:15.809 line:-2 align:center
+the sound will automatically
+stop itself
+
+
+242
+00:11:15,843 --> 00:11:17,511 line:-1
+when it becomes inaudible.
+
+
+243
+00:11:17.544 --> 00:11:19.947 line:-2 align:center
+If you
+set the cull option to sleep,
+
+
+244
+00:11:19,980 --> 00:11:23,450 line:-2
+the sound will stop rendering
+when it becomes inaudible
+
+
+245
+00:11:23,483 --> 00:11:26,920 line:-2
+and start rendering again when
+it becomes audible.
+
+
+246
+00:11:26,954 --> 00:11:29,356 line:-2
+This makes
+it so you don't have to
+
+
+247
+00:11:29.389 --> 00:11:31.425 line:-1 align:center
+manually start and stop sounds
+
+
+248
+00:11:31.458 --> 00:11:33.827 line:-2 align:center
+when they are culled
+by the engine.
+
+
+249
+00:11:33,861 --> 00:11:37,531 line:-2
+The calibration level sets the
+real-world level of the sound
+
+
+250
+00:11:37,564 --> 00:11:40,601 line:-1
+in decibels SPL.
+
+
+251
+00:11:40,634 --> 00:11:44,938 line:-2
+PHASE also supports
+four types of control nodes.
+
+
+252
+00:11:44.972 --> 00:11:51.378 line:-2 align:center
+These include random, switch,
+blend and container nodes.
+
+
+253
+00:11:51,411 --> 00:11:54,715 align:center
+The random node
+selects one of its children
+
+
+254
+00:11:54,748 --> 00:11:58,085 align:center
+according
+to a weighted random choice.
+
+
+255
+00:11:58,118 --> 00:12:00,320 line:0
+For example, in this case,
+
+
+256
+00:12:00,354 --> 00:12:04,791 line:0
+the left sampler has 4:1 odds
+over the right sampler of being
+
+
+257
+00:12:04,825 --> 00:12:08,829 line:0
+selected the next time the sound
+event is triggered.
+
+
+258
+00:12:08,862 --> 00:12:11,932 line:0
+The switch node
+switches between its children
+
+
+259
+00:12:11,965 --> 00:12:14,101 line:0
+based on a parameter name.
+
+
+260
+00:12:14,134 --> 00:12:16,937 align:center
+For example, you could change
+the terrain switch
+
+
+261
+00:12:16,970 --> 00:12:20,174 align:center
+from "creaky wood"
+to "soft gravel."
+
+
+262
+00:12:20,207 --> 00:12:22,809 line:-2
+The next time
+the sound event is triggered,
+
+
+263
+00:12:22.843 --> 00:12:26.413 line:-2 align:center
+it'll select the sampler that
+matches the parameter name.
+
+
+264
+00:12:26,446 --> 00:12:29,550 align:center
+The blend node blends between
+its children
+
+
+265
+00:12:29,583 --> 00:12:32,152 line:0
+based on a parameter value.
+
+
+266
+00:12:32,186 --> 00:12:35,389 line:0
+For example, you could assign
+a wetness parameter
+
+
+267
+00:12:35,422 --> 00:12:36,790 line:0
+to a blend node,
+
+
+268
+00:12:36,823 --> 00:12:39,293 align:center
+which could blend between
+a loud footstep
+
+
+269
+00:12:39,326 --> 00:12:41,695 align:center
+and quiet splash on the dry end
+
+
+270
+00:12:41,728 --> 00:12:46,366 line:0
+and a quiet footstep and
+loud splash on the wet end.
+
+
+271
+00:12:46,400 --> 00:12:51,271 line:0
+The container node plays
+all its children at once.
+
+
+272
+00:12:51,305 --> 00:12:53,841 line:0
+For example, you could
+have one sampler
+
+
+273
+00:12:53,874 --> 00:12:56,109 align:center
+that plays back a footstep
+
+
+274
+00:12:56,143 --> 00:12:59,479 line:0
+and another sampler that plays
+back the sound of clothing,
+
+
+275
+00:12:59,513 --> 00:13:02,916 line:0
+like the sound of a ruffling
+Gor-Tex jacket.
+
+
+276
+00:13:02,950 --> 00:13:05,652 line:0
+Every time
+the container is triggered,
+
+
+277
+00:13:05,686 --> 00:13:10,290 line:0
+both samplers will play back
+at the same time.
+
+
+278
+00:13:11.959 --> 00:13:17.097 line:-2 align:center
+Mixers in PHASE control
+spatialization of audio content.
+
+
+279
+00:13:17.130 --> 00:13:19.733 line:-2 align:center
+PHASE currently supports
+channel,
+
+
+280
+00:13:19.766 --> 00:13:23.837 line:-1 align:center
+ambient, and spatial mixers.
+
+
+281
+00:13:23.871 --> 00:13:27.574 line:-2 align:center
+Channel mixers render
+audio without spatialization
+
+
+282
+00:13:27,608 --> 00:13:29,710 line:-1
+and environmental effects.
+
+
+283
+00:13:29,743 --> 00:13:33,614 line:-2
+Use channel mixers for regular
+stem-based content that
+
+
+284
+00:13:33.647 --> 00:13:37.651 line:-2 align:center
+needs to be rendered directly
+to the output device, such as
+
+
+285
+00:13:37.684 --> 00:13:42.289 line:-2 align:center
+stereo music or center channel
+narrative dialogue.
+
+
+286
+00:13:42.322 --> 00:13:45.592 line:-2 align:center
+Ambient mixers render audio
+with externalization
+
+
+287
+00:13:45.626 --> 00:13:49.763 line:-2 align:center
+but without distance modeling
+or environmental effects.
+
+
+288
+00:13:49.796 --> 00:13:52.332 line:-2 align:center
+As the listener rotates
+their head,
+
+
+289
+00:13:52.366 --> 00:13:54.201 line:-2 align:center
+the sound will continue
+to come from
+
+
+290
+00:13:54.234 --> 00:13:57.171 line:-2 align:center
+the same relative location
+in space.
+
+
+291
+00:13:57.204 --> 00:14:00.207 line:-2 align:center
+Use ambient mixers
+for multichannel content
+
+
+292
+00:14:00,240 --> 00:14:03,210 line:-2
+that isn't being simulated
+in the environment but should
+
+
+293
+00:14:03,243 --> 00:14:06,680 line:-2
+still sound like it's coming
+from somewhere out in space,
+
+
+294
+00:14:06,713 --> 00:14:10,150 align:center
+for example, a
+background of crickets chirping
+
+
+295
+00:14:10,184 --> 00:14:12,452 line:0
+in a large forest.
+
+
+296
+00:14:12,486 --> 00:14:16,290 line:0
+Spatial mixers perform
+full spatialization.
+
+
+297
+00:14:16,323 --> 00:14:19,660 align:center
+As the sound source moves
+relative to the listener,
+
+
+298
+00:14:19,693 --> 00:14:22,729 line:0
+you'll hear changes
+in perceived location,
+
+
+299
+00:14:22,763 --> 00:14:26,934 line:0
+level, and frequency
+response based on panning,
+
+
+300
+00:14:26,967 --> 00:14:31,038 line:0
+distance modeling, and
+directivity modeling algorithms.
+
+
+301
+00:14:31,071 --> 00:14:32,840 line:0
+In addition to this,
+
+
+302
+00:14:32,873 --> 00:14:35,442 align:center
+geometry-aware environmental
+effects
+
+
+303
+00:14:35,475 --> 00:14:39,046 line:0
+are applied to the path between
+the source and listener.
+
+
+304
+00:14:39,079 --> 00:14:42,850 align:center
+If you're wearing headphones,
+you'll also get externalization
+
+
+305
+00:14:42,883 --> 00:14:45,919 align:center
+through the application
+of binaural filters.
+
+
+306
+00:14:45.953 --> 00:14:48.589 line:-1 align:center
+Use spatial mixers for sounds
+
+
+307
+00:14:48.622 --> 00:14:52.459 line:-2 align:center
+that should take part in the
+full environmental simulation.
+
+
+308
+00:14:52,492 --> 00:14:54,962 line:-1
+Spatial mixers support
+
+
+309
+00:14:54,995 --> 00:14:58,165 line:-2
+two unique
+distance modeling algorithms.
+
+
+310
+00:14:58,198 --> 00:15:01,869 line:0
+You can set up standard
+geometric spreading loss
+
+
+311
+00:15:01,902 --> 00:15:04,938 align:center
+for natural attenuation
+over distance.
+
+
+312
+00:15:04,972 --> 00:15:08,308 line:0
+You can also increase or
+decrease the effect
+
+
+313
+00:15:08,342 --> 00:15:10,043 line:0
+to your liking.
+
+
+314
+00:15:10,077 --> 00:15:13,013 line:0
+For example, lowering the value
+could be useful
+
+
+315
+00:15:13,046 --> 00:15:17,484 line:0
+if you wanted to boom mic
+a conversation at a distance.
+
+
+316
+00:15:17,518 --> 00:15:19,887 line:0
+On the other end of
+the spectrum,
+
+
+317
+00:15:19,920 --> 00:15:22,789 line:0
+you can add full piecewise
+curved
+
+
+318
+00:15:22,823 --> 00:15:25,726 align:center
+segments
+of attenuation over distance.
+
+
+319
+00:15:25,759 --> 00:15:29,363 align:center
+For example, you could
+construct a set of segments
+
+
+320
+00:15:29,396 --> 00:15:31,632 line:0
+with natural distance
+attenuation
+
+
+321
+00:15:31,665 --> 00:15:34,067 line:0
+at the start and end of the
+range,
+
+
+322
+00:15:34,101 --> 00:15:36,470 line:0
+but decrease the
+attenuation in the middle
+
+
+323
+00:15:36,503 --> 00:15:40,307 line:0
+to keep important dialogue
+audible at increased distances.
+
+
+324
+00:15:40.340 --> 00:15:44.244 line:-2 align:center
+For point sources,
+spatial mixers support
+
+
+325
+00:15:44.278 --> 00:15:47.748 line:-2 align:center
+two different directivity
+modeling algorithms.
+
+
+326
+00:15:47,781 --> 00:15:50,284 line:-2
+You can add cardioid directivity
+modeling
+
+
+327
+00:15:50,317 --> 00:15:52,319 line:-1
+to your spatial mix.
+
+
+328
+00:15:52,352 --> 00:15:54,621 line:-1
+Using some simple modifications,
+
+
+329
+00:15:54.655 --> 00:15:56.523 line:-2 align:center
+you could model a human
+speaker
+
+
+330
+00:15:56.557 --> 00:15:58.358 line:-2 align:center
+with a cardioid directivity
+pattern
+
+
+331
+00:15:58.392 --> 00:16:00.994 line:-2 align:center
+or the sound of an acoustic
+stringed instrument
+
+
+332
+00:16:01.028 --> 00:16:03.530 line:-1 align:center
+with a hyper-cardioid pattern.
+
+
+333
+00:16:03.564 --> 00:16:06.633 line:-2 align:center
+You can also add cone
+directivity modeling.
+
+
+334
+00:16:06,667 --> 00:16:09,770 line:-2
+This classic mode allows you
+to limit directivity filtering
+
+
+335
+00:16:09.803 --> 00:16:13.173 line:-2 align:center
+to within a specific
+range of rotation.
+
+
+336
+00:16:13.207 --> 00:16:15.943 line:-1 align:center
+Spatial mixers also support
+
+
+337
+00:16:15.976 --> 00:16:18.712 line:-2 align:center
+geometry-aware environmental
+effects
+
+
+338
+00:16:18,745 --> 00:16:21,148 line:-1
+based on a spatial pipeline.
+
+
+339
+00:16:21,181 --> 00:16:24,484 line:-2
+The spatial pipeline
+selects environmental effects
+
+
+340
+00:16:24,518 --> 00:16:26,453 line:-1
+to enable or disable,
+
+
+341
+00:16:26.486 --> 00:16:29.590 line:-2 align:center
+as well as the send levels
+to each.
+
+
+342
+00:16:29,623 --> 00:16:33,760 align:center
+PHASE currently supports
+direct path transmission,
+
+
+343
+00:16:33,794 --> 00:16:37,764 line:0
+early reflections,
+and late reverb.
+
+
+344
+00:16:37,798 --> 00:16:41,568 line:-2
+Direct path transmission
+renders the direct and occluded
+
+
+345
+00:16:41,602 --> 00:16:44,838 line:-2
+paths between the source and
+listener.
+
+
+346
+00:16:44,872 --> 00:16:46,840 line:-1
+Note that with occluded sound,
+
+
+347
+00:16:46.874 --> 00:16:49.209 line:-2 align:center
+some energy is absorbed by
+materials,
+
+
+348
+00:16:49,243 --> 00:16:51,311 line:-2
+while other energy is
+transmitted
+
+
+349
+00:16:51,345 --> 00:16:54,348 line:-1
+to the other side of the object.
+
+
+350
+00:16:54,381 --> 00:16:57,117 line:-2
+Early reflections
+provide both intensity
+
+
+351
+00:16:57,150 --> 00:17:01,188 line:-2
+modification and coloration
+to the direct path.
+
+
+352
+00:17:01.221 --> 00:17:04.157 line:-2 align:center
+These are usually built
+from the specular reflections
+
+
+353
+00:17:04,191 --> 00:17:07,094 line:-1
+off the walls and floor.
+
+
+354
+00:17:07,127 --> 00:17:10,631 line:-2
+In larger spaces, they also
+add noticeable echoes
+
+
+355
+00:17:10.664 --> 00:17:12.933 line:-1 align:center
+to the experience.
+
+
+356
+00:17:12,966 --> 00:17:17,004 line:-2
+Late reverb provides
+the sound of the environment.
+
+
+357
+00:17:17.037 --> 00:17:20.607 line:-2 align:center
+It's a dense build-up
+of the diffuse scattered energy
+
+
+358
+00:17:20,641 --> 00:17:24,044 line:-2
+that coalesces into the final
+audible representation
+
+
+359
+00:17:24,077 --> 00:17:26,146 line:-1
+of the space.
+
+
+360
+00:17:26.180 --> 00:17:29.850 line:-2 align:center
+In addition to providing cues
+for room size and shape,
+
+
+361
+00:17:29,883 --> 00:17:34,388 line:-2
+it's also responsible for giving
+you a sense of envelopment.
+
+
+362
+00:17:34.421 --> 00:17:36.757 line:-2 align:center
+Now
+that I've reviewed the concepts
+
+
+363
+00:17:36.790 --> 00:17:39.026 line:-1 align:center
+behind the PHASE engine,
+
+
+364
+00:17:39.059 --> 00:17:43.463 line:-2 align:center
+nodes and mixers, it's time
+to bring these concepts together
+
+
+365
+00:17:43.497 --> 00:17:45.499 line:-1 align:center
+with some sample use cases.
+
+
+366
+00:17:45.532 --> 00:17:50.103 line:-2 align:center
+In this section, I'll walk you
+through playing an audio file,
+
+
+367
+00:17:50.137 --> 00:17:52.639 line:-2 align:center
+building a spatial audio
+experience,
+
+
+368
+00:17:52.673 --> 00:17:55.275 line:-2 align:center
+and building a behavioral sound
+event.
+
+
+369
+00:17:55,309 --> 00:17:57,411 line:-1
+These three key areas
+
+
+370
+00:17:57,444 --> 00:18:00,781 line:-2
+will give you a wide overview
+of the capabilities of PHASE,
+
+
+371
+00:18:00,814 --> 00:18:04,251 line:-2
+with a gentle introduction at
+the beginning and a deep dive
+
+
+372
+00:18:04.284 --> 00:18:06.520 line:-2 align:center
+into the more interesting
+capabilities
+
+
+373
+00:18:06.553 --> 00:18:08.956 line:-1 align:center
+toward the middle and end.
+
+
+374
+00:18:08.989 --> 00:18:10.757 line:-1 align:center
+To kick things off,
+
+
+375
+00:18:10.791 --> 00:18:13.794 line:-2 align:center
+I'll show you how to play
+an audio file.
+
+
+376
+00:18:13.827 --> 00:18:17.965 line:-2 align:center
+First, let's create a PHASE
+engine instance.
+
+
+377
+00:18:17,998 --> 00:18:21,768 align:center
+Next, I'll retrieve the URL
+to an audio file
+
+
+378
+00:18:21,802 --> 00:18:24,872 align:center
+and register the sound
+asset with PHASE.
+
+
+379
+00:18:24,905 --> 00:18:29,309 align:center
+I'll give it the name "drums"
+so I can refer to it later.
+
+
+380
+00:18:29,343 --> 00:18:31,478 line:-1
+Here I'll create an engine
+
+
+381
+00:18:31.512 --> 00:18:34.581 line:-2 align:center
+and register a sound asset
+in code.
+
+
+382
+00:18:34.615 --> 00:18:37.251 line:-2 align:center
+First, I'll create a PHASE
+engine instance
+
+
+383
+00:18:37,284 --> 00:18:39,219 line:-1
+in automatic update mode.
+
+
+384
+00:18:39,253 --> 00:18:42,089 line:-2
+This is the preferred mode
+to get things up and running,
+
+
+385
+00:18:42.122 --> 00:18:45.092 line:-2 align:center
+so I'm using it here for
+demoing simple playback.
+
+
+386
+00:18:45,125 --> 00:18:48,562 line:-2
+Note that when a game requires
+more precise synchronization
+
+
+387
+00:18:48.595 --> 00:18:51.965 line:-2 align:center
+with the frame update,
+manual mode is the way to go.
+
+
+388
+00:18:51,999 --> 00:18:54,868 line:-2
+Check out the documentation
+for more details.
+
+
+389
+00:18:54,902 --> 00:18:57,871 line:-2
+Next, I'll retrieve the URL to
+an audio file
+
+
+390
+00:18:57.905 --> 00:19:00.340 line:-2 align:center
+stored in the application
+bundle.
+
+
+391
+00:19:00,374 --> 00:19:04,545 line:-2
+This is a mono 24bit,
+48kHz WAV file
+
+
+392
+00:19:04.578 --> 00:19:07.247 line:-2 align:center
+with a prepared drum
+loop sample.
+
+
+393
+00:19:07,281 --> 00:19:10,584 line:-2
+When registering the sound asset
+with the engine, I'll provide
+
+
+394
+00:19:10,617 --> 00:19:13,153 line:-1
+some additional arguments.
+
+
+395
+00:19:13.187 --> 00:19:15.289 line:-2 align:center
+I'll give the sound asset
+a unique name
+
+
+396
+00:19:15,322 --> 00:19:17,824 line:-1
+so I can refer to it later.
+
+
+397
+00:19:17.858 --> 00:19:20.827 line:-2 align:center
+I'll specify that the audio data
+within the sound asset
+
+
+398
+00:19:20.861 --> 00:19:23.463 line:-2 align:center
+should be pre-loaded into
+resident memory,
+
+
+399
+00:19:23,497 --> 00:19:26,800 line:-2
+as opposed to streaming it into
+memory in real time.
+
+
+400
+00:19:26.834 --> 00:19:29.803 line:-2 align:center
+This should be fine since the
+drum loop is fairly short,
+
+
+401
+00:19:29.837 --> 00:19:32.139 line:-2 align:center
+and I might want to play it back
+several times
+
+
+402
+00:19:32.172 --> 00:19:34.441 line:-1 align:center
+in short succession.
+
+
+403
+00:19:34,474 --> 00:19:37,244 line:-2
+I'm also choosing to normalize
+the sound asset
+
+
+404
+00:19:37,277 --> 00:19:40,380 line:-2
+for calibrated loudness
+on the output device.
+
+
+405
+00:19:40,414 --> 00:19:44,051 line:-2
+In general, it's advised
+to normalize the input.
+
+
+406
+00:19:44,084 --> 00:19:46,587 line:-2
+This'll make it
+easier to mix the content
+
+
+407
+00:19:46.620 --> 00:19:48.488 line:-1 align:center
+once we assign it to a sampler
+
+
+408
+00:19:48.522 --> 00:19:50.657 line:-2 align:center
+and set its
+target output level.
+
+
+409
+00:19:50,691 --> 00:19:54,928 line:-2
+Now that I've registered
+a sound asset with the engine,
+
+
+410
+00:19:54,962 --> 00:19:58,098 line:-2
+I'll construct a sound event
+asset.
+
+
+411
+00:19:58,131 --> 00:20:02,236 line:-2
+First I'll create a channel
+mixer from a channel layout.
+
+
+412
+00:20:02.269 --> 00:20:05.105 line:-1 align:center
+Then I'll create a sampler node.
+
+
+413
+00:20:05,138 --> 00:20:06,907 line:-2
+The
+sampler node takes the name
+
+
+414
+00:20:06,940 --> 00:20:09,176 line:-1
+of the registered sound asset
+
+
+415
+00:20:09.209 --> 00:20:11.945 line:-2 align:center
+and a reference to the
+downstream channel mixer.
+
+
+416
+00:20:11,979 --> 00:20:15,449 line:-2
+Next I'll set some basic
+properties on the sampler node
+
+
+417
+00:20:15.482 --> 00:20:17.818 line:-2 align:center
+to get it to play back
+correctly.
+
+
+418
+00:20:17,851 --> 00:20:19,953 line:-2
+The playback mode
+will set whether or not
+
+
+419
+00:20:19,987 --> 00:20:22,356 line:-2
+the sampler will loop
+the audio file,
+
+
+420
+00:20:22.389 --> 00:20:24.391 line:-2 align:center
+and the calibration level
+will set
+
+
+421
+00:20:24,424 --> 00:20:27,561 line:-2
+the perceived loudness of the
+sampler within the mix.
+
+
+422
+00:20:27,594 --> 00:20:31,031 align:center
+Now that I've hooked the output
+of the sampler node
+
+
+423
+00:20:31,064 --> 00:20:33,267 align:center
+to the input of the channel
+mixer
+
+
+424
+00:20:33,300 --> 00:20:34,968 line:0
+and set some basic parameters,
+
+
+425
+00:20:35,002 --> 00:20:39,039 line:0
+it's time to register the sound
+event asset with the engine.
+
+
+426
+00:20:39,072 --> 00:20:42,042 align:center
+In this case, I'll register
+the sound event asset
+
+
+427
+00:20:42,075 --> 00:20:44,111 line:0
+with the name drumEvent,
+
+
+428
+00:20:44,144 --> 00:20:46,580 line:0
+which I'll use to refer to it
+later.
+
+
+429
+00:20:46,613 --> 00:20:49,816 line:-2
+Here I'll register a sound event
+asset in code.
+
+
+430
+00:20:49,850 --> 00:20:54,354 line:-2
+I'll create a channelLayout
+from a mono ChannelLayoutTag.
+
+
+431
+00:20:54,388 --> 00:20:57,257 line:-2
+Then I'll initialize the channel
+mixer with the mono
+
+
+432
+00:20:57,291 --> 00:20:59,259 line:-1
+channelLayout.
+
+
+433
+00:20:59,293 --> 00:21:03,630 line:-2
+Next I'll create the sampler
+node and pass in the name drums,
+
+
+434
+00:21:03,664 --> 00:21:06,300 line:-2
+which refers to the mono
+drum asset
+
+
+435
+00:21:06.333 --> 00:21:09.369 line:-2 align:center
+I previously registered with the
+engine.
+
+
+436
+00:21:09.403 --> 00:21:13.273 line:-2 align:center
+The sampler node will be routed
+to the downstream channel mixer.
+
+
+437
+00:21:13.307 --> 00:21:15.676 line:-2 align:center
+I'll set
+the playbackMode to looping.
+
+
+438
+00:21:15,709 --> 00:21:18,412 line:-2
+This will ensure
+the sound continues to play back
+
+
+439
+00:21:18.445 --> 00:21:21.348 line:-2 align:center
+until I explicitly stop it from
+code.
+
+
+440
+00:21:21.381 --> 00:21:24.718 line:-2 align:center
+I'll set the
+CalibrationMode to relativeSpl,
+
+
+441
+00:21:24,751 --> 00:21:27,354 line:-1
+and the level to 0 decibels.
+
+
+442
+00:21:27,387 --> 00:21:29,590 line:-2
+This will ensure a comfortable
+listening level
+
+
+443
+00:21:29.623 --> 00:21:32.593 line:-2 align:center
+for the experience.
+Finally I'll register
+
+
+444
+00:21:32.626 --> 00:21:34.895 line:-2 align:center
+the soundEventAsset
+with the engine,
+
+
+445
+00:21:34,928 --> 00:21:38,198 line:-2
+passing in the name drumEvent
+so I can refer to it later
+
+
+446
+00:21:38.232 --> 00:21:41.368 line:-2 align:center
+when I start creating
+sound events for playback.
+
+
+447
+00:21:41,401 --> 00:21:44,538 line:-2
+Once a sound event asset is
+registered,
+
+
+448
+00:21:44.571 --> 00:21:47.674 line:-2 align:center
+I can create an
+instance and start playback.
+
+
+449
+00:21:47,708 --> 00:21:50,711 align:center
+The first thing I'll do is
+create a sound event
+
+
+450
+00:21:50,744 --> 00:21:55,716 align:center
+from the registered sound
+event asset named drumEvent.
+
+
+451
+00:21:55,749 --> 00:21:57,818 line:0
+Now that
+I have a sound event, I'll go
+
+
+452
+00:21:57,851 --> 00:21:59,953 align:center
+ahead and start the engine.
+
+
+453
+00:21:59,987 --> 00:22:03,690 align:center
+This will start the audio IO
+so I can listen to the audio
+
+
+454
+00:22:03,724 --> 00:22:06,260 align:center
+feeding the output device.
+
+
+455
+00:22:06,293 --> 00:22:08,929 line:0
+Finally I'll
+start the sound event.
+
+
+456
+00:22:08,962 --> 00:22:11,632 align:center
+At this point,
+the loaded sound asset
+
+
+457
+00:22:11,665 --> 00:22:13,433 line:0
+will be
+played through the sampler,
+
+
+458
+00:22:13,467 --> 00:22:15,636 line:0
+routed to the channel mixer,
+
+
+459
+00:22:15,669 --> 00:22:18,372 align:center
+remapped to the current output
+format,
+
+
+460
+00:22:18,405 --> 00:22:21,575 align:center
+and played back through
+the output device.
+
+
+461
+00:22:21.608 --> 00:22:25.412 line:-2 align:center
+Here I'll start a soundEvent
+in code.
+
+
+462
+00:22:25.445 --> 00:22:28.215 line:-2 align:center
+The sound event asset
+is constructed from the name
+
+
+463
+00:22:28,248 --> 00:22:30,617 line:-1
+of the registered sound asset.
+
+
+464
+00:22:30.651 --> 00:22:33.453 line:-2 align:center
+Here,
+I'm passing in drumEvent.
+
+
+465
+00:22:33,487 --> 00:22:35,589 line:-2
+I'll go ahead
+and start the engine,
+
+
+466
+00:22:35,622 --> 00:22:39,426 line:-2
+which will start the audio IO
+and start the sound event.
+
+
+467
+00:22:40,961 --> 00:22:43,530 line:0
+Once I'm finished
+playing back the sound event,
+
+
+468
+00:22:43,564 --> 00:22:45,632 line:0
+I can clean up the engine.
+
+
+469
+00:22:45,666 --> 00:22:48,268 line:0
+First I'll
+stop the sound event.
+
+
+470
+00:22:48,302 --> 00:22:50,304 align:center
+Then I'll stop the engine.
+
+
+471
+00:22:50,337 --> 00:22:55,108 align:center
+This will stop the audio IO and
+stop any playing sound events.
+
+
+472
+00:22:55,142 --> 00:22:59,012 align:center
+Next I'll unregister the sound
+event asset named drumEvent
+
+
+473
+00:22:59,046 --> 00:23:02,282 align:center
+and unregister the sound asset
+named drums.
+
+
+474
+00:23:02.316 --> 00:23:05.319 line:-1 align:center
+Finally I'll destroy the engine.
+
+
+475
+00:23:05.352 --> 00:23:07.688 line:-2 align:center
+Here I'll do
+the cleanup in code.
+
+
+476
+00:23:07.721 --> 00:23:09.656 line:-1 align:center
+First I'll stop the sound event
+
+
+477
+00:23:09.690 --> 00:23:12.492 line:-2 align:center
+once I'm finished
+listening to the drum loop.
+
+
+478
+00:23:12.526 --> 00:23:15.262 line:-2 align:center
+then I'll stop the engine,
+which will internally stop
+
+
+479
+00:23:15.295 --> 00:23:17.231 line:-1 align:center
+the audio IO.
+
+
+480
+00:23:17.264 --> 00:23:20.467 line:-2 align:center
+Next I'll unregister the sound
+event asset named drumEvent
+
+
+481
+00:23:20,501 --> 00:23:24,104 line:-2
+and unregister the sound asset
+named drums.
+
+
+482
+00:23:24.137 --> 00:23:26.039 line:-1 align:center
+Finally I'll destroy the engine.
+
+
+483
+00:23:28,141 --> 00:23:30,811 line:-2
+Now that I've covered the
+basics,
+
+
+484
+00:23:30.844 --> 00:23:33.046 line:-2 align:center
+I'll show you how to
+build a simple
+
+
+485
+00:23:33.080 --> 00:23:35.949 line:-2 align:center
+spatial audio experience in
+PHASE.
+
+
+486
+00:23:35,983 --> 00:23:39,019 line:-2
+We'll cover topics
+including spatial mixers,
+
+
+487
+00:23:39,052 --> 00:23:42,823 line:-2
+volumetric sound sources,
+and occluders.
+
+
+488
+00:23:42.856 --> 00:23:46.126 line:-2 align:center
+This first thing I'll do
+is register a sound event asset
+
+
+489
+00:23:46.159 --> 00:23:47.728 line:-1 align:center
+with the engine.
+
+
+490
+00:23:47,761 --> 00:23:49,463 line:-1
+For this example,
+
+
+491
+00:23:49.496 --> 00:23:51.965 line:-2 align:center
+I'll start with an engine that
+already has the drums sound
+
+
+492
+00:23:51,999 --> 00:23:54,201 line:-1
+event registered.
+
+
+493
+00:23:54.234 --> 00:23:56.670 line:-2 align:center
+From here,
+I'll upgrade the mix to go
+
+
+494
+00:23:56,703 --> 00:24:00,941 line:-2
+from simple channel-based
+playback to full spatialization.
+
+
+495
+00:24:00,974 --> 00:24:04,178 line:-2
+The first thing I'll do is
+construct a spatial pipeline
+
+
+496
+00:24:04.211 --> 00:24:07.481 line:-2 align:center
+to selectively apply different
+environmental effects
+
+
+497
+00:24:07.514 --> 00:24:09.850 line:-1 align:center
+to my sound source.
+
+
+498
+00:24:09,883 --> 00:24:13,787 line:-2
+Then I'll create a spatial
+mixer from the spatial pipeline.
+
+
+499
+00:24:13,820 --> 00:24:16,657 align:center
+Once constructed,
+I'll set some basic properties
+
+
+500
+00:24:16,690 --> 00:24:20,694 line:0
+on the spatial mixer to get
+it to play back correctly.
+
+
+501
+00:24:20,727 --> 00:24:23,263 align:center
+In this example,
+I'll set the distance model
+
+
+502
+00:24:23,297 --> 00:24:26,633 align:center
+to control level attenuation
+over distance.
+
+
+503
+00:24:26,667 --> 00:24:28,769 line:0
+I'll also set the directivity
+model
+
+
+504
+00:24:28,802 --> 00:24:32,039 line:0
+to control level attenuation
+based on the angle between
+
+
+505
+00:24:32,072 --> 00:24:35,008 align:center
+the source relative to the
+listener.
+
+
+506
+00:24:35,042 --> 00:24:37,177 line:0
+Then
+I'll create a sampler node.
+
+
+507
+00:24:37,211 --> 00:24:40,547 line:0
+The sampler node takes the name
+of the registered sound asset
+
+
+508
+00:24:40,581 --> 00:24:43,851 line:0
+and a reference to the
+downstream spatial mixer.
+
+
+509
+00:24:43,884 --> 00:24:47,187 align:center
+Next I'll set some basic
+properties on the sampler node
+
+
+510
+00:24:47,221 --> 00:24:49,556 align:center
+to get it to play back
+correctly.
+
+
+511
+00:24:49,590 --> 00:24:51,258 line:0
+In addition to the
+playback mode
+
+
+512
+00:24:51,291 --> 00:24:55,762 line:0
+and calibration level, I'll also
+set the cull option here.
+
+
+513
+00:24:55.796 --> 00:24:57.598 line:-1 align:center
+This will tell PHASE what to do
+
+
+514
+00:24:57,631 --> 00:25:00,934 line:-2
+when
+the sampler becomes inaudible.
+
+
+515
+00:25:00.968 --> 00:25:03.237 line:-2 align:center
+Now that I've hooked the output
+of our sampler node
+
+
+516
+00:25:03,270 --> 00:25:05,372 line:-2
+to the input of the spatial
+mixer
+
+
+517
+00:25:05.405 --> 00:25:07.441 line:-1 align:center
+and set some basic parameters,
+
+
+518
+00:25:07,474 --> 00:25:11,011 line:-2
+it's time to register the sound
+event asset with the engine.
+
+
+519
+00:25:11.044 --> 00:25:13.847 line:-2 align:center
+I'll use
+the same name as before.
+
+
+520
+00:25:13,881 --> 00:25:17,417 line:-2
+Here I'll create a sound event
+asset in code.
+
+
+521
+00:25:17,451 --> 00:25:19,620 line:-2
+First I'll create
+a spatialPipeline
+
+
+522
+00:25:19,653 --> 00:25:21,622 line:-2
+to render
+.directPathTransmission
+
+
+523
+00:25:21,655 --> 00:25:25,125 line:-2
+and .lateReverb.
+I'll also go ahead and set
+
+
+524
+00:25:25,158 --> 00:25:26,593 line:-1
+the .lateReverb .sendLevel
+
+
+525
+00:25:26.627 --> 00:25:29.396 line:-2 align:center
+to control the
+direct-to-reverberant ratio
+
+
+526
+00:25:29,429 --> 00:25:31,665 line:-2
+and choose
+a .mediumRoom preset
+
+
+527
+00:25:31.698 --> 00:25:34.234 line:-2 align:center
+for the late reverb
+simulation.
+
+
+528
+00:25:34,268 --> 00:25:38,605 line:-2
+Then I'll create a spatial
+mixer with the spatialPipeline.
+
+
+529
+00:25:38.639 --> 00:25:41.341 line:-2 align:center
+Next
+I'll create a natural-sounding
+
+
+530
+00:25:41.375 --> 00:25:43.610 line:-1 align:center
+GeometricSpreadingDistanceModel
+
+
+531
+00:25:43,644 --> 00:25:46,213 line:-2
+and assign it to the spatial
+mixer.
+
+
+532
+00:25:46,246 --> 00:25:49,116 line:-2
+I'll set the cullDistance
+to 10 meters.
+
+
+533
+00:25:49,149 --> 00:25:51,418 line:-2
+If the source were to go beyond
+this distance,
+
+
+534
+00:25:51.451 --> 00:25:55.155 line:-2 align:center
+I'd want to automatically
+cull it from the mix.
+
+
+535
+00:25:55.189 --> 00:25:57.391 line:-2 align:center
+And I'll adjust
+the rolloffFactor a little
+
+
+536
+00:25:57.424 --> 00:26:00.961 line:-2 align:center
+to de-emphasize
+the distance attenuation effect.
+
+
+537
+00:26:00,994 --> 00:26:03,163 line:-2
+Then
+I'll create a sampler node
+
+
+538
+00:26:03,197 --> 00:26:05,732 line:-1
+and pass it the name "drums,"
+
+
+539
+00:26:05,766 --> 00:26:08,869 line:-2
+which refers to the mono drum
+sound asset I previously
+
+
+540
+00:26:08,902 --> 00:26:11,004 line:-1
+registered with the engine.
+
+
+541
+00:26:11,038 --> 00:26:13,173 line:-2
+I'll set the playbackMode to
+.looping.
+
+
+542
+00:26:13.207 --> 00:26:16.643 line:-2 align:center
+I'll set the calibration
+mode to .relativeSpl,
+
+
+543
+00:26:16.677 --> 00:26:19.947 line:-2 align:center
+and the level to +12 decibels
+to increase the output level
+
+
+544
+00:26:19,980 --> 00:26:21,481 line:-1
+of the sampler.
+
+
+545
+00:26:21.515 --> 00:26:23.951 line:-2 align:center
+And I'll set the
+cullOption to sleep.
+
+
+546
+00:26:23.984 --> 00:26:26.353 line:-2 align:center
+Finally, I'll register
+the soundEventAsset
+
+
+547
+00:26:26,386 --> 00:26:29,356 line:-2
+with the engine, passing
+in the name drumEvent so I can
+
+
+548
+00:26:29.389 --> 00:26:33.327 line:-2 align:center
+refer to it later when I start
+creating sound events.
+
+
+549
+00:26:33.360 --> 00:26:37.264 line:-2 align:center
+Now that I have a sound event
+asset registered with the engine
+
+
+550
+00:26:37,297 --> 00:26:40,534 line:-2
+I need to create
+a scene for the simulation.
+
+
+551
+00:26:40.567 --> 00:26:43.203 line:-2 align:center
+This involves creating
+a listener, source,
+
+
+552
+00:26:43.237 --> 00:26:45.506 line:-1 align:center
+and occluder.
+
+
+553
+00:26:45,539 --> 00:26:48,108 line:-2
+In this example,
+I'll place the occluder
+
+
+554
+00:26:48.141 --> 00:26:50.911 line:-2 align:center
+between
+the source and listener.
+
+
+555
+00:26:50,944 --> 00:26:53,847 line:-1
+First I'll create a listener.
+
+
+556
+00:26:53,881 --> 00:26:56,483 line:-1
+Then I'll set its transform.
+
+
+557
+00:26:56,517 --> 00:26:58,886 line:0
+Once I'm ready to make
+the listener active
+
+
+558
+00:26:58,919 --> 00:27:01,321 align:center
+within the scene graph,
+I'll attach it to the engine's
+
+
+559
+00:27:01,355 --> 00:27:04,892 align:center
+root object or one of its
+children.
+
+
+560
+00:27:04,925 --> 00:27:07,294 line:-2
+Here I'll set up the
+listener in code.
+
+
+561
+00:27:07.327 --> 00:27:11.198 line:-2 align:center
+First I'll create a listener.
+Then I'll set its transform.
+
+
+562
+00:27:11.231 --> 00:27:12.633 line:-1 align:center
+In this example,
+
+
+563
+00:27:12,666 --> 00:27:15,802 line:-2
+I'll set the listener to the
+origin with no rotation.
+
+
+564
+00:27:15,836 --> 00:27:19,406 line:-2
+Finally I'll attach the listener
+to the engine's root object.
+
+
+565
+00:27:20.541 --> 00:27:23.777 line:-2 align:center
+Now let's set up a volumetric
+source.
+
+
+566
+00:27:23.810 --> 00:27:27.548 line:-2 align:center
+First I'll create a source shape
+from a mesh.
+
+
+567
+00:27:27,581 --> 00:27:31,451 align:center
+Then I'll create a source from
+the shape.
+
+
+568
+00:27:31,485 --> 00:27:35,689 line:0
+This inherently constructs
+a volumetric source.
+
+
+569
+00:27:35,722 --> 00:27:38,458 line:0
+Next I'll set its transform.
+
+
+570
+00:27:38,492 --> 00:27:40,861 line:0
+And once I'm ready to make the
+source active
+
+
+571
+00:27:40,894 --> 00:27:42,262 align:center
+within the scene graph,
+
+
+572
+00:27:42,296 --> 00:27:44,631 align:center
+I'll attach it to the engine's
+root object
+
+
+573
+00:27:44,665 --> 00:27:46,800 line:0
+or one of its children.
+
+
+574
+00:27:46,834 --> 00:27:50,304 line:-2
+Here I'll set up a volumetric
+source in code.
+
+
+575
+00:27:50.337 --> 00:27:54.274 line:-2 align:center
+First I'll create an Icosahedron
+mesh and scale it
+
+
+576
+00:27:54.308 --> 00:27:57.044 line:-2 align:center
+to about the size
+of a HomePod Mini.
+
+
+577
+00:27:57.077 --> 00:27:59.847 line:-2 align:center
+Then I'll create a shape
+from the mesh.
+
+
+578
+00:27:59,880 --> 00:28:03,517 line:-2
+This shape can be reused
+to construct multiple instances
+
+
+579
+00:28:03.550 --> 00:28:05.652 line:-1 align:center
+of a volumetric source.
+
+
+580
+00:28:05,686 --> 00:28:08,755 line:-2
+For example, I could place
+multiple HomePod Minis
+
+
+581
+00:28:08.789 --> 00:28:11.558 line:-2 align:center
+in the simulation that share
+the same mesh.
+
+
+582
+00:28:14.494 --> 00:28:18.532 line:-2 align:center
+Next I'll create a volumetric
+source from the shape.
+
+
+583
+00:28:18.565 --> 00:28:22.336 line:-2 align:center
+Note that I could also create
+a simple point source by using
+
+
+584
+00:28:22,369 --> 00:28:24,004 line:-1
+a version of the initializer
+
+
+585
+00:28:24,037 --> 00:28:26,640 line:-2
+that doesn't
+take a shape as input.
+
+
+586
+00:28:26.673 --> 00:28:28.909 line:-1 align:center
+Then I'll set its transform.
+
+
+587
+00:28:28,942 --> 00:28:31,311 line:-2
+I'll translate the source
+2 meters in front
+
+
+588
+00:28:31.345 --> 00:28:34.014 line:-2 align:center
+of the listener and rotate
+it back toward the listener
+
+
+589
+00:28:34.047 --> 00:28:36.617 line:-2 align:center
+so they are
+facing each other.
+
+
+590
+00:28:36,650 --> 00:28:40,053 line:-2
+Finally I'll attach the source
+to the engine's root object.
+
+
+591
+00:28:42,189 --> 00:28:44,625 align:center
+Now
+let's set up an occluder.
+
+
+592
+00:28:44,658 --> 00:28:47,628 align:center
+First I'll create
+a shape from a mesh.
+
+
+593
+00:28:50,297 --> 00:28:52,332 line:0
+Then I'll create
+a cardboard material
+
+
+594
+00:28:52,366 --> 00:28:55,002 align:center
+and assign it to the shape.
+
+
+595
+00:28:55,035 --> 00:29:00,073 align:center
+Now the shape has a geometry
+and an associated material.
+
+
+596
+00:29:00,107 --> 00:29:03,777 line:0
+Next I'll create an occluder
+from the shape.
+
+
+597
+00:29:03,810 --> 00:29:06,213 line:0
+Then I'll set its transform.
+
+
+598
+00:29:06,246 --> 00:29:08,982 align:center
+And once I'm ready to make the
+occluder active
+
+
+599
+00:29:09,016 --> 00:29:10,684 align:center
+within the scene graph,
+
+
+600
+00:29:10,717 --> 00:29:12,686 align:center
+I'll attach it to the engine's
+root object
+
+
+601
+00:29:12,719 --> 00:29:14,221 line:0
+or one of its children.
+
+
+602
+00:29:15.122 --> 00:29:17.858 line:-2 align:center
+Here I'll set up
+the occluder in code.
+
+
+603
+00:29:17.891 --> 00:29:20.093 line:-1 align:center
+First I'll create a boxMesh
+
+
+604
+00:29:20,127 --> 00:29:22,896 line:-2
+and scale its
+dimensions accordingly.
+
+
+605
+00:29:22,930 --> 00:29:25,832 line:-2
+Then I'll create a shape
+from the mesh.
+
+
+606
+00:29:25,866 --> 00:29:28,001 line:-2
+This shape
+can be reused to construct
+
+
+607
+00:29:28.035 --> 00:29:30.571 line:-2 align:center
+multiple instances
+of an occluder.
+
+
+608
+00:29:30,604 --> 00:29:33,774 line:-2
+For example, I can place
+multiple boxes in the simulation
+
+
+609
+00:29:33.807 --> 00:29:35.809 line:-1 align:center
+that share the same mesh.
+
+
+610
+00:29:35.843 --> 00:29:40.380 line:-2 align:center
+Next, I'll create a material
+from a cardboard box preset
+
+
+611
+00:29:40,414 --> 00:29:43,016 line:-2
+and assign the material
+to the shape.
+
+
+612
+00:29:44,785 --> 00:29:48,155 line:-2
+Next I'll create an occluder
+from the shape.
+
+
+613
+00:29:48.188 --> 00:29:50.457 line:-1 align:center
+Then I'll set its transform.
+
+
+614
+00:29:50,490 --> 00:29:53,527 line:-2
+I'll translate the occluder
+1 meter in front of the listener
+
+
+615
+00:29:53,560 --> 00:29:55,696 line:-2
+and rotate it back toward
+the listener
+
+
+616
+00:29:55.729 --> 00:29:58.131 line:-2 align:center
+so they are facing each
+other.
+
+
+617
+00:29:58.165 --> 00:30:00.667 line:-2 align:center
+This puts the occluder
+halfway between the source
+
+
+618
+00:30:00,701 --> 00:30:02,436 line:-1
+and listener.
+
+
+619
+00:30:02,469 --> 00:30:05,772 line:-2
+Finally I'll attach the occluder
+to the engine's root object.
+
+
+620
+00:30:07,374 --> 00:30:10,944 align:center
+At this point, I have
+a scene with an occluder halfway
+
+
+621
+00:30:10,978 --> 00:30:13,547 line:0
+between a source and listener.
+
+
+622
+00:30:14,748 --> 00:30:17,217 line:0
+Next I'll create a sound
+event from our registered
+
+
+623
+00:30:17,251 --> 00:30:19,786 align:center
+sound event asset
+and associate it
+
+
+624
+00:30:19,820 --> 00:30:22,823 align:center
+with the source
+and listener in the scene graph.
+
+
+625
+00:30:22,856 --> 00:30:26,226 line:0
+When I start the sound event,
+I'll hear an occluded drum loop
+
+
+626
+00:30:26,260 --> 00:30:28,795 line:0
+playing from a small volumetric
+source
+
+
+627
+00:30:28,829 --> 00:30:32,332 line:0
+on the opposite side of a
+cardboard box.
+
+
+628
+00:30:32.366 --> 00:30:35.369 line:-2 align:center
+Here I'll start the sound event
+in code.
+
+
+629
+00:30:35,402 --> 00:30:37,738 line:-2
+First I'll associate the source
+and listener
+
+
+630
+00:30:37.771 --> 00:30:40.174 line:-2 align:center
+with the spatial mixer
+in the sound event.
+
+
+631
+00:30:40.207 --> 00:30:43.477 line:-2 align:center
+Then I'll create a soundEvent
+from the registered soundEvent asset
+
+
+632
+00:30:43,510 --> 00:30:45,312 line:-1
+named drumEvent.
+
+
+633
+00:30:45.345 --> 00:30:47.548 line:-2 align:center
+The rest is the same
+as before.
+
+
+634
+00:30:47.581 --> 00:30:51.385 line:-2 align:center
+Make sure the engine is running,
+then start the sound event.
+
+
+635
+00:30:51.418 --> 00:30:54.721 line:-2 align:center
+Now that
+I've covered spatial audio,
+
+
+636
+00:30:54,755 --> 00:30:58,458 line:-2
+I'll show you how to build
+a complex sound event.
+
+
+637
+00:30:58.492 --> 00:31:00.961 line:-2 align:center
+Sound events can be organized
+into
+
+
+638
+00:31:00,994 --> 00:31:04,298 line:-2
+behavioral hierarchies
+for interactive sound design.
+
+
+639
+00:31:04,331 --> 00:31:08,135 line:-2
+In this section, I'll walk you
+through consecutive examples
+
+
+640
+00:31:08,168 --> 00:31:10,637 line:-2
+that build upon each type of
+sound event node
+
+
+641
+00:31:10,671 --> 00:31:13,407 line:-1
+to create the final sound event.
+
+
+642
+00:31:13,440 --> 00:31:17,678 line:-2
+Here we'll model an actor
+wearing a noisy Gore-Tex jacket
+
+
+643
+00:31:17.711 --> 00:31:20.280 line:-2 align:center
+walking on different types
+of terrain
+
+
+644
+00:31:20.314 --> 00:31:23.283 line:-2 align:center
+with variable surface
+wetness.
+
+
+645
+00:31:23,317 --> 00:31:26,253 line:-2
+First I'll create a sampler node
+that plays back a footstep
+
+
+646
+00:31:26.286 --> 00:31:27.955 line:-1 align:center
+on creaky wood.
+
+
+647
+00:31:27,988 --> 00:31:30,858 line:-2
+In code,
+I'll create a sampler node
+
+
+648
+00:31:30,891 --> 00:31:32,860 line:-1
+with a registered sound asset
+
+
+649
+00:31:32,893 --> 00:31:36,230 line:-2
+named "footstep_wood_clip_1."
+For this example,
+
+
+650
+00:31:36,263 --> 00:31:39,533 line:-2
+this node and all others
+will play back
+
+
+651
+00:31:39,566 --> 00:31:43,637 line:-2
+on a single pre-constructed
+channel mixer.
+
+
+652
+00:31:43,670 --> 00:31:45,873 line:-1
+Now I'll add some randomness.
+
+
+653
+00:31:45.906 --> 00:31:49.743 line:-2 align:center
+I'll create a random node
+with two child sampler nodes
+
+
+654
+00:31:49,776 --> 00:31:54,748 line:-2
+that play slightly different
+footstep on creaky wood samples.
+
+
+655
+00:31:54.781 --> 00:31:58.018 line:-2 align:center
+In code,
+I'll create two sampler nodes.
+
+
+656
+00:31:58.051 --> 00:32:00.687 line:-2 align:center
+The first
+uses a registered sound asset
+
+
+657
+00:32:00,721 --> 00:32:03,323 line:-1
+named "footstep_wood_clip_1
+
+
+658
+00:32:03,357 --> 00:32:05,792 line:-2
+and the second
+uses a registered sound asset
+
+
+659
+00:32:05,826 --> 00:32:08,562 line:-2
+named
+"footstep_wood_clip_2."
+
+
+660
+00:32:08,595 --> 00:32:10,697 line:-1
+Then , I'll create a random node
+
+
+661
+00:32:10,731 --> 00:32:13,600 line:-2
+and add the sampler nodes
+as children.
+
+
+662
+00:32:13,634 --> 00:32:17,104 line:-2
+Note that a weighting factor is
+applied to each child node
+
+
+663
+00:32:17.137 --> 00:32:19.339 line:-2 align:center
+to control
+the likelihood of that child
+
+
+664
+00:32:19,373 --> 00:32:22,709 line:-2
+being chosen over
+successive iterations.
+
+
+665
+00:32:22,743 --> 00:32:24,611 line:-1
+In this case, the first child
+
+
+666
+00:32:24.645 --> 00:32:28.048 line:-2 align:center
+has twice the chance of being
+selected over the second child.
+
+
+667
+00:32:29,249 --> 00:32:31,585 line:-2
+Next I'll add a terrain
+switch.
+
+
+668
+00:32:31,618 --> 00:32:35,822 line:0
+I'll create a switch node and
+two random nodes as children.
+
+
+669
+00:32:35,856 --> 00:32:38,992 align:center
+In this case, the second
+random node plays back random
+
+
+670
+00:32:39,026 --> 00:32:43,397 line:0
+footsteps on gravel as opposed
+to random footsteps on wood.
+
+
+671
+00:32:43,430 --> 00:32:46,733 align:center
+I'll use a terrain parameter
+to control the switch.
+
+
+672
+00:32:46.767 --> 00:32:50.771 line:-2 align:center
+In code,
+I'll create two sampler nodes.
+
+
+673
+00:32:50.804 --> 00:32:52.940 line:-2 align:center
+The first
+uses a registered sound asset
+
+
+674
+00:32:52,973 --> 00:32:56,343 line:-2
+named "footstep_gravel_clip_1"
+and the second
+
+
+675
+00:32:56.376 --> 00:32:58.412 line:-1 align:center
+uses a registered sound asset
+
+
+676
+00:32:58.445 --> 00:33:00.881 line:-2 align:center
+named
+"footstep_gravel_clip_2."
+
+
+677
+00:33:00.914 --> 00:33:02.950 line:-2 align:center
+Then I'll create
+a random node
+
+
+678
+00:33:02,983 --> 00:33:06,186 line:-2
+and add the sampler nodes as
+children.
+
+
+679
+00:33:06.220 --> 00:33:09.189 line:-2 align:center
+Next I'll create a terrain
+parameter.
+
+
+680
+00:33:09,223 --> 00:33:11,859 line:-2
+The default value will
+be "creaky_wood."
+
+
+681
+00:33:11.892 --> 00:33:13.660 line:-1 align:center
+Then I'll create a switch node
+
+
+682
+00:33:13,694 --> 00:33:16,029 line:-2
+that's controlled by the terrain
+parameter.
+
+
+683
+00:33:16.063 --> 00:33:18.565 line:-2 align:center
+I'll add two children,
+the wood random node
+
+
+684
+00:33:18.599 --> 00:33:21.068 line:-1 align:center
+and gravel random node.
+
+
+685
+00:33:21,101 --> 00:33:23,303 line:-2
+If I set the
+parameter to "creaky_wood,"
+
+
+686
+00:33:23,337 --> 00:33:25,472 line:-2
+it'll select the wood random
+node.
+
+
+687
+00:33:25,506 --> 00:33:28,242 line:-2
+Likewise, if I set the
+parameter to "soft_gravel,"
+
+
+688
+00:33:28.275 --> 00:33:30.511 line:-2 align:center
+it'll select the gravel random
+node.
+
+
+689
+00:33:31.745 --> 00:33:33.847 line:-2 align:center
+Next
+I'll add a wetness blend.
+
+
+690
+00:33:33,881 --> 00:33:37,017 line:-2
+I'll create a blend node
+with a terrain switch node
+
+
+691
+00:33:37.050 --> 00:33:40.521 line:-2 align:center
+and random splash node as
+children.
+
+
+692
+00:33:40,554 --> 00:33:42,856 line:0
+The new random splash node
+
+
+693
+00:33:42,890 --> 00:33:46,293 align:center
+plays random splash noises
+as the actor takes steps,
+
+
+694
+00:33:46,326 --> 00:33:48,495 line:0
+while the terrain switch
+determines
+
+
+695
+00:33:48,529 --> 00:33:50,497 line:0
+if the actor's feet
+are walking on creaky wood
+
+
+696
+00:33:50,531 --> 00:33:53,200 line:0
+or soft gravel.
+
+
+697
+00:33:53,233 --> 00:33:55,569 line:0
+The blend between the dry
+footstep sounds
+
+
+698
+00:33:55,602 --> 00:33:58,939 align:center
+and the splashes is dependent on
+the wetness parameter,
+
+
+699
+00:33:58,972 --> 00:34:03,477 line:0
+from completely dry--loud
+footsteps and no splashes--
+
+
+700
+00:34:03,510 --> 00:34:06,747 line:0
+to completely wet--quiet
+footsteps
+
+
+701
+00:34:06,780 --> 00:34:08,882 align:center
+and loud splashes.
+
+
+702
+00:34:08,916 --> 00:34:12,352 line:-2
+In code,
+I'll create two sampler nodes.
+
+
+703
+00:34:12.386 --> 00:34:15.022 line:-2 align:center
+The first uses
+a registered sound asset named
+
+
+704
+00:34:15.055 --> 00:34:19.059 line:-2 align:center
+"splash_clip_1" and the second
+uses a registered sound asset
+
+
+705
+00:34:19.092 --> 00:34:21.628 line:-1 align:center
+named "splash_clip_2."
+
+
+706
+00:34:21,662 --> 00:34:24,665 line:-2
+Then I'll create a random node
+and add the sampler nodes
+
+
+707
+00:34:24,698 --> 00:34:26,800 line:-1
+as children.
+
+
+708
+00:34:26,834 --> 00:34:30,304 line:-2
+Next I'll create
+a wetness parameter.
+
+
+709
+00:34:30.337 --> 00:34:32.506 line:-1 align:center
+The range will be 0 to 1,
+
+
+710
+00:34:32.539 --> 00:34:35.709 line:-2 align:center
+and the default value will
+be 0.5.
+
+
+711
+00:34:35,742 --> 00:34:37,744 line:-2
+Note that I can set the
+parameter
+
+
+712
+00:34:37,778 --> 00:34:41,682 line:-2
+to any value and range supported
+by my game.
+
+
+713
+00:34:41.715 --> 00:34:43.450 line:-1 align:center
+Then I'll create a blend node
+
+
+714
+00:34:43,483 --> 00:34:45,919 line:-2
+that's controlled by the wetness
+parameter.
+
+
+715
+00:34:45.953 --> 00:34:48.889 line:-2 align:center
+I'll add two children,
+the terrain switch node
+
+
+716
+00:34:48,922 --> 00:34:51,425 line:-1
+and random splash node.
+
+
+717
+00:34:51,458 --> 00:34:53,460 line:-1
+If I set the parameter to 0,
+
+
+718
+00:34:53.493 --> 00:34:56.830 line:-2 align:center
+I'll only hear dry footsteps
+on creaky wood or gravel,
+
+
+719
+00:34:56.864 --> 00:34:58.932 line:-1 align:center
+depending on the terrain.
+
+
+720
+00:34:58,966 --> 00:35:01,702 line:-2
+As I increase
+the wetness from 0 to 1,
+
+
+721
+00:35:01.735 --> 00:35:04.471 line:-2 align:center
+I'll increase the loudness of
+splash noises
+
+
+722
+00:35:04,505 --> 00:35:08,175 line:-2
+that accompany each footstep,
+simulating wet terrain.
+
+
+723
+00:35:10.143 --> 00:35:13.113 line:-2 align:center
+Finally I'll create a container
+node with the wetness
+
+
+724
+00:35:13.146 --> 00:35:17.384 line:-2 align:center
+blend node and a random noisy
+clothing node as children.
+
+
+725
+00:35:17,417 --> 00:35:20,087 line:-2
+The new noisy clothing node
+plays back
+
+
+726
+00:35:20.120 --> 00:35:22.489 line:-2 align:center
+the ruffling noises
+of a Gore-Tex jacket
+
+
+727
+00:35:22,523 --> 00:35:24,291 line:-1
+whenever the actor takes a step
+
+
+728
+00:35:24,324 --> 00:35:27,127 line:-2
+on changing terrain with
+variable wetness.
+
+
+729
+00:35:27.160 --> 00:35:30.130 line:-2 align:center
+With this final node hierarchy
+in place,
+
+
+730
+00:35:30.163 --> 00:35:32.499 line:-1 align:center
+I have a complete representation
+
+
+731
+00:35:32,533 --> 00:35:34,935 line:-1
+of the actor walking in a scene.
+
+
+732
+00:35:34,968 --> 00:35:37,437 line:-2
+Every
+time the actor takes a step,
+
+
+733
+00:35:37,471 --> 00:35:39,573 line:-2
+I'll hear the ruffling of the
+jacket,
+
+
+734
+00:35:39,606 --> 00:35:43,510 line:-2
+plus footsteps
+on creaky wood or soft gravel,
+
+
+735
+00:35:43,544 --> 00:35:45,979 line:-2
+depending on the terrain
+parameter.
+
+
+736
+00:35:46,013 --> 00:35:48,615 line:-2
+In addition to this,
+I'll hear more or less
+
+
+737
+00:35:48.649 --> 00:35:50.784 line:-2 align:center
+of the splashes with each
+footstep,
+
+
+738
+00:35:50,817 --> 00:35:52,953 line:-2
+depending on the wetness
+parameter.
+
+
+739
+00:35:52,986 --> 00:35:56,723 line:-2
+In code, I'll create two sampler
+nodes.
+
+
+740
+00:35:56.757 --> 00:35:59.660 line:-2 align:center
+The first uses a
+registered sound asset named
+
+
+741
+00:35:59,693 --> 00:36:03,630 line:-2
+"gortex_clip_1" and the second
+uses a registered sound asset
+
+
+742
+00:36:03,664 --> 00:36:06,266 line:-1
+named "gortex_clip_2."
+
+
+743
+00:36:06,300 --> 00:36:09,469 line:-2
+Then I'll create a random
+node and add the sampler nodes
+
+
+744
+00:36:09.503 --> 00:36:11.438 line:-1 align:center
+as children.
+
+
+745
+00:36:11,471 --> 00:36:15,042 line:-2
+Finally I'll create
+an actor_container node.
+
+
+746
+00:36:15,075 --> 00:36:17,978 line:-2
+I'll add two children,
+the wetness_blend node
+
+
+747
+00:36:18.011 --> 00:36:20.714 line:-2 align:center
+and noisy_clothing_random
+node.
+
+
+748
+00:36:20,747 --> 00:36:23,417 line:-2
+Together, they represent
+the complete sound
+
+
+749
+00:36:23.450 --> 00:36:25.319 line:-1 align:center
+of the actor.
+
+
+750
+00:36:25,352 --> 00:36:29,089 line:-2
+In review, we learned how
+to play an audio file.
+
+
+751
+00:36:29.122 --> 00:36:33.060 line:-2 align:center
+Following this, we expanded
+our knowledge by diving
+
+
+752
+00:36:33.093 --> 00:36:34.962 line:-1 align:center
+headfirst into constructing
+
+
+753
+00:36:34.995 --> 00:36:38.799 line:-2 align:center
+a simple yet effective
+spatial audio experience.
+
+
+754
+00:36:38.832 --> 00:36:40.934 line:-1 align:center
+Here we learned about listeners,
+
+
+755
+00:36:40,968 --> 00:36:44,304 line:-2
+volumetric sources,
+and occluders.
+
+
+756
+00:36:44.338 --> 00:36:48.075 line:-2 align:center
+Finally, we learned about
+building behavioral sound events
+
+
+757
+00:36:48.108 --> 00:36:50.377 line:-1 align:center
+for interactive sound design.
+
+
+758
+00:36:50,410 --> 00:36:53,213 line:-2
+Here we learned about grafting
+random,
+
+
+759
+00:36:53.247 --> 00:36:57.584 line:-2 align:center
+switch, blend, and
+container nodes together
+
+
+760
+00:36:57,618 --> 00:37:01,622 line:-2
+to form hierarchical,
+interactive sound events.
+
+
+761
+00:37:01,655 --> 00:37:03,056 line:-1
+Taken together,
+
+
+762
+00:37:03,090 --> 00:37:06,026 line:-2
+you should now have a broad
+understanding of the inner
+
+
+763
+00:37:06.059 --> 00:37:07.728 line:-1 align:center
+workings of PHASE
+
+
+764
+00:37:07,761 --> 00:37:10,931 line:-2
+and be able to take a deeper
+dive into the underlying system
+
+
+765
+00:37:10.964 --> 00:37:13.901 line:-2 align:center
+components when you're ready
+to settle in and build your
+
+
+766
+00:37:13,934 --> 00:37:17,838 line:-2
+next geometry-aware game audio
+experience.
+
+
+767
+00:37:17,871 --> 00:37:22,109 line:-2
+Thank you.
+Have a great WWDC21.
+
+
+768
+00:37:22.142 --> 00:37:24.111 line:-1 align:center
+[upbeat music]
+

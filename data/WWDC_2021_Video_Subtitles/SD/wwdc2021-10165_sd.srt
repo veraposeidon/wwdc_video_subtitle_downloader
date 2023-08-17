@@ -1,0 +1,2495 @@
+2
+00:00:01,835 --> 00:00:04,838 line:-1
+[upbeat music]
+
+
+3
+00:00:04,872 --> 00:00:09,009 line:-1
+♪ ♪
+
+
+4
+00:00:09,042 --> 00:00:11,979 line:-1
+[Yagil] Hi, my name is Yagil Burowski,
+
+
+5
+00:00:12,012 --> 00:00:15,549 line:-2 position:23%
+and I'm an engineer on the Location
+Technologies team at Apple.
+
+
+6
+00:00:15.582 --> 00:00:18.719 line:-2 align:start position:31%
+In this talk, I'll cover
+the latest advancements,
+
+
+7
+00:00:18.752 --> 00:00:21.288 line:-2 align:start position:29%
+as well as the new features
+that are coming
+
+
+8
+00:00:21.321 --> 00:00:23.624 line:-2 align:start position:23%
+to the Nearby Interaction framework
+this year.
+
+
+9
+00:00:23.657 --> 00:00:26.326 line:-2 align:start position:24%
+The Nearby Interaction framework
+makes it easy
+
+
+10
+00:00:26,360 --> 00:00:29,863 line:-2 position:26%
+to take advantage of the unique
+capabilities of U1,
+
+
+11
+00:00:29,897 --> 00:00:32,900 line:-2 align:start
+Apple's chip
+for Ultra-Wideband technology,
+
+
+12
+00:00:32.933 --> 00:00:35.235 line:-1 align:center
+and enables creating precise
+
+
+13
+00:00:35.269 --> 00:00:37.704 line:-1 align:center
+and spatially-aware interactions
+
+
+14
+00:00:37.738 --> 00:00:39.606 line:-1 align:center
+between nearby devices.
+
+
+15
+00:00:39,640 --> 00:00:41,575 line:-1
+It's the same technology that powers
+
+
+16
+00:00:41,608 --> 00:00:44,044 line:-1
+"Precision Finding" with AirTag
+
+
+17
+00:00:44.077 --> 00:00:46.113 line:-1 align:center
+and the fluid handoff gestures
+
+
+18
+00:00:46,146 --> 00:00:48,715 line:-1
+between iPhone and HomePod mini.
+
+
+19
+00:00:48.749 --> 00:00:51.585 line:-1 align:center
+This is what we'll cover in this session.
+
+
+20
+00:00:51,618 --> 00:00:53,320 line:-1
+We'll start with updates
+
+
+21
+00:00:53.353 --> 00:00:55.722 line:-1 align:center
+to the user permission flow.
+
+
+22
+00:00:55,756 --> 00:00:58,759 line:-1
+After that, we'll introduce new APIs
+
+
+23
+00:00:58,792 --> 00:01:02,629 line:-2 position:22%
+for running Nearby Interaction
+with compatible third-party hardware.
+
+
+24
+00:01:04,398 --> 00:01:06,200 line:-1
+And we'll finish with talking
+
+
+25
+00:01:06,233 --> 00:01:08,702 line:-1
+about resources for app developers,
+
+
+26
+00:01:08,735 --> 00:01:10,904 line:-1
+as well as accessory manufacturers,
+
+
+27
+00:01:10,938 --> 00:01:13,907 line:-2 align:start
+for getting started with adopting
+these new APIs
+
+
+28
+00:01:13,941 --> 00:01:16,677 line:-1
+in apps and third-party accessories.
+
+
+29
+00:01:16.710 --> 00:01:20.647 line:-2 align:start position:23%
+Before we dive in, for those of you
+who are new to Nearby Interaction,
+
+
+30
+00:01:20.681 --> 00:01:23.817 line:-2 align:start position:32%
+or just need a refresher,
+let's quickly recap
+
+
+31
+00:01:23,851 --> 00:01:26,420 position:29% line:-2
+how you use the framework
+in your app.
+
+
+32
+00:01:26,453 --> 00:01:30,357 position:33% line:-2
+You start with creating
+a session instance.
+
+
+33
+00:01:30,390 --> 00:01:33,393 align:start line:-2
+That's the main object
+through which you'll configure
+
+
+34
+00:01:33.427 --> 00:01:36.163 line:-1 align:center
+and run your spatial interactions
+
+
+35
+00:01:36.196 --> 00:01:38.899 line:-1 align:center
+with nearby devices.
+
+
+36
+00:01:38,932 --> 00:01:42,536 line:-2 position:27%
+Next, you'll need to designate
+a part of your app
+
+
+37
+00:01:42,569 --> 00:01:46,440 position:23% line:-2
+to conform
+to the NISessionDelegate protocol.
+
+
+38
+00:01:46,473 --> 00:01:50,377 position:24% line:-2
+The delegate will receive updates
+from the framework.
+
+
+39
+00:01:52,546 --> 00:01:54,615 line:-1
+The next thing you need to do is
+
+
+40
+00:01:54,648 --> 00:01:57,184 line:-1
+create a configuration object,
+
+
+41
+00:01:57,217 --> 00:02:01,088 position:32% line:-2
+which will be a subclass
+of NIConfiguration.
+
+
+42
+00:02:01,121 --> 00:02:03,390 line:-1
+For example, you can create
+
+
+43
+00:02:03,423 --> 00:02:05,926 line:-1
+a NearbyPeerConfiguration
+
+
+44
+00:02:05,959 --> 00:02:09,129 align:start line:-2
+when you want start a session
+between two iPhones
+
+
+45
+00:02:09.162 --> 00:02:11.865 line:-1 align:center
+that are running your app.
+
+
+46
+00:02:11.899 --> 00:02:14.501 line:-1 align:center
+Once you call run on the session
+
+
+47
+00:02:14,535 --> 00:02:17,171 line:-1
+with the configuration you had created,
+
+
+48
+00:02:17,204 --> 00:02:20,207 line:-2 align:start
+Nearby Interaction
+will start providing your app
+
+
+49
+00:02:20.240 --> 00:02:23.443 line:-1 align:center
+a stream of NearbyObject updates,
+
+
+50
+00:02:23,477 --> 00:02:25,445 line:-1
+each containing distance
+
+
+51
+00:02:25,479 --> 00:02:28,115 line:-1
+and, optionally, direction,
+
+
+52
+00:02:28.148 --> 00:02:29.516 line:-1 align:center
+to nearby devices
+
+
+53
+00:02:29,550 --> 00:02:32,553 line:-2 align:start
+that are actively participating
+in the session.
+
+
+54
+00:02:34.188 --> 00:02:36.056 line:-1 align:center
+If you're interested in a deeper dive
+
+
+55
+00:02:36.089 --> 00:02:38.025 line:-1 align:center
+into the framework's APIs,
+
+
+56
+00:02:38,058 --> 00:02:41,328 line:-1
+please watch last year's WWDC talk,
+
+
+57
+00:02:41.361 --> 00:02:44.831 line:-1 align:center
+"Meet Nearby Interaction."
+
+
+58
+00:02:44.865 --> 00:02:47.367 line:-1 align:center
+To access data such as distance
+
+
+59
+00:02:47,401 --> 00:02:49,837 line:-1
+or direction to a nearby device,
+
+
+60
+00:02:49.870 --> 00:02:53.006 line:-2 align:start position:33%
+your app needs to get
+the user's permission.
+
+
+61
+00:02:54.708 --> 00:02:56.743 line:-1 align:center
+So, let's talk about the improvements
+
+
+62
+00:02:56.777 --> 00:02:59.913 line:-2 position:29% align:start
+to the user-permission flow
+we've made this year.
+
+
+63
+00:02:59.947 --> 00:03:03.884 line:-2 position:27% align:start
+This is the Nearby Interaction
+permission flow in iOS 14.
+
+
+64
+00:03:03.917 --> 00:03:06.787 line:-1 align:center
+The prompt will appear the first time
+
+
+65
+00:03:06,820 --> 00:03:08,355 line:-1
+your app runs a session
+
+
+66
+00:03:08.388 --> 00:03:11.491 line:-1 align:center
+in a new app lifetime.
+
+
+67
+00:03:11.525 --> 00:03:13.327 line:-1 align:center
+The options on the alert,
+
+
+68
+00:03:13.360 --> 00:03:16.129 line:-1 align:center
+"Don't Allow" or "Allow Once,"
+
+
+69
+00:03:16,163 --> 00:03:18,799 line:-1
+provide a very clear choice,
+
+
+70
+00:03:18.832 --> 00:03:22.102 line:-1 align:center
+but since this permission is one-time,
+
+
+71
+00:03:22,135 --> 00:03:24,805 line:-1
+it can also lead to additional prompts
+
+
+72
+00:03:24,838 --> 00:03:27,407 line:-1
+in certain situations.
+
+
+73
+00:03:27,441 --> 00:03:30,844 line:-2 position:26%
+So, this year, there's a new way
+to grant apps permission
+
+
+74
+00:03:30.878 --> 00:03:34.281 line:-1 align:center
+to use Nearby Interaction.
+
+
+75
+00:03:34,314 --> 00:03:36,316 line:-1
+This is the new "Nearby Interaction"
+
+
+76
+00:03:36.350 --> 00:03:38.886 line:-1 align:center
+permission prompt in iOS 15.
+
+
+77
+00:03:38.919 --> 00:03:41.221 line:-2 position:33% align:start
+It looks kind of similar,
+but it's different
+
+
+78
+00:03:41.255 --> 00:03:43.824 line:-1 align:center
+in a couple of important ways.
+
+
+79
+00:03:43.857 --> 00:03:47.027 line:-2 align:start position:23%
+The system will automatically show
+the permission prompt
+
+
+80
+00:03:47.060 --> 00:03:50.764 line:-2 align:start position:28%
+on the first time
+your app runs an NISession.
+
+
+81
+00:03:50,797 --> 00:03:53,901 align:start line:-2
+So, it's really important
+for you to make sure
+
+
+82
+00:03:53.934 --> 00:03:57.104 line:-2 position:26% align:start
+that the timing
+of when you run your NISession
+
+
+83
+00:03:57.137 --> 00:04:00.908 line:-1 align:center
+coincides with a clear user intent,
+
+
+84
+00:04:00.941 --> 00:04:03.977 line:-1 align:center
+so it's easy for your users to understand
+
+
+85
+00:04:04.011 --> 00:04:06.280 line:-1 align:center
+why a particular feature in your app
+
+
+86
+00:04:06.313 --> 00:04:10.250 line:-1 align:center
+requires access to Nearby Interaction.
+
+
+87
+00:04:10,284 --> 00:04:11,919 line:-1
+Let's take a closer look
+
+
+88
+00:04:11,952 --> 00:04:14,655 line:-1
+at the new options on the prompt.
+
+
+89
+00:04:14,688 --> 00:04:18,458 align:start line:-2
+The new "OK" option
+grants your app permission
+
+
+90
+00:04:18,492 --> 00:04:20,928 line:-1
+while the app is in use.
+
+
+91
+00:04:20.961 --> 00:04:24.097 line:-1 align:center
+Whether the user accepts or denies
+
+
+92
+00:04:24,131 --> 00:04:26,667 align:start line:-2
+your app's request
+to use Nearby Interaction,
+
+
+93
+00:04:26.700 --> 00:04:29.636 line:-1 align:center
+the permission prompt will not show again.
+
+
+94
+00:04:30,938 --> 00:04:32,906 line:-1
+Starting in iOS 15,
+
+
+95
+00:04:32.940 --> 00:04:34.675 line:-1 align:center
+apps that use Nearby Interaction
+
+
+96
+00:04:34.708 --> 00:04:37.377 line:-1 align:center
+will appear in Settings.
+
+
+97
+00:04:37.411 --> 00:04:39.847 line:-1 align:center
+So, if users ever change their minds,
+
+
+98
+00:04:39,880 --> 00:04:41,515 line:-1
+they can head over to the Settings app
+
+
+99
+00:04:41,548 --> 00:04:44,818 line:-2 align:start
+and change your app's
+"Nearby Interaction" access.
+
+
+100
+00:04:44.852 --> 00:04:48.055 line:-2 position:24% align:start
+Make sure to test for this scenario
+when developing your app.
+
+
+101
+00:04:50,123 --> 00:04:53,760 position:18% line:-2
+Let's summarize the new
+Nearby Interaction user permission model.
+
+
+102
+00:04:56,063 --> 00:04:58,565 position:28% line:-2
+The new permission prompt,
+when accepted,
+
+
+103
+00:04:58,599 --> 00:05:00,834 line:-1
+gives your app persistent permission
+
+
+104
+00:05:00,868 --> 00:05:03,971 position:31% line:-2
+to use Nearby Interaction
+while the app is in use.
+
+
+105
+00:05:05,939 --> 00:05:09,543 position:30% line:-2
+The alert will present
+a usage description string,
+
+
+106
+00:05:09.576 --> 00:05:11.044 line:-1 align:center
+provided by you
+
+
+107
+00:05:11,078 --> 00:05:13,647 line:-1
+in your app's Info.plist.
+
+
+108
+00:05:13,680 --> 00:05:16,783 position:33% line:-2
+In this purpose string,
+be clear and concise,
+
+
+109
+00:05:16,817 --> 00:05:19,786 position:24% line:-2
+and explain what are
+the awesome features in your app
+
+
+110
+00:05:19,820 --> 00:05:22,656 line:-1
+that need access to Nearby Interaction.
+
+
+111
+00:05:24,324 --> 00:05:27,995 position:30% line:-2
+After the prompt shows
+for the first and final time,
+
+
+112
+00:05:28,028 --> 00:05:31,899 line:-2 position:26%
+your app's name and icon
+will appear in the Settings app,
+
+
+113
+00:05:34,034 --> 00:05:36,370 line:-1
+which means that users can change
+
+
+114
+00:05:36,403 --> 00:05:39,873 line:-1
+your app's permission state at any time.
+
+
+115
+00:05:39.907 --> 00:05:43.644 line:-2 align:start position:20%
+When your app does not have sufficient
+permission to use Nearby Interaction,
+
+
+116
+00:05:43,677 --> 00:05:46,446 line:-1
+your NISessions will be invalidated
+
+
+117
+00:05:46,480 --> 00:05:50,317 line:-1
+with a permission-related error code.
+
+
+118
+00:05:50,350 --> 00:05:53,720 position:28% line:-2
+So, if a key functionality
+in your app relies on access
+
+
+119
+00:05:53,754 --> 00:05:57,324 line:-2 position:28%
+to Nearby Interaction,
+be sure to explain this clearly
+
+
+120
+00:05:57.357 --> 00:05:59.560 line:-1 align:center
+to your users and guide them
+
+
+121
+00:05:59,593 --> 00:06:01,995 line:-1
+to the Settings app when appropriate.
+
+
+122
+00:06:02,029 --> 00:06:05,265 position:22% line:-2
+That was the new permission prompt
+in iOS 15.
+
+
+123
+00:06:07,000 --> 00:06:10,571 position:29% line:-2
+And now, we're excited
+to introduce some new APIs
+
+
+124
+00:06:10,604 --> 00:06:13,574 line:-2 align:start
+that make it possible
+to use Nearby Interaction
+
+
+125
+00:06:13,607 --> 00:06:15,909 line:-1
+with compatible third-party hardware.
+
+
+126
+00:06:15.943 --> 00:06:18.712 line:-1 align:center
+We wanted this API to work
+
+
+127
+00:06:18,745 --> 00:06:22,249 line:-2 position:25%
+with a wide range of accessories
+you may consider building.
+
+
+128
+00:06:22,282 --> 00:06:24,718 line:-1
+So, we based Nearby Interaction's
+
+
+129
+00:06:24,751 --> 00:06:26,553 line:-1
+third-party hardware support
+
+
+130
+00:06:26,587 --> 00:06:29,923 position:25% line:-2
+on standards we've been working
+on with industry groups.
+
+
+131
+00:06:31,091 --> 00:06:34,862 align:start line:-2
+And to help you get started
+on prototyping, experimenting,
+
+
+132
+00:06:34,895 --> 00:06:36,864 line:-1
+and building your accessories,
+
+
+133
+00:06:36,897 --> 00:06:39,366 position:26% line:-2
+we've worked
+with the chipset manufacturers,
+
+
+134
+00:06:39.399 --> 00:06:41.635 line:-1 align:center
+who are making available development kits
+
+
+135
+00:06:41,668 --> 00:06:44,071 line:-1
+containing hardware and firmware
+
+
+136
+00:06:44,104 --> 00:06:46,173 line:-1
+that is able to interoperate
+
+
+137
+00:06:46,206 --> 00:06:49,543 line:-1
+with U1 in iPhone.
+
+
+138
+00:06:49,576 --> 00:06:52,312 line:-1
+So, alongside development kits,
+
+
+139
+00:06:52,346 --> 00:06:55,749 line:-2 position:29%
+we're also making available
+sample app code
+
+
+140
+00:06:55,782 --> 00:06:57,317 line:-1
+that works out-of-the-box
+
+
+141
+00:06:57.351 --> 00:06:59.920 line:-1 align:center
+with the hardware in the development kits.
+
+
+142
+00:06:59,953 --> 00:07:02,022 line:-1
+So, together, they can serve
+
+
+143
+00:07:02,055 --> 00:07:05,058 line:-2 position:28%
+as an excellent starting point
+for your project.
+
+
+144
+00:07:07,160 --> 00:07:09,563 line:-1
+And if you're an accessory manufacturer,
+
+
+145
+00:07:09.596 --> 00:07:11.932 line:-1 align:center
+please check out the Nearby Interaction,
+
+
+146
+00:07:11,965 --> 00:07:14,735 line:-1
+Accessory Protocol Specification document
+
+
+147
+00:07:14,768 --> 00:07:17,804 position:27% line:-2
+that will be available
+to you in "Developer Preview"
+
+
+148
+00:07:17.838 --> 00:07:20.407 line:-1 align:center
+on the Apple developer website.
+
+
+149
+00:07:20,440 --> 00:07:23,844 line:-2 align:start
+Whether you just want to tinker
+with this exciting new technology,
+
+
+150
+00:07:23,877 --> 00:07:26,280 position:29% line:-2
+or you're ready
+to integrate Ultra Wideband
+
+
+151
+00:07:26,313 --> 00:07:28,215 line:-1
+into your very own accessory,
+
+
+152
+00:07:28,248 --> 00:07:30,717 line:-1
+let's look at a simple example
+
+
+153
+00:07:30,751 --> 00:07:32,986 line:-1
+that illustrates how you use
+
+
+154
+00:07:33,020 --> 00:07:34,955 line:-1
+the Nearby Interaction API
+
+
+155
+00:07:34.988 --> 00:07:37.124 line:-1 align:center
+with a third-party accessory.
+
+
+156
+00:07:37,157 --> 00:07:39,293 line:-1
+Enabling different functionality
+
+
+157
+00:07:39,326 --> 00:07:42,829 align:start line:-2
+based on the user's precise distance
+to an accessory
+
+
+158
+00:07:42.863 --> 00:07:44.898 line:-1 align:center
+can be a powerful way
+
+
+159
+00:07:44,932 --> 00:07:47,568 position:31% line:-2
+to streamline interactions
+with that device.
+
+
+160
+00:07:47,601 --> 00:07:49,636 position:28% line:-2
+So, let's say that
+you're building an accessory,
+
+
+161
+00:07:49,670 --> 00:07:53,140 align:start line:-2
+and you want to integrate
+Ultra Wideband into it,
+
+
+162
+00:07:53,173 --> 00:07:55,242 line:-1
+to enable a set of features
+
+
+163
+00:07:55,275 --> 00:07:58,178 line:-1
+that will really make it stand out.
+
+
+164
+00:07:58.212 --> 00:08:02.149 line:-2 align:start position:27%
+And since Ultra Wideband
+can give you precise distance,
+
+
+165
+00:08:02.182 --> 00:08:05.219 line:-2 align:start position:30%
+you're planning to utilize it
+to keep track
+
+
+166
+00:08:05,252 --> 00:08:07,354 line:-1
+of a couple of precise zones
+
+
+167
+00:08:07,387 --> 00:08:09,823 line:-1
+or regions around the accessory.
+
+
+168
+00:08:09,857 --> 00:08:12,259 line:-1
+So, let's say that you define a region
+
+
+169
+00:08:12,292 --> 00:08:16,230 line:-2 position:29%
+around the accessory
+that has a 1.5-meter radius,
+
+
+170
+00:08:16.263 --> 00:08:19.700 line:-2 position:32% align:start
+and another, larger one
+with a 3-meter radius.
+
+
+171
+00:08:19,733 --> 00:08:23,136 position:27% line:-2
+And let's say that you care
+about these specific distances
+
+
+172
+00:08:23,170 --> 00:08:25,572 line:-1
+because, when the user enters
+
+
+173
+00:08:25,606 --> 00:08:27,774 line:-1
+the larger region around the accessory,
+
+
+174
+00:08:27,808 --> 00:08:31,311 line:-1
+you want to enable some functionality A.
+
+
+175
+00:08:31,345 --> 00:08:33,981 align:start line:-2
+And when the user enters
+the smaller region,
+
+
+176
+00:08:34.014 --> 00:08:36.617 line:-1 align:center
+you want to enable functionality B.
+
+
+177
+00:08:38,218 --> 00:08:40,287 line:-2 align:start
+So, how do you actually
+achieve this in your app
+
+
+178
+00:08:40.320 --> 00:08:42.990 line:-1 align:center
+using the Nearby Interaction framework?
+
+
+179
+00:08:43.023 --> 00:08:46.860 line:-2 align:start position:22%
+First of all,
+Nearby Interaction expects your app
+
+
+180
+00:08:46,894 --> 00:08:50,163 line:-1
+and your accessory to have some sort
+
+
+181
+00:08:50,197 --> 00:08:53,300 position:27% line:-2
+of capability to exchange data
+between them.
+
+
+182
+00:08:54,935 --> 00:08:57,171 line:-1
+As for the particular technology
+
+
+183
+00:08:57,204 --> 00:08:59,206 line:-1
+to use to exchange data,
+
+
+184
+00:08:59,239 --> 00:09:02,609 align:start line:-2
+that is entirely up to you
+and what your accessory does
+
+
+185
+00:09:02.643 --> 00:09:06.146 line:-1 align:center
+and does not need to do.
+
+
+186
+00:09:06,180 --> 00:09:09,650 position:29% line:-2
+Suppose your accessory
+already supports Bluetooth.
+
+
+187
+00:09:09,683 --> 00:09:11,752 line:-1
+This will put you in a great spot
+
+
+188
+00:09:11.785 --> 00:09:15.556 line:-2 align:start position:22%
+because you'll be able to utilize your
+existing Bluetooth capability
+
+
+189
+00:09:15.589 --> 00:09:18.825 line:-1 align:center
+for your data exchange requirement.
+
+
+190
+00:09:18.859 --> 00:09:21.795 line:-2 position:27% align:start
+If your accessory is connected
+to the local network
+
+
+191
+00:09:21,828 --> 00:09:24,698 line:-1
+or is securely connected to the internet,
+
+
+192
+00:09:24,731 --> 00:09:26,466 line:-1
+you're in great shape, too.
+
+
+193
+00:09:26.500 --> 00:09:30.003 line:-2 position:26% align:start
+That capability to send data
+back and forth between the app
+
+
+194
+00:09:30,037 --> 00:09:33,340 line:-2 align:start
+and the accessory will serve you
+for what you'll need to do next.
+
+
+195
+00:09:35,242 --> 00:09:37,444 line:-2 align:start
+Recall that when we wanted
+to start a session
+
+
+196
+00:09:37,477 --> 00:09:39,746 line:-1
+between two iPhones running your app,
+
+
+197
+00:09:39.780 --> 00:09:43.183 line:-1 align:center
+we created a NearbyPeerConfiguration.
+
+
+198
+00:09:43,217 --> 00:09:45,886 line:-1
+To start a session with an accessory,
+
+
+199
+00:09:45,919 --> 00:09:49,323 align:start line:-2
+we'll create
+a NearbyAccessoryConfiguration.
+
+
+200
+00:09:50,324 --> 00:09:52,693 line:-1
+This is a new NIConfiguration type
+
+
+201
+00:09:52,726 --> 00:09:55,028 line:-1
+in iOS 15.
+
+
+202
+00:09:55.062 --> 00:09:58.298 line:-1 align:center
+To instantiate an Accessory Configuration,
+
+
+203
+00:09:58,332 --> 00:10:02,069 position:31% line:-2
+we need to provide it
+some configuration data,
+
+
+204
+00:10:02.102 --> 00:10:03.904 line:-1 align:center
+describing the accessory
+
+
+205
+00:10:03.937 --> 00:10:06.573 line:-1 align:center
+that the framework expects to receive
+
+
+206
+00:10:06.607 --> 00:10:08.475 line:-1 align:center
+in a particular format
+
+
+207
+00:10:08,509 --> 00:10:12,279 line:-1
+called Accessory Configuration Data.
+
+
+208
+00:10:12,312 --> 00:10:14,781 line:-1
+But how do we get this configuration data,
+
+
+209
+00:10:14,815 --> 00:10:17,317 line:-1
+and what is this particular format?
+
+
+210
+00:10:17,351 --> 00:10:20,654 line:-1
+U1-compatible Ultra-Wideband hardware,
+
+
+211
+00:10:20.687 --> 00:10:22.956 line:-1 align:center
+like the types you'll be able to get
+
+
+212
+00:10:22,990 --> 00:10:25,526 line:-1
+from certified technology providers,
+
+
+213
+00:10:25,559 --> 00:10:28,829 align:start line:-2
+will know how to generate
+this configuration data
+
+
+214
+00:10:28,862 --> 00:10:31,698 line:-1
+upon request.
+
+
+215
+00:10:31,732 --> 00:10:34,168 line:-1
+This means that code you're running
+
+
+216
+00:10:34,201 --> 00:10:36,170 line:-1
+on the accessory itself
+
+
+217
+00:10:36,203 --> 00:10:38,705 line:-1
+will need to generate this data
+
+
+218
+00:10:38.739 --> 00:10:41.642 line:-1 align:center
+and then send it over to your app
+
+
+219
+00:10:41,675 --> 00:10:45,445 line:-1
+on your data channel.
+
+
+220
+00:10:45,479 --> 00:10:47,181 line:-1
+Let's look at a code example
+
+
+221
+00:10:47,214 --> 00:10:50,217 line:-2 align:start
+for instantiating
+a NearbyAccessoryConfiguration
+
+
+222
+00:10:50,250 --> 00:10:54,121 line:-1
+with data received from an accessory.
+
+
+223
+00:10:54,154 --> 00:10:56,590 line:-1
+Let's assume that setupAccessory
+
+
+224
+00:10:56,623 --> 00:10:59,993 line:-1
+is a helper method I wrote in my app.
+
+
+225
+00:11:00.027 --> 00:11:03.063 line:-2 position:24% align:start
+Whenever I get
+the Accessory Configuration Data
+
+
+226
+00:11:03,096 --> 00:11:06,400 line:-2 position:33%
+from an accessory,
+there's logic in my app
+
+
+227
+00:11:06.433 --> 00:11:08.602 line:-1 align:center
+that routes it to this function,
+
+
+228
+00:11:08.635 --> 00:11:12.039 line:-1 align:center
+along with the accessory's name.
+
+
+229
+00:11:12,072 --> 00:11:14,208 line:-1
+At this point, I can create
+
+
+230
+00:11:14,241 --> 00:11:17,010 line:-1
+an NINearbyAccessoryConfiguration
+
+
+231
+00:11:17,044 --> 00:11:20,848 line:-2 position:31%
+using the data I received
+from the accessory.
+
+
+232
+00:11:20.881 --> 00:11:23.817 line:-2 position:28% align:start
+You'll notice
+that I create my configuration
+
+
+233
+00:11:23.851 --> 00:11:27.287 line:-1 align:center
+inside a do/catch statement.
+
+
+234
+00:11:27.321 --> 00:11:29.923 line:-1 align:center
+I do this because if the data
+
+
+235
+00:11:29,957 --> 00:11:33,894 line:-2 align:start
+I received from the accessory
+is invalid in some way,
+
+
+236
+00:11:33,927 --> 00:11:36,730 line:-1
+the NIConfiguration init method
+
+
+237
+00:11:36.763 --> 00:11:39.833 line:-1 align:center
+will throw an exception.
+
+
+238
+00:11:39,867 --> 00:11:43,871 position:28% line:-2
+But if the configuration object
+is created successfully,
+
+
+239
+00:11:43.904 --> 00:11:47.074 line:-2 position:27% align:start
+it means that the data I
+received from the accessory is
+
+
+240
+00:11:47.107 --> 00:11:50.577 line:-1 align:center
+in the right format and can now be used.
+
+
+241
+00:11:50,611 --> 00:11:53,814 line:-2 align:start
+The ultimate reason
+for creating a configuration
+
+
+242
+00:11:53,847 --> 00:11:56,884 line:-1
+is for using it to run a session.
+
+
+243
+00:11:56.917 --> 00:12:00.287 line:-2 align:start position:25%
+But before I do that,
+there's a good opportunity for me
+
+
+244
+00:12:00.320 --> 00:12:03.190 line:-1 align:center
+to cache some useful data for later use.
+
+
+245
+00:12:03,223 --> 00:12:06,493 line:-1
+The new NearbyAccessoryConfiguration type
+
+
+246
+00:12:06.527 --> 00:12:10.030 line:-2 position:26% align:start
+has a DiscoveryToken property
+for the accessory
+
+
+247
+00:12:10,063 --> 00:12:13,634 line:-2 position:32%
+that the framework
+automatically populates.
+
+
+248
+00:12:13,667 --> 00:12:17,271 position:19% line:-2
+In addition,
+in the setupAccessory function I defined,
+
+
+249
+00:12:17,304 --> 00:12:21,074 line:-1
+I also have the accessory's name.
+
+
+250
+00:12:21.108 --> 00:12:25.279 line:-2 position:29% align:start
+So, it could be really useful
+to save the discovery token
+
+
+251
+00:12:25,312 --> 00:12:29,349 line:-2 align:start
+alongside the accessory's name
+at this stage
+
+
+252
+00:12:29,383 --> 00:12:32,419 line:-1
+because, later on, when I start receiving
+
+
+253
+00:12:32.452 --> 00:12:35.422 line:-1 align:center
+NearbyObject updates about this accessory,
+
+
+254
+00:12:35.455 --> 00:12:38.659 line:-2 align:start position:26%
+I would be able to use the token
+and the name
+
+
+255
+00:12:38,692 --> 00:12:42,062 position:22% line:-2
+to correlate the updates back to this
+accessory,
+
+
+256
+00:12:42,095 --> 00:12:45,899 line:-2 align:start
+and then display more relevant
+and rich UI.
+
+
+257
+00:12:47,201 --> 00:12:48,302 line:-1
+Okay.
+
+
+258
+00:12:48,335 --> 00:12:51,638 line:-2 align:start
+So, we have valid configuration data
+from the accessory,
+
+
+259
+00:12:51,672 --> 00:12:53,774 line:-1
+and we used it to create
+
+
+260
+00:12:53,807 --> 00:12:56,844 line:-1
+an accessory configuration object.
+
+
+261
+00:12:56,877 --> 00:13:00,047 align:start line:-2
+Now, we can get ready
+to interact with this accessory.
+
+
+262
+00:13:02.349 --> 00:13:04.051 line:-1 align:center
+To manage the interaction,
+
+
+263
+00:13:04,084 --> 00:13:06,620 line:-1
+we'll need an NISession instance,
+
+
+264
+00:13:06,653 --> 00:13:09,857 line:-2 align:start
+and we'll need to set
+the session's delegate.
+
+
+265
+00:13:09,890 --> 00:13:12,459 line:-1
+To start the session, we simply call
+
+
+266
+00:13:12,492 --> 00:13:14,995 line:-1
+the "run" function on the session,
+
+
+267
+00:13:15.028 --> 00:13:18.165 line:-2 position:26% align:start
+using the accessory
+configuration object we created.
+
+
+268
+00:13:19.733 --> 00:13:22.970 line:-2 align:start position:29%
+Just like Nearby Interaction
+needed configuration data
+
+
+269
+00:13:23,003 --> 00:13:26,240 line:-2 align:start
+from the accessory,
+the accessory also needs
+
+
+270
+00:13:26,273 --> 00:13:28,775 line:-1
+configuration data from Nearby Interaction
+
+
+271
+00:13:28,809 --> 00:13:31,478 line:-1
+in order to know how to configure itself.
+
+
+272
+00:13:31,512 --> 00:13:34,081 line:-1
+This data needs to be in a format
+
+
+273
+00:13:34.114 --> 00:13:37.384 line:-1 align:center
+called "Shareable Configuration Data."
+
+
+274
+00:13:37.417 --> 00:13:41.121 line:-2 position:25% align:start
+When you run a session
+with an accessory configuration,
+
+
+275
+00:13:41.154 --> 00:13:43.524 line:-1 align:center
+Nearby Interaction will provide
+
+
+276
+00:13:43,557 --> 00:13:45,592 line:-1
+the Shareable Configuration Data
+
+
+277
+00:13:45,626 --> 00:13:49,062 line:-1
+to your app through a delegate callback.
+
+
+278
+00:13:49,096 --> 00:13:51,565 line:-1
+And just like we used the data channel
+
+
+279
+00:13:51,598 --> 00:13:55,035 line:-2 align:start
+to receive the accessory's
+configuration data,
+
+
+280
+00:13:55,068 --> 00:13:56,970 line:-1
+here, we'll use it again
+
+
+281
+00:13:57,004 --> 00:13:59,072 line:-1
+to send the shareable configuration data
+
+
+282
+00:13:59,106 --> 00:14:01,575 line:-1
+back to the accessory.
+
+
+283
+00:14:01,608 --> 00:14:03,277 line:-1
+To make things more concrete,
+
+
+284
+00:14:03,310 --> 00:14:05,512 line:-1
+let's look at a code example.
+
+
+285
+00:14:05.546 --> 00:14:08.815 line:-2 align:start position:27%
+Shareable Configuration Data
+is provided to your app
+
+
+286
+00:14:08.849 --> 00:14:11.018 line:-1 align:center
+through the didGenerate delegate callback,
+
+
+287
+00:14:11,051 --> 00:14:14,955 line:-2 align:start
+which is a new delegate callback
+in iOS 15.
+
+
+288
+00:14:16.857 --> 00:14:19.526 line:-2 position:24% align:start
+Here is a possible implementation
+of this callback in an app.
+
+
+289
+00:14:19,560 --> 00:14:23,163 line:-2 align:start
+The framework provides
+the Shareable Configuration Data,
+
+
+290
+00:14:23,197 --> 00:14:26,900 line:-2 align:start
+and also indicates
+which accessory it should go to,
+
+
+291
+00:14:26,934 --> 00:14:30,003 line:-2 align:start
+which is really useful
+in case you're interacting
+
+
+292
+00:14:30,037 --> 00:14:32,706 line:-1
+with multiple accessories.
+
+
+293
+00:14:32,739 --> 00:14:35,642 align:start line:-2
+You should plan to send the data
+to the accessory
+
+
+294
+00:14:35,676 --> 00:14:39,413 align:start line:-2
+as soon as possible
+over your data channel.
+
+
+295
+00:14:39,446 --> 00:14:42,583 position:29% line:-2
+On a general note,
+managing data connections
+
+
+296
+00:14:42.616 --> 00:14:45.719 line:-2 position:28% align:start
+to different accessories can
+take on many different forms,
+
+
+297
+00:14:45.752 --> 00:14:48.055 line:-1 align:center
+all depending on your use case.
+
+
+298
+00:14:48.088 --> 00:14:50.157 line:-1 align:center
+For simplicity,
+
+
+299
+00:14:50.190 --> 00:14:52.860 line:-1 align:center
+let's say that in my app's architecture,
+
+
+300
+00:14:52,893 --> 00:14:55,929 line:-2 align:start
+I chose to keep
+an independent data connection
+
+
+301
+00:14:55.963 --> 00:14:58.932 line:-1 align:center
+for each accessory I'm interacting with.
+
+
+302
+00:14:58,966 --> 00:15:01,235 line:-1
+And to keep my code nicely organized,
+
+
+303
+00:15:01,268 --> 00:15:03,270 line:-1
+I defined a helper function
+
+
+304
+00:15:03,303 --> 00:15:05,172 line:-1
+that gives me back a connection
+
+
+305
+00:15:05,205 --> 00:15:08,208 line:-1
+based on the NearbyObject I give it.
+
+
+306
+00:15:08.242 --> 00:15:10.777 line:-1 align:center
+Once I get a reference to the connection,
+
+
+307
+00:15:10,811 --> 00:15:14,214 line:-2 align:start
+I'll use it to send
+the Shareable Configuration Data
+
+
+308
+00:15:14,248 --> 00:15:17,618 line:-1
+to the accessory right away.
+
+
+309
+00:15:17.651 --> 00:15:20.020 line:-1 align:center
+It's important to optimize your app
+
+
+310
+00:15:20.053 --> 00:15:22.322 line:-2 align:start position:31%
+for sending the shareable
+configuration data
+
+
+311
+00:15:22,356 --> 00:15:25,826 line:-2 position:27%
+to the accessory
+with as little delay as possible.
+
+
+312
+00:15:25,859 --> 00:15:29,229 line:-2 align:start
+If the ShareableConfigurationData
+is not sent quickly enough,
+
+
+313
+00:15:29,263 --> 00:15:31,198 line:-1
+your session may timeout.
+
+
+314
+00:15:31,231 --> 00:15:34,067 line:-1
+A timeout in a session with an accessory
+
+
+315
+00:15:34.101 --> 00:15:36.170 line:-1 align:center
+will be communicated to your app
+
+
+316
+00:15:36.203 --> 00:15:40.541 line:-1 align:center
+through the didRemove delegate callback.
+
+
+317
+00:15:40,574 --> 00:15:43,443 align:start line:-2
+Let's look at how you might
+handle this scenario.
+
+
+318
+00:15:44,645 --> 00:15:47,781 position:24% line:-2
+When Nearby Interaction
+gives me the didRemove callback,
+
+
+319
+00:15:47.814 --> 00:15:49.283 line:-1 align:center
+shown on the screen,
+
+
+320
+00:15:49,316 --> 00:15:52,719 line:-1
+I'll first check the "reason" parameter.
+
+
+321
+00:15:52,753 --> 00:15:54,655 line:-1
+If the reason is .timeout,
+
+
+322
+00:15:54,688 --> 00:15:56,890 line:-1
+and I have high confidence
+
+
+323
+00:15:56.924 --> 00:15:59.493 line:-1 align:center
+that the accessory may still be nearby,
+
+
+324
+00:15:59,526 --> 00:16:02,796 line:-2 position:34%
+I can attempt to retry
+to interact with it.
+
+
+325
+00:16:04,331 --> 00:16:06,500 line:-1
+To decide whether or not I should go
+
+
+326
+00:16:06,533 --> 00:16:08,869 line:-1
+into a "retry flow" with this accessory,
+
+
+327
+00:16:08,902 --> 00:16:11,138 line:-1
+I defined a helper function
+
+
+328
+00:16:11.171 --> 00:16:13.273 line:-1 align:center
+that contains specialized logic
+
+
+329
+00:16:13,307 --> 00:16:16,343 line:-1
+that helps me make this decision.
+
+
+330
+00:16:16,376 --> 00:16:18,979 line:-1
+You can imagine that conditions like
+
+
+331
+00:16:19,012 --> 00:16:22,316 line:-2 align:start
+"How many times have I retried
+without being successful?"
+
+
+332
+00:16:22,349 --> 00:16:25,919 position:27% line:-2
+or "Has the accessory notified
+me it has stopped?"
+
+
+333
+00:16:25,953 --> 00:16:29,756 position:25% line:-2
+or other similar questions can be
+a part of decisions like this.
+
+
+334
+00:16:31.391 --> 00:16:33.427 line:-1 align:center
+If I do decide to retry,
+
+
+335
+00:16:33,460 --> 00:16:36,530 line:-1
+all I have to do is run the session again
+
+
+336
+00:16:36,563 --> 00:16:39,233 line:-1
+with the same configuration.
+
+
+337
+00:16:39,266 --> 00:16:41,969 line:-2 align:start
+Keep in mind,
+that the cached configuration
+
+
+338
+00:16:42.002 --> 00:16:45.239 line:-2 position:33% align:start
+will only remain valid
+as long as the session
+
+
+339
+00:16:45,272 --> 00:16:48,375 line:-1
+on the accessory was not terminated.
+
+
+340
+00:16:48,408 --> 00:16:50,410 line:-1
+If the session was terminated,
+
+
+341
+00:16:50,444 --> 00:16:53,213 line:-1
+I'll have to go through the same flow
+
+
+342
+00:16:53.247 --> 00:16:56.884 line:-2 align:start position:31%
+I used to create and run
+the session the first time.
+
+
+343
+00:16:56,917 --> 00:16:59,786 line:-2 align:start
+Keep in mind that sessions
+on the accessory
+
+
+344
+00:16:59,820 --> 00:17:03,190 align:start line:-2
+is something the code running
+on the accessory has to manage,
+
+
+345
+00:17:03,223 --> 00:17:05,859 line:-1
+and can be done in many different ways,
+
+
+346
+00:17:05.893 --> 00:17:08.262 line:-1 align:center
+all depending on your use case.
+
+
+347
+00:17:09.696 --> 00:17:10.797 line:-1 align:center
+Okay.
+
+
+348
+00:17:10,831 --> 00:17:14,134 line:-2 align:start
+You sent the Shareable Configuration Data
+to your accessory,
+
+
+349
+00:17:14,168 --> 00:17:17,771 position:29% line:-2
+and you even have logic
+to handle retries if needed.
+
+
+350
+00:17:17,804 --> 00:17:19,606 line:-1
+What's next?
+
+
+351
+00:17:19,640 --> 00:17:22,409 line:-1
+Just like with the Accessory Configuration Data
+
+
+352
+00:17:22,442 --> 00:17:25,345 position:27% line:-2
+U1-compatible hardware
+in the accessory
+
+
+353
+00:17:25,379 --> 00:17:28,048 line:-1
+will automatically know what to do
+
+
+354
+00:17:28.081 --> 00:17:30.184 line:-1 align:center
+with the Shareable Configuration Data
+
+
+355
+00:17:30,217 --> 00:17:33,086 align:start line:-2
+once your accessory code
+provides it to it.
+
+
+356
+00:17:34,588 --> 00:17:38,292 line:-2 position:16%
+So, once the code running on the accessory
+receives the data,
+
+
+357
+00:17:38.325 --> 00:17:40.761 line:-1 align:center
+it needs to provide it as-is,
+
+
+358
+00:17:40,794 --> 00:17:42,729 line:-1
+and as quickly as possible,
+
+
+359
+00:17:42.763 --> 00:17:46.366 line:-1 align:center
+to the Ultra-Wideband hardware on board.
+
+
+360
+00:17:46.400 --> 00:17:47.701 line:-1 align:center
+You might be wondering--
+
+
+361
+00:17:47,734 --> 00:17:50,704 align:start line:-2
+how will the Ultra-Wideband hardware
+in the accessory
+
+
+362
+00:17:50,737 --> 00:17:54,474 align:start line:-2
+know to generate
+or consume the configuration data?
+
+
+363
+00:17:54,508 --> 00:17:56,910 line:-1
+Both the Accessory Configuration Data
+
+
+364
+00:17:56,944 --> 00:17:59,079 line:-1
+and the Shareable Configuration Data
+
+
+365
+00:17:59.112 --> 00:18:02.049 line:-1 align:center
+are defined in a specification document
+
+
+366
+00:18:02.082 --> 00:18:05.986 line:-1 align:center
+we published earlier this spring.
+
+
+367
+00:18:06.019 --> 00:18:07.855 line:-1 align:center
+The document is intended
+
+
+368
+00:18:07.888 --> 00:18:10.324 line:-1 align:center
+for chipset and module manufactures,
+
+
+369
+00:18:10,357 --> 00:18:13,160 line:-1
+and it contains the necessary details
+
+
+370
+00:18:13.193 --> 00:18:15.996 line:-1 align:center
+for creating Ultra-Wideband solutions
+
+
+371
+00:18:16.029 --> 00:18:17.931 line:-1 align:center
+that use industry standards
+
+
+372
+00:18:17.965 --> 00:18:21.268 line:-1 align:center
+to interoperate with U1 in iPhone.
+
+
+373
+00:18:22.569 --> 00:18:25.339 line:-2 align:start position:24%
+On top
+of the interoperability specification
+
+
+374
+00:18:25,372 --> 00:18:27,074 line:-1
+for chipset manufacturers,
+
+
+375
+00:18:27.107 --> 00:18:30.010 line:-1 align:center
+we are also releasing a specification
+
+
+376
+00:18:30,043 --> 00:18:32,913 line:-1
+targeted at accessory manufacturers.
+
+
+377
+00:18:32.946 --> 00:18:35.549 line:-1 align:center
+So, if you're hoping to build an accessory
+
+
+378
+00:18:35,582 --> 00:18:37,951 line:-1
+that contains Ultra-Wideband hardware,
+
+
+379
+00:18:37.985 --> 00:18:39.887 line:-1 align:center
+and you want to interact with it
+
+
+380
+00:18:39.920 --> 00:18:43.156 line:-2 align:start position:20%
+using the Nearby Interaction framework
+in your app,
+
+
+381
+00:18:43.190 --> 00:18:45.492 line:-1 align:center
+this document is for you.
+
+
+382
+00:18:45,526 --> 00:18:47,928 line:-1
+You'll find it on the developer website,
+
+
+383
+00:18:47,961 --> 00:18:50,130 line:-1
+alongside additional resources
+
+
+384
+00:18:50.163 --> 00:18:52.533 line:-1 align:center
+for getting started.
+
+
+385
+00:18:52.566 --> 00:18:54.868 line:-1 align:center
+This is where we left off.
+
+
+386
+00:18:54.902 --> 00:18:57.871 line:-2 align:start position:24%
+We had just sent
+the Shareable Configuration Data
+
+
+387
+00:18:57.905 --> 00:19:01.308 line:-1 align:center
+to the accessory over the data channel.
+
+
+388
+00:19:01,341 --> 00:19:02,809 line:-1
+Now, let's see what happens
+
+
+389
+00:19:02.843 --> 00:19:05.412 line:-2 position:28% align:start
+once the code
+on the accessory receives it,
+
+
+390
+00:19:05,445 --> 00:19:08,782 align:start line:-2
+and provides it
+to the Ultra-Wideband hardware.
+
+
+391
+00:19:09,850 --> 00:19:13,220 align:start line:-2
+After receiving
+the shareable configuration data,
+
+
+392
+00:19:13,253 --> 00:19:16,089 line:-2 align:start
+the Ultra-Wideband hardware
+on the accessory
+
+
+393
+00:19:16,123 --> 00:19:18,458 line:-1
+will immediately start running
+
+
+394
+00:19:18,492 --> 00:19:20,460 line:-1
+in the appropriate configuration
+
+
+395
+00:19:20.494 --> 00:19:24.431 line:-2 align:start position:25%
+for interacting with the NISession
+in your app.
+
+
+396
+00:19:24,464 --> 00:19:28,268 align:start line:-2
+And if both the accessory
+and the iPhone running your app
+
+
+397
+00:19:28.302 --> 00:19:29.903 line:-1 align:center
+are nearby one another,
+
+
+398
+00:19:29,937 --> 00:19:32,172 line:-1
+the session will start providing your app
+
+
+399
+00:19:32,206 --> 00:19:34,808 line:-1
+a stream of NearbyObject updates,
+
+
+400
+00:19:34,842 --> 00:19:37,244 line:-1
+containing distance and, optionally,
+
+
+401
+00:19:37.277 --> 00:19:40.581 line:-1 align:center
+direction to the accessory.
+
+
+402
+00:19:40,614 --> 00:19:44,351 line:-2 align:start
+You can even interact
+with several accessories simultaneously,
+
+
+403
+00:19:44,384 --> 00:19:47,821 line:-2 position:32%
+by creating and running
+a session for each one.
+
+
+404
+00:19:47.855 --> 00:19:51.491 line:-2 position:22% align:start
+Depending on the hardware features
+on the accessory,
+
+
+405
+00:19:51,525 --> 00:19:54,595 position:23% line:-2
+you may also be able
+to get equivalent proximity updates
+
+
+406
+00:19:54.628 --> 00:19:56.630 line:-1 align:center
+in the code running on the accessory.
+
+
+407
+00:19:56,663 --> 00:20:00,234 line:-2 align:start
+Once you get NearbyObject updates
+from the framework,
+
+
+408
+00:20:00,267 --> 00:20:02,803 line:-1
+what do you do with them?
+
+
+409
+00:20:02.836 --> 00:20:06.139 line:-2 align:start position:24%
+As a reminder,
+we wanted to build an experience
+
+
+410
+00:20:06,173 --> 00:20:09,042 line:-1
+in which the app and the accessory
+
+
+411
+00:20:10.911 --> 00:20:13.447 line:-1 align:center
+when the user enters the larger region,
+
+
+412
+00:20:13,480 --> 00:20:15,182 line:-1
+and enable functionality B
+
+
+413
+00:20:15,215 --> 00:20:18,819 line:-2 align:start
+when the user enters the smaller region
+around the accessory.
+
+
+414
+00:20:18,852 --> 00:20:22,222 line:-2 position:25%
+Let's look at a code example
+that shows how you could do this
+
+
+415
+00:20:22.256 --> 00:20:25.325 line:-2 align:start position:28%
+using NearbyObject updates
+in your iOS app.
+
+
+416
+00:20:26,894 --> 00:20:30,631 line:-2 align:start
+When the session between the app
+and the accessory is running,
+
+
+417
+00:20:30,664 --> 00:20:34,468 line:-2 position:20%
+updates about the accessory
+are delivered to the session's delegate
+
+
+418
+00:20:34.501 --> 00:20:38.305 line:-1 align:center
+through the didUpdate delegate callback.
+
+
+419
+00:20:38,338 --> 00:20:41,575 line:-2 position:31%
+First, I'll grab a reference
+to the nearby object
+
+
+420
+00:20:41.608 --> 00:20:44.511 line:-2 align:start position:32%
+for which the framework
+is giving me an update.
+
+
+421
+00:20:44.545 --> 00:20:47.548 line:-1 align:center
+Next, I'll create a local variable
+
+
+422
+00:20:47,581 --> 00:20:49,683 line:-1
+with the distance to this object,
+
+
+423
+00:20:49,716 --> 00:20:52,786 position:33% line:-2
+which the framework
+is providing in meters.
+
+
+424
+00:20:52,819 --> 00:20:55,989 line:-2 position:34%
+The next thing I'll do
+is provide this data
+
+
+425
+00:20:56.023 --> 00:20:58.492 line:-1 align:center
+to a helper function I have in my app
+
+
+426
+00:20:58,525 --> 00:21:02,262 line:-1
+I called getSmoothedDistance.
+
+
+427
+00:21:02,296 --> 00:21:04,598 line:-1
+I defined this function in my app
+
+
+428
+00:21:04,631 --> 00:21:07,301 line:-1
+to help me guard against rapid changes
+
+
+429
+00:21:07,334 --> 00:21:08,936 line:-1
+in the distance.
+
+
+430
+00:21:08,969 --> 00:21:11,271 line:-1
+For example, in cases where the user
+
+
+431
+00:21:11.305 --> 00:21:13.073 line:-1 align:center
+makes sudden movements,
+
+
+432
+00:21:13,106 --> 00:21:15,175 line:-1
+or they happen to be standing
+
+
+433
+00:21:15,209 --> 00:21:18,011 line:-1
+on the boundary between the zones.
+
+
+434
+00:21:18,045 --> 00:21:20,681 line:-1
+Lastly, I can check to see
+
+
+435
+00:21:20,714 --> 00:21:23,450 line:-1
+if the user's distance from the accessory
+
+
+436
+00:21:23.483 --> 00:21:26.587 line:-1 align:center
+crossed my predefined thresholds.
+
+
+437
+00:21:26.620 --> 00:21:29.456 line:-2 position:28% align:start
+Here, I can choose to
+enableFunctionalityA
+
+
+438
+00:21:29.489 --> 00:21:32.826 line:-2 align:start position:32%
+or FunctionalityB based
+on the current distance.
+
+
+439
+00:21:34,628 --> 00:21:38,265 position:23% line:-2
+If you're interested in learning more
+about designing experiences
+
+
+440
+00:21:38.298 --> 00:21:41.301 line:-2 position:26% align:start
+based on distance and direction
+between devices,
+
+
+441
+00:21:41.335 --> 00:21:44.104 line:-2 align:start position:25%
+check out the "Design for Spatial
+Interaction"
+
+
+442
+00:21:44,137 --> 00:21:46,807 line:-1
+WWDC talk from this year.
+
+
+443
+00:21:48,976 --> 00:21:52,179 line:-2 align:start
+So, let's summarize
+what we discussed in this session.
+
+
+444
+00:21:53,947 --> 00:21:57,584 position:24% line:-2
+We talked about how the new
+permission model allows your app
+
+
+445
+00:21:57,618 --> 00:22:00,721 position:28% line:-2
+to access Nearby Interaction
+while the app is in use.
+
+
+446
+00:22:02,623 --> 00:22:05,292 line:-2 align:start
+We took a deep dive into the brand-new
+world
+
+
+447
+00:22:05,325 --> 00:22:08,662 line:-2 align:start
+of Nearby Interaction-enabled
+third-party accessories,
+
+
+448
+00:22:08,695 --> 00:22:10,931 line:-1
+and what APIs you can use
+
+
+449
+00:22:10,964 --> 00:22:14,635 position:27% line:-2
+to build spatial interactions
+with your very own accessory.
+
+
+450
+00:22:14,668 --> 00:22:17,905 position:28% line:-2
+We also discussed
+third-party development kits,
+
+
+451
+00:22:17,938 --> 00:22:20,874 align:start line:-2
+available from supported
+technology providers,
+
+
+452
+00:22:20.908 --> 00:22:24.011 line:-2 align:start position:27%
+and iOS app code
+that you can use to get started
+
+
+453
+00:22:24.044 --> 00:22:25.979 line:-1 align:center
+with your project right away.
+
+
+454
+00:22:26,013 --> 00:22:28,282 line:-1
+So, go on ahead, give it a try,
+
+
+455
+00:22:28.315 --> 00:22:31.418 line:-2 position:26% align:start
+and start experimenting
+and prototyping your use cases.
+
+
+456
+00:22:32,753 --> 00:22:36,523 line:-2 position:24%
+And when you're ready to adopt
+Ultra Wideband in your accessory,
+
+
+457
+00:22:36.557 --> 00:22:38.926 line:-1 align:center
+read the relevant specification documents,
+
+
+458
+00:22:38,959 --> 00:22:42,196 line:-1
+available on the Apple developer website.
+
+
+459
+00:22:42.229 --> 00:22:45.232 line:-2 align:start position:29%
+That's it for this year's
+Nearby Interaction updates.
+
+
+460
+00:22:45.265 --> 00:22:46.834 line:-1 align:center
+Thanks for tuning in.
+
+
+461
+00:22:46,867 --> 00:22:48,735 line:-1
+We hope this session was helpful
+
+
+462
+00:22:48.769 --> 00:22:50.838 line:-1 align:center
+and contained all the information you need
+
+
+463
+00:22:50,871 --> 00:22:54,374 line:-2 align:start
+to get started with building some
+amazing apps and accessories.
+
+
+464
+00:22:54,408 --> 00:22:57,411 line:-1
+[upbeat music]
+

@@ -1,0 +1,967 @@
+1
+00:00:03,871 --> 00:00:06,206 line:-1
+Hello and welcome to WWDC.
+
+
+2
+00:00:08,408 --> 00:00:11,979 line:0
+Hi, I'm Dan, and today
+we're gonna talk about how to create
+
+
+3
+00:00:12,045 --> 00:00:14,214 line:0
+a seamless speech experience in your apps.
+
+
+4
+00:00:15,215 --> 00:00:19,119 line:-2
+In this talk, I'll go over
+when to leverage AVSpeechSynthesizer
+
+
+5
+00:00:19,186 --> 00:00:21,889 line:-2
+and when you might wanna consider
+other APIs instead.
+
+
+6
+00:00:21,955 --> 00:00:24,424 line:-1
+Then, I'll go over some of the API basics,
+
+
+7
+00:00:24,491 --> 00:00:26,627 line:-2
+before jumping
+into some more advanced topics,
+
+
+8
+00:00:26,693 --> 00:00:29,363 line:-2
+like how to route speech
+through an outgoing call
+
+
+9
+00:00:29,429 --> 00:00:33,066 line:-2
+or how to opt speech audio out of
+your application shared audio session.
+
+
+10
+00:00:33,934 --> 00:00:36,703 line:-2
+Let's start by taking a look
+at a couple different examples
+
+
+11
+00:00:36,770 --> 00:00:39,473 line:-2
+of when you might be considering
+using speech in your apps.
+
+
+12
+00:00:40,040 --> 00:00:42,776 line:-2
+If you are trying to use speech
+for everyone in your app,
+
+
+13
+00:00:42,843 --> 00:00:45,312 line:-2
+AVSpeechSynthesizer
+is likely a good choice.
+
+
+14
+00:00:45,746 --> 00:00:48,916 line:-2
+Perhaps your app is designed
+to be used without looking at the screen,
+
+
+15
+00:00:48,982 --> 00:00:52,419 line:-2
+like how the Maps app uses speech
+to provide spoken directions.
+
+
+16
+00:00:53,854 --> 00:00:56,924 line:-2
+If you're trying to provide speech
+only for people using your app
+
+
+17
+00:00:56,990 --> 00:00:59,626 line:-2
+with a screen reader
+or other assistive technology,
+
+
+18
+00:00:59,693 --> 00:01:02,196 line:-2
+AVSpeechSynthesizer
+may not be the right choice.
+
+
+19
+00:01:03,263 --> 00:01:05,299 line:-1
+All of our devices ship with VoiceOver,
+
+
+20
+00:01:05,364 --> 00:01:08,135 line:-2
+a built-in screen reader
+with a rich feature set.
+
+
+21
+00:01:08,202 --> 00:01:10,637 line:-2
+So there's no need for you
+to create your own screen reader
+
+
+22
+00:01:10,704 --> 00:01:13,540 line:-2
+that's local to your app
+using AVSpeechSynthesizer.
+
+
+23
+00:01:14,408 --> 00:01:18,412 line:-2
+Instead, make your app accessible
+using the UIAccessibility APIs.
+
+
+24
+00:01:18,979 --> 00:01:20,747 line:-2
+If you need help
+getting started with this,
+
+
+25
+00:01:20,814 --> 00:01:24,051 line:-2
+we have some great talks
+from past WWDCs that can help.
+
+
+26
+00:01:25,018 --> 00:01:28,889 line:-2
+For the cases where you want to provide
+infrequent additional speech to VoiceOver,
+
+
+27
+00:01:28,956 --> 00:01:31,091 line:-2
+such as describing
+an event that has occurred,
+
+
+28
+00:01:31,158 --> 00:01:33,861 line:-2
+you can do so by posting
+an announcement notification.
+
+
+29
+00:01:33,927 --> 00:01:38,832 line:-2
+Use UIAccessibility.post and pass in
+a notification type of announcement
+
+
+30
+00:01:38,899 --> 00:01:41,401 line:-2
+and a string
+that you'd like to have spoken.
+
+
+31
+00:01:41,468 --> 00:01:45,606 line:-2
+This will delegate the speech request
+to VoiceOver so it can manage it for you.
+
+
+32
+00:01:45,672 --> 00:01:48,876 line:-2
+If you're building an app that has
+an experience centered around speech,
+
+
+33
+00:01:48,942 --> 00:01:51,378 line:-2
+AVSpeechSynthesizer
+might be able to provide you
+
+
+34
+00:01:51,445 --> 00:01:53,080 line:-1
+with some additional flexibility
+
+
+35
+00:01:53,146 --> 00:01:56,783 line:-2
+even if your app is going to be used in
+conjunction with an assistive technology.
+
+
+36
+00:01:57,618 --> 00:02:01,722 line:-2
+Augmentative Alternative Communication,
+or AAC, apps are one example
+
+
+37
+00:02:01,788 --> 00:02:03,257 line:-1
+of this kind of experience.
+
+
+38
+00:02:03,757 --> 00:02:06,860 line:-2
+And Proloquo2Go
+is an AAC app that does a great job.
+
+
+39
+00:02:07,961 --> 00:02:09,930 line:-1
+It's a tool for people who are nonverbal,
+
+
+40
+00:02:09,997 --> 00:02:14,168 line:-2
+and it uses pictures and other visual cues
+to help people construct sentences
+
+
+41
+00:02:14,234 --> 00:02:16,904 line:-2
+that are spoken aloud
+via AVSpeechSynthesizer
+
+
+42
+00:02:16,970 --> 00:02:18,772 line:-1
+so they may communicate with others.
+
+
+43
+00:02:20,874 --> 00:02:23,243 line:-2
+Apps designed for people
+who are blind or low-vision
+
+
+44
+00:02:23,310 --> 00:02:25,779 line:-2
+might also have experiences
+centered around speech.
+
+
+45
+00:02:26,647 --> 00:02:30,517 line:-2
+Seeing AI is an app that helps people
+interact with the world around them
+
+
+46
+00:02:30,584 --> 00:02:32,653 line:-2
+by describing objects
+in their environment.
+
+
+47
+00:02:33,787 --> 00:02:37,157 line:-2
+Notice that Seeing AI is still
+completely accessible to VoiceOver,
+
+
+48
+00:02:37,224 --> 00:02:39,426 line:-1
+and all of its UI is properly labeled.
+
+
+49
+00:02:40,427 --> 00:02:42,529 line:-1
+AVSpeechSynthesizer can still help
+
+
+50
+00:02:42,596 --> 00:02:45,599 line:-2
+by being used to describe the objects
+in the viewfinder
+
+
+51
+00:02:45,666 --> 00:02:47,201 line:-1
+and gives the app additional control
+
+
+52
+00:02:47,267 --> 00:02:49,837 line:-2
+over how and when
+those speech requests are spoken.
+
+
+53
+00:02:50,370 --> 00:02:53,440 line:-2
+Now that we know when it's appropriate
+to use AVSpeechSynthesizer,
+
+
+54
+00:02:53,507 --> 00:02:55,275 line:-1
+let's dive into some of the API.
+
+
+55
+00:02:56,043 --> 00:02:58,212 line:0
+To get started, it's pretty simple.
+
+
+56
+00:02:58,278 --> 00:03:01,582 line:0
+All you need to do is create
+an AVSpeechSynthesizer object.
+
+
+57
+00:03:02,282 --> 00:03:05,652 line:0
+Make sure that this object is retained
+until speech is concluded.
+
+
+58
+00:03:06,486 --> 00:03:08,722 line:0
+Next, create an AVSpeechUtterance,
+
+
+59
+00:03:08,789 --> 00:03:11,091 line:0
+passing in the string
+you'd like to have spoken.
+
+
+60
+00:03:12,059 --> 00:03:14,862 line:0
+Finally, call the speak method
+on your synthesizer,
+
+
+61
+00:03:14,928 --> 00:03:16,864 line:0
+passing in the utterance you've created.
+
+
+62
+00:03:17,464 --> 00:03:19,099 line:0
+Getting started is that simple.
+
+
+63
+00:03:19,566 --> 00:03:23,337 line:0
+If you're trying to provide basic amounts
+of speech for everyone using your app,
+
+
+64
+00:03:23,403 --> 00:03:25,572 line:0
+this is likely all you'll need to do.
+
+
+65
+00:03:25,639 --> 00:03:28,909 line:0
+By default, AVSpeechSynthesizer
+will configure your utterance
+
+
+66
+00:03:28,976 --> 00:03:32,746 line:0
+using the settings on your device
+in Accessibility Spoken Content.
+
+
+67
+00:03:33,380 --> 00:03:35,949 line:0
+Keep in mind
+that although Siri voices are available
+
+
+68
+00:03:36,016 --> 00:03:38,018 line:0
+to be selected in Spoken Content Settings,
+
+
+69
+00:03:38,085 --> 00:03:41,054 line:0
+they are not available
+through the AVSpeechSynthesizer API.
+
+
+70
+00:03:41,955 --> 00:03:44,625 line:0
+In the case that a Siri voice
+is the selected voice,
+
+
+71
+00:03:44,691 --> 00:03:46,527 line:0
+we'll automatically
+configure your utterance
+
+
+72
+00:03:46,593 --> 00:03:48,595 line:0
+using an appropriate fallback voice
+
+
+73
+00:03:48,662 --> 00:03:51,865 line:0
+that matches the same language code
+as the selected Siri voice.
+
+
+74
+00:03:51,932 --> 00:03:55,269 line:-2
+People using your app with
+an assistive technology like VoiceOver
+
+
+75
+00:03:55,335 --> 00:03:56,737 line:-1
+likely have other speech settings
+
+
+76
+00:03:56,803 --> 00:03:59,039 line:-2
+configured specifically
+for that technology.
+
+
+77
+00:03:59,640 --> 00:04:03,544 line:-2
+Until now, it hasn't been possible
+to request that AVSpeechSynthesizer
+
+
+78
+00:04:03,610 --> 00:04:07,614 line:-2
+respect those settings instead of the ones
+on your device in Spoken Content.
+
+
+79
+00:04:08,448 --> 00:04:09,883 line:0
+Well, this year we're changing that
+
+
+80
+00:04:09,950 --> 00:04:12,953 line:0
+with the new
+prefersAssistiveTechnologySettings API.
+
+
+81
+00:04:13,921 --> 00:04:16,723 line:0
+Setting this property to "true"
+on your AVSpeechUtterance
+
+
+82
+00:04:16,790 --> 00:04:19,526 line:0
+will request that AVSpeechSynthesizer
+apply the settings
+
+
+83
+00:04:19,593 --> 00:04:22,696 line:0
+from the currently running
+assistive technology to your utterance.
+
+
+84
+00:04:23,363 --> 00:04:26,233 line:0
+This includes speech properties
+such as the selected voice,
+
+
+85
+00:04:26,300 --> 00:04:27,835 line:0
+speaking rate and pitch.
+
+
+86
+00:04:29,002 --> 00:04:31,905 line:0
+It's important to note
+that these properties will take precedence
+
+
+87
+00:04:31,972 --> 00:04:35,075 line:0
+over any properties you are
+explicitly setting on the utterance.
+
+
+88
+00:04:35,843 --> 00:04:37,644 line:0
+If no assistive technology is running,
+
+
+89
+00:04:37,711 --> 00:04:40,280 line:0
+we'll continue to use
+the settings from Spoken Content
+
+
+90
+00:04:40,347 --> 00:04:42,850 line:0
+or whichever properties
+you are setting on the utterance.
+
+
+91
+00:04:43,951 --> 00:04:45,953 line:0
+We encourage you
+to set this on your utterances,
+
+
+92
+00:04:46,019 --> 00:04:47,888 line:0
+especially if your app
+is likely to be used
+
+
+93
+00:04:47,955 --> 00:04:49,990 line:0
+with an assistive technology
+like VoiceOver.
+
+
+94
+00:04:50,924 --> 00:04:55,095 line:0
+However, this API may not be appropriate
+for all apps, like AAC apps,
+
+
+95
+00:04:55,162 --> 00:04:57,598 line:0
+so make sure you evaluate
+your use case accordingly.
+
+
+96
+00:04:58,232 --> 00:05:01,235 line:-2
+Let's take a look
+at how this API affects speech.
+
+
+97
+00:05:01,301 --> 00:05:03,504 line:-2
+In this app,
+tapping on each of the buttons
+
+
+98
+00:05:03,570 --> 00:05:05,572 line:-1
+will speak the string "Hello, world."
+
+
+99
+00:05:05,639 --> 00:05:07,741 line:-2
+The first button uses
+the default settings,
+
+
+100
+00:05:07,808 --> 00:05:12,145 line:-2
+whereas the second uses the
+prefersAssistiveTechnologySettings API.
+
+
+101
+00:05:12,212 --> 00:05:14,014 line:-1
+On this device, VoiceOver is running
+
+
+102
+00:05:14,081 --> 00:05:16,350 line:-2
+with a non-default voice
+and a higher speaking rate.
+
+
+103
+00:05:16,416 --> 00:05:18,519 line:-1
+Let's listen to how the speech sounds.
+
+
+104
+00:05:19,920 --> 00:05:21,889 line:-2
+[male electronic voice]
+Speak "Hello, world" button.
+
+
+105
+00:05:21,955 --> 00:05:23,423 line:-1
+[female electronic voice] Hello, world.
+
+
+106
+00:05:23,490 --> 00:05:26,360 line:-2
+[male electronic voice]
+Speak "Hello, world" button. Hello, world.
+
+
+107
+00:05:27,127 --> 00:05:28,662 line:-1
+Notice how the second speech request
+
+
+108
+00:05:28,729 --> 00:05:31,565 line:-2
+used the same voice
+and speaking rate as VoiceOver
+
+
+109
+00:05:31,632 --> 00:05:35,102 line:-2
+so that speech fit in much more seamlessly
+with the VoiceOver experience.
+
+
+110
+00:05:35,669 --> 00:05:38,805 line:-2
+Meanwhile, the first button
+spoke the string quite differently,
+
+
+111
+00:05:38,872 --> 00:05:42,075 line:-2
+and it may not be what the person
+who is using this app would've expected.
+
+
+112
+00:05:42,976 --> 00:05:46,013 line:0
+Sometimes, you might want
+to customize speech within your app
+
+
+113
+00:05:46,079 --> 00:05:48,382 line:0
+rather than respecting
+the settings on the device.
+
+
+114
+00:05:48,916 --> 00:05:49,917 line:0
+For example,
+
+
+115
+00:05:49,983 --> 00:05:54,054 line:0
+an AAC app might wanna provide people
+with a list of voices to choose from
+
+
+116
+00:05:54,121 --> 00:05:56,557 line:0
+and the ability to customize
+other speech properties
+
+
+117
+00:05:56,623 --> 00:05:59,626 line:0
+so they can create a voice
+that sounds more unique to them.
+
+
+118
+00:05:59,693 --> 00:06:01,562 line:0
+You can set a voice on your utterance,
+
+
+119
+00:06:01,628 --> 00:06:05,065 line:0
+choosing one using
+either a language code or an identifier.
+
+
+120
+00:06:05,132 --> 00:06:08,001 line:0
+You can also get a list of voices
+available on the system
+
+
+121
+00:06:08,068 --> 00:06:12,072 line:0
+by calling the Speech Voices method
+on AVSpeechSynthesisVoice.
+
+
+122
+00:06:12,139 --> 00:06:16,276 line:0
+This list will be updated as new voices
+are downloaded in Accessibility Settings.
+
+
+123
+00:06:16,343 --> 00:06:17,878 line:-1
+You can further customize speech
+
+
+124
+00:06:17,945 --> 00:06:20,681 line:-2
+by setting additional properties
+on your AVSpeechUtterance,
+
+
+125
+00:06:20,747 --> 00:06:24,551 line:-2
+such as speaking rate,
+a pitch multiplier and a volume.
+
+
+126
+00:06:24,618 --> 00:06:27,988 line:-1
+The AVSpeechSynthesizer talk from WWDC18
+
+
+127
+00:06:28,055 --> 00:06:30,424 line:-2
+covers all of these properties
+in more detail,
+
+
+128
+00:06:30,490 --> 00:06:33,060 line:-2
+so I encourage you to watch that
+if you'd like to learn more.
+
+
+129
+00:06:33,961 --> 00:06:36,897 line:-2
+An API to consider if you're building
+an app centered around speech
+
+
+130
+00:06:36,964 --> 00:06:39,233 line:-1
+is the mixToTelephonyUplink property.
+
+
+131
+00:06:39,967 --> 00:06:42,769 line:-2
+Setting this property to "true"
+on your AVSpeechSynthesizer
+
+
+132
+00:06:42,836 --> 00:06:45,772 line:-2
+will route speech
+through the current active outgoing call,
+
+
+133
+00:06:45,839 --> 00:06:48,008 line:-1
+such as a phone call or a FaceTime call.
+
+
+134
+00:06:48,742 --> 00:06:50,043 line:-1
+If no call is active,
+
+
+135
+00:06:50,110 --> 00:06:53,013 line:-2
+we'll continue to route speech
+through its default audio route.
+
+
+136
+00:06:53,647 --> 00:06:56,917 line:-2
+This is a really powerful API
+for apps like AAC apps
+
+
+137
+00:06:56,984 --> 00:06:58,952 line:-1
+as it can empower people who are nonverbal
+
+
+138
+00:06:59,019 --> 00:07:01,288 line:-2
+to communicate using
+more traditional methods.
+
+
+139
+00:07:01,955 --> 00:07:03,957 line:-2
+Another API to consider
+if you're building an app
+
+
+140
+00:07:04,024 --> 00:07:06,226 line:-2
+that has an experience
+centered around speech,
+
+
+141
+00:07:06,293 --> 00:07:08,395 line:-1
+or if your app uses a lot of other audio,
+
+
+142
+00:07:08,462 --> 00:07:11,565 line:-1
+is the usesApplicationAudioSession API.
+
+
+143
+00:07:11,632 --> 00:07:15,035 line:-2
+By default, this is set to "true"
+on your AVSpeechSynthesizer,
+
+
+144
+00:07:15,102 --> 00:07:18,372 line:-2
+and speech audio will use
+your application shared audio session.
+
+
+145
+00:07:19,072 --> 00:07:20,307 line:-1
+You can set it to "false"
+
+
+146
+00:07:20,374 --> 00:07:23,210 line:-2
+to delegate away the management
+of speech audio to the system.
+
+
+147
+00:07:23,977 --> 00:07:26,313 line:-2
+This way,
+we'll take care of certain things for you,
+
+
+148
+00:07:26,380 --> 00:07:28,081 line:-1
+such as handling audio interruptions
+
+
+149
+00:07:28,148 --> 00:07:30,717 line:-2
+and setting your audio session
+to active or inactive.
+
+
+150
+00:07:31,451 --> 00:07:35,956 line:-2
+Additionally, speech will duck and mix
+with the other audio coming from your app,
+
+
+151
+00:07:36,023 --> 00:07:37,891 line:-2
+so you don't have to worry
+about it interfering
+
+
+152
+00:07:37,958 --> 00:07:40,527 line:-2
+with things like sound effects,
+music or video.
+
+
+153
+00:07:42,129 --> 00:07:45,299 line:-2
+That's an overview of some
+of the AVSpeechSynthesizer API.
+
+
+154
+00:07:45,365 --> 00:07:46,366 line:-1
+Remember,
+
+
+155
+00:07:46,433 --> 00:07:50,237 line:-2
+AVSpeechSynthesizer is not a replacement
+for the UIAccessibility APIs
+
+
+156
+00:07:50,304 --> 00:07:53,073 line:-2
+and, instead, should be used
+in conjunction with those APIs
+
+
+157
+00:07:53,140 --> 00:07:54,575 line:-1
+to create a great experience.
+
+
+158
+00:07:55,475 --> 00:07:58,212 line:-2
+Use the
+prefersAssistiveTechnologySettings API
+
+
+159
+00:07:58,278 --> 00:08:01,148 line:-2
+to request that AVSpeechSynthesizer
+apply the speech settings
+
+
+160
+00:08:01,215 --> 00:08:04,284 line:-2
+from the currently running
+assistive technology to your utterances.
+
+
+161
+00:08:05,018 --> 00:08:07,387 line:-2
+And if you're building an experience
+centered around speech,
+
+
+162
+00:08:07,454 --> 00:08:09,523 line:-1
+consider whether the mixToTelephonyUplink
+
+
+163
+00:08:09,590 --> 00:08:12,059 line:-1
+or usesApplicationAudioSession APIs
+
+
+164
+00:08:12,125 --> 00:08:14,728 line:-2
+can improve the experience
+for people using your app.
+
+
+165
+00:08:15,696 --> 00:08:19,466 line:-2
+Speech can be a really powerful tool for
+people that use assistive technologies,
+
+
+166
+00:08:19,533 --> 00:08:21,301 line:-1
+so I really encourage you to take a look
+
+
+167
+00:08:21,368 --> 00:08:23,971 line:-2
+at how you can incorporate speech
+into your apps
+
+
+168
+00:08:24,037 --> 00:08:26,406 line:-2
+to empower those people
+to do some incredible things.
+
+
+169
+00:08:26,907 --> 00:08:30,077 line:-1
+Thanks for watching, and enjoy WWDC.
+

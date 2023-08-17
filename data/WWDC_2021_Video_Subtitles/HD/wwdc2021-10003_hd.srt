@@ -1,0 +1,3829 @@
+2
+00:00:02,002 --> 00:00:09,009 line:-1
+[music]
+
+
+3
+00:00:09.643 --> 00:00:12.613 line:-1 align:center
+- Hi! Welcome to WWDC.
+
+
+4
+00:00:12,646 --> 00:00:14,214 line:-1
+My name is Anne Hitchcock,
+
+
+5
+00:00:14,248 --> 00:00:17,050 line:-2
+and I'm an engineer
+on the Watch Frameworks team.
+
+
+6
+00:00:17,084 --> 00:00:19,052 line:-1
+I'm excited to be here today
+
+
+7
+00:00:19,086 --> 00:00:23,090 line:-2
+to talk about data transfer
+strategies on Apple Watch.
+
+
+8
+00:00:24,091 --> 00:00:25,726 line:-1
+Since its introduction,
+
+
+9
+00:00:25.759 --> 00:00:29.196 line:-2 align:center
+Apple Watch has become
+increasingly independent.
+
+
+10
+00:00:29.229 --> 00:00:32.266 line:-2 align:center
+Series 3 was the first
+Apple Watch available
+
+
+11
+00:00:32.299 --> 00:00:34.101 line:-1 align:center
+with cellular capability.
+
+
+12
+00:00:35,269 --> 00:00:38,038 line:-2
+Independent Watch Apps
+in watchOS 6
+
+
+13
+00:00:38,071 --> 00:00:40,107 line:-2
+gave you
+the ability to write apps
+
+
+14
+00:00:40,140 --> 00:00:42,576 line:-2
+that didn't require
+an iOS companion
+
+
+15
+00:00:42.609 --> 00:00:44.711 line:-2 align:center
+and could be purchased
+from the App Store
+
+
+16
+00:00:44,745 --> 00:00:47,347 line:-1
+on your customers' Watches.
+
+
+17
+00:00:47,381 --> 00:00:51,118 line:-2
+With the introduction of
+Family Setup in watchOS 7,
+
+
+18
+00:00:51.151 --> 00:00:53.921 line:-2 align:center
+your customers have
+more independence than ever,
+
+
+19
+00:00:53,954 --> 00:00:56,924 line:-2
+without having
+a companion iPhone.
+
+
+20
+00:00:56,957 --> 00:00:59,593 line:-2
+But these new
+capabilities present us,
+
+
+21
+00:00:59,626 --> 00:01:00,994 line:-1
+as developers,
+
+
+22
+00:01:01,028 --> 00:01:03,897 line:-2
+new challenges in the way
+we think about communicating
+
+
+23
+00:01:03,931 --> 00:01:05,699 line:-1
+with our Watch apps.
+
+
+24
+00:01:05.732 --> 00:01:09.203 line:-2 align:center
+Fortunately,
+we have lots of great options.
+
+
+25
+00:01:09,236 --> 00:01:12,639 line:-2
+Today we're going
+to talk about those options
+
+
+26
+00:01:12,673 --> 00:01:15,709 line:-2
+and how we pick
+the right one for the job.
+
+
+27
+00:01:16,510 --> 00:01:18,545 line:-2
+I'm going to give you
+an overview of tools
+
+
+28
+00:01:18.579 --> 00:01:21.481 line:-2 align:center
+we have for data communication
+in Watch apps
+
+
+29
+00:01:21,515 --> 00:01:24,318 line:-2
+and discuss how to evaluate
+which one will be
+
+
+30
+00:01:24,351 --> 00:01:27,154 line:-1
+the right choice for your task.
+
+
+31
+00:01:27.187 --> 00:01:30.490 line:-2 align:center
+We can broadly group the tools
+into a few categories.
+
+
+32
+00:01:31,258 --> 00:01:35,195 line:-2
+iCloud allows us to
+share with all our devices
+
+
+33
+00:01:35,229 --> 00:01:37,631 line:-1
+and gives us server storage.
+
+
+34
+00:01:37.664 --> 00:01:39.166 line:-1 align:center
+We can use this in our apps
+
+
+35
+00:01:39.199 --> 00:01:42.503 line:-2 align:center
+using Keychain
+with iCloud Synchronization
+
+
+36
+00:01:42.536 --> 00:01:45.339 line:-1 align:center
+and CoreData with CloudKit.
+
+
+37
+00:01:46,940 --> 00:01:50,177 line:-2
+If we need to transfer data
+between paired devices,
+
+
+38
+00:01:50.210 --> 00:01:53.046 line:-1 align:center
+we can use Watch Connectivity.
+
+
+39
+00:01:54,848 --> 00:01:57,451 line:-2
+To communicate
+directly with servers,
+
+
+40
+00:01:57.484 --> 00:02:01.955 line:-2 align:center
+we can use
+URL sessions or sockets.
+
+
+41
+00:02:01,989 --> 00:02:03,957 line:-1
+But first, we'll talk about
+
+
+42
+00:02:03,991 --> 00:02:05,659 line:-1
+the questions you can ask
+
+
+43
+00:02:05.692 --> 00:02:07.761 line:-1 align:center
+to pick the right one.
+
+
+44
+00:02:08,729 --> 00:02:10,864 line:-2
+When I think about
+how I'm going to communicate
+
+
+45
+00:02:10,898 --> 00:02:13,800 line:-2
+from my Watch app,
+I think about a few things.
+
+
+46
+00:02:14,701 --> 00:02:17,471 line:-1
+What kind of data is it?
+
+
+47
+00:02:17.504 --> 00:02:21.875 line:-2 align:center
+And where is the data now,
+and where do I need it to be?
+
+
+48
+00:02:21.909 --> 00:02:26.713 line:-2 align:center
+Is the interaction reliant
+on a companion iOS app?
+
+
+49
+00:02:26.747 --> 00:02:30.050 line:-2 align:center
+Do I want to support
+Family Setup?
+
+
+50
+00:02:30,083 --> 00:02:33,487 line:-2
+And when does the data
+need to be at its destination?
+
+
+51
+00:02:33,520 --> 00:02:36,390 line:-2
+Can it wait to let the system
+optimize performance
+
+
+52
+00:02:36.423 --> 00:02:39.159 line:-2 align:center
+and battery usage
+for my customer?
+
+
+53
+00:02:39,193 --> 00:02:42,696 line:-2
+How frequently is
+the data going to change?
+
+
+54
+00:02:43,497 --> 00:02:45,799 line:-2
+Based on my answers
+to these questions,
+
+
+55
+00:02:45.832 --> 00:02:47.868 line:-2 align:center
+I can start
+going through my toolbox
+
+
+56
+00:02:47,901 --> 00:02:50,571 line:-2
+to evaluate how to craft
+the right solution
+
+
+57
+00:02:50,604 --> 00:02:52,639 line:-1
+for my data transfer task.
+
+
+58
+00:02:53,674 --> 00:02:55,342 line:-1
+Let's look at what capabilities
+
+
+59
+00:02:55.375 --> 00:02:59.346 line:-2 align:center
+we get from the Keychain
+with iCloud Synchronization.
+
+
+60
+00:03:00.848 --> 00:03:04.084 line:-2 align:center
+Keychain provides secure
+storage for passwords,
+
+
+61
+00:03:04.117 --> 00:03:07.020 line:-2 align:center
+keys, and other
+sensitive credentials.
+
+
+62
+00:03:07,054 --> 00:03:09,923 line:-2
+And with iCloud
+Keychain Synchronization,
+
+
+63
+00:03:09.957 --> 00:03:12.593 line:-1 align:center
+introduced in watchOS 6.2,
+
+
+64
+00:03:12.626 --> 00:03:14.728 line:-2 align:center
+these keychain items can be
+synchronized
+
+
+65
+00:03:14,761 --> 00:03:17,731 line:-1
+to all of a person's devices.
+
+
+66
+00:03:18.832 --> 00:03:20.868 line:-2 align:center
+There are two ways
+you can benefit
+
+
+67
+00:03:20.901 --> 00:03:24.037 line:-2 align:center
+from iCloud Synchronization
+in your app:
+
+
+68
+00:03:24.071 --> 00:03:27.708 line:-2 align:center
+by using Password autofill with
+Associated Domains
+
+
+69
+00:03:27.741 --> 00:03:30.177 line:-1 align:center
+and Shared Keychain items.
+
+
+70
+00:03:30.844 --> 00:03:34.748 line:-2 align:center
+Password autofill allows you
+to use Keychain synchronization
+
+
+71
+00:03:34,781 --> 00:03:37,050 line:-1
+with very little code.
+
+
+72
+00:03:37,084 --> 00:03:40,487 line:-2
+First, add the
+Associated Domains capability
+
+
+73
+00:03:40,521 --> 00:03:42,222 line:-1
+to your target.
+
+
+74
+00:03:42.256 --> 00:03:43.590 line:-1 align:center
+For your Watch app,
+
+
+75
+00:03:43.624 --> 00:03:47.761 line:-2 align:center
+add the capability to the
+WatchKit Extension Target.
+
+
+76
+00:03:47.794 --> 00:03:51.598 line:-2 align:center
+Add a webcredentials entry
+with your domain name.
+
+
+77
+00:03:52.866 --> 00:03:55.769 line:-2 align:center
+Add the
+apple-app-site-association file
+
+
+78
+00:03:55,802 --> 00:03:58,105 line:-1
+to your web server.
+
+
+79
+00:03:58,138 --> 00:04:02,876 line:-2
+The file must be accessible
+via HTTPS without redirects.
+
+
+80
+00:04:02.910 --> 00:04:07.347 line:-2 align:center
+The file is JSON format
+with no file extension,
+
+
+81
+00:04:07.381 --> 00:04:08.882 line:-1 align:center
+and it should be placed in the
+
+
+82
+00:04:08,916 --> 00:04:12,152 line:-2
+./well-known directory
+on your server.
+
+
+83
+00:04:12,186 --> 00:04:14,454 line:-2
+Check out
+the documentation online
+
+
+84
+00:04:14,488 --> 00:04:20,060 line:-2
+for "Supporting Associated
+Domains" for complete details.
+
+
+85
+00:04:20,093 --> 00:04:21,428 line:-1
+Add text content types
+
+
+86
+00:04:21,461 --> 00:04:24,498 line:-2
+to your text fields
+and secure fields.
+
+
+87
+00:04:24,531 --> 00:04:26,767 line:-1
+Your options for autofill are
+
+
+88
+00:04:26,800 --> 00:04:32,005 line:-2
+username, email address,
+password, and new password.
+
+
+89
+00:04:32.039 --> 00:04:33.373 line:-1 align:center
+For new passwords,
+
+
+90
+00:04:33,407 --> 00:04:35,876 line:-2
+the system will prompt the
+person to save,
+
+
+91
+00:04:35.909 --> 00:04:38.345 line:-2 align:center
+and a record will be
+added or updated
+
+
+92
+00:04:38.378 --> 00:04:40.547 line:-1 align:center
+in the Keychain for your site.
+
+
+93
+00:04:41,548 --> 00:04:43,750 line:-2
+AutoFill suggestions
+have been available
+
+
+94
+00:04:43,784 --> 00:04:45,853 line:-1
+since watchOS 6.2
+
+
+95
+00:04:45,886 --> 00:04:47,354 line:-1
+and are even better
+
+
+96
+00:04:47.387 --> 00:04:51.758 line:-2 align:center
+with the new text-editing
+experience in watchOS 8.
+
+
+97
+00:04:52.526 --> 00:04:56.296 line:-2 align:center
+For more information
+about using password autofill,
+
+
+98
+00:04:56,330 --> 00:04:59,600 line:-2
+check out the
+"Autofill everywhere" session
+
+
+99
+00:04:59,633 --> 00:05:02,469 line:-1
+in the Developer app or online.
+
+
+100
+00:05:03,070 --> 00:05:05,105 line:-1
+Another way you can share data
+
+
+101
+00:05:05.138 --> 00:05:07.341 line:-1 align:center
+using Keychain synchronization
+
+
+102
+00:05:07.374 --> 00:05:11.311 line:-2 align:center
+is by sharing Keychain items
+among your apps.
+
+
+103
+00:05:12,446 --> 00:05:13,914 line:-1
+As we discussed,
+
+
+104
+00:05:13.947 --> 00:05:16.950 line:-2 align:center
+the Keychain is secure storage
+for sensitive data,
+
+
+105
+00:05:16.984 --> 00:05:20.888 line:-2 align:center
+like passwords, keys,
+and credentials.
+
+
+106
+00:05:20,921 --> 00:05:23,557 line:-2
+You can also store
+other small bits of shared data
+
+
+107
+00:05:23,590 --> 00:05:24,758 line:-1
+in the Keychain,
+
+
+108
+00:05:24,791 --> 00:05:28,061 line:-2
+such as a person's preference
+for a startup screen,
+
+
+109
+00:05:28.095 --> 00:05:32.466 line:-2 align:center
+as long as the information
+isn't changing frequently.
+
+
+110
+00:05:32,499 --> 00:05:34,168 line:-1
+The data stored in the Keychain
+
+
+111
+00:05:34.201 --> 00:05:37.237 line:-2 align:center
+will be synchronized
+to all of the person's devices.
+
+
+112
+00:05:38,005 --> 00:05:40,607 line:-2
+Let's look at how
+we can store and retrieve
+
+
+113
+00:05:40,641 --> 00:05:43,210 line:-1
+an OAuth 2 token in the Keychain,
+
+
+114
+00:05:43.243 --> 00:05:46.079 line:-2 align:center
+and share that
+with a group of our apps.
+
+
+115
+00:05:46,813 --> 00:05:49,616 line:-2
+First, we need to add
+the Keychain Sharing
+
+
+116
+00:05:49.650 --> 00:05:51.885 line:-1 align:center
+or App Groups capability,
+
+
+117
+00:05:51,919 --> 00:05:55,422 line:-2
+all the apps we want to share
+these keychain items.
+
+
+118
+00:05:55.455 --> 00:05:57.791 line:-2 align:center
+This is required
+to share the items,
+
+
+119
+00:05:57,824 --> 00:05:59,993 line:-2
+and helps ensure
+the security and privacy
+
+
+120
+00:06:00.027 --> 00:06:01.695 line:-1 align:center
+of your customers' information
+
+
+121
+00:06:01,728 --> 00:06:05,065 line:-2
+by preventing access
+by other apps.
+
+
+122
+00:06:05.098 --> 00:06:06.400 line:-1 align:center
+For your Watch app,
+
+
+123
+00:06:06,433 --> 00:06:10,470 line:-2
+add the capability
+to your Watch Extension target.
+
+
+124
+00:06:10.504 --> 00:06:11.972 line:-1 align:center
+In this example,
+
+
+125
+00:06:12.005 --> 00:06:14.908 line:-2 align:center
+I'm going to add
+the Keychain Sharing capability
+
+
+126
+00:06:14,942 --> 00:06:17,911 line:-2
+and add my app
+to a Keychain Group.
+
+
+127
+00:06:17,945 --> 00:06:19,646 line:-2
+All of my apps
+that are going to share
+
+
+128
+00:06:19,680 --> 00:06:23,417 line:-2
+the Keychain items
+need to also share this group.
+
+
+129
+00:06:24.184 --> 00:06:25.853 line:-1 align:center
+Now, let's look at the code
+
+
+130
+00:06:25,886 --> 00:06:29,456 line:-2
+to store an OAuth 2 token
+in the Keychain.
+
+
+131
+00:06:29.489 --> 00:06:30.924 line:-1 align:center
+To store a token,
+
+
+132
+00:06:30,958 --> 00:06:33,060 line:-2
+we'll update the item
+if it exists,
+
+
+133
+00:06:33,093 --> 00:06:35,762 line:-1
+and add it if it doesn't.
+
+
+134
+00:06:35.796 --> 00:06:37.898 line:-2 align:center
+I've created
+an OAuth 2 token struct
+
+
+135
+00:06:37.931 --> 00:06:39.666 line:-1 align:center
+to contain the token data,
+
+
+136
+00:06:39.700 --> 00:06:44.204 line:-2 align:center
+like the token string,
+expiration, and refresh token.
+
+
+137
+00:06:44,238 --> 00:06:47,107 line:-2
+I made the token struct
+conform to codable
+
+
+138
+00:06:47.140 --> 00:06:50.544 line:-2 align:center
+to make it easy
+to store and retrieve.
+
+
+139
+00:06:50.577 --> 00:06:52.846 line:-1 align:center
+We create a query dictionary.
+
+
+140
+00:06:52,880 --> 00:06:56,149 line:-2
+This is the set of attributes
+that match an existing item
+
+
+141
+00:06:56,183 --> 00:07:00,087 line:-2
+if we already have one saved
+for this server and account.
+
+
+142
+00:07:00.854 --> 00:07:03.524 line:-2 align:center
+Note the synchronizable
+attribute here
+
+
+143
+00:07:03.557 --> 00:07:05.425 line:-1 align:center
+that is set to "true."
+
+
+144
+00:07:05.459 --> 00:07:08.462 line:-2 align:center
+It's important that we include
+this attribute in our query
+
+
+145
+00:07:08,495 --> 00:07:11,164 line:-2
+to indicate that we want
+our item to synchronize
+
+
+146
+00:07:11.198 --> 00:07:14.134 line:-2 align:center
+to all of our customer's
+devices.
+
+
+147
+00:07:14.168 --> 00:07:16.637 line:-1 align:center
+We'll encode the token as data,
+
+
+148
+00:07:16,670 --> 00:07:19,339 line:-2
+and set that Data as the value
+for our Keychain item
+
+
+149
+00:07:19,373 --> 00:07:21,575 line:-1
+in the attributes dictionary.
+
+
+150
+00:07:21.608 --> 00:07:23.777 line:-2 align:center
+Then, update the item
+in the Keychain
+
+
+151
+00:07:23.810 --> 00:07:26.513 line:-1 align:center
+with the query and attributes.
+
+
+152
+00:07:27,614 --> 00:07:29,550 line:-2
+We always need
+to check the result code
+
+
+153
+00:07:29,583 --> 00:07:32,252 line:-1
+returned from the Keychain API.
+
+
+154
+00:07:32.286 --> 00:07:33.787 line:-1 align:center
+We'll first check to see
+
+
+155
+00:07:33,820 --> 00:07:37,424 line:-2
+if the Keychain said
+that the item was not found.
+
+
+156
+00:07:37,457 --> 00:07:40,494 line:-2
+If so, we'll call
+another function we wrote
+
+
+157
+00:07:40,527 --> 00:07:42,596 line:-1
+to add it to the Keychain.
+
+
+158
+00:07:42,629 --> 00:07:45,432 line:-1
+We'll look at that in a moment.
+
+
+159
+00:07:45.465 --> 00:07:48.635 line:-2 align:center
+Otherwise, we'll make sure
+there was no error.
+
+
+160
+00:07:48.669 --> 00:07:52.139 line:-2 align:center
+To do that,
+we check for the success result.
+
+
+161
+00:07:52.172 --> 00:07:54.775 line:-2 align:center
+If the update function
+returned success,
+
+
+162
+00:07:54,808 --> 00:07:58,111 line:-2
+then our token was
+updated in the Keychain.
+
+
+163
+00:07:59.346 --> 00:08:02.216 line:-2 align:center
+Now, let's look at
+the add function.
+
+
+164
+00:08:02.249 --> 00:08:04.218 line:-2 align:center
+To add the token
+to the Keychain,
+
+
+165
+00:08:04.251 --> 00:08:07.654 line:-2 align:center
+we'll set up a dictionary
+with all the attributes.
+
+
+166
+00:08:07.688 --> 00:08:09.122 line:-1 align:center
+This includes the attributes
+
+
+167
+00:08:09,156 --> 00:08:11,325 line:-2
+we used to find
+an existing item,
+
+
+168
+00:08:11,358 --> 00:08:14,595 line:-1
+plus the token data.
+
+
+169
+00:08:14.628 --> 00:08:16.330 line:-2 align:center
+Then, we'll call
+the Keychain API's
+
+
+170
+00:08:16.363 --> 00:08:19.333 line:-2 align:center
+add function
+with the attributes.
+
+
+171
+00:08:19,366 --> 00:08:20,968 line:-1
+And check the return code
+
+
+172
+00:08:21,001 --> 00:08:23,337 line:-1
+to make sure it succeeded.
+
+
+173
+00:08:25.272 --> 00:08:28.342 line:-2 align:center
+To retrieve the token
+information from the Keychain,
+
+
+174
+00:08:28,375 --> 00:08:32,312 line:-2
+we'll set up a query dictionary
+to find the item we want.
+
+
+175
+00:08:32.346 --> 00:08:35.148 line:-2 align:center
+We'll include the same set
+of keys and values we included
+
+
+176
+00:08:35,182 --> 00:08:39,553 line:-2
+to find the item before
+in the update function.
+
+
+177
+00:08:39,586 --> 00:08:41,722 line:-1
+Plus, we include some attributes
+
+
+178
+00:08:41,755 --> 00:08:43,657 line:-1
+to tell the Keychain API
+
+
+179
+00:08:43.690 --> 00:08:46.627 line:-2 align:center
+whether we want
+the item attributes returned
+
+
+180
+00:08:46.660 --> 00:08:48.095 line:-1 align:center
+(we don't)
+
+
+181
+00:08:48,128 --> 00:08:50,764 line:-2
+and whether we want
+the item data returned
+
+
+182
+00:08:50.797 --> 00:08:52.466 line:-1 align:center
+(we do).
+
+
+183
+00:08:52,499 --> 00:08:54,735 line:-2
+The Keychain
+"copy matching" function
+
+
+184
+00:08:54,768 --> 00:08:56,770 line:-1
+searches using our query
+
+
+185
+00:08:56,803 --> 00:09:01,975 line:-2
+and populates the reference
+we provided as "item."
+
+
+186
+00:09:02,009 --> 00:09:04,611 line:-2
+Before we try to access
+the retrieved item,
+
+
+187
+00:09:04,645 --> 00:09:08,382 line:-2
+we'll check the return code
+to ensure it was found.
+
+
+188
+00:09:09,616 --> 00:09:10,784 line:-1
+Then, as always,
+
+
+189
+00:09:10.817 --> 00:09:14.087 line:-2 align:center
+we check the return code
+for success.
+
+
+190
+00:09:14.121 --> 00:09:17.558 line:-2 align:center
+Get the dictionary
+that was copied for the item,
+
+
+191
+00:09:17,591 --> 00:09:21,395 line:-2
+get the token data we requested
+from the dictionary,
+
+
+192
+00:09:21,428 --> 00:09:25,332 line:-2
+and decode the data
+as our OAuth 2 token type.
+
+
+193
+00:09:25,365 --> 00:09:28,902 line:-2
+And now, we've successfully
+saved, updated,
+
+
+194
+00:09:28,936 --> 00:09:32,339 line:-2
+and retrieved an OAuth 2 token
+to the Keychain,
+
+
+195
+00:09:32,372 --> 00:09:34,641 line:-2
+and it's shared with all the
+apps
+
+
+196
+00:09:34,675 --> 00:09:37,211 line:-1
+in our Keychain Sharing Group.
+
+
+197
+00:09:38.445 --> 00:09:40.814 line:-2 align:center
+There's one more
+Keychain storage function
+
+
+198
+00:09:40,848 --> 00:09:43,083 line:-1
+I want to share with you.
+
+
+199
+00:09:43,116 --> 00:09:45,686 line:-2
+Just like anywhere
+that you store something
+
+
+200
+00:09:45,719 --> 00:09:47,688 line:-1
+on your customers' devices,
+
+
+201
+00:09:47,721 --> 00:09:50,924 line:-2
+you should remove it
+when you're done with it.
+
+
+202
+00:09:50,958 --> 00:09:52,459 line:-1
+We'll set up our query
+
+
+203
+00:09:52,492 --> 00:09:56,496 line:-2
+with our now-familiar attributes
+to search.
+
+
+204
+00:09:56,530 --> 00:10:01,535 line:-2
+Call the Keychain API's
+delete function with our query.
+
+
+205
+00:10:01,568 --> 00:10:04,805 line:-2
+And, as always,
+check for success.
+
+
+206
+00:10:04.838 --> 00:10:08.742 line:-2 align:center
+In the case of delete,
+not found is successful.
+
+
+207
+00:10:08,775 --> 00:10:12,679 line:-2
+Now, we finish cleaning up
+after we're done with the data.
+
+
+208
+00:10:13,647 --> 00:10:17,484 line:-2
+Keychain services with
+iCloud Keychain synchronization
+
+
+209
+00:10:17,518 --> 00:10:21,021 line:-2
+are a great way for your app
+to share small pieces of data
+
+
+210
+00:10:21,054 --> 00:10:22,956 line:-1
+that don't change frequently,
+
+
+211
+00:10:22,990 --> 00:10:24,725 line:-2
+and that data
+will be synchronized
+
+
+212
+00:10:24.758 --> 00:10:27.227 line:-1 align:center
+to all of a person's devices.
+
+
+213
+00:10:27,261 --> 00:10:29,563 line:-2
+Use Associated Domains
+to easily add
+
+
+214
+00:10:29.596 --> 00:10:33.367 line:-2 align:center
+password autofill
+functionality to your app.
+
+
+215
+00:10:34.067 --> 00:10:36.303 line:-2 align:center
+You can also
+store and retrieve values
+
+
+216
+00:10:36.336 --> 00:10:38.071 line:-1 align:center
+directly to the Keychain
+
+
+217
+00:10:38.105 --> 00:10:39.506 line:-2 align:center
+and share them
+with your other apps
+
+
+218
+00:10:39.540 --> 00:10:43.377 line:-2 align:center
+using Keychain Sharing
+or App Groups.
+
+
+219
+00:10:43,410 --> 00:10:45,312 line:-1
+iCloud Keychain Synchronization
+
+
+220
+00:10:45,345 --> 00:10:49,783 line:-2
+doesn't rely on having
+an iOS companion app,
+
+
+221
+00:10:49,816 --> 00:10:53,287 line:-1
+and it supports Family Setup.
+
+
+222
+00:10:53,320 --> 00:10:55,322 line:-2
+The items
+are synchronized when possible
+
+
+223
+00:10:55.355 --> 00:10:57.791 line:-2 align:center
+based on
+network availability, battery,
+
+
+224
+00:10:57,824 --> 00:11:00,427 line:-1
+and other system conditions.
+
+
+225
+00:11:01.161 --> 00:11:02.763 line:-1 align:center
+Be aware that customers
+
+
+226
+00:11:02,796 --> 00:11:05,699 line:-2
+can disable
+iCloud Keychain synchronization
+
+
+227
+00:11:05,732 --> 00:11:09,603 line:-2
+and that it isn't available
+in all regions.
+
+
+228
+00:11:10.504 --> 00:11:12.239 line:-1 align:center
+CoreData with CloudKit
+
+
+229
+00:11:12.272 --> 00:11:14.374 line:-1 align:center
+synchronizes your local database
+
+
+230
+00:11:14,408 --> 00:11:17,010 line:-2
+to all of your customer's
+other devices
+
+
+231
+00:11:17.044 --> 00:11:20.280 line:-2 align:center
+that share your app's
+CloudKit container.
+
+
+232
+00:11:20,314 --> 00:11:22,583 line:-2
+CoreData integration
+with SwiftUI
+
+
+233
+00:11:22,616 --> 00:11:25,219 line:-2
+simplifies accessing
+and displaying data
+
+
+234
+00:11:25,252 --> 00:11:28,822 line:-2
+from your database
+in your Watch application.
+
+
+235
+00:11:29.790 --> 00:11:32.025 line:-2 align:center
+You can quickly
+get too much data
+
+
+236
+00:11:32,059 --> 00:11:33,560 line:-1
+on a Watch this way
+
+
+237
+00:11:33.594 --> 00:11:36.930 line:-2 align:center
+if you're developing
+a multi-platform application.
+
+
+238
+00:11:36,964 --> 00:11:38,232 line:-1
+Think carefully
+
+
+239
+00:11:38,265 --> 00:11:40,300 line:-2
+about what information your
+customer
+
+
+240
+00:11:40,334 --> 00:11:42,870 line:-1
+really needs on their Watch.
+
+
+241
+00:11:44,071 --> 00:11:46,540 line:-2
+Consider
+using multiple configurations
+
+
+242
+00:11:46,573 --> 00:11:48,375 line:-1
+in your Core Data model
+
+
+243
+00:11:48.408 --> 00:11:52.079 line:-2 align:center
+to segment data that makes sense
+to have in your Watch app
+
+
+244
+00:11:52.112 --> 00:11:54.781 line:-2 align:center
+from data
+that is appropriate for your app
+
+
+245
+00:11:54,815 --> 00:11:56,149 line:-1
+running on a device
+
+
+246
+00:11:56,183 --> 00:11:59,152 line:-2
+with more storage
+and battery capacity.
+
+
+247
+00:12:00.521 --> 00:12:03.957 line:-2 align:center
+CloudKit and Core Data
+are powerful tools.
+
+
+248
+00:12:03,991 --> 00:12:06,293 line:-2
+The integration
+of Core Data with SwiftUI
+
+
+249
+00:12:06,326 --> 00:12:11,198 line:-2
+makes it easier to use
+Core Data features in your apps.
+
+
+250
+00:12:11,231 --> 00:12:13,634 line:-2
+You can provide
+the managed object context"
+
+
+251
+00:12:13.667 --> 00:12:16.470 line:-2 align:center
+to your Views
+with the environment value,
+
+
+252
+00:12:16.503 --> 00:12:19.373 line:-2 align:center
+and use the fetch request
+property wrapper
+
+
+253
+00:12:19.406 --> 00:12:22.843 line:-2 align:center
+to get results
+from your database.
+
+
+254
+00:12:22,876 --> 00:12:25,746 line:-2
+Those results can be used
+in SwiftUI Lists
+
+
+255
+00:12:25.779 --> 00:12:28.248 line:-1 align:center
+and other views.
+
+
+256
+00:12:28.282 --> 00:12:30.384 line:-2 align:center
+Core Data with CloudKit
+provides us
+
+
+257
+00:12:30.417 --> 00:12:32.286 line:-2 align:center
+with a way to share
+structured data
+
+
+258
+00:12:32.319 --> 00:12:35.489 line:-2 align:center
+that can be synchronized
+to all of a person's devices
+
+
+259
+00:12:35.522 --> 00:12:38.425 line:-1 align:center
+and backed up on iCloud.
+
+
+260
+00:12:38.458 --> 00:12:41.862 line:-2 align:center
+It doesn't rely on having
+a companion iPhone app
+
+
+261
+00:12:41,895 --> 00:12:45,232 line:-1
+and does support Family Setup.
+
+
+262
+00:12:45.265 --> 00:12:47.301 line:-2 align:center
+Synchronization
+of Core Data changes
+
+
+263
+00:12:47.334 --> 00:12:49.636 line:-2 align:center
+happens based on
+network availability
+
+
+264
+00:12:49,670 --> 00:12:51,605 line:-1
+and system conditions.
+
+
+265
+00:12:51.638 --> 00:12:53.874 line:-2 align:center
+Don't expect it
+to be instantaneous,
+
+
+266
+00:12:53.907 --> 00:12:56.176 line:-2 align:center
+but CloudKit will handle
+optimizing performance
+
+
+267
+00:12:56,210 --> 00:12:59,179 line:-2
+of this synchronization
+for your app.
+
+
+268
+00:13:00,180 --> 00:13:03,317 line:-2
+To learn more about using
+Core Data with CloudKit
+
+
+269
+00:13:03,350 --> 00:13:05,619 line:-1
+in your app, check out
+
+
+270
+00:13:05.652 --> 00:13:10.224 line:-2 align:center
+"Build apps that share data
+through CloudKit and Core Data"
+
+
+271
+00:13:10.257 --> 00:13:15.462 line:-2 align:center
+and "Bring Core Data concurrency
+to Swift and SwiftUI"
+
+
+272
+00:13:15.495 --> 00:13:18.665 line:-1 align:center
+in the Developer app or online.
+
+
+273
+00:13:19.233 --> 00:13:22.636 line:-2 align:center
+You might already be familiar
+with Watch Connectivity,
+
+
+274
+00:13:22,669 --> 00:13:25,105 line:-2
+and you might
+have used it before.
+
+
+275
+00:13:25,138 --> 00:13:27,140 line:-2
+But I'd like
+to give you more details
+
+
+276
+00:13:27,174 --> 00:13:31,278 line:-2
+and some best practices
+to help you be successful.
+
+
+277
+00:13:32.446 --> 00:13:34.948 line:-2 align:center
+Watch Connectivity
+allows you to send data
+
+
+278
+00:13:34,982 --> 00:13:38,385 line:-2
+between your Watch app
+and its companion iPhone app
+
+
+279
+00:13:38.418 --> 00:13:41.588 line:-2 align:center
+when both devices
+are within Bluetooth range
+
+
+280
+00:13:41.622 --> 00:13:44.725 line:-1 align:center
+or on the same Wi-Fi network.
+
+
+281
+00:13:44.758 --> 00:13:48.395 line:-2 align:center
+It's best used for optimizing
+your customer's experience
+
+
+282
+00:13:48,428 --> 00:13:51,832 line:-2
+when they have both your phone
+and Watch apps installed,
+
+
+283
+00:13:51,865 --> 00:13:56,603 line:-2
+and for sharing data that is
+only available on one device.
+
+
+284
+00:13:57.604 --> 00:14:00.908 line:-2 align:center
+For example, if someone
+has launched your iPhone app
+
+
+285
+00:14:00,941 --> 00:14:02,976 line:-2
+and has downloaded
+the latest data,
+
+
+286
+00:14:03,010 --> 00:14:05,179 line:-2
+you can share that data
+with your Watch app
+
+
+287
+00:14:05,212 --> 00:14:07,481 line:-2
+to keep
+your complications current
+
+
+288
+00:14:07,514 --> 00:14:09,082 line:-2
+and allow your Watch app
+to start
+
+
+289
+00:14:09.116 --> 00:14:10.217 line:-1 align:center
+with that same data
+
+
+290
+00:14:10,250 --> 00:14:12,653 line:-1
+the next time it launches.
+
+
+291
+00:14:12.686 --> 00:14:15.355 line:-2 align:center
+This will feel more responsive
+for your customers
+
+
+292
+00:14:15.389 --> 00:14:18.192 line:-2 align:center
+and minimizes
+the duplicate data downloads
+
+
+293
+00:14:18.225 --> 00:14:20.928 line:-1 align:center
+your apps need to do.
+
+
+294
+00:14:20,961 --> 00:14:24,031 line:-2
+Watch Connectivity
+has a diverse set of features,
+
+
+295
+00:14:24.064 --> 00:14:26.333 line:-2 align:center
+so it's helpful to know
+what's available
+
+
+296
+00:14:26,366 --> 00:14:28,402 line:-1
+and when to use each one.
+
+
+297
+00:14:28,435 --> 00:14:31,338 line:-2
+But first,
+I want to share a few tips
+
+
+298
+00:14:31,371 --> 00:14:32,906 line:-1
+to help you succeed
+
+
+299
+00:14:32.940 --> 00:14:34.908 line:-2 align:center
+if you decide
+that Watch Connectivity
+
+
+300
+00:14:34.942 --> 00:14:38.011 line:-1 align:center
+is the right tool for your task.
+
+
+301
+00:14:38.045 --> 00:14:40.581 line:-2 align:center
+Since Watch Connectivity
+is a tool to communicate
+
+
+302
+00:14:40,614 --> 00:14:42,049 line:-1
+between two devices,
+
+
+303
+00:14:42,082 --> 00:14:43,684 line:-1
+it's going to require us to know
+
+
+304
+00:14:43.717 --> 00:14:45.452 line:-1 align:center
+about a few preconditions
+
+
+305
+00:14:45,485 --> 00:14:47,421 line:-1
+and handle some errors.
+
+
+306
+00:14:47,454 --> 00:14:49,323 line:-2
+These are some things
+you can do to ensure
+
+
+307
+00:14:49,356 --> 00:14:53,360 line:-2
+your Watch Connectivity
+communication works smoothly.
+
+
+308
+00:14:53.393 --> 00:14:55.896 line:-2 align:center
+Activate your
+watch connectivity session
+
+
+309
+00:14:55.929 --> 00:14:59.132 line:-2 align:center
+as early in your app
+life cycle as possible,
+
+
+310
+00:14:59.166 --> 00:15:01.635 line:-2 align:center
+preferably when
+your app finishes launching
+
+
+311
+00:15:01,668 --> 00:15:04,238 line:-2
+in your app
+or extension delegate.
+
+
+312
+00:15:04.271 --> 00:15:06.807 line:-2 align:center
+This makes your app
+available to receive information
+
+
+313
+00:15:06,840 --> 00:15:09,943 line:-2
+from its counterpart app
+as soon as possible.
+
+
+314
+00:15:10.844 --> 00:15:13.213 line:-1 align:center
+Understand reachability.
+
+
+315
+00:15:13.247 --> 00:15:15.082 line:-2 align:center
+None of the background
+communication
+
+
+316
+00:15:15,115 --> 00:15:16,617 line:-1
+requires your counterpart app
+
+
+317
+00:15:16.650 --> 00:15:19.253 line:-2 align:center
+to be reachable
+when you send data.
+
+
+318
+00:15:19,286 --> 00:15:20,754 line:-1
+But interactive messaging
+
+
+319
+00:15:20,787 --> 00:15:22,923 line:-2
+does have reachability
+requirements,
+
+
+320
+00:15:22.956 --> 00:15:25.192 line:-1 align:center
+and we'll discuss them then.
+
+
+321
+00:15:25.225 --> 00:15:28.028 line:-2 align:center
+It will save you time
+to understand them.
+
+
+322
+00:15:29,129 --> 00:15:31,698 line:-2
+All of the watch connectivity
+session delegate functions
+
+
+323
+00:15:31.732 --> 00:15:34.902 line:-2 align:center
+are called
+on a non-main serial queue.
+
+
+324
+00:15:34.935 --> 00:15:37.304 line:-2 align:center
+If you need to do
+any work from these functions
+
+
+325
+00:15:37,337 --> 00:15:39,506 line:-1
+to update your user interface,
+
+
+326
+00:15:39.540 --> 00:15:42.709 line:-2 align:center
+make sure you do that
+on the main queue.
+
+
+327
+00:15:43.343 --> 00:15:45.145 line:-2 align:center
+Now, let's talk about
+the different
+
+
+328
+00:15:45.179 --> 00:15:46.713 line:-1 align:center
+Watch Connectivity features
+
+
+329
+00:15:46.747 --> 00:15:49.216 line:-1 align:center
+and when to use each one.
+
+
+330
+00:15:49.249 --> 00:15:50.918 line:-1 align:center
+The application context
+
+
+331
+00:15:50,951 --> 00:15:53,187 line:-2
+is a single property
+list dictionary
+
+
+332
+00:15:53.220 --> 00:15:54.755 line:-2 align:center
+that is sent
+to the counterpart app
+
+
+333
+00:15:54,788 --> 00:15:55,956 line:-1
+in the background,
+
+
+334
+00:15:55.989 --> 00:15:57.991 line:-1 align:center
+with the goal of being available
+
+
+335
+00:15:58,025 --> 00:16:00,060 line:-1
+when the app wakes up.
+
+
+336
+00:16:00.093 --> 00:16:02.162 line:-2 align:center
+If you update
+the application context
+
+
+337
+00:16:02,196 --> 00:16:04,531 line:-2
+before the previous
+dictionary is sent,
+
+
+338
+00:16:04,565 --> 00:16:07,267 line:-1
+it is replaced by the new value.
+
+
+339
+00:16:08,302 --> 00:16:11,271 line:-2
+Application context
+is useful for keeping content
+
+
+340
+00:16:11,305 --> 00:16:13,106 line:-2
+up to date
+on the counterpart app
+
+
+341
+00:16:13,140 --> 00:16:14,842 line:-1
+when you have new data,
+
+
+342
+00:16:14,875 --> 00:16:18,345 line:-2
+and for data
+that may update frequently.
+
+
+343
+00:16:18,378 --> 00:16:20,147 line:-1
+User info transfer
+
+
+344
+00:16:20,180 --> 00:16:22,416 line:-2
+also sends
+a property list dictionary
+
+
+345
+00:16:22,449 --> 00:16:24,985 line:-2
+to the counterpart app
+in the background,
+
+
+346
+00:16:25,018 --> 00:16:28,355 line:-2
+but it's a little different
+than application context.
+
+
+347
+00:16:28.388 --> 00:16:30.490 line:-2 align:center
+Instead of being
+a single dictionary
+
+
+348
+00:16:30,524 --> 00:16:33,360 line:-2
+that is replaced
+each time you update it,
+
+
+349
+00:16:33,393 --> 00:16:35,829 line:-2
+each user info
+dictionary transfer
+
+
+350
+00:16:35.863 --> 00:16:37.531 line:-1 align:center
+is queued and delivered
+
+
+351
+00:16:37,564 --> 00:16:40,100 line:-2
+in the order
+that you enqueued it.
+
+
+352
+00:16:40,133 --> 00:16:42,202 line:-1
+You can also access the queue
+
+
+353
+00:16:42.236 --> 00:16:44.304 line:-1 align:center
+to cancel a transfer.
+
+
+354
+00:16:44.838 --> 00:16:48.242 line:-2 align:center
+File transfer is similar
+to user info transfer,
+
+
+355
+00:16:48.275 --> 00:16:52.145 line:-2 align:center
+and once you've done one,
+the other will feel familiar.
+
+
+356
+00:16:52.179 --> 00:16:55.015 line:-2 align:center
+Files are queued to be sent
+to the counterpart app,
+
+
+357
+00:16:55,048 --> 00:16:58,585 line:-2
+and sent when power
+and other conditions permit.
+
+
+358
+00:16:58.619 --> 00:17:02.456 line:-2 align:center
+You can access the queue
+to cancel a transfer.
+
+
+359
+00:17:03.190 --> 00:17:06.126 line:-2 align:center
+The files are placed
+in the document inbox
+
+
+360
+00:17:06.159 --> 00:17:09.029 line:-2 align:center
+for the receiving app
+when they are transferred.
+
+
+361
+00:17:09.062 --> 00:17:12.833 line:-2 align:center
+Each file will be deleted
+from the inbox when you return
+
+
+362
+00:17:12,866 --> 00:17:17,471 line:-2
+from the did receive file callback
+in your session delegate.
+
+
+363
+00:17:17.504 --> 00:17:19.106 line:-1 align:center
+Make sure you move the file
+
+
+364
+00:17:19,139 --> 00:17:21,341 line:-1
+or otherwise quickly process it
+
+
+365
+00:17:21.375 --> 00:17:23.977 line:-2 align:center
+before you return
+from this method.
+
+
+366
+00:17:24.745 --> 00:17:27.447 line:-2 align:center
+One helpful thing
+to remember about this:
+
+
+367
+00:17:27,481 --> 00:17:29,449 line:-1
+since this callback is called
+
+
+368
+00:17:29.483 --> 00:17:31.685 line:-1 align:center
+on a non-main serial queue,
+
+
+369
+00:17:31.718 --> 00:17:34.655 line:-2 align:center
+if you call an async method
+to process the file
+
+
+370
+00:17:34.688 --> 00:17:35.822 line:-1 align:center
+from the inbox,
+
+
+371
+00:17:35.856 --> 00:17:38.192 line:-2 align:center
+you will most likely
+run into a problem
+
+
+372
+00:17:38.225 --> 00:17:41.228 line:-1 align:center
+because the file will be gone.
+
+
+373
+00:17:41,261 --> 00:17:42,930 line:-1
+The timing of file transfers
+
+
+374
+00:17:42.963 --> 00:17:44.731 line:-1 align:center
+is based on system conditions,
+
+
+375
+00:17:44,765 --> 00:17:45,933 line:-1
+and, of course,
+
+
+376
+00:17:45.966 --> 00:17:48.936 line:-2 align:center
+larger files may take
+longer to transfer.
+
+
+377
+00:17:50.070 --> 00:17:52.840 line:-2 align:center
+transferCurrentComplicationUserInfo(_:)
+
+
+378
+00:17:52.873 --> 00:17:56.743 line:-2 align:center
+is a special case of the
+user info transfer functionality
+
+
+379
+00:17:56,777 --> 00:18:00,547 line:-2
+to send complication-related
+data to the Watch.
+
+
+380
+00:18:00.581 --> 00:18:03.016 line:-2 align:center
+It's transferred
+as soon as possible,
+
+
+381
+00:18:03.050 --> 00:18:05.752 line:-2 align:center
+ahead of other user info
+transfers,
+
+
+382
+00:18:05.786 --> 00:18:08.655 line:-2 align:center
+as long as you have complication
+transfers
+
+
+383
+00:18:08,689 --> 00:18:11,158 line:-1
+remaining in your budget.
+
+
+384
+00:18:11,191 --> 00:18:12,793 line:-1
+This immediate transfer
+
+
+385
+00:18:12.826 --> 00:18:15.762 line:-2 align:center
+allows you to keep your active
+complications current
+
+
+386
+00:18:15.796 --> 00:18:20.367 line:-2 align:center
+for your customers when you have
+updated data from your phone.
+
+
+387
+00:18:20.400 --> 00:18:22.469 line:-2 align:center
+You can check
+your remaining budget,
+
+
+388
+00:18:22,503 --> 00:18:25,138 line:-2
+and if you transfer
+current complication info
+
+
+389
+00:18:25,172 --> 00:18:28,642 line:-2
+with no remaining budget,
+it will still be sent.
+
+
+390
+00:18:28.675 --> 00:18:33.247 line:-2 align:center
+It will just use the
+normal user info transfer queue.
+
+
+391
+00:18:34,248 --> 00:18:35,983 line:-1
+You can use sendMessage
+
+
+392
+00:18:36.016 --> 00:18:37.885 line:-2 align:center
+to send data
+to your counterpart app
+
+
+393
+00:18:37.918 --> 00:18:39.553 line:-1 align:center
+and get a reply.
+
+
+394
+00:18:39,586 --> 00:18:41,421 line:-2
+This is for
+interactive messaging
+
+
+395
+00:18:41.455 --> 00:18:44.324 line:-2 align:center
+when your counterpart app
+is reachable.
+
+
+396
+00:18:44.358 --> 00:18:46.960 line:-2 align:center
+Whether you're sending
+a dictionary or data,
+
+
+397
+00:18:46.994 --> 00:18:49.162 line:-1 align:center
+keep your messages small.
+
+
+398
+00:18:49.196 --> 00:18:52.599 line:-2 align:center
+We also recommend that you
+opt to include a reply handler
+
+
+399
+00:18:52.633 --> 00:18:55.002 line:-1 align:center
+for your sendMessage calls.
+
+
+400
+00:18:55,035 --> 00:18:57,137 line:-2
+A short reply
+allows you to verify
+
+
+401
+00:18:57.171 --> 00:18:59.840 line:-2 align:center
+that the counterpart app
+did receive the message
+
+
+402
+00:18:59.873 --> 00:19:02.342 line:-1 align:center
+and that the data was correct.
+
+
+403
+00:19:02.376 --> 00:19:04.478 line:-2 align:center
+When you include
+that reply handler
+
+
+404
+00:19:04,511 --> 00:19:06,146 line:-1
+on your sendMessage,
+
+
+405
+00:19:06,180 --> 00:19:07,648 line:-1
+also make sure you implement
+
+
+406
+00:19:07.681 --> 00:19:10.651 line:-2 align:center
+the version of the
+did receive message
+
+
+407
+00:19:10.684 --> 00:19:13.954 line:-2 align:center
+or did receive data
+delegate callback function
+
+
+408
+00:19:13.987 --> 00:19:17.491 line:-2 align:center
+in the counterpart app
+that includes a reply handler.
+
+
+409
+00:19:17.524 --> 00:19:21.962 line:-2 align:center
+Otherwise, you'll get an error
+when you send the message.
+
+
+410
+00:19:22,963 --> 00:19:25,332 line:-2
+Now that we've heard
+about sendMessage,
+
+
+411
+00:19:25.365 --> 00:19:28.368 line:-2 align:center
+let's revisit
+the concept of reachability.
+
+
+412
+00:19:28,402 --> 00:19:30,370 line:-2
+Both of your apps
+need to be reachable
+
+
+413
+00:19:30,404 --> 00:19:32,105 line:-1
+to send messages.
+
+
+414
+00:19:32.139 --> 00:19:34.575 line:-2 align:center
+You can check
+the isReachable property
+
+
+415
+00:19:34,608 --> 00:19:36,476 line:-2
+on the
+Watch Connectivity session
+
+
+416
+00:19:36.510 --> 00:19:38.979 line:-2 align:center
+to determine if your
+counterpart app is reachable
+
+
+417
+00:19:39,012 --> 00:19:42,015 line:-2
+for live,
+non-background messaging.
+
+
+418
+00:19:42.049 --> 00:19:46.620 line:-2 align:center
+But what does it mean
+to be reachable?
+
+
+419
+00:19:46,653 --> 00:19:49,556 line:-2
+Both devices need to be
+within range of each other
+
+
+420
+00:19:49.590 --> 00:19:54.261 line:-2 align:center
+via Bluetooth
+or on the same Wi-Fi network.
+
+
+421
+00:19:54,294 --> 00:19:56,897 line:-2
+For the WatchKit Extension
+to be reachable,
+
+
+422
+00:19:56.930 --> 00:19:59.499 line:-2 align:center
+it must be either
+running in the foreground
+
+
+423
+00:19:59.533 --> 00:20:02.970 line:-2 align:center
+or running in the background
+with a high priority,
+
+
+424
+00:20:03,003 --> 00:20:04,438 line:-1
+as it does when performing
+
+
+425
+00:20:04,471 --> 00:20:07,007 line:-2
+long-running
+background sessions.
+
+
+426
+00:20:07,040 --> 00:20:12,246 line:-2
+The iOS app doesn't have
+this foreground requirement.
+
+
+427
+00:20:12.279 --> 00:20:14.748 line:-2 align:center
+If you send a message
+from your Watch app
+
+
+428
+00:20:14.781 --> 00:20:16.350 line:-1 align:center
+to your iOS app,
+
+
+429
+00:20:16.383 --> 00:20:18.886 line:-2 align:center
+and your iOS app
+is not in the foreground,
+
+
+430
+00:20:18.919 --> 00:20:20.821 line:-1 align:center
+your iOS app will be activated
+
+
+431
+00:20:20.854 --> 00:20:22.756 line:-2 align:center
+in the background
+to receive the message.
+
+
+432
+00:20:23,757 --> 00:20:25,959 line:-1
+This means that your iOS app
+
+
+433
+00:20:25.993 --> 00:20:28.262 line:-2 align:center
+is reachable
+from your Watch Extension
+
+
+434
+00:20:28.295 --> 00:20:30.998 line:-2 align:center
+far more of the time
+than vice versa.
+
+
+435
+00:20:31,598 --> 00:20:33,967 line:-1
+Watch Connectivity is a good way
+
+
+436
+00:20:34.001 --> 00:20:36.170 line:-2 align:center
+to provide your customers
+with an experience
+
+
+437
+00:20:36.203 --> 00:20:39.673 line:-2 align:center
+that feels timely,
+responsive, and intuitive
+
+
+438
+00:20:39,706 --> 00:20:43,177 line:-2
+when they have installed both
+your iPhone and Watch apps.
+
+
+439
+00:20:43,210 --> 00:20:46,446 line:-2
+Since Watch Connectivity
+is specifically communicating
+
+
+440
+00:20:46.480 --> 00:20:48.849 line:-2 align:center
+between a phone
+and a paired Watch,
+
+
+441
+00:20:48.882 --> 00:20:52.486 line:-2 align:center
+don't use it to support apps
+for Family Setup.
+
+
+442
+00:20:53,754 --> 00:20:55,222 line:-1
+Data transfer is dependent
+
+
+443
+00:20:55,255 --> 00:20:57,524 line:-2
+on the availability
+of the companion device
+
+
+444
+00:20:57.558 --> 00:21:00.093 line:-1 align:center
+via Bluetooth or Wi-Fi.
+
+
+445
+00:21:00,127 --> 00:21:02,729 line:-2
+Real-time communication
+using sendMessage
+
+
+446
+00:21:02,763 --> 00:21:05,499 line:-2
+requires the counterpart
+to be reachable.
+
+
+447
+00:21:05,532 --> 00:21:07,100 line:-2
+Remember that
+your counterpart app
+
+
+448
+00:21:07.134 --> 00:21:09.837 line:-2 align:center
+won't be reachable a
+lot of the time,
+
+
+449
+00:21:09,870 --> 00:21:11,839 line:-2
+especially when
+you're trying to communicate
+
+
+450
+00:21:11.872 --> 00:21:13.807 line:-1 align:center
+to your Watch app.
+
+
+451
+00:21:13.841 --> 00:21:16.710 line:-2 align:center
+Background transfers
+aren't delivered immediately.
+
+
+452
+00:21:16.743 --> 00:21:19.146 line:-2 align:center
+Think of them
+like posting a letter:
+
+
+453
+00:21:19,179 --> 00:21:20,547 line:-1
+you drop it in the box,
+
+
+454
+00:21:20.581 --> 00:21:24.384 line:-2 align:center
+but you're not sure exactly
+when it's going to be there.
+
+
+455
+00:21:25.752 --> 00:21:28.589 line:-2 align:center
+For more information
+about Watch Connectivity,
+
+
+456
+00:21:28.622 --> 00:21:31.692 line:-2 align:center
+check out
+"Introducing Watch Connectivity"
+
+
+457
+00:21:31,725 --> 00:21:34,962 line:-1
+in the Developer app or online.
+
+
+458
+00:21:34,995 --> 00:21:38,131 line:-2
+Now, we're going to talk about
+a couple of ways
+
+
+459
+00:21:38.165 --> 00:21:41.435 line:-2 align:center
+to communicate
+directly with servers.
+
+
+460
+00:21:41.468 --> 00:21:42.936 line:-1 align:center
+For most use cases,
+
+
+461
+00:21:42.970 --> 00:21:46.273 line:-1 align:center
+the best option is URL sessions.
+
+
+462
+00:21:46,306 --> 00:21:49,810 line:-2
+Depending on the interaction
+and type of data,
+
+
+463
+00:21:49.843 --> 00:21:52.212 line:-2 align:center
+you might be able to defer
+communication
+
+
+464
+00:21:52.246 --> 00:21:54.548 line:-2 align:center
+or might need
+to do it right away.
+
+
+465
+00:21:54,581 --> 00:21:57,951 line:-2
+So, we have different
+configurations for URL sessions
+
+
+466
+00:21:57.985 --> 00:22:02.456 line:-2 align:center
+to allow them to be run
+in the background or foreground.
+
+
+467
+00:22:02,489 --> 00:22:05,826 line:-2
+Let's look at when you should
+use each of these options.
+
+
+468
+00:22:06,393 --> 00:22:10,063 line:-2
+You should use background
+sessions wherever possible.
+
+
+469
+00:22:10,097 --> 00:22:11,899 line:-2
+This might not be
+our first instinct
+
+
+470
+00:22:11.932 --> 00:22:13.200 line:-1 align:center
+as developers,
+
+
+471
+00:22:13,233 --> 00:22:15,435 line:-2
+where we might want
+to just go ahead
+
+
+472
+00:22:15,469 --> 00:22:17,804 line:-1
+and get or send data right away.
+
+
+473
+00:22:18.639 --> 00:22:21.008 line:-1 align:center
+But really think about it.
+
+
+474
+00:22:21.041 --> 00:22:23.010 line:-2 align:center
+Foreground sessions
+need to complete
+
+
+475
+00:22:23.043 --> 00:22:24.678 line:-2 align:center
+while your app
+is in the foreground
+
+
+476
+00:22:24.711 --> 00:22:26.113 line:-1 align:center
+or front-most,
+
+
+477
+00:22:26.146 --> 00:22:28.315 line:-2 align:center
+and for all
+but the shortest tasks,
+
+
+478
+00:22:28.348 --> 00:22:30.684 line:-1 align:center
+this isn't enough time.
+
+
+479
+00:22:30.717 --> 00:22:32.586 line:-2 align:center
+Think about
+your customers' experience
+
+
+480
+00:22:32,619 --> 00:22:35,455 line:-2
+if their communication
+task fails.
+
+
+481
+00:22:36.456 --> 00:22:38.625 line:-2 align:center
+So, please be considerate
+of your customers
+
+
+482
+00:22:38,659 --> 00:22:41,461 line:-2
+and carefully evaluate
+each communication task
+
+
+483
+00:22:41.495 --> 00:22:44.932 line:-2 align:center
+and ask, "Can I do this
+in the background?"
+
+
+484
+00:22:45,933 --> 00:22:48,735 line:-2
+Background URL sessions
+are the right choice
+
+
+485
+00:22:48.769 --> 00:22:51.572 line:-2 align:center
+for any time communication
+can be delayed
+
+
+486
+00:22:51.605 --> 00:22:54.007 line:-1 align:center
+and for large data transfers.
+
+
+487
+00:22:54.041 --> 00:22:56.243 line:-2 align:center
+You can also send
+a push notification
+
+
+488
+00:22:56.276 --> 00:22:59.379 line:-2 align:center
+to your app to indicate
+that new data is available
+
+
+489
+00:22:59.413 --> 00:23:02.316 line:-2 align:center
+and initiate
+a background update.
+
+
+490
+00:23:02.349 --> 00:23:04.751 line:-2 align:center
+The exact timing of
+your background transfer
+
+
+491
+00:23:04.785 --> 00:23:08.021 line:-2 align:center
+will depend
+on system conditions.
+
+
+492
+00:23:08.055 --> 00:23:10.424 line:-2 align:center
+Let's walk through an example
+of sending some data
+
+
+493
+00:23:10,457 --> 00:23:12,826 line:-1
+to a server in the background.
+
+
+494
+00:23:12,860 --> 00:23:14,461 line:-1
+For example,
+
+
+495
+00:23:14,494 --> 00:23:17,130 line:-2
+if I have some settings for my
+application
+
+
+496
+00:23:17,164 --> 00:23:19,700 line:-2
+that I want to store
+through my web server,
+
+
+497
+00:23:19,733 --> 00:23:21,502 line:-1
+when my customer saves those,
+
+
+498
+00:23:21,535 --> 00:23:23,403 line:-1
+I can save them on the Watch
+
+
+499
+00:23:23.437 --> 00:23:26.874 line:-2 align:center
+and then send them to the server
+in the background.
+
+
+500
+00:23:28.041 --> 00:23:31.778 line:-2 align:center
+To do that, I've made
+a background URL session class
+
+
+501
+00:23:31.812 --> 00:23:35.382 line:-2 align:center
+to handle the work
+of the server communication.
+
+
+502
+00:23:36.383 --> 00:23:39.853 line:-2 align:center
+Our URL session will
+have a background configuration
+
+
+503
+00:23:39.887 --> 00:23:44.691 line:-2 align:center
+with a unique identifier
+we can use to find it later.
+
+
+504
+00:23:44.725 --> 00:23:48.562 line:-2 align:center
+Set the sends launch events
+property to true
+
+
+505
+00:23:48,595 --> 00:23:50,097 line:-1
+to indicate that the session
+
+
+506
+00:23:50.130 --> 00:23:52.332 line:-2 align:center
+should launch your app
+in the background
+
+
+507
+00:23:52,366 --> 00:23:56,203 line:-2
+when tasks on your session
+need to be handled.
+
+
+508
+00:23:57.137 --> 00:24:00.974 line:-2 align:center
+Note that if you're transferring
+a large amount of data,
+
+
+509
+00:24:01.008 --> 00:24:04.111 line:-2 align:center
+you should set the
+isDiscretionary property
+
+
+510
+00:24:04,144 --> 00:24:07,314 line:-2
+of the URL session configuration
+to true
+
+
+511
+00:24:07,347 --> 00:24:09,516 line:-2
+to let the system
+schedule the transfer
+
+
+512
+00:24:09,550 --> 00:24:14,054 line:-2
+at an optimal time for
+the device for best performance.
+
+
+513
+00:24:14,955 --> 00:24:16,256 line:-1
+In this case,
+
+
+514
+00:24:16,290 --> 00:24:18,392 line:-2
+you should also
+let your customers know
+
+
+515
+00:24:18.425 --> 00:24:20.460 line:-2 align:center
+that their downloads might not
+happen
+
+
+516
+00:24:20.494 --> 00:24:24.097 line:-2 align:center
+until they're connected
+to Wi-Fi and power.
+
+
+517
+00:24:25,766 --> 00:24:27,768 line:-2
+When we're ready
+to send the data,
+
+
+518
+00:24:27,801 --> 00:24:29,403 line:-1
+we need to enqueue the transfer
+
+
+519
+00:24:29.436 --> 00:24:32.673 line:-2 align:center
+to schedule
+the background session.
+
+
+520
+00:24:32.706 --> 00:24:35.709 line:-2 align:center
+We'll create and configure
+a URL request
+
+
+521
+00:24:35,742 --> 00:24:40,314 line:-2
+with the contents for our
+Settings update to our server.
+
+
+522
+00:24:41,348 --> 00:24:45,452 line:-2
+Then, we'll create a task
+for our request on the session.
+
+
+523
+00:24:45.485 --> 00:24:47.421 line:-1 align:center
+In this simplified example,
+
+
+524
+00:24:47,454 --> 00:24:50,624 line:-2
+I'm only adding one task
+to my session,
+
+
+525
+00:24:50.657 --> 00:24:52.459 line:-2 align:center
+but you can add
+multiple requests
+
+
+526
+00:24:52,492 --> 00:24:55,095 line:-1
+to your session for efficiency.
+
+
+527
+00:24:55,128 --> 00:24:59,333 line:-2
+Set the earliestBeginDate
+to start the download later.
+
+
+528
+00:24:59.366 --> 00:25:02.069 line:-2 align:center
+Note that the system
+will determine the actual time
+
+
+529
+00:25:02,102 --> 00:25:04,872 line:-2
+our task starts
+based on background budget,
+
+
+530
+00:25:04.905 --> 00:25:07.474 line:-1 align:center
+network, and system conditions.
+
+
+531
+00:25:07.508 --> 00:25:08.609 line:-1 align:center
+Your app can receive
+
+
+532
+00:25:08,642 --> 00:25:11,879 line:-2
+up to four background
+refresh tasks per hour,
+
+
+533
+00:25:11.912 --> 00:25:15.148 line:-2 align:center
+if you have a complication
+on the active watch face,
+
+
+534
+00:25:15.182 --> 00:25:18.485 line:-2 align:center
+so schedule your tasks
+at least 15 minutes apart
+
+
+535
+00:25:18,519 --> 00:25:21,555 line:-2
+to prevent them from
+being delayed by the system.
+
+
+536
+00:25:23,023 --> 00:25:24,591 line:-1
+I'm holding on to this session
+
+
+537
+00:25:24,625 --> 00:25:27,094 line:-2
+in a list
+of in-progress sessions.
+
+
+538
+00:25:27,127 --> 00:25:29,129 line:-2
+This will become
+important later,
+
+
+539
+00:25:29.162 --> 00:25:30.631 line:-1 align:center
+when the system lets me know
+
+
+540
+00:25:30,664 --> 00:25:33,934 line:-2
+that my URL request
+has completed.
+
+
+541
+00:25:34.902 --> 00:25:38.238 line:-2 align:center
+Calling "resume" on the task
+actually starts it,
+
+
+542
+00:25:38,272 --> 00:25:41,074 line:-2
+so it's important
+that you call this.
+
+
+543
+00:25:41.875 --> 00:25:44.578 line:-2 align:center
+Finally,
+I set my status to queued
+
+
+544
+00:25:44,611 --> 00:25:48,315 line:-2
+in case there are
+observers for the session.
+
+
+545
+00:25:48.348 --> 00:25:50.417 line:-1 align:center
+The system will notify our app
+
+
+546
+00:25:50.450 --> 00:25:52.753 line:-2 align:center
+when our background request
+has been processed
+
+
+547
+00:25:52,786 --> 00:25:56,723 line:-2
+using a background task sent
+to our Extension Delegate.
+
+
+548
+00:25:56,757 --> 00:25:59,193 line:-2
+In order for us
+to handle that task,
+
+
+549
+00:25:59.226 --> 00:26:01.795 line:-2 align:center
+we need to create
+a class that conforms
+
+
+550
+00:26:01.828 --> 00:26:04.598 line:-1 align:center
+to WK extension delegate
+
+
+551
+00:26:04,631 --> 00:26:09,336 line:-2
+and implement the
+handle(_ backgroundTasks:) function.
+
+
+552
+00:26:09.369 --> 00:26:12.673 line:-2 align:center
+For Background URL
+Session Refresh tasks,
+
+
+553
+00:26:12.706 --> 00:26:14.341 line:-1 align:center
+we'll try to find our session
+
+
+554
+00:26:14.374 --> 00:26:18.245 line:-2 align:center
+in our list
+of in-progress requests.
+
+
+555
+00:26:18.278 --> 00:26:21.615 line:-2 align:center
+If we have it, we'll call
+a function on the session
+
+
+556
+00:26:21.648 --> 00:26:23.550 line:-2 align:center
+to add
+the background refresh task
+
+
+557
+00:26:23.584 --> 00:26:25.219 line:-1 align:center
+to the list for the session,
+
+
+558
+00:26:25.252 --> 00:26:28.088 line:-2 align:center
+so we can let the system know
+we've completed it
+
+
+559
+00:26:28.121 --> 00:26:31.225 line:-2 align:center
+as soon as we've finished
+processing the data.
+
+
+560
+00:26:31,258 --> 00:26:33,527 line:-1
+I'll show you this in a moment.
+
+
+561
+00:26:34,561 --> 00:26:36,897 line:-2
+If we don't find
+the session in our list,
+
+
+562
+00:26:36,930 --> 00:26:39,533 line:-2
+we need to mark
+the task as completed.
+
+
+563
+00:26:39.566 --> 00:26:41.902 line:-2 align:center
+It is very important that you
+always set
+
+
+564
+00:26:41.935 --> 00:26:44.304 line:-2 align:center
+your background refresh task
+completed
+
+
+565
+00:26:44.338 --> 00:26:46.607 line:-1 align:center
+as soon as you're done.
+
+
+566
+00:26:46.640 --> 00:26:48.509 line:-2 align:center
+There's one more thing
+we need to do
+
+
+567
+00:26:48.542 --> 00:26:50.544 line:-2 align:center
+to get
+our background task calls:
+
+
+568
+00:26:50.577 --> 00:26:53.714 line:-2 align:center
+we need to connect our extension
+delegate to our App.
+
+
+569
+00:26:53.747 --> 00:26:54.848 line:-1 align:center
+To do this
+
+
+570
+00:26:54.882 --> 00:26:57.818 line:-2 align:center
+we're going to use
+the WK extension delegate adaptor
+
+
+571
+00:26:57,851 --> 00:26:59,152 line:-1
+property wrapper
+
+
+572
+00:26:59.186 --> 00:27:01.288 line:-2 align:center
+with our Extension Delegate
+class,
+
+
+573
+00:27:01.321 --> 00:27:03.724 line:-1 align:center
+and add a property to our app.
+
+
+574
+00:27:03,757 --> 00:27:06,293 line:-2
+Now, the system will
+call our extension delegate
+
+
+575
+00:27:06.326 --> 00:27:08.929 line:-1 align:center
+to handle our background tasks.
+
+
+576
+00:27:08.962 --> 00:27:10.731 line:-1 align:center
+In our extension delegate,
+
+
+577
+00:27:10.764 --> 00:27:13.467 line:-2 align:center
+we called this function
+to add our background task
+
+
+578
+00:27:13,500 --> 00:27:16,470 line:-1
+to our existing session.
+
+
+579
+00:27:16.503 --> 00:27:19.373 line:-2 align:center
+Add this task
+to our list of background tasks
+
+
+580
+00:27:19.406 --> 00:27:21.208 line:-1 align:center
+so we can mark it completed
+
+
+581
+00:27:21.241 --> 00:27:25.846 line:-2 align:center
+as soon as we're done
+processing the URL data.
+
+
+582
+00:27:25,879 --> 00:27:28,549 line:-2
+Now, we've wired up
+the whole round trip,
+
+
+583
+00:27:28,582 --> 00:27:31,618 line:-2
+and all we have left
+to do is get our data
+
+
+584
+00:27:31.652 --> 00:27:34.721 line:-2 align:center
+and let the system know
+we're done.
+
+
+585
+00:27:34.755 --> 00:27:36.924 line:-2 align:center
+Our URL session
+download delegate
+
+
+586
+00:27:36.957 --> 00:27:40.260 line:-2 align:center
+will get called when
+our request completes.
+
+
+587
+00:27:40,294 --> 00:27:43,964 line:-2
+Process the data received in
+the file from the download task.
+
+
+588
+00:27:43,997 --> 00:27:46,066 line:-2
+It's important that
+you either move this item
+
+
+589
+00:27:46,099 --> 00:27:48,302 line:-2
+into a directory accessible
+to your app
+
+
+590
+00:27:48.335 --> 00:27:51.071 line:-2 align:center
+or quickly process
+the data from the file.
+
+
+591
+00:27:51,104 --> 00:27:52,539 line:-1
+When this task completes,
+
+
+592
+00:27:52.573 --> 00:27:55.475 line:-2 align:center
+the downloaded
+file will be deleted.
+
+
+593
+00:27:55.509 --> 00:27:59.246 line:-2 align:center
+We're removing this session from
+the list of in-process sessions,
+
+
+594
+00:27:59,279 --> 00:28:01,915 line:-2
+since we won't get any more
+background tasks for it
+
+
+595
+00:28:01,949 --> 00:28:03,984 line:-1
+from the extension delegate,
+
+
+596
+00:28:04.017 --> 00:28:06.086 line:-2 align:center
+and we're setting the status to
+completed
+
+
+597
+00:28:06,119 --> 00:28:08,755 line:-1
+in case there are any observers.
+
+
+598
+00:28:09.523 --> 00:28:13.193 line:-2 align:center
+Finally, we're setting
+our background task completed.
+
+
+599
+00:28:13.227 --> 00:28:14.494 line:-1 align:center
+This lets the system know
+
+
+600
+00:28:14.528 --> 00:28:17.531 line:-2 align:center
+we've completed
+our background processing.
+
+
+601
+00:28:17.564 --> 00:28:18.999 line:-1 align:center
+Making sure you do this
+
+
+602
+00:28:19.032 --> 00:28:22.302 line:-2 align:center
+isn't just being
+a good Watch app citizen.
+
+
+603
+00:28:22,336 --> 00:28:24,905 line:-2
+It prevents the system
+from terminating your app
+
+
+604
+00:28:24.938 --> 00:28:27.808 line:-2 align:center
+for exceeding
+its background limits.
+
+
+605
+00:28:27,841 --> 00:28:29,142 line:-1
+And that's it!
+
+
+606
+00:28:29,176 --> 00:28:30,644 line:-2
+We're all done
+sending our settings
+
+
+607
+00:28:30.677 --> 00:28:33.113 line:-2 align:center
+in the background and
+getting any updates.
+
+
+608
+00:28:33.146 --> 00:28:34.982 line:-2 align:center
+Note that in
+a full implementation,
+
+
+609
+00:28:35,015 --> 00:28:37,684 line:-2
+you'll want to handle errors
+and authentication challenges,
+
+
+610
+00:28:37.718 --> 00:28:40.821 line:-2 align:center
+but this gives
+you the basic steps.
+
+
+611
+00:28:40.854 --> 00:28:44.691 line:-2 align:center
+Use foreground URL sessions
+for quick server communication
+
+
+612
+00:28:44.725 --> 00:28:47.761 line:-2 align:center
+while a person
+is interacting with your app.
+
+
+613
+00:28:47.794 --> 00:28:49.062 line:-1 align:center
+A good example of this
+
+
+614
+00:28:49,096 --> 00:28:50,797 line:-2
+is getting
+the latest workout list
+
+
+615
+00:28:50,831 --> 00:28:54,034 line:-1
+or the meditation of the day.
+
+
+616
+00:28:54.067 --> 00:28:57.504 line:-2 align:center
+Foreground URL sessions
+are a less-power-efficient way
+
+
+617
+00:28:57,538 --> 00:28:59,373 line:-1
+to get and send data,
+
+
+618
+00:28:59.406 --> 00:29:02.709 line:-2 align:center
+and a two-and-a-half
+minute timeout is enforced.
+
+
+619
+00:29:02.743 --> 00:29:06.079 line:-2 align:center
+But in practice, you should try
+to target foreground sessions
+
+
+620
+00:29:06,113 --> 00:29:10,284 line:-2
+to interactions that are
+much quicker than that limit.
+
+
+621
+00:29:10,317 --> 00:29:12,819 line:-1
+URL sessions are the best method
+
+
+622
+00:29:12,853 --> 00:29:14,821 line:-2
+for general purpose
+communication
+
+
+623
+00:29:14.855 --> 00:29:16.823 line:-1 align:center
+directly with servers.
+
+
+624
+00:29:16.857 --> 00:29:19.793 line:-2 align:center
+They don't rely on
+a companion iPhone app,
+
+
+625
+00:29:19,826 --> 00:29:23,697 line:-2
+and you can use them with apps
+supporting Family Setup.
+
+
+626
+00:29:23.730 --> 00:29:25.199 line:-1 align:center
+Use background sessions
+
+
+627
+00:29:25.232 --> 00:29:28.569 line:-2 align:center
+for anywhere you can possibly
+delay the data transfer,
+
+
+628
+00:29:28.602 --> 00:29:32.739 line:-2 align:center
+and always for transferring
+larger amounts of data.
+
+
+629
+00:29:33.273 --> 00:29:35.943 line:-2 align:center
+To learn more about
+URL sessions,
+
+
+630
+00:29:35,976 --> 00:29:39,246 line:-2
+check out "Keep your
+complications up to date"
+
+
+631
+00:29:39.279 --> 00:29:42.349 line:-2 align:center
+and "Background
+execution demystified"
+
+
+632
+00:29:42,382 --> 00:29:44,885 line:-1
+in the Developer app or online.
+
+
+633
+00:29:45,452 --> 00:29:47,621 line:-1
+In addition to URL sessions,
+
+
+634
+00:29:47.654 --> 00:29:49.923 line:-2 align:center
+if you're building
+a streaming audio app,
+
+
+635
+00:29:49.957 --> 00:29:52.392 line:-2 align:center
+sockets are another option
+to communicate
+
+
+636
+00:29:52.426 --> 00:29:55.062 line:-1 align:center
+directly with servers.
+
+
+637
+00:29:55,095 --> 00:29:57,798 line:-1
+You can use HTTP Live Streaming
+
+
+638
+00:29:57.831 --> 00:29:59.600 line:-1 align:center
+or Web Sockets in Watch apps
+
+
+639
+00:29:59,633 --> 00:30:03,136 line:-2
+in the context of your active
+streaming audio session.
+
+
+640
+00:30:03.904 --> 00:30:07.207 line:-2 align:center
+For more information on
+using Sockets, check out
+
+
+641
+00:30:07,241 --> 00:30:10,677 line:-2
+the "Streaming Audio
+on watchOS 6" session
+
+
+642
+00:30:10,711 --> 00:30:13,480 line:-1
+in the Developer app or online.
+
+
+643
+00:30:14.181 --> 00:30:16.517 line:-1 align:center
+We've covered a lot,
+
+
+644
+00:30:16,550 --> 00:30:18,719 line:-2
+so let's summarize
+how we can choose
+
+
+645
+00:30:18,752 --> 00:30:21,088 line:-2
+from among all the options
+we've seen.
+
+
+646
+00:30:21.889 --> 00:30:24.525 line:-2 align:center
+For small pieces
+of sensitive data
+
+
+647
+00:30:24,558 --> 00:30:27,728 line:-2
+that can be synced to
+all a person's devices,
+
+
+648
+00:30:27,761 --> 00:30:31,331 line:-2
+choose Keychain with
+iCloud Synchronization.
+
+
+649
+00:30:31.365 --> 00:30:33.567 line:-1 align:center
+To store databases in iCloud
+
+
+650
+00:30:33.600 --> 00:30:35.936 line:-2 align:center
+and share
+with all a person's devices,
+
+
+651
+00:30:35.969 --> 00:30:39.540 line:-1 align:center
+choose Core Data with CloudKit.
+
+
+652
+00:30:39.573 --> 00:30:43.544 line:-2 align:center
+To optimize the experience for
+companion iPhone and Watch apps,
+
+
+653
+00:30:43,577 --> 00:30:46,980 line:-2
+or to share data that is
+available only on one device
+
+
+654
+00:30:47.014 --> 00:30:50.651 line:-2 align:center
+in companion apps,
+choose Watch Connectivity.
+
+
+655
+00:30:50.684 --> 00:30:52.853 line:-2 align:center
+To communicate
+directly with servers,
+
+
+656
+00:30:52,886 --> 00:30:55,189 line:-1
+choose URL sessions.
+
+
+657
+00:30:55.222 --> 00:30:59.693 line:-2 align:center
+For streaming audio apps,
+you can also use sockets.
+
+
+658
+00:30:59.726 --> 00:31:02.863 line:-2 align:center
+To support customers
+who are using Family Setup
+
+
+659
+00:31:02,896 --> 00:31:05,199 line:-2
+or to use
+cellular data transfer,
+
+
+660
+00:31:05,232 --> 00:31:09,436 line:-2
+make sure you choose Keychain
+with iCloud Synchronization,
+
+
+661
+00:31:09,469 --> 00:31:11,238 line:-1
+Core Data with CloudKit,
+
+
+662
+00:31:11,271 --> 00:31:14,508 line:-1
+URL sessions, or sockets.
+
+
+663
+00:31:15,175 --> 00:31:17,110 line:-1
+Think about the type of data,
+
+
+664
+00:31:17.144 --> 00:31:19.012 line:-1 align:center
+its source and destination,
+
+
+665
+00:31:19,046 --> 00:31:20,447 line:-1
+and your customer audience
+
+
+666
+00:31:20.480 --> 00:31:22.216 line:-1 align:center
+before choosing a solution
+
+
+667
+00:31:22,249 --> 00:31:25,819 line:-2
+to help you pick
+the right tool for the job.
+
+
+668
+00:31:25.853 --> 00:31:28.121 line:-2 align:center
+And always
+test your app on devices,
+
+
+669
+00:31:28.155 --> 00:31:31.191 line:-2 align:center
+not connected to the debugger,
+before you deploy it
+
+
+670
+00:31:31,225 --> 00:31:35,395 line:-2
+to verify its behavior
+in real-world conditions.
+
+
+671
+00:31:35.429 --> 00:31:37.097 line:-1 align:center
+Thank you for coming
+
+
+672
+00:31:37.130 --> 00:31:39.199 line:-2 align:center
+to learn about
+all the great tools
+
+
+673
+00:31:39,233 --> 00:31:42,503 line:-2
+we have for data transfer
+in your Watch apps.
+
+
+674
+00:31:42,536 --> 00:31:45,405 line:-2
+We can't wait to see
+what you build next.
+
+
+675
+00:31:45,439 --> 00:31:50,811 line:-1
+[music]
+

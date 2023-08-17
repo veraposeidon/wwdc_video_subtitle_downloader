@@ -1,0 +1,1527 @@
+1
+00:00:03,904 --> 00:00:06,640 line:-1
+Hello, and welcome to WWDC.
+
+
+2
+00:00:06,707 --> 00:00:10,310 line:0
+Hi, I'm Sam Colbran
+from the GPU Software team at Apple,
+
+
+3
+00:00:10,377 --> 00:00:12,980 line:0
+and today we're gonna be talking
+about Metal tools
+
+
+4
+00:00:13,046 --> 00:00:17,251 line:0
+and how they can help you gain insights
+into your apps in the world of Apple GPUs.
+
+
+5
+00:00:18,385 --> 00:00:21,989 line:-2
+These days, the rendering pipeline
+is increasing in complexity,
+
+
+6
+00:00:22,055 --> 00:00:24,458 line:-2
+with potentially hundreds
+of render passes.
+
+
+7
+00:00:25,125 --> 00:00:27,227 line:-1
+And that probably sounds a bit daunting,
+
+
+8
+00:00:27,294 --> 00:00:29,730 line:-2
+especially if you're new
+to the Apple platform.
+
+
+9
+00:00:30,197 --> 00:00:31,231 line:-1
+But don't worry.
+
+
+10
+00:00:31,298 --> 00:00:33,100 line:-1
+We've got a bunch of great Metal tools
+
+
+11
+00:00:33,166 --> 00:00:36,236 line:-2
+that can guide you and help to reduce
+some of that complexity.
+
+
+12
+00:00:36,803 --> 00:00:38,605 line:-1
+We're gonna be going through them today,
+
+
+13
+00:00:38,672 --> 00:00:41,375 line:-2
+and once you use them,
+I hope that you'll be able to deliver
+
+
+14
+00:00:41,441 --> 00:00:44,611 line:-2
+amazingly optimized,
+beautiful apps and games
+
+
+15
+00:00:44,678 --> 00:00:46,246 line:-1
+to people all over the world.
+
+
+16
+00:00:46,847 --> 00:00:49,816 line:-2
+In this session, we're gonna dig around
+in the Metal toolbox
+
+
+17
+00:00:49,883 --> 00:00:53,420 line:-2
+and discover what's available in
+the Metal Debugger and Metal System Trace.
+
+
+18
+00:00:54,321 --> 00:00:58,692 line:-2
+At the end, we're gonna have a sneak peek
+at an upcoming game from Larian Studios,
+
+
+19
+00:00:58,759 --> 00:01:01,595 line:-2
+and then I'll show you how you might
+investigate it with the tools.
+
+
+20
+00:01:02,196 --> 00:01:04,096 line:0
+First up is the Metal Debugger,
+
+
+21
+00:01:04,164 --> 00:01:06,533 line:0
+which you'd typically use
+when you're GPU-bound.
+
+
+22
+00:01:07,234 --> 00:01:10,070 line:0
+The Metal Debugger in Xcode
+is a powerful toolset
+
+
+23
+00:01:10,137 --> 00:01:12,906 line:0
+for capturing and debugging
+a single frame of your app.
+
+
+24
+00:01:13,507 --> 00:01:16,043 line:-2
+It lets you deep dive
+into your render pipeline
+
+
+25
+00:01:16,109 --> 00:01:18,512 line:-2
+and helps to diagnose issues
+at an API level.
+
+
+26
+00:01:19,780 --> 00:01:21,982 line:-2
+Let's take a closer look
+at each of the tools.
+
+
+27
+00:01:22,249 --> 00:01:24,251 line:-1
+It all begins with a frame capture.
+
+
+28
+00:01:25,419 --> 00:01:28,689 line:-2
+In Xcode, make sure
+to first enable GPU Frame Capture
+
+
+29
+00:01:28,755 --> 00:01:30,224 line:-1
+under the scheme options,
+
+
+30
+00:01:30,290 --> 00:01:31,825 line:-1
+and then run your Metal app.
+
+
+31
+00:01:32,125 --> 00:01:33,994 line:0
+Once you're at a frame
+that you wanna debug,
+
+
+32
+00:01:34,061 --> 00:01:36,964 line:0
+simply click on the camera icon
+in the debug bar.
+
+
+33
+00:01:38,098 --> 00:01:42,269 line:-2
+To help you better understand your frame,
+this year we've created a new summary view
+
+
+34
+00:01:42,603 --> 00:01:45,606 line:-2
+with the information about a frame
+in one convenient location,
+
+
+35
+00:01:46,073 --> 00:01:47,074 line:-1
+giving you quick access
+
+
+36
+00:01:47,140 --> 00:01:51,044 line:-2
+to an overview of encoders,
+performance numbers and memory usage.
+
+
+37
+00:01:51,612 --> 00:01:53,146 line:-1
+From here, you can jump into tools
+
+
+38
+00:01:53,213 --> 00:01:56,450 line:-2
+that are specific to the areas
+you're interested in exploring.
+
+
+39
+00:01:56,850 --> 00:01:58,852 line:0
+The summary also shows Insights,
+
+
+40
+00:01:59,186 --> 00:02:01,188 line:0
+which suggest changes
+that you can make to your app
+
+
+41
+00:02:01,255 --> 00:02:06,326 line:0
+in order to improve memory usage,
+bandwidth, performance or Metal API usage.
+
+
+42
+00:02:06,927 --> 00:02:10,864 line:0
+It's okay if this is your first journey
+into the world of Apple GPUs.
+
+
+43
+00:02:11,398 --> 00:02:14,735 line:0
+The tools will give you the guidance
+you need to face the challenges.
+
+
+44
+00:02:15,402 --> 00:02:18,305 line:0
+Each insight is accompanied
+by a description of the problem,
+
+
+45
+00:02:18,605 --> 00:02:22,276 line:0
+a hint on how to fix it,
+along with links to related documentation.
+
+
+46
+00:02:23,477 --> 00:02:26,780 line:0
+Let's move on to the dependency viewer,
+which you can get to by clicking
+
+
+47
+00:02:26,847 --> 00:02:29,550 line:0
+on the Show Dependencies button
+in the summary view
+
+
+48
+00:02:29,883 --> 00:02:33,720 line:0
+or by clicking on any command buffer
+or encoder in the navigator.
+
+
+49
+00:02:34,621 --> 00:02:37,224 line:0
+As apps and render pipelines
+become more complicated,
+
+
+50
+00:02:37,558 --> 00:02:41,061 line:0
+it's often useful to see all the
+dependencies between different encoders
+
+
+51
+00:02:41,128 --> 00:02:42,963 line:0
+to understand how your frame is rendered.
+
+
+52
+00:02:43,530 --> 00:02:46,667 line:0
+The dependency viewer provides
+a bird's-eye overview
+
+
+53
+00:02:46,733 --> 00:02:49,102 line:0
+of all of the GPU passes
+encoded by your app
+
+
+54
+00:02:49,570 --> 00:02:52,639 line:0
+and is a great place
+to start debugging load/store actions
+
+
+55
+00:02:52,706 --> 00:02:53,941 line:0
+and bandwidth in general.
+
+
+56
+00:02:55,375 --> 00:02:56,910 line:-1
+If you're interested in learning more,
+
+
+57
+00:02:56,977 --> 00:02:59,546 line:-2
+check out the "Delivering Optimized
+Metal Apps and Games" talk
+
+
+58
+00:02:59,613 --> 00:03:01,148 line:-1
+from last year's WWDC.
+
+
+59
+00:03:01,748 --> 00:03:04,151 line:-2
+We'll also come back
+to the dependency viewer a bit later,
+
+
+60
+00:03:04,218 --> 00:03:05,586 line:-1
+so let's move on for now.
+
+
+61
+00:03:06,687 --> 00:03:09,356 line:0
+Apple GPUs are packed with enormous power,
+
+
+62
+00:03:09,690 --> 00:03:11,892 line:0
+and we want you to take
+full advantage of it.
+
+
+63
+00:03:12,259 --> 00:03:14,461 line:0
+Clicking on Counters in the navigator
+
+
+64
+00:03:14,528 --> 00:03:16,730 line:0
+brings you
+to the GPU Performance counters,
+
+
+65
+00:03:17,164 --> 00:03:18,432 line:0
+which give you great detail
+
+
+66
+00:03:18,498 --> 00:03:22,035 line:0
+into how long the GPU is spending
+on the various parts of your frame.
+
+
+67
+00:03:23,170 --> 00:03:26,273 line:0
+If you're interested in learning more,
+we have another session this year
+
+
+68
+00:03:26,340 --> 00:03:29,243 line:0
+that goes into much more detail
+about performance counters
+
+
+69
+00:03:29,643 --> 00:03:31,712 line:0
+and how to use them to fine-tune your app.
+
+
+70
+00:03:31,912 --> 00:03:32,913 line:0
+So go check it out.
+
+
+71
+00:03:34,081 --> 00:03:37,017 line:0
+Shaders are also becoming
+more powerful each year.
+
+
+72
+00:03:37,084 --> 00:03:38,252 line:0
+But not to worry.
+
+
+73
+00:03:38,318 --> 00:03:41,822 line:0
+Simply switch the navigator
+to "View Frame by Pipeline State"
+
+
+74
+00:03:41,889 --> 00:03:43,557 line:0
+and then select a render pipeline.
+
+
+75
+00:03:44,024 --> 00:03:47,794 line:0
+On Apple GPU's, you can get
+per-line performance breakdowns
+
+
+76
+00:03:47,861 --> 00:03:50,898 line:0
+directly in your shader source code
+with the shader profiler.
+
+
+77
+00:03:51,598 --> 00:03:54,568 line:-2
+You can even make edits
+directly in the shader profiler
+
+
+78
+00:03:54,635 --> 00:03:56,537 line:-1
+and see how the performance would change.
+
+
+79
+00:03:56,837 --> 00:03:59,873 line:-2
+The "Metal Shader Debugging
+and Profiling" talk from 2018
+
+
+80
+00:03:59,940 --> 00:04:03,277 line:-2
+goes into much more detail,
+so I encourage you to check it out.
+
+
+81
+00:04:04,378 --> 00:04:05,746 line:0
+But why stop at performance?
+
+
+82
+00:04:06,013 --> 00:04:08,749 line:0
+You can also debug your shaders
+with the shader debugger.
+
+
+83
+00:04:09,349 --> 00:04:11,185 line:0
+There are a couple of ways
+to get to this tool,
+
+
+84
+00:04:11,251 --> 00:04:14,488 line:0
+but the easiest is to click
+on the debug button in the debug bar.
+
+
+85
+00:04:15,189 --> 00:04:17,991 line:0
+You can then select a pixel
+to debug the fragment shader,
+
+
+86
+00:04:18,192 --> 00:04:22,229 line:0
+geometry to debug the vertex shader
+or threads to debug a compute shader.
+
+
+87
+00:04:22,930 --> 00:04:25,132 line:0
+Once you're ready,
+click on the debug button.
+
+
+88
+00:04:26,333 --> 00:04:30,270 line:0
+The shader debugger provides you access
+to variable state over multiple threads,
+
+
+89
+00:04:30,604 --> 00:04:32,940 line:0
+so you can easily see
+exactly what is happening
+
+
+90
+00:04:33,006 --> 00:04:35,108 line:0
+during the entire execution
+of your shader.
+
+
+91
+00:04:36,043 --> 00:04:38,412 line:0
+For anyone who's used
+a traditional CPU debugger,
+
+
+92
+00:04:38,745 --> 00:04:40,380 line:0
+you've probably been in a situation
+
+
+93
+00:04:40,447 --> 00:04:43,350 line:0
+where you've accidentally stepped too far
+and can't go back.
+
+
+94
+00:04:43,917 --> 00:04:46,119 line:0
+In the shader debugger
+that's not a problem.
+
+
+95
+00:04:46,820 --> 00:04:49,923 line:0
+There's also no need
+to step over and into instructions,
+
+
+96
+00:04:49,990 --> 00:04:52,726 line:0
+because you get access
+to all of the variable values
+
+
+97
+00:04:53,026 --> 00:04:55,128 line:0
+for the entire execution of your shader.
+
+
+98
+00:04:55,996 --> 00:04:58,966 line:0
+For example, if you wanna look
+at iteration 28 of a loop,
+
+
+99
+00:04:59,466 --> 00:05:00,467 line:0
+it's right there.
+
+
+100
+00:05:00,868 --> 00:05:01,869 line:0
+That's pretty cool.
+
+
+101
+00:05:02,436 --> 00:05:05,239 line:0
+Like the shader profiler,
+the shader debugger also lets you
+
+
+102
+00:05:05,305 --> 00:05:08,542 line:0
+directly edit the source code
+and see your changes live.
+
+
+103
+00:05:09,109 --> 00:05:11,979 line:0
+These tools combined let you
+write huge performance shaders
+
+
+104
+00:05:12,045 --> 00:05:14,147 line:0
+without worrying about
+seeing a black screen
+
+
+105
+00:05:14,214 --> 00:05:16,083 line:0
+and trying to figure out
+where you went wrong.
+
+
+106
+00:05:17,317 --> 00:05:19,019 line:-1
+Once again, if you want to learn more,
+
+
+107
+00:05:19,086 --> 00:05:23,257 line:-2
+the "Metal Shader Debugging and Profiling"
+talk also covers the shader debugger.
+
+
+108
+00:05:24,725 --> 00:05:27,027 line:0
+Finally, that brings us
+to the Memory Viewer,
+
+
+109
+00:05:27,094 --> 00:05:30,998 line:0
+which is the go-to place to learn more
+about your app's memory usage.
+
+
+110
+00:05:31,532 --> 00:05:34,368 line:0
+You can get here
+by clicking on Memory in the navigator.
+
+
+111
+00:05:34,801 --> 00:05:36,403 line:0
+In modern rendering pipelines,
+
+
+112
+00:05:36,470 --> 00:05:40,073 line:0
+you have so much more explicit control
+over the memory usage.
+
+
+113
+00:05:40,507 --> 00:05:42,476 line:0
+The Memory Viewer provides a breakdown
+
+
+114
+00:05:42,543 --> 00:05:45,712 line:0
+of all of the resources in your app
+and their various properties.
+
+
+115
+00:05:46,280 --> 00:05:50,651 line:0
+You can also filter by categories,
+including volatility, resource type,
+
+
+116
+00:05:50,717 --> 00:05:52,853 line:0
+access and whether they're used or not.
+
+
+117
+00:05:54,454 --> 00:05:57,591 line:-2
+The "Delivering Optimized Metal Apps
+and Games" talk from last year
+
+
+118
+00:05:57,658 --> 00:06:00,928 line:-2
+also includes the Memory Viewer
+and goes into much more detail.
+
+
+119
+00:06:02,062 --> 00:06:05,098 line:0
+So these are just some
+of the amazing tools in the Metal Debugger
+
+
+120
+00:06:05,165 --> 00:06:06,633 line:0
+that can help you to understand
+
+
+121
+00:06:06,700 --> 00:06:09,970 line:0
+and take further advantage
+of Metal and Apple GPUs in your app.
+
+
+122
+00:06:10,571 --> 00:06:11,905 line:0
+I encourage you to go through
+
+
+123
+00:06:11,972 --> 00:06:15,275 line:0
+each of the related talks from past WWDC's
+for each tool
+
+
+124
+00:06:15,342 --> 00:06:16,343 line:0
+to learn more about them.
+
+
+125
+00:06:16,977 --> 00:06:19,880 line:0
+Of course, there are also
+a few extra tools in Xcode,
+
+
+126
+00:06:19,947 --> 00:06:22,983 line:0
+such as the new shader validation,
+that we didn't cover.
+
+
+127
+00:06:23,784 --> 00:06:25,953 line:0
+You can learn more about it
+in this related talk.
+
+
+128
+00:06:27,221 --> 00:06:29,756 line:-1
+Now, let's move on to Metal System Trace.
+
+
+129
+00:06:30,791 --> 00:06:33,126 line:0
+Metal System Trace
+is a template in Instruments
+
+
+130
+00:06:33,193 --> 00:06:35,662 line:0
+that lets you capture
+traits of your app over time,
+
+
+131
+00:06:35,996 --> 00:06:38,465 line:0
+as opposed to a single frame
+in the Metal Debugger.
+
+
+132
+00:06:38,866 --> 00:06:40,901 line:0
+This is perfect
+if you're trying to find issues
+
+
+133
+00:06:40,968 --> 00:06:44,071 line:0
+like stutters, dropped frames
+or memory leaks.
+
+
+134
+00:06:44,705 --> 00:06:46,340 line:-1
+We also provide the Game template,
+
+
+135
+00:06:46,673 --> 00:06:50,010 line:-2
+which is a great set of tracks
+if you're trying to investigate a game.
+
+
+136
+00:06:50,644 --> 00:06:52,513 line:0
+Let's start with the Encoder Timeline.
+
+
+137
+00:06:52,913 --> 00:06:55,349 line:0
+You can disclose the GPU track
+to see a timeline
+
+
+138
+00:06:55,415 --> 00:06:57,651 line:0
+of all the command buffers
+running in your app,
+
+
+139
+00:06:57,718 --> 00:06:58,852 line:0
+color-coded by frame.
+
+
+140
+00:06:59,419 --> 00:07:02,089 line:0
+This is perfect
+to see the overlap between encoders
+
+
+141
+00:07:02,356 --> 00:07:05,359 line:0
+and to make sure there are
+no bubbles where the GPU is idle.
+
+
+142
+00:07:05,425 --> 00:07:06,927 line:0
+It's also great for correlation
+
+
+143
+00:07:06,994 --> 00:07:09,963 line:0
+because you have access
+to the state of system in other tracks,
+
+
+144
+00:07:10,030 --> 00:07:11,565 line:0
+like the current thermal state.
+
+
+145
+00:07:11,765 --> 00:07:14,101 line:0
+For example,
+if your encoder is taking longer
+
+
+146
+00:07:14,168 --> 00:07:16,236 line:0
+because the device is in a critical state,
+
+
+147
+00:07:16,670 --> 00:07:19,139 line:0
+maybe you need to do less work
+to let it cool down.
+
+
+148
+00:07:20,274 --> 00:07:21,508 line:-1
+I encourage you to check out
+
+
+149
+00:07:21,575 --> 00:07:24,811 line:-2
+the "Delivering Optimized
+Metal Apps and Games" talk to learn more.
+
+
+150
+00:07:25,979 --> 00:07:28,081 line:0
+Next up is the new Shader Timeline.
+
+
+151
+00:07:28,515 --> 00:07:31,818 line:0
+If you want more detail
+about encoders on Apple GPUs,
+
+
+152
+00:07:32,119 --> 00:07:36,223 line:0
+you can enable the Shader Timeline under
+the Metal Application recording options.
+
+
+153
+00:07:36,823 --> 00:07:40,394 line:0
+The Shader Timeline shows you
+which shaders are running at sampled times
+
+
+154
+00:07:40,460 --> 00:07:42,629 line:0
+during the execution
+of your command encoder,
+
+
+155
+00:07:42,930 --> 00:07:46,400 line:0
+and this fine-grain detail
+makes it really easy to see
+
+
+156
+00:07:46,466 --> 00:07:49,102 line:0
+why a given encoder is taking
+a certain amount of time.
+
+
+157
+00:07:49,803 --> 00:07:53,207 line:0
+You can even see the number of times
+that shaders were sampled
+
+
+158
+00:07:53,273 --> 00:07:55,943 line:0
+and an approximate GPU time
+for how long they were running
+
+
+159
+00:07:56,009 --> 00:07:57,344 line:0
+in the table at the bottom.
+
+
+160
+00:07:58,812 --> 00:08:00,347 line:0
+In addition to the Shader Timeline,
+
+
+161
+00:08:00,414 --> 00:08:02,516 line:0
+we also have
+the Performance Limiter tracks.
+
+
+162
+00:08:03,016 --> 00:08:06,987 line:0
+Once again, you can enable these
+in the Metal Application recording options
+
+
+163
+00:08:07,054 --> 00:08:08,288 line:0
+under GPU Counter Set.
+
+
+164
+00:08:09,022 --> 00:08:12,025 line:0
+These tracks show you
+the values of the limiters over time.
+
+
+165
+00:08:12,793 --> 00:08:14,428 line:0
+I really encourage you to check out
+
+
+166
+00:08:14,494 --> 00:08:17,364 line:0
+the "Optimize Metal Apps
+and Games with GPU Counters" talk
+
+
+167
+00:08:17,764 --> 00:08:20,334 line:0
+if you're interested in
+learning more about counters,
+
+
+168
+00:08:20,400 --> 00:08:23,136 line:0
+as it basically explains
+every single limiter,
+
+
+169
+00:08:23,203 --> 00:08:26,039 line:0
+what they mean
+and what to do if you see a high value.
+
+
+170
+00:08:26,840 --> 00:08:31,378 line:-2
+This year, GPU Counters are also available
+for non-Apple GPUs.
+
+
+171
+00:08:32,111 --> 00:08:35,015 line:0
+Lastly, the memory allocations track
+shows you when resources,
+
+
+172
+00:08:35,082 --> 00:08:38,385 line:0
+such as buffers or textures,
+are allocated or deallocated,
+
+
+173
+00:08:39,019 --> 00:08:40,988 line:0
+which can help you to find memory leaks
+
+
+174
+00:08:41,054 --> 00:08:43,256 line:0
+or just overall reduce
+your memory footprint.
+
+
+175
+00:08:44,424 --> 00:08:47,227 line:-2
+And that's a quick summary
+of the tools we provide in Instruments
+
+
+176
+00:08:47,294 --> 00:08:49,263 line:-1
+to help you debug your frame over time.
+
+
+177
+00:08:50,364 --> 00:08:53,200 line:0
+These, plus all of tools
+from the Metal Debugger,
+
+
+178
+00:08:53,267 --> 00:08:56,403 line:0
+work together to help you understand
+and take further advantage
+
+
+179
+00:08:56,470 --> 00:08:58,805 line:0
+of Metal and Apple GPUs in your app.
+
+
+180
+00:08:59,907 --> 00:09:03,177 line:-2
+But that's a lot of tools,
+and it might seem a little daunting,
+
+
+181
+00:09:03,243 --> 00:09:04,945 line:-1
+so let's see them in practice.
+
+
+182
+00:09:05,712 --> 00:09:10,584 line:-2
+Coming to iPad soon,
+we have one of the world's greatest RPGs,
+
+
+183
+00:09:11,018 --> 00:09:14,922 line:-2
+with over 100 hours of role-play
+and over a million words of voice over.
+
+
+184
+00:09:15,722 --> 00:09:17,024 line:-1
+Divinity: Original Sin 2.
+
+
+185
+00:09:17,090 --> 00:09:18,392 line:-1
+[title screen music plays]
+
+
+186
+00:09:18,458 --> 00:09:22,129 line:-2
+Larian Studios has given us
+their first iPad game to play with,
+
+
+187
+00:09:22,763 --> 00:09:24,398 line:-1
+and it's just beautiful.
+
+
+188
+00:09:24,464 --> 00:09:29,136 line:-2
+It really goes to show the quality of
+graphics that can run on modern Apple GPUs
+
+
+189
+00:09:29,603 --> 00:09:32,840 line:-2
+and, of course, the amazing talent
+and commitment at Larian.
+
+
+190
+00:09:35,242 --> 00:09:38,712 line:-2
+Now I wanna show you how to use the tools
+to debug something like this.
+
+
+191
+00:09:38,946 --> 00:09:41,448 line:-2
+It's obviously a pretty advanced
+rendering pipeline,
+
+
+192
+00:09:41,515 --> 00:09:44,952 line:-2
+but let's see if the tools will guide us
+and help to make any improvements.
+
+
+193
+00:09:45,018 --> 00:09:47,421 line:-1
+I've got the game running on my iPad Pro,
+
+
+194
+00:09:47,955 --> 00:09:50,490 line:-2
+so let's quickly look
+at the GPU gauges in Xcode.
+
+
+195
+00:09:51,191 --> 00:09:54,695 line:-2
+So we're now in the Metal Debugger
+and looking at the summary of our frame.
+
+
+196
+00:09:54,928 --> 00:09:58,265 line:-2
+In the overview we can see
+that this app has four command buffers,
+
+
+197
+00:09:58,632 --> 00:10:02,069 line:-2
+53 render command encoders
+and almost 1000 draw calls.
+
+
+198
+00:10:02,769 --> 00:10:07,040 line:-2
+Under Performance we can see that this
+frame took about 26 milliseconds to render
+
+
+199
+00:10:07,574 --> 00:10:10,177 line:-2
+and has almost
+four-and-a-half-million vertices.
+
+
+200
+00:10:11,245 --> 00:10:14,681 line:-2
+We can also see how much memory
+the app is using for various resources.
+
+
+201
+00:10:15,182 --> 00:10:20,087 line:-2
+And that brings us to the most interesting
+section of the summary page: Insights.
+
+
+202
+00:10:20,153 --> 00:10:21,388 line:-1
+If you remember from earlier,
+
+
+203
+00:10:21,455 --> 00:10:23,724 line:-2
+Insights suggest changes
+that you can make to your app
+
+
+204
+00:10:23,790 --> 00:10:28,896 line:-2
+in order to improve memory usage,
+bandwidth, performance or Metal API usage.
+
+
+205
+00:10:29,830 --> 00:10:32,766 line:0
+Each insight is accompanied
+by a description of the problem,
+
+
+206
+00:10:33,100 --> 00:10:36,436 line:0
+a hint on how to fix it,
+along with links to related documentation.
+
+
+207
+00:10:37,738 --> 00:10:39,673 line:-1
+Let's look at some bandwidth insights.
+
+
+208
+00:10:40,174 --> 00:10:43,710 line:-2
+So if you've watched the
+"Harnessing Apple GPUs with Metal" talk,
+
+
+209
+00:10:44,178 --> 00:10:46,613 line:-2
+you know that load/store actions
+are pretty important.
+
+
+210
+00:10:47,147 --> 00:10:50,083 line:-2
+And here, it seems like
+we have a few unused resources.
+
+
+211
+00:10:50,751 --> 00:10:53,287 line:-2
+If we look at the description,
+it seems like this encoder
+
+
+212
+00:10:53,353 --> 00:10:56,323 line:-2
+is storing a resource
+that's never again used in this frame.
+
+
+213
+00:10:58,158 --> 00:10:59,426 line:-1
+The insight gives us a hint
+
+
+214
+00:10:59,493 --> 00:11:02,696 line:-2
+that we should consider
+changing the store action to "Don't Care."
+
+
+215
+00:11:03,197 --> 00:11:05,799 line:-2
+So I'm going to click
+on the Show In Dependencies button
+
+
+216
+00:11:05,866 --> 00:11:08,468 line:-2
+to jump right into
+the Dependency Viewer to investigate.
+
+
+217
+00:11:09,703 --> 00:11:13,173 line:-2
+The Dependency Viewer shows us
+all of the GPU passes encoded by an app.
+
+
+218
+00:11:13,807 --> 00:11:17,945 line:-2
+In essence, we can see when a resource is
+stored in one encoder and used in others.
+
+
+219
+00:11:18,946 --> 00:11:20,614 line:-1
+Focusing back in on this encoder,
+
+
+220
+00:11:21,148 --> 00:11:24,885 line:-2
+we can see that the depth and
+stencil textures are both set to "Store,"
+
+
+221
+00:11:25,519 --> 00:11:27,354 line:-1
+but there's no line coming out of them,
+
+
+222
+00:11:27,788 --> 00:11:29,289 line:-1
+so they're not actually being used
+
+
+223
+00:11:29,356 --> 00:11:31,758 line:-2
+by any other
+render command encoder in this frame.
+
+
+224
+00:11:32,125 --> 00:11:35,662 line:0
+The Metal Debugger knows this,
+so it's put an insight right here
+
+
+225
+00:11:36,230 --> 00:11:39,233 line:0
+which suggests that we change
+the store action to "Don't Care."
+
+
+226
+00:11:40,567 --> 00:11:44,571 line:-2
+Now, if we do that, we'll save
+almost 11 megabytes of memory bandwidth.
+
+
+227
+00:11:45,606 --> 00:11:48,509 line:-2
+Let's go back to the summary page
+and look at some other insights.
+
+
+228
+00:11:49,209 --> 00:11:51,712 line:-2
+This time I'm gonna look
+in the Performance category.
+
+
+229
+00:11:54,081 --> 00:11:56,049 line:-2
+So it looks like
+this render command encoder
+
+
+230
+00:11:56,116 --> 00:11:58,285 line:-1
+might be an unnecessary depth pass.
+
+
+231
+00:11:59,186 --> 00:12:02,656 line:-2
+So, Apple GPUs with a Tile Based
+Deferred Rendering architecture
+
+
+232
+00:12:02,990 --> 00:12:05,526 line:-2
+automatically perform
+hidden surface removal
+
+
+233
+00:12:05,592 --> 00:12:08,095 line:-2
+to avoid invoking
+the fragment shader unnecessarily.
+
+
+234
+00:12:09,029 --> 00:12:12,332 line:-2
+Once again, let's jump back
+into the dependency viewer to investigate
+
+
+235
+00:12:12,399 --> 00:12:14,768 line:-2
+by clicking on the
+Show in Dependencies button.
+
+
+236
+00:12:17,604 --> 00:12:22,176 line:-2
+So it looks like this encoder
+takes 1.71 milliseconds of GPU time
+
+
+237
+00:12:22,709 --> 00:12:24,611 line:-1
+and has roughly a million vertices.
+
+
+238
+00:12:25,412 --> 00:12:28,282 line:-2
+From the thumbnail, it looks like
+it's drawing the entire scene
+
+
+239
+00:12:28,348 --> 00:12:30,317 line:-1
+into the depth and stencil textures.
+
+
+240
+00:12:30,984 --> 00:12:34,021 line:-2
+So what I'm gonna do is
+I'm gonna disclose it in the navigator
+
+
+241
+00:12:34,087 --> 00:12:37,257 line:-2
+and use the new thumbnail popover
+to scroll through the draw calls.
+
+
+242
+00:12:37,724 --> 00:12:40,093 line:-2
+And we can see
+that our suspicions are confirmed.
+
+
+243
+00:12:40,761 --> 00:12:45,098 line:-2
+It's then storing this result,
+which is being used by this encoder...
+
+
+244
+00:12:46,233 --> 00:12:49,136 line:-2
+which looks like it's drawing
+the entire scene once again.
+
+
+245
+00:12:51,138 --> 00:12:54,408 line:-2
+Now, this looks very much
+like a traditional depth pre-pass
+
+
+246
+00:12:54,474 --> 00:12:56,643 line:-2
+that you might use
+to cull invisible meshes.
+
+
+247
+00:12:57,444 --> 00:13:01,481 line:-2
+While on non-Apple GPUs this is a pretty
+common technique to reduce overdraw,
+
+
+248
+00:13:01,915 --> 00:13:03,350 line:-1
+it's not actually needed here
+
+
+249
+00:13:03,417 --> 00:13:06,386 line:-2
+thanks to Apple GPUs
+and their hidden surface removal.
+
+
+250
+00:13:07,621 --> 00:13:11,024 line:-2
+So this encoder
+could be eliminated entirely,
+
+
+251
+00:13:11,458 --> 00:13:14,528 line:-2
+and we'd save
+1.71 milliseconds of GPU time.
+
+
+252
+00:13:16,563 --> 00:13:18,265 line:-1
+So in a matter of mere minutes,
+
+
+253
+00:13:18,332 --> 00:13:22,369 line:-2
+we've captured Divinity: Original Sin 2
+in the Metal Debugger
+
+
+254
+00:13:22,669 --> 00:13:25,572 line:-2
+and used Insights to find
+both a bandwidth issue
+
+
+255
+00:13:25,639 --> 00:13:27,741 line:-1
+and an advanced performance issue,
+
+
+256
+00:13:27,808 --> 00:13:30,744 line:-2
+along with a detailed description
+about how to fix them.
+
+
+257
+00:13:31,578 --> 00:13:33,046 line:0
+What I'm trying to stress here
+
+
+258
+00:13:33,113 --> 00:13:36,583 line:0
+is that you don't need to be an expert
+in the world of Apple GPUs
+
+
+259
+00:13:36,650 --> 00:13:38,652 line:0
+to start taking better advantage of them.
+
+
+260
+00:13:39,119 --> 00:13:41,154 line:0
+The tools are here to help you,
+
+
+261
+00:13:41,221 --> 00:13:43,323 line:0
+so capture your game
+and let them guide you.
+
+
+262
+00:13:43,991 --> 00:13:47,961 line:0
+You have incredible hardware,
+software and tools at your disposal,
+
+
+263
+00:13:48,328 --> 00:13:51,265 line:0
+so use them to create
+your beautiful apps and games.
+
+
+264
+00:13:52,232 --> 00:13:54,168 line:-2
+There are a ton of talks
+that you can watch
+
+
+265
+00:13:54,234 --> 00:13:57,704 line:-2
+to learn more about the tools
+and how to take better advantage of Metal,
+
+
+266
+00:13:58,038 --> 00:14:00,941 line:-2
+so I really encourage you
+to go and check them out.
+
+
+267
+00:14:02,109 --> 00:14:06,480 line:-2
+I hope you enjoyed today's session,
+and have a great WWDC 2020.
+

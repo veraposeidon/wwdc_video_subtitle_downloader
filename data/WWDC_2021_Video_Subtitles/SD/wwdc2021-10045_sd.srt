@@ -1,0 +1,1675 @@
+2
+00:00:00,200 --> 00:00:02,169 line:-1
+[MAC STARTUP CHIME]
+
+
+3
+00:00:02,169 --> 00:00:05,739 line:-1
+♪ Bass music playing ♪
+
+
+4
+00:00:05.739 --> 00:00:07.908 line:-1 position:50%
+[KEYSTROKES]
+
+
+5
+00:00:07,908 --> 00:00:09,276 position:90% line:0 size:2%
+♪
+
+
+6
+00:00:09,276 --> 00:00:10,811 line:-1
+Alex Telek: Hi, I'm Alex.
+
+
+7
+00:00:10,811 --> 00:00:12,779 line:-1
+I'm an engineer
+on the Shazam team.
+
+
+8
+00:00:12.779 --> 00:00:14.681 line:-1 position:50%
+Thanks for joining this session.
+
+
+9
+00:00:14,681 --> 00:00:17,017 line:-1
+Today, I'm going to show you
+how to create
+
+
+10
+00:00:17,017 --> 00:00:20,187 line:-1
+custom audio experiences
+for your app with ShazamKit
+
+
+11
+00:00:20,187 --> 00:00:22,890 line:-1
+using custom catalog
+recognition.
+
+
+12
+00:00:22,890 --> 00:00:25,058 line:-1
+On this session,
+I'm going to use
+
+
+13
+00:00:25.058 --> 00:00:27.427 line:-1 position:50%
+some of the existing
+ShazamKit concepts,
+
+
+14
+00:00:27,427 --> 00:00:31,965 line:-1
+such as catalogs, signatures,
+and media items.
+
+
+15
+00:00:31,965 --> 00:00:34,234 line:0
+If you're not already familiar
+with those,
+
+
+16
+00:00:34,234 --> 00:00:37,471 line:0
+make sure to check out
+the "Explore ShazamKit" talk.
+
+
+17
+00:00:37,471 --> 00:00:41,074 line:-1
+Let's take a look at
+what we will be covering today.
+
+
+18
+00:00:41.074 --> 00:00:43.510 line:-1 position:50%
+We will talk about
+how to build catalogs
+
+
+19
+00:00:43.510 --> 00:00:46.580 line:-1 position:50%
+with custom audio and metadata.
+
+
+20
+00:00:46.580 --> 00:00:50.217 line:-1 position:50%
+We will learn how you can match
+audio to your own custom catalog
+
+
+21
+00:00:50.217 --> 00:00:53.687 line:-1 position:50%
+when using the microphone
+and the AVFAudio framework
+
+
+22
+00:00:53.687 --> 00:00:55.756 line:-1 position:50%
+to record audio.
+
+
+23
+00:00:55,756 --> 00:00:58,091 line:-1
+Then we are going
+to customize our app
+
+
+24
+00:00:58,091 --> 00:01:01,528 line:-1
+to synchronize content
+to the custom audio.
+
+
+25
+00:01:01,528 --> 00:01:04,464 line:-1
+Finally, we will cover
+some of the best practices
+
+
+26
+00:01:04,464 --> 00:01:08,902 line:-1
+that you can use when working
+with custom catalogs.
+
+
+27
+00:01:08.902 --> 00:01:10.304 line:-1 position:50%
+This is a code-along.
+
+
+28
+00:01:10.304 --> 00:01:12.606 line:-1 position:50%
+There is a project available
+on the developer portal
+
+
+29
+00:01:12,606 --> 00:01:16,076 line:-1
+that we will be using
+throughout this session.
+
+
+30
+00:01:16,076 --> 00:01:20,314 line:-1
+I recommend that you download
+the project before we begin.
+
+
+31
+00:01:20,314 --> 00:01:22,883 line:-1
+As learning becomes
+increasingly more digital,
+
+
+32
+00:01:22,883 --> 00:01:26,887 line:-1
+we need to come up with ways
+to keep children engaged.
+
+
+33
+00:01:26,887 --> 00:01:30,223 line:-1
+What if you could play a video
+on your Apple TV
+
+
+34
+00:01:30,223 --> 00:01:33,060 line:-1
+and have a companion app
+that displays questions
+
+
+35
+00:01:33,060 --> 00:01:35,395 line:-1
+at exactly the right time?
+
+
+36
+00:01:35,395 --> 00:01:39,132 position:50%
+Today, I'm going to show you
+how to build a remote app
+
+
+37
+00:01:39,132 --> 00:01:42,369 position:50%
+that synchronizes and reacts
+to an educational video
+
+
+38
+00:01:42,369 --> 00:01:45,205 line:0
+using custom catalog
+recognition.
+
+
+39
+00:01:45,205 --> 00:01:48,475 line:-1
+First, what are custom catalogs
+exactly,
+
+
+40
+00:01:48,475 --> 00:01:50,811 line:-1
+and how do we build one?
+
+
+41
+00:01:50,811 --> 00:01:54,214 line:-1
+Custom catalog is a collection
+of signatures that you generate
+
+
+42
+00:01:54,214 --> 00:01:56,049 line:-1
+from any audio.
+
+
+43
+00:01:56.049 --> 00:02:01.088 line:-1 position:50%
+You can also add associated
+metadata for each signature.
+
+
+44
+00:02:01.088 --> 00:02:03.657 line:-1 position:50%
+To add signatures
+to your custom catalog,
+
+
+45
+00:02:03.657 --> 00:02:06.426 line:-1 position:50%
+you can use
+the SignatureGenerator object.
+
+
+46
+00:02:06,426 --> 00:02:10,030 line:-1
+It will convert audio buffers
+into a signature.
+
+
+47
+00:02:10,030 --> 00:02:13,066 line:-1
+First, create
+a signature generator,
+
+
+48
+00:02:13.066 --> 00:02:16.069 line:-1 position:50%
+then using
+the installTap function
+
+
+49
+00:02:16,069 --> 00:02:19,373 line:-1
+on the audioEngine's inputNode,
+append the buffer
+
+
+50
+00:02:19,373 --> 00:02:22,242 line:-1
+and the audioTime
+to the generator.
+
+
+51
+00:02:22.242 --> 00:02:25.045 line:-1 position:50%
+The buffer parameter
+is a buffer of audio
+
+
+52
+00:02:25,045 --> 00:02:27,881 line:-1
+captured from the output
+of the inputNode.
+
+
+53
+00:02:27.881 --> 00:02:32.352 line:-1 position:50%
+audioTime is the time
+when the buffer was captured.
+
+
+54
+00:02:32,352 --> 00:02:36,556 line:-1
+When you specify the audioFormat
+make sure that the format is PCM
+
+
+55
+00:02:36.556 --> 00:02:40.060 line:-1 position:50%
+in one of the supported
+sample rates.
+
+
+56
+00:02:40.060 --> 00:02:42.796 line:-1 position:50%
+Calling the signature function
+on the generator
+
+
+57
+00:02:42,796 --> 00:02:46,033 line:-1
+will convert the audio buffers
+into a signature.
+
+
+58
+00:02:46,033 --> 00:02:47,968 line:-1
+We call this
+the reference signature,
+
+
+59
+00:02:47.968 --> 00:02:51.605 line:-1 position:50%
+which we can then add
+to a custom catalog.
+
+
+60
+00:02:51,605 --> 00:02:53,807 line:-1
+You can also add signatures
+to a catalog
+
+
+61
+00:02:53.807 --> 00:02:56.543 line:-1 position:50%
+by using a shazamsignature file.
+
+
+62
+00:02:56,543 --> 00:03:00,213 line:-1
+This is an opaque file that
+can be shared across devices.
+
+
+63
+00:03:00.213 --> 00:03:03.717 line:-1 position:50%
+To make it easier adopting
+custom catalogs with ShazamKit,
+
+
+64
+00:03:03.717 --> 00:03:07.788 line:-1 position:50%
+for this session we included
+this file for you to use.
+
+
+65
+00:03:07.788 --> 00:03:10.791 line:-1 position:50%
+Before we begin, let's open
+the downloaded project
+
+
+66
+00:03:10,791 --> 00:03:12,993 line:-1
+and see what we have in there.
+
+
+67
+00:03:12,993 --> 00:03:15,996 line:-1
+Let's take a close look
+at the Question object.
+
+
+68
+00:03:18,198 --> 00:03:22,102 line:-1
+A Question represents
+a custom content in the app.
+
+
+69
+00:03:22.102 --> 00:03:26.339 line:-1 position:50%
+First, there's a title
+and an offset.
+
+
+70
+00:03:26,339 --> 00:03:29,843 line:-1
+A title is a string describing
+a section in the video.
+
+
+71
+00:03:29.843 --> 00:03:33.513 line:-1 position:50%
+Offset is the time
+when this section appears.
+
+
+72
+00:03:33,513 --> 00:03:35,916 line:-1
+For example, at 45 seconds,
+
+
+73
+00:03:35,916 --> 00:03:38,919 line:-1
+the teacher starts talking
+about a math equation.
+
+
+74
+00:03:38.919 --> 00:03:41.521 line:-1 position:50%
+You would create
+a Question with that title
+
+
+75
+00:03:41.521 --> 00:03:45.325 line:-1 position:50%
+and 45 as the offset.
+
+
+76
+00:03:45,325 --> 00:03:48,395 line:-1
+Equation represents
+a teaching moment,
+
+
+77
+00:03:48,395 --> 00:03:50,864 line:-1
+showing mathematical equations.
+
+
+78
+00:03:50,864 --> 00:03:53,867 line:-1
+You can use this
+as incremental building blocks.
+
+
+79
+00:03:53,867 --> 00:03:55,969 line:-1
+For instance,
+you might want to show
+
+
+80
+00:03:55.969 --> 00:03:58.438 line:-1 position:50%
+the left- and the right-hand
+side of an equation
+
+
+81
+00:03:58,438 --> 00:04:00,640 line:-1
+at different offsets.
+
+
+82
+00:04:00,640 --> 00:04:04,077 line:-1
+Finally, answerRange
+and requiresAnswer
+
+
+83
+00:04:04.077 --> 00:04:07.080 line:-1 position:50%
+are used to indicate when
+an interactive UI would show,
+
+
+84
+00:04:07,080 --> 00:04:11,618 line:-1
+so children can practice
+answering the questions.
+
+
+85
+00:04:11.618 --> 00:04:13.753 line:-1 position:50%
+Let's take a look at
+what this would look like
+
+
+86
+00:04:13,753 --> 00:04:16,623 line:-1
+for our educational video.
+
+
+87
+00:04:16.623 --> 00:04:19.860 line:-1 position:50%
+The first question
+starts at 14 seconds.
+
+
+88
+00:04:19,860 --> 00:04:23,563 line:-1
+I have one red apple
+at 21 seconds
+
+
+89
+00:04:23.563 --> 00:04:27.901 line:-1 position:50%
+and adding three green apples
+at 25 seconds.
+
+
+90
+00:04:27,901 --> 00:04:30,337 line:-1
+Finally, at 31 seconds,
+
+
+91
+00:04:30,337 --> 00:04:33,540 line:-1
+the student will have a chance
+to answer the question.
+
+
+92
+00:04:33,540 --> 00:04:36,910 line:-1
+Note, that videos
+are usually formatted in hours,
+
+
+93
+00:04:36.910 --> 00:04:38.678 line:-1 position:50%
+minutes and seconds,
+
+
+94
+00:04:38.678 --> 00:04:40.814 line:-1 position:50%
+so to create offsets
+like I did here,
+
+
+95
+00:04:40,814 --> 00:04:44,117 line:-1
+you should convert the time
+into seconds first.
+
+
+96
+00:04:44,117 --> 00:04:46,853 line:-1
+For example,
+you could ask Siri for help,
+
+
+97
+00:04:46,853 --> 00:04:52,125 line:-1
+like, "What's three minutes
+and 14 seconds in seconds?"
+
+
+98
+00:04:52.125 --> 00:04:53.660 line:-1 position:50%
+Now, let's dive into the code
+
+
+99
+00:04:53.660 --> 00:04:57.631 line:-1 position:50%
+and see how we can get started
+with custom catalogs!
+
+
+100
+00:04:57.631 --> 00:05:01.868 line:-1 position:50%
+First, I'm going to build
+a catalog by adding a signature
+
+
+101
+00:05:01,868 --> 00:05:06,606 line:-1
+with some metadata
+associated to it.
+
+
+102
+00:05:06,606 --> 00:05:08,942 line:-1
+Here, I have CatalogProvider
+
+
+103
+00:05:08,942 --> 00:05:13,046 line:-1
+with a function
+that creates the catalog.
+
+
+104
+00:05:13,046 --> 00:05:16,149 line:-1
+The reference signature that you
+are going to add to the catalog
+
+
+105
+00:05:16,149 --> 00:05:20,587 line:-1
+is called
+FoodMath.shazamsignature.
+
+
+106
+00:05:24.324 --> 00:05:25.759 line:-1 position:50%
+Let's load that file in
+
+
+107
+00:05:25,759 --> 00:05:29,396 line:-1
+and create a signature object
+from it.
+
+
+108
+00:05:29.396 --> 00:05:31.131 line:-1 position:50%
+Once you have that,
+
+
+109
+00:05:31.131 --> 00:05:36.069 line:-1 position:50%
+you define the metadata
+using media items.
+
+
+110
+00:05:39,906 --> 00:05:41,007 line:0
+I'm going to set
+
+
+111
+00:05:41,007 --> 00:05:43,476 position:50%
+some of the predefined
+media item property keys,
+
+
+112
+00:05:43,476 --> 00:05:46,046 line:0
+such as title and subtitle.
+
+
+113
+00:05:46,046 --> 00:05:49,482 line:-1
+This is going to describe
+the educational video.
+
+
+114
+00:05:49.482 --> 00:05:53.019 line:-1 position:50%
+I also created an extension
+on SHMediaItemProperty
+
+
+115
+00:05:53.019 --> 00:05:56.456 line:-1 position:50%
+with two custom keys:
+
+
+116
+00:05:56.456 --> 00:05:58.925 line:-1 position:50%
+teacher and episode.
+
+
+117
+00:05:58,925 --> 00:06:01,795 line:-1
+Setting the episode number
+and the name of the teacher
+
+
+118
+00:06:01,795 --> 00:06:04,898 line:-1
+will further customize
+the content of the catalog.
+
+
+119
+00:06:04,898 --> 00:06:06,333 line:-1
+All you have to do now
+
+
+120
+00:06:06,333 --> 00:06:10,003 line:-1
+is to create
+a customCatalog object.
+
+
+121
+00:06:15,308 --> 00:06:17,844 line:0
+Then call
+addReferenceSignature on it
+
+
+122
+00:06:17,844 --> 00:06:21,681 position:50%
+and pass in the signature
+and the mediaItem object.
+
+
+123
+00:06:21,681 --> 00:06:24,551 position:50%
+This will associate the metadata
+you just created
+
+
+124
+00:06:24,551 --> 00:06:27,687 line:0
+with the reference signature
+you loaded from disk.
+
+
+125
+00:06:27.687 --> 00:06:29.222 line:-1 position:50%
+Perfect!
+
+
+126
+00:06:29,222 --> 00:06:31,124 line:-1
+Now that I have that in place,
+
+
+127
+00:06:31.124 --> 00:06:33.893 line:-1 position:50%
+I can start matching audio
+to the catalog
+
+
+128
+00:06:33.893 --> 00:06:36.329 line:-1 position:50%
+and see the result in action.
+
+
+129
+00:06:36,329 --> 00:06:40,467 line:-1
+So let's open the Matcher.
+
+
+130
+00:06:40.467 --> 00:06:43.536 line:-1 position:50%
+We are going to match the input
+audio from the microphone
+
+
+131
+00:06:43,536 --> 00:06:47,073 line:-1
+to the content of the custom
+catalog we just created.
+
+
+132
+00:06:47,073 --> 00:06:49,476 line:-1
+To capture audio
+from the microphone,
+
+
+133
+00:06:49,476 --> 00:06:54,247 line:-1
+you can use
+AVAudioEngine from AVFAudio.
+
+
+134
+00:06:54.247 --> 00:06:56.850 line:-1 position:50%
+In this project,
+I already added a description
+
+
+135
+00:06:56.850 --> 00:07:03.556 line:-1 position:50%
+for the microphone usage
+in the Info.plist file.
+
+
+136
+00:07:03.556 --> 00:07:06.159 line:-1 position:50%
+Also in the Matcher,
+I included code
+
+
+137
+00:07:06,159 --> 00:07:10,163 line:-1
+to request microphone permission
+and set up the audio session.
+
+
+138
+00:07:12.999 --> 00:07:15.769 line:-1 position:50%
+First, to receive updates
+on matches,
+
+
+139
+00:07:15.769 --> 00:07:20.106 line:-1 position:50%
+you create a session object
+and set the delegate.
+
+
+140
+00:07:23,743 --> 00:07:26,079 position:50%
+The match function takes
+the custom catalog
+
+
+141
+00:07:26,079 --> 00:07:27,414 position:50%
+we created before,
+
+
+142
+00:07:27,414 --> 00:07:30,550 position:50%
+so you can just pass that
+to the session.
+
+
+143
+00:07:30,550 --> 00:07:32,952 line:-1
+Now, you're ready
+to match the audio
+
+
+144
+00:07:32.952 --> 00:07:37.957 line:-1 position:50%
+using the installTap function
+on the audioEngine's inputNode.
+
+
+145
+00:07:41,628 --> 00:07:43,997 line:0
+The function returns
+an audioBuffer --
+
+
+146
+00:07:43,997 --> 00:07:46,666 line:0
+which is the converted audio
+from the microphone --
+
+
+147
+00:07:46,666 --> 00:07:48,401 line:-1
+and an audioTime --
+
+
+148
+00:07:48,401 --> 00:07:51,438 line:-1
+which is the time
+when the buffer was captured.
+
+
+149
+00:07:51.438 --> 00:07:54.074 line:-1 position:50%
+Then, you call
+matchStreamingBuffer
+
+
+150
+00:07:54.074 --> 00:07:56.309 line:-1 position:50%
+on the session and pass in
+the audio buffer
+
+
+151
+00:07:56.309 --> 00:07:59.079 line:-1 position:50%
+and the audio time.
+
+
+152
+00:07:59,079 --> 00:08:02,148 line:-1
+We recommend that you include
+the time when available
+
+
+153
+00:08:02,148 --> 00:08:04,684 line:-1
+as this is going to be validated
+by the session
+
+
+154
+00:08:04,684 --> 00:08:09,422 line:-1
+to ensure that the provided
+audio is contiguous.
+
+
+155
+00:08:09.422 --> 00:08:12.759 line:-1 position:50%
+Since you set the session
+delegate at the beginning,
+
+
+156
+00:08:12,759 --> 00:08:14,928 line:-1
+to handle updates,
+you can implement
+
+
+157
+00:08:14.928 --> 00:08:16.996 line:-1 position:50%
+the session: didFind match:
+function
+
+
+158
+00:08:16,996 --> 00:08:19,366 line:-1
+from the session delegate.
+
+
+159
+00:08:24,204 --> 00:08:29,209 position:50%
+For this, I created an object
+called MatchResult.
+
+
+160
+00:08:32,078 --> 00:08:34,280 line:-1
+It contains
+a MatchedMediaItem,
+
+
+161
+00:08:34.280 --> 00:08:37.817 line:-1 position:50%
+returned by the session:
+didFind match: function,
+
+
+162
+00:08:37.817 --> 00:08:40.053 line:-1 position:50%
+this is the metadata
+that's associated
+
+
+163
+00:08:40.053 --> 00:08:43.490 line:-1 position:50%
+with the reference signature
+in the catalog.
+
+
+164
+00:08:43,490 --> 00:08:46,259 line:-1
+It will include details
+we created earlier,
+
+
+165
+00:08:46.259 --> 00:08:49.729 line:-1 position:50%
+like the episode number
+and the teacher's name.
+
+
+166
+00:08:49,729 --> 00:08:52,298 line:-1
+It can be only generated
+from a match,
+
+
+167
+00:08:52,298 --> 00:08:56,436 line:-1
+and it contains extra
+information related to that.
+
+
+168
+00:08:56,436 --> 00:08:58,304 line:-1
+Also in the MatchResult,
+
+
+169
+00:08:58.304 --> 00:09:03.009 line:-1 position:50%
+we have the Question object
+I showed you earlier.
+
+
+170
+00:09:03.009 --> 00:09:05.512 line:-1 position:50%
+This is representing
+a section in the video
+
+
+171
+00:09:05.512 --> 00:09:07.414 line:-1 position:50%
+with a math equation.
+
+
+172
+00:09:07,414 --> 00:09:09,883 line:-1
+We will use this to find
+the relevant content
+
+
+173
+00:09:09.883 --> 00:09:11.484 line:-1 position:50%
+for a match.
+
+
+174
+00:09:11,484 --> 00:09:14,554 line:-1
+So inside the delegate,
+we set MatchResult
+
+
+175
+00:09:14.554 --> 00:09:17.290 line:-1 position:50%
+to take the first
+MatchedMediaItem object,
+
+
+176
+00:09:17,290 --> 00:09:22,629 line:-1
+and for now we, will set
+nothing for the Question.
+
+
+177
+00:09:26,800 --> 00:09:30,737 line:-1
+Now let's build and run
+and see the match in action.
+
+
+178
+00:09:30.737 --> 00:09:32.839 line:-1 position:50%
+This is our FoodMath app,
+
+
+179
+00:09:32.839 --> 00:09:36.443 line:-1 position:50%
+it has a list of episodes that
+are available for the students.
+
+
+180
+00:09:36.443 --> 00:09:39.412 line:-1 position:50%
+I can play the video and
+together with my colleague Neil,
+
+
+181
+00:09:39.412 --> 00:09:41.948 line:-1 position:50%
+we can learn to solve
+some math problems.
+
+
+182
+00:09:41,948 --> 00:09:44,784 line:-1
+Neil, what do you have
+for us today?
+
+
+183
+00:09:44,784 --> 00:09:48,188 line:-1
+>> Neil: So the format is
+I'll ask you a question,
+
+
+184
+00:09:48.188 --> 00:09:50.423 line:-1 position:50%
+you'll have some time
+to think about it,
+
+
+185
+00:09:50,423 --> 00:09:52,492 line:-1
+and then we'll see
+if you got it right!
+
+
+186
+00:09:52.492 --> 00:09:54.861 line:-1 position:50%
+You can play along too
+if you have our app. <<
+
+
+187
+00:09:54.861 --> 00:09:56.529 line:-1 position:50%
+[CLICK]
+
+
+188
+00:09:56,529 --> 00:09:58,064 line:-1
+As I started the video,
+
+
+189
+00:09:58.064 --> 00:10:00.900 line:-1 position:50%
+the app recognized that we are
+listening to episode three,
+
+
+190
+00:10:00,900 --> 00:10:02,769 line:-1
+"Count on Me."
+
+
+191
+00:10:02,769 --> 00:10:04,637 line:-1
+This is great!
+
+
+192
+00:10:04.637 --> 00:10:08.041 line:-1 position:50%
+Next, I want to figure out
+what sections to show
+
+
+193
+00:10:08,041 --> 00:10:10,376 line:-1
+for a particular offset
+in the audio,
+
+
+194
+00:10:10,376 --> 00:10:12,412 line:-1
+using our Question object.
+
+
+195
+00:10:12.412 --> 00:10:14.247 line:-1 position:50%
+We use MatchedMediaItem
+
+
+196
+00:10:14,247 --> 00:10:16,883 line:-1
+to know what video
+we are watching,
+
+
+197
+00:10:16.883 --> 00:10:20.119 line:-1 position:50%
+but it also contains
+extra information about a match,
+
+
+198
+00:10:20,119 --> 00:10:23,389 line:-1
+such as the
+predictedCurrentMatchOffset.
+
+
+199
+00:10:23,389 --> 00:10:25,325 line:-1
+This is an auto-updating
+position
+
+
+200
+00:10:25.325 --> 00:10:26.793 line:-1 position:50%
+in the reference signature
+
+
+201
+00:10:26.793 --> 00:10:30.663 line:-1 position:50%
+represented as a time interval
+in seconds.
+
+
+202
+00:10:30,663 --> 00:10:33,933 line:-1
+You can use this to figure out
+where you are in the video
+
+
+203
+00:10:33,933 --> 00:10:37,270 line:-1
+and find the relevant
+Question object.
+
+
+204
+00:10:37,270 --> 00:10:39,105 line:-1
+Going back to the code,
+
+
+205
+00:10:39,105 --> 00:10:42,308 line:-1
+in the delegate callback,
+instead of setting nil,
+
+
+206
+00:10:42,308 --> 00:10:45,178 line:-1
+I want to find the last Question
+that comes right after
+
+
+207
+00:10:45.178 --> 00:10:49.115 line:-1 position:50%
+the
+predicatedCurrentMatchOffset.
+
+
+208
+00:10:53,152 --> 00:10:57,957 line:0
+I can use the question's offset
+to compare the values.
+
+
+209
+00:10:57,957 --> 00:11:01,594 position:50%
+session:didFindMatch
+can be called multiple times
+
+
+210
+00:11:01,594 --> 00:11:03,596 position:50%
+with the same match.
+
+
+211
+00:11:06,699 --> 00:11:10,203 position:50%
+So let's implement a filter
+that will only update the result
+
+
+212
+00:11:10,203 --> 00:11:13,806 line:0
+when you get
+a new Question object.
+
+
+213
+00:11:13,806 --> 00:11:15,041 line:-1
+Once you have that,
+
+
+214
+00:11:15.041 --> 00:11:18.044 line:-1 position:50%
+you can update the result
+with the value.
+
+
+215
+00:11:21,247 --> 00:11:28,821 line:-1
+Now let's see how that looks;
+build and run.
+
+
+216
+00:11:28.821 --> 00:11:31.257 line:-1 position:50%
+This time,
+I want to learn about addition.
+
+
+217
+00:11:31,257 --> 00:11:33,126 line:-1
+I'm going
+to play the video again
+
+
+218
+00:11:33,126 --> 00:11:35,962 line:-1
+and see if the content
+of the question will show up
+
+
+219
+00:11:35.962 --> 00:11:40.233 line:-1 position:50%
+synced with the video.
+
+
+220
+00:11:40.233 --> 00:11:43.202 line:-1 position:50%
+>> Neil: Question one.
+Let's get started.
+
+
+221
+00:11:43.202 --> 00:11:46.472 line:-1 position:50%
+I went to the shops today
+and I fancied some apples,
+
+
+222
+00:11:46,472 --> 00:11:48,474 line:-1
+so I bought one red apple;
+
+
+223
+00:11:48,474 --> 00:11:54,814 line:-1
+and I bought one, two,
+three green apples.
+
+
+224
+00:11:54.814 --> 00:11:57.083 line:-1 position:50%
+How many apples did I buy
+in total?
+
+
+225
+00:11:57.083 --> 00:12:01.020 line:-1 position:50%
+Your timer starts... now. <<
+
+
+226
+00:12:01,020 --> 00:12:04,624 line:-1
+Alex: Now it's question time.
+What's one plus three?
+
+
+227
+00:12:04,624 --> 00:12:07,226 line:-1
+Could it be five?
+
+
+228
+00:12:07.226 --> 00:12:10.730 line:-1 position:50%
+Oh. No, I got that one wrong.
+Let's try again.
+
+
+229
+00:12:10.730 --> 00:12:12.231 line:-1 position:50%
+I'm going to rewind the video,
+
+
+230
+00:12:12.231 --> 00:12:15.468 line:-1 position:50%
+and this time
+I'll pay more attention!
+
+
+231
+00:12:19,272 --> 00:12:22,342 line:-1
+>> Neil: Question one.
+Let's get started.
+
+
+232
+00:12:22,342 --> 00:12:25,311 line:-1
+I went to the shops today
+and I fancied some apples,
+
+
+233
+00:12:25,311 --> 00:12:27,614 line:-1
+so I bought one red apple;
+
+
+234
+00:12:27,614 --> 00:12:34,120 line:-1
+and I bought one, two,
+three green apples.
+
+
+235
+00:12:34,120 --> 00:12:36,122 line:-1
+How many apples did I buy
+in total?
+
+
+236
+00:12:36.122 --> 00:12:39.659 line:-1 position:50%
+Your timer starts... now. <<
+
+
+237
+00:12:39,659 --> 00:12:46,232 position:50%
+Alex: Now that I heard it again,
+I know that the answer is four.
+
+
+238
+00:12:46.232 --> 00:12:49.002 line:-1 position:50%
+What if you find this question
+too easy?
+
+
+239
+00:12:49.002 --> 00:12:51.671 line:-1 position:50%
+Let me skip forward and see
+if Neil has something
+
+
+240
+00:12:51,671 --> 00:12:54,774 line:-1
+a bit more complicated
+to teach us.
+
+
+241
+00:13:00.713 --> 00:13:04.851 line:-1 position:50%
+>> Neil: Question four.
+The last question.
+
+
+242
+00:13:04.851 --> 00:13:08.454 line:-1 position:50%
+So today,
+I'm feeling pretty hungry.
+
+
+243
+00:13:08.454 --> 00:13:12.692 line:-1 position:50%
+So I've decided
+I'm going to buy 14 apples.
+
+
+244
+00:13:12,692 --> 00:13:18,998 line:-1
+One... two...
+three... four -- <<
+
+
+245
+00:13:18.998 --> 00:13:20.366 line:-1 position:50%
+[CLICK]
+
+
+246
+00:13:20,366 --> 00:13:25,138 line:-1
+Alex: That's a lot of apples.
+Let me go ahead a bit more.
+
+
+247
+00:13:25.138 --> 00:13:27.607 line:-1 position:50%
+Skip ahead 20 seconds.
+
+
+248
+00:13:27.607 --> 00:13:32.378 line:-1 position:50%
+>> Neil: So I decided to buy
+another 28 apples.
+
+
+249
+00:13:32,378 --> 00:13:35,348 line:-1
+[SIGHS DEEPLY]
+
+
+250
+00:13:35.348 --> 00:13:36.716 line:-1 position:50%
+[THUD]
+
+
+251
+00:13:36.716 --> 00:13:42.321 line:-1 position:50%
+One... two... three...
+
+
+252
+00:13:42,321 --> 00:13:46,325 line:-1
+four... five... six...
+
+
+253
+00:13:49,829 --> 00:13:55,868 line:-1
+26... 27...
+
+
+254
+00:13:55,868 --> 00:13:57,270 line:-1
+28 apples.
+[THUDDING]
+
+
+255
+00:13:57.270 --> 00:13:59.572 line:-1 position:50%
+How many apples did I buy
+in total?
+
+
+256
+00:13:59.572 --> 00:14:02.175 line:-1 position:50%
+[CLATTERING]
+Your timer starts now. <<
+
+
+257
+00:14:02,175 --> 00:14:04,444 line:-1
+Alex: Now,
+that is a great question.
+
+
+258
+00:14:04,444 --> 00:14:05,945 line:-1
+Did you follow?
+
+
+259
+00:14:05,945 --> 00:14:10,149 line:0
+I'm going to go
+with my favorite number!
+
+
+260
+00:14:10,149 --> 00:14:11,484 line:0
+That is correct!
+
+
+261
+00:14:11.484 --> 00:14:15.288 line:-1 position:50%
+The answer
+to the ultimate question is 42!
+
+
+262
+00:14:15.288 --> 00:14:18.357 line:-1 position:50%
+It's simple: no matter where
+the student is in the video,
+
+
+263
+00:14:18.357 --> 00:14:21.794 line:-1 position:50%
+your remote app will keep up
+and update the content.
+
+
+264
+00:14:21,794 --> 00:14:24,030 line:-1
+Let's cover
+some of the best practices
+
+
+265
+00:14:24,030 --> 00:14:27,333 line:-1
+when using custom catalogs.
+
+
+266
+00:14:27.333 --> 00:14:31.137 line:-1 position:50%
+Custom catalogs can be shared
+between devices seamlessly
+
+
+267
+00:14:31,137 --> 00:14:34,474 line:-1
+using the shazamcatalog
+file extension.
+
+
+268
+00:14:34,474 --> 00:14:38,277 line:-1
+You can load from
+and save to disk using a fileURL
+
+
+269
+00:14:38,277 --> 00:14:41,681 line:-1
+as well as deliver them
+over the network.
+
+
+270
+00:14:41.681 --> 00:14:43.716 line:-1 position:50%
+When using a remote web service,
+
+
+271
+00:14:43.716 --> 00:14:45.952 line:-1 position:50%
+you may want to download
+the catalog first
+
+
+272
+00:14:45.952 --> 00:14:50.123 line:-1 position:50%
+and then use the add function
+on the custom catalog object.
+
+
+273
+00:14:50,123 --> 00:14:52,058 line:-1
+Make sure to provide
+a local catalog
+
+
+274
+00:14:52,058 --> 00:14:56,863 line:-1
+when there's no available one
+over the network.
+
+
+275
+00:14:56,863 --> 00:14:59,932 line:-1
+Catalogs can store custom keys
+to return data
+
+
+276
+00:14:59.932 --> 00:15:01.667 line:-1 position:50%
+specific to your use case.
+
+
+277
+00:15:01,667 --> 00:15:04,270 line:-1
+Make sure that the data you add
+in your catalog
+
+
+278
+00:15:04,270 --> 00:15:08,641 line:-1
+is one of the valid
+property list values.
+
+
+279
+00:15:08.641 --> 00:15:10.877 line:-1 position:50%
+When using matchStreamingBuffer,
+
+
+280
+00:15:10.877 --> 00:15:13.179 line:-1 position:50%
+ShazamKit will match
+the audio stream
+
+
+281
+00:15:13.179 --> 00:15:16.115 line:-1 position:50%
+and balance the performance
+as well as the intensity
+
+
+282
+00:15:16,115 --> 00:15:19,252 line:-1
+of the search,
+doing all the work of generating
+
+
+283
+00:15:19,252 --> 00:15:23,156 line:-1
+and auto-updating
+the signature for you.
+
+
+284
+00:15:23.156 --> 00:15:24.957 line:-1 position:50%
+So now you built a full app
+
+
+285
+00:15:24.957 --> 00:15:27.560 line:-1 position:50%
+that's synchronized
+to an educational video,
+
+
+286
+00:15:27.560 --> 00:15:31.798 line:-1 position:50%
+updating the content to where
+the student currently is
+
+
+287
+00:15:31.798 --> 00:15:36.169 line:-1 position:50%
+using only a signature
+and a custom catalog.
+
+
+288
+00:15:36,169 --> 00:15:37,870 line:-1
+This is just one
+of the many examples
+
+
+289
+00:15:37,870 --> 00:15:39,105 line:-1
+that is possible,
+
+
+290
+00:15:39.105 --> 00:15:41.407 line:-1 position:50%
+and we are really excited
+to see what you will build
+
+
+291
+00:15:41,407 --> 00:15:43,576 line:-1
+using ShazamKit.
+
+
+292
+00:15:43,576 --> 00:15:46,345 line:-1
+Thank you
+and have a great WWDC.
+
+
+293
+00:15:46,345 --> 00:15:49,582 align:right size:2% position:90%
+♪
+

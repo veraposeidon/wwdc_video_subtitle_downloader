@@ -1,0 +1,1465 @@
+2
+00:00:00,000 --> 00:00:02,035 line:-1
+[MAC STARTUP CHIME]
+
+
+3
+00:00:02.035 --> 00:00:05.706 line:-1 position:50%
+♪ Bass music playing ♪
+
+
+4
+00:00:05.706 --> 00:00:07.274 line:-1 position:50%
+[KEYSTROKES]
+
+
+5
+00:00:07,274 --> 00:00:10,010 position:89% size:2% line:0
+♪
+
+
+6
+00:00:10.010 --> 00:00:13.347 line:-1 position:50%
+Naiwei Zheng: Hello.
+Welcome to WWDC.
+
+
+7
+00:00:13.347 --> 00:00:15.215 line:-1 position:50%
+My name is Zheng Naiwei.
+
+
+8
+00:00:15.215 --> 00:00:18.151 line:-1 position:50%
+I'm from Apple's
+HLS Streaming Team.
+
+
+9
+00:00:18.151 --> 00:00:21.722 line:-1 position:50%
+Today I'm going to talk about
+a new feature in HLS
+
+
+10
+00:00:21,722 --> 00:00:23,590 line:-1
+called Content Steering,
+
+
+11
+00:00:23,590 --> 00:00:27,995 line:-1
+and how it can improve
+global streaming availability.
+
+
+12
+00:00:27,995 --> 00:00:32,065 line:-1
+Today's network connectivity
+is at global scale.
+
+
+13
+00:00:32,065 --> 00:00:34,501 line:-1
+Streaming media providers
+deliver their contents
+
+
+14
+00:00:34,501 --> 00:00:36,203 line:-1
+all around the world.
+
+
+15
+00:00:36.203 --> 00:00:39.573 line:-1 position:50%
+However, delivering contents
+at the global scale comes with
+
+
+16
+00:00:39.573 --> 00:00:44.077 line:-1 position:50%
+enormous amount of challenges
+the industry has to solve.
+
+
+17
+00:00:44,077 --> 00:00:46,513 line:-1
+We, HLS Streaming Team at Apple,
+
+
+18
+00:00:46,513 --> 00:00:49,283 line:-1
+also recognize
+these challenging problems
+
+
+19
+00:00:49,283 --> 00:00:52,986 line:-1
+and are constantly working
+to provide solutions.
+
+
+20
+00:00:52.986 --> 00:00:57.157 line:-1 position:50%
+Today, we will be focusing on
+the problem of availability.
+
+
+21
+00:00:57,157 --> 00:00:59,960 line:-1
+Specifically,
+network congestion mitigation
+
+
+22
+00:00:59.960 --> 00:01:02.362 line:-1 position:50%
+and error recovery.
+
+
+23
+00:01:02.362 --> 00:01:04.598 line:-1 position:50%
+To help us understand
+these problems,
+
+
+24
+00:01:04,598 --> 00:01:07,334 line:-1
+let's take a look at an example.
+
+
+25
+00:01:07,334 --> 00:01:11,004 line:-1
+Let's assume a popular
+streaming provider in Asia
+
+
+26
+00:01:11.004 --> 00:01:13.073 line:-1 position:50%
+deploys its CDN infrastructures
+
+
+27
+00:01:13.073 --> 00:01:15.075 line:-1 position:50%
+in the following
+three countries:
+
+
+28
+00:01:15.075 --> 00:01:17.811 line:-1 position:50%
+China, Japan, and Singapore.
+
+
+29
+00:01:17,811 --> 00:01:20,614 line:0
+In this graph, we are showing
+a state where everything
+
+
+30
+00:01:20,614 --> 00:01:22,950 position:50%
+is working in perfect condition.
+
+
+31
+00:01:22,950 --> 00:01:26,653 line:0
+We have users in China
+streaming from Chinese CDN
+
+
+32
+00:01:26,653 --> 00:01:31,124 position:50%
+and users from Japan
+streaming from Japanese CDN,
+
+
+33
+00:01:31,124 --> 00:01:35,162 position:50%
+and both CDN networks
+are performing at capable level.
+
+
+34
+00:01:35,162 --> 00:01:38,632 position:50%
+Now, let's introduce
+some change.
+
+
+35
+00:01:38,632 --> 00:01:41,735 position:50%
+Let's say a while later,
+users in China
+
+
+36
+00:01:41,735 --> 00:01:45,272 position:50%
+streaming from the Chinese CDN
+has greatly increased,
+
+
+37
+00:01:45,272 --> 00:01:49,743 position:50%
+to a degree that CDN network
+is becoming overloading.
+
+
+38
+00:01:49,743 --> 00:01:52,279 position:50%
+With the HLS technologies
+we had,
+
+
+39
+00:01:52,279 --> 00:01:54,448 position:50%
+it's difficult to fully address
+this issue
+
+
+40
+00:01:54,448 --> 00:01:56,483 position:50%
+of network congestion.
+
+
+41
+00:01:56,483 --> 00:02:00,120 line:0
+Even though we could assign
+new users to different CDN,
+
+
+42
+00:02:00,120 --> 00:02:03,023 line:0
+it's, however, difficult
+to instruct existing clients
+
+
+43
+00:02:03,023 --> 00:02:05,459 line:0
+to use a different CDN,
+
+
+44
+00:02:05,459 --> 00:02:08,328 line:0
+and existing traffic
+will continuously overload
+
+
+45
+00:02:08,328 --> 00:02:09,529 position:50%
+the current CDN.
+
+
+46
+00:02:09,529 --> 00:02:12,199 line:0
+With our new HLS
+Content Steering feature,
+
+
+47
+00:02:12,199 --> 00:02:14,468 position:50%
+content providers
+can solve this problem
+
+
+48
+00:02:14,468 --> 00:02:17,504 line:0
+by hosting their own
+steering server.
+
+
+49
+00:02:17,504 --> 00:02:21,608 position:50%
+It establishes a side channel
+with all latest HLS clients
+
+
+50
+00:02:21,608 --> 00:02:24,778 position:50%
+to update them
+with the latest CDN policy.
+
+
+51
+00:02:24,778 --> 00:02:28,648 position:50%
+For example, it can send
+a policy update to 30 percent
+
+
+52
+00:02:28,648 --> 00:02:33,587 position:50%
+of the existing clients in China
+to switch to Japanese CDN.
+
+
+53
+00:02:33,587 --> 00:02:36,156 position:50%
+And the clients receiving
+the policy update
+
+
+54
+00:02:36,156 --> 00:02:39,159 position:50%
+will honor the change and
+redirect their network traffics
+
+
+55
+00:02:39,159 --> 00:02:41,428 position:50%
+to the Japanese CDN.
+
+
+56
+00:02:41,428 --> 00:02:46,233 position:50%
+Now the network congestion
+in the Chinese CDN is mitigated.
+
+
+57
+00:02:46.233 --> 00:02:48.368 line:-1 position:50%
+But network congestion
+is only one
+
+
+58
+00:02:48,368 --> 00:02:51,004 line:-1
+of the many
+availability problems.
+
+
+59
+00:02:51,004 --> 00:02:54,241 line:-1
+What happens when
+there's a network outage?
+
+
+60
+00:02:54,241 --> 00:02:56,343 position:50%
+Let's take another example.
+
+
+61
+00:02:56,343 --> 00:03:01,048 position:50%
+Say the network path from users
+in Japan to the Japanese CDN
+
+
+62
+00:03:01,048 --> 00:03:04,117 line:0
+has experienced
+a regional outage.
+
+
+63
+00:03:04,117 --> 00:03:06,253 line:0
+With HLS technologies we had,
+
+
+64
+00:03:06,253 --> 00:03:09,489 position:50%
+content providers can list
+our fallback variant streams
+
+
+65
+00:03:09,489 --> 00:03:11,091 line:0
+in master playlist,
+
+
+66
+00:03:11,091 --> 00:03:13,160 position:50%
+so clients can try
+to walk through the list
+
+
+67
+00:03:13,160 --> 00:03:16,229 line:0
+until it reaches a working CDN.
+
+
+68
+00:03:16.229 --> 00:03:18.398 line:-1 position:50%
+But this approach
+is preliminary in the sense
+
+
+69
+00:03:18,398 --> 00:03:20,934 line:-1
+that content provider
+is unable to change
+
+
+70
+00:03:20.934 --> 00:03:24.037 line:-1 position:50%
+the ordering or priorities
+of the CDNs listed
+
+
+71
+00:03:24.037 --> 00:03:27.107 line:-1 position:50%
+in the master playlist
+in real time.
+
+
+72
+00:03:27,107 --> 00:03:29,843 line:-1
+However, with the help
+of the steering server,
+
+
+73
+00:03:29.843 --> 00:03:33.346 line:-1 position:50%
+clients will be updated
+with the latest CDN priorities
+
+
+74
+00:03:33.346 --> 00:03:35.082 line:-1 position:50%
+at near real time.
+
+
+75
+00:03:35.082 --> 00:03:38.652 line:-1 position:50%
+Let's rewind a bit to see
+how it can facilitate the client
+
+
+76
+00:03:38.652 --> 00:03:41.822 line:-1 position:50%
+with more efficient
+error recovery.
+
+
+77
+00:03:41,822 --> 00:03:43,657 position:50%
+Before the network outage,
+
+
+78
+00:03:43,657 --> 00:03:45,659 position:50%
+clients in Japan
+periodically pull
+
+
+79
+00:03:45,659 --> 00:03:49,930 position:50%
+for CDN priority list updates
+from the steering server.
+
+
+80
+00:03:49,930 --> 00:03:52,299 position:50%
+Let's say in the latest update,
+
+
+81
+00:03:52,299 --> 00:03:57,037 position:50%
+clients in Japan received
+the following CDN priority list
+
+
+82
+00:03:57,037 --> 00:04:00,040 position:50%
+where the Japanese CDN
+being most preferred,
+
+
+83
+00:04:00,040 --> 00:04:03,243 position:50%
+following Singapore
+and then China.
+
+
+84
+00:04:03,243 --> 00:04:09,015 position:50%
+Currently, users in Japan are
+streaming from the Japanese CDN.
+
+
+85
+00:04:09,015 --> 00:04:11,985 position:50%
+Now when the network
+outage happens,
+
+
+86
+00:04:11,985 --> 00:04:14,721 position:50%
+the Japanese CDN
+will be marked as penalized
+
+
+87
+00:04:14,721 --> 00:04:16,857 line:0
+from the priority list.
+
+
+88
+00:04:16,857 --> 00:04:20,694 position:50%
+The client will move on to the
+next CDN in the priority list,
+
+
+89
+00:04:20,694 --> 00:04:23,630 position:50%
+which in this case,
+the CDN in Singapore,
+
+
+90
+00:04:23,630 --> 00:04:26,466 line:0
+and redirect
+their network traffics.
+
+
+91
+00:04:26,466 --> 00:04:29,503 position:50%
+Now the users in Japan
+will be able to continue
+
+
+92
+00:04:29,503 --> 00:04:32,973 line:0
+watching their shows
+without interrupt.
+
+
+93
+00:04:32,973 --> 00:04:36,510 line:-1
+What our example showed you
+is just a high-level overview
+
+
+94
+00:04:36,510 --> 00:04:39,846 line:-1
+of our new HLS feature,
+Content Steering.
+
+
+95
+00:04:39,846 --> 00:04:42,782 line:-1
+Now let's dive deeper
+to show you how to integrate
+
+
+96
+00:04:42.782 --> 00:04:45.919 line:-1 position:50%
+this amazing feature
+into your streams.
+
+
+97
+00:04:45.919 --> 00:04:49.556 line:-1 position:50%
+It's just a simple listing
+of different CDN URLs
+
+
+98
+00:04:49,556 --> 00:04:52,392 line:-1
+duplicating all
+available variants.
+
+
+99
+00:04:52,392 --> 00:04:55,428 line:-1
+As explained before,
+a playlist like this
+
+
+100
+00:04:55.428 --> 00:04:59.432 line:-1 position:50%
+has a constant and final
+ordering of CDN priorities.
+
+
+101
+00:04:59,432 --> 00:05:01,902 line:-1
+Content providers
+cannot change it later
+
+
+102
+00:05:01.902 --> 00:05:03.837 line:-1 position:50%
+during the playback.
+
+
+103
+00:05:03,837 --> 00:05:06,740 line:-1
+Now let's see how to add
+Content Steering support
+
+
+104
+00:05:06.740 --> 00:05:10.544 line:-1 position:50%
+to this playlist.
+
+
+105
+00:05:10,544 --> 00:05:14,181 line:-1
+You may be surprised how little
+the change introduced.
+
+
+106
+00:05:14.181 --> 00:05:16.483 line:-1 position:50%
+In fact, the changes
+are backward-compatible
+
+
+107
+00:05:16.483 --> 00:05:18.718 line:-1 position:50%
+with current HLS clients.
+
+
+108
+00:05:18.718 --> 00:05:21.621 line:-1 position:50%
+Let's walk through
+the additions.
+
+
+109
+00:05:21.621 --> 00:05:24.457 line:-1 position:50%
+Most notably,
+we now group variant streams
+
+
+110
+00:05:24.457 --> 00:05:28.295 line:-1 position:50%
+into different pathways
+by the PATHWAY-ID attributes
+
+
+111
+00:05:28.295 --> 00:05:30.330 line:-1 position:50%
+on each variant stream,
+
+
+112
+00:05:30,330 --> 00:05:34,935 line:-1
+where each pathway typically
+corresponds to one CDN.
+
+
+113
+00:05:34,935 --> 00:05:39,806 line:-1
+In this example, we group the
+variant streams into pathway CN,
+
+
+114
+00:05:39,806 --> 00:05:44,177 line:-1
+JP, and SG, representing
+CDNs in China, Japan,
+
+
+115
+00:05:44,177 --> 00:05:46,780 line:-1
+and Singapore, respectively.
+
+
+116
+00:05:46.780 --> 00:05:49.149 line:-1 position:50%
+However, a pathway
+may contain variant streams
+
+
+117
+00:05:49,149 --> 00:05:54,554 line:-1
+from different CDNs to enable
+more advanced use case.
+
+
+118
+00:05:54.554 --> 00:05:56.623 line:-1 position:50%
+When the client selects
+a pathway,
+
+
+119
+00:05:56.623 --> 00:05:59.059 line:-1 position:50%
+only the variant streams
+from that pathway
+
+
+120
+00:05:59.059 --> 00:06:01.595 line:-1 position:50%
+is eligible
+for variant selection.
+
+
+121
+00:06:01,595 --> 00:06:05,665 line:-1
+The PATHWAY-ID attribute on
+the new CONTENT-STEERING tag
+
+
+122
+00:06:05.665 --> 00:06:10.103 line:-1 position:50%
+specifies the initial pathway
+to use at playback startup.
+
+
+123
+00:06:10,103 --> 00:06:12,305 line:-1
+So, in this case,
+the client will only choose
+
+
+124
+00:06:12,305 --> 00:06:15,508 line:-1
+from variant streams
+belonging to the CN pathway
+
+
+125
+00:06:15,508 --> 00:06:18,645 line:-1
+at the initial playback.
+
+
+126
+00:06:18.645 --> 00:06:20.413 line:-1 position:50%
+The SERVER-URI attribute
+
+
+127
+00:06:20.413 --> 00:06:23.783 line:-1 position:50%
+specifies where is
+the Content Steering server.
+
+
+128
+00:06:23,783 --> 00:06:26,052 line:-1
+Clients will pull for
+Content Steering updates
+
+
+129
+00:06:26.052 --> 00:06:28.388 line:-1 position:50%
+from this URI.
+
+
+130
+00:06:28,388 --> 00:06:31,391 line:-1
+But what if your playlist
+contains media groups?
+
+
+131
+00:06:31.391 --> 00:06:32.592 line:-1 position:50%
+No problem.
+
+
+132
+00:06:32.592 --> 00:06:36.796 line:-1 position:50%
+It's still very simple
+to enable Content Steering.
+
+
+133
+00:06:36,796 --> 00:06:39,933 line:-1
+All you have to do is to
+duplicate the media groups
+
+
+134
+00:06:39.933 --> 00:06:45.071 line:-1 position:50%
+for each pathway and assign them
+with unique GROUP-IDs.
+
+
+135
+00:06:45.071 --> 00:06:48.241 line:-1 position:50%
+For example,
+the audio group in this playlist
+
+
+136
+00:06:48.241 --> 00:06:50.977 line:-1 position:50%
+is being duplicated
+for each pathway,
+
+
+137
+00:06:50,977 --> 00:06:54,981 line:-1
+with the GROUP-ID set to
+CN-audio for the CN pathway
+
+
+138
+00:06:54,981 --> 00:06:56,916 line:-1
+and et cetera.
+
+
+139
+00:06:56.916 --> 00:06:59.552 line:-1 position:50%
+When an HLS client
+loaded a master playlist
+
+
+140
+00:06:59.552 --> 00:07:01.321 line:-1 position:50%
+with Content Steering tag,
+
+
+141
+00:07:01,321 --> 00:07:05,558 line:-1
+it triggers a slightly different
+startup routine.
+
+
+142
+00:07:05.558 --> 00:07:10.196 line:-1 position:50%
+First, when it performs initial
+variant stream selection,
+
+
+143
+00:07:10.196 --> 00:07:14.334 line:-1 position:50%
+it will only use variant streams
+from the initial pathway.
+
+
+144
+00:07:14.334 --> 00:07:17.003 line:-1 position:50%
+Then it will load
+and start playing
+
+
+145
+00:07:17.003 --> 00:07:22.075 line:-1 position:50%
+the selected variant stream
+and its media segments as usual.
+
+
+146
+00:07:22,075 --> 00:07:25,011 line:-1
+But in parallel to the normal
+playback routine,
+
+
+147
+00:07:25.011 --> 00:07:26.613 line:-1 position:50%
+the client will start making
+
+
+148
+00:07:26.613 --> 00:07:30.650 line:-1 position:50%
+periodic Steering Manifest
+requests in background.
+
+
+149
+00:07:30.650 --> 00:07:32.018 line:-1 position:50%
+Let's take a look of what
+
+
+150
+00:07:32.018 --> 00:07:36.056 line:-1 position:50%
+a Steering Manifest request
+looks like.
+
+
+151
+00:07:36.056 --> 00:07:38.692 line:-1 position:50%
+It's just a simple
+HTTP GET request
+
+
+152
+00:07:38,692 --> 00:07:42,462 line:-1
+sent to this resolved URI
+from the SERVER-URI attribute
+
+
+153
+00:07:42.462 --> 00:07:45.465 line:-1 position:50%
+based on
+the master playlist URL.
+
+
+154
+00:07:45,465 --> 00:07:49,602 line:-1
+The steering server will respond
+with a Steering Manifest.
+
+
+155
+00:07:49.602 --> 00:07:53.573 line:-1 position:50%
+Let's dissect its format
+with an example.
+
+
+156
+00:07:53,573 --> 00:07:56,910 line:-1
+The Steering Manifest
+is a JSON document.
+
+
+157
+00:07:56.910 --> 00:08:00.413 line:-1 position:50%
+The steering server can craft
+customized Steering Manifests
+
+
+158
+00:08:00,413 --> 00:08:02,048 line:-1
+for each client.
+
+
+159
+00:08:02.048 --> 00:08:04.818 line:-1 position:50%
+This gives steering server
+great potential
+
+
+160
+00:08:04,818 --> 00:08:08,188 line:-1
+in shaping its managed
+network traffic.
+
+
+161
+00:08:08.188 --> 00:08:11.725 line:-1 position:50%
+The most important property
+in this Steering Manifest
+
+
+162
+00:08:11,725 --> 00:08:14,661 line:-1
+is the PATHWAY-PRIORITY field.
+
+
+163
+00:08:14.661 --> 00:08:18.531 line:-1 position:50%
+It's a list of pathway IDs
+ordered by their priorities,
+
+
+164
+00:08:18.531 --> 00:08:21.434 line:-1 position:50%
+with the first being
+the most preferred.
+
+
+165
+00:08:21,434 --> 00:08:23,203 line:-1
+Here in this example,
+
+
+166
+00:08:23,203 --> 00:08:26,940 line:-1
+we have a priority of CN pathway
+being most preferred,
+
+
+167
+00:08:26.940 --> 00:08:30.744 line:-1 position:50%
+followed by JP and then SG.
+
+
+168
+00:08:30.744 --> 00:08:32.946 line:-1 position:50%
+Upon receiving
+the Steering Manifest
+
+
+169
+00:08:32,946 --> 00:08:35,982 line:-1
+from the steering server,
+the client will perform
+
+
+170
+00:08:35,982 --> 00:08:39,018 line:-1
+Content Steering evaluation
+to determine whether
+
+
+171
+00:08:39.018 --> 00:08:42.222 line:-1 position:50%
+to switch to
+a different pathway.
+
+
+172
+00:08:42,222 --> 00:08:45,225 line:-1
+First, the client will exclude
+variant streams
+
+
+173
+00:08:45.225 --> 00:08:47.861 line:-1 position:50%
+ineligible for selection.
+
+
+174
+00:08:47.861 --> 00:08:50.497 line:-1 position:50%
+This includes
+penalized variant streams
+
+
+175
+00:08:50.497 --> 00:08:52.799 line:-1 position:50%
+due to network errors.
+
+
+176
+00:08:52,799 --> 00:08:56,002 line:-1
+And also, variant streams
+with unsupported codecs,
+
+
+177
+00:08:56,002 --> 00:09:00,073 line:-1
+just like usual
+variant selection would do.
+
+
+178
+00:09:00.073 --> 00:09:03.576 line:-1 position:50%
+It will select a pathway
+that has at least one
+
+
+179
+00:09:03.576 --> 00:09:08.415 line:-1 position:50%
+eligible variant streams
+and has highest pathway priority
+
+
+180
+00:09:08,415 --> 00:09:11,584 line:-1
+among all eligible pathways.
+
+
+181
+00:09:11.584 --> 00:09:13.620 line:-1 position:50%
+If the chosen pathway
+is different
+
+
+182
+00:09:13.620 --> 00:09:15.822 line:-1 position:50%
+from the currently
+using pathway,
+
+
+183
+00:09:15.822 --> 00:09:20.093 line:-1 position:50%
+the client will immediately
+switch to the new pathway.
+
+
+184
+00:09:20,093 --> 00:09:22,695 line:0
+If no suitable pathway
+is chosen
+
+
+185
+00:09:22,695 --> 00:09:25,565 line:0
+or is already using
+the chosen pathway,
+
+
+186
+00:09:25,565 --> 00:09:27,033 position:50%
+client will do nothing
+
+
+187
+00:09:27,033 --> 00:09:31,237 line:0
+and keep playing using
+the current pathway.
+
+
+188
+00:09:31,237 --> 00:09:33,306 position:50%
+Finally, the client
+will schedule
+
+
+189
+00:09:33,306 --> 00:09:36,209 position:50%
+for the next
+Steering Manifest request
+
+
+190
+00:09:36,209 --> 00:09:39,846 line:0
+to pull for latest updates
+from the steering server.
+
+
+191
+00:09:39,846 --> 00:09:42,749 line:-1
+So how does
+this scheduling work?
+
+
+192
+00:09:42,749 --> 00:09:45,518 line:-1
+Let's review
+the Steering Manifest.
+
+
+193
+00:09:45,518 --> 00:09:49,923 line:-1
+Notice that there's a TTL field
+which specify
+
+
+194
+00:09:49,923 --> 00:09:52,525 line:-1
+the number of seconds
+the client should wait
+
+
+195
+00:09:52.525 --> 00:09:56.529 line:-1 position:50%
+until sending the next
+Steering Manifest request.
+
+
+196
+00:09:56,529 --> 00:09:59,599 line:-1
+In this example,
+after the client performed
+
+
+197
+00:09:59,599 --> 00:10:01,801 line:-1
+the Content Steering evaluation
+
+
+198
+00:10:01,801 --> 00:10:05,605 line:-1
+using this Steering Manifest's
+pathway priority list,
+
+
+199
+00:10:05.605 --> 00:10:08.508 line:-1 position:50%
+it will schedule the next
+Steering Manifest request
+
+
+200
+00:10:08.508 --> 00:10:12.212 line:-1 position:50%
+in 300 seconds,
+which is five minutes.
+
+
+201
+00:10:12.212 --> 00:10:15.548 line:-1 position:50%
+It's also worth noting that
+steering server is able
+
+
+202
+00:10:15.548 --> 00:10:20.420 line:-1 position:50%
+to change this TTL value in each
+Steering Manifest response,
+
+
+203
+00:10:20.420 --> 00:10:22.188 line:-1 position:50%
+affecting how long the client
+
+
+204
+00:10:22,188 --> 00:10:24,657 line:-1
+should schedule
+the next request.
+
+
+205
+00:10:24.657 --> 00:10:26.860 line:-1 position:50%
+It's also useful
+for steering server
+
+
+206
+00:10:26,860 --> 00:10:30,129 line:-1
+to inject some randomness
+to each client's TTL value
+
+
+207
+00:10:30,129 --> 00:10:33,299 line:-1
+to distribute server load.
+
+
+208
+00:10:33,299 --> 00:10:36,603 line:-1
+In addition,
+the optional RELOAD-URI field
+
+
+209
+00:10:36,603 --> 00:10:38,638 line:-1
+tells the clients
+where to request
+
+
+210
+00:10:38.638 --> 00:10:41.007 line:-1 position:50%
+the next Steering Manifest.
+
+
+211
+00:10:41.007 --> 00:10:43.676 line:-1 position:50%
+Steering server can leverage
+this field to inject
+
+
+212
+00:10:43,676 --> 00:10:47,447 line:-1
+client-specific state
+or session data in the URL
+
+
+213
+00:10:47,447 --> 00:10:50,884 line:-1
+to be echoed back
+in the next request.
+
+
+214
+00:10:50,884 --> 00:10:53,453 line:-1
+Now you have seen
+the major technical details
+
+
+215
+00:10:53.453 --> 00:10:55.221 line:-1 position:50%
+of Content Steering.
+
+
+216
+00:10:55,221 --> 00:10:57,724 line:-1
+Let's go back
+to one of our early examples
+
+
+217
+00:10:57.724 --> 00:11:02.295 line:-1 position:50%
+to see how it works
+under the hood.
+
+
+218
+00:11:02,295 --> 00:11:05,498 position:50%
+Let's say in this case,
+all users in China
+
+
+219
+00:11:05,498 --> 00:11:07,300 line:0
+have received
+a Steering Manifest
+
+
+220
+00:11:07,300 --> 00:11:11,304 position:50%
+with the CN pathway
+being most preferred,
+
+
+221
+00:11:11,304 --> 00:11:14,707 position:50%
+and the corresponding Chinese
+CDN is being overloaded
+
+
+222
+00:11:14,707 --> 00:11:18,611 position:50%
+because of the increasing
+number of users.
+
+
+223
+00:11:18,611 --> 00:11:21,214 position:50%
+So the steering server
+came into action,
+
+
+224
+00:11:21,214 --> 00:11:24,050 position:50%
+and sending out a different
+Steering Manifest
+
+
+225
+00:11:24,050 --> 00:11:27,153 position:50%
+to 30 percent
+of the users in China,
+
+
+226
+00:11:27,153 --> 00:11:30,290 position:50%
+with the most preferred
+pathway changed to JP.
+
+
+227
+00:11:30,290 --> 00:11:33,226 line:0
+After performing
+a Content Steering evaluation,
+
+
+228
+00:11:33,226 --> 00:11:35,528 line:0
+those 30 percent
+clients in China
+
+
+229
+00:11:35,528 --> 00:11:37,697 line:0
+will switch to the JP pathway,
+
+
+230
+00:11:37,697 --> 00:11:41,467 position:50%
+redirecting their network
+traffics to the CDN in Japan,
+
+
+231
+00:11:41,467 --> 00:11:47,073 line:0
+resolving the network congestion
+situation in Chinese CDN.
+
+
+232
+00:11:47.073 --> 00:11:50.777 line:-1 position:50%
+To wrap up, we introduced
+the new HLS feature
+
+
+233
+00:11:50,777 --> 00:11:53,780 line:-1
+of Content Steering,
+explained how it works,
+
+
+234
+00:11:53.780 --> 00:11:56.916 line:-1 position:50%
+and how to integrate it
+in your streams.
+
+
+235
+00:11:56,916 --> 00:11:59,519 line:-1
+With this amazing feature,
+you will be able
+
+
+236
+00:11:59,519 --> 00:12:03,022 line:-1
+to fine-tune your global
+streaming availability.
+
+
+237
+00:12:03.022 --> 00:12:07.193 line:-1 position:50%
+For more technical details,
+follow the link below this video
+
+
+238
+00:12:07,193 --> 00:12:10,730 line:-1
+for "HLS Content Steering
+Specification".
+
+
+239
+00:12:10,730 --> 00:12:13,366 line:-1
+I'd also like to tell you
+that playlists
+
+
+240
+00:12:13.366 --> 00:12:16.669 line:-1 position:50%
+and Steering Manifest
+validation is also supported
+
+
+241
+00:12:16,669 --> 00:12:20,473 line:-1
+in our latest HTTP Live
+Streaming Tools.
+
+
+242
+00:12:20.473 --> 00:12:22.575 line:-1 position:50%
+I'd also like to acknowledge
+feedbacks
+
+
+243
+00:12:22.575 --> 00:12:25.678 line:-1 position:50%
+and helps we received
+from industry members
+
+
+244
+00:12:25,678 --> 00:12:28,848 line:-1
+in the HLS Interest IETF forum.
+
+
+245
+00:12:28.848 --> 00:12:33.019 line:-1 position:50%
+Future feedbacks and suggestions
+are also welcomed.
+
+
+246
+00:12:33,019 --> 00:12:34,554 line:0
+And with all these in place,
+
+
+247
+00:12:34,554 --> 00:12:37,690 position:50%
+the HLS Content Steering
+will be available to developers
+
+
+248
+00:12:37,690 --> 00:12:41,628 line:0
+and users in this year's
+WWDC Seed builds.
+
+
+249
+00:12:41,628 --> 00:12:45,198 line:-1
+So, if you want a better
+global streaming delivery
+
+
+250
+00:12:45,198 --> 00:12:46,866 line:-1
+with more availability,
+
+
+251
+00:12:46,866 --> 00:12:49,535 line:-1
+act now to integrate
+HLS Content Steering
+
+
+252
+00:12:49,535 --> 00:12:51,137 line:-1
+in your streams
+
+
+253
+00:12:51.137 --> 00:12:54.207 line:-1 position:50%
+and bring your customers
+a better streaming experience.
+
+
+254
+00:12:54,207 --> 00:12:55,842 line:-1
+Thank you very much.
+
+
+255
+00:12:55,842 --> 00:12:58,778 size:2% align:center position:89%
+♪
+

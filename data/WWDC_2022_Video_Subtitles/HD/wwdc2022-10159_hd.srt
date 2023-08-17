@@ -1,0 +1,2177 @@
+2
+00:00:00.434 --> 00:00:06.440 line:-1 align:center
+[upbeat music]
+
+
+3
+00:00:09,309 --> 00:00:11,478 line:-1
+- Hello and welcome.
+
+
+4
+00:00:11,512 --> 00:00:13,413 line:-1
+My name is Marco Giordano,
+
+
+5
+00:00:13,447 --> 00:00:17,050 line:-2
+and I'm with the GPU Software
+Engineering team here at Apple.
+
+
+6
+00:00:17.084 --> 00:00:19.620 line:-1 align:center
+In this session I'll talk to you about
+
+
+7
+00:00:19.653 --> 00:00:23.357 line:-2 align:center
+how to scale workloads
+across Apple M1 GPUs.
+
+
+8
+00:00:23,390 --> 00:00:26,727 line:-2
+If you work on complex compute
+workloads and want to know how to
+
+
+9
+00:00:26,760 --> 00:00:31,031 line:-2
+take full advantage of Apple silicon
+hardware and achieve great scaling,
+
+
+10
+00:00:31,064 --> 00:00:33,433 line:-1
+this talk is the one for you.
+
+
+11
+00:00:33.467 --> 00:00:36.837 line:-2 align:center
+I will start by discussing
+compute scalability concepts
+
+
+12
+00:00:36.870 --> 00:00:42.276 line:-2 align:center
+and how applications can naturally scale
+performance across the M1 GPU family.
+
+
+13
+00:00:42.309 --> 00:00:45.846 line:-2 align:center
+And then, I'll share
+step-by-step "how-tos"
+
+
+14
+00:00:45,879 --> 00:00:48,782 line:-1
+and talk about what tools are available
+
+
+15
+00:00:48.815 --> 00:00:52.252 line:-2 align:center
+to maximize compute scaling
+for your workloads.
+
+
+16
+00:00:52,286 --> 00:00:55,122 line:-2
+Let's start by understanding
+what scalability is
+
+
+17
+00:00:55.155 --> 00:00:57.991 line:-2 align:center
+and why it is important
+for your workload.
+
+
+18
+00:00:59,293 --> 00:01:02,829 line:0
+The Apple M1 GPU was designed
+from the ground up to scale
+
+
+19
+00:01:02,863 --> 00:01:08,535 line:0
+and to let your workload achieve excellent
+performance across the entire SOC family.
+
+
+20
+00:01:08,569 --> 00:01:13,407 line:0
+The same GPU supporting all Metal 3
+features scales from your 8-core iPad
+
+
+21
+00:01:13,440 --> 00:01:16,476 align:center
+all the way to your 64-core Mac Studio.
+
+
+22
+00:01:17,544 --> 00:01:20,214 line:-2
+To take advantage
+of the high level of scaling,
+
+
+23
+00:01:20.247 --> 00:01:24.551 line:-2 align:center
+having an app optimized for M1
+is a great starting point.
+
+
+24
+00:01:24.585 --> 00:01:29.089 line:-2 align:center
+Many prominent pro apps have already
+been optimized for Apple M1
+
+
+25
+00:01:29,122 --> 00:01:33,260 line:-2
+and have been experiencing
+excellent scaling across all devices.
+
+
+26
+00:01:34,962 --> 00:01:39,933 line:-2
+For example, here we have
+Affinity Photo and DaVinci Resolve--
+
+
+27
+00:01:39.967 --> 00:01:43.971 line:-2 align:center
+photo and video editors from
+the post-production industry.
+
+
+28
+00:01:44.004 --> 00:01:47.608 line:-1 align:center
+These apps are achieving great scaling.
+
+
+29
+00:01:47.641 --> 00:01:53.447 line:-2 align:center
+Let's define what scalability really means
+and how you can achieve "ideal" scaling.
+
+
+30
+00:01:53.480 --> 00:01:58.385 line:-2 align:center
+GPU workload scalability
+is the capacity to improve performance
+
+
+31
+00:01:58,418 --> 00:02:01,555 line:-1
+with an increased number of GPU cores.
+
+
+32
+00:02:01,588 --> 00:02:04,658 line:-2
+The chart on the right
+shows application speed-up
+
+
+33
+00:02:04.691 --> 00:02:07.194 line:-1 align:center
+with an increasing GPU cores count.
+
+
+34
+00:02:07.227 --> 00:02:10.964 line:-2 align:center
+Linear proportion improvement
+is considered ideal.
+
+
+35
+00:02:12.232 --> 00:02:16.403 line:-2 align:center
+However, while working on your app,
+you might notice a type of scaling
+
+
+36
+00:02:16.436 --> 00:02:20.307 line:-2 align:center
+which hits a plateau and scales with
+diminishing returns,
+
+
+37
+00:02:20,340 --> 00:02:24,945 line:-2
+or doesn't scale at all
+due to gaps in the GPU timeline.
+
+
+38
+00:02:25,579 --> 00:02:29,983 line:-2
+Or you might see another type scaling
+where the performance improves
+
+
+39
+00:02:30.017 --> 00:02:32.819 line:-1 align:center
+but not uniformly across the stack
+
+
+40
+00:02:32.853 --> 00:02:37.157 line:-2 align:center
+where the workload
+is hitting some GPU limiters,
+
+
+41
+00:02:37.191 --> 00:02:42.930 line:-2 align:center
+like here, between 24 to 32
+or 48 to 64 cores.
+
+
+42
+00:02:44,431 --> 00:02:48,569 line:-2
+Your goal is to get as close as
+possible to linear scaling,
+
+
+43
+00:02:48.602 --> 00:02:51.338 line:-2 align:center
+and I will show you
+the tools and techniques
+
+
+44
+00:02:51.371 --> 00:02:55.108 line:-2 align:center
+to identify bottlenecks and
+achieve the result you want.
+
+
+45
+00:02:56.276 --> 00:03:01.682 line:-2 align:center
+In the next section I will discuss the
+approaches to maximize GPU scaling.
+
+
+46
+00:03:01.715 --> 00:03:06.954 line:-2 align:center
+For every workload, you should
+first identify where the bottleneck is.
+
+
+47
+00:03:06,987 --> 00:03:11,225 line:-2
+Workloads can be limited either by
+computation or bandwidth.
+
+
+48
+00:03:11,258 --> 00:03:14,027 line:-1
+During the optimization process,
+
+
+49
+00:03:14.061 --> 00:03:16.930 line:-2 align:center
+you might end up
+bouncing between one and the other.
+
+
+50
+00:03:16.964 --> 00:03:21.635 line:-2 align:center
+If you are computational-bound,
+you might try to shift some of the load
+
+
+51
+00:03:21.668 --> 00:03:26.039 line:-2 align:center
+to leverage memory
+to reduce computation, or vice versa.
+
+
+52
+00:03:26.073 --> 00:03:29.576 line:-1 align:center
+Bottlenecks can shift when you scale up.
+
+
+53
+00:03:29,610 --> 00:03:32,379 line:-2
+One good solution could be
+using Apple frameworks
+
+
+54
+00:03:32,412 --> 00:03:34,982 line:-1
+like MPS or MPSGraph.
+
+
+55
+00:03:35.015 --> 00:03:37.184 line:-1 align:center
+if you can leverage their primitives,
+
+
+56
+00:03:37,217 --> 00:03:41,522 line:-2
+we made sure every compute kernel
+runs best on all the hardware.
+
+
+57
+00:03:41,555 --> 00:03:44,725 line:-2
+However, you
+can't replace everything with MPS,
+
+
+58
+00:03:44.758 --> 00:03:48.529 line:-2 align:center
+so it is critical to profile
+and understand your workload.
+
+
+59
+00:03:50.297 --> 00:03:51.164 line:-2 align:center
+I will first cover three items
+that can help minimize GPU gaps:
+
+
+60
+00:03:54.868 --> 00:03:58.839 line:-2 align:center
+Improve your work distribution,
+eliminate GPU timeline gaps,
+
+
+61
+00:03:58,872 --> 00:04:01,508 line:-1
+and atomics operation considerations.
+
+
+62
+00:04:02,476 --> 00:04:06,613 line:-2
+Then I will explain
+how to optimize for GPU limiters
+
+
+63
+00:04:06,647 --> 00:04:10,951 line:-2
+by first investigating the effect of
+compute grid shapes
+
+
+64
+00:04:10,984 --> 00:04:13,387 line:-1
+and memory layouts of your workload
+
+
+65
+00:04:13,420 --> 00:04:18,892 align:center
+and finally by looking
+at a specific example in Blender Cycles.
+
+
+66
+00:04:18,926 --> 00:04:22,362 line:0
+Start by focusing on minimizing GPU gaps.
+
+
+67
+00:04:22,396 --> 00:04:26,967 align:center
+This kind of scaling can be the result
+of the GPU not being fully utilized,
+
+
+68
+00:04:27,000 --> 00:04:30,070 line:0
+with gaps in the GPU timeline
+where the hardware is idle.
+
+
+69
+00:04:32,139 --> 00:04:35,976 align:center
+Let's see if we can improve scaling by
+investigating work distribution.
+
+
+70
+00:04:37.544 --> 00:04:41.715 line:-2 align:center
+Small workloads
+usually do not saturate the whole GPU,
+
+
+71
+00:04:41.748 --> 00:04:44.418 line:-1 align:center
+and kernel synchronization has its cost,
+
+
+72
+00:04:44,451 --> 00:04:47,955 line:-1
+so both can prevent proper scaling.
+
+
+73
+00:04:47,988 --> 00:04:53,093 line:-2
+It is very important to understand how
+the workload gets mapped to the hardware,
+
+
+74
+00:04:53.126 --> 00:04:54.928 line:-1 align:center
+so let's talk about it.
+
+
+75
+00:04:55.696 --> 00:05:00.267 line:-2 align:center
+A workload is dispatched in the form
+of a 3D grid of threadgroups.
+
+
+76
+00:05:00,300 --> 00:05:04,137 line:-2
+Threadgroups are uniformly
+distributed to the GPU cores
+
+
+77
+00:05:04.171 --> 00:05:08.976 line:-2 align:center
+and have access to threadgroup memory,
+which is limited in size,
+
+
+78
+00:05:09,009 --> 00:05:11,945 line:-1
+but very fast, local to the GPU core.
+
+
+79
+00:05:12,913 --> 00:05:16,783 line:-2
+A single threadgroup is further
+broken down into SIMD-groups,
+
+
+80
+00:05:16.817 --> 00:05:21.088 line:-2 align:center
+which are also known as waves or warps
+in other compute dialects.
+
+
+81
+00:05:21.989 --> 00:05:26.059 line:-2 align:center
+Checking the "threadExecutionWidth"
+on the compute pipeline state object
+
+
+82
+00:05:26.093 --> 00:05:28.161 line:-1 align:center
+will return the SIMD width,
+
+
+83
+00:05:28.195 --> 00:05:31.765 line:-2 align:center
+and on all Apple GPUs,
+it is equal to 32.
+
+
+84
+00:05:33.033 --> 00:05:37.337 line:-2 align:center
+Threadgroups can have up to
+1024 threads per threadgroup
+
+
+85
+00:05:37,371 --> 00:05:41,575 line:-2
+and threads can share up to
+32K of threadgroup memory.
+
+
+86
+00:05:42,876 --> 00:05:45,679 line:-2
+To keep the GPU busy,
+there should be enough work to do
+
+
+87
+00:05:45.712 --> 00:05:47.347 line:-1 align:center
+on all the GPU cores.
+
+
+88
+00:05:48.749 --> 00:05:51.618 line:-1 align:center
+Here is an example of a grid to dispatch.
+
+
+89
+00:05:51.652 --> 00:05:54.555 line:-2 align:center
+Threadgroups are dispatched
+to GPU Clusters
+
+
+90
+00:05:54,588 --> 00:05:58,091 line:-1
+and distributed among GPU cores.
+
+
+91
+00:05:59,159 --> 00:06:01,228 line:-1
+If there are too few threadgroups,
+
+
+92
+00:06:01,261 --> 00:06:04,565 line:-2
+the workload
+won't fully saturate the machine.
+
+
+93
+00:06:04.598 --> 00:06:06.033 line:-1 align:center
+Here's how to fix this.
+
+
+94
+00:06:08.101 --> 00:06:11.438 line:-2 align:center
+Start by computing
+how many threads the workload produces
+
+
+95
+00:06:11,471 --> 00:06:15,475 line:-2
+and roughly see if the dispatch
+will saturate the whole machine.
+
+
+96
+00:06:16,410 --> 00:06:22,082 align:center
+For relatively complex kernels, 1K to 2K
+concurrent threads per shader core
+
+
+97
+00:06:22,115 --> 00:06:24,651 line:0
+is considered a very good occupancy,
+
+
+98
+00:06:24,685 --> 00:06:30,591 align:center
+so take 1 to 2K threads per GPU core as
+a rule of thumb.
+
+
+99
+00:06:30,624 --> 00:06:35,596 align:center
+Now you can compute if you have enough
+work to fully saturate the hardware.
+
+
+100
+00:06:35,629 --> 00:06:39,032 align:center
+The table here shows the lowest
+recommended number of threads
+
+
+101
+00:06:39,066 --> 00:06:41,301 line:0
+to saturate different SOCs.
+
+
+102
+00:06:43,670 --> 00:06:45,739 align:center
+Another thing to consider
+would be avoiding
+
+
+103
+00:06:45,772 --> 00:06:48,909 align:center
+using unnecessarily large
+threadgroup sizes.
+
+
+104
+00:06:48,942 --> 00:06:54,481 line:0
+Making threadgroups smaller will map
+the load to the hardware more uniformly.
+
+
+105
+00:06:54,515 --> 00:06:58,752 line:0
+Using larger threadgroups might prevent
+a more uniform distribution,
+
+
+106
+00:06:58,785 --> 00:07:01,588 line:0
+leading to imbalance in the GPU cores.
+
+
+107
+00:07:02.890 --> 00:07:05.926 line:-2 align:center
+It's best to use
+the smallest multiple of the SIMD width
+
+
+108
+00:07:05.959 --> 00:07:07.995 line:-1 align:center
+that maps well to your workload.
+
+
+109
+00:07:08.629 --> 00:07:12.165 line:-2 align:center
+By using smaller threadgroups,
+the GPU has more opportunities
+
+
+110
+00:07:12.199 --> 00:07:14.668 line:-1 align:center
+to better balance its workload.
+
+
+111
+00:07:16.170 --> 00:07:19.039 line:-2 align:center
+Please always check your
+kernel runtime performance
+
+
+112
+00:07:19,072 --> 00:07:21,942 line:-1
+with Xcode or Instruments GPU Tools.
+
+
+113
+00:07:23,443 --> 00:07:28,882 line:-2
+In this GPU capture, for example, there is
+a kernel performing some computation.
+
+
+114
+00:07:28,916 --> 00:07:32,653 line:-2
+Occupancy is pretty low,
+which is unexpected.
+
+
+115
+00:07:32.686 --> 00:07:36.089 line:-2 align:center
+The compiler statistics show
+that max theoretical occupancy,
+
+
+116
+00:07:36,123 --> 00:07:40,060 line:-1
+which is new in Xcode 14, is 100%.
+
+
+117
+00:07:40.093 --> 00:07:43.997 line:-2 align:center
+This indicates there might not
+be enough threads--and indeed,
+
+
+118
+00:07:44,031 --> 00:07:48,569 line:-2
+we can see the algorithms starts
+to dispatch fewer and fewer threads,
+
+
+119
+00:07:48,602 --> 00:07:50,604 line:-1
+not saturating the machine anymore.
+
+
+120
+00:07:51,805 --> 00:07:54,975 line:-2
+Low occupancy
+might have several other causes.
+
+
+121
+00:07:55,008 --> 00:08:01,014 line:0
+To get all the details, check the
+Metal Compute on MacBook Pro Tech talk.
+
+
+122
+00:08:01,849 --> 00:08:05,152 line:0
+OK, now that workload
+is correctly distributed,
+
+
+123
+00:08:05,185 --> 00:08:08,655 align:center
+it's time to make sure the GPU
+is always busy.
+
+
+124
+00:08:09,957 --> 00:08:13,393 line:0
+Under-utilizing the GPU
+never leads to ideal scaling,
+
+
+125
+00:08:13,427 --> 00:08:18,131 line:0
+and the worst case
+of under-utilizing is keeping it idle.
+
+
+126
+00:08:18,165 --> 00:08:21,768 align:center
+The GPU can be idle
+because of GPU timeline gaps.
+
+
+127
+00:08:23,971 --> 00:08:26,807 line:0
+Consider this example.
+
+
+128
+00:08:26,840 --> 00:08:30,110 line:0
+Here is a workload
+using only 50% of the GPU
+
+
+129
+00:08:30,143 --> 00:08:34,248 line:0
+due to work serialization
+between CPU and GPU.
+
+
+130
+00:08:34,281 --> 00:08:39,152 line:0
+In this case, overall task duration
+is the sum of CPU and GPU work
+
+
+131
+00:08:39,186 --> 00:08:41,455 line:0
+with no overlaps.
+
+
+132
+00:08:42,489 --> 00:08:46,727 line:0
+Doubling the GPU cores makes
+the GPU track complete faster,
+
+
+133
+00:08:46,760 --> 00:08:49,796 line:0
+but the CPU track is not affected.
+
+
+134
+00:08:49,830 --> 00:08:56,103 align:center
+Overall performance increases only by 33%,
+far from ideal scaling.
+
+
+135
+00:08:57,237 --> 00:09:02,676 align:center
+If the GPU cores are doubled again,
+the workload is even faster on the GPU,
+
+
+136
+00:09:02,709 --> 00:09:08,315 align:center
+but overall latency is reduced by
+only 60% compared to the original time!
+
+
+137
+00:09:08,348 --> 00:09:13,053 line:0
+So GPU cores scaling brings
+diminishing returns in such cases.
+
+
+138
+00:09:13,086 --> 00:09:16,089 line:0
+This is far from ideal.
+Let's fix it!
+
+
+139
+00:09:17,858 --> 00:09:23,397 line:-2
+This Instrument trace from a M1 pro
+shows big GPU timeline gaps,
+
+
+140
+00:09:23,430 --> 00:09:26,667 line:-2
+and this will clearly prevent
+proper scaling.
+
+
+141
+00:09:28.035 --> 00:09:31.738 line:-2 align:center
+On M1 Ultra the same workload
+is indeed a bit faster,
+
+
+142
+00:09:31.772 --> 00:09:34.441 line:-1 align:center
+but the GPU idle time became higher
+
+
+143
+00:09:34,474 --> 00:09:38,278 line:-1
+and the workload is not scaling well.
+
+
+144
+00:09:38.312 --> 00:09:41.348 line:-2 align:center
+The big gaps are caused by
+CPU synchronization
+
+
+145
+00:09:41,381 --> 00:09:44,651 line:-2
+using the waitUntilCompleted
+on the command buffer.
+
+
+146
+00:09:45.552 --> 00:09:49.189 line:-2 align:center
+After changing the waiting logic
+and removing serialization,
+
+
+147
+00:09:49.223 --> 00:09:53.327 line:-2 align:center
+the GPU became fully utilized,
+which is great.
+
+
+148
+00:09:54,661 --> 00:09:56,029 align:center
+Comparing the workload scaling
+
+
+149
+00:09:56,063 --> 00:09:57,030 line:0
+before and after,
+
+
+150
+00:09:57,064 --> 00:09:58,765 align:center
+we can state that the scaling
+
+
+151
+00:09:58,799 --> 00:10:01,635 line:0
+became much closer to the ideal scaling.
+
+
+152
+00:10:03,403 --> 00:10:06,773 line:-2
+In the previous example,
+it was possible to remove
+
+
+153
+00:10:06,807 --> 00:10:09,810 line:-1
+CPU/GPU synchronization altogether,
+
+
+154
+00:10:09.843 --> 00:10:15.482 line:-2 align:center
+however this is not always the case,
+due to your application nature.
+
+
+155
+00:10:15.516 --> 00:10:20.587 line:-2 align:center
+There are other approaches you can take
+to reduce idle time.
+
+
+156
+00:10:20.621 --> 00:10:23.724 line:-1 align:center
+Use MTLSharedEvents to signal the CPU,
+
+
+157
+00:10:23,757 --> 00:10:27,961 line:-2
+pipeline more work,
+consider using GPU-driven encoding,
+
+
+158
+00:10:27,995 --> 00:10:30,497 line:-1
+and using concurrent dispatches.
+
+
+159
+00:10:30.531 --> 00:10:35.335 line:-2 align:center
+So let's discuss those approaches
+to minimize GPU timeline gaps.
+
+
+160
+00:10:35,369 --> 00:10:37,905 line:-1
+Some of them might fit your workflow.
+
+
+161
+00:10:39.139 --> 00:10:44.378 line:-2 align:center
+Waiting on the CPU for GPU completion
+leads to not ideal scaling.
+
+
+162
+00:10:44,411 --> 00:10:46,947 line:-2
+If your application
+is using WaitUntilCompleted,
+
+
+163
+00:10:46.980 --> 00:10:50.584 line:-2 align:center
+you might want to try to use
+MTLSharedEvents instead.
+
+
+164
+00:10:51.919 --> 00:10:54.555 line:-1 align:center
+MTLSharedEvents have lower overhead
+
+
+165
+00:10:54,588 --> 00:10:57,724 line:-1
+and can help you reduce the timeline gaps.
+
+
+166
+00:10:57.758 --> 00:10:58.959 line:-1 align:center
+The next thing to consider
+
+
+167
+00:10:58.992 --> 00:11:01.228 line:-1 align:center
+is pipelining the workload.
+
+
+168
+00:11:02,329 --> 00:11:04,498 line:-1
+If the algorithm has the data necessary
+
+
+169
+00:11:04.531 --> 00:11:06.633 line:-1 align:center
+for the next batch to work on,
+
+
+170
+00:11:06.667 --> 00:11:09.937 line:-2 align:center
+it's possible to encode one or
+more batches in advance
+
+
+171
+00:11:09,970 --> 00:11:12,973 line:-1
+before waiting on the MTLSharedEvents.
+
+
+172
+00:11:13.006 --> 00:11:15.843 line:-2 align:center
+By doing so,
+the GPU will not become drained
+
+
+173
+00:11:15,876 --> 00:11:18,312 line:-1
+and will always have work to process.
+
+
+174
+00:11:19,713 --> 00:11:23,116 line:-2
+If work can't be encoded
+in advance on the same queue,
+
+
+175
+00:11:23,150 --> 00:11:26,787 line:-2
+consider using a second queue
+to overlap work.
+
+
+176
+00:11:26.820 --> 00:11:30.424 line:-2 align:center
+Using multiple queues allows you
+to submit independent work,
+
+
+177
+00:11:30.457 --> 00:11:33.026 line:-2 align:center
+and they do not stall
+the other submission thread
+
+
+178
+00:11:33.060 --> 00:11:35.462 line:-1 align:center
+when waiting on an event.
+
+
+179
+00:11:35.495 --> 00:11:40.067 line:-2 align:center
+This way, the GPU has the chance
+to keep receiving and processing work.
+
+
+180
+00:11:41,602 --> 00:11:46,807 line:-2
+In some cases, an algorithm
+can encode work directly from the GPU.
+
+
+181
+00:11:47,841 --> 00:11:49,576 line:-1
+Using indirect command buffer,
+
+
+182
+00:11:49,610 --> 00:11:53,380 line:-2
+you can move the encoding of the
+next batch directly on the GPU,
+
+
+183
+00:11:53,413 --> 00:11:56,416 line:-1
+avoiding any need for synchronization.
+
+
+184
+00:11:56.450 --> 00:12:00.153 line:-3 align:center
+For more details about indirect
+command buffers, please check
+
+
+185
+00:12:00,187 --> 00:12:02,456 line:-2
+"Modern Rendering with Metal."
+
+
+186
+00:12:02.489 --> 00:12:06.527 line:-2 align:center
+The workload now removes
+or minimizes expensive synchronizations
+
+
+187
+00:12:06,560 --> 00:12:09,763 line:-1
+between CPU and GPU as much as possible.
+
+
+188
+00:12:09,796 --> 00:12:15,035 line:-2
+But even with a busy GPU timeline,
+scaling challenges may still exist.
+
+
+189
+00:12:15.068 --> 00:12:17.137 line:-1 align:center
+Let's investigate.
+
+
+190
+00:12:17,171 --> 00:12:19,973 line:0
+This graph
+is from an image processing workload
+
+
+191
+00:12:20,007 --> 00:12:23,744 line:0
+where images are processed
+1 frame at a time.
+
+
+192
+00:12:23,777 --> 00:12:28,982 align:center
+A lot of back-to-back compute serial
+dispatches can also limit scaling.
+
+
+193
+00:12:29,016 --> 00:12:31,718 line:0
+The GPU is busy,
+but kernel synchronization
+
+
+194
+00:12:31,752 --> 00:12:36,223 line:0
+has a cost and additionally,
+every dispatch has a small ramp up
+
+
+195
+00:12:36,256 --> 00:12:38,392 align:center
+where the threadgroups
+are being distributed
+
+
+196
+00:12:38,425 --> 00:12:41,361 line:0
+and not yet saturating the cores.
+
+
+197
+00:12:41,395 --> 00:12:45,032 line:0
+Likewise, when threadgroups
+finish and retire,
+
+
+198
+00:12:45,065 --> 00:12:49,303 align:center
+there might not be enough work
+to fully saturate the cores anymore.
+
+
+199
+00:12:49,336 --> 00:12:54,174 align:center
+In this situation, the advice is to
+overlap independent work when possible.
+
+
+200
+00:12:54,208 --> 00:12:56,810 line:-1
+Let's see a visual example.
+
+
+201
+00:12:56,844 --> 00:13:00,747 line:-2
+Here we have a workload processing
+two images, one after the other.
+
+
+202
+00:13:00.781 --> 00:13:04.017 line:-2 align:center
+Normally, kernels need to
+synchronize between each other.
+
+
+203
+00:13:04,051 --> 00:13:07,688 line:-2
+However, this is not the only
+way to schedule work.
+
+
+204
+00:13:07,721 --> 00:13:13,327 line:-2
+You can interleave independent work of
+two images using concurrent dispatches.
+
+
+205
+00:13:13.360 --> 00:13:16.730 line:-2 align:center
+Here the driver is able to
+interleave different work,
+
+
+206
+00:13:16,763 --> 00:13:19,299 line:-1
+thanks to concurrent dispatches.
+
+
+207
+00:13:19,333 --> 00:13:22,402 line:-2
+We can see that the two kernels
+that previously were back-to-back
+
+
+208
+00:13:22,436 --> 00:13:27,140 line:-2
+are now separated
+by some independent work.
+
+
+209
+00:13:27.174 --> 00:13:30.644 line:-2 align:center
+However,
+when you use MTLDispatchTypeConcurrent,
+
+
+210
+00:13:30.677 --> 00:13:33.780 line:-1 align:center
+barriers must be put in manually.
+
+
+211
+00:13:33.814 --> 00:13:38.118 line:-2 align:center
+Concurrent dispatches enable the
+driver to pack the work more tightly,
+
+
+212
+00:13:38,151 --> 00:13:42,222 line:-2
+hiding most of the synchronization cost
+between dependent kernels,
+
+
+213
+00:13:42.256 --> 00:13:47.427 line:-2 align:center
+as well as fill the ramp up
+and tail end of the various kernels.
+
+
+214
+00:13:47,461 --> 00:13:50,764 line:0
+This optimization greatly improved
+the workload performance
+
+
+215
+00:13:50,797 --> 00:13:55,402 align:center
+and scaling when
+moving from M1 Max to M1 Ultra.
+
+
+216
+00:13:55,435 --> 00:13:59,506 align:center
+The workload runs 30% faster
+with two images interleaved,
+
+
+217
+00:13:59,540 --> 00:14:04,811 line:0
+70% faster with 3 images in parallel,
+compared to the previous scaling.
+
+
+218
+00:14:07,014 --> 00:14:11,652 align:center
+It's important to carefully consider
+atomic operations that kernels are doing.
+
+
+219
+00:14:11,685 --> 00:14:15,422 align:center
+Let's make sure it is made in
+the most efficient way.
+
+
+220
+00:14:15,455 --> 00:14:19,126 line:-2
+Atomic operation
+allows reading and writing data
+
+
+221
+00:14:19,159 --> 00:14:22,229 line:-1
+from multiple threads in a safe manner.
+
+
+222
+00:14:22.262 --> 00:14:26.333 line:-2 align:center
+Global atomics
+are coherent across the whole GPU.
+
+
+223
+00:14:26.366 --> 00:14:29.937 line:-2 align:center
+When many threads attempt to
+read and write the same global value,
+
+
+224
+00:14:29,970 --> 00:14:32,472 line:-1
+this leads to contention.
+
+
+225
+00:14:32.506 --> 00:14:38.445 line:-2 align:center
+Increasing numbers of GPU cores doesn't
+help and in fact leads to more contention.
+
+
+226
+00:14:38.478 --> 00:14:41.682 line:-2 align:center
+Let's investigate how you can
+improve atomics behavior
+
+
+227
+00:14:41,715 --> 00:14:44,051 line:-1
+in an algorithm with an example.
+
+
+228
+00:14:45,719 --> 00:14:49,356 align:center
+Here is a reduction algorithm,
+where all of the values in a buffer
+
+
+229
+00:14:49,389 --> 00:14:51,792 align:center
+will be summed up together.
+
+
+230
+00:14:51,825 --> 00:14:54,928 line:0
+The simplest approach is to perform
+an atomic add operation
+
+
+231
+00:14:54,962 --> 00:14:57,464 line:0
+per thread in main memory.
+
+
+232
+00:14:57,497 --> 00:15:02,603 line:0
+However, this is not ideal because
+that puts a great level of pressure
+
+
+233
+00:15:02,636 --> 00:15:08,008 line:0
+on a single value in main memory,
+effectively serializing each memory write.
+
+
+234
+00:15:09,376 --> 00:15:11,945 line:-2
+There are two things that the
+hardware offers to help with
+
+
+235
+00:15:11.979 --> 00:15:14.381 line:-1 align:center
+atomic memory contention:
+
+
+236
+00:15:14,414 --> 00:15:16,950 line:-2
+Simd-group instruction
+and threadgroup atomics.
+
+
+237
+00:15:18.585 --> 00:15:24.291 line:-2 align:center
+SIMD instructions like prefix_exlusive sum
+and simd_min and many more
+
+
+238
+00:15:24.324 --> 00:15:28.161 line:-2 align:center
+allow to do operations and
+exchange memory between registers
+
+
+239
+00:15:28,195 --> 00:15:31,932 line:-2
+in a SIMD-group
+without round trip to memory.
+
+
+240
+00:15:31,965 --> 00:15:35,769 line:-2
+Threadgroup atomics are fulfilled by
+the threadgroup memory.
+
+
+241
+00:15:35,802 --> 00:15:38,839 line:-2
+Each GPU core
+has its own threadgroup memory
+
+
+242
+00:15:38.872 --> 00:15:42.476 line:-2 align:center
+allowing to scale
+with the number of GPU cores.
+
+
+243
+00:15:42.509 --> 00:15:46.847 line:-2 align:center
+Let's see how these two features
+can help you improve your workload.
+
+
+244
+00:15:48,549 --> 00:15:50,617 line:0
+Here we have
+the same reduction problem,
+
+
+245
+00:15:50,651 --> 00:15:54,321 align:center
+but this time it start using
+a SIMD-group instruction,
+
+
+246
+00:15:54,354 --> 00:15:56,390 line:0
+an inclusive memory sum.
+
+
+247
+00:15:56.423 --> 00:16:01.094 line:-2 align:center
+Such operation will leave the sum
+of all the numbers in the SIMD-group
+
+
+248
+00:16:01,128 --> 00:16:03,664 line:-1
+in the last thread.
+
+
+249
+00:16:03,697 --> 00:16:08,001 line:0
+The last thread from each SIMD-group
+can then perform a single atomic add
+
+
+250
+00:16:08,035 --> 00:16:12,739 line:0
+in threadgroup memory to reduce
+all SIMD-groups to a single value
+
+
+251
+00:16:12,773 --> 00:16:14,908 align:center
+in threadgroup memory.
+
+
+252
+00:16:14,942 --> 00:16:19,246 align:center
+In this way, using SIMD-group
+instruction and threadgroup memory,
+
+
+253
+00:16:19,279 --> 00:16:24,484 align:center
+a whole threadgroup was reduced
+without touching main memory at all.
+
+
+254
+00:16:24,518 --> 00:16:28,488 align:center
+Each group will be able to reduce
+independently and in parallel.
+
+
+255
+00:16:29,823 --> 00:16:32,926 align:center
+Now that each threadgroup has
+been reduced to a single value,
+
+
+256
+00:16:32,960 --> 00:16:35,229 line:0
+one thread per threadgroup can perform
+
+
+257
+00:16:35,262 --> 00:16:37,898 align:center
+a single atomic in main memory.
+
+
+258
+00:16:37,931 --> 00:16:39,666 line:0
+Not only this requires only
+
+
+259
+00:16:39,700 --> 00:16:41,201 line:0
+one atomic per threadgroup,
+
+
+260
+00:16:41,235 --> 00:16:43,136 align:center
+but since threadgroups complete
+
+
+261
+00:16:43,170 --> 00:16:44,771 line:0
+at different times,
+
+
+262
+00:16:44,805 --> 00:16:47,107 align:center
+it scatters atomics over time,
+
+
+263
+00:16:47,140 --> 00:16:50,677 line:0
+reducing memory contention even further.
+
+
+264
+00:16:50.711 --> 00:16:54.114 line:-2 align:center
+To recap,
+to maximize atomics effectiveness,
+
+
+265
+00:16:54,147 --> 00:16:59,119 line:-2
+try to leverage memory locality,
+try to use SIMD-group operation,
+
+
+266
+00:16:59.152 --> 00:17:02.756 line:-2 align:center
+as well as to leverage
+threadgroup memory atomics.
+
+
+267
+00:17:02,789 --> 00:17:07,628 line:-2
+All this should greatly help reduce atomic
+operation pressure that prevents scaling.
+
+
+268
+00:17:08,829 --> 00:17:15,035 line:0
+Now that GPU gaps are fixed, it's time
+to see if the scaling is closer to ideal.
+
+
+269
+00:17:15,068 --> 00:17:19,706 align:center
+GPU Limiters in Xcode and
+Metal System Trace help to optimize
+
+
+270
+00:17:19,740 --> 00:17:25,179 line:0
+any bottlenecks and inefficiencies in GPU
+cores execution pipeline.
+
+
+271
+00:17:25,212 --> 00:17:28,382 line:0
+For example,
+inefficient memory access patterns
+
+
+272
+00:17:28,415 --> 00:17:33,020 line:0
+always cause high Last Level Cache
+or Memory Management Unit,
+
+
+273
+00:17:33,053 --> 00:17:36,723 align:center
+or MMU limiters,
+and pretty low utilizations.
+
+
+274
+00:17:36,757 --> 00:17:43,497 line:0
+The first thing to address is the way
+to tune threadgroups and memory layout.
+
+
+275
+00:17:43.530 --> 00:17:46.200 line:-2 align:center
+The key in reducing memory span
+and divergence
+
+
+276
+00:17:46.233 --> 00:17:50.537 line:-2 align:center
+is to have a clear understanding
+of the workload memory access pattern,
+
+
+277
+00:17:50.571 --> 00:17:54.007 line:-1 align:center
+both spatially and temporally.
+
+
+278
+00:17:54.041 --> 00:17:58.312 line:-2 align:center
+Once that's understood,
+there are two possible tuning directions:
+
+
+279
+00:17:58,345 --> 00:18:01,915 line:-2
+Re-organize the data layout to improve
+data access locality,
+
+
+280
+00:18:01.949 --> 00:18:05.953 line:-2 align:center
+or tune the access pattern
+to better match the data layout
+
+
+281
+00:18:05,986 --> 00:18:09,056 line:-1
+and improve memory and cache locality.
+
+
+282
+00:18:09,089 --> 00:18:10,490 line:-1
+Let's see an example.
+
+
+283
+00:18:12,659 --> 00:18:16,663 line:-2
+Here it is a memory buffer
+where the data is laid out horizontally,
+
+
+284
+00:18:16.697 --> 00:18:18.732 line:-1 align:center
+one row after the other.
+
+
+285
+00:18:18,765 --> 00:18:21,802 line:-2
+However, when the compute kernel
+is dispatched,
+
+
+286
+00:18:21.835 --> 00:18:24.404 line:-1 align:center
+it is common to have a 2D like pattern
+
+
+287
+00:18:24,438 --> 00:18:27,374 line:-2
+with square threadgroups
+being distributed,
+
+
+288
+00:18:27.407 --> 00:18:29.843 line:-1 align:center
+which is quite spatially localized.
+
+
+289
+00:18:29,877 --> 00:18:34,414 line:-2
+This access pattern and data layout
+is not great for data locality.
+
+
+290
+00:18:36.216 --> 00:18:39.653 line:-2 align:center
+For example, when the first
+SIMD-group access the data,
+
+
+291
+00:18:39.686 --> 00:18:42.322 line:-1 align:center
+the requests are packed in a cache lines.
+
+
+292
+00:18:42,356 --> 00:18:44,992 line:-1
+Most of the cache line won't be used,
+
+
+293
+00:18:45.025 --> 00:18:50.063 line:-2 align:center
+however still
+occupying space in the cache.
+
+
+294
+00:18:50,097 --> 00:18:53,100 line:-2
+Re-arrange the data to fit
+the access pattern better,
+
+
+295
+00:18:53.133 --> 00:18:56.837 line:-2 align:center
+where, for example,
+instead of spanning the whole row,
+
+
+296
+00:18:56,870 --> 00:18:59,940 line:-1
+it is localized into stripes.
+
+
+297
+00:19:01,008 --> 00:19:04,144 line:-2
+With this new memory layout,
+a threadgroup will be able
+
+
+298
+00:19:04.178 --> 00:19:07.080 line:-2 align:center
+to utilize
+most of the data that will be requested
+
+
+299
+00:19:07.114 --> 00:19:11.585 line:-2 align:center
+in a cache line, reducing divergence
+and improving cache efficiency.
+
+
+300
+00:19:12,586 --> 00:19:16,089 line:-2
+The other option is to change
+how the 3D grid is dispatched
+
+
+301
+00:19:16,123 --> 00:19:19,126 line:-1
+to better fit the current data layout.
+
+
+302
+00:19:19.159 --> 00:19:23.664 line:-2 align:center
+Try to play with the threadgroup
+size to create groups that map better
+
+
+303
+00:19:23.697 --> 00:19:27.768 line:-2 align:center
+to your memory layout,
+like a more rectangular shape,
+
+
+304
+00:19:27,801 --> 00:19:29,670 line:-1
+for example.
+
+
+305
+00:19:29.703 --> 00:19:33.440 line:-2 align:center
+In this case, the access pattern
+is aligned with the memory layout,
+
+
+306
+00:19:33,473 --> 00:19:36,977 line:-1
+giving a much higher cache efficiency.
+
+
+307
+00:19:37,010 --> 00:19:41,415 line:-2
+You might need to experiment
+to find the best fit for your workload.
+
+
+308
+00:19:41.448 --> 00:19:44.418 line:-2 align:center
+Sometimes
+you might need to make trade-offs,
+
+
+309
+00:19:44.451 --> 00:19:49.756 line:-2 align:center
+sacrifice thread divergence
+for memory locality, or vice versa,
+
+
+310
+00:19:49.790 --> 00:19:54.661 line:-2 align:center
+change your data layout, grid dispatch,
+or a combination of them all.
+
+
+311
+00:19:54.695 --> 00:19:57.631 line:-2 align:center
+Every workload and access pattern
+is different.
+
+
+312
+00:20:00,100 --> 00:20:03,270 line:0
+Now that you're aware of ways
+to improve memory locality,
+
+
+313
+00:20:03,303 --> 00:20:06,273 line:0
+let's see a more concrete example
+in Blender Cycles.
+
+
+314
+00:20:08,408 --> 00:20:13,680 line:-2
+Cycles is Blender's physically-based
+path tracer for production rendering.
+
+
+315
+00:20:13.714 --> 00:20:17.885 line:-2 align:center
+It is designed to provide physically
+based results out-of-the-box,
+
+
+316
+00:20:17.918 --> 00:20:22.422 line:-2 align:center
+with artistic control and flexible
+shading nodes for production needs.
+
+
+317
+00:20:24.258 --> 00:20:30.230 line:-2 align:center
+This Instrument trace clearly shows low
+Read Bandwidth, high Top GPU Limiter,
+
+
+318
+00:20:30.264 --> 00:20:34.368 line:-2 align:center
+high Cache Limiter
+and low Last Level Cache Utilization.
+
+
+319
+00:20:36.170 --> 00:20:41.975 line:-2 align:center
+Keeping bandwidth and MMU limiters
+in control is important for scaling.
+
+
+320
+00:20:42,009 --> 00:20:45,679 line:-2
+If your Top limiter is the Last
+Level Cache or MMU,
+
+
+321
+00:20:45,712 --> 00:20:50,551 line:-2
+you need to reduce your memory span
+and maximize data locality.
+
+
+322
+00:20:50,584 --> 00:20:52,152 line:-1
+Let's see an example.
+
+
+323
+00:20:53.887 --> 00:20:57.958 line:-2 align:center
+Cycles use sorting of data
+to try to reduce divergence.
+
+
+324
+00:20:57,991 --> 00:21:01,762 line:-2
+It does that by sorting
+the ray hits by material type.
+
+
+325
+00:21:01,795 --> 00:21:04,131 line:-1
+This is great to reduce thread divergence,
+
+
+326
+00:21:04.164 --> 00:21:07.401 line:-2 align:center
+but it increases
+spatial memory divergence,
+
+
+327
+00:21:07,434 --> 00:21:11,004 line:-1
+resulting in a high MMU Limiter.
+
+
+328
+00:21:11.038 --> 00:21:14.641 line:-2 align:center
+To help with this, we experimented with
+partitioning the memory range
+
+
+329
+00:21:14.675 --> 00:21:17.711 line:-1 align:center
+before sorting to increase data locality.
+
+
+330
+00:21:17.744 --> 00:21:18.579 line:-1 align:center
+Let's visualize it.
+
+
+331
+00:21:18.612 --> 00:21:24.051 line:-2 align:center
+When rays are shot into the scene
+to simulate light traveling,
+
+
+332
+00:21:24.084 --> 00:21:28.055 line:-2 align:center
+they hit objects and data is
+collected into buffers.
+
+
+333
+00:21:28,088 --> 00:21:30,958 line:-2
+At the point of intersection
+we know many things--
+
+
+334
+00:21:30.991 --> 00:21:34.728 line:-2 align:center
+the material type that was
+hit, like glass, metal and so on,
+
+
+335
+00:21:34,761 --> 00:21:39,099 line:-2
+the intersection position,
+the ray, and more.
+
+
+336
+00:21:39,132 --> 00:21:43,303 line:-2
+For simplicity,
+let's focus on the material type only.
+
+
+337
+00:21:43,337 --> 00:21:45,906 line:-2
+Here are the materials
+in a buffer in memory.
+
+
+338
+00:21:47.341 --> 00:21:49.910 line:-2 align:center
+Since a lot of data
+is gathered per ray hit,
+
+
+339
+00:21:49.943 --> 00:21:53.380 line:-1 align:center
+the memory buffer can become quite large.
+
+
+340
+00:21:53.413 --> 00:21:55.616 line:-1 align:center
+To avoid moving a lot of memory around,
+
+
+341
+00:21:55.649 --> 00:22:00.521 line:-2 align:center
+populate a list of indices
+and sort those instead.
+
+
+342
+00:22:00,554 --> 00:22:03,957 line:-2
+After the sort,
+the indices for the same material type
+
+
+343
+00:22:03,991 --> 00:22:06,560 line:-1
+are now packed closed together.
+
+
+344
+00:22:06,593 --> 00:22:11,932 line:0
+SIMD-groups can start loading
+the indices and process the materials.
+
+
+345
+00:22:11,965 --> 00:22:15,269 line:0
+The SIMD-group will use the index
+to load the corresponding data
+
+
+346
+00:22:15,302 --> 00:22:16,837 align:center
+in the original buffer.
+
+
+347
+00:22:18,472 --> 00:22:22,576 line:0
+However, the SIMD-group would be
+reading across the whole memory span,
+
+
+348
+00:22:22,609 --> 00:22:25,279 line:0
+putting pressure on the MMU.
+
+
+349
+00:22:25,312 --> 00:22:27,981 line:0
+Let's investigate the new approach.
+
+
+350
+00:22:28.015 --> 00:22:31.985 line:-2 align:center
+The memory range is partitioned
+in an idealized partition
+
+
+351
+00:22:32.019 --> 00:22:36.390 line:-2 align:center
+that simply won't
+let indices from different partition mix.
+
+
+352
+00:22:36,423 --> 00:22:41,962 line:-2
+When sorting, it is apparent that
+the range of data accessed is contained
+
+
+353
+00:22:41,995 --> 00:22:46,733 align:center
+inside the partition instead of spanning
+the full memory range like before.
+
+
+354
+00:22:46,767 --> 00:22:52,739 align:center
+It is a trade-off and balance between
+thread divergence and memory divergence.
+
+
+355
+00:22:52,773 --> 00:22:55,609 line:0
+The number of partitions
+and size that is ideal
+
+
+356
+00:22:55,642 --> 00:22:58,078 line:0
+is highly dependent on the workload.
+
+
+357
+00:22:58,111 --> 00:23:02,216 line:0
+You might have to experiment
+to see which one works best.
+
+
+358
+00:23:02,249 --> 00:23:07,421 line:-2
+Let's take another Metal System Trace
+and let see if the workload improved.
+
+
+359
+00:23:07,454 --> 00:23:11,124 line:-2
+Here we see the limiters and
+utilizations for the optimized version.
+
+
+360
+00:23:11.158 --> 00:23:17.364 line:-2 align:center
+The Top Performance limiter went down,
+as well as Last Level Cache limiter.
+
+
+361
+00:23:17.397 --> 00:23:22.436 line:-2 align:center
+As a result, bandwidth and shader runtime
+substantially improved.
+
+
+362
+00:23:22.469 --> 00:23:24.137 line:-2 align:center
+Let's see how much.
+
+
+363
+00:23:24,171 --> 00:23:28,976 line:-3
+Top limiter and LLC limiter
+reduced by around 20%.
+
+
+364
+00:23:29.009 --> 00:23:32.145 line:-2 align:center
+That means data flow is more efficient.
+
+
+365
+00:23:32,179 --> 00:23:35,215 line:-3
+GPU Read bandwidth increased
+significantly,
+
+
+366
+00:23:35.249 --> 00:23:38.652 line:-3 align:center
+allowing to push more data
+to the GPU cores.
+
+
+367
+00:23:39.987 --> 00:23:43.557 line:-2 align:center
+Overall, increasing
+memory locality with this experiment
+
+
+368
+00:23:43,590 --> 00:23:48,896 line:-2
+improved performance between
+10 to 30%, depending on the scene.
+
+
+369
+00:23:48,929 --> 00:23:54,034 line:-2
+This was just an example of many ways you
+can try to improve memory access pattern.
+
+
+370
+00:23:54,067 --> 00:23:58,472 line:-2
+Keep experimenting and optimizing
+for the Top Performance Limiter.
+
+
+371
+00:23:58.505 --> 00:24:02.476 line:-2 align:center
+The GPU tools have more useful
+counters to tune for.
+
+
+372
+00:24:03,677 --> 00:24:08,916 line:-2
+Xcode has a new theoretical occupancy
+in the compiler statistic window.
+
+
+373
+00:24:08,949 --> 00:24:15,556 line:-2
+Both Xcode and Instruments now have
+several MMU related limiters and counters,
+
+
+374
+00:24:15.589 --> 00:24:20.060 line:-2 align:center
+specifically a new MMU Limiter,
+MMU Utilization Counter,
+
+
+375
+00:24:20.093 --> 00:24:23.130 line:-1 align:center
+and MMU TLB Miss Rate Counter.
+
+
+376
+00:24:24.431 --> 00:24:27.301 line:-1 align:center
+I have covered a lot of ground today.
+
+
+377
+00:24:27,334 --> 00:24:31,972 line:-2
+I discussed GPU scalability and how
+bottlenecks can shift when scaling up,
+
+
+378
+00:24:32.005 --> 00:24:36.009 line:-2 align:center
+and how the tools can help
+you find and fix scalability issues.
+
+
+379
+00:24:36.043 --> 00:24:40.147 line:-2 align:center
+I also discussed how you might
+need to experiment and make trade-offs
+
+
+380
+00:24:40,180 --> 00:24:43,417 line:-2
+to get the best result
+for your application.
+
+
+381
+00:24:43.450 --> 00:24:47.855 line:-2 align:center
+I am looking forward to seeing all
+your great apps scale amazingly well
+
+
+382
+00:24:47.888 --> 00:24:48.956 line:-1 align:center
+on Apple silicon.
+
+
+383
+00:24:48.989 --> 00:24:50.624 line:-1 align:center
+Thank you for watching.
+

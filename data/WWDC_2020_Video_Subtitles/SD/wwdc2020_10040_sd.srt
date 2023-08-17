@@ -1,0 +1,3734 @@
+1
+00:00:03,871 --> 00:00:07,174 line:-1
+Hello and welcome to WWDC.
+
+
+2
+00:00:08,442 --> 00:00:11,612 line:0
+Hello, and welcome
+to Data Essentials in SwiftUI.
+
+
+3
+00:00:11,912 --> 00:00:15,048 line:-2
+I'm Curt Clifton,
+an engineer on the SwiftUI team.
+
+
+4
+00:00:15,115 --> 00:00:18,218 line:-2
+Later I'll be joined by my friends
+and colleagues, Luca Bernardi
+
+
+5
+00:00:18,285 --> 00:00:19,620 line:-1
+and Raj Ramamurthy.
+
+
+6
+00:00:20,521 --> 00:00:23,090 line:-2
+We're going to cover three main areas
+in this talk.
+
+
+7
+00:00:23,156 --> 00:00:26,593 line:-2
+I'll talk about getting started
+on the data flow in your SwiftUI app,
+
+
+8
+00:00:26,660 --> 00:00:28,929 line:-1
+and cover topics like State and Binding.
+
+
+9
+00:00:29,263 --> 00:00:32,499 line:-2
+Then Luca will discuss how you can build
+on those ideas and more
+
+
+10
+00:00:32,566 --> 00:00:34,735 line:-1
+to design the data model for your app.
+
+
+11
+00:00:34,801 --> 00:00:38,005 line:-2
+Finally, Raj will share techniques
+for integrating your data model
+
+
+12
+00:00:38,071 --> 00:00:39,072 line:-1
+into your app.
+
+
+13
+00:00:39,606 --> 00:00:43,010 line:-2
+Along the way, we'll discuss
+the life cycle of a SwiftUI view
+
+
+14
+00:00:43,076 --> 00:00:44,878 line:-1
+and share several cool, new features
+
+
+15
+00:00:44,945 --> 00:00:47,548 line:-2
+that make it even easier
+to model your data.
+
+
+16
+00:00:47,614 --> 00:00:50,050 line:-2
+We'll also help you develop
+a deeper understanding
+
+
+17
+00:00:50,117 --> 00:00:55,289 line:-2
+of how value and reference types in Swift
+interact with data flow in SwiftUI.
+
+
+18
+00:00:55,989 --> 00:00:59,092 line:-2
+I'll be walking through some basic
+data flow features in SwiftUI,
+
+
+19
+00:00:59,159 --> 00:01:01,261 line:-2
+and we'll cover some questions
+you should ask yourself
+
+
+20
+00:01:01,328 --> 00:01:03,430 line:-1
+whenever you create a new SwiftUI view.
+
+
+21
+00:01:03,864 --> 00:01:05,999 line:-1
+Luca is really into book clubs.
+
+
+22
+00:01:06,066 --> 00:01:08,836 line:-2
+He's so into them that he decided
+he needed an app
+
+
+23
+00:01:08,902 --> 00:01:11,138 line:-2
+to keep track of
+what each of his clubs is reading
+
+
+24
+00:01:11,205 --> 00:01:13,407 line:-2
+and take some notes
+for their next meeting.
+
+
+25
+00:01:13,473 --> 00:01:14,875 line:-1
+I enjoy reading too,
+
+
+26
+00:01:14,942 --> 00:01:17,644 line:-2
+and thought it would be fun
+to work on an app together.
+
+
+27
+00:01:18,712 --> 00:01:19,780 line:-1
+To get started,
+
+
+28
+00:01:19,847 --> 00:01:22,950 line:-2
+I want to prototype the view
+that represents a book I'm reading.
+
+
+29
+00:01:23,450 --> 00:01:25,986 line:-1
+When I start on a new view in SwiftUI,
+
+
+30
+00:01:26,053 --> 00:01:28,622 line:-2
+there are three key questions
+I like to think about.
+
+
+31
+00:01:29,556 --> 00:01:32,659 line:-2
+What data does this view need
+to do its job?
+
+
+32
+00:01:32,726 --> 00:01:35,762 line:-2
+In this example, the view needs
+a thumbnail of the book cover,
+
+
+33
+00:01:35,829 --> 00:01:37,831 line:-1
+the title, the author's name,
+
+
+34
+00:01:37,898 --> 00:01:40,100 line:-2
+and the percentage of the book
+that I've read.
+
+
+35
+00:01:40,834 --> 00:01:43,070 line:-1
+How will the view manipulate that data?
+
+
+36
+00:01:43,136 --> 00:01:46,373 line:-2
+This view just needs to display the data.
+It doesn't change it.
+
+
+37
+00:01:47,241 --> 00:01:48,842 line:-1
+Where will the data come from?
+
+
+38
+00:01:48,909 --> 00:01:51,178 line:-1
+This is the "Source of Truth".
+
+
+39
+00:01:51,612 --> 00:01:55,482 line:-2
+In the examples throughout this talk,
+Luca, Raj and I will use this badge
+
+
+40
+00:01:55,549 --> 00:01:57,150 line:-1
+to label the source of truth.
+
+
+41
+00:01:58,151 --> 00:02:01,021 line:-2
+Ultimate, as we'll see,
+this question of the source of truth
+
+
+42
+00:02:01,088 --> 00:02:04,324 line:-2
+is the most important one
+in the design of your data model.
+
+
+43
+00:02:04,691 --> 00:02:07,961 line:-2
+Let's build out this view and see
+what its source of truth should be.
+
+
+44
+00:02:09,062 --> 00:02:12,399 line:-2
+So what data does this view need
+to do its job?
+
+
+45
+00:02:12,933 --> 00:02:15,369 line:-2
+The book value provides the name
+of the cover image,
+
+
+46
+00:02:15,435 --> 00:02:16,937 line:-1
+the author and the title.
+
+
+47
+00:02:17,571 --> 00:02:20,140 line:-2
+The progress value provides
+the percent complete.
+
+
+48
+00:02:21,074 --> 00:02:23,477 line:-2
+And how will the view
+manipulate this data?
+
+
+49
+00:02:23,544 --> 00:02:26,046 line:-2
+It just displays the data,
+it doesn't change it,
+
+
+50
+00:02:26,113 --> 00:02:28,282 line:-1
+so these can be "let" properties.
+
+
+51
+00:02:29,449 --> 00:02:31,351 line:-1
+And where will the data come from?
+
+
+52
+00:02:31,418 --> 00:02:35,822 line:-2
+It will be passed in from the superview
+when the BookCard is instantiated.
+
+
+53
+00:02:36,490 --> 00:02:39,960 line:-2
+The source of truth is somewhere
+farther up the view hierarchy.
+
+
+54
+00:02:40,027 --> 00:02:44,598 line:-2
+The superview passes the true data in
+when it instantiates a BookCard.
+
+
+55
+00:02:44,998 --> 00:02:49,736 line:-2
+A new BookCard is instantiated every time
+the superview's body executes.
+
+
+56
+00:02:50,037 --> 00:02:54,741 line:-2
+The instance lives just long enough
+for SwiftUI to render it, then it's gone.
+
+
+57
+00:02:55,676 --> 00:02:58,779 line:-2
+We can visualize the internal structure
+using a diagram.
+
+
+58
+00:02:58,846 --> 00:03:01,582 line:-2
+The boxes on the left represent
+the SwiftUI views
+
+
+59
+00:03:01,648 --> 00:03:04,017 line:-1
+that are composed to build this BookCard.
+
+
+60
+00:03:04,751 --> 00:03:07,554 line:-2
+The capsules on the right represent
+the data that's used
+
+
+61
+00:03:07,621 --> 00:03:09,056 line:-1
+to render the views.
+
+
+62
+00:03:09,122 --> 00:03:11,925 line:-2
+We'll return to diagrams like this
+throughout the talk.
+
+
+63
+00:03:13,327 --> 00:03:16,797 line:-2
+Next, I'd like to look
+at a slightly more interesting view.
+
+
+64
+00:03:17,097 --> 00:03:18,265 line:-1
+When I tap on a book,
+
+
+65
+00:03:18,332 --> 00:03:21,535 line:-2
+the app takes me to this screen
+where I can review my progress.
+
+
+66
+00:03:21,602 --> 00:03:23,770 line:-1
+I want to add a way to update my progress,
+
+
+67
+00:03:23,837 --> 00:03:26,640 line:-2
+and add notes when I tap
+on the "Update Progress" button.
+
+
+68
+00:03:26,707 --> 00:03:28,008 line:-1
+Something like this.
+
+
+69
+00:03:30,577 --> 00:03:33,981 line:-2
+Let's look at how the parent view
+and this sheet work together.
+
+
+70
+00:03:35,148 --> 00:03:37,417 line:-1
+We'll focus on how the sheet is presented.
+
+
+71
+00:03:38,018 --> 00:03:40,420 line:-2
+When the user taps
+the "Update Progress" button,
+
+
+72
+00:03:40,487 --> 00:03:42,656 line:-1
+we'll call the presentEditor method.
+
+
+73
+00:03:42,723 --> 00:03:45,392 line:-2
+It will mutate some state
+to cause the sheet to appear.
+
+
+74
+00:03:46,393 --> 00:03:50,030 line:-2
+What data does this view need
+to control the presentation of the sheet?
+
+
+75
+00:03:50,464 --> 00:03:53,901 line:-2
+We need a Boolean to keep track
+of whether the sheet is presented,
+
+
+76
+00:03:53,967 --> 00:03:56,937 line:-2
+and we need a String
+to keep track of the note,
+
+
+77
+00:03:57,004 --> 00:03:59,306 line:-1
+and a Double to track the progress.
+
+
+78
+00:03:59,706 --> 00:04:02,576 line:-2
+Whenever I have multiple
+related properties like this,
+
+
+79
+00:04:02,643 --> 00:04:05,112 line:-2
+I like to pull them out
+into their own struct.
+
+
+80
+00:04:06,213 --> 00:04:08,315 line:-1
+Besides making BookView more readable,
+
+
+81
+00:04:08,382 --> 00:04:11,285 line:-2
+there are two other great things
+about this approach.
+
+
+82
+00:04:11,351 --> 00:04:13,620 line:-1
+We get all the benefits of encapsulation.
+
+
+83
+00:04:13,687 --> 00:04:16,490 line:-2
+EditorConfig can maintain invariants
+on its properties
+
+
+84
+00:04:16,557 --> 00:04:18,158 line:-1
+and be tested independently.
+
+
+85
+00:04:18,591 --> 00:04:21,595 line:-1
+And because EditorConfig is a value type,
+
+
+86
+00:04:21,661 --> 00:04:25,499 line:-2
+any change to a property of EditorConfig,
+like its progress,
+
+
+87
+00:04:25,566 --> 00:04:28,836 line:-2
+is visible as a change
+to EditorConfig itself.
+
+
+88
+00:04:29,736 --> 00:04:33,340 line:-2
+Our next question is,
+how will the view manipulate this data?
+
+
+89
+00:04:33,607 --> 00:04:35,475 line:-1
+When the "Update" button is tapped,
+
+
+90
+00:04:35,542 --> 00:04:38,312 line:-2
+we'll need to set
+isEditorPresented to "True"
+
+
+91
+00:04:38,378 --> 00:04:40,881 line:-2
+and update progress
+to match the current progress.
+
+
+92
+00:04:42,049 --> 00:04:45,452 line:-2
+Because we extracted the state
+into the EditorConfig struct,
+
+
+93
+00:04:45,519 --> 00:04:47,921 line:-2
+we can make it responsible
+for those updates,
+
+
+94
+00:04:48,522 --> 00:04:52,025 line:-2
+and just have the BookView
+ask the EditorConfig to do the work.
+
+
+95
+00:04:52,860 --> 00:04:56,830 line:-2
+Then, we'll add a mutating method
+to EditorConfig, like so.
+
+
+96
+00:04:59,099 --> 00:05:00,901 line:-1
+And where will the data come from?
+
+
+97
+00:05:00,968 --> 00:05:03,337 line:-2
+Well, the editor configuration is local
+to this view.
+
+
+98
+00:05:03,403 --> 00:05:06,006 line:-2
+There isn't some parent view
+that can pass it in,
+
+
+99
+00:05:06,073 --> 00:05:09,142 line:-2
+so we need to establish
+a local source of truth.
+
+
+100
+00:05:09,409 --> 00:05:12,880 line:-2
+The simplest source of truth
+in SwiftUI is State.
+
+
+101
+00:05:13,947 --> 00:05:18,652 line:-2
+When we mark this property as State,
+SwiftUI takes over managing its storage.
+
+
+102
+00:05:18,719 --> 00:05:20,554 line:-1
+Let's look at that as a diagram.
+
+
+103
+00:05:21,455 --> 00:05:24,558 line:-2
+Again, we have the views represented
+by these boxes on the left,
+
+
+104
+00:05:24,625 --> 00:05:26,593 line:-1
+and the data by a capsule on the right.
+
+
+105
+00:05:27,127 --> 00:05:29,429 line:-2
+Notice that the capsule
+has a thick border.
+
+
+106
+00:05:29,496 --> 00:05:33,734 line:-2
+I'm using this border to indicate data
+that's managed by SwiftUI for us.
+
+
+107
+00:05:34,234 --> 00:05:35,636 line:-1
+Why is that important?
+
+
+108
+00:05:35,702 --> 00:05:38,805 line:-2
+Well, remember that our views
+only exist transiently.
+
+
+109
+00:05:38,872 --> 00:05:43,544 line:-2
+After SwiftUI completes a rendering pass,
+the structs themselves go away.
+
+
+110
+00:05:44,244 --> 00:05:46,547 line:-2
+But because we marked this property
+as State,
+
+
+111
+00:05:46,613 --> 00:05:48,549 line:-1
+SwiftUI maintains it for us.
+
+
+112
+00:05:48,615 --> 00:05:51,218 line:-2
+The next time the framework needs
+to render this view,
+
+
+113
+00:05:51,285 --> 00:05:55,923 line:-2
+it reinstantiates the structs,
+and reconnects it to the existing storage.
+
+
+114
+00:05:57,424 --> 00:05:59,393 line:-1
+Let's look at the ProgressEditor next.
+
+
+115
+00:06:00,360 --> 00:06:03,497 line:-2
+What data does the ProgressEditor need
+to do its job?
+
+
+116
+00:06:03,931 --> 00:06:06,333 line:-1
+Well, all the data from an EditorConfig.
+
+
+117
+00:06:06,400 --> 00:06:08,502 line:-2
+And how will the view
+manipulate that data?
+
+
+118
+00:06:08,569 --> 00:06:11,138 line:-1
+It needs to change it, so we'll use a var.
+
+
+119
+00:06:12,105 --> 00:06:13,874 line:-1
+And where will the data come from?
+
+
+120
+00:06:14,241 --> 00:06:16,376 line:-2
+That's an interesting question
+in this case.
+
+
+121
+00:06:16,443 --> 00:06:17,978 line:-1
+Back to the diagrams.
+
+
+122
+00:06:18,946 --> 00:06:21,849 line:-2
+Let's focus on the BookView
+and the ProgressEditor.
+
+
+123
+00:06:22,216 --> 00:06:24,384 line:-1
+Suppose we just pass the EditorConfig
+
+
+124
+00:06:24,451 --> 00:06:27,254 line:-2
+down to the ProgressEditor
+as a regular property.
+
+
+125
+00:06:28,055 --> 00:06:33,460 line:-2
+Because EditorConfig is a value type,
+Swift would make a new copy of the value.
+
+
+126
+00:06:33,861 --> 00:06:37,764 line:-2
+Any changes the ProgressEditor made
+to the note, or the progress,
+
+
+127
+00:06:37,831 --> 00:06:39,733 line:-1
+would only change this new copy,
+
+
+128
+00:06:39,800 --> 00:06:43,036 line:-2
+not the original value that SwiftUI
+is managing for us.
+
+
+129
+00:06:43,470 --> 00:06:47,474 line:-2
+So this doesn't allow ProgressEditor
+to communicate with BookView.
+
+
+130
+00:06:48,208 --> 00:06:49,343 line:-1
+What next?
+
+
+131
+00:06:49,409 --> 00:06:53,914 line:-2
+Ah! What if we gave ProgressEditor
+its own State property?
+
+
+132
+00:06:54,281 --> 00:06:56,316 line:-1
+That seems like it might be what we want.
+
+
+133
+00:06:56,383 --> 00:06:59,620 line:-2
+It tells SwiftUI to manage
+a new piece of data for us.
+
+
+134
+00:07:00,787 --> 00:07:02,789 line:-1
+Sadly, this is also wrong. [sighs]
+
+
+135
+00:07:03,290 --> 00:07:06,460 line:-2
+Remember,
+State creates a new source of truth.
+
+
+136
+00:07:06,527 --> 00:07:10,631 line:-2
+Any changes made by the ProgressEditor
+would be made to its own state,
+
+
+137
+00:07:10,697 --> 00:07:12,733 line:-1
+not the one shared with BookView.
+
+
+138
+00:07:12,799 --> 00:07:15,068 line:-1
+We want a single source of truth.
+
+
+139
+00:07:15,969 --> 00:07:20,374 line:-2
+We need a way to share write-access
+to the source of truth from BookView
+
+
+140
+00:07:20,440 --> 00:07:21,708 line:-1
+with ProgressEditor.
+
+
+141
+00:07:22,176 --> 00:07:24,878 line:-2
+In SwiftUI,
+the tool for sharing write-access
+
+
+142
+00:07:24,945 --> 00:07:27,614 line:-1
+to any source of truth is Binding.
+
+
+143
+00:07:28,148 --> 00:07:30,951 line:-2
+BookView creates a Binding
+to EditorConfig.
+
+
+144
+00:07:31,385 --> 00:07:34,388 line:-2
+A read-write reference
+to the existing data
+
+
+145
+00:07:34,454 --> 00:07:37,558 line:-2
+and shares that reference
+with ProgressEditor.
+
+
+146
+00:07:39,593 --> 00:07:42,229 line:-2
+By updating the EditorConfig
+through this Binding,
+
+
+147
+00:07:42,296 --> 00:07:46,366 line:-2
+the ProgressEditor is mutating
+the same state that BookView is using.
+
+
+148
+00:07:46,834 --> 00:07:49,670 line:-2
+SwiftUI notices changes
+to the EditorConfig.
+
+
+149
+00:07:49,736 --> 00:07:52,573 line:-2
+It knows that both BookView
+and ProgressEditor
+
+
+150
+00:07:52,639 --> 00:07:54,374 line:-1
+have a dependency on that value,
+
+
+151
+00:07:54,441 --> 00:07:58,078 line:-2
+and so it knows to re-render those views
+when the value changes.
+
+
+152
+00:07:59,413 --> 00:08:02,516 line:-2
+The ProgressEditor needs to pass data
+back to the BookView.
+
+
+153
+00:08:03,584 --> 00:08:07,120 line:-2
+We've just seen that Bindings
+are the right tool for this task.
+
+
+154
+00:08:08,121 --> 00:08:11,225 line:-2
+The dollar sign in the call
+creates a Binding from the State
+
+
+155
+00:08:11,758 --> 00:08:16,063 line:-2
+because the projected value of
+the State property wrapper is a Binding.
+
+
+156
+00:08:16,897 --> 00:08:18,565 line:-1
+The Binding property wrapper
+
+
+157
+00:08:18,632 --> 00:08:21,602 line:-2
+creates a data dependency
+between the ProgressEditor
+
+
+158
+00:08:21,668 --> 00:08:24,471 line:-1
+and the EditorConfig state in BookView.
+
+
+159
+00:08:24,938 --> 00:08:28,342 line:-2
+Many built in SwiftUI controls
+also take Bindings.
+
+
+160
+00:08:28,408 --> 00:08:32,479 line:-2
+For example, the new TextEditor control
+used for our notes
+
+
+161
+00:08:32,546 --> 00:08:34,615 line:-1
+takes a Binding to a String value.
+
+
+162
+00:08:34,881 --> 00:08:37,918 line:-2
+Using the dollar sign
+projected value accessor,
+
+
+163
+00:08:37,985 --> 00:08:41,688 line:-2
+we can get a new Binding to the note
+within the EditorConfig.
+
+
+164
+00:08:42,256 --> 00:08:45,859 line:-2
+SwiftUI lets us build a new Binding
+from an existing Binding.
+
+
+165
+00:08:45,926 --> 00:08:48,428 line:-1
+Remember, Bindings aren't just for State.
+
+
+166
+00:08:49,897 --> 00:08:52,966 line:-2
+That's a bit on getting started
+with data flow in SwiftUI.
+
+
+167
+00:08:53,033 --> 00:08:55,235 line:-2
+Remember to ask yourself
+the three questions
+
+
+168
+00:08:55,302 --> 00:08:57,271 line:-1
+when adding a SwiftUI view.
+
+
+169
+00:08:57,604 --> 00:08:59,506 line:-1
+What data does this view need?
+
+
+170
+00:09:00,040 --> 00:09:01,608 line:-1
+How will it use that data?
+
+
+171
+00:09:02,009 --> 00:09:03,810 line:-1
+And where does the data come from?
+
+
+172
+00:09:04,978 --> 00:09:07,848 line:-2
+You can use properties for data
+that doesn't change.
+
+
+173
+00:09:08,115 --> 00:09:11,318 line:-2
+Use State for transient data
+owned by the view.
+
+
+174
+00:09:11,718 --> 00:09:15,589 line:-2
+Use Binding for mutating data
+owned by another view.
+
+
+175
+00:09:16,690 --> 00:09:20,861 line:-2
+Now I'd like to turn things over to Luca
+to dive into designing your data model
+
+
+176
+00:09:20,928 --> 00:09:23,530 line:-1
+because State is not the whole story.
+
+
+177
+00:09:24,464 --> 00:09:25,599 line:-1
+Thank you, Curt.
+
+
+178
+00:09:25,666 --> 00:09:27,668 line:-1
+Ciao, everyone. My name is Luca.
+
+
+179
+00:09:27,734 --> 00:09:31,972 line:-2
+My colleague, Curt, has just described
+how to use State and Binding
+
+
+180
+00:09:32,039 --> 00:09:34,141 line:-1
+to drive changes in your UI,
+
+
+181
+00:09:34,208 --> 00:09:38,378 line:-2
+and how these tools are a great way
+to quickly iterate on your view code.
+
+
+182
+00:09:38,946 --> 00:09:41,582 line:-2
+But State is designed
+for transient UI state
+
+
+183
+00:09:41,648 --> 00:09:43,083 line:-1
+that is local to a view.
+
+
+184
+00:09:43,383 --> 00:09:47,554 line:-2
+In this section, I want to move
+your attention to designing your model
+
+
+185
+00:09:47,621 --> 00:09:50,757 line:-2
+and explain all the tools
+that SwiftUI provides to you.
+
+
+186
+00:09:51,458 --> 00:09:55,095 line:-2
+Typically, in your app,
+you store and process data
+
+
+187
+00:09:55,162 --> 00:09:58,031 line:-2
+by using a data model
+that is separate from its UI.
+
+
+188
+00:09:58,599 --> 00:10:00,534 line:-1
+This is when you reach a critical point
+
+
+189
+00:10:00,601 --> 00:10:03,003 line:-2
+where you need to manage the life cycle
+of your data,
+
+
+190
+00:10:03,070 --> 00:10:05,239 line:-1
+including persisting and syncing it,
+
+
+191
+00:10:05,305 --> 00:10:09,977 line:-2
+handle side-effects, and, more generally,
+integrate it with existing components.
+
+
+192
+00:10:10,477 --> 00:10:12,946 line:-2
+This is when you should use
+ObservableObject.
+
+
+193
+00:10:13,013 --> 00:10:17,050 line:-2
+First, let's take a look
+at how ObservableObject is defined.
+
+
+194
+00:10:17,784 --> 00:10:19,553 line:-1
+It's a class constrained protocol
+
+
+195
+00:10:19,620 --> 00:10:22,923 line:-2
+which means it can only be adopted
+by reference type.
+
+
+196
+00:10:23,690 --> 00:10:27,728 line:-2
+It has a single requirement,
+an objectWillChange property.
+
+
+197
+00:10:27,794 --> 00:10:31,698 line:-2
+ObjectWillChange is a Publisher,
+and as the name suggests,
+
+
+198
+00:10:31,765 --> 00:10:35,335 line:-2
+the semantic requirement
+of the ObservableObject protocol
+
+
+199
+00:10:35,402 --> 00:10:40,874 line:-2
+is that the publisher has to emit before
+any mutation is applied to the object.
+
+
+200
+00:10:41,308 --> 00:10:45,412 line:-2
+By default, you get a publisher
+that works great out of the box.
+
+
+201
+00:10:45,479 --> 00:10:48,715 line:-2
+But if you need to,
+you can provide a custom publisher.
+
+
+202
+00:10:49,082 --> 00:10:52,186 line:-2
+For example,
+you can use a publisher for a timer,
+
+
+203
+00:10:52,252 --> 00:10:55,489 line:-2
+or use a KVO publisher
+that observes your existing model.
+
+
+204
+00:10:56,890 --> 00:10:58,492 line:-1
+Now that we've seen the protocol,
+
+
+205
+00:10:58,559 --> 00:11:02,462 line:-2
+let's take a look at a mental model
+for understanding ObservableObject.
+
+
+206
+00:11:03,197 --> 00:11:05,999 line:-2
+When your type conforms
+to ObservableObject,
+
+
+207
+00:11:06,066 --> 00:11:07,901 line:-1
+you are creating a new source of truth
+
+
+208
+00:11:07,968 --> 00:11:11,205 line:-2
+and teaching SwiftUI
+how to react to changes.
+
+
+209
+00:11:11,805 --> 00:11:16,210 line:-2
+In other words, you are defining the data
+that a view needs to render its UI
+
+
+210
+00:11:16,276 --> 00:11:17,978 line:-1
+and perform its logic.
+
+
+211
+00:11:19,046 --> 00:11:23,250 line:-2
+SwiftUI will establish a dependency
+between your data and your view,
+
+
+212
+00:11:23,317 --> 00:11:25,152 line:-1
+here represented with blue boxes.
+
+
+213
+00:11:25,786 --> 00:11:30,390 line:-2
+SwiftUI uses this dependency
+to automatically keep your view consistent
+
+
+214
+00:11:30,457 --> 00:11:33,260 line:-2
+and show the correct representation
+of your data.
+
+
+215
+00:11:34,394 --> 00:11:39,132 line:-2
+We like to think of ObservableObject
+as your data dependency surface.
+
+
+216
+00:11:39,199 --> 00:11:42,769 line:-2
+This is the part of your model
+that exposes data to your view,
+
+
+217
+00:11:42,836 --> 00:11:45,305 line:-1
+but it's not necessarily the full model.
+
+
+218
+00:11:46,306 --> 00:11:48,976 line:-1
+If you think of ObservableObject this way,
+
+
+219
+00:11:49,042 --> 00:11:51,745 line:-2
+it doesn't need to be
+exactly your data model.
+
+
+220
+00:11:52,045 --> 00:11:55,749 line:-2
+You can separate your data
+from its storage and life cycle.
+
+
+221
+00:11:55,816 --> 00:11:58,719 line:-1
+You can model your data using value type
+
+
+222
+00:11:58,785 --> 00:12:02,856 line:-2
+and manage its life cycle and side effects
+with a reference type.
+
+
+223
+00:12:03,190 --> 00:12:06,260 line:-2
+For example,
+you can have a single ObservableObject
+
+
+224
+00:12:06,326 --> 00:12:11,164 line:-2
+that centralizes your entire data model
+and is shared by all your views,
+
+
+225
+00:12:11,231 --> 00:12:12,966 line:-1
+like in the diagram here.
+
+
+226
+00:12:13,033 --> 00:12:16,136 line:-2
+This gives you a single place
+for all your logic,
+
+
+227
+00:12:16,203 --> 00:12:19,473 line:-2
+making it easy to reason
+about all the possible states
+
+
+228
+00:12:19,540 --> 00:12:21,141 line:-1
+and mutations in your app.
+
+
+229
+00:12:21,408 --> 00:12:25,846 line:-2
+Or you can focus on part of your app
+by having multiple ObservableObject
+
+
+230
+00:12:25,913 --> 00:12:29,149 line:-2
+that offer a specific projection
+onto your data model
+
+
+231
+00:12:29,216 --> 00:12:32,819 line:-2
+are are designed to expose just the data
+that is needed.
+
+
+232
+00:12:32,886 --> 00:12:35,656 line:-2
+This works better when you have
+a complex data model
+
+
+233
+00:12:35,722 --> 00:12:40,093 line:-2
+and you want to provide a more tightly
+scoped invalidation to part of your app.
+
+
+234
+00:12:40,627 --> 00:12:42,663 line:-1
+Let's go back to the app we were building,
+
+
+235
+00:12:42,729 --> 00:12:45,799 line:-2
+and let's see how we can apply
+what we have just discussed.
+
+
+236
+00:12:46,266 --> 00:12:49,036 line:-2
+Let's bring back the view
+that Curt was working on before.
+
+
+237
+00:12:49,336 --> 00:12:52,906 line:-2
+This is the view that allows me
+to update my progress in the book
+
+
+238
+00:12:53,373 --> 00:12:57,211 line:-2
+and add some notes of things I found
+interesting during my reading session.
+
+
+239
+00:12:58,979 --> 00:13:01,548 line:-2
+Curt focused on the data
+for the progress sheet.
+
+
+240
+00:13:02,015 --> 00:13:04,918 line:-2
+Let's look at the rest of the data
+we need for this view
+
+
+241
+00:13:05,252 --> 00:13:08,689 line:-2
+and how to use ObservableObject
+to add rich features,
+
+
+242
+00:13:08,755 --> 00:13:12,226 line:-2
+such as storing data on disk
+or syncing it with iCloud.
+
+
+243
+00:13:13,260 --> 00:13:15,929 line:-2
+We can create a new class
+called CurrentlyReading
+
+
+244
+00:13:15,996 --> 00:13:20,868 line:-2
+that conforms to ObservableObject that
+stashes a book and its reading progress.
+
+
+245
+00:13:20,934 --> 00:13:24,571 line:-2
+This is the part of our model
+that we will expose to our view
+
+
+246
+00:13:24,638 --> 00:13:26,974 line:-1
+to present data and respond to changes.
+
+
+247
+00:13:27,040 --> 00:13:31,245 line:-2
+The specific book will never change,
+so we can just make this property a let.
+
+
+248
+00:13:31,311 --> 00:13:35,349 line:-2
+We want to be able to update the progress
+and have our UI react to it.
+
+
+249
+00:13:35,415 --> 00:13:38,952 line:-2
+We can do this just by annotating
+the progress property
+
+
+250
+00:13:39,019 --> 00:13:41,054 line:-1
+with the @Published property wrapper.
+
+
+251
+00:13:41,121 --> 00:13:43,757 line:-1
+Let's take a look at how @Published works.
+
+
+252
+00:13:44,324 --> 00:13:48,462 line:-2
+@Published is a property wrapper
+which makes a property observable
+
+
+253
+00:13:48,529 --> 00:13:50,063 line:-1
+by exposing a Publisher.
+
+
+254
+00:13:50,631 --> 00:13:54,401 line:-2
+For most models, you can just conform
+to ObservableObject,
+
+
+255
+00:13:54,468 --> 00:13:58,038 line:-2
+add @Published to the properties
+that might change, and you're done.
+
+
+256
+00:13:58,672 --> 00:14:01,108 line:-1
+It's that simple to never have to worry
+
+
+257
+00:14:01,175 --> 00:14:03,610 line:-2
+about keeping your data
+in sync with your view.
+
+
+258
+00:14:04,244 --> 00:14:05,612 line:-1
+When you use @Published
+
+
+259
+00:14:05,679 --> 00:14:08,215 line:-2
+with the default
+ObservableObject publisher,
+
+
+260
+00:14:08,282 --> 00:14:11,318 line:-2
+the system will automatically
+perform invalidation
+
+
+261
+00:14:11,385 --> 00:14:14,054 line:-2
+by publishing right before
+the value changes.
+
+
+262
+00:14:14,955 --> 00:14:16,456 line:-1
+For advanced use cases,
+
+
+263
+00:14:16,523 --> 00:14:20,827 line:-2
+the projected value of @Published
+is a Publisher that you can use
+
+
+264
+00:14:20,894 --> 00:14:22,329 line:-1
+to build reactive streams.
+
+
+265
+00:14:23,564 --> 00:14:26,300 line:-2
+Let's revisit the three questions
+that you should be asking
+
+
+266
+00:14:26,366 --> 00:14:28,035 line:-1
+when designing your data model.
+
+
+267
+00:14:28,802 --> 00:14:30,170 line:-1
+With ObservableObject,
+
+
+268
+00:14:30,237 --> 00:14:33,307 line:-2
+answering the second question
+is pretty straightforward:
+
+
+269
+00:14:33,373 --> 00:14:35,676 line:-1
+we always assume mutability.
+
+
+270
+00:14:36,577 --> 00:14:40,214 line:-2
+Let's now take a look at how
+to answer these other two questions
+
+
+271
+00:14:40,280 --> 00:14:42,282 line:-1
+when it comes to ObservableObject.
+
+
+272
+00:14:42,583 --> 00:14:46,553 line:-2
+We have seen how to define our model,
+but now we need to use it in our view.
+
+
+273
+00:14:47,321 --> 00:14:51,058 line:-2
+SwiftUI offers three property wrappers
+that you can use in a view
+
+
+274
+00:14:51,124 --> 00:14:53,694 line:-2
+to create a dependency
+to an ObservableObject.
+
+
+275
+00:14:54,361 --> 00:14:58,298 line:-2
+These tools are ObservedObject,
+StateObject, which is new this year,
+
+
+276
+00:14:58,365 --> 00:14:59,700 line:-1
+and EnvironmentObject.
+
+
+277
+00:15:00,234 --> 00:15:02,936 line:-2
+Let's start by taking a look
+at ObservedObject.
+
+
+278
+00:15:03,370 --> 00:15:05,506 line:-1
+ObservedObject is a property wrapper
+
+
+279
+00:15:05,572 --> 00:15:08,375 line:-2
+that you can use to annotate properties
+of your view
+
+
+280
+00:15:08,442 --> 00:15:11,178 line:-2
+that holds a type conforming
+to ObservableObject.
+
+
+281
+00:15:11,578 --> 00:15:15,449 line:-2
+Using it informs SwiftUI
+to start tracking the property
+
+
+282
+00:15:15,516 --> 00:15:16,917 line:-1
+as a dependency for the view.
+
+
+283
+00:15:17,618 --> 00:15:21,321 line:-2
+You are defining the data
+that this view will need to do its job.
+
+
+284
+00:15:22,422 --> 00:15:25,259 line:-2
+This is the most simple
+and flexible of the tools.
+
+
+285
+00:15:25,325 --> 00:15:29,563 line:-2
+ObservedObject does not get ownership
+of the instance you're providing to it,
+
+
+286
+00:15:29,630 --> 00:15:32,766 line:-2
+and it's your responsibility
+to manage its life cycle.
+
+
+287
+00:15:32,833 --> 00:15:34,968 line:-1
+Let's see how to use it in our app.
+
+
+288
+00:15:35,269 --> 00:15:36,503 line:-1
+Here I have my BookView.
+
+
+289
+00:15:36,570 --> 00:15:40,474 line:-2
+It's the view that displays the book
+and all the progress I've logged so far.
+
+
+290
+00:15:40,541 --> 00:15:43,744 line:-2
+From this screen, I can also
+update my progress for this book.
+
+
+291
+00:15:43,810 --> 00:15:46,680 line:-2
+We can add a property
+of the type currentlyReading,
+
+
+292
+00:15:46,747 --> 00:15:48,515 line:-1
+the type we have just created,
+
+
+293
+00:15:48,582 --> 00:15:52,286 line:-2
+and annotate it with
+the @ObservedObject property wrapper.
+
+
+294
+00:15:52,352 --> 00:15:54,621 line:-2
+The instance that is assigned
+to this property
+
+
+295
+00:15:54,688 --> 00:15:57,457 line:-2
+is going to be the source of truth
+for this view.
+
+
+296
+00:15:58,292 --> 00:16:01,261 line:-2
+Now, we can read the model
+in the view body.
+
+
+297
+00:16:01,328 --> 00:16:05,265 line:-2
+SwiftUI will guarantee that the view
+is always up to date.
+
+
+298
+00:16:05,532 --> 00:16:07,534 line:-1
+There is no code that you have to write,
+
+
+299
+00:16:07,601 --> 00:16:11,271 line:-2
+and there is no event to manage
+to keep your view in sync.
+
+
+300
+00:16:11,605 --> 00:16:16,143 line:-2
+You can just declaratively describe
+how to write the view from the data,
+
+
+301
+00:16:16,210 --> 00:16:19,513 line:-2
+and SwiftUI will take care
+of all the rest.
+
+
+302
+00:16:20,013 --> 00:16:22,482 line:-2
+My colleague, Raj,
+will go into more detail
+
+
+303
+00:16:22,549 --> 00:16:24,651 line:-1
+about the SwiftUI update life cycle,
+
+
+304
+00:16:24,718 --> 00:16:27,254 line:-2
+but I want to take you behind the scene
+and show you
+
+
+305
+00:16:27,321 --> 00:16:28,989 line:-1
+what SwiftUI is doing for you.
+
+
+306
+00:16:29,556 --> 00:16:31,425 line:-1
+Whenever you use ObservedObject,
+
+
+307
+00:16:31,491 --> 00:16:34,494 line:-2
+SwiftUI will subscribe
+to the objectWillChange
+
+
+308
+00:16:34,561 --> 00:16:37,231 line:-1
+of that specific ObservableObject.
+
+
+309
+00:16:37,297 --> 00:16:40,367 line:-2
+Now, whenever the ObservableObject
+will change,
+
+
+310
+00:16:40,434 --> 00:16:43,270 line:-2
+all the view that depends on it
+will be updated.
+
+
+311
+00:16:43,637 --> 00:16:47,074 line:-2
+One of the questions that we often get
+is "why 'will' change?
+
+
+312
+00:16:47,140 --> 00:16:49,142 line:-1
+Why not 'did' change?"
+
+
+313
+00:16:49,209 --> 00:16:52,045 line:-2
+And the reason
+is that SwiftUI needs to know
+
+
+314
+00:16:52,112 --> 00:16:54,281 line:-1
+when something is about to change
+
+
+315
+00:16:54,348 --> 00:16:57,351 line:-2
+so it can coalesce every change
+into a single update.
+
+
+316
+00:16:57,618 --> 00:16:59,720 line:-1
+But how do we produce mutation?
+
+
+317
+00:16:59,786 --> 00:17:02,923 line:-2
+Many of the UI components vended
+by SwiftUI
+
+
+318
+00:17:02,990 --> 00:17:06,894 line:-2
+take a Binding to a piece of data
+and, earlier in the talk,
+
+
+319
+00:17:06,960 --> 00:17:11,498 line:-2
+you have seen an example of how
+to design your component to do the same.
+
+
+320
+00:17:11,798 --> 00:17:15,636 line:-2
+This is one of the fundamental
+design principles of SwiftUI.
+
+
+321
+00:17:15,702 --> 00:17:21,474 line:-2
+Accepting a Binding allows a component
+read and write access to a piece of data
+
+
+322
+00:17:21,541 --> 00:17:24,111 line:-1
+while preserving a single source of truth.
+
+
+323
+00:17:25,512 --> 00:17:29,183 line:-2
+Curt has shown you how to derive
+a Binding from State.
+
+
+324
+00:17:29,249 --> 00:17:33,287 line:-2
+Doing the same with ObservableObject
+is just as easy.
+
+
+325
+00:17:34,621 --> 00:17:37,024 line:-1
+You can get a Binding from any property
+
+
+326
+00:17:37,090 --> 00:17:40,160 line:-2
+that is of value type
+on an ObservableObject
+
+
+327
+00:17:40,227 --> 00:17:44,298 line:-2
+just by adding the dollar sign prefix
+in front of your variable
+
+
+328
+00:17:44,364 --> 00:17:46,066 line:-1
+and accessing the property.
+
+
+329
+00:17:46,567 --> 00:17:49,403 line:-2
+Let's see a concrete example
+in our book club app.
+
+
+330
+00:17:50,170 --> 00:17:52,673 line:-2
+One of the great satisfactions
+when reading a book
+
+
+331
+00:17:52,739 --> 00:17:54,541 line:-1
+is finishing that last chapter,
+
+
+332
+00:17:54,608 --> 00:17:57,911 line:-2
+and I want a grand gesture
+to mark this event.
+
+
+333
+00:17:58,378 --> 00:18:01,448 line:-2
+I can't think of anything better
+than tapping on a Toggle
+
+
+334
+00:18:01,515 --> 00:18:03,550 line:-1
+to say, "I'm done with this book."
+
+
+335
+00:18:03,851 --> 00:18:06,486 line:-2
+The first thing I need to change
+is my model.
+
+
+336
+00:18:06,553 --> 00:18:09,790 line:-2
+We can just add a new property,
+"isFinished"
+
+
+337
+00:18:09,857 --> 00:18:12,159 line:-1
+and annotate it with @Published
+
+
+338
+00:18:12,226 --> 00:18:16,530 line:-2
+so that whenever its value changes,
+our UI will reflect the change.
+
+
+339
+00:18:16,597 --> 00:18:20,100 line:-2
+Let's see how we can change BookView
+to add this feature.
+
+
+340
+00:18:20,634 --> 00:18:25,305 line:-2
+I can add a Toggle with a nice label
+to allow me to mark this book as done.
+
+
+341
+00:18:25,572 --> 00:18:29,409 line:-2
+The Toggle expects a Binding
+so that it can show the current state
+
+
+342
+00:18:29,476 --> 00:18:32,346 line:-2
+and when the user taps on it,
+it can mutate the value.
+
+
+343
+00:18:32,412 --> 00:18:36,683 line:-2
+We can provide a Binding to "isFinished"
+just by adding the dollar sign prefix
+
+
+344
+00:18:36,750 --> 00:18:40,087 line:-2
+to currentlyReading
+and accessing the "isFinished" property.
+
+
+345
+00:18:40,153 --> 00:18:43,423 line:-2
+Now, whenever the user interacts
+with the Toggle,
+
+
+346
+00:18:43,490 --> 00:18:45,659 line:-1
+currentlyReading will be updated
+
+
+347
+00:18:45,726 --> 00:18:49,630 line:-2
+and SwiftUI will update all the views
+that depend on it.
+
+
+348
+00:18:50,163 --> 00:18:54,701 line:-2
+For example, in this view, we will disable
+the button to update the progress
+
+
+349
+00:18:54,768 --> 00:18:56,503 line:-1
+when we are done reading the book.
+
+
+350
+00:18:56,770 --> 00:18:59,873 line:-2
+Throughout our app, we are shown
+these beautiful book covers,
+
+
+351
+00:18:59,940 --> 00:19:02,943 line:-2
+and we want to load them asynchronously
+from the network,
+
+
+352
+00:19:03,010 --> 00:19:05,646 line:-1
+just before they are displayed on screen.
+
+
+353
+00:19:06,213 --> 00:19:07,881 line:-1
+They're expensive resources,
+
+
+354
+00:19:08,348 --> 00:19:11,752 line:-2
+so we want to keep them alive
+only while the view is visible.
+
+
+355
+00:19:12,619 --> 00:19:14,988 line:-1
+More generally, we noticed that often
+
+
+356
+00:19:15,055 --> 00:19:19,092 line:-2
+you do want to tie the life cycle
+of your ObservableObject to your view,
+
+
+357
+00:19:19,159 --> 00:19:20,761 line:-1
+like with State.
+
+
+358
+00:19:21,495 --> 00:19:22,629 line:-1
+If you recall,
+
+
+359
+00:19:22,696 --> 00:19:27,768 line:-2
+ObservedObject does not own
+the life cycle of its ObservableObject,
+
+
+360
+00:19:27,835 --> 00:19:30,637 line:-2
+and so we wanted to provide
+a more ergonomic tool.
+
+
+361
+00:19:31,839 --> 00:19:35,843 line:-2
+[clicks tongue] This tool is StateObject,
+which is new this year.
+
+
+362
+00:19:36,710 --> 00:19:39,213 line:-2
+When you annotate a property
+with StateObject,
+
+
+363
+00:19:39,279 --> 00:19:41,081 line:-1
+you provide an initial value,
+
+
+364
+00:19:41,148 --> 00:19:43,851 line:-1
+and SwiftUI will instantiate that value
+
+
+365
+00:19:43,917 --> 00:19:46,687 line:-2
+just before running body
+for the first time.
+
+
+366
+00:19:47,120 --> 00:19:51,391 line:-2
+SwiftUI will keep the object alive
+for the whole life cycle of the view.
+
+
+367
+00:19:52,159 --> 00:19:54,328 line:-1
+This is a great addition to SwiftUI
+
+
+368
+00:19:54,394 --> 00:19:56,697 line:-2
+and let's see how we can use it
+in practice.
+
+
+369
+00:19:57,097 --> 00:20:02,369 line:-2
+Let's create a CoverImageLoader class
+to load a specific image by name.
+
+
+370
+00:20:02,436 --> 00:20:04,972 line:-2
+Here I'm just showing
+the skeleton of this class,
+
+
+371
+00:20:05,038 --> 00:20:08,342 line:-1
+but not how I made it an ObservableObject
+
+
+372
+00:20:08,408 --> 00:20:12,212 line:-2
+and annotated the property
+that holds the image with @Published.
+
+
+373
+00:20:13,080 --> 00:20:16,950 line:-2
+Once we have our image, SwiftUI
+will automatically update the view.
+
+
+374
+00:20:17,918 --> 00:20:21,088 line:-2
+And now in our view,
+we can use CoverImageLoader
+
+
+375
+00:20:21,154 --> 00:20:24,658 line:-2
+and just annotate the property
+with StateObject.
+
+
+376
+00:20:24,725 --> 00:20:28,695 line:-2
+CoverImageLoader will not be
+instantiated when the view is created.
+
+
+377
+00:20:28,762 --> 00:20:33,200 line:-2
+Instead, it will be instantiated
+just before body runs
+
+
+378
+00:20:33,267 --> 00:20:36,503 line:-2
+and kept alive
+for the whole view life cycle.
+
+
+379
+00:20:36,570 --> 00:20:38,605 line:-1
+When the view is not needed anymore,
+
+
+380
+00:20:38,672 --> 00:20:42,709 line:-2
+SwiftUI will release
+the CoverImageLoader as expected.
+
+
+381
+00:20:42,776 --> 00:20:46,079 line:-2
+You don't need to fiddle
+with onDisappear anymore.
+
+
+382
+00:20:46,146 --> 00:20:51,018 line:-2
+Instead, you can use the ObservableObject
+lifetime to manage your resources.
+
+
+383
+00:20:51,451 --> 00:20:53,854 line:-1
+In SwiftUI, views are very cheap.
+
+
+384
+00:20:53,921 --> 00:20:57,891 line:-2
+We really encourage you to make them
+your primary encapsulation mechanism
+
+
+385
+00:20:57,958 --> 00:21:01,728 line:-2
+and create small views that are simple
+to understand and reuse.
+
+
+386
+00:21:02,296 --> 00:21:05,465 line:-2
+This means that you might end up
+with a deep and wide view hierarchy,
+
+
+387
+00:21:05,532 --> 00:21:07,100 line:-1
+like in the diagram here.
+
+
+388
+00:21:07,167 --> 00:21:10,070 line:-2
+If we look at this
+through the perspective of data flow,
+
+
+389
+00:21:10,137 --> 00:21:12,539 line:-2
+you might need to create
+an ObservableObject
+
+
+390
+00:21:12,606 --> 00:21:14,174 line:-1
+high up in the view hierarchy
+
+
+391
+00:21:14,241 --> 00:21:16,610 line:-1
+and pass the same instance to many views.
+
+
+392
+00:21:17,377 --> 00:21:21,915 line:-2
+Sometimes, you need to you use
+your ObservableObject in a distant subview
+
+
+393
+00:21:21,982 --> 00:21:25,252 line:-2
+and passing it down through views
+that don't need the data
+
+
+394
+00:21:25,319 --> 00:21:28,088 line:-2
+can be cumbersome
+and involve a lot of boilerplate.
+
+
+395
+00:21:28,155 --> 00:21:32,593 line:-2
+Luckily, we have a solution
+for this problem with EnvironmentObject.
+
+
+396
+00:21:32,659 --> 00:21:36,797 line:-2
+EnvironmentObject is both a view modifier
+and a property wrapper.
+
+
+397
+00:21:36,864 --> 00:21:39,399 line:-1
+You use the view modifier in a parent view
+
+
+398
+00:21:39,466 --> 00:21:42,302 line:-2
+where you want to inject
+an ObservableObject.
+
+
+399
+00:21:42,369 --> 00:21:45,239 line:-2
+And you use the property wrapper
+in all the views
+
+
+400
+00:21:45,305 --> 00:21:49,142 line:-2
+where you want to read an instance
+of that specific ObservableObject.
+
+
+401
+00:21:49,209 --> 00:21:53,480 line:-2
+The framework will take care of passing
+that value everywhere it's needed
+
+
+402
+00:21:53,547 --> 00:21:56,583 line:-2
+and track it as a dependency
+only where it's read.
+
+
+403
+00:21:57,417 --> 00:21:59,253 line:-1
+In this part of the talk we have seen
+
+
+404
+00:21:59,319 --> 00:22:02,489 line:-2
+how to design your model
+using ObservableObject
+
+
+405
+00:22:02,556 --> 00:22:05,826 line:-2
+and how SwiftUI provides
+all the fundamental primitives
+
+
+406
+00:22:05,893 --> 00:22:09,630 line:-2
+that you can use to build
+the best architecture for your needs.
+
+
+407
+00:22:11,031 --> 00:22:14,868 line:-2
+We have seen how to create a dependency
+between a view and a piece of data,
+
+
+408
+00:22:15,702 --> 00:22:18,272 line:-2
+how with the new StateObject
+property wrapper
+
+
+409
+00:22:18,338 --> 00:22:22,543 line:-2
+you can tie the life cycle
+of an ObservableObject to a view,
+
+
+410
+00:22:23,210 --> 00:22:27,314 line:-2
+and finally, how EnvironmentObject
+gives you the convenience
+
+
+411
+00:22:27,381 --> 00:22:30,684 line:-2
+to flow ObservableObject
+in your view hierarchy.
+
+
+412
+00:22:31,118 --> 00:22:33,253 line:-1
+Now I'm going to hand it over to Raj.
+
+
+413
+00:22:33,320 --> 00:22:35,856 line:-2
+He's going to dive deep
+into SwiftUI's life cycle
+
+
+414
+00:22:35,923 --> 00:22:37,758 line:-1
+and how it relates to performance,
+
+
+415
+00:22:37,824 --> 00:22:41,495 line:-2
+how to handle side effects
+and some exciting new tools.
+
+
+416
+00:22:41,562 --> 00:22:44,731 line:-2
+Thank you, everyone,
+and have a great WWDC. Raj?
+
+
+417
+00:22:45,399 --> 00:22:46,900 line:-1
+Thanks, Luca.
+
+
+418
+00:22:46,967 --> 00:22:49,303 line:-2
+You've learned how to get started
+with data in SwiftUI
+
+
+419
+00:22:49,369 --> 00:22:51,705 line:-1
+and how to design a great model.
+
+
+420
+00:22:51,772 --> 00:22:54,775 line:-2
+Now, I'd like to tell you how to design
+for the best performance,
+
+
+421
+00:22:54,842 --> 00:22:58,045 line:-2
+as well as some further considerations
+in choosing a source of truth.
+
+
+422
+00:22:58,512 --> 00:23:02,850 line:-2
+To begin with, let's talk about views
+and their role in the SwiftUI system.
+
+
+423
+00:23:02,916 --> 00:23:05,819 line:-2
+A view is simply a definition
+of a piece of UI.
+
+
+424
+00:23:06,253 --> 00:23:10,057 line:-2
+SwiftUI uses this definition
+to create the appropriate rendering.
+
+
+425
+00:23:10,924 --> 00:23:15,095 line:-2
+SwiftUI manages the identity
+and the lifetime of your views.
+
+
+426
+00:23:15,162 --> 00:23:17,598 line:-1
+And because a view defines a piece of UI,
+
+
+427
+00:23:17,664 --> 00:23:20,067 line:-2
+they should be lightweight
+and inexpensive.
+
+
+428
+00:23:20,567 --> 00:23:25,105 line:-2
+In the book club app, like in every app,
+everything on screen is a view.
+
+
+429
+00:23:26,006 --> 00:23:28,008 line:-1
+Note that the lifetime of a view
+
+
+430
+00:23:28,075 --> 00:23:31,378 line:-2
+is separate from the lifetime
+of a struct that defines it.
+
+
+431
+00:23:31,979 --> 00:23:34,681 line:-2
+The struct you create that conforms
+to the View protocol
+
+
+432
+00:23:34,748 --> 00:23:36,917 line:-1
+actually has a very short lifetime.
+
+
+433
+00:23:36,984 --> 00:23:40,287 line:-2
+SwiftUI uses it to create a rendering,
+and then it's gone.
+
+
+434
+00:23:41,255 --> 00:23:45,292 line:-2
+Let's use a diagram to illustrate the
+importance of making views lightweight.
+
+
+435
+00:23:46,527 --> 00:23:49,863 line:-2
+This diagram shows
+the SwiftUI update life cycle.
+
+
+436
+00:23:49,930 --> 00:23:52,699 line:-1
+Starting at the top, we have your UI.
+
+
+437
+00:23:52,766 --> 00:23:55,936 line:-1
+Moving counterclockwise, an event comes in
+
+
+438
+00:23:56,003 --> 00:23:59,173 line:-2
+which causes some closure
+or action to run.
+
+
+439
+00:23:59,673 --> 00:24:02,943 line:-2
+That then results in a mutation
+of a source of truth.
+
+
+440
+00:24:04,545 --> 00:24:06,980 line:-2
+Then once we've mutated
+the source of truth,
+
+
+441
+00:24:07,047 --> 00:24:10,617 line:-2
+we'll get a new copy of the view,
+which we'll use to produce a rendering.
+
+
+442
+00:24:11,051 --> 00:24:12,786 line:-1
+That rendering is your UI.
+
+
+443
+00:24:13,520 --> 00:24:16,557 line:-2
+That's just the basics.
+We'll revisit the diagram in a bit.
+
+
+444
+00:24:17,024 --> 00:24:18,892 line:-1
+For now, let's simplify it.
+
+
+445
+00:24:19,326 --> 00:24:21,361 line:-1
+And a little bit more.
+
+
+446
+00:24:22,162 --> 00:24:24,097 line:-1
+Ah. Much better.
+
+
+447
+00:24:24,932 --> 00:24:29,203 line:-2
+As the name implies,
+this life cycle is a cycle.
+
+
+448
+00:24:29,269 --> 00:24:32,472 line:-2
+It keeps repeating many times
+while your app is running.
+
+
+449
+00:24:33,240 --> 00:24:36,009 line:-2
+This cycle is also really important
+for performance...
+
+
+450
+00:24:37,044 --> 00:24:40,581 line:-2
+and ideally,
+the cycle carries on smoothly, like this.
+
+
+451
+00:24:44,251 --> 00:24:47,754 line:-2
+But if there's expensive blocking work
+at any of these points,
+
+
+452
+00:24:47,821 --> 00:24:49,923 line:-1
+the performance of your app will suffer.
+
+
+453
+00:24:51,091 --> 00:24:53,093 line:-1
+We call this a slow update.
+
+
+454
+00:24:53,627 --> 00:24:56,296 line:0
+It means you might drop frames
+or your app might hang.
+
+
+455
+00:24:57,464 --> 00:24:59,099 line:0
+So how do you avoid slow updates?
+
+
+456
+00:25:00,434 --> 00:25:03,103 line:-2
+Well, the first thing you can do
+to avoid slow updates
+
+
+457
+00:25:03,170 --> 00:25:05,973 line:-2
+is to ensure that
+your view initialization is cheap.
+
+
+458
+00:25:06,740 --> 00:25:10,844 line:-2
+A view's body should be a pure function,
+free of side effects.
+
+
+459
+00:25:10,911 --> 00:25:14,515 line:-2
+That means you should simply create
+your view description and return.
+
+
+460
+00:25:14,581 --> 00:25:18,619 line:-2
+No dispatching, no other work.
+Just create some views and move on.
+
+
+461
+00:25:19,553 --> 00:25:23,891 line:-2
+Avoid making assumptions
+about when and how often body is called.
+
+
+462
+00:25:23,957 --> 00:25:26,693 line:-2
+Remember,
+SwiftUI can be pretty smart sometimes,
+
+
+463
+00:25:26,760 --> 00:25:29,596 line:-2
+which means it might not call body
+in line with your assumptions.
+
+
+464
+00:25:30,864 --> 00:25:33,100 line:-2
+To illustrate the importance
+of body being cheap,
+
+
+465
+00:25:33,166 --> 00:25:34,635 line:-1
+let's look at an example.
+
+
+466
+00:25:36,003 --> 00:25:39,840 line:-2
+Here's a simplified example of what our
+Currently Reading list might look like.
+
+
+467
+00:25:40,207 --> 00:25:41,675 line:-1
+In the ReadingListViewer,
+
+
+468
+00:25:41,742 --> 00:25:46,113 line:-2
+we'll define body as a NavigationView
+with the ReadingList within.
+
+
+469
+00:25:46,180 --> 00:25:50,384 line:-2
+Then, in ReadingList, we'll use
+an ObservedObject to generate the data.
+
+
+470
+00:25:51,451 --> 00:25:55,689 line:-2
+This seems pretty reasonable,
+but there's actually a bug lurking here.
+
+
+471
+00:25:55,756 --> 00:25:57,024 line:-1
+Can you see it?
+
+
+472
+00:25:58,091 --> 00:26:01,461 line:-2
+It turns out whenever the body
+of ReadingListViewer is created,
+
+
+473
+00:26:01,528 --> 00:26:05,832 line:-2
+you're going to incur a repeated
+heap allocation of ReadingListStore,
+
+
+474
+00:26:05,899 --> 00:26:08,135 line:-1
+and this can cause a slow update.
+
+
+475
+00:26:08,735 --> 00:26:13,207 line:-2
+Remember from earlier that your view
+structs do not have a defined lifetime,
+
+
+476
+00:26:13,273 --> 00:26:14,274 line:-1
+so when you write this,
+
+
+477
+00:26:14,341 --> 00:26:18,178 line:-2
+you're actually going to create
+a new copy of the object every time.
+
+
+478
+00:26:18,245 --> 00:26:22,382 line:-2
+And a repeated heap allocation like this
+can be expensive and slow.
+
+
+479
+00:26:22,449 --> 00:26:26,320 line:-2
+It also causes data loss
+because the object is reset every time.
+
+
+480
+00:26:27,054 --> 00:26:30,324 line:-2
+Okay, so we've identified a problem,
+but how do we fix it?
+
+
+481
+00:26:31,124 --> 00:26:35,295 line:-2
+Well, in the past you had to create
+the model somewhere else and pass it in.
+
+
+482
+00:26:35,362 --> 00:26:37,965 line:-2
+But wouldn't it be great
+if you could just do this inline?
+
+
+483
+00:26:38,832 --> 00:26:42,269 line:-2
+I'm happy to tell you that this year
+we have a tool to solve this problem,
+
+
+484
+00:26:42,336 --> 00:26:44,037 line:-1
+called StateObject,
+
+
+485
+00:26:44,104 --> 00:26:45,973 line:-1
+and as Luca explained earlier,
+
+
+486
+00:26:46,039 --> 00:26:50,811 line:-2
+StateObject lets SwiftUI instantiate
+your ObservableObjects at the right time,
+
+
+487
+00:26:50,878 --> 00:26:55,148 line:-2
+so you don't incur unnecessary heap
+allocations, and you don't lose data.
+
+
+488
+00:26:56,183 --> 00:27:00,521 line:-2
+This means you can get great performance
+and correctness.
+
+
+489
+00:27:01,488 --> 00:27:02,656 line:-1
+One thing to note:
+
+
+490
+00:27:02,723 --> 00:27:04,725 line:-2
+We are declaring
+a new source of truth here,
+
+
+491
+00:27:04,791 --> 00:27:06,593 line:-1
+so let's slap the badge on it.
+
+
+492
+00:27:07,528 --> 00:27:10,097 line:-2
+All right,
+let's bring back the diagram again.
+
+
+493
+00:27:11,064 --> 00:27:12,699 line:-1
+And enhance.
+
+
+494
+00:27:13,333 --> 00:27:14,401 line:-1
+Great.
+
+
+495
+00:27:14,468 --> 00:27:18,539 line:-2
+One thing to note is there are multiple
+sources of the events at the top left.
+
+
+496
+00:27:18,605 --> 00:27:21,775 line:-2
+Your app might react to an event
+generated by user interaction,
+
+
+497
+00:27:21,842 --> 00:27:23,343 line:-1
+such as tapping a button,
+
+
+498
+00:27:23,410 --> 00:27:27,948 line:-2
+or it might react to a publisher firing,
+like a timer or a notification.
+
+
+499
+00:27:28,015 --> 00:27:31,084 line:-2
+Regardless of what triggers the event,
+the cycle is still the same.
+
+
+500
+00:27:31,151 --> 00:27:33,587 line:-2
+We'll mutate a source of truth,
+update the view
+
+
+501
+00:27:33,654 --> 00:27:35,222 line:-1
+and then produce a new rendering.
+
+
+502
+00:27:35,722 --> 00:27:38,125 line:-1
+These triggers are called event sources.
+
+
+503
+00:27:38,192 --> 00:27:40,460 line:-2
+They are the drivers of change
+in your views.
+
+
+504
+00:27:40,928 --> 00:27:44,498 line:-2
+As I mentioned, a good example of this
+is user interaction
+
+
+505
+00:27:44,565 --> 00:27:46,667 line:-1
+or a publisher, such as a timer.
+
+
+506
+00:27:46,733 --> 00:27:50,304 line:-2
+And new this year, we have new ways
+to react to events,
+
+
+507
+00:27:50,370 --> 00:27:52,973 line:-2
+such as changes
+to the environment and bindings,
+
+
+508
+00:27:53,040 --> 00:27:56,243 line:-2
+and new ways to handle URLs
+and user activities.
+
+
+509
+00:27:56,944 --> 00:27:59,446 line:-1
+Each of these modifiers takes a parameter,
+
+
+510
+00:27:59,513 --> 00:28:03,750 line:-2
+such as a publisher or a value to compare,
+and it also takes a closure.
+
+
+511
+00:28:04,351 --> 00:28:06,920 line:-2
+SwiftUI will run the closure
+at the right time
+
+
+512
+00:28:06,987 --> 00:28:10,424 line:-2
+to help you avoid slow updates
+and keep body cheap.
+
+
+513
+00:28:10,490 --> 00:28:14,895 line:-2
+However, note that SwiftUI will run
+these closures on the main thread,
+
+
+514
+00:28:14,962 --> 00:28:16,730 line:-1
+so if you need to do expensive work,
+
+
+515
+00:28:16,797 --> 00:28:18,799 line:-2
+consider dispatching
+to a background queue.
+
+
+516
+00:28:19,566 --> 00:28:21,969 line:-2
+We're not going to go into detail
+on these today,
+
+
+517
+00:28:22,035 --> 00:28:25,005 line:-2
+but I encourage you to check out
+the documentation to learn more.
+
+
+518
+00:28:25,572 --> 00:28:27,708 line:-2
+So that's a bit on
+how to avoid slow updates
+
+
+519
+00:28:27,774 --> 00:28:30,110 line:-1
+and how to design for great performance.
+
+
+520
+00:28:30,177 --> 00:28:32,412 line:-2
+Next, let's bring back
+those three questions.
+
+
+521
+00:28:34,281 --> 00:28:36,917 line:-2
+So we've largely covered
+how to solve the first two questions,
+
+
+522
+00:28:36,984 --> 00:28:39,186 line:-1
+but the third one isn't as easy.
+
+
+523
+00:28:40,053 --> 00:28:41,522 line:-1
+When you answer this question,
+
+
+524
+00:28:41,588 --> 00:28:45,058 line:-2
+you're making a decision about the
+source of truth that you're going to use.
+
+
+525
+00:28:45,125 --> 00:28:46,593 line:-1
+And this is a hard question.
+
+
+526
+00:28:47,394 --> 00:28:48,896 line:-1
+There's no one right answer here,
+
+
+527
+00:28:48,962 --> 00:28:51,732 line:-2
+so to help, I'd like to walk through
+some considerations.
+
+
+528
+00:28:54,234 --> 00:28:57,638 line:-2
+An important question to ask is,
+who owns the data?
+
+
+529
+00:28:57,704 --> 00:29:01,708 line:-2
+Is it the view that uses the data,
+or maybe an ancestor of that view?
+
+
+530
+00:29:01,775 --> 00:29:04,178 line:-2
+Perhaps it's even another subsystem
+of your app.
+
+
+531
+00:29:05,612 --> 00:29:06,980 line:-1
+A few guidelines here:
+
+
+532
+00:29:07,047 --> 00:29:10,384 line:-2
+As mentioned earlier,
+share data with a common ancestor.
+
+
+533
+00:29:10,450 --> 00:29:14,054 line:-2
+Also, prefer StateObject as a view-owned
+source of truth
+
+
+534
+00:29:14,121 --> 00:29:15,822 line:-1
+for your ObservableObjects.
+
+
+535
+00:29:16,356 --> 00:29:19,893 line:-2
+Lastly, consider placing global data
+in the app.
+
+
+536
+00:29:19,960 --> 00:29:21,295 line:-1
+We'll cover this next.
+
+
+537
+00:29:23,197 --> 00:29:25,098 line:0
+Now let's talk about data lifetime.
+
+
+538
+00:29:25,165 --> 00:29:29,903 line:0
+We'll cover tying data lifetimes
+to Views, Scenes and Apps.
+
+
+539
+00:29:29,970 --> 00:29:32,105 line:0
+For more on SwiftUI Scenes and Apps,
+
+
+540
+00:29:32,172 --> 00:29:35,242 line:0
+please refer to
+the "App Essentials in SwiftUI" session.
+
+
+541
+00:29:35,909 --> 00:29:37,811 line:0
+First, let's start with Views.
+
+
+542
+00:29:39,313 --> 00:29:41,215 line:-1
+As we've shown you throughout this talk,
+
+
+543
+00:29:41,281 --> 00:29:44,651 line:-2
+Views are a great tool
+to tie your data lifetime to,
+
+
+544
+00:29:44,718 --> 00:29:48,288 line:-2
+and all of the property wrappers
+we've discussed today work with views.
+
+
+545
+00:29:48,822 --> 00:29:52,159 line:-2
+You can make use of the State
+and StateObject property wrappers
+
+
+546
+00:29:52,226 --> 00:29:54,928 line:-1
+to tie data lifetime to view lifetime.
+
+
+547
+00:29:54,995 --> 00:29:56,997 line:-1
+Next, let's talk about scenes.
+
+
+548
+00:29:57,965 --> 00:30:01,168 line:-2
+Because SwiftUI's scenes each have
+a unique view tree,
+
+
+549
+00:30:01,235 --> 00:30:04,605 line:-2
+you can hang important pieces of data
+off the root of the tree.
+
+
+550
+00:30:04,671 --> 00:30:09,042 line:-2
+For example, you can put a source of truth
+on the view inside of a window group.
+
+
+551
+00:30:10,077 --> 00:30:14,248 line:-2
+In doing so, each instance of the scene
+that the window group creates
+
+
+552
+00:30:14,314 --> 00:30:17,184 line:-2
+can have
+its own, independent source of truth
+
+
+553
+00:30:17,251 --> 00:30:20,854 line:-2
+that serves as a lens
+onto the underlying data model.
+
+
+554
+00:30:20,921 --> 00:30:22,923 line:-1
+This works great with multiple windows.
+
+
+555
+00:30:24,024 --> 00:30:25,158 line:-1
+As you can see here,
+
+
+556
+00:30:25,225 --> 00:30:30,163 line:-2
+the two scenes have independent UI states
+that represent the same underlying data.
+
+
+557
+00:30:30,230 --> 00:30:34,601 line:-2
+So now, Luca can go to
+two online book clubs at the same time.
+
+
+558
+00:30:34,668 --> 00:30:36,203 line:-1
+Next, let's talk about Apps.
+
+
+559
+00:30:37,004 --> 00:30:40,107 line:-2
+Apps are a powerful new tool
+this year in SwiftUI
+
+
+560
+00:30:40,174 --> 00:30:43,977 line:-2
+allowing you to write your entire app
+in just SwiftUI.
+
+
+561
+00:30:44,044 --> 00:30:46,647 line:-2
+But what's great about Apps
+is that you can use State
+
+
+562
+00:30:46,713 --> 00:30:50,117 line:-2
+and other sources of truth in an app,
+just like you do in a view.
+
+
+563
+00:30:50,517 --> 00:30:52,019 line:-1
+Let me show you an example.
+
+
+564
+00:30:52,719 --> 00:30:56,056 line:-2
+Here, we'll create a global book model
+for our entire app
+
+
+565
+00:30:56,123 --> 00:30:58,525 line:-1
+by using the StateObject property wrapper.
+
+
+566
+00:30:58,592 --> 00:31:01,361 line:-2
+Whenever the model changes,
+all of our app's scenes,
+
+
+567
+00:31:01,428 --> 00:31:04,298 line:-2
+and consequently,
+all of their views, will update,
+
+
+568
+00:31:04,364 --> 00:31:08,135 line:-2
+and by writing this, we've created
+an app-wide source of truth.
+
+
+569
+00:31:08,202 --> 00:31:10,604 line:-2
+When considering
+where to put your source of truth,
+
+
+570
+00:31:10,671 --> 00:31:14,875 line:-2
+you might want to put it in the app
+if it represents truly global data.
+
+
+571
+00:31:15,676 --> 00:31:17,811 line:-1
+Your data's lifetime is important,
+
+
+572
+00:31:17,878 --> 00:31:21,648 line:-2
+but that lifetime is tied to the lifetime
+of its source of truth,
+
+
+573
+00:31:21,715 --> 00:31:23,483 line:-1
+and in all of the previous examples,
+
+
+574
+00:31:23,550 --> 00:31:27,521 line:-2
+we've used tools like State,
+StateObject, and Constants.
+
+
+575
+00:31:28,155 --> 00:31:30,190 line:-1
+But these have a limitation,
+
+
+576
+00:31:30,257 --> 00:31:32,593 line:-2
+which is that they're tied
+to the process lifetime,
+
+
+577
+00:31:33,193 --> 00:31:36,496 line:-2
+which means if your app gets killed
+or the device restarts,
+
+
+578
+00:31:36,563 --> 00:31:38,065 line:-1
+State won't come back.
+
+
+579
+00:31:39,066 --> 00:31:42,936 line:-2
+To help solve this problem, new this year,
+we're introducing Storage.
+
+
+580
+00:31:44,238 --> 00:31:49,076 line:-2
+These have an extended lifetime
+and are saved and restored automatically.
+
+
+581
+00:31:49,142 --> 00:31:51,578 line:-1
+Note, these are not your model.
+
+
+582
+00:31:51,645 --> 00:31:56,116 line:-2
+Rather, they are lightweight stores that
+you use in conjunction with your model.
+
+
+583
+00:31:57,150 --> 00:31:59,419 line:-2
+Let's start by taking a look
+at SceneStorage.
+
+
+584
+00:32:01,455 --> 00:32:04,725 line:-2
+SceneStorage is
+a per-scene scoped property wrapper
+
+
+585
+00:32:04,791 --> 00:32:08,462 line:-2
+that reads and writes data
+completely managed by SwiftUI.
+
+
+586
+00:32:08,529 --> 00:32:11,164 line:-1
+It is only accessible from within Views,
+
+
+587
+00:32:11,231 --> 00:32:14,234 line:-2
+which makes it a great candidate
+for storing lightweight information
+
+
+588
+00:32:14,301 --> 00:32:15,903 line:-1
+about the current state of your app.
+
+
+589
+00:32:16,370 --> 00:32:18,038 line:-1
+Let's take a look at an example.
+
+
+590
+00:32:20,073 --> 00:32:24,011 line:-2
+Here's the book club app from earlier
+with two scenes side-by-side.
+
+
+591
+00:32:24,077 --> 00:32:27,214 line:-2
+The first thing to think about
+when using SceneStorage is,
+
+
+592
+00:32:27,281 --> 00:32:29,650 line:-1
+what do you really need to restore?
+
+
+593
+00:32:29,716 --> 00:32:33,187 line:-2
+In this case, all we need to save
+and restore is the selection.
+
+
+594
+00:32:33,253 --> 00:32:38,559 line:-2
+The names of the book, progress
+and the notes are all stored in the model,
+
+
+595
+00:32:38,625 --> 00:32:41,528 line:-2
+so we don't need to save
+and restore those.
+
+
+596
+00:32:41,595 --> 00:32:42,963 line:-1
+Let's jump to code.
+
+
+597
+00:32:43,664 --> 00:32:48,368 line:-2
+Here you can see how we use SceneStorage
+to save and restore our selected state.
+
+
+598
+00:32:48,435 --> 00:32:52,239 line:-2
+We'll pass a key, which must be unique
+to the type of data we're storing.
+
+
+599
+00:32:52,306 --> 00:32:54,842 line:-1
+Then, we can use it just like State.
+
+
+600
+00:32:54,908 --> 00:32:58,378 line:-2
+SwiftUI will automatically save
+and restore the value on our behalf.
+
+
+601
+00:32:59,446 --> 00:33:01,215 line:-1
+And since this behaves like State,
+
+
+602
+00:33:01,281 --> 00:33:03,517 line:-2
+we've actually declared
+a new source of truth here,
+
+
+603
+00:33:03,584 --> 00:33:06,453 line:-2
+and this time,
+it's a scene-wide source of truth.
+
+
+604
+00:33:07,054 --> 00:33:08,689 line:-1
+Now, if the device restarts,
+
+
+605
+00:33:08,755 --> 00:33:11,992 line:-2
+or the system needs to reclaim resources
+backing a scene,
+
+
+606
+00:33:12,059 --> 00:33:14,261 line:-2
+the data will be available
+at the next launch,
+
+
+607
+00:33:14,328 --> 00:33:18,799 line:-2
+allowing Luca to pick up his book club
+activities right from where he left off.
+
+
+608
+00:33:18,866 --> 00:33:20,767 line:-2
+Now that you've seen SceneStorage
+in action,
+
+
+609
+00:33:20,834 --> 00:33:22,903 line:-1
+I'd like to discuss AppStorage.
+
+
+610
+00:33:22,970 --> 00:33:27,941 line:-2
+This is app-scoped global storage,
+which is persisted using UserDefaults.
+
+
+611
+00:33:28,008 --> 00:33:29,510 line:-1
+It's usable from anywhere,
+
+
+612
+00:33:29,576 --> 00:33:33,480 line:-2
+so you can access it from within your app
+or from within your view.
+
+
+613
+00:33:33,547 --> 00:33:35,349 line:-1
+AppStorage, like UserDefaults,
+
+
+614
+00:33:35,415 --> 00:33:38,151 line:-2
+is super useful
+for storing small bits of data,
+
+
+615
+00:33:38,218 --> 00:33:39,453 line:-1
+such as settings.
+
+
+616
+00:33:40,220 --> 00:33:43,524 line:-2
+In our book club app, we've also decided
+to introduce some settings.
+
+
+617
+00:33:44,224 --> 00:33:47,194 line:-2
+Let's take a look at how to use
+AppStorage to accomplish this.
+
+
+618
+00:33:48,028 --> 00:33:49,096 line:-1
+In our Settings view,
+
+
+619
+00:33:49,162 --> 00:33:53,600 line:-2
+all we need to do is add the AppStorage
+property wrapper and give it a key.
+
+
+620
+00:33:53,667 --> 00:33:56,904 line:-2
+By default,
+this uses the standard user defaults,
+
+
+621
+00:33:56,970 --> 00:33:59,273 line:-1
+but you can customize it if you need to.
+
+
+622
+00:33:59,973 --> 00:34:02,776 line:-2
+For more information,
+please refer to the documentation.
+
+
+623
+00:34:03,510 --> 00:34:07,581 line:-2
+In this case, we'll set up an AppStorage
+for each of our two settings here.
+
+
+624
+00:34:07,648 --> 00:34:12,085 line:-2
+We'll give them each a unique key because
+they are independent pieces of data.
+
+
+625
+00:34:12,152 --> 00:34:14,588 line:-1
+When using SceneStorage and AppStorage,
+
+
+626
+00:34:14,655 --> 00:34:18,358 line:-2
+it's important that unique
+pieces of data have unique keys.
+
+
+627
+00:34:18,425 --> 00:34:22,029 line:-2
+And just like the other property wrappers,
+this is also a source of truth,
+
+
+628
+00:34:22,094 --> 00:34:25,431 line:-2
+which means we can get bindings to it,
+such as for use in a toggle.
+
+
+629
+00:34:25,899 --> 00:34:27,935 line:-1
+And now, whenever the data changes,
+
+
+630
+00:34:28,001 --> 00:34:32,306 line:-2
+it will automatically be saved
+and restored to and from user defaults.
+
+
+631
+00:34:33,139 --> 00:34:37,978 line:-2
+We've seen a variety of tools today for
+Process Lifetime and Extended Lifetime,
+
+
+632
+00:34:38,045 --> 00:34:41,547 line:-2
+and you use each of the tools here
+to store UI-level state.
+
+
+633
+00:34:41,614 --> 00:34:45,351 line:-2
+For the storage types, please be careful
+not to store everything with them
+
+
+634
+00:34:45,418 --> 00:34:47,454 line:-1
+because persistence isn't free.
+
+
+635
+00:34:47,955 --> 00:34:51,458 line:-2
+I'd also like to call out one more tool,
+and that's ObservableObject.
+
+
+636
+00:34:52,359 --> 00:34:55,429 line:-2
+We've designed ObservableObject
+to be very flexible,
+
+
+637
+00:34:55,495 --> 00:34:58,298 line:-2
+so you can use it to achieve
+super custom behaviors,
+
+
+638
+00:34:58,365 --> 00:35:02,102 line:-2
+such as backing the data by a server
+or by another service.
+
+
+639
+00:35:02,169 --> 00:35:04,505 line:-1
+And together, these tools form a family
+
+
+640
+00:35:04,571 --> 00:35:08,475 line:-2
+that gives you a high degree of freedom
+to choose what best suits your needs.
+
+
+641
+00:35:09,343 --> 00:35:11,812 line:-2
+We've seen a lot of tools
+and uses of them today,
+
+
+642
+00:35:11,879 --> 00:35:15,382 line:-2
+but the main takeaway is that
+there isn't a one-size-fits-all tool.
+
+
+643
+00:35:15,449 --> 00:35:20,554 line:-2
+Each has its own set of traits, so
+a typical app will use a variety of tools.
+
+
+644
+00:35:20,621 --> 00:35:22,823 line:-1
+We've done just that in our book club app.
+
+
+645
+00:35:22,890 --> 00:35:25,926 line:-2
+We've used State for buttons
+and our progress view,
+
+
+646
+00:35:26,426 --> 00:35:28,962 line:-2
+StateObject for
+our currentlyReading model,
+
+
+647
+00:35:29,029 --> 00:35:33,367 line:-2
+SceneStorage for our selection,
+and AppStorage for our settings.
+
+
+648
+00:35:33,433 --> 00:35:37,104 line:-2
+It's important to think about
+what the properties of your data are
+
+
+649
+00:35:37,171 --> 00:35:39,740 line:-2
+and what the right source
+of truth to use is,
+
+
+650
+00:35:39,806 --> 00:35:42,409 line:-2
+and you should also try to limit
+the number of sources of truth
+
+
+651
+00:35:42,476 --> 00:35:43,944 line:-1
+to cut down on complexity.
+
+
+652
+00:35:44,278 --> 00:35:48,749 line:-2
+And finally, take advantage of bindings
+as a way to build reusable components.
+
+
+653
+00:35:49,216 --> 00:35:52,853 line:-2
+Remember, bindings are completely agnostic
+to their source of truth,
+
+
+654
+00:35:52,920 --> 00:35:56,023 line:-2
+which makes them a powerful tool
+for building clean abstractions.
+
+
+655
+00:35:56,089 --> 00:35:59,560 line:-2
+Now that you've learned the essentials,
+it's time to build a great model.
+
+
+656
+00:36:00,093 --> 00:36:01,094 line:-1
+Thank you.
+
+
+657
+00:36:04,364 --> 00:36:06,033 line:-1
+And have a great WWDC.
+

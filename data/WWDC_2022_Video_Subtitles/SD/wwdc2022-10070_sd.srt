@@ -1,0 +1,1785 @@
+2
+00:00:00.501 --> 00:00:08.509 line:-1 align:center
+♪ ♪
+
+
+3
+00:00:09.843 --> 00:00:12.112 line:-2 align:center
+Mohammed:
+Hi, I'm Mohammed from UIKit.
+
+
+4
+00:00:12,145 --> 00:00:14,114 line:-2
+Thank you for joining me
+for this deep dive
+
+
+5
+00:00:14,147 --> 00:00:17,584 line:-1
+into building a Desktop Class iPad app.
+
+
+6
+00:00:17,618 --> 00:00:20,954 line:-2
+In this video,
+we'll use iPadOS 16 APIs
+
+
+7
+00:00:20.988 --> 00:00:25.092 line:-2 align:center
+to update an existing iPad app
+to a desktop class experience.
+
+
+8
+00:00:25,125 --> 00:00:28,362 line:-2
+We'll start by using
+new navigation bar API
+
+
+9
+00:00:28.395 --> 00:00:30.664 line:-1 align:center
+to surface powerful functionality,
+
+
+10
+00:00:30.697 --> 00:00:34.334 line:-2 align:center
+increase UI density,
+and provide customizability.
+
+
+11
+00:00:35.836 --> 00:00:39.573 line:-2 align:center
+Then, we'll adopt new UICollectionView
+and menu API
+
+
+12
+00:00:39.606 --> 00:00:45.212 line:-2 align:center
+to enable complex workflows
+and quick actions on multiple selections.
+
+
+13
+00:00:45,245 --> 00:00:49,316 line:-2
+And we'll round things out by enabling
+the new Find and Replace experience
+
+
+14
+00:00:49.349 --> 00:00:52.753 line:-2 align:center
+and enhancing text editing
+with the new Edit Menu.
+
+
+15
+00:00:52,786 --> 00:00:57,858 line:-2
+The app we'll be updating is
+a Markdown editor built for iPadOS 15.
+
+
+16
+00:00:57.891 --> 00:01:01.495 line:-2 align:center
+As we walk through each step
+of the modernization process,
+
+
+17
+00:01:01.528 --> 00:01:05.299 line:-2 align:center
+I'll discuss best practices
+and motivations behind our choices,
+
+
+18
+00:01:05.332 --> 00:01:08.435 line:-2 align:center
+giving you an idea of the factors
+you should consider
+
+
+19
+00:01:08.468 --> 00:01:12.072 line:-2 align:center
+while taking your own app
+through a similar process.
+
+
+20
+00:01:13.140 --> 00:01:15.809 line:-2 align:center
+If you'd like a bit of a primer
+before getting started,
+
+
+21
+00:01:15,843 --> 00:01:18,045 align:center
+check out “Meet Desktop Class iPad”
+
+
+22
+00:01:18,078 --> 00:01:22,549 align:center
+for a breakdown of
+all of UIKit's new iPadOS APIs,
+
+
+23
+00:01:22,583 --> 00:01:25,152 line:0
+and check out
+“What's new in iPad app design”
+
+
+24
+00:01:25,185 --> 00:01:30,090 align:center
+for tips on how to design
+the best Desktop Class iPad app possible.
+
+
+25
+00:01:30,123 --> 00:01:31,925 line:0
+All right, let's dive right in!
+
+
+26
+00:01:32.659 --> 00:01:37.197 line:-2 align:center
+To start things off, let's consider
+the organization of our app's controls.
+
+
+27
+00:01:37,231 --> 00:01:41,401 line:-2
+Since the app is designed for iPadOS 15,
+it already exposes
+
+
+28
+00:01:41,435 --> 00:01:44,571 line:-2
+its most important controls
+in the navigation bar
+
+
+29
+00:01:44.605 --> 00:01:49.276 line:-2 align:center
+and places secondary controls
+in various menus and popovers.
+
+
+30
+00:01:50,878 --> 00:01:55,916 line:-2
+In iPadOS 16, UIKit formalizes
+the existing navigation style
+
+
+31
+00:01:55,949 --> 00:02:01,188 line:-2
+and introduces two new ones with
+a denser and more customizable layout.
+
+
+32
+00:02:01.221 --> 00:02:05.826 line:-2 align:center
+This allows apps to express the layout
+that's most appropriate to their content
+
+
+33
+00:02:05.859 --> 00:02:09.229 line:-2 align:center
+while bringing more functionality
+to the forefront of the UI.
+
+
+34
+00:02:11,265 --> 00:02:16,603 line:-2
+Navigator apps have a familiar
+push / pop navigation model.
+
+
+35
+00:02:16,637 --> 00:02:20,340 line:-2
+This is generally appropriate
+for apps that display hierarchical data,
+
+
+36
+00:02:20.374 --> 00:02:22.142 line:-1 align:center
+like Settings.
+
+
+37
+00:02:23,443 --> 00:02:27,714 line:-2
+Browsers, like Safari or Files
+are ideal for looking through
+
+
+38
+00:02:27.748 --> 00:02:32.386 line:-2 align:center
+and navigating back and forth between
+multiple documents or folder structures.
+
+
+39
+00:02:34.655 --> 00:02:39.993 line:-2 align:center
+And Editors are great for focused viewing
+or editing of individual documents.
+
+
+40
+00:02:42.029 --> 00:02:46.200 line:-2 align:center
+Being a Markdown editor, this style
+is the perfect choice for our app.
+
+
+41
+00:02:48.302 --> 00:02:52.506 line:-2 align:center
+The editor style aligns the title
+towards the leading edge of the bar,
+
+
+42
+00:02:52.539 --> 00:02:55.909 line:-2 align:center
+opening up its center
+for a new set of items.
+
+
+43
+00:02:55,943 --> 00:02:58,912 line:-2
+This'll allow us to expose
+additional functionality
+
+
+44
+00:02:58,946 --> 00:03:02,916 line:-2
+that might've been hidden away
+in other views or menus.
+
+
+45
+00:03:02.950 --> 00:03:07.454 line:-2 align:center
+We're going to do a few things to make
+as much use of this design as possible.
+
+
+46
+00:03:07,487 --> 00:03:12,059 line:-2
+We'll start by customizing
+the built-in back action to fit our needs.
+
+
+47
+00:03:12.092 --> 00:03:15.162 line:-2 align:center
+Then we'll add a title menu
+with some document info
+
+
+48
+00:03:15,195 --> 00:03:18,165 line:-1
+and common document actions.
+
+
+49
+00:03:18.198 --> 00:03:23.237 line:-2 align:center
+We'll also add support for renaming
+via the new built-in rename UI.
+
+
+50
+00:03:23,270 --> 00:03:28,242 line:-2
+And finally, we'll make previously buried
+functionality more easily accessible
+
+
+51
+00:03:28.275 --> 00:03:30.177 line:-1 align:center
+by bringing it to the center of the bar.
+
+
+52
+00:03:30.944 --> 00:03:34.047 line:-2 align:center
+Let's start by opting into
+the editor style by setting
+
+
+53
+00:03:34,081 --> 00:03:38,285 line:0
+our view controller's navigationItem's
+style property to .editor.
+
+
+54
+00:03:39,987 --> 00:03:42,923 line:0
+This immediately gives us
+the leading aligned title
+
+
+55
+00:03:42,956 --> 00:03:44,892 line:0
+and opens up the center area.
+
+
+56
+00:03:47,394 --> 00:03:51,098 line:0
+After that,
+let's remove our trailing done button
+
+
+57
+00:03:51,131 --> 00:03:55,636 align:center
+and replace it
+using the new backAction API.
+
+
+58
+00:03:55,669 --> 00:03:58,505 align:center
+This way we get a more standard look
+for the action
+
+
+59
+00:03:58,539 --> 00:04:01,975 align:center
+that dismisses this view
+and returns to the document picker.
+
+
+60
+00:04:05,078 --> 00:04:09,750 align:center
+Next let's figure out whether our app
+would benefit from a title menu.
+
+
+61
+00:04:09.783 --> 00:04:12.653 line:-2 align:center
+As the name implies,
+the title menu is presented
+
+
+62
+00:04:12,686 --> 00:04:15,656 line:-1
+from the navigation bar's title view.
+
+
+63
+00:04:15.689 --> 00:04:18.192 line:-2 align:center
+It's a great place to show
+document metadata
+
+
+64
+00:04:18,225 --> 00:04:22,062 line:-2
+and surface actions
+that apply to the whole document.
+
+
+65
+00:04:22.095 --> 00:04:26.366 line:-2 align:center
+If your app isn't document based,
+it may be a good place to surface actions
+
+
+66
+00:04:26.400 --> 00:04:28.335 line:-1 align:center
+that apply to the entire view.
+
+
+67
+00:04:29.203 --> 00:04:33.240 line:-2 align:center
+For our app, it makes sense
+to use the document menu's header
+
+
+68
+00:04:33,273 --> 00:04:37,544 line:-2
+to surface some useful information
+about the document.
+
+
+69
+00:04:37,578 --> 00:04:41,548 line:-2
+We'll also be able to provide
+a draggable representation of the document
+
+
+70
+00:04:41.582 --> 00:04:45.686 line:-1 align:center
+and easy access to sharing functionality.
+
+
+71
+00:04:45.719 --> 00:04:48.121 line:-1 align:center
+And now it's time to write some code!
+
+
+72
+00:04:49.857 --> 00:04:51.892 line:-1 align:center
+Our app is UIDocument backed,
+
+
+73
+00:04:51,925 --> 00:04:54,862 line:-1
+so we can use the UIDocument's fileURL
+
+
+74
+00:04:54,895 --> 00:04:58,966 line:-2
+to instantiate
+a UIDocumentProperties object.
+
+
+75
+00:05:00.501 --> 00:05:05.105 line:-2 align:center
+Next, we'll use that same URL
+to create an NSItemProvider.
+
+
+76
+00:05:07,608 --> 00:05:11,879 line:-2
+Then we'll use the item provider
+to create a UIDragItem
+
+
+77
+00:05:11.912 --> 00:05:16.416 line:-2 align:center
+which we'll return from the properties
+object's dragItemsProvider.
+
+
+78
+00:05:18.252 --> 00:05:22.022 line:-2 align:center
+We'll also use it to construct
+a UIActivityViewController
+
+
+79
+00:05:22,055 --> 00:05:26,994 line:-2
+which we'll return from the properties
+object's activityViewControllerProvider.
+
+
+80
+00:05:27.027 --> 00:05:31.198 line:-2 align:center
+And finally, we'll set the properties
+object as the editor view controller's
+
+
+81
+00:05:31.231 --> 00:05:34.134 line:-1 align:center
+navigationItem's documentProperties.
+
+
+82
+00:05:34,168 --> 00:05:37,371 line:-2
+The code we just wrote results in
+this document header,
+
+
+83
+00:05:37,404 --> 00:05:39,973 line:-2
+which provides a quick overview
+of the document
+
+
+84
+00:05:40.007 --> 00:05:44.211 line:-2 align:center
+including its name, size,
+and an icon representation.
+
+
+85
+00:05:44.244 --> 00:05:48.081 line:-2 align:center
+Since we specified drag item
+and activity view controller providers,
+
+
+86
+00:05:48.115 --> 00:05:51.485 line:-2 align:center
+I can drag the icon to copy
+the document outside the app
+
+
+87
+00:05:51,518 --> 00:05:55,355 line:-2
+or tap the share button to bring up
+an activity view controller.
+
+
+88
+00:05:57.057 --> 00:05:59.693 line:-2 align:center
+In addition to displaying
+the document header,
+
+
+89
+00:05:59,726 --> 00:06:02,696 line:-2
+the title menu is a good place
+to provide functionality
+
+
+90
+00:06:02,729 --> 00:06:05,799 line:-1
+that applies to the entire document.
+
+
+91
+00:06:05.832 --> 00:06:09.536 line:-2 align:center
+There are two kinds of actions
+that can be displayed in this menu:
+
+
+92
+00:06:09.570 --> 00:06:14.842 line:-2 align:center
+system-provided ones with pre-defined
+localized titles and symbol images,
+
+
+93
+00:06:14,875 --> 00:06:17,945 line:-2
+and entirely custom ones
+that the app provides.
+
+
+94
+00:06:19,546 --> 00:06:21,481 line:-2
+Since it comes with
+some additional behavior,
+
+
+95
+00:06:21,515 --> 00:06:24,284 line:-1
+let's start with the rename action.
+
+
+96
+00:06:24.318 --> 00:06:26.954 line:-2 align:center
+We can add this action to our menu
+by conforming
+
+
+97
+00:06:26,987 --> 00:06:30,057 line:-1
+to the rename delegate protocol.
+
+
+98
+00:06:30.090 --> 00:06:34.561 line:-2 align:center
+When triggered, the action presents
+the bar's built-in rename UI.
+
+
+99
+00:06:35,963 --> 00:06:40,868 line:-2
+First we'll assign our view controller
+as its navigation item's renameDelegate.
+
+
+100
+00:06:43,403 --> 00:06:48,041 line:-2
+Then, we'll implement
+navigationItemDidEndRenamingWithTitle
+
+
+101
+00:06:48.075 --> 00:06:51.345 line:-2 align:center
+to handle the actual renaming
+of the displayed document.
+
+
+102
+00:06:52.846 --> 00:06:56.717 line:-2 align:center
+This function is called
+when the rename action is committed.
+
+
+103
+00:06:56.750 --> 00:07:02.322 line:-2 align:center
+It's the app's responsibility to handle
+this by actually renaming the document.
+
+
+104
+00:07:02,356 --> 00:07:04,825 line:-1
+The API is intentionally open ended
+
+
+105
+00:07:04.858 --> 00:07:08.228 line:-2 align:center
+to support any kind of data model
+your app may have.
+
+
+106
+00:07:08,262 --> 00:07:10,797 line:-2
+Moving on to other
+system provided actions,
+
+
+107
+00:07:10.831 --> 00:07:15.602 line:-2 align:center
+we'll first need to override their
+functions on our editor view controller.
+
+
+108
+00:07:15.636 --> 00:07:20.474 line:-2 align:center
+Here we've implemented
+the duplicate and move functions.
+
+
+109
+00:07:20,507 --> 00:07:23,877 align:center
+UIKit automatically surfaces
+system-provided actions,
+
+
+110
+00:07:23,911 --> 00:07:25,612 align:center
+including the rename action,
+
+
+111
+00:07:25,646 --> 00:07:28,482 line:0
+in the navigationItem's titleMenuProvider
+
+
+112
+00:07:28,515 --> 00:07:32,319 line:0
+as an array
+of suggested UIMenuElements.
+
+
+113
+00:07:32,352 --> 00:07:34,321 align:center
+To include them in our title menu,
+
+
+114
+00:07:34,354 --> 00:07:37,558 align:center
+we'll just add them
+to the returned menu's children.
+
+
+115
+00:07:39.159 --> 00:07:41.094 line:-1 align:center
+In addition to the system-vended actions,
+
+
+116
+00:07:41,128 --> 00:07:43,797 line:-1
+we can add entirely custom actions
+
+
+117
+00:07:43.830 --> 00:07:47.067 line:-1 align:center
+or even whole menu hierarchies.
+
+
+118
+00:07:47.100 --> 00:07:53.006 line:-2 align:center
+Here I've added an Export submenu
+with export as HTML and PDF sub-actions.
+
+
+119
+00:07:54,408 --> 00:07:57,444 line:-2
+And with that, tapping the title view
+now brings up a menu
+
+
+120
+00:07:57.477 --> 00:08:01.481 line:-2 align:center
+with the document header
+and all the actions we just added.
+
+
+121
+00:08:01,515 --> 00:08:03,050 line:-1
+And when I select rename,
+
+
+122
+00:08:03.083 --> 00:08:05.219 line:-1 align:center
+the built-in rename UI is activated
+
+
+123
+00:08:05,252 --> 00:08:07,221 line:-1
+and I'm able to rename the document.
+
+
+124
+00:08:08.755 --> 00:08:11.892 line:-2 align:center
+Now that we've started establishing
+the base structure of our app,
+
+
+125
+00:08:11,925 --> 00:08:14,161 line:-2
+it's a good time to check in
+on how things look
+
+
+126
+00:08:14,194 --> 00:08:17,064 line:-1
+when we build our app with Mac catalyst.
+
+
+127
+00:08:17.097 --> 00:08:20.167 line:-2 align:center
+When we run the app on a Mac,
+we'll find that the editor style
+
+
+128
+00:08:20.200 --> 00:08:23.370 line:-2 align:center
+with its leading aligned title
+has been translated nicely.
+
+
+129
+00:08:24.872 --> 00:08:27.307 line:-2 align:center
+Our back action
+has also been carried over,
+
+
+130
+00:08:27.341 --> 00:08:30.444 line:-2 align:center
+and when clicked,
+brings up a file browser.
+
+
+131
+00:08:31,745 --> 00:08:34,381 line:-2
+The system provided actions
+and rename functionality
+
+
+132
+00:08:34.414 --> 00:08:37.584 line:-2 align:center
+are automatically surfaced
+in the app's File menu.
+
+
+133
+00:08:37,618 --> 00:08:41,655 line:-2
+Note that the titleMenuProvider
+is not called on Mac Catalyst,
+
+
+134
+00:08:41.688 --> 00:08:45.993 line:-2 align:center
+so our custom actions are not included
+in the File menu.
+
+
+135
+00:08:46,026 --> 00:08:48,962 line:-2
+To expose these actions,
+we would need to manually add them
+
+
+136
+00:08:48,996 --> 00:08:52,966 line:-2
+to the app's main menu
+using the main UIMenuSystem.
+
+
+137
+00:08:55,202 --> 00:08:57,905 line:-2
+All right, let's continue
+our modernization process.
+
+
+138
+00:08:57.938 --> 00:09:01.942 line:-2 align:center
+We'll keep checking in on the Mac
+as we make progress towards our goal.
+
+
+139
+00:09:01,975 --> 00:09:06,880 line:0
+Let's consider the opportunities
+made available by the bar's center area.
+
+
+140
+00:09:06,914 --> 00:09:10,083 align:center
+The iOS 15 version of the app
+has a menu that holds
+
+
+141
+00:09:10,117 --> 00:09:13,520 line:0
+a number of secondary controls and tools.
+
+
+142
+00:09:13,554 --> 00:09:17,524 align:center
+With center items, we're able to make
+these tools more discoverable.
+
+
+143
+00:09:19,092 --> 00:09:23,463 line:-2
+Since the center area is customizable,
+we can include a large set of controls
+
+
+144
+00:09:23,497 --> 00:09:28,068 line:-2
+without worrying about filling the UI
+with less commonly used ones.
+
+
+145
+00:09:28.101 --> 00:09:32.973 line:-2 align:center
+Each person can tailor the bar's contents
+to fit their workflow.
+
+
+146
+00:09:33.006 --> 00:09:37.878 line:-2 align:center
+The first step in enabling customization
+is specifying a customizationIdentifier
+
+
+147
+00:09:37,911 --> 00:09:39,880 line:-1
+on the navigation item.
+
+
+148
+00:09:41,181 --> 00:09:46,019 line:-2
+Next, we'll define the center items
+as UIBarButtonItemGroups.
+
+
+149
+00:09:46.053 --> 00:09:50.424 line:-2 align:center
+Groups are an existing concept
+that's been extended to UINavigationBar
+
+
+150
+00:09:50,457 --> 00:09:54,962 line:-2
+and enhanced to support
+customization in iOS 16.
+
+
+151
+00:09:54,995 --> 00:09:59,499 line:-2
+This screenshot shows the set of
+center items we'd like to show by default.
+
+
+152
+00:09:59.533 --> 00:10:01.835 line:-2 align:center
+The synchronize scrolling button
+all the way on the left
+
+
+153
+00:10:01.869 --> 00:10:04.872 line:-2 align:center
+provides an important function
+that can't be reached
+
+
+154
+00:10:04.905 --> 00:10:07.374 line:-1 align:center
+by any other means,
+
+
+155
+00:10:07,407 --> 00:10:09,977 line:-2
+so it makes sense to place it
+in a fixed group
+
+
+156
+00:10:10.010 --> 00:10:15.682 line:-2 align:center
+using UIBarButtonItem's
+new creatingFixedGroup() function.
+
+
+157
+00:10:15.716 --> 00:10:20.087 line:-2 align:center
+Fixed groups are not customizable
+and cannot be moved by the user.
+
+
+158
+00:10:22.022 --> 00:10:25.993 line:-2 align:center
+The add link button, on the other hand,
+doesn't provide critical functionality,
+
+
+159
+00:10:26.026 --> 00:10:30.531 line:-2 align:center
+and the same task can be achieved
+by typing link tags in the editor,
+
+
+160
+00:10:30,564 --> 00:10:36,470 line:-2
+so we'll use creatingOptionalGroup
+to create a completely customizable item.
+
+
+161
+00:10:36,503 --> 00:10:39,773 line:-2
+And we'll give it a unique
+customizationIdentifier
+
+
+162
+00:10:39,806 --> 00:10:43,544 line:-2
+so the customization is persisted
+across app launches.
+
+
+163
+00:10:45,112 --> 00:10:47,848 line:-2
+We'll follow a similar process
+to define the remaining items
+
+
+164
+00:10:47.881 --> 00:10:51.385 line:-2 align:center
+in the default set,
+then move on to lower priority items
+
+
+165
+00:10:51.418 --> 00:10:54.488 line:-2 align:center
+that don't need to be available
+by default.
+
+
+166
+00:10:54.521 --> 00:10:58.392 line:-2 align:center
+One such item is the text format group,
+which includes the bold,
+
+
+167
+00:10:58,425 --> 00:11:00,761 line:-1
+italics, and underline items.
+
+
+168
+00:11:01.995 --> 00:11:04.231 line:-2 align:center
+It's not important enough
+to show by default,
+
+
+169
+00:11:04,264 --> 00:11:08,836 line:-2
+but we want it in the customization
+popover so it can be dragged into the bar.
+
+
+170
+00:11:10,470 --> 00:11:13,540 line:-2
+To achieve this,
+we'll use UIBarButtonItemGroup's
+
+
+171
+00:11:13.574 --> 00:11:18.812 line:-2 align:center
+optionalGroup initializer with
+isInDefaultCustomization set to false.
+
+
+172
+00:11:21,248 --> 00:11:24,218 line:-2
+We'll also be sure to give the group
+a representative item
+
+
+173
+00:11:24,251 --> 00:11:26,353 line:-1
+so it has a title in the popover,
+
+
+174
+00:11:26.386 --> 00:11:28.388 line:-1 align:center
+and has a compact representation
+
+
+175
+00:11:28.422 --> 00:11:31.692 line:-2 align:center
+that it can be collapsed to
+when the bar runs out of space.
+
+
+176
+00:11:33.227 --> 00:11:35.662 line:-2 align:center
+Back on the iPad,
+the center items we defined
+
+
+177
+00:11:35.696 --> 00:11:38.465 line:-1 align:center
+show up in the center of the bar.
+
+
+178
+00:11:38,498 --> 00:11:40,734 line:-1
+If I click the newly added More button,
+
+
+179
+00:11:40,767 --> 00:11:44,705 line:-2
+a menu shows up
+with a Customize Toolbar action.
+
+
+180
+00:11:44,738 --> 00:11:48,108 line:-2
+And if I click that,
+the customization mode is activated.
+
+
+181
+00:11:49.376 --> 00:11:53.847 line:-2 align:center
+The sync scrolling button that we marked
+as fixed is de-emphasized and static,
+
+
+182
+00:11:53,881 --> 00:11:58,318 line:-2
+while all the other items lift and shake
+to show that they're customizable.
+
+
+183
+00:12:00,220 --> 00:12:04,258 line:-2
+Optional items like the Format group
+show up in the popover
+
+
+184
+00:12:04.291 --> 00:12:06.393 line:-1 align:center
+and can be dragged into the bar.
+
+
+185
+00:12:09.596 --> 00:12:12.499 line:-2 align:center
+When we run the app on a Mac,
+we find that the center items
+
+
+186
+00:12:12.533 --> 00:12:16.837 line:-2 align:center
+have been converted to fully customizable
+macOS toolbar buttons.
+
+
+187
+00:12:19.106 --> 00:12:24.378 line:-2 align:center
+Before we move on, let's go back to
+the iPad for a minute and resize the app.
+
+
+188
+00:12:24,411 --> 00:12:27,080 line:-2
+Now that we have less space available
+in the toolbar,
+
+
+189
+00:12:27,114 --> 00:12:30,684 line:-1
+the center items are no longer visible.
+
+
+190
+00:12:30.717 --> 00:12:34.821 line:-2 align:center
+UIKit automatically handles
+showing and hiding center items
+
+
+191
+00:12:34.855 --> 00:12:37.691 line:-1 align:center
+in response to the available space.
+
+
+192
+00:12:37.724 --> 00:12:42.462 line:-2 align:center
+Any items that don't fit
+are displayed in the overflow menu.
+
+
+193
+00:12:42.496 --> 00:12:45.332 line:-2 align:center
+Standard bar button items
+are automatically converted
+
+
+194
+00:12:45,365 --> 00:12:47,401 line:-1
+to their menu representation,
+
+
+195
+00:12:47,434 --> 00:12:52,873 line:-2
+but we're also able to provide
+a custom menu representation if we like.
+
+
+196
+00:12:52,906 --> 00:12:56,877 line:-2
+Since UIKit has no insight
+into the purpose of a custom view item,
+
+
+197
+00:12:56.910 --> 00:13:00.047 line:-2 align:center
+our slider item
+isn't automatically translated.
+
+
+198
+00:13:00,080 --> 00:13:03,317 line:-2
+We'll need to manually
+specify a menu representation.
+
+
+199
+00:13:04.751 --> 00:13:06.086 line:-1 align:center
+Here's our slider item.
+
+
+200
+00:13:06,119 --> 00:13:08,722 line:-2
+It's a single bar button item
+with a custom view,
+
+
+201
+00:13:08.755 --> 00:13:12.426 line:-1 align:center
+wrapped in an optional bar button group.
+
+
+202
+00:13:12.459 --> 00:13:15.162 line:-2 align:center
+To provide the core functionality
+of the slider,
+
+
+203
+00:13:15,195 --> 00:13:19,867 line:-2
+we'll define the menu representation
+as a UIMenu with Decrease,
+
+
+204
+00:13:19.900 --> 00:13:22.603 line:-1 align:center
+Reset, and Increase actions.
+
+
+205
+00:13:25.038 --> 00:13:28.642 line:-2 align:center
+Using UIMenu's
+new preferredElementSize property,
+
+
+206
+00:13:28,675 --> 00:13:33,313 line:-2
+we can give the menu a more
+compact side by side appearance.
+
+
+207
+00:13:35.516 --> 00:13:38.585 line:-2 align:center
+And using the
+new keepsMenuPresented attribute,
+
+
+208
+00:13:38.619 --> 00:13:42.489 line:-2 align:center
+we can keep the menu presented
+after each action is performed,
+
+
+209
+00:13:42,523 --> 00:13:45,092 line:-2
+allowing the font size to be changed
+multiple times
+
+
+210
+00:13:45,125 --> 00:13:48,929 line:-2
+without dismissing
+and re-presenting the menu.
+
+
+211
+00:13:48.962 --> 00:13:51.331 line:-1 align:center
+Let's run this on the iPad again.
+
+
+212
+00:13:51.365 --> 00:13:54.001 line:-1 align:center
+Now when we bring up the overflow menu,
+
+
+213
+00:13:54,034 --> 00:13:58,739 line:-2
+the slider appears as an inline menu
+with three side-by-side actions,
+
+
+214
+00:13:58.772 --> 00:14:01.175 line:-2 align:center
+covering the full functionality
+of the slider.
+
+
+215
+00:14:02,576 --> 00:14:05,445 line:-2
+Since the small element size
+doesn't exist on the Mac,
+
+
+216
+00:14:05.479 --> 00:14:09.716 line:-2 align:center
+the actions will appear
+as standard macOS menu items.
+
+
+217
+00:14:09.750 --> 00:14:12.986 line:-2 align:center
+And that's it for UI organization
+and customization.
+
+
+218
+00:14:13,020 --> 00:14:16,023 line:-2
+Next, let's look into speeding up
+some workflows in the app
+
+
+219
+00:14:16,056 --> 00:14:19,259 line:-1
+using new collection view and menu API.
+
+
+220
+00:14:19.293 --> 00:14:22.396 line:-2 align:center
+Our app has a table of contents sidebar
+that can be used
+
+
+221
+00:14:22,429 --> 00:14:27,401 line:-2
+to quickly navigate the document
+or take action on top level tags.
+
+
+222
+00:14:27,434 --> 00:14:31,371 line:-2
+Prior to iOS 16,
+adding the ability to edit multiple items
+
+
+223
+00:14:31.405 --> 00:14:34.775 line:-2 align:center
+would've likely meant implementing
+a distinct edit mode,
+
+
+224
+00:14:34.808 --> 00:14:37.911 line:-2 align:center
+with bulk actions relegated
+to buttons in a toolbar.
+
+
+225
+00:14:40,914 --> 00:14:44,718 line:-2
+iOS 16 introduces a new design
+for multi-item menus
+
+
+226
+00:14:44.751 --> 00:14:49.122 line:-2 align:center
+with a flock of items that clearly
+communicates which items the menu affects
+
+
+227
+00:14:49,156 --> 00:14:53,460 line:-2
+and provides a direct transition
+to a multi-item drag.
+
+
+228
+00:14:53,493 --> 00:14:57,464 line:-2
+In a desktop class iPad app,
+this new menu design is best paired
+
+
+229
+00:14:57,497 --> 00:15:00,734 line:-1
+with a lighter weight selection style.
+
+
+230
+00:15:00.767 --> 00:15:03.637 line:-2 align:center
+"Lightweight" here
+means selecting multiple items
+
+
+231
+00:15:03.670 --> 00:15:06.540 line:-2 align:center
+without kicking the collection view
+into an edit mode
+
+
+232
+00:15:06.573 --> 00:15:09.610 line:-2 align:center
+or making significant changes
+to the app's UI.
+
+
+233
+00:15:09.643 --> 00:15:15.082 line:-2 align:center
+We can achieve this and enable
+keyboard focus using existing API.
+
+
+234
+00:15:15.115 --> 00:15:18.285 line:-2 align:center
+First, we'll set
+allowsMultipleSelection to true.
+
+
+235
+00:15:21.121 --> 00:15:25.626 line:-2 align:center
+Then we'll enable keyboard focus
+by setting allowsFocus to true.
+
+
+236
+00:15:28,128 --> 00:15:33,600 line:-2
+And we'll allow focus to drive selection
+by setting selectionFollowsFocus to true.
+
+
+237
+00:15:36,270 --> 00:15:39,306 line:-2
+If we run this on our iPad,
+we immediately notice
+
+
+238
+00:15:39.339 --> 00:15:41.775 line:-2 align:center
+that as each item is added
+to the selection,
+
+
+239
+00:15:41.808 --> 00:15:44.211 line:-1 align:center
+it still fires its selection action,
+
+
+240
+00:15:44.244 --> 00:15:46.580 line:-1 align:center
+causing the editor view to scroll.
+
+
+241
+00:15:46.613 --> 00:15:49.650 line:-2 align:center
+Let's head back to our code and
+figure out what's going on.
+
+
+242
+00:15:51.285 --> 00:15:52.286 line:-1 align:center
+There it is!
+
+
+243
+00:15:52.319 --> 00:15:54.855 line:-1 align:center
+The code in didSelectItemAtIndexPath
+
+
+244
+00:15:54,888 --> 00:15:57,724 line:-2
+tries to disallow scrolling
+while in edit mode
+
+
+245
+00:15:57.758 --> 00:16:01.695 line:-2 align:center
+by checking
+the collectionView's isEditing property.
+
+
+246
+00:16:01.728 --> 00:16:05.098 line:-2 align:center
+Now that we allow multiple
+selection outside of edit mode,
+
+
+247
+00:16:05.132 --> 00:16:08.001 line:-1 align:center
+this code runs for every selection.
+
+
+248
+00:16:08.035 --> 00:16:11.972 line:-2 align:center
+We can fix this using a new
+UICollectionViewDelegate method.
+
+
+249
+00:16:12.005 --> 00:16:16.510 line:-2 align:center
+We'll implement
+performPrimaryActionForItemAtIndexPath
+
+
+250
+00:16:16.543 --> 00:16:21.215 line:-2 align:center
+and just move our scrolling code
+to this new function.
+
+
+251
+00:16:21.248 --> 00:16:24.251 line:-2 align:center
+Since this function is only called
+when a single item is tapped
+
+
+252
+00:16:24.284 --> 00:16:26.420 line:-1 align:center
+and the collection view is not editing,
+
+
+253
+00:16:26.453 --> 00:16:29.089 line:-1 align:center
+we no longer need the check for edit mode.
+
+
+254
+00:16:31,658 --> 00:16:34,795 line:-2
+And since we don't have
+any selection related behavior,
+
+
+255
+00:16:34,828 --> 00:16:39,333 line:-2
+we can remove our implementation
+of did select item at indexPath.
+
+
+256
+00:16:43,237 --> 00:16:46,874 line:-2
+Back on the iPad,
+selecting multiple items no longer scrolls
+
+
+257
+00:16:46,907 --> 00:16:50,177 line:-2
+to the corresponding text
+in the editor view.
+
+
+258
+00:16:50.210 --> 00:16:53.080 line:-2 align:center
+With that done,
+let's actually add support for the menu.
+
+
+259
+00:16:55,382 --> 00:17:00,554 line:-2
+In iPadOS 16, UICollectionViewDelegate's
+existing single item menu method
+
+
+260
+00:17:00,587 --> 00:17:02,256 line:-1
+is deprecated.
+
+
+261
+00:17:02.289 --> 00:17:08.328 line:-2 align:center
+Its replacement supports displaying menus
+for anywhere from zero to many items.
+
+
+262
+00:17:08.362 --> 00:17:11.298 line:-2 align:center
+The number of items in the given
+indexPaths array
+
+
+263
+00:17:11.331 --> 00:17:13.500 line:-1 align:center
+depends on how many items are selected,
+
+
+264
+00:17:13.534 --> 00:17:15.636 line:-1 align:center
+and where the menu is invoked.
+
+
+265
+00:17:17.271 --> 00:17:22.042 line:-2 align:center
+If the array is empty, then the menu was
+invoked in the blank space between cells.
+
+
+266
+00:17:25.012 --> 00:17:26.914 line:-1 align:center
+If it has a single indexPath,
+
+
+267
+00:17:26.947 --> 00:17:30.150 line:-2 align:center
+then it was invoked on an item
+that is either deselected
+
+
+268
+00:17:30,184 --> 00:17:32,386 line:-1
+or is the sole selected one.
+
+
+269
+00:17:35.088 --> 00:17:37.824 line:-2 align:center
+If it has more than one item,
+then the menu was invoked
+
+
+270
+00:17:37,858 --> 00:17:41,461 line:-2
+on an item that is part
+of a multiple selection.
+
+
+271
+00:17:44.031 --> 00:17:47.668 line:-2 align:center
+If I head back to the iPad,
+select the top four items again,
+
+
+272
+00:17:47,701 --> 00:17:50,103 line:-2
+and two-finger click
+one of the selected items,
+
+
+273
+00:17:50.137 --> 00:17:52.706 line:-1 align:center
+a new multi-item menu comes up.
+
+
+274
+00:17:56,343 --> 00:17:58,111 line:-1
+When I do the same thing on a Mac,
+
+
+275
+00:17:58,145 --> 00:18:01,248 line:-2
+a ring is drawn around the selected cells
+to highlight them.
+
+
+276
+00:18:02.783 --> 00:18:04.685 line:-1 align:center
+With multi-item menus done,
+
+
+277
+00:18:04.718 --> 00:18:07.321 line:-2 align:center
+let's look into enhancing
+the text editing experience
+
+
+278
+00:18:07.354 --> 00:18:10.624 line:-2 align:center
+using the new Find and Replace
+and edit menu features.
+
+
+279
+00:18:10.657 --> 00:18:13.660 line:-1 align:center
+Our app uses a UITextView for its editor
+
+
+280
+00:18:13.694 --> 00:18:17.931 line:-2 align:center
+and doesn't require
+any custom Find and Replace behavior,
+
+
+281
+00:18:17,965 --> 00:18:21,602 line:-2
+so all we need to do
+to enable the default system functionality
+
+
+282
+00:18:21.635 --> 00:18:26.807 line:-2 align:center
+is set the text view's
+isFindInteractionEnabled property to true.
+
+
+283
+00:18:26.840 --> 00:18:29.743 line:-2 align:center
+With that set,
+hitting Command+F while editing text
+
+
+284
+00:18:29.776 --> 00:18:31.979 line:-1 align:center
+brings up the Find and Replace UI.
+
+
+285
+00:18:33,180 --> 00:18:37,084 line:-2
+Adding custom actions to the text view's
+edit menu doesn't take much,
+
+
+286
+00:18:37,117 --> 00:18:40,988 line:-2
+and can enable
+some great quick editing features.
+
+
+287
+00:18:41.021 --> 00:18:44.057 line:-2 align:center
+We'll just implement
+the new UITextViewDelegate method
+
+
+288
+00:18:44,091 --> 00:18:48,495 line:-2
+edit menu for text in range
+suggested actions.
+
+
+289
+00:18:48,529 --> 00:18:52,699 line:-2
+In the implementation,
+we can construct and return a UIMenu
+
+
+290
+00:18:52.733 --> 00:18:55.636 line:-2 align:center
+that combines custom actions,
+like this Hide action,
+
+
+291
+00:18:55.669 --> 00:18:57.204 line:-1 align:center
+with the system menu.
+
+
+292
+00:18:59.907 --> 00:19:01.308 line:-1 align:center
+And this is the result. W
+
+
+293
+00:19:01.341 --> 00:19:04.011 line:-2 align:center
+hen I select some text
+and bring up the edit menu,
+
+
+294
+00:19:04.044 --> 00:19:08.615 line:-2 align:center
+both our custom actions and
+the system-provided ones are displayed.
+
+
+295
+00:19:08,649 --> 00:19:11,952 line:-2
+For more information about
+Find and Replace and the edit menu,
+
+
+296
+00:19:11,985 --> 00:19:16,223 align:center
+check out “Adopt desktop class
+editing interactions.”
+
+
+297
+00:19:16,256 --> 00:19:17,090 line:0
+And that's it!
+
+
+298
+00:19:17.124 --> 00:19:20.127 line:-2 align:center
+With these few changes,
+we've taken some great basic steps
+
+
+299
+00:19:20,160 --> 00:19:22,496 line:-1
+towards making our app desktop class
+
+
+300
+00:19:22.529 --> 00:19:25.599 line:-1 align:center
+and translating it seamlessly to the Mac.
+
+
+301
+00:19:25.632 --> 00:19:28.435 line:-1 align:center
+Use the APIs offered in iPadOS 16
+
+
+302
+00:19:28.468 --> 00:19:31.338 line:-2 align:center
+to take your own app
+through a similar process.
+
+
+303
+00:19:31.371 --> 00:19:35.642 line:-2 align:center
+Start by choosing a navigation style
+that fits your app.
+
+
+304
+00:19:35,676 --> 00:19:39,947 line:-2
+Enhance document workflows with
+document properties and the title menu.
+
+
+305
+00:19:39,980 --> 00:19:45,452 line:-2
+And surface important functionality and
+provide customizability with center items.
+
+
+306
+00:19:45.485 --> 00:19:49.289 line:-2 align:center
+Enable quickly acting on multiple
+items with multi-item menus.
+
+
+307
+00:19:49.323 --> 00:19:53.093 line:-2 align:center
+And enhance your app's text editing
+experience using Find and Replace
+
+
+308
+00:19:53,126 --> 00:19:54,795 line:-1
+and the new edit menu.
+
+
+309
+00:19:54.828 --> 00:19:58.031 line:-2 align:center
+Whether you're building a new app
+or updating an existing one,
+
+
+310
+00:19:58,065 --> 00:20:01,668 line:-2
+I can't wait to use the apps you build
+with these new tools.
+
+
+311
+00:20:01,702 --> 00:20:04,171 line:-1
+Thanks for watching.
+

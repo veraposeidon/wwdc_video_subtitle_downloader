@@ -1,0 +1,1691 @@
+2
+00:00:00.000 --> 00:00:02.336 line:-1 position:50%
+[MAC STARTUP CHIME]
+
+
+3
+00:00:02.336 --> 00:00:05.505 line:-1 position:50%
+♪ Bass music playing ♪
+
+
+4
+00:00:05,505 --> 00:00:07,140 line:-1
+[KEYSTROKES]
+
+
+5
+00:00:07,140 --> 00:00:09,076 position:89% line:0 align:center
+♪
+
+
+6
+00:00:09.076 --> 00:00:11.645 line:-1 position:50%
+Pranav Sodhani: Hello
+and welcome to WWDC!
+
+
+7
+00:00:11.645 --> 00:00:13.013 line:-1 position:50%
+My name is Pranav,
+
+
+8
+00:00:13.013 --> 00:00:15.282 line:-1 position:50%
+and I am part of the Display
+and Color Technologies team
+
+
+9
+00:00:15,282 --> 00:00:16,783 line:-1
+at Apple.
+
+
+10
+00:00:16,783 --> 00:00:20,520 line:-1
+In this talk, we will introduce
+a video quality tool
+
+
+11
+00:00:20.520 --> 00:00:22.322 line:-1 position:50%
+and show how you can use it
+
+
+12
+00:00:22.322 --> 00:00:25.525 line:-1 position:50%
+to evaluate perceptual quality
+of compressed videos
+
+
+13
+00:00:25.525 --> 00:00:28.996 line:-1 position:50%
+in your apps or content
+creation workflows
+
+
+14
+00:00:28,996 --> 00:00:30,330 line:-1
+All right.
+
+
+15
+00:00:30,330 --> 00:00:33,834 line:-1
+Let's start by looking at a
+typical video delivery workflow.
+
+
+16
+00:00:33.834 --> 00:00:37.237 line:-1 position:50%
+In such a workflow,
+the high-quality source video
+
+
+17
+00:00:37.237 --> 00:00:40.007 line:-1 position:50%
+undergoes video compression
+and, optionally,
+
+
+18
+00:00:40,007 --> 00:00:44,811 line:-1
+video downscaling to generate
+videos with lower bit rates.
+
+
+19
+00:00:44,811 --> 00:00:48,482 line:-1
+And these low-bit rate videos
+can then be easily delivered
+
+
+20
+00:00:48,482 --> 00:00:51,184 line:-1
+over bandwidth-constrained
+networks.
+
+
+21
+00:00:51,184 --> 00:00:54,621 line:0
+A few possible ways
+to use such workflows
+
+
+22
+00:00:54,621 --> 00:00:58,258 line:0
+include AVFoundation APIs
+such as AVAssetWriter,
+
+
+23
+00:00:58,258 --> 00:01:00,093 position:50%
+apps such as Compressor,
+
+
+24
+00:01:00,093 --> 00:01:04,731 line:0
+or it can be one of your own
+video compression workflows.
+
+
+25
+00:01:04,731 --> 00:01:06,867 position:50%
+Now, downscaling and compression
+
+
+26
+00:01:06,867 --> 00:01:09,903 line:0
+can add video coding
+and scaling artifacts.
+
+
+27
+00:01:09,903 --> 00:01:12,205 line:0
+And this will impair
+the source video
+
+
+28
+00:01:12,205 --> 00:01:15,275 line:0
+and create visible artifacts.
+
+
+29
+00:01:15,275 --> 00:01:17,277 line:0
+One example of such artifact
+
+
+30
+00:01:17,277 --> 00:01:19,780 line:0
+is blockiness
+in the compressed video,
+
+
+31
+00:01:19,780 --> 00:01:23,750 line:0
+which is shown in the frame
+on the right side.
+
+
+32
+00:01:23,750 --> 00:01:27,154 line:0
+Another example is when
+the video appears blurry
+
+
+33
+00:01:27,154 --> 00:01:30,057 line:0
+and video details
+start disappearing.
+
+
+34
+00:01:30,057 --> 00:01:32,459 line:0
+Such artifacts
+can adversely affect
+
+
+35
+00:01:32,459 --> 00:01:37,297 line:0
+a consumer's
+video quality experience.
+
+
+36
+00:01:37,297 --> 00:01:38,832 line:0
+We know that consumers
+are expecting
+
+
+37
+00:01:38,832 --> 00:01:41,068 position:50%
+a high-quality
+video experience.
+
+
+38
+00:01:41,068 --> 00:01:44,571 line:0
+So it's important to deliver
+on this expectation.
+
+
+39
+00:01:44,571 --> 00:01:46,373 line:0
+Now, the first step to do this
+
+
+40
+00:01:46,373 --> 00:01:50,110 line:0
+is to evaluate the quality
+of your delivered content.
+
+
+41
+00:01:50,110 --> 00:01:52,446 line:0
+And the most accurate
+way of doing this
+
+
+42
+00:01:52,446 --> 00:01:55,215 position:50%
+is to have real people
+watch the videos
+
+
+43
+00:01:55,215 --> 00:01:58,218 line:0
+and rate them
+on a video quality scale.
+
+
+44
+00:01:58,218 --> 00:02:01,488 line:0
+But this is very time consuming
+and not scalable
+
+
+45
+00:02:01,488 --> 00:02:04,992 line:0
+if you want to evaluate
+a high volume of videos.
+
+
+46
+00:02:04,992 --> 00:02:08,328 line:-1
+Fortunately,
+there's another way.
+
+
+47
+00:02:08.328 --> 00:02:09.596 line:-1 position:50%
+What we need here
+
+
+48
+00:02:09,596 --> 00:02:12,733 line:-1
+is an objective way
+to characterize video quality,
+
+
+49
+00:02:12,733 --> 00:02:15,702 line:-1
+so that we can automate
+the process for speed
+
+
+50
+00:02:15.702 --> 00:02:17.671 line:-1 position:50%
+and scalability.
+
+
+51
+00:02:17,671 --> 00:02:21,675 line:-1
+In such a setup, the perceptual
+video quality tool
+
+
+52
+00:02:21.675 --> 00:02:26.213 line:-1 position:50%
+will take the compressed video
+and the source video as input
+
+
+53
+00:02:26.213 --> 00:02:29.116 line:-1 position:50%
+and output
+a video quality score.
+
+
+54
+00:02:29.116 --> 00:02:31.885 line:-1 position:50%
+This score can be
+a floating point number
+
+
+55
+00:02:31,885 --> 00:02:34,187 line:-1
+in the range of one to five
+
+
+56
+00:02:34,187 --> 00:02:39,493 line:-1
+and mimic how real people would
+have rated the compressed video.
+
+
+57
+00:02:39,493 --> 00:02:43,397 line:-1
+Today, we are very excited
+to enable our developers
+
+
+58
+00:02:43,397 --> 00:02:46,166 line:-1
+with such a perceptual
+video quality tool.
+
+
+59
+00:02:46.166 --> 00:02:49.636 line:-1 position:50%
+We are calling it the
+Advanced Video Quality Tool
+
+
+60
+00:02:49.636 --> 00:02:51.972 line:-1 position:50%
+or AVQT in short.
+
+
+61
+00:02:51.972 --> 00:02:54.408 line:-1 position:50%
+Let's learn more about AVQT.
+
+
+62
+00:02:54,408 --> 00:02:56,810 line:-1
+So what exactly is AVQT?
+
+
+63
+00:02:56,810 --> 00:03:01,214 line:-1
+Well, AVQT comes as a macOS
+command line executable.
+
+
+64
+00:03:01,214 --> 00:03:03,617 line:-1
+And it attempts to mimic
+how real people
+
+
+65
+00:03:03,617 --> 00:03:07,054 line:-1
+rate quality
+of compressed videos.
+
+
+66
+00:03:07.054 --> 00:03:10.424 line:-1 position:50%
+You can use AVQT
+to compute both frame level
+
+
+67
+00:03:10.424 --> 00:03:12.292 line:-1 position:50%
+and segment level scores,
+
+
+68
+00:03:12.292 --> 00:03:15.395 line:-1 position:50%
+where a segment is typically
+a few seconds long.
+
+
+69
+00:03:15,395 --> 00:03:18,131 line:-1
+And, of course,
+we have added support
+
+
+70
+00:03:18,131 --> 00:03:22,402 line:-1
+for all AVFoundation-based
+video formats in AVQT.
+
+
+71
+00:03:22.402 --> 00:03:26.840 line:-1 position:50%
+This includes SDR,
+as well as HDR video formats
+
+
+72
+00:03:26,840 --> 00:03:32,746 line:-1
+such as HDR10, HLG,
+and Dolby Vision.
+
+
+73
+00:03:32.746 --> 00:03:37.284 line:-1 position:50%
+Next, we want to discuss
+three key attributes of AVQT
+
+
+74
+00:03:37,284 --> 00:03:40,687 line:-1
+that make it very useful
+across applications.
+
+
+75
+00:03:40,687 --> 00:03:46,893 line:-1
+First, we will see how well AVQT
+aligns with human perception.
+
+
+76
+00:03:46.893 --> 00:03:51.064 line:-1 position:50%
+Then we will talk about
+AVQT's computational speed.
+
+
+77
+00:03:51.064 --> 00:03:52.365 line:-1 position:50%
+And finally,
+
+
+78
+00:03:52.365 --> 00:03:56.002 line:-1 position:50%
+we will show why viewing
+setup awareness is important
+
+
+79
+00:03:56,002 --> 00:03:58,705 line:-1
+when predicting video quality.
+
+
+80
+00:03:58,705 --> 00:04:02,409 line:-1
+Let's get into details
+for each of these.
+
+
+81
+00:04:02.409 --> 00:04:07.147 line:-1 position:50%
+AVQT correlates well with
+human opinions on video quality.
+
+
+82
+00:04:07,147 --> 00:04:10,150 line:-1
+And it works well
+across content types,
+
+
+83
+00:04:10,150 --> 00:04:14,588 line:-1
+such as animation,
+natural scenes, or sports.
+
+
+84
+00:04:14.588 --> 00:04:17.924 line:-1 position:50%
+We have found that traditional
+video quality metrics
+
+
+85
+00:04:17,924 --> 00:04:21,361 line:-1
+such as PSNR
+and structural similarity --
+
+
+86
+00:04:21,361 --> 00:04:23,029 line:-1
+or SSIM in short --
+
+
+87
+00:04:23,029 --> 00:04:27,334 line:-1
+typically do not work very well
+across content types.
+
+
+88
+00:04:27.334 --> 00:04:30.804 line:-1 position:50%
+Let's look at one example.
+
+
+89
+00:04:30,804 --> 00:04:34,207 line:-1
+Now, this is a frame from
+a high-quality sports clip,
+
+
+90
+00:04:34.207 --> 00:04:36.910 line:-1 position:50%
+which is our first source video.
+
+
+91
+00:04:36.910 --> 00:04:42.215 line:-1 position:50%
+Let's look at the same frame
+in the compressed video.
+
+
+92
+00:04:42,215 --> 00:04:44,451 line:-1
+You can see that the frame
+does appear to be
+
+
+93
+00:04:44.451 --> 00:04:47.721 line:-1 position:50%
+of sufficiently high
+perceptual quality.
+
+
+94
+00:04:47,721 --> 00:04:52,292 line:-1
+Rightly so, it gets a PSNR score
+of around 35
+
+
+95
+00:04:52,292 --> 00:04:56,796 line:-1
+and an AVQT score of 4.4.
+
+
+96
+00:04:56.796 --> 00:04:59.332 line:-1 position:50%
+Next, we go with
+the same exercise
+
+
+97
+00:04:59,332 --> 00:05:02,536 line:-1
+for our second source video.
+
+
+98
+00:05:02.536 --> 00:05:04.604 line:-1 position:50%
+The compressed video
+in this case
+
+
+99
+00:05:04,604 --> 00:05:07,607 line:-1
+seems to have visible artifacts.
+
+
+100
+00:05:07.607 --> 00:05:10.477 line:-1 position:50%
+In particular,
+you can see some artifacts
+
+
+101
+00:05:10.477 --> 00:05:13.113 line:-1 position:50%
+on the face of the person.
+
+
+102
+00:05:13,113 --> 00:05:18,151 line:-1
+Interestingly, it gets the same
+PSNR score of around 35,
+
+
+103
+00:05:18,151 --> 00:05:22,489 line:-1
+but this time AVQT rates it
+around 2.5,
+
+
+104
+00:05:22,489 --> 00:05:25,058 line:-1
+implying poor quality.
+
+
+105
+00:05:25.058 --> 00:05:29.863 line:-1 position:50%
+We think the AVQT score
+is the correct prediction here.
+
+
+106
+00:05:29,863 --> 00:05:33,533 line:-1
+Note that this is just one
+example we have picked
+
+
+107
+00:05:33.533 --> 00:05:39.306 line:-1 position:50%
+to illustrate what can go wrong
+in cross-content evaluations.
+
+
+108
+00:05:39.306 --> 00:05:42.576 line:-1 position:50%
+We wanted to test AVQT's
+perceptual accuracy
+
+
+109
+00:05:42,576 --> 00:05:45,111 line:-1
+on a diverse set of videos.
+
+
+110
+00:05:45.111 --> 00:05:46.746 line:-1 position:50%
+So we evaluated it
+
+
+111
+00:05:46,746 --> 00:05:50,417 line:-1
+on publicly available
+video quality datasets.
+
+
+112
+00:05:50,417 --> 00:05:53,887 line:-1
+These datasets include
+source videos,
+
+
+113
+00:05:53,887 --> 00:05:57,057 line:-1
+compressed videos,
+and video quality scores
+
+
+114
+00:05:57,057 --> 00:05:59,993 line:-1
+provided by human subjects.
+
+
+115
+00:05:59,993 --> 00:06:03,697 line:0
+Here, we will show you
+the results on two datasets:
+
+
+116
+00:06:03,697 --> 00:06:08,635 position:50%
+Waterloo IVC 4K
+and VQEG HD3.
+
+
+117
+00:06:08,635 --> 00:06:12,839 position:50%
+The Waterloo IVC dataset
+includes 20 source videos
+
+
+118
+00:06:12,839 --> 00:06:15,242 line:0
+and 480 compressed videos,
+
+
+119
+00:06:15,242 --> 00:06:19,279 position:50%
+spanning both coding
+and scaling artifacts.
+
+
+120
+00:06:19,279 --> 00:06:22,115 position:50%
+It covers four different
+video resolutions
+
+
+121
+00:06:22,115 --> 00:06:25,185 line:0
+and two different
+video standards.
+
+
+122
+00:06:25,185 --> 00:06:29,289 position:50%
+The VQEG HD3 dataset
+is relatively smaller.
+
+
+123
+00:06:29,289 --> 00:06:34,427 line:0
+It has nine source videos
+and 72 compressed videos.
+
+
+124
+00:06:34,427 --> 00:06:37,664 position:50%
+And these were generated
+using video coding
+
+
+125
+00:06:37,664 --> 00:06:41,201 line:0
+at 1080p video resolution.
+
+
+126
+00:06:41.201 --> 00:06:42.502 line:-1 position:50%
+And to measure performance
+
+
+127
+00:06:42.502 --> 00:06:45.071 line:-1 position:50%
+of a video quality metric
+objectively,
+
+
+128
+00:06:45,071 --> 00:06:49,276 line:-1
+we make use of correlation
+and distance measures.
+
+
+129
+00:06:49.276 --> 00:06:53.513 line:-1 position:50%
+Pearson Correlation Coefficient,
+or PCC in short,
+
+
+130
+00:06:53.513 --> 00:06:56.049 line:-1 position:50%
+measures how well
+the predicted scores
+
+
+131
+00:06:56.049 --> 00:06:58.752 line:-1 position:50%
+correlate
+with subjective scores.
+
+
+132
+00:06:58.752 --> 00:07:03.023 line:-1 position:50%
+A higher PCC value
+implies better correlation.
+
+
+133
+00:07:03.023 --> 00:07:06.793 line:-1 position:50%
+And RMSE measures how far off
+the predictions are
+
+
+134
+00:07:06,793 --> 00:07:09,362 line:-1
+from subjective scores.
+
+
+135
+00:07:09.362 --> 00:07:14.768 line:-1 position:50%
+A lower RMSE value would imply
+higher prediction accuracy.
+
+
+136
+00:07:14,768 --> 00:07:18,972 line:-1
+Now, we want to evaluate how
+well can AVQT predict the scores
+
+
+137
+00:07:18.972 --> 00:07:21.408 line:-1 position:50%
+given by human subjects.
+
+
+138
+00:07:21,408 --> 00:07:23,009 line:0
+On the x-axis here,
+
+
+139
+00:07:23,009 --> 00:07:26,680 position:50%
+we have the ground truth
+subjective video quality scores.
+
+
+140
+00:07:26,680 --> 00:07:31,718 line:0
+And on the y-axis, we have
+scores predicted by AVQT.
+
+
+141
+00:07:31,718 --> 00:07:35,655 position:50%
+Every point here
+represents a compressed video.
+
+
+142
+00:07:35,655 --> 00:07:37,957 line:0
+As you can see
+from the scatter plot,
+
+
+143
+00:07:37,957 --> 00:07:39,959 position:50%
+except for a few outliers,
+
+
+144
+00:07:39,959 --> 00:07:43,697 line:0
+AVQT does a great job in
+predicting the subjective scores
+
+
+145
+00:07:43,697 --> 00:07:45,965 position:50%
+for this dataset.
+
+
+146
+00:07:45,965 --> 00:07:52,505 line:0
+This is also reflected in the
+high PCC and low RMSE scores.
+
+
+147
+00:07:52,505 --> 00:07:58,678 line:0
+And we see a high performance
+on the VQEG HD3 dataset as well.
+
+
+148
+00:07:58,678 --> 00:08:03,116 line:0
+Let's move on and talk about
+AVQT's computational speed.
+
+
+149
+00:08:03,116 --> 00:08:06,586 line:-1
+Note that high computational
+speed is quite important
+
+
+150
+00:08:06.586 --> 00:08:09.389 line:-1 position:50%
+to ensure scalability.
+
+
+151
+00:08:09,389 --> 00:08:15,195 line:-1
+AVQT's algorithm is designed and
+optimized to run fast on Metal.
+
+
+152
+00:08:15,195 --> 00:08:18,698 line:0
+This implies that you can run
+through large video files
+
+
+153
+00:08:18,698 --> 00:08:20,767 position:50%
+very quickly.
+
+
+154
+00:08:20,767 --> 00:08:24,371 position:50%
+It also takes care of all
+preprocessing natively.
+
+
+155
+00:08:24,371 --> 00:08:27,907 position:50%
+For you, this means you don't
+have to decode your videos
+
+
+156
+00:08:27,907 --> 00:08:29,542 position:50%
+and scale them offline.
+
+
+157
+00:08:29,542 --> 00:08:31,711 line:0
+AVQT does that for you.
+
+
+158
+00:08:31,711 --> 00:08:35,382 position:50%
+You should note that AVQT
+runs through a 1080p video
+
+
+159
+00:08:35,382 --> 00:08:38,251 line:0
+at 175 frames per second.
+
+
+160
+00:08:38,251 --> 00:08:42,856 position:50%
+So if you have a 10-minute long
+1080p video at 24 Hz,
+
+
+161
+00:08:42,856 --> 00:08:48,661 position:50%
+AVQT can compute its quality
+in under 1.5 minutes.
+
+
+162
+00:08:48.661 --> 00:08:51.197 line:-1 position:50%
+The final attribute
+we want to talk about
+
+
+163
+00:08:51.197 --> 00:08:55.034 line:-1 position:50%
+is viewing setup awareness.
+
+
+164
+00:08:55.034 --> 00:08:58.605 line:-1 position:50%
+Your viewing setup can affect
+the video quality you perceive
+
+
+165
+00:08:58.605 --> 00:09:01.040 line:-1 position:50%
+when watching a video.
+
+
+166
+00:09:01,040 --> 00:09:04,310 line:-1
+In particular,
+factors such as display size,
+
+
+167
+00:09:04,310 --> 00:09:07,213 line:-1
+display resolution,
+and viewing distance
+
+
+168
+00:09:07,213 --> 00:09:11,384 line:-1
+can mask or exaggerate
+artifacts in the video.
+
+
+169
+00:09:11,384 --> 00:09:12,852 line:-1
+To address this,
+
+
+170
+00:09:12.852 --> 00:09:17.023 line:-1 position:50%
+AVQT takes these parameters
+as input to the tool
+
+
+171
+00:09:17.023 --> 00:09:19.292 line:-1 position:50%
+and then attempts
+to predict the right trend
+
+
+172
+00:09:19,292 --> 00:09:21,728 line:-1
+as these factors change.
+
+
+173
+00:09:21,728 --> 00:09:24,497 line:-1
+Let's take a look
+at one such case.
+
+
+174
+00:09:24.497 --> 00:09:26.499 line:-1 position:50%
+Consider two scenarios.
+
+
+175
+00:09:26.499 --> 00:09:31.671 line:-1 position:50%
+In scenario A, you're watching
+a 4K video on a 4K display
+
+
+176
+00:09:31,671 --> 00:09:36,910 line:-1
+at a viewing distance of 1.5
+times the height of the screen.
+
+
+177
+00:09:36,910 --> 00:09:40,313 line:-1
+In scenario B,
+you are watching the same video
+
+
+178
+00:09:40.313 --> 00:09:43.616 line:-1 position:50%
+on the same display
+but now at a viewing distance
+
+
+179
+00:09:43,616 --> 00:09:47,086 line:-1
+which is three times
+the height of the screen.
+
+
+180
+00:09:47,086 --> 00:09:51,624 line:-1
+Clearly, in scenario B you will
+miss out on some of the artifacts
+
+
+181
+00:09:51.624 --> 00:09:55.528 line:-1 position:50%
+which were visible when
+you were watching it closely.
+
+
+182
+00:09:55,528 --> 00:09:59,933 line:-1
+This implies that your perceived
+video quality in scenario B
+
+
+183
+00:09:59,933 --> 00:10:03,236 line:-1
+will be higher
+than in scenario A.
+
+
+184
+00:10:03.236 --> 00:10:07.841 line:-1 position:50%
+And AVQT can capture such trends
+at different quality levels.
+
+
+185
+00:10:07,841 --> 00:10:11,644 line:-1
+The chart here shows that
+as viewing distance increases
+
+
+186
+00:10:11.644 --> 00:10:17.584 line:-1 position:50%
+from 1.5H to 3H,
+AVQT scores increase as well.
+
+
+187
+00:10:17,584 --> 00:10:20,320 line:0
+We recommend you go over
+the README document
+
+
+188
+00:10:20,320 --> 00:10:25,225 line:0
+available with the tool
+for more information on this.
+
+
+189
+00:10:25,225 --> 00:10:28,995 line:-1
+Well, now that we have
+all of you excited about AVQT,
+
+
+190
+00:10:28.995 --> 00:10:33.099 line:-1 position:50%
+let me show how you can
+use the tool the right way.
+
+
+191
+00:10:33,099 --> 00:10:36,436 line:-1
+We will be making AVQT available
+to all of you soon
+
+
+192
+00:10:36,436 --> 00:10:40,340 line:-1
+via the Developer
+downloads portal.
+
+
+193
+00:10:40.340 --> 00:10:43.376 line:-1 position:50%
+Let me walk you through a demo.
+
+
+194
+00:10:43,376 --> 00:10:45,478 line:-1
+So I have already
+downloaded the tool
+
+
+195
+00:10:45.478 --> 00:10:49.115 line:-1 position:50%
+and installed AVQT
+on this system.
+
+
+196
+00:10:49,115 --> 00:10:51,918 line:-1
+If you look at the output
+of "which AVQT",
+
+
+197
+00:10:51,918 --> 00:10:58,024 line:-1
+you can see AVQT is placed
+in the usr/local/bin directory.
+
+
+198
+00:10:58,024 --> 00:11:00,960 line:-1
+Now, you can invoke
+AVQT help command
+
+
+199
+00:11:00,960 --> 00:11:04,097 line:-1
+to read more about the usage
+of different flags
+
+
+200
+00:11:04,097 --> 00:11:08,034 line:-1
+supported by AVQT.
+
+
+201
+00:11:08,034 --> 00:11:11,638 line:-1
+Let's see what I have
+in my current directory.
+
+
+202
+00:11:11.638 --> 00:11:15.275 line:-1 position:50%
+I have a sample reference and
+a sample compressed video
+
+
+203
+00:11:15.275 --> 00:11:17.744 line:-1 position:50%
+that I will use for the demo.
+
+
+204
+00:11:17.744 --> 00:11:21.481 line:-1 position:50%
+So let me run AVQT through them.
+
+
+205
+00:11:21.481 --> 00:11:25.318 line:-1 position:50%
+We will provide the reference
+and test files as input
+
+
+206
+00:11:25,318 --> 00:11:28,288 line:-1
+and specify an output file.
+
+
+207
+00:11:28.288 --> 00:11:34.294 line:-1 position:50%
+Let's name the output file
+sample_output.csv.
+
+
+208
+00:11:34,294 --> 00:11:36,129 line:-1
+The tool prints the progress
+
+
+209
+00:11:36,129 --> 00:11:39,198 line:-1
+and reports the segment scores
+on the screen.
+
+
+210
+00:11:39,198 --> 00:11:42,035 line:-1
+The default segment duration
+is six seconds
+
+
+211
+00:11:42,035 --> 00:11:44,904 line:-1
+and since this clip
+is five seconds long,
+
+
+212
+00:11:44,904 --> 00:11:48,241 line:-1
+we have only one segment.
+
+
+213
+00:11:48,241 --> 00:11:52,145 line:-1
+Next, let's look
+at the output file.
+
+
+214
+00:11:52.145 --> 00:11:55.114 line:-1 position:50%
+You can see
+the frame level scores here.
+
+
+215
+00:11:55,114 --> 00:11:58,785 position:50%
+And, finally, we have
+the segment level scores
+
+
+216
+00:11:58,785 --> 00:12:03,122 position:50%
+towards the bottom.
+
+
+217
+00:12:03,122 --> 00:12:06,159 line:-1
+Now, in the demo,
+we showed a few options,
+
+
+218
+00:12:06,159 --> 00:12:09,696 line:-1
+but the tool has several other
+features built into it as well.
+
+
+219
+00:12:09.696 --> 00:12:13.199 line:-1 position:50%
+For example, you can use
+the segment-duration
+
+
+220
+00:12:13.199 --> 00:12:15.335 line:-1 position:50%
+and the temporal-pooling flags
+
+
+221
+00:12:15.335 --> 00:12:19.505 line:-1 position:50%
+to change the way frame level
+scores are aggregated.
+
+
+222
+00:12:19.505 --> 00:12:23.042 line:-1 position:50%
+Similarly, you can specify
+the viewing setup
+
+
+223
+00:12:23.042 --> 00:12:27.947 line:-1 position:50%
+using the viewing-distance
+and display-resolution flags.
+
+
+224
+00:12:27.947 --> 00:12:31.918 line:-1 position:50%
+Please refer to the README
+for more details on this.
+
+
+225
+00:12:31,918 --> 00:12:33,086 line:-1
+All right.
+
+
+226
+00:12:33,086 --> 00:12:35,521 line:-1
+So far we have learned about
+some of the key attributes
+
+
+227
+00:12:35,521 --> 00:12:37,323 line:-1
+of AVQT.
+
+
+228
+00:12:37,323 --> 00:12:40,293 line:-1
+We have also seen how to use
+the command line tool
+
+
+229
+00:12:40,293 --> 00:12:45,498 line:-1
+on a pair of videos to generate
+video quality scores.
+
+
+230
+00:12:45,498 --> 00:12:48,001 line:-1
+Now let's take a look at
+a specific case
+
+
+231
+00:12:48.001 --> 00:12:54.607 line:-1 position:50%
+where you can use AVQT
+to optimize bit rates for HLS.
+
+
+232
+00:12:54.607 --> 00:12:58.344 line:-1 position:50%
+HLS tiers are encoded
+at different bit rates.
+
+
+233
+00:12:58,344 --> 00:13:00,613 line:-1
+And we know that
+choosing these bit rates
+
+
+234
+00:13:00.613 --> 00:13:03.683 line:-1 position:50%
+is not an easy process always.
+
+
+235
+00:13:03.683 --> 00:13:05.151 line:-1 position:50%
+To help with this,
+
+
+236
+00:13:05,151 --> 00:13:07,854 line:-1
+we have published
+some bit rate guidelines
+
+
+237
+00:13:07,854 --> 00:13:11,691 line:-1
+in the HLS Authoring
+Specification document.
+
+
+238
+00:13:11,691 --> 00:13:13,693 line:0
+Please note that these bit rates
+
+
+239
+00:13:13,693 --> 00:13:15,928 line:0
+are only initial
+encoding targets
+
+
+240
+00:13:15,928 --> 00:13:20,433 position:50%
+for typical content
+delivered via HLS.
+
+
+241
+00:13:20,433 --> 00:13:22,135 line:-1
+We also know that
+different content
+
+
+242
+00:13:22,135 --> 00:13:24,537 line:-1
+has different
+encoding complexity,
+
+
+243
+00:13:24.537 --> 00:13:27.273 line:-1 position:50%
+which implies that
+the optimal bit rate
+
+
+244
+00:13:27.273 --> 00:13:29.909 line:-1 position:50%
+varies across different content.
+
+
+245
+00:13:29,909 --> 00:13:33,479 position:50%
+So the bit rate that works well
+for one type of content --
+
+
+246
+00:13:33,479 --> 00:13:35,615 line:0
+for example,
+an animation movie --
+
+
+247
+00:13:35,615 --> 00:13:40,753 position:50%
+might not work well
+for a sporting event.
+
+
+248
+00:13:40,753 --> 00:13:44,991 line:-1
+Here's how you can use AVQT as
+feedback to help you determine
+
+
+249
+00:13:44,991 --> 00:13:48,127 line:-1
+optimal bit rate
+for your content.
+
+
+250
+00:13:48.127 --> 00:13:52.298 line:-1 position:50%
+First, we start with
+our initial target bit rates.
+
+
+251
+00:13:52,298 --> 00:13:55,768 line:-1
+We use this bit rate to encode
+our source video
+
+
+252
+00:13:55,768 --> 00:13:58,905 line:-1
+and create the HLS tier.
+
+
+253
+00:13:58,905 --> 00:14:02,975 line:-1
+We then use the source video
+and the encoded HLS tier
+
+
+254
+00:14:02,975 --> 00:14:07,747 line:-1
+to compute video quality
+scores using AVQT.
+
+
+255
+00:14:07.747 --> 00:14:10.850 line:-1 position:50%
+Finally, we can analyze
+AVQT scores
+
+
+256
+00:14:10,850 --> 00:14:14,987 line:-1
+to decide if we want to increase
+or decrease the target bit rate
+
+
+257
+00:14:14,987 --> 00:14:18,491 line:-1
+for the HLS tier.
+
+
+258
+00:14:18,491 --> 00:14:20,793 line:-1
+To demonstrate
+this with an example,
+
+
+259
+00:14:20,793 --> 00:14:23,930 line:-1
+let's pick a specific HLS tier.
+
+
+260
+00:14:23,930 --> 00:14:26,899 position:50%
+Here we are choosing
+the 2160p tier
+
+
+261
+00:14:26,899 --> 00:14:30,336 position:50%
+at 11.6 megabits per second.
+
+
+262
+00:14:30,336 --> 00:14:33,306 position:50%
+We will then encode our previous
+two sequences --
+
+
+263
+00:14:33,306 --> 00:14:37,710 line:0
+animation and sports --
+with this recommended bit rate.
+
+
+264
+00:14:37.710 --> 00:14:40.046 line:-1 position:50%
+Once we have
+the encoded tiers ready,
+
+
+265
+00:14:40,046 --> 00:14:45,551 line:-1
+we will use AVQT to compute
+their video quality scores.
+
+
+266
+00:14:45,551 --> 00:14:50,490 line:-1
+The chart here shows AVQT scores
+for the two video sequences.
+
+
+267
+00:14:50,490 --> 00:14:54,761 line:-1
+For this particular tier, we
+can expect a high video quality,
+
+
+268
+00:14:54,761 --> 00:14:58,364 line:-1
+so we are setting
+the threshold to be 4.5,
+
+
+269
+00:14:58.364 --> 00:15:01.901 line:-1 position:50%
+indicating close-to-excellent
+quality.
+
+
+270
+00:15:01.901 --> 00:15:03.669 line:-1 position:50%
+You can see that
+while this bit rate
+
+
+271
+00:15:03,669 --> 00:15:05,972 line:-1
+is good enough
+for this animation clip,
+
+
+272
+00:15:05,972 --> 00:15:10,143 line:-1
+it is not sufficient
+for the sports clip.
+
+
+273
+00:15:10,143 --> 00:15:12,912 line:-1
+So we go back
+and use this feedback
+
+
+274
+00:15:12,912 --> 00:15:15,448 line:-1
+to adapt our bit rate target.
+
+
+275
+00:15:15,448 --> 00:15:18,718 line:-1
+In particular, we need
+to increase our bit rate target
+
+
+276
+00:15:18.718 --> 00:15:23.489 line:-1 position:50%
+for the sports clip
+and recompute its AVQT score.
+
+
+277
+00:15:23,489 --> 00:15:28,361 line:-1
+Let's aim for a 10-percent
+increase in bit rate.
+
+
+278
+00:15:28,361 --> 00:15:33,399 line:-1
+Here we have plotted our new
+AVQT scores for the sports clip.
+
+
+279
+00:15:33.399 --> 00:15:37.170 line:-1 position:50%
+The updated scores now lie above
+our expected threshold
+
+
+280
+00:15:37,170 --> 00:15:39,005 line:-1
+of four and a half.
+
+
+281
+00:15:39.005 --> 00:15:43.209 line:-1 position:50%
+And it also resembles video
+quality of the animation content
+
+
+282
+00:15:43.209 --> 00:15:45.511 line:-1 position:50%
+much more closely.
+
+
+283
+00:15:45.511 --> 00:15:48.714 line:-1 position:50%
+To wrap up, here are a few
+important things
+
+
+284
+00:15:48.714 --> 00:15:52.018 line:-1 position:50%
+that we want you
+to take away from this talk.
+
+
+285
+00:15:52,018 --> 00:15:55,521 line:-1
+Video compression
+can lead to visible artifacts,
+
+
+286
+00:15:55.521 --> 00:15:59.525 line:-1 position:50%
+which affects consumers'
+video quality experience.
+
+
+287
+00:15:59.525 --> 00:16:02.728 line:-1 position:50%
+You can evaluate the quality
+of your compressed videos
+
+
+288
+00:16:02.728 --> 00:16:05.364 line:-1 position:50%
+using AVQT.
+
+
+289
+00:16:05,364 --> 00:16:08,367 line:-1
+AVQT comes as a macOS
+command line tool,
+
+
+290
+00:16:08,367 --> 00:16:12,772 line:-1
+is quick to compute,
+and is viewing setup aware.
+
+
+291
+00:16:12.772 --> 00:16:14.006 line:-1 position:50%
+It also has support
+
+
+292
+00:16:14.006 --> 00:16:18.077 line:-1 position:50%
+for all AVFoundation-based
+video formats.
+
+
+293
+00:16:18.077 --> 00:16:22.682 line:-1 position:50%
+Finally, you can use AVQT
+to optimize the video quality
+
+
+294
+00:16:22.682 --> 00:16:25.918 line:-1 position:50%
+of your HLS tiers.
+
+
+295
+00:16:25.918 --> 00:16:28.621 line:-1 position:50%
+Thank you very much!
+
+
+296
+00:16:28,621 --> 00:16:31,991 position:89% align:center size:2%
+♪
+

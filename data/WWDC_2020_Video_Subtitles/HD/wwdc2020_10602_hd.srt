@@ -1,0 +1,2386 @@
+1
+00:00:03,836 --> 00:00:05,906 line:-1
+Hello and welcome to WWDC.
+
+
+2
+00:00:08,475 --> 00:00:12,045 line:0
+Hello. I am Guillem Viñals
+from the Metal Ecosystem team at Apple.
+
+
+3
+00:00:12,379 --> 00:00:14,948 line:-1
+Today we will talk about our unique GPUs.
+
+
+4
+00:00:15,315 --> 00:00:18,252 line:-2
+This is a talk about hardware so there is
+not a single line of code,
+
+
+5
+00:00:18,318 --> 00:00:20,087 line:-1
+but plenty of pipelines instead.
+
+
+6
+00:00:20,153 --> 00:00:22,155 line:-1
+And, as we all know, pipelines are cool.
+
+
+7
+00:00:23,123 --> 00:00:24,791 line:-1
+This talk has two parts.
+
+
+8
+00:00:25,526 --> 00:00:28,295 line:-1
+First, we will talk about Apple TBDR GPUs,
+
+
+9
+00:00:28,729 --> 00:00:31,298 line:-2
+which will cover the basics
+of the rendering pipeline.
+
+
+10
+00:00:31,965 --> 00:00:34,434 line:0
+Then we will talk about modern Apple GPUs,
+
+
+11
+00:00:34,835 --> 00:00:37,604 line:0
+which cover some of the recent
+enhancements to the pipeline.
+
+
+12
+00:00:39,273 --> 00:00:41,441 line:-1
+So why are GPUs so important?
+
+
+13
+00:00:41,508 --> 00:00:44,578 line:-2
+Well, they are at the heart
+of our A Series processors.
+
+
+14
+00:00:45,245 --> 00:00:48,849 line:-2
+Our Apple processors are powering
+over one billion devices worldwide.
+
+
+15
+00:00:48,916 --> 00:00:50,817 line:-1
+So that's a lot of Apple GPUs.
+
+
+16
+00:00:52,319 --> 00:00:54,788 line:-1
+Apple processors are very power efficient,
+
+
+17
+00:00:55,222 --> 00:00:57,724 line:-2
+and they have this unified
+memory architecture,
+
+
+18
+00:00:58,125 --> 00:01:01,662 line:-2
+which means that the CPU and the GPU
+share System Memory.
+
+
+19
+00:01:02,329 --> 00:01:06,433 line:-2
+Also, the GPU has a dedicated pool
+of on-chip memory,
+
+
+20
+00:01:06,500 --> 00:01:07,901 line:-1
+which we call Tile Memory.
+
+
+21
+00:01:08,802 --> 00:01:11,972 line:-2
+Notice, though, that the GPU
+does not have video memory.
+
+
+22
+00:01:12,506 --> 00:01:15,909 line:-2
+So bandwidth could be a problem
+if the content has not been tuned.
+
+
+23
+00:01:17,077 --> 00:01:19,913 line:-2
+In order to be fast and efficient
+without video memory,
+
+
+24
+00:01:19,980 --> 00:01:23,250 line:-2
+our GPUs have a unique architecture
+known as TBDR,
+
+
+25
+00:01:23,317 --> 00:01:25,219 line:-1
+or Tile Based Deferred Renderer.
+
+
+26
+00:01:25,285 --> 00:01:26,653 line:-1
+So let's talk about that.
+
+
+27
+00:01:27,054 --> 00:01:29,556 line:-2
+Today, we will review
+the rendering pipeline,
+
+
+28
+00:01:29,623 --> 00:01:32,893 line:-2
+as well as some of the features
+that make the GPUs so efficient.
+
+
+29
+00:01:33,594 --> 00:01:36,463 line:-2
+We will talk about Vertex
+and Fragment stage overlap,
+
+
+30
+00:01:37,064 --> 00:01:38,398 line:-1
+Hidden Surface Removal,
+
+
+31
+00:01:38,799 --> 00:01:40,367 line:-1
+Programmable Blending,
+
+
+32
+00:01:40,434 --> 00:01:42,169 line:-1
+Memoryless Render Targets,
+
+
+33
+00:01:42,236 --> 00:01:45,239 line:-2
+and also our very efficient
+MSAA implementation.
+
+
+34
+00:01:45,806 --> 00:01:47,708 line:-2
+So let's have a look
+at the graphics pipeline
+
+
+35
+00:01:47,774 --> 00:01:49,343 line:-1
+to understand this a bit better.
+
+
+36
+00:01:50,978 --> 00:01:54,915 line:-2
+Our GPUs are TBDRs,
+or Tile Based Deferred Renderers.
+
+
+37
+00:01:55,415 --> 00:01:57,284 line:-1
+TBDRs have two main phases.
+
+
+38
+00:01:57,651 --> 00:02:00,888 line:-2
+First, tiling, where all of the geometry
+will be processed.
+
+
+39
+00:02:01,321 --> 00:02:05,058 line:-2
+Second, rendering, where all of the pixels
+will be processed.
+
+
+40
+00:02:05,425 --> 00:02:07,694 line:-2
+So let's cover this pipeline
+more in detail,
+
+
+41
+00:02:08,461 --> 00:02:11,265 line:-2
+starting with the Tiling Phase
+at the very beginning.
+
+
+42
+00:02:11,865 --> 00:02:14,535 line:-2
+In the Tiling Phase,
+for the entire render pass,
+
+
+43
+00:02:14,601 --> 00:02:17,771 line:-2
+the GPU will split the viewport
+into a list of tiles,
+
+
+44
+00:02:18,205 --> 00:02:20,908 line:-1
+shade all of the vertices and, finally,
+
+
+45
+00:02:20,974 --> 00:02:24,144 line:-2
+bin the transformed primitives
+into a list of tiles.
+
+
+46
+00:02:24,511 --> 00:02:28,215 line:-2
+Remember, our GPUs don't have
+a large pool of dedicated memory.
+
+
+47
+00:02:28,749 --> 00:02:31,285 line:-2
+So where does all this
+post-transform data go?
+
+
+48
+00:02:32,186 --> 00:02:34,254 line:-1
+It goes into the Tiled Vertex Buffer.
+
+
+49
+00:02:34,821 --> 00:02:38,158 line:-2
+The Tiled Vertex Buffer
+stores the Tiling phase output,
+
+
+50
+00:02:38,625 --> 00:02:41,261 line:-2
+which includes the post-transform
+vertex data,
+
+
+51
+00:02:41,328 --> 00:02:43,163 line:-1
+as well as other internal data.
+
+
+52
+00:02:43,664 --> 00:02:45,999 line:-2
+This data structure
+is mostly opaque to you.
+
+
+53
+00:02:47,000 --> 00:02:49,536 line:-1
+But it may cause a Partial Render if full.
+
+
+54
+00:02:50,070 --> 00:02:53,740 line:-2
+A Partial Render
+is when the GPU splits the render pass
+
+
+55
+00:02:53,807 --> 00:02:56,210 line:-2
+in order to flush
+the contents of that buffer.
+
+
+56
+00:02:57,144 --> 00:03:01,348 line:-2
+So the takeaway is for you to know
+that the Tiled Vertex Buffer exists,
+
+
+57
+00:03:01,415 --> 00:03:02,983 line:-1
+but don't worry too much over it.
+
+
+58
+00:03:04,218 --> 00:03:06,019 line:-1
+Okay. So far, so good.
+
+
+59
+00:03:06,420 --> 00:03:10,457 line:-2
+Let's move on to the second stage
+of our GPU pipelines, rendering.
+
+
+60
+00:03:10,958 --> 00:03:13,560 line:-2
+This is where
+most of the heavy lifting happens
+
+
+61
+00:03:13,627 --> 00:03:16,830 line:-2
+and it's also where the TBDR architecture
+shines the most.
+
+
+62
+00:03:17,798 --> 00:03:21,668 line:-2
+In the previous stage, the GPU
+split the viewport into a list of tiles.
+
+
+63
+00:03:22,469 --> 00:03:25,372 line:-2
+Now we are going to shade
+all of these tiles separately.
+
+
+64
+00:03:26,673 --> 00:03:30,878 line:-2
+In the rendering phase, the GPU will,
+for each tile in the render pass,
+
+
+65
+00:03:30,944 --> 00:03:32,479 line:-1
+execute the load action,
+
+
+66
+00:03:33,113 --> 00:03:36,617 line:-2
+rasterize all of the primitives
+and compute their visibility,
+
+
+67
+00:03:37,417 --> 00:03:39,553 line:-1
+shade all of the visible pixels
+
+
+68
+00:03:40,220 --> 00:03:42,556 line:-1
+and, finally, execute the store action.
+
+
+69
+00:03:43,423 --> 00:03:46,193 line:-2
+Most of this is also
+opaque to the application,
+
+
+70
+00:03:46,260 --> 00:03:48,262 line:-1
+it just happens to be very efficient.
+
+
+71
+00:03:49,763 --> 00:03:52,399 line:-2
+What the application
+can control very explicitly
+
+
+72
+00:03:52,466 --> 00:03:53,901 line:-1
+are the load and store actions.
+
+
+73
+00:03:54,301 --> 00:03:56,803 line:-2
+So let's review those
+to make sure you got them right.
+
+
+74
+00:03:57,738 --> 00:04:00,307 line:-2
+Load and store actions
+are executed for each tile.
+
+
+75
+00:04:00,941 --> 00:04:02,442 line:-1
+At the beginning of the pass,
+
+
+76
+00:04:02,509 --> 00:04:05,179 line:-2
+where we tell the GPU
+how to initialize Tile Memory,
+
+
+77
+00:04:05,779 --> 00:04:09,850 line:-2
+and at the end of the pass, to inform
+the GPU what to do with the final render.
+
+
+78
+00:04:10,884 --> 00:04:13,854 line:-2
+The recommendation
+is to only load the data that you need.
+
+
+79
+00:04:14,454 --> 00:04:15,889 line:-1
+If you don't need any data,
+
+
+80
+00:04:15,956 --> 00:04:17,824 line:-1
+don't load anything and clear instead.
+
+
+81
+00:04:18,257 --> 00:04:20,494 line:-1
+This will save us all the memory transfers
+
+
+82
+00:04:20,560 --> 00:04:22,863 line:-2
+required to upload
+all the color attachments,
+
+
+83
+00:04:23,163 --> 00:04:24,998 line:-1
+as well as depth and stencil buffers.
+
+
+84
+00:04:25,999 --> 00:04:27,734 line:-1
+The same goes for the store action.
+
+
+85
+00:04:28,135 --> 00:04:30,404 line:-2
+Make sure to only store
+the data that you need,
+
+
+86
+00:04:30,470 --> 00:04:32,239 line:-1
+like the main color attachment.
+
+
+87
+00:04:32,306 --> 00:04:35,175 line:-2
+This is very important to improve
+the efficiency of your render.
+
+
+88
+00:04:35,776 --> 00:04:38,378 line:-2
+So let's look at the rendering phase
+in a bit more detail,
+
+
+89
+00:04:39,012 --> 00:04:42,382 line:-2
+starting with Hidden Surface Removal,
+or HSR,
+
+
+90
+00:04:42,916 --> 00:04:44,952 line:-1
+which happens before we render anything.
+
+
+91
+00:04:45,953 --> 00:04:48,856 line:-2
+This is possible thanks
+to the on-chip depth buffer.
+
+
+92
+00:04:49,623 --> 00:04:52,059 line:-1
+This is also a key aspect of TBDR.
+
+
+93
+00:04:53,026 --> 00:04:56,230 line:-1
+HSR allows the GPU to minimize overdraw
+
+
+94
+00:04:56,296 --> 00:04:59,766 line:-2
+by keeping track of the frontmost
+visible layer for each pixel.
+
+
+95
+00:05:00,601 --> 00:05:04,771 line:-2
+HSR is both pixel perfect
+and submission order independent.
+
+
+96
+00:05:05,672 --> 00:05:08,308 line:-2
+So pixels will be processed
+into two stages,
+
+
+97
+00:05:08,775 --> 00:05:11,712 line:-2
+Hidden Surface Removal
+and Fragment Processing.
+
+
+98
+00:05:12,579 --> 00:05:16,116 line:-2
+For example, even if you draw
+two triangles back to front,
+
+
+99
+00:05:16,183 --> 00:05:18,685 line:-1
+HSR will ensure that there is no overdraw.
+
+
+100
+00:05:19,753 --> 00:05:23,624 line:-2
+So let's assume we want to render
+three triangles, submitted back to front.
+
+
+101
+00:05:24,291 --> 00:05:26,593 line:-1
+First, the blue triangle at the back.
+
+
+102
+00:05:27,027 --> 00:05:29,363 line:-1
+Second, orange triangle in the middle.
+
+
+103
+00:05:29,830 --> 00:05:32,766 line:-2
+And, finally, a purple
+translucent triangle in the front.
+
+
+104
+00:05:33,734 --> 00:05:36,403 line:-2
+HSR will keep track
+of visibility information.
+
+
+105
+00:05:37,104 --> 00:05:38,805 line:-1
+Each pixel will keep the depth
+
+
+106
+00:05:38,872 --> 00:05:41,241 line:-2
+and primitive ID
+for the frontmost primitive.
+
+
+107
+00:05:41,842 --> 00:05:45,312 line:-2
+Zero, in this case, means
+that the background color should be used.
+
+
+108
+00:05:45,379 --> 00:05:47,548 line:-1
+We have not yet rasterized anything.
+
+
+109
+00:05:48,615 --> 00:05:51,518 line:-2
+We will rasterize the first primitive,
+the blue triangle.
+
+
+110
+00:05:52,519 --> 00:05:56,323 line:-2
+This primitive will populate the depth ID
+for all of the pixels covered.
+
+
+111
+00:05:57,257 --> 00:06:00,661 line:-2
+Notice that so far we haven't run
+any fragment shader yet.
+
+
+112
+00:06:01,762 --> 00:06:04,431 line:-2
+Then we will rasterize
+the second primitive
+
+
+113
+00:06:04,498 --> 00:06:05,899 line:-1
+and to exactly the same.
+
+
+114
+00:06:06,834 --> 00:06:08,869 line:-1
+Since the orange triangle is in front,
+
+
+115
+00:06:08,936 --> 00:06:12,539 line:-2
+we update the depth and primitive ID
+of all of the pixels it covers.
+
+
+116
+00:06:13,307 --> 00:06:17,411 line:-2
+Again, we rasterize the primitive
+without running any fragment shader.
+
+
+117
+00:06:18,245 --> 00:06:21,615 line:-2
+The GPU will first calculate
+the visibility for each pixel
+
+
+118
+00:06:21,682 --> 00:06:23,217 line:-1
+before shading anything.
+
+
+119
+00:06:24,251 --> 00:06:26,520 line:-2
+Now we will rasterize
+the translucent triangle.
+
+
+120
+00:06:27,788 --> 00:06:32,359 line:-2
+HSR does only keep the frontmost
+visible primitive ID for each pixel.
+
+
+121
+00:06:32,793 --> 00:06:35,562 line:-2
+But now we have a primitive
+that needs to be blended.
+
+
+122
+00:06:36,296 --> 00:06:39,266 line:-2
+At this point, the HSR block
+will need to flush
+
+
+123
+00:06:39,333 --> 00:06:41,635 line:-2
+the pixels covered
+by the translucent primitive.
+
+
+124
+00:06:42,503 --> 00:06:46,139 line:-2
+In this context, flushing means
+running the fragment shader
+
+
+125
+00:06:46,206 --> 00:06:47,808 line:-1
+for all of the pixels covered.
+
+
+126
+00:06:48,609 --> 00:06:51,445 line:-2
+The GPU cannot defer
+fragment shading any longer.
+
+
+127
+00:06:52,579 --> 00:06:54,314 line:-1
+Once the pixels have been flushed,
+
+
+128
+00:06:54,381 --> 00:06:57,484 line:-2
+the GPU can now process
+the blended primitive correctly.
+
+
+129
+00:06:58,519 --> 00:07:00,220 line:-1
+This was the last primitive,
+
+
+130
+00:07:00,287 --> 00:07:02,689 line:-2
+so the remaining pixels
+in the Visibility Buffer
+
+
+131
+00:07:02,756 --> 00:07:04,558 line:-1
+will also need to be flushed.
+
+
+132
+00:07:05,359 --> 00:07:08,095 line:-2
+At the end of the pass,
+all of the pixels are shaded.
+
+
+133
+00:07:09,096 --> 00:07:12,366 line:-2
+Notice, though, that some pixels
+have only been shaded once.
+
+
+134
+00:07:13,000 --> 00:07:16,370 line:-2
+In spite of potentially having
+multiple primitives overlapping,
+
+
+135
+00:07:17,037 --> 00:07:18,939 line:-1
+these pixels have no overdraw.
+
+
+136
+00:07:19,540 --> 00:07:24,211 line:-2
+In this context, overdraw is the number
+of fragment shader invocations per pixel,
+
+
+137
+00:07:24,278 --> 00:07:25,779 line:-1
+and we want to keep it low.
+
+
+138
+00:07:27,147 --> 00:07:29,416 line:-1
+On a scene with non-opaque geometry,
+
+
+139
+00:07:29,483 --> 00:07:32,419 line:-2
+overdraw will depend
+on the HSR efficiency.
+
+
+140
+00:07:32,486 --> 00:07:34,254 line:-1
+So you will want to maximize that.
+
+
+141
+00:07:34,855 --> 00:07:38,592 line:-2
+You will want to draw the meshes
+sorted by visibility state.
+
+
+142
+00:07:39,126 --> 00:07:40,427 line:-1
+First, opaque.
+
+
+143
+00:07:41,061 --> 00:07:44,364 line:-2
+Second, alpha test,
+discard or depth feedback.
+
+
+144
+00:07:44,898 --> 00:07:47,301 line:-2
+And third, and finally,
+translucent meshes.
+
+
+145
+00:07:47,935 --> 00:07:50,737 line:-2
+You should avoid interleaving
+opaque and non-opaque meshes
+
+
+146
+00:07:51,205 --> 00:07:53,674 line:-1
+and also avoid interleaving opaque meshes
+
+
+147
+00:07:54,074 --> 00:07:56,176 line:-2
+with different color attachment
+write masks.
+
+
+148
+00:07:56,910 --> 00:08:00,714 line:-2
+Maximizing the efficiency of HSR
+will help us reduce overdraw.
+
+
+149
+00:08:01,582 --> 00:08:03,517 line:-1
+So let's review these with an example.
+
+
+150
+00:08:04,084 --> 00:08:07,020 line:-2
+This time we want to draw
+the same triangles as before,
+
+
+151
+00:08:07,087 --> 00:08:08,422 line:-1
+but with a different order.
+
+
+152
+00:08:08,922 --> 00:08:11,792 line:-2
+The translucent triangle
+is now in between the other two.
+
+
+153
+00:08:13,560 --> 00:08:17,197 line:-2
+If we just submit back to front,
+we will mix different visibility states.
+
+
+154
+00:08:17,798 --> 00:08:22,069 line:-2
+In this case, interleaving opaque
+and non-opaque primitives is inefficient.
+
+
+155
+00:08:22,703 --> 00:08:26,940 line:-2
+HSR will need to flush all of the pixels
+covered by the translucent primitive.
+
+
+156
+00:08:27,641 --> 00:08:30,244 line:-2
+Many of these pixels shaded
+will soon be occluded
+
+
+157
+00:08:30,310 --> 00:08:32,813 line:-2
+by the next primitive
+and then shaded again.
+
+
+158
+00:08:33,780 --> 00:08:37,818 line:-2
+To maximize efficiency,
+render all of the opaque geometry first.
+
+
+159
+00:08:37,885 --> 00:08:40,621 line:-2
+We don't actually need to sort
+opaque meshes.
+
+
+160
+00:08:40,687 --> 00:08:43,557 line:-2
+As long as we submit them
+before the non-opaque meshes,
+
+
+161
+00:08:43,624 --> 00:08:45,526 line:-1
+HSR will be very efficient.
+
+
+162
+00:08:46,793 --> 00:08:50,631 line:-2
+After HSR, we move on to the actual
+Fragment Processing stage.
+
+
+163
+00:08:51,765 --> 00:08:54,401 line:-2
+Notice, though, that if we discard
+or update the depth,
+
+
+164
+00:08:55,068 --> 00:08:57,070 line:-1
+we will need to go back to HSR.
+
+
+165
+00:08:58,405 --> 00:09:02,276 line:-2
+This stage is very efficient
+thanks to the on-chip frame buffer.
+
+
+166
+00:09:03,644 --> 00:09:06,647 line:-2
+Alpha Blending will always happen
+on Tile Memory.
+
+
+167
+00:09:07,414 --> 00:09:10,851 line:-2
+Also, notice that there is
+no dedicated blending unit.
+
+
+168
+00:09:12,085 --> 00:09:15,489 line:-2
+The only time while we read
+or write any render target
+
+
+169
+00:09:15,556 --> 00:09:18,292 line:-2
+is when the load and store actions
+get executed.
+
+
+170
+00:09:18,792 --> 00:09:21,295 line:-1
+In this example, in spite of blending,
+
+
+171
+00:09:21,361 --> 00:09:25,332 line:-2
+the final render target gets written
+only once at the end of the pass.
+
+
+172
+00:09:27,000 --> 00:09:30,103 line:-2
+Sometimes, conventional Alpha Blending
+may not be usable though.
+
+
+173
+00:09:30,871 --> 00:09:33,173 line:-2
+This is the case
+for some full screen effects
+
+
+174
+00:09:33,240 --> 00:09:35,843 line:-1
+such as global fog or deferred lighting,
+
+
+175
+00:09:35,909 --> 00:09:37,678 line:-1
+which requires some custom blending.
+
+
+176
+00:09:38,545 --> 00:09:41,448 line:-2
+These algorithms are traditional
+multi-pass techniques.
+
+
+177
+00:09:42,049 --> 00:09:45,319 line:-2
+Many of these techniques
+will store all of the attachments
+
+
+178
+00:09:45,385 --> 00:09:47,554 line:-1
+just to sample from them in a second pass.
+
+
+179
+00:09:48,722 --> 00:09:53,026 line:-2
+TBDR GPUs expose a feature
+called Programmable Blending.
+
+
+180
+00:09:53,694 --> 00:09:56,029 line:-2
+Programmable Blending
+allows fragment shaders
+
+
+181
+00:09:56,096 --> 00:09:59,299 line:-2
+to access pixel data
+directly from Tile Memory.
+
+
+182
+00:10:00,834 --> 00:10:04,471 line:-2
+This allows you to merge
+multiple render passes into one
+
+
+183
+00:10:04,538 --> 00:10:06,707 line:-2
+and drastically improve
+the memory bandwidth.
+
+
+184
+00:10:07,274 --> 00:10:11,111 line:-2
+In this example, we don't need to load
+or store any intermediate render target.
+
+
+185
+00:10:12,613 --> 00:10:14,581 line:-1
+But there is still some waste in here.
+
+
+186
+00:10:15,983 --> 00:10:20,120 line:-2
+There are a couple of render targets
+which are not being loaded or stored.
+
+
+187
+00:10:20,654 --> 00:10:22,956 line:-2
+They are just being used
+within the Tile Memory.
+
+
+188
+00:10:23,457 --> 00:10:25,325 line:-1
+And those are potentially big textures
+
+
+189
+00:10:25,392 --> 00:10:27,794 line:-2
+taking a large chunk
+of your memory footprint.
+
+
+190
+00:10:28,595 --> 00:10:31,164 line:-1
+TBDR's GPUs have a solution for that,
+
+
+191
+00:10:31,231 --> 00:10:32,900 line:-1
+Memoryless Render Targets.
+
+
+192
+00:10:33,467 --> 00:10:37,171 line:-2
+We can explicitly define a texture
+as having memoryless storage mode.
+
+
+193
+00:10:38,172 --> 00:10:41,241 line:-2
+This gets rid of all of these
+unnecessary allocations,
+
+
+194
+00:10:41,308 --> 00:10:43,810 line:-1
+saving us precious memory footprint.
+
+
+195
+00:10:44,745 --> 00:10:47,581 line:-2
+There's another technique
+which fits this design very well.
+
+
+196
+00:10:48,315 --> 00:10:50,250 line:-1
+But let's talk about the problem first.
+
+
+197
+00:10:50,817 --> 00:10:53,754 line:-1
+Aliasing. Aliasing, or Jaggies,
+
+
+198
+00:10:53,820 --> 00:10:57,558 line:-2
+are the stair-shaped pattern
+that we may see sometimes in games.
+
+
+199
+00:10:58,492 --> 00:11:01,295 line:-2
+Aliasing is a common artifact
+of rasterization.
+
+
+200
+00:11:01,795 --> 00:11:04,431 line:-2
+The GPU will sample
+the pixel at the center
+
+
+201
+00:11:04,498 --> 00:11:07,801 line:-2
+and only shade the primitive
+if it intersects with a sample point.
+
+
+202
+00:11:09,203 --> 00:11:12,206 line:-2
+Multisample Antialiasing
+is a very common technique
+
+
+203
+00:11:12,272 --> 00:11:15,475 line:-2
+that consists of rasterizing
+multiple samples per pixel.
+
+
+204
+00:11:16,844 --> 00:11:20,013 line:-2
+This allows rasterization to occur
+at higher resolution.
+
+
+205
+00:11:21,481 --> 00:11:25,118 line:-2
+The pixel shader is run
+once per triangle per pixel
+
+
+206
+00:11:25,185 --> 00:11:27,020 line:-1
+and blended with the rest of samples.
+
+
+207
+00:11:27,554 --> 00:11:29,756 line:-2
+This will smooth out
+the edges of a primitive.
+
+
+208
+00:11:31,458 --> 00:11:34,895 line:-2
+Apple GPUs have a very efficient
+MSAA implementation.
+
+
+209
+00:11:36,230 --> 00:11:38,699 line:-1
+Apple GPUs will track the primitive edges,
+
+
+210
+00:11:38,765 --> 00:11:41,735 line:-2
+so pixels without edges
+will blend per pixel,
+
+
+211
+00:11:41,802 --> 00:11:44,738 line:-2
+and pixels that contain edges
+will blend each sample.
+
+
+212
+00:11:45,739 --> 00:11:46,840 line:-1
+But that is not all.
+
+
+213
+00:11:48,008 --> 00:11:51,245 line:-2
+The multiple samples are stored
+on-chip Tile Memory
+
+
+214
+00:11:51,311 --> 00:11:53,280 line:-1
+and resolve once the tile is flushed.
+
+
+215
+00:11:54,414 --> 00:11:57,017 line:-2
+This makes the store action
+very efficient,
+
+
+216
+00:11:57,084 --> 00:11:59,086 line:-2
+and you can also use
+memoryless storage mode
+
+
+217
+00:11:59,152 --> 00:12:00,621 line:-1
+to save some footprint.
+
+
+218
+00:12:00,687 --> 00:12:01,788 line:-1
+So let's review this.
+
+
+219
+00:12:02,856 --> 00:12:05,025 line:-1
+Trivially, this is how it would look.
+
+
+220
+00:12:05,092 --> 00:12:08,595 line:-2
+We have a large multisample texture,
+as well as a Resolve Texture.
+
+
+221
+00:12:09,263 --> 00:12:13,800 line:-2
+At the end of the pass,
+we store the multiple samples and resolve.
+
+
+222
+00:12:16,170 --> 00:12:18,906 line:-1
+By using efficient Resolve action,
+
+
+223
+00:12:18,972 --> 00:12:24,044 line:-2
+we can save all of the bandwidth required
+to store the large multisample texture.
+
+
+224
+00:12:24,111 --> 00:12:28,415 line:-2
+That is because MSAA Resolve
+always happens from Tile Memory.
+
+
+225
+00:12:28,482 --> 00:12:30,617 line:-2
+So there is no point
+in storing the samples...
+
+
+226
+00:12:31,552 --> 00:12:34,288 line:-2
+which makes the multisample texture
+fully transient.
+
+
+227
+00:12:34,354 --> 00:12:36,790 line:-1
+We never load it or store it.
+
+
+228
+00:12:36,857 --> 00:12:39,560 line:-2
+This means that we may as well
+make it memoryless
+
+
+229
+00:12:39,626 --> 00:12:41,562 line:-1
+and save all that footprint too.
+
+
+230
+00:12:42,429 --> 00:12:44,765 line:-1
+Awesome! So now let's take a step back.
+
+
+231
+00:12:45,933 --> 00:12:48,468 line:-1
+Thanks to the efficient load and store actions,
+
+
+232
+00:12:48,535 --> 00:12:51,505 line:-1
+Tile Memory and memoryless render targets,
+
+
+233
+00:12:51,572 --> 00:12:55,542 line:-2
+we can write some awesome renders
+which are impressively efficient.
+
+
+234
+00:12:56,043 --> 00:12:59,046 line:-1
+Another characteristic of Apple TBDR GPUs
+
+
+235
+00:12:59,112 --> 00:13:03,550 line:-2
+is that the tiling and rendering are
+separate stages for each render pass.
+
+
+236
+00:13:04,718 --> 00:13:08,288 line:-2
+This allows the tiling work
+of a render pass to overlap
+
+
+237
+00:13:08,355 --> 00:13:10,591 line:-2
+with the rendering work
+of a previous pass.
+
+
+238
+00:13:11,258 --> 00:13:14,027 line:-2
+And of course,
+if there is no dependencies,
+
+
+239
+00:13:14,094 --> 00:13:16,096 line:-1
+Compute will always overlap.
+
+
+240
+00:13:17,264 --> 00:13:20,601 line:-1
+As you can see, Apple TBDR GPUs are great.
+
+
+241
+00:13:20,667 --> 00:13:24,538 line:-2
+And thanks to Metal, it's very easy
+to leverage the architecture.
+
+
+242
+00:13:25,539 --> 00:13:29,910 line:-2
+Apple designed Metal to enable
+rapid innovations in GPU architecture.
+
+
+243
+00:13:29,977 --> 00:13:34,248 line:-2
+And in turn, the Apple GPU architecture
+has informed the design of Metal.
+
+
+244
+00:13:35,649 --> 00:13:38,719 line:-1
+Metal is designed for Apple GPUs.
+
+
+245
+00:13:38,785 --> 00:13:42,489 line:-2
+It exposes a unified graphics
+and compute architecture
+
+
+246
+00:13:42,556 --> 00:13:45,492 line:-2
+as well as TBDR features
+such as Programmable Blending
+
+
+247
+00:13:45,559 --> 00:13:47,427 line:-1
+and Memoryless Render Targets.
+
+
+248
+00:13:48,028 --> 00:13:52,299 line:-2
+It also exposes an explicit submission
+model and explicit multi-threading.
+
+
+249
+00:13:53,333 --> 00:13:56,270 line:-2
+This deep integration
+of hardware and software makes it possible
+
+
+250
+00:13:56,336 --> 00:13:58,605 line:-1
+to easily optimize advanced algorithms...
+
+
+251
+00:13:59,673 --> 00:14:01,175 line:-1
+such as deferred rendering.
+
+
+252
+00:14:01,842 --> 00:14:04,411 line:-2
+Deferred rendering is
+a multi-pass algorithm
+
+
+253
+00:14:04,478 --> 00:14:08,415 line:-2
+that decouples rendering the scene
+properties from the actual lighting.
+
+
+254
+00:14:09,016 --> 00:14:10,684 line:-1
+In its most basic form,
+
+
+255
+00:14:10,751 --> 00:14:14,955 line:-2
+we can think of each of the algorithm
+stages as a rendering pass.
+
+
+256
+00:14:16,056 --> 00:14:17,858 line:-1
+This is considered bandwidth-heavy
+
+
+257
+00:14:17,925 --> 00:14:21,695 line:-2
+because we need to write out
+and then sample a lot of data
+
+
+258
+00:14:21,762 --> 00:14:24,231 line:-1
+in order to produce the final lit render.
+
+
+259
+00:14:24,865 --> 00:14:28,936 line:-2
+This requires a lot of memory footprint
+to store these intermediate textures
+
+
+260
+00:14:29,002 --> 00:14:30,304 line:-1
+or G-Buffer.
+
+
+261
+00:14:31,038 --> 00:14:34,341 line:-2
+Of course, you know by now
+that by using Programmable Blending,
+
+
+262
+00:14:34,408 --> 00:14:38,111 line:-2
+efficient load and store actions
+and memoryless render targets,
+
+
+263
+00:14:38,178 --> 00:14:43,083 line:-2
+we can make this algorithm very efficient.
+Both in terms of memory footprint,
+
+
+264
+00:14:43,150 --> 00:14:45,018 line:-1
+but also in terms of memory bandwidth.
+
+
+265
+00:14:46,420 --> 00:14:50,023 line:-2
+You can find a lot of documentation
+on the topic of deferred rendering
+
+
+266
+00:14:50,090 --> 00:14:53,193 line:-2
+and all of the TBDR features
+in the following samples.
+
+
+267
+00:14:53,260 --> 00:14:54,561 line:-1
+So go check them out.
+
+
+268
+00:14:54,628 --> 00:14:56,463 line:-1
+Check the Deferred Lighting sample code,
+
+
+269
+00:14:56,530 --> 00:14:58,899 line:-2
+which is actually written
+in multiple languages,
+
+
+270
+00:14:58,966 --> 00:15:02,436 line:-1
+and also optimized for Apple TBDR GPUs.
+
+
+271
+00:15:02,870 --> 00:15:06,206 line:-2
+Now, let's move on
+to the second part of the talk.
+
+
+272
+00:15:06,273 --> 00:15:08,208 line:-1
+Modern Apple GPUs.
+
+
+273
+00:15:09,309 --> 00:15:13,480 line:-2
+Starting with A11,
+we introduced a major GPU redesign.
+
+
+274
+00:15:13,547 --> 00:15:16,350 line:-1
+We redesigned and rebalanced the full GPU
+
+
+275
+00:15:16,416 --> 00:15:20,153 line:-2
+in order to support
+more modern rendering algorithms.
+
+
+276
+00:15:20,220 --> 00:15:22,256 line:-1
+These algorithms may require us
+
+
+277
+00:15:22,322 --> 00:15:25,926 line:-2
+to explicitly leverage
+the Apple TBDR architecture,
+
+
+278
+00:15:25,993 --> 00:15:28,929 line:-1
+potentially manage complex data structures
+
+
+279
+00:15:28,996 --> 00:15:31,398 line:-1
+as well as greater numerical accuracy.
+
+
+280
+00:15:32,132 --> 00:15:34,301 line:-1
+Since we also rebalanced the design,
+
+
+281
+00:15:34,368 --> 00:15:36,803 line:-1
+we made several rate improvements
+
+
+282
+00:15:36,870 --> 00:15:39,540 line:-2
+as well as increased
+some implementation limits.
+
+
+283
+00:15:40,307 --> 00:15:43,343 line:-2
+Cool! So let's review
+the render pipeline changes.
+
+
+284
+00:15:44,578 --> 00:15:47,681 line:-1
+This is the TBDR pipeline we've just seen.
+
+
+285
+00:15:48,715 --> 00:15:53,020 line:-2
+And this is the new TBDR pipeline
+of modern Apple GPUs.
+
+
+286
+00:15:53,654 --> 00:15:55,856 line:-1
+Most of the changes occurred here.
+
+
+287
+00:15:55,923 --> 00:15:58,258 line:-1
+We have now an on-chip Imageblock
+
+
+288
+00:15:58,325 --> 00:16:01,628 line:-2
+as well as a new programmable stage
+called Tile Compute.
+
+
+289
+00:16:02,196 --> 00:16:05,299 line:-2
+So let's review that,
+starting with the Imageblock.
+
+
+290
+00:16:06,366 --> 00:16:09,736 line:-2
+An Imageblock is a 2D data structure
+in Tile Memory.
+
+
+291
+00:16:10,337 --> 00:16:13,006 line:-1
+It has width, height and pixel depth.
+
+
+292
+00:16:13,674 --> 00:16:17,578 line:-2
+It can be accessed by both
+fragment functions or kernel functions.
+
+
+293
+00:16:18,345 --> 00:16:22,616 line:-2
+Using this structure explicitly
+also has some efficiency gains.
+
+
+294
+00:16:24,151 --> 00:16:25,352 line:-1
+Prior to Imageblocks,
+
+
+295
+00:16:25,419 --> 00:16:30,157 line:-2
+you probably moved your textures into
+Threadgroup Memory one pixel at a time.
+
+
+296
+00:16:30,224 --> 00:16:34,127 line:-2
+But the GPU didn't understand
+that you were operating on image data.
+
+
+297
+00:16:34,194 --> 00:16:38,065 line:-2
+You also had to store the texture
+one pixel at a time.
+
+
+298
+00:16:38,131 --> 00:16:43,070 line:-2
+With Imageblocks, you can load and store
+image data using a single operation.
+
+
+299
+00:16:43,570 --> 00:16:45,606 line:-1
+This is much more efficient.
+
+
+300
+00:16:46,607 --> 00:16:48,208 line:-1
+So far, so good.
+
+
+301
+00:16:48,275 --> 00:16:52,145 line:-2
+But the Imageblock makes more sense
+when we talk about Tile Shading.
+
+
+302
+00:16:53,847 --> 00:16:57,284 line:-2
+Tile Shaders are the compute kernels
+that we can dispatch
+
+
+303
+00:16:57,351 --> 00:17:00,254 line:-2
+in order to access the Imageblock
+mid-render pass.
+
+
+304
+00:17:00,754 --> 00:17:06,159 line:-2
+Dispatches are interleaved with draw calls
+executed in API submission order.
+
+
+305
+00:17:06,226 --> 00:17:09,695 line:-2
+And they will barrier against
+earlier and later draw calls,
+
+
+306
+00:17:09,762 --> 00:17:11,999 line:-1
+so synchronization should not be an issue.
+
+
+307
+00:17:13,000 --> 00:17:16,904 line:-2
+Tile Shaders and Imageblocks will also
+help us with MSAA.
+
+
+308
+00:17:17,838 --> 00:17:21,474 line:-2
+MSAA also got more efficient
+On our modern GPUs.
+
+
+309
+00:17:21,541 --> 00:17:24,344 line:-1
+Now, the GPU also tracks unique samples.
+
+
+310
+00:17:25,145 --> 00:17:28,982 line:-2
+But so far, MSAA is fairly opaque
+to your application.
+
+
+311
+00:17:29,049 --> 00:17:31,418 line:-2
+You could enable or disable it
+for a render pass
+
+
+312
+00:17:31,485 --> 00:17:34,421 line:-2
+with no control
+on how the samples are resolved.
+
+
+313
+00:17:35,689 --> 00:17:38,926 line:-2
+Leveraging the flexibility of Imageblocks
+and Tile Shading,
+
+
+314
+00:17:38,992 --> 00:17:41,862 line:-2
+Imageblock sample coverage control
+gives you access
+
+
+315
+00:17:41,929 --> 00:17:44,831 line:-2
+to each pixel sample coverage
+tracking data
+
+
+316
+00:17:44,898 --> 00:17:48,435 line:-2
+for even more control
+of your multisample render passes.
+
+
+317
+00:17:48,502 --> 00:17:52,773 line:-2
+This allows you to leverage MSAA
+where you would have not before.
+
+
+318
+00:17:54,274 --> 00:17:58,111 line:-2
+Some applications render complex scenes
+with lots of opaque geometry
+
+
+319
+00:17:58,178 --> 00:18:00,747 line:-2
+and lots of translucent geometry,
+like particles.
+
+
+320
+00:18:01,381 --> 00:18:05,118 line:-2
+This would have a negative impact
+on the performance
+
+
+321
+00:18:05,185 --> 00:18:08,288 line:-2
+due to the high number
+of small, translucent triangles
+
+
+322
+00:18:08,355 --> 00:18:10,858 line:-2
+which will have a lot of samples
+per pixel.
+
+
+323
+00:18:11,859 --> 00:18:12,960 line:-1
+In this case,
+
+
+324
+00:18:13,026 --> 00:18:16,363 line:-2
+you may want to resolve your sample data
+with a tile pipeline
+
+
+325
+00:18:16,430 --> 00:18:18,832 line:-1
+before the heavy blending phase.
+
+
+326
+00:18:18,899 --> 00:18:21,201 line:-1
+With Imageblock Sample Coverage Control,
+
+
+327
+00:18:21,268 --> 00:18:24,338 line:-2
+you can resolve the sample data
+with a tile pipeline
+
+
+328
+00:18:24,404 --> 00:18:26,206 line:-1
+after rendering the opaque geometry
+
+
+329
+00:18:26,273 --> 00:18:29,877 line:-2
+to ensure that all of the pixels contain
+a single unique color.
+
+
+330
+00:18:30,844 --> 00:18:33,614 line:-1
+Also, the resolve is fully programmable.
+
+
+331
+00:18:34,181 --> 00:18:36,984 line:-2
+You may actually want to implement
+a custom resolve
+
+
+332
+00:18:37,050 --> 00:18:38,886 line:-1
+for each type of render target,
+
+
+333
+00:18:38,952 --> 00:18:41,655 line:-1
+such as HDR color or linear depth.
+
+
+334
+00:18:43,557 --> 00:18:48,195 line:-2
+Tile Shaders and Imageblocks add
+a great deal of flexibility to the GPU.
+
+
+335
+00:18:48,262 --> 00:18:52,866 line:-2
+They also help you leverage the TBDR
+architecture of our modern Apple GPUs.
+
+
+336
+00:18:53,634 --> 00:18:57,171 line:-2
+You can learn more about Apple GPUs
+in the following Tech Talks.
+
+
+337
+00:18:57,871 --> 00:19:01,875 line:-2
+These Tech Talks also cover some
+great features we haven't talked about,
+
+
+338
+00:19:01,942 --> 00:19:03,710 line:-1
+such as raster order groups.
+
+
+339
+00:19:04,645 --> 00:19:07,648 line:-2
+Now, let's switch back to Metal
+for a second.
+
+
+340
+00:19:09,449 --> 00:19:13,654 line:-2
+Metal makes it possible to leverage
+the improved capabilities of Apple GPUs.
+
+
+341
+00:19:14,821 --> 00:19:18,525 line:-2
+We will review an example of this
+for these two major areas.
+
+
+342
+00:19:19,226 --> 00:19:21,995 line:-2
+First, the explicit control
+of Tile Memory,
+
+
+343
+00:19:22,062 --> 00:19:24,731 line:-1
+and second, GPU-driven rendering,
+
+
+344
+00:19:25,132 --> 00:19:28,135 line:-2
+starting with explicit control
+of Tile Memory.
+
+
+345
+00:19:28,769 --> 00:19:32,072 line:-2
+Metal allows you
+to take advantage of Tile Memory directly.
+
+
+346
+00:19:32,639 --> 00:19:35,909 line:-2
+Tile Memory is exposed
+through Tile Shaders, Imageblocks
+
+
+347
+00:19:35,976 --> 00:19:38,979 line:-1
+as well as Persistent Threadgroup Memory.
+
+
+348
+00:19:39,046 --> 00:19:42,850 line:-2
+You can use this to improve the efficiency
+of more complex algorithms,
+
+
+349
+00:19:43,317 --> 00:19:45,118 line:-1
+such as tiled deferred rendering.
+
+
+350
+00:19:45,986 --> 00:19:48,989 line:-2
+This is a more advanced version
+of deferred rendering
+
+
+351
+00:19:49,056 --> 00:19:52,726 line:-2
+which is considered to be more efficient
+for a large number of lights.
+
+
+352
+00:19:53,327 --> 00:19:57,798 line:-2
+This algorithm adds an extra step
+to cull all the lights into a tile list
+
+
+353
+00:19:57,865 --> 00:20:01,468 line:-2
+that is used by a later compute pass
+to light the scene.
+
+
+354
+00:20:02,302 --> 00:20:04,605 line:-1
+So, if we start from deferred rendering,
+
+
+355
+00:20:05,506 --> 00:20:08,442 line:-2
+we need to add an extra compute stage
+to cull the lights.
+
+
+356
+00:20:09,042 --> 00:20:12,746 line:-2
+Potentially, we could also use compute
+for the light accumulation.
+
+
+357
+00:20:13,747 --> 00:20:17,217 line:-2
+But this would prevent TBDR GPUs
+from merging the passes,
+
+
+358
+00:20:17,284 --> 00:20:21,788 line:-2
+because Programmable Blending only allows
+us to work on a single pixel at a time,
+
+
+359
+00:20:22,322 --> 00:20:25,425 line:-2
+and this would make light culling
+far too expensive.
+
+
+360
+00:20:26,293 --> 00:20:29,630 line:-2
+But Tile Shading allows us
+to work on a full tile.
+
+
+361
+00:20:30,130 --> 00:20:34,001 line:-2
+By using Tile Shading,
+we can interleave rendering and compute.
+
+
+362
+00:20:34,468 --> 00:20:38,939 line:-2
+This allows us to merge the three
+render passes into a single pass.
+
+
+363
+00:20:39,640 --> 00:20:42,309 line:-2
+And of course,
+this is much more efficient.
+
+
+364
+00:20:43,610 --> 00:20:47,648 line:-2
+But Metal also exposes the capabilities
+of the Apple GPUs
+
+
+365
+00:20:47,714 --> 00:20:49,383 line:-1
+through GPU-driven rendering.
+
+
+366
+00:20:49,883 --> 00:20:51,919 line:-1
+This is a fairly modern concept,
+
+
+367
+00:20:51,985 --> 00:20:54,588 line:-2
+possible in Metal
+thanks to Argument Buffers
+
+
+368
+00:20:54,655 --> 00:20:56,523 line:-1
+and Indirect Command Buffers.
+
+
+369
+00:20:57,191 --> 00:21:00,761 line:-2
+Traditionally, the render loop is driven
+by the CPU.
+
+
+370
+00:21:01,962 --> 00:21:05,899 line:-2
+This is because the data set
+and the process required to traverse it
+
+
+371
+00:21:05,966 --> 00:21:07,201 line:-1
+are complex.
+
+
+372
+00:21:07,634 --> 00:21:10,871 line:-2
+We need several structures
+to define the entire scene.
+
+
+373
+00:21:11,438 --> 00:21:12,973 line:-1
+In this example,
+
+
+374
+00:21:13,040 --> 00:21:17,010 line:-2
+our scene contains a list of meshes,
+materials and models.
+
+
+375
+00:21:17,878 --> 00:21:21,381 line:-2
+Each model will contain indices
+to a parent mesh and a material.
+
+
+376
+00:21:22,482 --> 00:21:23,684 line:-1
+So far, so good.
+
+
+377
+00:21:23,750 --> 00:21:28,422 line:-2
+The actual real problem here
+is when we have to decide what to render.
+
+
+378
+00:21:28,488 --> 00:21:30,791 line:-2
+We just cannot render everything
+every frame.
+
+
+379
+00:21:32,025 --> 00:21:35,662 line:-2
+The CPU will need to decide
+what geometry to render
+
+
+380
+00:21:35,729 --> 00:21:38,532 line:-2
+based on the occlusion culling
+from the previous frame
+
+
+381
+00:21:38,599 --> 00:21:40,667 line:-1
+as well as the view frustum.
+
+
+382
+00:21:40,734 --> 00:21:44,571 line:-2
+And of course, the CPU will also need
+to select the appropriate LOD.
+
+
+383
+00:21:45,772 --> 00:21:48,642 line:-2
+This requires
+several synchronization points.
+
+
+384
+00:21:48,709 --> 00:21:51,879 line:-2
+The CPU needs to read occlusion data
+written by the GPU
+
+
+385
+00:21:51,945 --> 00:21:53,981 line:-1
+in order to issue the draw commands.
+
+
+386
+00:21:55,215 --> 00:21:57,818 line:-2
+So there are two problems
+that we need to solve.
+
+
+387
+00:21:57,885 --> 00:22:00,487 line:-2
+First, the traversal
+of the scene description,
+
+
+388
+00:22:00,554 --> 00:22:02,756 line:-1
+and then the encoding of draw commands.
+
+
+389
+00:22:03,257 --> 00:22:06,326 line:-2
+Metal has the following building blocks
+to help.
+
+
+390
+00:22:06,393 --> 00:22:11,365 line:-2
+First, Argument Buffers, which make
+the scene data available on the GPU
+
+
+391
+00:22:11,431 --> 00:22:14,501 line:-2
+and also allow us to describe
+complex data structures.
+
+
+392
+00:22:15,269 --> 00:22:18,372 line:-2
+And then we also have
+Indirect Command Buffers,
+
+
+393
+00:22:18,438 --> 00:22:21,508 line:-2
+which will allow the GPU
+to encode its own draw calls.
+
+
+394
+00:22:22,776 --> 00:22:24,144 line:-1
+So this scene...
+
+
+395
+00:22:27,047 --> 00:22:30,117 line:-2
+can be flattened to an array
+of Argument Buffer arrays.
+
+
+396
+00:22:30,484 --> 00:22:34,421 line:-2
+And these can be efficiently traversed
+by modern Apple GPUs.
+
+
+397
+00:22:35,289 --> 00:22:39,426 line:-2
+Thanks to Argument Buffers, the GPU
+can now transverse the entire scene.
+
+
+398
+00:22:39,860 --> 00:22:44,398 line:-2
+And by using Indirect Command Buffers,
+the GPU can also issue draw commands.
+
+
+399
+00:22:45,132 --> 00:22:48,735 line:-2
+In this example, we can see a GPU-driven
+render loop.
+
+
+400
+00:22:49,870 --> 00:22:52,673 line:-2
+This is how the GPU will manage
+the render loop.
+
+
+401
+00:22:52,739 --> 00:22:55,642 line:-2
+It will first traverse the scene
+to render occluders,
+
+
+402
+00:22:56,276 --> 00:23:00,948 line:-2
+then traverse the scene again to perform
+culling and the LOD selection
+
+
+403
+00:23:01,014 --> 00:23:04,051 line:-1
+and then render the scene one final time.
+
+
+404
+00:23:04,852 --> 00:23:08,989 line:-2
+This requires no synchronization
+between the CPU and the GPU.
+
+
+405
+00:23:09,756 --> 00:23:11,758 line:-2
+You can learn
+how to implement these algorithms
+
+
+406
+00:23:11,825 --> 00:23:15,128 line:-2
+by studying the
+"Modern Rendering with Metal" sample code.
+
+
+407
+00:23:15,195 --> 00:23:18,432 line:-2
+This sample includes
+a full GPU-driven render loop.
+
+
+408
+00:23:18,999 --> 00:23:21,802 line:-1
+It is also written using modern constructs
+
+
+409
+00:23:21,869 --> 00:23:25,239 line:-2
+such as Argument Buffers
+or Indirect Command Buffers.
+
+
+410
+00:23:25,305 --> 00:23:28,475 line:-2
+It also leverages
+modern Apple GPU features
+
+
+411
+00:23:28,542 --> 00:23:31,044 line:-1
+such as Tile Shaders, Imageblocks,
+
+
+412
+00:23:31,111 --> 00:23:34,114 line:-2
+Sparse Textures
+and Variable Rasterization Rate.
+
+
+413
+00:23:35,649 --> 00:23:37,518 line:-1
+And this was just a summary.
+
+
+414
+00:23:37,584 --> 00:23:41,021 line:-2
+You may actually want to follow up
+on more Metal talks.
+
+
+415
+00:23:41,088 --> 00:23:45,125 line:-2
+Also, do not forget to check out the
+"Modern Rendering with Metal" sample code.
+
+
+416
+00:23:46,426 --> 00:23:48,028 line:-1
+And that's about it.
+
+
+417
+00:23:48,095 --> 00:23:53,200 line:-2
+Today we have talked about Apple GPUs and
+what makes them so unique and efficient.
+
+
+418
+00:23:53,834 --> 00:23:55,869 line:-1
+We've also revealed some use cases
+
+
+419
+00:23:55,936 --> 00:24:00,307 line:-2
+in which you can use Metal in order
+to accelerate rendering algorithms.
+
+
+420
+00:24:02,042 --> 00:24:07,014 line:-2
+So the next steps are for you to follow up
+on related talks about Apple GPUs
+
+
+421
+00:24:07,080 --> 00:24:11,785 line:-2
+and also explore the best practices
+for both Metal and Apple GPUs.
+
+
+422
+00:24:12,920 --> 00:24:14,154 line:-1
+Thanks for watching.
+

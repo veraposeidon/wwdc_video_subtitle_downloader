@@ -1,0 +1,2950 @@
+2
+00:00:00.033 --> 00:00:03.003 line:-1 position:50%
+♪ instrumental hip hop music ♪
+
+
+3
+00:00:03,003 --> 00:00:09,276 position:90% size:2% line:0
+♪
+
+
+4
+00:00:09,276 --> 00:00:11,011 line:-1
+Hello, I'm Alejandro.
+
+
+5
+00:00:11,011 --> 00:00:13,247 line:-1
+I'm an engineer
+on the CreateML team.
+
+
+6
+00:00:13.247 --> 00:00:15.582 line:-1 position:50%
+Today I'm going to talk about
+a brand-new API
+
+
+7
+00:00:15.582 --> 00:00:19.453 line:-1 position:50%
+for building machine learning
+models using components.
+
+
+8
+00:00:19,453 --> 00:00:21,655 position:50%
+Create ML
+provides a simple API
+
+
+9
+00:00:21,655 --> 00:00:23,957 position:50%
+for training
+machine learning models.
+
+
+10
+00:00:23.957 --> 00:00:25.826 line:-1 position:50%
+It is based on
+a set of supported tasks
+
+
+11
+00:00:25.826 --> 00:00:31.198 line:-1 position:50%
+like image classification,
+sound classification, and so on.
+
+
+12
+00:00:31,198 --> 00:00:33,567 position:50%
+At WWDC 2021,
+
+
+13
+00:00:33,567 --> 00:00:36,937 position:50%
+we presented two great talks
+on the Create ML framework.
+
+
+14
+00:00:36,937 --> 00:00:39,873 position:50%
+Make sure to check those out
+if you haven't.
+
+
+15
+00:00:39,873 --> 00:00:42,943 position:50%
+But I want to talk about
+going beyond predefined tasks.
+
+
+16
+00:00:42.943 --> 00:00:44.611 line:-1 position:50%
+What if you wanted
+to customize a task
+
+
+17
+00:00:44,611 --> 00:00:48,115 line:-1
+to your particular problem
+beyond what Create ML offers?
+
+
+18
+00:00:48.115 --> 00:00:51.752 line:-1 position:50%
+Or what if you wanted to build
+a different type of task?
+
+
+19
+00:00:51,752 --> 00:00:54,254 line:-1
+Using components,
+you can now compose tasks
+
+
+20
+00:00:54,254 --> 00:00:56,056 line:-1
+in new and creative ways.
+
+
+21
+00:00:56.056 --> 00:00:58.325 line:-1 position:50%
+Let's dig in.
+
+
+22
+00:00:58.325 --> 00:01:00.427 line:-1 position:50%
+I'll start by breaking up
+an ML task
+
+
+23
+00:01:00,427 --> 00:01:03,397 line:-1
+and explaining what
+each component does.
+
+
+24
+00:01:03.397 --> 00:01:07.234 line:-1 position:50%
+Then, I'll talk about how you
+can piece components together.
+
+
+25
+00:01:07,234 --> 00:01:10,404 line:-1
+Followed with an example
+of a custom image task.
+
+
+26
+00:01:10,404 --> 00:01:13,507 line:-1
+Then, I'll talk about
+tabular tasks.
+
+
+27
+00:01:13.507 --> 00:01:16.610 line:-1 position:50%
+And I'll end with
+deployment strategies.
+
+
+28
+00:01:16.610 --> 00:01:18.378 line:-1 position:50%
+Let me start by exploring
+the insides
+
+
+29
+00:01:18.378 --> 00:01:20.781 line:-1 position:50%
+of a machine learning task
+so that you understand
+
+
+30
+00:01:20.781 --> 00:01:23.216 line:-1 position:50%
+what goes into it
+and how it works.
+
+
+31
+00:01:23.216 --> 00:01:25.652 line:-1 position:50%
+This way, when we start
+building custom tasks,
+
+
+32
+00:01:25.652 --> 00:01:27.421 line:-1 position:50%
+you know what I'm talking about.
+
+
+33
+00:01:27.421 --> 00:01:31.158 line:-1 position:50%
+I'm going to use an image
+classifier as an example.
+
+
+34
+00:01:31.158 --> 00:01:34.094 line:-1 position:50%
+An image classifier
+uses a list of labeled images
+
+
+35
+00:01:34.094 --> 00:01:36.096 line:-1 position:50%
+to train a model.
+
+
+36
+00:01:36,096 --> 00:01:38,799 line:0
+In this example,
+I have images of cats and dogs
+
+
+37
+00:01:38,799 --> 00:01:41,234 line:0
+with their respective labels.
+
+
+38
+00:01:41,234 --> 00:01:45,339 position:50%
+But let's explore how images
+are transformed at each step.
+
+
+39
+00:01:45,339 --> 00:01:48,208 line:-1
+To do that, I'll expand
+the image classification task
+
+
+40
+00:01:48.208 --> 00:01:50.711 line:-1 position:50%
+to see what's inside.
+
+
+41
+00:01:50.711 --> 00:01:53.280 line:-1 position:50%
+Conceptually, an image
+classifier is very simple.
+
+
+42
+00:01:53.280 --> 00:01:56.650 line:-1 position:50%
+It consists of a feature
+extractor and a classifier.
+
+
+43
+00:01:56,650 --> 00:01:59,987 line:-1
+But the important part
+is that Create ML components
+
+
+44
+00:01:59,987 --> 00:02:02,889 line:-1
+gives you access to these
+components independently.
+
+
+45
+00:02:02.889 --> 00:02:07.761 line:-1 position:50%
+You can add, remove, or switch
+components to compose new tasks.
+
+
+46
+00:02:07.761 --> 00:02:10.664 line:-1 position:50%
+I'm going to represent
+components as boxes.
+
+
+47
+00:02:10.664 --> 00:02:12.899 line:-1 position:50%
+Arrows represent
+the flow of data.
+
+
+48
+00:02:12.899 --> 00:02:15.669 line:-1 position:50%
+Let's zoom into the first step
+of the image classifier:
+
+
+49
+00:02:15,669 --> 00:02:18,271 line:-1
+feature extraction.
+
+
+50
+00:02:18,271 --> 00:02:21,308 line:-1
+Generally, feature extractors
+reduce the dimensionality
+
+
+51
+00:02:21.308 --> 00:02:24.277 line:-1 position:50%
+of the input by keeping
+only the interesting parts --
+
+
+52
+00:02:24,277 --> 00:02:25,645 line:-1
+the features.
+
+
+53
+00:02:25.645 --> 00:02:26.980 line:-1 position:50%
+In the case of images,
+
+
+54
+00:02:26,980 --> 00:02:31,018 line:-1
+a feature extractor
+looks for patterns in the image.
+
+
+55
+00:02:31,018 --> 00:02:33,687 position:50%
+Create ML uses
+Vision Feature Print,
+
+
+56
+00:02:33,687 --> 00:02:36,223 line:0
+which is an excellent
+image-feature extractor
+
+
+57
+00:02:36,223 --> 00:02:39,459 position:50%
+provided
+by the Vision Framework.
+
+
+58
+00:02:39,459 --> 00:02:41,528 line:-1
+Now, let's talk about
+the second piece:
+
+
+59
+00:02:41.528 --> 00:02:42.929 line:-1 position:50%
+the classifier.
+
+
+60
+00:02:42,929 --> 00:02:45,198 line:-1
+A classifier
+uses a set of examples
+
+
+61
+00:02:45,198 --> 00:02:47,667 line:-1
+to learn a classification.
+
+
+62
+00:02:47,667 --> 00:02:50,771 line:-1
+Some common implementations
+are logistic regression,
+
+
+63
+00:02:50,771 --> 00:02:54,241 line:-1
+boosted trees,
+and neural networks.
+
+
+64
+00:02:54,241 --> 00:02:57,711 line:0
+So training an image classifier
+starts with annotated images,
+
+
+65
+00:02:57,711 --> 00:03:02,249 position:50%
+goes to annotated features,
+and ends with the classifier.
+
+
+66
+00:03:02.249 --> 00:03:05.118 line:-1 position:50%
+But why do we want
+to break it into pieces?
+
+
+67
+00:03:05,118 --> 00:03:08,688 line:-1
+The reason is we want
+to expand the possibilities.
+
+
+68
+00:03:08.688 --> 00:03:10.657 line:-1 position:50%
+Maybe you want
+to do some preprocessing
+
+
+69
+00:03:10.657 --> 00:03:12.859 line:-1 position:50%
+by increasing the contrast.
+
+
+70
+00:03:12.859 --> 00:03:15.062 line:-1 position:50%
+Or maybe you want
+to normalize all images
+
+
+71
+00:03:15,062 --> 00:03:19,533 line:-1
+so they have uniform brightness
+before you extract features.
+
+
+72
+00:03:19,533 --> 00:03:22,803 line:-1
+Or maybe you want to try
+a different feature extractor.
+
+
+73
+00:03:22,803 --> 00:03:25,639 line:-1
+Or maybe you want
+to try a different classifier.
+
+
+74
+00:03:25,639 --> 00:03:27,974 line:-1
+The possibilities are endless.
+
+
+75
+00:03:27,974 --> 00:03:30,644 line:-1
+These are just
+a few of the options.
+
+
+76
+00:03:30.644 --> 00:03:33.113 line:-1 position:50%
+That's why we've added
+support for ML components
+
+
+77
+00:03:33,113 --> 00:03:37,717 line:-1
+in macOS, iOS, iPadOS, and tvOS.
+
+
+78
+00:03:37.717 --> 00:03:40.053 line:-1 position:50%
+Our hope is that you can
+compose new models
+
+
+79
+00:03:40,053 --> 00:03:41,721 line:-1
+using some of the components
+we provide
+
+
+80
+00:03:41,721 --> 00:03:43,457 line:-1
+together with
+your own components,
+
+
+81
+00:03:43.457 --> 00:03:46.226 line:-1 position:50%
+or even components built
+by others in the community.
+
+
+82
+00:03:46,226 --> 00:03:49,729 line:-1
+And you can leverage it
+across all of our platforms.
+
+
+83
+00:03:49.729 --> 00:03:54.835 line:-1 position:50%
+Here are some of the components
+built into Create ML Components.
+
+
+84
+00:03:54.835 --> 00:03:58.238 line:-1 position:50%
+But let me take a step back
+and introduce some concepts.
+
+
+85
+00:03:58,238 --> 00:03:59,706 line:-1
+There are two types
+of components:
+
+
+86
+00:03:59,706 --> 00:04:02,175 line:-1
+transformers and estimators.
+
+
+87
+00:04:02,175 --> 00:04:04,010 line:-1
+A transformer is simply a type
+
+
+88
+00:04:04.010 --> 00:04:07.013 line:-1 position:50%
+that is able to perform
+some transformation.
+
+
+89
+00:04:07.013 --> 00:04:10.350 line:-1 position:50%
+It defines an input type
+and an output type.
+
+
+90
+00:04:10.350 --> 00:04:14.221 line:-1 position:50%
+For example, an image-feature
+extractor takes an input image
+
+
+91
+00:04:14.221 --> 00:04:17.691 line:-1 position:50%
+and produces a shaped
+array of features.
+
+
+92
+00:04:17.691 --> 00:04:21.628 line:-1 position:50%
+An estimator, on the other hand,
+needs to learn from data.
+
+
+93
+00:04:21,628 --> 00:04:25,098 line:-1
+It takes input examples,
+does some processing,
+
+
+94
+00:04:25.098 --> 00:04:27.267 line:-1 position:50%
+and produces a transformer.
+
+
+95
+00:04:27.267 --> 00:04:30.370 line:-1 position:50%
+We call this process "fitting."
+
+
+96
+00:04:30,370 --> 00:04:33,140 line:-1
+Great. With those concepts
+out of the way,
+
+
+97
+00:04:33.140 --> 00:04:35.609 line:-1 position:50%
+let me talk about
+how Create ML Components
+
+
+98
+00:04:35,609 --> 00:04:37,711 line:-1
+lets you build
+an image classifier
+
+
+99
+00:04:37.711 --> 00:04:41.181 line:-1 position:50%
+from its individual components
+using composition.
+
+
+100
+00:04:41.181 --> 00:04:44.084 line:-1 position:50%
+This is an image classifier
+using components.
+
+
+101
+00:04:44.084 --> 00:04:46.953 line:-1 position:50%
+It has ImageFeaturePrint
+as the feature extractor
+
+
+102
+00:04:46.953 --> 00:04:50.290 line:-1 position:50%
+and LogisticRegressionClassifier
+as the classifier.
+
+
+103
+00:04:50,290 --> 00:04:52,159 line:-1
+Regardless of
+whether a component
+
+
+104
+00:04:52,159 --> 00:04:54,427 line:-1
+is a transformer
+or an estimator,
+
+
+105
+00:04:54,427 --> 00:04:58,999 line:-1
+you combine them using
+the appending method.
+
+
+106
+00:04:58.999 --> 00:05:02.502 line:-1 position:50%
+And this is where components
+provide unlimited possibilities.
+
+
+107
+00:05:02.502 --> 00:05:05.272 line:-1 position:50%
+You can use a fully connected
+neural network as a classifier
+
+
+108
+00:05:05.272 --> 00:05:09.442 line:-1 position:50%
+instead of logistic regression
+with a simple change.
+
+
+109
+00:05:09,442 --> 00:05:13,413 line:-1
+Or you can use a custom feature
+extractor in a CoreML model.
+
+
+110
+00:05:13,413 --> 00:05:16,449 line:-1
+For example,
+the headless ResNet-50 model
+
+
+111
+00:05:16,449 --> 00:05:19,786 line:-1
+you can find
+in the model gallery.
+
+
+112
+00:05:19.786 --> 00:05:21.688 line:-1 position:50%
+When composing two components,
+
+
+113
+00:05:21.688 --> 00:05:23.390 line:-1 position:50%
+the output
+of the first component
+
+
+114
+00:05:23,390 --> 00:05:25,759 line:-1
+must match
+the input of the second.
+
+
+115
+00:05:25.759 --> 00:05:27.994 line:-1 position:50%
+In the case
+of our image classifier,
+
+
+116
+00:05:27.994 --> 00:05:30.830 line:-1 position:50%
+the output of the feature
+extractor is a shaped array,
+
+
+117
+00:05:30,830 --> 00:05:32,666 line:-1
+from the CoreML framework.
+
+
+118
+00:05:32.666 --> 00:05:36.503 line:-1 position:50%
+Which is also the input of a
+logistic regression classifier.
+
+
+119
+00:05:36,503 --> 00:05:39,739 line:-1
+If you get a compiler error
+when using the appending method,
+
+
+120
+00:05:39.739 --> 00:05:41.908 line:-1 position:50%
+this is the first thing
+to check.
+
+
+121
+00:05:41,908 --> 00:05:44,444 line:-1
+Make sure the types match.
+
+
+122
+00:05:44.444 --> 00:05:48.415 line:-1 position:50%
+But let me clarify an important
+point around fitting.
+
+
+123
+00:05:48,415 --> 00:05:50,550 line:-1
+I said before that fitting
+is the process
+
+
+124
+00:05:50,550 --> 00:05:53,486 line:-1
+of going from an estimator
+to a transformer.
+
+
+125
+00:05:53.486 --> 00:05:55.088 line:-1 position:50%
+Let's look at this
+from the perspective
+
+
+126
+00:05:55.088 --> 00:05:57.524 line:-1 position:50%
+of a composed estimator.
+
+
+127
+00:05:57,524 --> 00:05:58,825 line:-1
+When your composed estimator
+
+
+128
+00:05:58.825 --> 00:06:01.061 line:-1 position:50%
+has both transformers
+and estimators,
+
+
+129
+00:06:01.061 --> 00:06:03.330 line:-1 position:50%
+like in the case
+of the image classifier,
+
+
+130
+00:06:03.330 --> 00:06:05.932 line:-1 position:50%
+only the estimator pieces
+are fitted.
+
+
+131
+00:06:05.932 --> 00:06:09.002 line:-1 position:50%
+But the transformers are
+an important part of the process
+
+
+132
+00:06:09.002 --> 00:06:11.271 line:-1 position:50%
+because they are used
+to feed the correct features
+
+
+133
+00:06:11,271 --> 00:06:14,307 line:-1
+to the estimator's
+fitted method.
+
+
+134
+00:06:14.307 --> 00:06:15.508 line:-1 position:50%
+Here is the code.
+
+
+135
+00:06:15.508 --> 00:06:16.876 line:-1 position:50%
+The image classifier
+
+
+136
+00:06:16.876 --> 00:06:19.446 line:-1 position:50%
+needs a collection
+of annotated features
+
+
+137
+00:06:19.446 --> 00:06:24.251 line:-1 position:50%
+where the features are images
+and the annotations are strings.
+
+
+138
+00:06:24,251 --> 00:06:25,885 line:-1
+We'll talk about
+loading the features
+
+
+139
+00:06:25.885 --> 00:06:28.955 line:-1 position:50%
+when we go into the demo.
+
+
+140
+00:06:28,955 --> 00:06:32,325 line:-1
+Once I have the data,
+I can call the fitted method.
+
+
+141
+00:06:32,325 --> 00:06:37,264 line:-1
+This returns the trained model,
+a transformer.
+
+
+142
+00:06:37,264 --> 00:06:39,933 line:-1
+And it's important to note
+that the types used
+
+
+143
+00:06:39,933 --> 00:06:42,269 line:-1
+when fitting are related
+but different
+
+
+144
+00:06:42,269 --> 00:06:44,971 line:-1
+from the types
+of the resulting transformer.
+
+
+145
+00:06:44.971 --> 00:06:47.774 line:-1 position:50%
+In particular, the types used
+in the fitted method
+
+
+146
+00:06:47,774 --> 00:06:49,643 line:-1
+are always collections.
+
+
+147
+00:06:49.643 --> 00:06:52.045 line:-1 position:50%
+And in the case
+of supervised estimators,
+
+
+148
+00:06:52,045 --> 00:06:55,415 line:-1
+the features must include
+the annotations.
+
+
+149
+00:06:55,415 --> 00:06:58,485 line:-1
+Create ML Components
+uses the AnnotatedFeature type
+
+
+150
+00:06:58.485 --> 00:07:03.056 line:-1 position:50%
+to represent a feature
+along with its annotation.
+
+
+151
+00:07:03,056 --> 00:07:06,226 line:-1
+Once I have the model,
+I can do predictions.
+
+
+152
+00:07:06,226 --> 00:07:08,461 line:-1
+It doesn't matter
+if it's a model I just fitted,
+
+
+153
+00:07:08.461 --> 00:07:11.765 line:-1 position:50%
+or if I'm loading
+the parameters from a disk.
+
+
+154
+00:07:11.765 --> 00:07:15.702 line:-1 position:50%
+The API is the same
+in both cases.
+
+
+155
+00:07:15.702 --> 00:07:17.570 line:-1 position:50%
+Since I am training
+a classifier,
+
+
+156
+00:07:17.570 --> 00:07:20.874 line:-1 position:50%
+the result is
+a classification distribution.
+
+
+157
+00:07:20,874 --> 00:07:25,312 line:-1
+The distribution includes
+a probability for each label.
+
+
+158
+00:07:25.312 --> 00:07:27.681 line:-1 position:50%
+In this case, I'm just printing
+the most likely label
+
+
+159
+00:07:27.681 --> 00:07:30.817 line:-1 position:50%
+for the image.
+
+
+160
+00:07:30.817 --> 00:07:33.320 line:-1 position:50%
+The fitted method
+also provides a mechanism
+
+
+161
+00:07:33.320 --> 00:07:37.457 line:-1 position:50%
+to observe training events,
+including validation metrics.
+
+
+162
+00:07:37,457 --> 00:07:39,826 line:-1
+In this example,
+I'm passing validation data
+
+
+163
+00:07:39,826 --> 00:07:43,096 line:-1
+and printing
+the validation accuracy.
+
+
+164
+00:07:43.096 --> 00:07:44.798 line:-1 position:50%
+Note that only
+supervised estimators
+
+
+165
+00:07:44.798 --> 00:07:48.401 line:-1 position:50%
+provide validation metrics.
+
+
+166
+00:07:48.401 --> 00:07:50.003 line:-1 position:50%
+Once you train a model,
+
+
+167
+00:07:50.003 --> 00:07:52.372 line:-1 position:50%
+you can save
+the learned parameters,
+
+
+168
+00:07:52,372 --> 00:07:56,009 line:-1
+either to reuse later
+or to deploy to an app.
+
+
+169
+00:07:56,009 --> 00:07:58,545 line:-1
+You do this using
+the write method.
+
+
+170
+00:07:58,545 --> 00:08:02,248 line:-1
+Later, you can read
+using the read method.
+
+
+171
+00:08:02.248 --> 00:08:04.184 line:-1 position:50%
+And that's composition.
+
+
+172
+00:08:04,184 --> 00:08:06,653 line:-1
+This is where
+it gets interesting.
+
+
+173
+00:08:06,653 --> 00:08:08,755 line:-1
+Let me talk about
+writing a new task,
+
+
+174
+00:08:08.755 --> 00:08:11.758 line:-1 position:50%
+something that Create ML
+didn't support until now.
+
+
+175
+00:08:13.727 --> 00:08:17.597 line:-1 position:50%
+What if you wanted to train
+a model to score images?
+
+
+176
+00:08:17,597 --> 00:08:19,632 line:-1
+Let's say you have
+photos of fruit,
+
+
+177
+00:08:19.632 --> 00:08:21.601 line:-1 position:50%
+but instead of
+classifying the fruit,
+
+
+178
+00:08:21,601 --> 00:08:23,670 line:-1
+you wanted to rate it.
+
+
+179
+00:08:23.670 --> 00:08:26.606 line:-1 position:50%
+Give it a score
+based on how ripe it is.
+
+
+180
+00:08:26.606 --> 00:08:28.808 line:-1 position:50%
+To do this,
+you need to do regression
+
+
+181
+00:08:28.808 --> 00:08:30.944 line:-1 position:50%
+instead of classification.
+
+
+182
+00:08:30,944 --> 00:08:33,046 line:0
+So let me write
+an image regressor
+
+
+183
+00:08:33,046 --> 00:08:37,550 position:50%
+that gives a score to images
+of bananas based on ripeness.
+
+
+184
+00:08:37,550 --> 00:08:43,089 position:50%
+I'll give each image a ripeness
+value between one and 10.
+
+
+185
+00:08:43.089 --> 00:08:47.594 line:-1 position:50%
+An image regressor is very
+similar to an image classifier.
+
+
+186
+00:08:47.594 --> 00:08:49.696 line:-1 position:50%
+The only difference
+is that our estimator
+
+
+187
+00:08:49.696 --> 00:08:54.167 line:-1 position:50%
+is going to be a regressor
+instead of a classifier.
+
+
+188
+00:08:54.167 --> 00:08:55.869 line:-1 position:50%
+As you may have
+already guessed,
+
+
+189
+00:08:55.869 --> 00:08:58.238 line:-1 position:50%
+this is going to be easy.
+
+
+190
+00:08:58,238 --> 00:09:01,875 line:-1
+To refresh your memory,
+here is our image classifier.
+
+
+191
+00:09:01,875 --> 00:09:04,411 line:-1
+And this is an image regressor.
+
+
+192
+00:09:04,411 --> 00:09:07,180 line:-1
+I substituted the logistic
+regression classifier
+
+
+193
+00:09:07.180 --> 00:09:09.582 line:-1 position:50%
+with a linear regressor.
+
+
+194
+00:09:09.582 --> 00:09:12.786 line:-1 position:50%
+This simple change
+also changes the expected input
+
+
+195
+00:09:12.786 --> 00:09:15.121 line:-1 position:50%
+to the fitted method.
+
+
+196
+00:09:15.121 --> 00:09:17.791 line:-1 position:50%
+Before, it expected
+images and labels.
+
+
+197
+00:09:17.791 --> 00:09:20.960 line:-1 position:50%
+Now, it expects
+images and scores.
+
+
+198
+00:09:20.960 --> 00:09:22.429 line:-1 position:50%
+But enough about concepts.
+
+
+199
+00:09:22.429 --> 00:09:25.899 line:-1 position:50%
+Let me demo this
+with some actual code.
+
+
+200
+00:09:28,501 --> 00:09:31,538 line:-1
+Let me show you how to write
+a custom image regressor.
+
+
+201
+00:09:31.538 --> 00:09:33.640 line:-1 position:50%
+I'll start by defining
+an ImageRegressor struct
+
+
+202
+00:09:33.640 --> 00:09:36.443 line:-1 position:50%
+to encapsulate the code.
+
+
+203
+00:09:38,445 --> 00:09:40,547 line:-1
+I have a folder
+with images of bananas
+
+
+204
+00:09:40.547 --> 00:09:42.715 line:-1 position:50%
+at different levels of ripeness.
+
+
+205
+00:09:42,715 --> 00:09:46,119 line:-1
+I'm going to start
+by defining that URL.
+
+
+206
+00:09:48,121 --> 00:09:51,124 line:-1
+The next step
+is to add a train method.
+
+
+207
+00:09:51,124 --> 00:09:52,292 line:-1
+This is where you use
+
+
+208
+00:09:52,292 --> 00:09:56,229 line:-1
+training data
+to produce a model.
+
+
+209
+00:09:56.229 --> 00:09:59.265 line:-1 position:50%
+I'm going to use the "some"
+keyword on the return type
+
+
+210
+00:09:59,265 --> 00:10:00,967 line:-1
+so that the return type
+doesn't change
+
+
+211
+00:10:00,967 --> 00:10:05,138 line:-1
+as I add or modify steps
+in the composed estimator.
+
+
+212
+00:10:05,138 --> 00:10:07,340 line:-1
+Now, I'm going to define
+the estimator.
+
+
+213
+00:10:07,340 --> 00:10:09,042 line:-1
+It's simply
+the feature extractor
+
+
+214
+00:10:09.042 --> 00:10:14.047 line:-1 position:50%
+with the linear regressor
+appended.
+
+
+215
+00:10:14,047 --> 00:10:16,316 line:-1
+And now, I need to load
+the training images
+
+
+216
+00:10:16.316 --> 00:10:17.584 line:-1 position:50%
+with their score.
+
+
+217
+00:10:17.584 --> 00:10:19.819 line:-1 position:50%
+I can use AnnotatedFiles,
+which is a collection
+
+
+218
+00:10:19.819 --> 00:10:24.157 line:-1 position:50%
+of AnnotatedFeatures containing
+URLs and string labels.
+
+
+219
+00:10:24.157 --> 00:10:29.729 line:-1 position:50%
+It provides a convenience
+initializer that fits my needs.
+
+
+220
+00:10:29.729 --> 00:10:32.599 line:-1 position:50%
+My files consist of a name,
+followed by a dash,
+
+
+221
+00:10:32,599 --> 00:10:34,200 line:-1
+followed by the ripeness value.
+
+
+222
+00:10:34.200 --> 00:10:37.604 line:-1 position:50%
+So I'm going to specify
+that the separator is a dash
+
+
+223
+00:10:37,604 --> 00:10:39,305 line:-1
+and the annotation
+is at index: 1
+
+
+224
+00:10:39,305 --> 00:10:41,307 line:-1
+of the filename components.
+
+
+225
+00:10:41,307 --> 00:10:42,542 line:-1
+I'm also going to request
+
+
+226
+00:10:42,542 --> 00:10:46,145 line:-1
+only image files
+by using the type argument.
+
+
+227
+00:10:46,145 --> 00:10:49,682 line:-1
+Now that I have URLs,
+I need to load the images.
+
+
+228
+00:10:49,682 --> 00:10:51,384 line:-1
+I can use
+the mapFeatures method
+
+
+229
+00:10:51.384 --> 00:10:56.689 line:-1 position:50%
+and the ImageReader to do this.
+
+
+230
+00:10:56,689 --> 00:10:58,725 line:-1
+I also need
+to convert the scores
+
+
+231
+00:10:58.725 --> 00:11:01.661 line:-1 position:50%
+from strings
+to floating point values.
+
+
+232
+00:11:01,661 --> 00:11:05,598 line:-1
+I can use the mapAnnotations
+method to do this.
+
+
+233
+00:11:08.935 --> 00:11:12.005 line:-1 position:50%
+And with that,
+I have the training data.
+
+
+234
+00:11:12.005 --> 00:11:15.174 line:-1 position:50%
+But I want to put some of it
+aside for validation.
+
+
+235
+00:11:15.174 --> 00:11:17.911 line:-1 position:50%
+I can use the randomSplit
+method to do this.
+
+
+236
+00:11:17.911 --> 00:11:19.445 line:-1 position:50%
+I'll keep 80 percent
+for training
+
+
+237
+00:11:19,445 --> 00:11:25,218 line:-1
+and use the rest for validation.
+
+
+238
+00:11:25.218 --> 00:11:27.220 line:-1 position:50%
+Now, I'm ready to fit.
+
+
+239
+00:11:29.956 --> 00:11:32.025 line:-1 position:50%
+And I'm going to save
+the trained parameters
+
+
+240
+00:11:32.025 --> 00:11:33.826 line:-1 position:50%
+so that I can deploy to my app.
+
+
+241
+00:11:33.826 --> 00:11:36.129 line:-1 position:50%
+I'll choose a location
+to save to.
+
+
+242
+00:11:40.033 --> 00:11:42.235 line:-1 position:50%
+And I'll call the write method.
+
+
+243
+00:11:44.671 --> 00:11:46.940 line:-1 position:50%
+Finally,
+I'll return the transformer.
+
+
+244
+00:11:50.944 --> 00:11:53.513 line:-1 position:50%
+This is the essence
+of defining and training a model
+
+
+245
+00:11:53,513 --> 00:11:55,248 line:-1
+using components.
+
+
+246
+00:11:55.248 --> 00:11:57.650 line:-1 position:50%
+I defined
+my composed estimator,
+
+
+247
+00:11:57.650 --> 00:12:00.920 line:-1 position:50%
+I loaded my training data,
+I called the fitted method,
+
+
+248
+00:12:00.920 --> 00:12:03.256 line:-1 position:50%
+and I used write
+to save the parameters.
+
+
+249
+00:12:03.256 --> 00:12:05.592 line:-1 position:50%
+But there are some things
+I can improve.
+
+
+250
+00:12:05.592 --> 00:12:08.561 line:-1 position:50%
+For starters, I am passing
+a validation data set
+
+
+251
+00:12:08.561 --> 00:12:11.230 line:-1 position:50%
+but not observing
+the validation error,
+
+
+252
+00:12:11.230 --> 00:12:12.932 line:-1 position:50%
+so I'll do that.
+
+
+253
+00:12:12,932 --> 00:12:15,134 line:-1
+The fitted method
+takes an event handler
+
+
+254
+00:12:15.134 --> 00:12:17.236 line:-1 position:50%
+that you can use
+to gather metrics.
+
+
+255
+00:12:21.374 --> 00:12:23.776 line:-1 position:50%
+For now, I'll just print
+both the training
+
+
+256
+00:12:23,776 --> 00:12:26,913 line:-1
+and validation
+maximum-error values.
+
+
+257
+00:12:26.913 --> 00:12:30.750 line:-1 position:50%
+I also want the mean absolute
+error for the final model.
+
+
+258
+00:12:33,987 --> 00:12:36,356 position:50%
+I compute that by applying
+the fitted transformer
+
+
+259
+00:12:36,356 --> 00:12:37,991 line:0
+to the validation features
+
+
+260
+00:12:37,991 --> 00:12:40,593 position:50%
+and then passing that along
+with the actual scores
+
+
+261
+00:12:40,593 --> 00:12:44,564 line:0
+to the meanAbsoluteError
+function.
+
+
+262
+00:12:44,564 --> 00:12:46,799 line:-1
+I ran this but I didn't get
+a great model -
+
+
+263
+00:12:46.799 --> 00:12:49.135 line:-1 position:50%
+the error was high.
+
+
+264
+00:12:49.135 --> 00:12:52.205 line:-1 position:50%
+This is because I don't have
+that many images of bananas.
+
+
+265
+00:12:52,205 --> 00:12:54,807 line:-1
+I should get more images,
+but before I do that,
+
+
+266
+00:12:54.807 --> 00:12:57.243 line:-1 position:50%
+I can try augmenting my dataset.
+
+
+267
+00:12:57,243 --> 00:13:00,513 line:-1
+I can rotate and scale my images
+to get more examples.
+
+
+268
+00:13:00,513 --> 00:13:02,482 line:-1
+To do this, I'm going to write
+a new method
+
+
+269
+00:13:02.482 --> 00:13:05.585 line:-1 position:50%
+that takes an annotated image
+and augments it.
+
+
+270
+00:13:05,585 --> 00:13:08,154 position:50%
+It returns an array
+of annotated images.
+
+
+271
+00:13:13,826 --> 00:13:17,664 position:50%
+The first augmentation
+I'm going to do is rotation.
+
+
+272
+00:13:20,800 --> 00:13:23,703 position:50%
+I'll randomly choose an angle
+between -pi and pi
+
+
+273
+00:13:23,703 --> 00:13:26,072 line:0
+and use it to rotate the image.
+
+
+274
+00:13:26,072 --> 00:13:28,541 line:0
+I'll also do a random scale.
+
+
+275
+00:13:31,144 --> 00:13:32,712 position:50%
+And I'll return three images:
+
+
+276
+00:13:32,712 --> 00:13:36,082 position:50%
+the original, the rotated one,
+and the scaled one.
+
+
+277
+00:13:39.118 --> 00:13:40.687 line:-1 position:50%
+Now that I have
+my augment function,
+
+
+278
+00:13:40,687 --> 00:13:44,691 line:-1
+I'll use it to augment my
+training images using flatMap.
+
+
+279
+00:13:49.429 --> 00:13:53.366 line:-1 position:50%
+Each element of my dataset
+will be converted to an array.
+
+
+280
+00:13:53,366 --> 00:13:56,936 line:-1
+FlatMap flattens that array
+of arrays into a single array,
+
+
+281
+00:13:56.936 --> 00:13:59.605 line:-1 position:50%
+which is what I need
+for the fitted method.
+
+
+282
+00:13:59.605 --> 00:14:02.408 line:-1 position:50%
+Note that augmentations
+only apply when fitting,
+
+
+283
+00:14:02.408 --> 00:14:04.944 line:-1 position:50%
+not when doing predictions.
+
+
+284
+00:14:04,944 --> 00:14:07,480 line:-1
+OK, this increased my accuracy.
+
+
+285
+00:14:07,480 --> 00:14:09,382 line:-1
+But let me talk about
+one more improvement
+
+
+286
+00:14:09.382 --> 00:14:12.218 line:-1 position:50%
+that is going to make
+my model even better.
+
+
+287
+00:14:12,218 --> 00:14:13,619 line:-1
+I want to use
+the Vision framework
+
+
+288
+00:14:13.619 --> 00:14:16.923 line:-1 position:50%
+to crop the images
+to the salient object.
+
+
+289
+00:14:16.923 --> 00:14:19.325 line:-1 position:50%
+This is one of the images
+in my training data.
+
+
+290
+00:14:19.325 --> 00:14:23.096 line:-1 position:50%
+Someone is holding bananas with
+other fruits in the background.
+
+
+291
+00:14:23,096 --> 00:14:27,300 line:-1
+The model may get confused by
+the other objects in the photo.
+
+
+292
+00:14:27.300 --> 00:14:29.268 line:-1 position:50%
+Using the Vision framework API,
+
+
+293
+00:14:29,268 --> 00:14:31,003 line:-1
+I can automatically
+crop the image
+
+
+294
+00:14:31.003 --> 00:14:33.573 line:-1 position:50%
+to the most salient object.
+
+
+295
+00:14:33,573 --> 00:14:38,745 position:50%
+To do this, please check out
+the Vision talk from WWDC 2019.
+
+
+296
+00:14:38,745 --> 00:14:41,948 position:50%
+I can easily apply this
+transformation to all my images,
+
+
+297
+00:14:41,948 --> 00:14:44,183 position:50%
+both when fitting
+and when getting predictions
+
+
+298
+00:14:44,183 --> 00:14:46,419 line:0
+if I write a custom transformer.
+
+
+299
+00:14:46,419 --> 00:14:47,987 line:0
+Let me show you how.
+
+
+300
+00:14:47.987 --> 00:14:49.422 line:-1 position:50%
+The only thing I need to do
+
+
+301
+00:14:49.422 --> 00:14:51.424 line:-1 position:50%
+to conform to
+a transformer protocol
+
+
+302
+00:14:51.424 --> 00:14:53.659 line:-1 position:50%
+is implement the applied method.
+
+
+303
+00:14:53,659 --> 00:14:55,895 line:-1
+And in this case,
+I want it to take an image
+
+
+304
+00:14:55.895 --> 00:14:57.697 line:-1 position:50%
+and return an image.
+
+
+305
+00:14:57.697 --> 00:14:59.265 line:-1 position:50%
+I'm not going to go
+into this code,
+
+
+306
+00:14:59.265 --> 00:15:02.235 line:-1 position:50%
+except to say that if I don't
+get a salient object,
+
+
+307
+00:15:02.235 --> 00:15:06.305 line:-1 position:50%
+I'll just return
+the original image.
+
+
+308
+00:15:06.305 --> 00:15:08.141 line:-1 position:50%
+Now that I have
+my custom transformer,
+
+
+309
+00:15:08.141 --> 00:15:10.076 line:-1 position:50%
+I'll add it
+to my image regressor.
+
+
+310
+00:15:16.415 --> 00:15:18.217 line:-1 position:50%
+I just need to use
+my custom transformer
+
+
+311
+00:15:18,217 --> 00:15:19,986 line:-1
+before feature extraction.
+
+
+312
+00:15:28,694 --> 00:15:31,430 line:-1
+Now that saliency is part of
+my task definition,
+
+
+313
+00:15:31,430 --> 00:15:34,133 line:-1
+it will be used to crop
+every training image,
+
+
+314
+00:15:34.133 --> 00:15:37.069 line:-1 position:50%
+and it will also be used
+when doing inference.
+
+
+315
+00:15:37,069 --> 00:15:39,705 line:-1
+This is one of the advantages
+of sharing the task definition
+
+
+316
+00:15:39.705 --> 00:15:42.141 line:-1 position:50%
+between training and inference.
+
+
+317
+00:15:42.141 --> 00:15:44.377 line:-1 position:50%
+Before we go on
+to the next task,
+
+
+318
+00:15:44.377 --> 00:15:46.813 line:-1 position:50%
+let me highlight
+some important points.
+
+
+319
+00:15:46.813 --> 00:15:50.650 line:-1 position:50%
+Using components,
+I can now create custom tasks.
+
+
+320
+00:15:50,650 --> 00:15:53,452 line:-1
+I did this by using
+the appending method.
+
+
+321
+00:15:53.452 --> 00:15:55.955 line:-1 position:50%
+I used AnnotatedFiles
+to load my files
+
+
+322
+00:15:55,955 --> 00:15:58,124 line:-1
+with annotated file names,
+
+
+323
+00:15:58.124 --> 00:16:01.427 line:-1 position:50%
+but you can also load files
+annotated by directories.
+
+
+324
+00:16:01,427 --> 00:16:04,664 line:-1
+I mapped the URL to images
+using ImageReader
+
+
+325
+00:16:04,664 --> 00:16:08,601 line:-1
+and mapped the annotations
+from strings to values.
+
+
+326
+00:16:08,601 --> 00:16:12,238 line:-1
+I used randomSplit to set aside
+a validation dataset,
+
+
+327
+00:16:12,238 --> 00:16:15,408 line:-1
+and I saved the trained
+parameters for use later.
+
+
+328
+00:16:15.408 --> 00:16:18.277 line:-1 position:50%
+Then I added augmentations
+and defined a custom transformer
+
+
+329
+00:16:18.277 --> 00:16:20.313 line:-1 position:50%
+to improve my model.
+
+
+330
+00:16:20.313 --> 00:16:23.249 line:-1 position:50%
+But this works for more
+than just images.
+
+
+331
+00:16:23,249 --> 00:16:26,319 line:-1
+I'll switch gears and talk about
+another type of task:
+
+
+332
+00:16:26,319 --> 00:16:28,187 line:-1
+tabular tasks.
+
+
+333
+00:16:28,187 --> 00:16:30,957 line:-1
+These are tasks
+that use tabular data.
+
+
+334
+00:16:30.957 --> 00:16:33.492 line:-1 position:50%
+Tabular data is characterized
+by having multiple features
+
+
+335
+00:16:33.492 --> 00:16:35.294 line:-1 position:50%
+of different types.
+
+
+336
+00:16:35,294 --> 00:16:37,129 line:-1
+It can include
+both numerical data
+
+
+337
+00:16:37.129 --> 00:16:39.332 line:-1 position:50%
+as well as categorical data.
+
+
+338
+00:16:39,332 --> 00:16:42,401 line:-1
+A popular example is
+house-pricing data.
+
+
+339
+00:16:42.401 --> 00:16:44.904 line:-1 position:50%
+You have things
+like area and age,
+
+
+340
+00:16:44.904 --> 00:16:46.505 line:-1 position:50%
+but also things
+like neighborhood,
+
+
+341
+00:16:46.505 --> 00:16:48.741 line:-1 position:50%
+type of building, et cetera.
+
+
+342
+00:16:48,741 --> 00:16:51,110 line:-1
+And you want to learn
+to predict a value;
+
+
+343
+00:16:51.110 --> 00:16:53.779 line:-1 position:50%
+for example, the sale price.
+
+
+344
+00:16:53.779 --> 00:16:58.351 line:-1 position:50%
+In 2021, we introduced
+the TabularData framework.
+
+
+345
+00:16:58,351 --> 00:17:00,152 line:-1
+Now you can use
+the TabularData framework
+
+
+346
+00:17:00,152 --> 00:17:02,355 line:-1
+together with
+Create ML Components
+
+
+347
+00:17:02.355 --> 00:17:06.926 line:-1 position:50%
+to build and train tabular
+classifiers and regressors.
+
+
+348
+00:17:06,926 --> 00:17:09,695 line:0
+I also recommend the tech talk
+on TabularData.
+
+
+349
+00:17:09,695 --> 00:17:12,231 position:50%
+It's a great introduction
+to data exploration,
+
+
+350
+00:17:12,231 --> 00:17:15,268 position:50%
+which you will likely need
+when building a tabular task.
+
+
+351
+00:17:15,268 --> 00:17:17,970 position:50%
+Let's dive in.
+
+
+352
+00:17:17,970 --> 00:17:21,407 position:50%
+When dealing with tabular data,
+each column of the table
+
+
+353
+00:17:21,407 --> 00:17:23,876 position:50%
+will have a different
+type of feature.
+
+
+354
+00:17:23,876 --> 00:17:26,412 position:50%
+And you may want to process
+each column differently,
+
+
+355
+00:17:26,412 --> 00:17:28,447 line:0
+based on what type of
+information it contains;
+
+
+356
+00:17:28,447 --> 00:17:30,149 position:50%
+the distribution,
+range of values,
+
+
+357
+00:17:30,149 --> 00:17:32,351 position:50%
+and other factors.
+
+
+358
+00:17:32,351 --> 00:17:36,322 line:0
+Create ML Components lets you do
+this using the ColumnSelector.
+
+
+359
+00:17:36,322 --> 00:17:38,491 position:50%
+Here is an example.
+
+
+360
+00:17:38,491 --> 00:17:42,028 line:0
+I mentioned house prices,
+but those are ridiculous.
+
+
+361
+00:17:42,028 --> 00:17:44,764 position:50%
+I'm going to use
+avocado prices instead.
+
+
+362
+00:17:44,764 --> 00:17:47,266 position:50%
+I have this table
+of avocado prices.
+
+
+363
+00:17:47,266 --> 00:17:49,235 line:0
+I want to build
+a tabular regressor
+
+
+364
+00:17:49,235 --> 00:17:52,104 line:0
+to predict avocado prices
+based on this.
+
+
+365
+00:17:52,104 --> 00:17:54,240 line:0
+It contains columns
+with numeric data
+
+
+366
+00:17:54,240 --> 00:17:56,642 line:0
+such as bags, year, and volume
+
+
+367
+00:17:56,642 --> 00:18:01,714 line:0
+and columns with categorical
+data such as type and region.
+
+
+368
+00:18:01,714 --> 00:18:03,449 position:50%
+Some regressors
+benefit from having
+
+
+369
+00:18:03,449 --> 00:18:06,619 position:50%
+a better representation
+of these values.
+
+
+370
+00:18:06,619 --> 00:18:08,087 line:0
+For instance,
+
+
+371
+00:18:08,087 --> 00:18:11,657 line:0
+this is the distribution of
+volume values in the dataset.
+
+
+372
+00:18:11,657 --> 00:18:14,093 position:50%
+It is close to
+a normal distribution,
+
+
+373
+00:18:14,093 --> 00:18:17,697 line:0
+but with large values
+centered around 15,000.
+
+
+374
+00:18:17,697 --> 00:18:20,232 position:50%
+I think this is
+a great example of a dataset
+
+
+375
+00:18:20,232 --> 00:18:23,035 line:0
+that could benefit
+from normalization.
+
+
+376
+00:18:23,035 --> 00:18:27,273 position:50%
+So the first thing I want to do
+is normalize these values.
+
+
+377
+00:18:27,273 --> 00:18:30,977 position:50%
+To do this, I can pass the
+column names I want to normalize
+
+
+378
+00:18:30,977 --> 00:18:35,081 line:0
+to the ColumnSelector
+and then use a standard scaler.
+
+
+379
+00:18:35,081 --> 00:18:37,083 position:50%
+Here is the code.
+
+
+380
+00:18:37,083 --> 00:18:39,518 line:-1
+First I create
+a column selector.
+
+
+381
+00:18:39.518 --> 00:18:42.788 line:-1 position:50%
+Then I pass the column names
+I want to scale.
+
+
+382
+00:18:42.788 --> 00:18:45.491 line:-1 position:50%
+All columns must contain
+the same type of element;
+
+
+383
+00:18:45.491 --> 00:18:47.760 line:-1 position:50%
+in this case, Double.
+
+
+384
+00:18:47,760 --> 00:18:50,129 line:-1
+Then I unwrap optionals.
+
+
+385
+00:18:50.129 --> 00:18:53.132 line:-1 position:50%
+I can do this because I know
+there are no missing values.
+
+
+386
+00:18:53.132 --> 00:18:56.902 line:-1 position:50%
+But I could also use an imputer
+which replaces missing values.
+
+
+387
+00:18:56.902 --> 00:18:58.804 line:-1 position:50%
+And then I append
+the StandardScaler
+
+
+388
+00:18:58.804 --> 00:19:01.307 line:-1 position:50%
+to the unwrapper.
+
+
+389
+00:19:01,307 --> 00:19:02,675 position:50%
+So I started with this table
+
+
+390
+00:19:02,675 --> 00:19:05,611 line:0
+where bags numbers
+were in the tens of thousands
+
+
+391
+00:19:05,611 --> 00:19:08,414 position:50%
+and volumes were in
+the hundreds of thousands.
+
+
+392
+00:19:08,414 --> 00:19:10,082 position:50%
+And after scaling those columns,
+
+
+393
+00:19:10,082 --> 00:19:13,185 position:50%
+I end up with values that now
+have a magnitude close to one,
+
+
+394
+00:19:13,185 --> 00:19:16,722 position:50%
+which could improve
+the performance of my model.
+
+
+395
+00:19:16,722 --> 00:19:20,426 position:50%
+To be more specific, my values
+now have a mean of zero
+
+
+396
+00:19:20,426 --> 00:19:24,063 position:50%
+and a standard deviation of one.
+
+
+397
+00:19:24.063 --> 00:19:27.066 line:-1 position:50%
+Here is a similar example,
+but in this example,
+
+
+398
+00:19:27,066 --> 00:19:29,602 line:-1
+I'm selecting the type
+and region columns,
+
+
+399
+00:19:29.602 --> 00:19:34.073 line:-1 position:50%
+which are of type string and
+performing a one-hot encoding.
+
+
+400
+00:19:34.073 --> 00:19:37.376 line:-1 position:50%
+One-hot encoding refers
+to encoding categorical data
+
+
+401
+00:19:37,376 --> 00:19:42,148 line:-1
+using an array to indicate
+the presence of each category.
+
+
+402
+00:19:42,148 --> 00:19:44,450 line:-1
+In this example,
+I have three categories:
+
+
+403
+00:19:44.450 --> 00:19:47.586 line:-1 position:50%
+Bronze, Silver, and Gold.
+
+
+404
+00:19:47,586 --> 00:19:50,156 line:-1
+Each gets a unique position
+within the array,
+
+
+405
+00:19:50,156 --> 00:19:54,193 line:-1
+indicated by a one
+in that position.
+
+
+406
+00:19:54,193 --> 00:19:57,329 line:-1
+An alternative is to use
+an ordinal encoder,
+
+
+407
+00:19:57,329 --> 00:20:01,033 line:-1
+which gives a consecutive
+number to each category.
+
+
+408
+00:20:01,033 --> 00:20:04,203 line:-1
+Use a one-hot encoder when
+there are only a few categories
+
+
+409
+00:20:04.203 --> 00:20:07.940 line:-1 position:50%
+and an ordinal encoder
+otherwise.
+
+
+410
+00:20:07,940 --> 00:20:13,446 line:-1
+Now let me put all this together
+and build a tabular regressor.
+
+
+411
+00:20:17,216 --> 00:20:19,452 line:-1
+As before,
+I'll start creating a struct
+
+
+412
+00:20:19.452 --> 00:20:23.956 line:-1 position:50%
+and defining the data URL
+and the parameters URL.
+
+
+413
+00:20:25.791 --> 00:20:27.760 line:-1 position:50%
+I also want to define
+a column ID
+
+
+414
+00:20:27,760 --> 00:20:30,362 line:-1
+for the column
+I want to predict: price.
+
+
+415
+00:20:32.965 --> 00:20:35.701 line:-1 position:50%
+I'll define my task separately
+so that I can use it
+
+
+416
+00:20:35.701 --> 00:20:38.537 line:-1 position:50%
+both from the train method
+and the predict method.
+
+
+417
+00:20:41.207 --> 00:20:44.009 line:-1 position:50%
+As I mentioned, I'm going
+to normalize the volume.
+
+
+418
+00:20:46,779 --> 00:20:49,048 line:-1
+Then I'm going to use
+a boosted tree regressor
+
+
+419
+00:20:49.048 --> 00:20:53.152 line:-1 position:50%
+to predict the price.
+
+
+420
+00:20:53,152 --> 00:20:55,187 line:-1
+It takes the name
+of the annotation column --
+
+
+421
+00:20:55.187 --> 00:20:58.023 line:-1 position:50%
+which is also the column
+of the resulting predictions --
+
+
+422
+00:20:58,023 --> 00:21:01,760 line:-1
+and it takes the names
+of all three feature columns.
+
+
+423
+00:21:01.760 --> 00:21:03.929 line:-1 position:50%
+I'll start with
+these three columns.
+
+
+424
+00:21:03,929 --> 00:21:07,366 line:-1
+Then I'll combine the pieces
+using the appending method
+
+
+425
+00:21:07.366 --> 00:21:08.834 line:-1 position:50%
+and return the task.
+
+
+426
+00:21:13.539 --> 00:21:15.474 line:-1 position:50%
+Now that I have
+my task definition,
+
+
+427
+00:21:15,474 --> 00:21:17,643 line:-1
+I'll add a train method
+as before.
+
+
+428
+00:21:20.546 --> 00:21:23.082 line:-1 position:50%
+And as before, I want to make
+sure that the return type
+
+
+429
+00:21:23,082 --> 00:21:26,452 line:-1
+doesn't depend
+the specifics of my model.
+
+
+430
+00:21:26,452 --> 00:21:32,391 line:-1
+The first step is to load
+the CSV file into a data frame.
+
+
+431
+00:21:32,391 --> 00:21:35,027 line:-1
+I'm using the TabularData
+framework to do this.
+
+
+432
+00:21:35.027 --> 00:21:37.363 line:-1 position:50%
+And as before, I want to split
+off some of the data
+
+
+433
+00:21:37,363 --> 00:21:39,398 line:-1
+for validation.
+
+
+434
+00:21:43.702 --> 00:21:46.038 line:-1 position:50%
+I'll pass the training
+and validation datasets
+
+
+435
+00:21:46.038 --> 00:21:47.606 line:-1 position:50%
+to the fitted method.
+
+
+436
+00:21:50,509 --> 00:21:53,512 position:50%
+I'll also report validation
+error as before,
+
+
+437
+00:21:53,512 --> 00:21:55,881 position:50%
+and I'll save the trained
+parameters for use later.
+
+
+438
+00:21:59,552 --> 00:22:01,754 position:50%
+Finally, I'll return
+the transformer.
+
+
+439
+00:22:04.890 --> 00:22:06.625 line:-1 position:50%
+Once I have
+a trained transformer,
+
+
+440
+00:22:06,625 --> 00:22:09,762 line:-1
+I can use it to make price
+predictions on data frames.
+
+
+441
+00:22:09.762 --> 00:22:13.966 line:-1 position:50%
+I'm going to write
+a predict method to do this.
+
+
+442
+00:22:17,403 --> 00:22:19,738 position:50%
+I'll start by loading the model
+from the task definition
+
+
+443
+00:22:19,738 --> 00:22:22,107 line:0
+and the parameters URL.
+
+
+444
+00:22:24,977 --> 00:22:27,580 position:50%
+I need to make sure the data
+frame I use for predictions
+
+
+445
+00:22:27,580 --> 00:22:30,883 position:50%
+has the columns
+I used as features:
+
+
+446
+00:22:30,883 --> 00:22:35,154 position:50%
+type, region, and volume.
+
+
+447
+00:22:35,154 --> 00:22:38,324 line:0
+The predicted value
+will be in the price column.
+
+
+448
+00:22:38,324 --> 00:22:40,659 position:50%
+I'll use the column ID
+I defined at the top.
+
+
+449
+00:22:44,563 --> 00:22:46,699 line:0
+And that concludes
+my tabular regressor.
+
+
+450
+00:22:46.699 --> 00:22:48.934 line:-1 position:50%
+I have a train method,
+that I only need to call once
+
+
+451
+00:22:48,934 --> 00:22:50,369 line:-1
+to produce my trained
+parameters,
+
+
+452
+00:22:50.369 --> 00:22:52.605 line:-1 position:50%
+and a predict method
+that returns the avocado price,
+
+
+453
+00:22:52.605 --> 00:22:54.573 line:-1 position:50%
+predictions based on the type,
+
+
+454
+00:22:54.573 --> 00:22:56.976 line:-1 position:50%
+region, and the
+volume of avocados.
+
+
+455
+00:22:56,976 --> 00:22:59,345 line:-1
+That's all I need
+to use this in my app.
+
+
+456
+00:22:59.345 --> 00:23:01.013 line:-1 position:50%
+Here are some things
+to keep in mind
+
+
+457
+00:23:01.013 --> 00:23:03.349 line:-1 position:50%
+when working on tabular tasks.
+
+
+458
+00:23:03,349 --> 00:23:04,984 line:-1
+You can use
+ColumnSelector operations
+
+
+459
+00:23:04.984 --> 00:23:07.286 line:-1 position:50%
+to process specific columns.
+
+
+460
+00:23:07.286 --> 00:23:10.256 line:-1 position:50%
+It's worth noting that
+tree classifiers and regressors
+
+
+461
+00:23:10,256 --> 00:23:13,959 line:-1
+are all tabular, but you can
+also use a nontabular estimator,
+
+
+462
+00:23:13,959 --> 00:23:15,527 line:-1
+such as a linear regressor,
+
+
+463
+00:23:15,527 --> 00:23:19,365 line:-1
+in a tabular task using
+AnnotatedFeatureProvider.
+
+
+464
+00:23:19,365 --> 00:23:22,167 line:-1
+Please refer
+to the documentation.
+
+
+465
+00:23:22,167 --> 00:23:23,469 line:-1
+When doing predictions,
+
+
+466
+00:23:23.469 --> 00:23:26.038 line:-1 position:50%
+build a data frame
+with the required columns,
+
+
+467
+00:23:26,038 --> 00:23:29,141 line:-1
+making sure to use
+the correct types.
+
+
+468
+00:23:29.141 --> 00:23:31.744 line:-1 position:50%
+Now that you know
+how to build a custom task,
+
+
+469
+00:23:31,744 --> 00:23:34,780 line:-1
+let's talk about deployment.
+
+
+470
+00:23:34.780 --> 00:23:38.784 line:-1 position:50%
+So far, I've used the same API
+for training and inference.
+
+
+471
+00:23:38,784 --> 00:23:41,654 line:-1
+I want to point out that when
+using Create ML Components,
+
+
+472
+00:23:41.654 --> 00:23:43.656 line:-1 position:50%
+your model is your code.
+
+
+473
+00:23:43,656 --> 00:23:45,057 line:-1
+You need the task definition,
+
+
+474
+00:23:45,057 --> 00:23:48,961 line:-1
+even when loading the trained
+parameters from a file.
+
+
+475
+00:23:48.961 --> 00:23:50.996 line:-1 position:50%
+This is useful
+in some situations,
+
+
+476
+00:23:50.996 --> 00:23:55.167 line:-1 position:50%
+but sometimes you may want
+to use Core ML for deployment.
+
+
+477
+00:23:55.167 --> 00:23:58.103 line:-1 position:50%
+When using Core ML,
+you leave the code behind.
+
+
+478
+00:23:58,103 --> 00:24:01,507 line:-1
+The model is fully represented
+by a model file.
+
+
+479
+00:24:01.507 --> 00:24:03.208 line:-1 position:50%
+If you are
+all ready using Core ML,
+
+
+480
+00:24:03.208 --> 00:24:05.044 line:-1 position:50%
+this may be a good workflow.
+
+
+481
+00:24:05,044 --> 00:24:08,747 line:-1
+And it has the advantage
+of optimized tensor operations.
+
+
+482
+00:24:08,747 --> 00:24:10,049 line:-1
+But there are
+some considerations
+
+
+483
+00:24:10.049 --> 00:24:12.251 line:-1 position:50%
+you should keep in mind.
+
+
+484
+00:24:12.251 --> 00:24:15.054 line:-1 position:50%
+Not all operations
+are supported in Core ML.
+
+
+485
+00:24:15.054 --> 00:24:17.556 line:-1 position:50%
+Specifically, custom
+transformers and estimators
+
+
+486
+00:24:17,556 --> 00:24:19,291 line:-1
+are not supported.
+
+
+487
+00:24:19,291 --> 00:24:21,260 line:-1
+And Core ML only supports
+a few types
+
+
+488
+00:24:21.260 --> 00:24:24.129 line:-1 position:50%
+like images and shaped arrays.
+
+
+489
+00:24:24.129 --> 00:24:25.864 line:-1 position:50%
+If you are using custom types,
+
+
+490
+00:24:25.864 --> 00:24:27.833 line:-1 position:50%
+you may need to convert
+those in your app
+
+
+491
+00:24:27,833 --> 00:24:30,102 line:-1
+when using the Core ML model.
+
+
+492
+00:24:30,102 --> 00:24:33,639 line:-1
+This is how you can export your
+transformer as a Core ML model.
+
+
+493
+00:24:33,639 --> 00:24:36,375 line:-1
+If your transformer contains
+unsupported operations,
+
+
+494
+00:24:36,375 --> 00:24:39,078 line:-1
+this will throw an error.
+
+
+495
+00:24:39,078 --> 00:24:41,747 line:-1
+If you'd rather stick with
+deploying your task definition
+
+
+496
+00:24:41,747 --> 00:24:43,582 line:-1
+along with
+the trained parameters,
+
+
+497
+00:24:43.582 --> 00:24:46.885 line:-1 position:50%
+you should consider bundling
+them in a Swift package.
+
+
+498
+00:24:46,885 --> 00:24:49,555 line:0
+This way, you can provide simple
+methods to load the parameters
+
+
+499
+00:24:49,555 --> 00:24:51,457 position:50%
+and perform a prediction.
+
+
+500
+00:24:51,457 --> 00:24:53,926 position:50%
+For more information
+on Swift package resources,
+
+
+501
+00:24:53,926 --> 00:24:58,197 position:50%
+check out the Swift packages
+talk from WWDC 2020.
+
+
+502
+00:24:58.197 --> 00:24:59.832 line:-1 position:50%
+That's all I have.
+
+
+503
+00:24:59.832 --> 00:25:01.233 line:-1 position:50%
+The main thing to remember
+
+
+504
+00:25:01.233 --> 00:25:04.636 line:-1 position:50%
+is that you can now create
+custom tasks with composition.
+
+
+505
+00:25:04,636 --> 00:25:06,672 line:-1
+The possibilities are endless.
+
+
+506
+00:25:06.672 --> 00:25:08.774 line:-1 position:50%
+I look forward to seeing
+what you build.
+
+
+507
+00:25:08,774 --> 00:25:09,942 line:0
+For more advanced techniques,
+
+
+508
+00:25:09,942 --> 00:25:12,578 position:50%
+including audio and video tasks,
+check out
+
+
+509
+00:25:12,578 --> 00:25:15,514 position:50%
+"Compose advanced models
+with Create ML Components"
+
+
+510
+00:25:15,514 --> 00:25:17,249 position:50%
+where my colleague David
+will present
+
+
+511
+00:25:17,249 --> 00:25:20,285 position:50%
+more advanced custom tasks.
+
+
+512
+00:25:20,285 --> 00:25:24,289 line:-1
+Thank you and enjoy the rest
+of WWDC 2022!
+
+
+513
+00:25:24,289 --> 00:25:29,061 position:90% line:0 size:2%
+♪
+

@@ -1,0 +1,2025 @@
+2
+00:00:00,534 --> 00:00:07,541 line:-1
+[upbeat music]
+
+
+3
+00:00:09,042 --> 00:00:11,044 line:-2
+[Tom] Hi, I'm Tom,
+and I'd like to welcome you
+
+
+4
+00:00:11,044 --> 00:00:13,380 line:-2
+to "SF Symbols in UIKit
+and AppKit."
+
+
+5
+00:00:13.380 --> 00:00:16.116 line:-2 align:center
+Today I'm going to take you on
+a tour of how to implement
+
+
+6
+00:00:16.116 --> 00:00:18.886 line:-2 align:center
+the new features
+of SF Symbols in your app.
+
+
+7
+00:00:19.820 --> 00:00:21.955 line:-2 align:center
+First, we're gonna go over
+the different color modes
+
+
+8
+00:00:21,955 --> 00:00:23,290 line:-1
+and how to use them.
+
+
+9
+00:00:24.224 --> 00:00:26.426 line:-2 align:center
+Then, we'll talk about
+how to combine configurations
+
+
+10
+00:00:26,426 --> 00:00:28,028 line:-2
+to get the effects
+that you want.
+
+
+11
+00:00:28,929 --> 00:00:30,631 line:-2
+And finally,
+we're going to explore using
+
+
+12
+00:00:30,631 --> 00:00:33,767 line:-2
+these colored symbols
+in attributed strings.
+
+
+13
+00:00:33.767 --> 00:00:36.837 line:-2 align:center
+You will see examples that apply
+both to AppKit and UIKit.
+
+
+14
+00:00:37,337 --> 00:00:40,140 line:-2
+The new APIs are identical
+for both frameworks,
+
+
+15
+00:00:40.140 --> 00:00:42.743 line:-2 align:center
+so what applies to one,
+also applies to the other,
+
+
+16
+00:00:42.743 --> 00:00:46.113 line:-2 align:center
+with the exception of some
+framework-specific nuances.
+
+
+17
+00:00:47,047 --> 00:00:50,584 line:-2
+The new features center around
+adding colors to SF Symbols.
+
+
+18
+00:00:50.584 --> 00:00:54.087 line:-2 align:center
+While AppKit added multicolor
+symbols in macOS 11,
+
+
+19
+00:00:54.087 --> 00:00:57.024 line:-2 align:center
+UIKit is adding them
+in iOS 15.
+
+
+20
+00:00:57.024 --> 00:00:58.926 line:-2 align:center
+For this year's releases,
+additional
+
+
+21
+00:00:58,926 --> 00:01:01,828 line:-2
+color rendering modes
+for SF Symbols are being added.
+
+
+22
+00:01:01.828 --> 00:01:05.232 line:-2 align:center
+And to be clear, these rendering
+modes work on all platforms.
+
+
+23
+00:01:05.232 --> 00:01:07.701 line:-2 align:center
+In order to support the new
+rendering modes,
+
+
+24
+00:01:07,701 --> 00:01:09,570 line:-2
+symbols
+now have different layers,
+
+
+25
+00:01:09,570 --> 00:01:11,271 line:-1
+each having a different color.
+
+
+26
+00:01:11.271 --> 00:01:13.841 line:-2 align:center
+These layers
+are defined in a hierarchy,
+
+
+27
+00:01:13.841 --> 00:01:16.543 line:-2 align:center
+meaning that one layer
+is more prominent than another.
+
+
+28
+00:01:16.543 --> 00:01:19.746 line:-2 align:center
+This means we've got
+three layers: primary,
+
+
+29
+00:01:19.746 --> 00:01:21.415 line:-1 align:center
+secondary, and tertiary.
+
+
+30
+00:01:22.649 --> 00:01:24.818 line:-2 align:center
+On iOS, symbols
+require template mode
+
+
+31
+00:01:24,818 --> 00:01:27,621 line:-2
+for the new rendering modes
+to take effect.
+
+
+32
+00:01:27.621 --> 00:01:29.590 line:-2 align:center
+On macOS,
+applying the new configurations
+
+
+33
+00:01:29,590 --> 00:01:31,892 line:-2
+will automatically set
+the correct template mode.
+
+
+34
+00:01:32,926 --> 00:01:34,661 align:center
+And if you're new to SF Symbols,
+check out
+
+
+35
+00:01:34,661 --> 00:01:38,765 line:0
+"Introducing SF Symbols"
+from WWDC19.
+
+
+36
+00:01:38.765 --> 00:01:41.301 line:-2 align:center
+The first rendering mode
+we're going to look at
+
+
+37
+00:01:41.301 --> 00:01:43.203 line:-1 align:center
+are monochrome symbols.
+
+
+38
+00:01:43.203 --> 00:01:45.239 line:-1 align:center
+Here's a Voicemail app.
+
+
+39
+00:01:45,239 --> 00:01:48,475 line:-2
+In this UI,
+a couple symbols are being used.
+
+
+40
+00:01:48.475 --> 00:01:50.010 line:-1 align:center
+There's one monochrome symbol,
+
+
+41
+00:01:50.010 --> 00:01:52.980 line:-2 align:center
+and a few other symbols
+using a different color mode.
+
+
+42
+00:01:52,980 --> 00:01:55,616 line:-2
+But let's focus on
+the monochrome symbol first,
+
+
+43
+00:01:55,616 --> 00:01:57,951 line:-2
+and we'll come back
+to the others later.
+
+
+44
+00:01:59,052 --> 00:02:00,287 line:-1
+As the name implies,
+
+
+45
+00:02:00,287 --> 00:02:02,456 line:-2
+a monochrome symbol
+only has one color:
+
+
+46
+00:02:02,456 --> 00:02:05,425 line:-2
+usually the tint
+or accent color of the view.
+
+
+47
+00:02:05.425 --> 00:02:07.661 line:-2 align:center
+And in order to accomplish this
+result,
+
+
+48
+00:02:07,661 --> 00:02:09,229 line:-2
+we create a new symbol
+image,
+
+
+49
+00:02:09.229 --> 00:02:11.365 line:-2 align:center
+assign it to the image view,
+and set a tint
+
+
+50
+00:02:11.365 --> 00:02:13.800 line:-2 align:center
+or accent color to configure
+the color of the symbol.
+
+
+51
+00:02:13,800 --> 00:02:16,336 line:-2
+And nothing has changed here:
+we don't need
+
+
+52
+00:02:16,336 --> 00:02:19,439 line:-2
+any extra configuration
+to render a monochrome symbol,
+
+
+53
+00:02:19,439 --> 00:02:22,042 line:-1
+as it is the default behavior.
+
+
+54
+00:02:22.943 --> 00:02:24.611 line:-2 align:center
+So, monochrome was
+the only rendering mode
+
+
+55
+00:02:24,611 --> 00:02:27,347 line:-1
+before iOS 15 and macOS 11.
+
+
+56
+00:02:27.347 --> 00:02:30.284 line:-2 align:center
+To specify a color, all we
+have to do is set the tint
+
+
+57
+00:02:30.284 --> 00:02:32.986 line:-2 align:center
+or accent color on the image
+view, and that's it.
+
+
+58
+00:02:33,820 --> 00:02:35,756 line:-2
+Now that we have
+the previously-existing
+
+
+59
+00:02:35,756 --> 00:02:39,026 align:center
+monochrome mode out of the way,
+we can talk about a new mode:
+
+
+60
+00:02:39,026 --> 00:02:40,861 align:center
+hierarchical color symbols.
+
+
+61
+00:02:40,861 --> 00:02:44,031 line:-2
+A good example of hierarchical
+symbols on a Mac
+
+
+62
+00:02:44.031 --> 00:02:47.067 line:-2 align:center
+are the icons used
+in Control Center.
+
+
+63
+00:02:47,067 --> 00:02:49,336 line:-2
+There are a few places
+where symbols are being used
+
+
+64
+00:02:49,336 --> 00:02:52,706 line:-2
+in Control Center, but let's
+zoom in on the Display section.
+
+
+65
+00:02:54,007 --> 00:02:56,009 line:-2
+There are a few symbols
+being used here:
+
+
+66
+00:02:56.009 --> 00:02:58.111 line:-2 align:center
+the row of toggle buttons
+in the center,
+
+
+67
+00:02:58,111 --> 00:03:01,281 line:-2
+and the icons in the list
+of devices.
+
+
+68
+00:03:01.281 --> 00:03:03.116 line:-2 align:center
+The device symbols
+are tinted differently
+
+
+69
+00:03:03.116 --> 00:03:04.918 line:-2 align:center
+than the toggle buttons
+above them,
+
+
+70
+00:03:04.918 --> 00:03:07.187 line:-2 align:center
+and these are
+hierarchically-colored symbols.
+
+
+71
+00:03:08.188 --> 00:03:09.590 line:-1 align:center
+The hierarchical color mode
+
+
+72
+00:03:09.590 --> 00:03:12.826 line:-2 align:center
+uses the layer hierarchy of a
+symbol to color each layer,
+
+
+73
+00:03:12.826 --> 00:03:16.330 line:-2 align:center
+and the provided color is
+used as the primary layer color.
+
+
+74
+00:03:16.330 --> 00:03:18.365 line:-2 align:center
+The secondary and tertiary
+layers
+
+
+75
+00:03:18.365 --> 00:03:20.334 line:-2 align:center
+get variations
+of the primary color
+
+
+76
+00:03:20.334 --> 00:03:22.236 line:-2 align:center
+with progressively
+reduced opacity.
+
+
+77
+00:03:23.837 --> 00:03:25.906 line:-2 align:center
+You specify the color mode
+through a new type
+
+
+78
+00:03:25.906 --> 00:03:28.742 line:-2 align:center
+of symbol configuration,
+which works exactly like
+
+
+79
+00:03:28,742 --> 00:03:32,479 line:-2
+the existing types
+of symbol configurations.
+
+
+80
+00:03:32,479 --> 00:03:34,715 line:-2
+And by setting the symbol
+configuration of an imageView
+
+
+81
+00:03:34.715 --> 00:03:36.383 line:-1 align:center
+to this type of configuration,
+
+
+82
+00:03:36,383 --> 00:03:39,453 line:-2
+the symbol will be displayed as
+a hierarchical color symbol.
+
+
+83
+00:03:40.387 --> 00:03:42.189 line:-2 align:center
+The color scheme
+of a hierarchical color symbol
+
+
+84
+00:03:42,189 --> 00:03:44,758 line:-2
+is based on one color,
+with the other colors
+
+
+85
+00:03:44.758 --> 00:03:48.195 line:-2 align:center
+derived from that one color
+by reducing opacity.
+
+
+86
+00:03:48,195 --> 00:03:50,130 line:-2
+The layer hierarchy
+is important here.
+
+
+87
+00:03:50.130 --> 00:03:51.431 line:-1 align:center
+If one layer is missing,
+
+
+88
+00:03:51,431 --> 00:03:54,001 line:-2
+the associated derived
+color will not be used.
+
+
+89
+00:03:55,169 --> 00:03:58,205 line:-2
+There's also a third color
+rendering mode: palette.
+
+
+90
+00:03:58.205 --> 00:04:00.440 line:-2 align:center
+As we will discover,
+it's much like hierarchical
+
+
+91
+00:04:00,440 --> 00:04:02,843 line:-2
+color rendering mode,
+but also different.
+
+
+92
+00:04:02.843 --> 00:04:05.379 line:-2 align:center
+Let's go back to our
+Voicemail example.
+
+
+93
+00:04:05.379 --> 00:04:08.048 line:-2 align:center
+The three buttons on the right
+each have multiple colors,
+
+
+94
+00:04:08,048 --> 00:04:10,350 line:-1
+and each have different colors.
+
+
+95
+00:04:10.350 --> 00:04:12.619 line:-2 align:center
+We're going to build these
+buttons one step at a time.
+
+
+96
+00:04:14,254 --> 00:04:15,822 line:-2
+First, we're gonna initialize
+our buttons
+
+
+97
+00:04:15,822 --> 00:04:17,157 line:-1
+with the desired images.
+
+
+98
+00:04:17,157 --> 00:04:20,260 line:-2
+We're using a new button
+configuration for this.
+
+
+99
+00:04:20.260 --> 00:04:23.564 line:-2 align:center
+But these plain images
+isn't what we want at all.
+
+
+100
+00:04:23.564 --> 00:04:27.034 line:-2 align:center
+The images should have
+a circle shape and be filled in.
+
+
+101
+00:04:28,068 --> 00:04:29,937 line:-2
+We used to be able
+to do this by appending
+
+
+102
+00:04:29,937 --> 00:04:31,939 line:-2
+the desired modifiers
+to the symbol name,
+
+
+103
+00:04:31,939 --> 00:04:34,908 line:-2
+but now there's a better way:
+image variants.
+
+
+104
+00:04:34.908 --> 00:04:37.578 line:-2 align:center
+As the name implies,
+when using image variants,
+
+
+105
+00:04:37.578 --> 00:04:40.113 line:-2 align:center
+you can request a different
+variant of an image
+
+
+106
+00:04:40,113 --> 00:04:42,816 line:-2
+without manually changing
+the name.
+
+
+107
+00:04:42,816 --> 00:04:45,652 line:-2
+First, let's turn our
+images into circles.
+
+
+108
+00:04:47.054 --> 00:04:49.223 line:-2 align:center
+Then, we'll add a nice fill
+to those circles.
+
+
+109
+00:04:50,791 --> 00:04:52,392 line:-2
+Since we
+are specifying the variants
+
+
+110
+00:04:52,392 --> 00:04:54,761 line:-2
+on the button container view,
+those variants are
+
+
+111
+00:04:54,761 --> 00:04:57,297 line:-2
+applied to all the images
+in all the buttons.
+
+
+112
+00:04:57,297 --> 00:04:59,399 line:-2
+If an image
+doesn't have that variant,
+
+
+113
+00:04:59.399 --> 00:05:02.736 line:-2 align:center
+the originally-specified
+image will be used.
+
+
+114
+00:05:02,736 --> 00:05:05,072 line:-2
+The variant specification
+will propagate down
+
+
+115
+00:05:05,072 --> 00:05:06,907 line:-2
+the view hierarchy,
+and the image view
+
+
+116
+00:05:06,907 --> 00:05:09,943 line:-2
+in that hierarchy will pick them
+up to do their magic.
+
+
+117
+00:05:11.245 --> 00:05:12.913 line:-2 align:center
+Now that we have the shape out
+of the way,
+
+
+118
+00:05:12,913 --> 00:05:16,049 line:-2
+how do we specify the colors
+for each of these symbols?
+
+
+119
+00:05:16.049 --> 00:05:19.052 line:-2 align:center
+Well, we can create a new type
+of symbol configuration,
+
+
+120
+00:05:19,052 --> 00:05:21,922 line:-2
+one that specifies
+a palette of colors.
+
+
+121
+00:05:21.922 --> 00:05:23.690 line:-2 align:center
+These colors are applied
+to the layer hierarchy
+
+
+122
+00:05:23.690 --> 00:05:26.360 line:-2 align:center
+similar to the hierarchical
+color configuration.
+
+
+123
+00:05:26,360 --> 00:05:28,662 line:-2
+But we're using colors
+here that are specified
+
+
+124
+00:05:28,662 --> 00:05:31,798 line:-2
+explicitly versus
+using derived colors.
+
+
+125
+00:05:31.798 --> 00:05:33.467 line:-2 align:center
+And we're also using
+a new type of color
+
+
+126
+00:05:33.467 --> 00:05:36.036 line:-2 align:center
+in the list of palette
+colors: tint color.
+
+
+127
+00:05:36,036 --> 00:05:37,704 line:-2
+This means that the view
+will automatically
+
+
+128
+00:05:37,704 --> 00:05:40,007 line:-2
+apply its tint color
+to the appropriate layer.
+
+
+129
+00:05:41.308 --> 00:05:44.344 line:-2 align:center
+And for the next button,
+we do exactly as before.
+
+
+130
+00:05:44.344 --> 00:05:47.314 line:-2 align:center
+Load the base image, build the
+right color configuration,
+
+
+131
+00:05:47.314 --> 00:05:50.184 line:-2 align:center
+and apply them
+to the button configuration.
+
+
+132
+00:05:50.184 --> 00:05:53.153 line:-2 align:center
+And in this case, it looks
+exactly the same as before,
+
+
+133
+00:05:53,153 --> 00:05:55,355 line:-2
+but there's a catch here,
+and I'll explain that later.
+
+
+134
+00:05:56.924 --> 00:05:59.059 line:-2 align:center
+And the same scenario also works
+for the last button,
+
+
+135
+00:05:59,059 --> 00:06:01,728 line:-1
+but just with different colors.
+
+
+136
+00:06:01,728 --> 00:06:03,397 line:-2
+And like before,
+you might wonder why
+
+
+137
+00:06:03.397 --> 00:06:05.432 line:-2 align:center
+we explicitly have
+to specify white here.
+
+
+138
+00:06:05.432 --> 00:06:07.801 line:-2 align:center
+Couldn't we just use
+a monochrome symbol
+
+
+139
+00:06:07.801 --> 00:06:09.736 line:-1 align:center
+and tint them correctly?
+
+
+140
+00:06:09,736 --> 00:06:12,806 line:-2
+The answer is no, we can't,
+and this is the catch
+
+
+141
+00:06:12.806 --> 00:06:14.274 line:-1 align:center
+I mentioned before.
+
+
+142
+00:06:14.274 --> 00:06:16.076 line:-2 align:center
+Our designer specified
+that the inner parts
+
+
+143
+00:06:16.076 --> 00:06:18.612 line:-2 align:center
+of these symbols
+should always be white.
+
+
+144
+00:06:18.612 --> 00:06:20.414 line:-2 align:center
+And up until now,
+we would've gotten
+
+
+145
+00:06:20.414 --> 00:06:22.182 line:-2 align:center
+the correct result
+by accident,
+
+
+146
+00:06:22,182 --> 00:06:24,618 line:-2
+even when using
+monochrome symbols.
+
+
+147
+00:06:24.618 --> 00:06:27.621 line:-2 align:center
+Why?
+We were in light mode.
+
+
+148
+00:06:27,621 --> 00:06:29,456 line:-1
+But when we switch to dark mode,
+
+
+149
+00:06:29,456 --> 00:06:32,526 line:-2
+monochrome symbols do not
+give us the desired results.
+
+
+150
+00:06:32,526 --> 00:06:34,561 line:-2
+This is because the monochrome
+versions
+
+
+151
+00:06:34.561 --> 00:06:36.797 line:-2 align:center
+use knockouts
+for the inner parts,
+
+
+152
+00:06:36.797 --> 00:06:39.566 line:-2 align:center
+and so the background
+bleeds through the gaps.
+
+
+153
+00:06:39.566 --> 00:06:41.735 line:-2 align:center
+Now, by using
+a palette rendering mode,
+
+
+154
+00:06:41.735 --> 00:06:43.871 line:-2 align:center
+we make sure
+these buttons appear correctly
+
+
+155
+00:06:43.871 --> 00:06:45.839 line:-2 align:center
+for different
+user interface styles.
+
+
+156
+00:06:47,841 --> 00:06:50,110 align:center
+I mentioned a new color
+before: tintColor.
+
+
+157
+00:06:50,110 --> 00:06:52,813 align:center
+This is a new dynamic
+color in UIKit that will
+
+
+158
+00:06:52,813 --> 00:06:56,083 align:center
+resolve to the tint color
+of the view it is used in.
+
+
+159
+00:06:56,083 --> 00:06:59,620 line:0
+This is especially handy when
+specifying symbol layer colors,
+
+
+160
+00:06:59,620 --> 00:07:01,154 line:0
+but you can also use
+this color
+
+
+161
+00:07:01,154 --> 00:07:03,924 align:center
+everywhere where you
+can use any other color.
+
+
+162
+00:07:03,924 --> 00:07:05,692 align:center
+However,
+keep in mind that the rules
+
+
+163
+00:07:05,692 --> 00:07:07,561 align:center
+around dynamic colors
+still apply.
+
+
+164
+00:07:08,595 --> 00:07:11,164 align:center
+See "Implementing dark
+mode on iOS" session
+
+
+165
+00:07:11,164 --> 00:07:16,336 align:center
+of WWDC19 to learn more about
+how dynamic colors work.
+
+
+166
+00:07:16,336 --> 00:07:18,772 line:-2
+Some symbols
+only have two layers.
+
+
+167
+00:07:18.772 --> 00:07:20.541 line:-2 align:center
+For instance,
+there's a bunch of symbols
+
+
+168
+00:07:20,541 --> 00:07:22,576 line:-2
+that are missing
+a secondary layer.
+
+
+169
+00:07:22,576 --> 00:07:25,112 line:-2
+How do we handle palette
+mode for these kinds of symbols?
+
+
+170
+00:07:26,747 --> 00:07:29,116 line:-2
+A good example of these
+are the device symbols,
+
+
+171
+00:07:29.116 --> 00:07:31.752 line:-2 align:center
+which only have a primary
+layer and a tertiary layer.
+
+
+172
+00:07:32.986 --> 00:07:36.623 line:-2 align:center
+How do we color this iPad symbol
+with two layer colors?
+
+
+173
+00:07:36,623 --> 00:07:38,559 line:-2
+Since symbols can have
+up to three layers,
+
+
+174
+00:07:38,559 --> 00:07:41,828 line:-2
+you can just specify three
+colors, one for each layer.
+
+
+175
+00:07:43,931 --> 00:07:46,066 line:-2
+In this case,
+the secondary color is not used
+
+
+176
+00:07:46,066 --> 00:07:48,168 line:-1
+because the layer isn't there.
+
+
+177
+00:07:48,168 --> 00:07:50,370 line:-2
+However,
+there's another way to do this
+
+
+178
+00:07:50,370 --> 00:07:52,806 line:-2
+for symbols
+with only two layers.
+
+
+179
+00:07:52.806 --> 00:07:54.975 line:-2 align:center
+For those symbols,
+we can specify just two colors
+
+
+180
+00:07:54.975 --> 00:07:57.911 line:-2 align:center
+in your configuration,
+and the colors will be
+
+
+181
+00:07:57.911 --> 00:08:00.247 line:-2 align:center
+applied to the available
+layers in sequence.
+
+
+182
+00:08:01,248 --> 00:08:02,249 line:-1
+The former method
+
+
+183
+00:08:02,249 --> 00:08:03,550 line:-1
+allows for consistency on how
+
+
+184
+00:08:03.550 --> 00:08:05.319 line:-1 align:center
+to specify palette colors
+
+
+185
+00:08:05,319 --> 00:08:06,520 line:-1
+for related symbols
+
+
+186
+00:08:06,520 --> 00:08:07,921 line:-1
+with a mixed number of layers,
+
+
+187
+00:08:07,921 --> 00:08:10,257 line:-2
+because the colors directly
+map to the correct layer.
+
+
+188
+00:08:12.893 --> 00:08:14.995 line:-2 align:center
+The latter method is
+a convenience for when
+
+
+189
+00:08:14,995 --> 00:08:16,063 line:-1
+you know for sure
+
+
+190
+00:08:16.063 --> 00:08:18.198 line:-2 align:center
+that the symbol only has
+two layers.
+
+
+191
+00:08:19.700 --> 00:08:20.968 line:-1 align:center
+The palette configuration
+
+
+192
+00:08:20,968 --> 00:08:23,203 line:-2
+specifies an explicit
+set of colors that are
+
+
+193
+00:08:23.203 --> 00:08:26.240 line:-2 align:center
+applied to the layer
+hierarchy of the symbol.
+
+
+194
+00:08:26,240 --> 00:08:28,275 line:-2
+Unlike the hierarchical
+rendering mode,
+
+
+195
+00:08:28.275 --> 00:08:31.712 line:-2 align:center
+the palette rendering mode
+doesn't create derived colors.
+
+
+196
+00:08:31.712 --> 00:08:33.547 line:-2 align:center
+And similar
+to hierarchical rendering mode,
+
+
+197
+00:08:33.547 --> 00:08:37.150 line:-2 align:center
+the hierarchy level of each
+symbol layer is important.
+
+
+198
+00:08:37.150 --> 00:08:38.585 line:-2 align:center
+There's
+also a convenient solution
+
+
+199
+00:08:38.585 --> 00:08:41.421 line:-2 align:center
+for symbols
+with less than three layers.
+
+
+200
+00:08:41.421 --> 00:08:45.259 line:-2 align:center
+This brings us to the last color
+rendering mode: multicolor.
+
+
+201
+00:08:45,259 --> 00:08:47,194 line:-2
+Like I mentioned before,
+this color mode
+
+
+202
+00:08:47.194 --> 00:08:49.696 line:-2 align:center
+was added to AppKit
+and SwiftUI last year
+
+
+203
+00:08:49,696 --> 00:08:51,999 line:-2
+but is introduced
+to UIKit this year.
+
+
+204
+00:08:53.400 --> 00:08:56.203 line:-2 align:center
+Some of these categories have
+images with multiple colors.
+
+
+205
+00:08:56,203 --> 00:08:58,038 line:-1
+These are multicolor symbols.
+
+
+206
+00:08:58,038 --> 00:08:59,806 line:-2
+Let's see
+how we would implement this.
+
+
+207
+00:09:01.108 --> 00:09:04.578 line:-2 align:center
+First of all, we need to load
+the images for each cell.
+
+
+208
+00:09:04.578 --> 00:09:06.380 line:-2 align:center
+For now,
+these are regular symbols,
+
+
+209
+00:09:06.380 --> 00:09:08.582 line:-2 align:center
+and we get
+the monochrome mode by default.
+
+
+210
+00:09:09.583 --> 00:09:13.020 line:-2 align:center
+Then we need to indicate
+that we want multicolor symbols.
+
+
+211
+00:09:13,020 --> 00:09:14,922 line:-2
+We do this
+by creating a configuration
+
+
+212
+00:09:14.922 --> 00:09:17.891 line:-2 align:center
+requesting the multicolor
+variant of a symbol
+
+
+213
+00:09:17.891 --> 00:09:20.260 line:-2 align:center
+and assigning that configuration
+to the image view.
+
+
+214
+00:09:21.828 --> 00:09:23.363 line:-1 align:center
+But one icon didn't change:
+
+
+215
+00:09:23,363 --> 00:09:26,433 line:-2
+its symbol does not
+support multicolor.
+
+
+216
+00:09:26,433 --> 00:09:27,467 line:-1
+So, how do you figure out
+
+
+217
+00:09:27,467 --> 00:09:29,970 line:-2
+which symbols support
+multicolor or not?
+
+
+218
+00:09:29,970 --> 00:09:33,540 align:center
+An easy way to find out is
+to use the SF Symbols app.
+
+
+219
+00:09:33,540 --> 00:09:35,976 line:0
+Search for the symbol,
+then use the inspector to see
+
+
+220
+00:09:35,976 --> 00:09:39,479 align:center
+which color rendering modes
+the symbol supports.
+
+
+221
+00:09:39,479 --> 00:09:42,316 align:center
+For instance, our flame
+symbol only supports monochrome.
+
+
+222
+00:09:43,250 --> 00:09:46,253 line:0
+But the lung symbol supports
+all four color rendering modes.
+
+
+223
+00:09:47,387 --> 00:09:49,356 line:0
+Additionally, you can also play
+with the color mapping
+
+
+224
+00:09:49,356 --> 00:09:50,757 align:center
+for each layer here,
+
+
+225
+00:09:50,757 --> 00:09:52,993 line:0
+in order to get a better feel
+of how the symbol would appear
+
+
+226
+00:09:52,993 --> 00:09:55,195 line:0
+without having
+to write one line of code.
+
+
+227
+00:09:55,929 --> 00:09:57,564 line:-1
+Let's go back to our example.
+
+
+228
+00:09:58.899 --> 00:10:01.301 line:-2 align:center
+So, since not all of these
+symbols support multicolor,
+
+
+229
+00:10:01.301 --> 00:10:03.637 line:-2 align:center
+we need to manually set
+the tintColor to the right value
+
+
+230
+00:10:03.637 --> 00:10:05.939 line:-2 align:center
+in order for the symbol
+to display correctly.
+
+
+231
+00:10:07.341 --> 00:10:09.476 line:-2 align:center
+Some multicolor symbols
+have a tint layer,
+
+
+232
+00:10:09,476 --> 00:10:11,044 line:-2
+and they will be
+affected by the tint
+
+
+233
+00:10:11.044 --> 00:10:13.247 line:-1 align:center
+or accent color of the view.
+
+
+234
+00:10:13,247 --> 00:10:16,116 line:-2
+Symbols without such layer
+won't be affected.
+
+
+235
+00:10:16.116 --> 00:10:19.953 line:-2 align:center
+In our example, none of them do,
+so everything remains as is.
+
+
+236
+00:10:21.288 --> 00:10:23.590 line:-2 align:center
+As you might have guessed from
+the name of the configuration,
+
+
+237
+00:10:23,590 --> 00:10:25,526 line:-2
+the multicolor configuration
+indicates
+
+
+238
+00:10:25.526 --> 00:10:29.229 line:-2 align:center
+a preference for a multicolor
+rendering of a symbol.
+
+
+239
+00:10:29,229 --> 00:10:30,464 line:-1
+As I mentioned before,
+
+
+240
+00:10:30.464 --> 00:10:33.901 line:-2 align:center
+not all symbols
+have a multicolor variant.
+
+
+241
+00:10:33,901 --> 00:10:36,003 line:-2
+You can combine
+a multicolor configuration
+
+
+242
+00:10:36.003 --> 00:10:38.438 line:-2 align:center
+with one of the other
+color configurations,
+
+
+243
+00:10:38,438 --> 00:10:40,274 line:-1
+but more on that later.
+
+
+244
+00:10:40,274 --> 00:10:42,209 line:-2
+And the result is
+a configuration that supports
+
+
+245
+00:10:42,209 --> 00:10:45,646 line:-2
+two color modes: multicolor
+when it is available,
+
+
+246
+00:10:45.646 --> 00:10:48.582 line:-2 align:center
+and the other color mode
+otherwise.
+
+
+247
+00:10:48.582 --> 00:10:50.751 line:-2 align:center
+Note that combining hierarchical
+mode and palette mode
+
+
+248
+00:10:50,751 --> 00:10:52,920 line:-2
+will result
+in the last-specified mode,
+
+
+249
+00:10:52.920 --> 00:10:54.988 line:-1 align:center
+as they are mutually exclusive.
+
+
+250
+00:10:55.956 --> 00:10:57.925 line:-2 align:center
+If, in turn, that color mode
+is not supported,
+
+
+251
+00:10:57.925 --> 00:10:59.993 line:-1 align:center
+the system uses monochrome mode.
+
+
+252
+00:11:01.562 --> 00:11:03.897 line:-2 align:center
+So, multicolor symbols
+have a fixed set of colors
+
+
+253
+00:11:03,897 --> 00:11:06,567 line:-1
+which aren't modifiable in code.
+
+
+254
+00:11:06,567 --> 00:11:08,635 line:-2
+Additionally,
+some symbols have a layer
+
+
+255
+00:11:08.635 --> 00:11:11.605 line:-2 align:center
+that will be rendered using
+the tint or accent color.
+
+
+256
+00:11:11.605 --> 00:11:14.508 line:-2 align:center
+And you don't have anything
+to do in order for this to work.
+
+
+257
+00:11:14.508 --> 00:11:16.643 line:-2 align:center
+The symbol picks up
+the right tint or accent color
+
+
+258
+00:11:16,643 --> 00:11:18,879 line:-2
+from its imageview
+when it is displayed.
+
+
+259
+00:11:20.180 --> 00:11:22.049 line:-2 align:center
+Now, we've covered
+all four modes
+
+
+260
+00:11:22.049 --> 00:11:23.717 line:-2 align:center
+and how to use them
+in your code.
+
+
+261
+00:11:23.717 --> 00:11:26.119 line:-2 align:center
+But can we do the same
+in Interface Builder?
+
+
+262
+00:11:26,987 --> 00:11:28,922 align:center
+Fortunately, the answer is yes.
+
+
+263
+00:11:28,922 --> 00:11:31,658 align:center
+Xcode has added similar
+functionality to configure
+
+
+264
+00:11:31,658 --> 00:11:34,094 align:center
+color rendering modes
+right from the IDE.
+
+
+265
+00:11:35,529 --> 00:11:37,030 align:center
+Here we have Xcode Open
+displaying
+
+
+266
+00:11:37,798 --> 00:11:39,533 line:0
+a storyboard
+for the Planets app.
+
+
+267
+00:11:39,533 --> 00:11:41,835 line:-2
+The ImageView UI
+has been expanded
+
+
+268
+00:11:41.835 --> 00:11:44.404 line:-2 align:center
+to enable specifying
+a color rendering mode.
+
+
+269
+00:11:44,404 --> 00:11:47,508 line:-2
+And the resulting color
+configuration is also combinable
+
+
+270
+00:11:47,508 --> 00:11:50,677 line:0
+with the previously-existing
+configurations.
+
+
+271
+00:11:50,677 --> 00:11:52,646 line:0
+If you want to learn more
+about all these new features
+
+
+272
+00:11:52,646 --> 00:11:54,848 line:0
+in Interface Builder,
+check out this year's
+
+
+273
+00:11:55,215 --> 00:11:57,851 align:center
+"Build interfaces with style."
+
+
+274
+00:11:57.851 --> 00:11:59.219 line:-1 align:center
+Now that we have talked about
+
+
+275
+00:11:59,219 --> 00:12:02,022 line:-2
+all these different color modes,
+how can we combine them
+
+
+276
+00:12:02.022 --> 00:12:04.992 line:-2 align:center
+with other configurations
+to get more complex effects?
+
+
+277
+00:12:04,992 --> 00:12:06,994 line:-1
+Luckily, it's not that hard.
+
+
+278
+00:12:06.994 --> 00:12:09.129 line:-1 align:center
+Let's check out another example,
+
+
+279
+00:12:09.129 --> 00:12:11.498 line:-2 align:center
+this time
+from the Shortcuts app.
+
+
+280
+00:12:11,498 --> 00:12:13,800 line:-2
+The icons of each
+of the actions are quite large,
+
+
+281
+00:12:13,800 --> 00:12:15,169 line:-1
+but they also appear to have
+
+
+282
+00:12:15,169 --> 00:12:17,004 line:-2
+a hierarchical color
+rendering mode.
+
+
+283
+00:12:17.004 --> 00:12:21.508 line:-2 align:center
+So, we need two configurations:
+one for specifying a point size,
+
+
+284
+00:12:21.508 --> 00:12:24.411 line:-2 align:center
+and one for specifying
+a color configuration.
+
+
+285
+00:12:25.579 --> 00:12:27.214 line:-1 align:center
+But we can only apply one.
+
+
+286
+00:12:27.214 --> 00:12:28.949 line:-1 align:center
+How do we combine them?
+
+
+287
+00:12:28.949 --> 00:12:31.218 line:-2 align:center
+Turns out there's
+an easy way to do this.
+
+
+288
+00:12:31,218 --> 00:12:33,620 line:-2
+There's a method to combine
+two configurations,
+
+
+289
+00:12:33.620 --> 00:12:35.088 line:-1 align:center
+resulting in a configuration
+
+
+290
+00:12:35,088 --> 00:12:37,457 line:-2
+that has the elements
+of both configurations.
+
+
+291
+00:12:38.525 --> 00:12:41.495 line:-2 align:center
+In the example here,
+we create two configurations:
+
+
+292
+00:12:41,495 --> 00:12:43,497 line:-2
+one
+for specifying a point size,
+
+
+293
+00:12:43.497 --> 00:12:45.966 line:-2 align:center
+and another one for specifying
+a hierarchical color.
+
+
+294
+00:12:47.000 --> 00:12:49.036 line:-2 align:center
+We then combine them
+using the applying methods
+
+
+295
+00:12:49.036 --> 00:12:51.171 line:-1 align:center
+to create a final configuration.
+
+
+296
+00:12:51,171 --> 00:12:53,407 line:-2
+And that configuration is
+applied on the image view
+
+
+297
+00:12:53.407 --> 00:12:56.577 line:-2 align:center
+displaying the image,
+giving us the desired result.
+
+
+298
+00:12:56,577 --> 00:12:57,911 line:-1
+Note that this mechanism
+
+
+299
+00:12:57,911 --> 00:13:00,480 line:-2
+is not limited to color
+configurations only.
+
+
+300
+00:13:00.480 --> 00:13:01.682 line:-1 align:center
+You can also use this
+
+
+301
+00:13:01,682 --> 00:13:03,417 line:-2
+with the other types
+of configurations.
+
+
+302
+00:13:03.417 --> 00:13:05.853 line:-2 align:center
+For instance, combining text,
+style, and weight.
+
+
+303
+00:13:06,854 --> 00:13:10,090 line:-2
+Now we know how to combine
+different configurations.
+
+
+304
+00:13:10.090 --> 00:13:11.558 line:-1 align:center
+We've got one topic left:
+
+
+305
+00:13:11.558 --> 00:13:14.394 line:-2 align:center
+using color symbols
+in attributed strings.
+
+
+306
+00:13:14.394 --> 00:13:16.463 line:-1 align:center
+Take this last example.
+
+
+307
+00:13:16,463 --> 00:13:18,665 line:-2
+This is an imaginary app
+that lists various hotels
+
+
+308
+00:13:18.665 --> 00:13:21.401 line:-2 align:center
+and information
+about their available rooms.
+
+
+309
+00:13:21.401 --> 00:13:23.036 line:-2 align:center
+There's
+a few places where symbols
+
+
+310
+00:13:23.036 --> 00:13:24.204 line:-1 align:center
+are combined with text.
+
+
+311
+00:13:24.204 --> 00:13:25.906 line:-2 align:center
+But let's focus on
+the room amenities
+
+
+312
+00:13:25,906 --> 00:13:28,842 line:-2
+and how we would
+implement this text.
+
+
+313
+00:13:28,842 --> 00:13:30,844 line:-2
+It's fairly simple,
+but a bit elaborate.
+
+
+314
+00:13:30,844 --> 00:13:33,380 line:-2
+We have to build an attributed
+string with an image attachment.
+
+
+315
+00:13:34,681 --> 00:13:38,352 line:-2
+First, we load the image, using
+the correct color configuration.
+
+
+316
+00:13:38.352 --> 00:13:40.153 line:-2 align:center
+In this case,
+we're using a hierarchical
+
+
+317
+00:13:40.153 --> 00:13:41.488 line:-1 align:center
+color configuration.
+
+
+318
+00:13:42.890 --> 00:13:44.958 line:-2 align:center
+We use this image to create
+a text attachment,
+
+
+319
+00:13:44.958 --> 00:13:46.493 line:-2 align:center
+and then we use
+that attachment
+
+
+320
+00:13:46,493 --> 00:13:48,328 line:-2
+to complete
+our attributed string.
+
+
+321
+00:13:48,328 --> 00:13:52,232 line:-2
+And this is then repeated
+for all the available amenities.
+
+
+322
+00:13:52.232 --> 00:13:53.734 line:-2 align:center
+On the label
+displaying the text,
+
+
+323
+00:13:53.734 --> 00:13:55.669 line:-2 align:center
+we also
+specify the correct font
+
+
+324
+00:13:55.669 --> 00:13:57.304 line:-2 align:center
+and the same text color
+as we used
+
+
+325
+00:13:57.304 --> 00:13:59.273 line:-2 align:center
+for the hierarchical
+color configurations.
+
+
+326
+00:14:00,541 --> 00:14:03,076 line:-2
+Monochrome symbols pick up
+the text color automatically,
+
+
+327
+00:14:03.076 --> 00:14:05.546 line:-2 align:center
+but for symbols with a color
+configuration,
+
+
+328
+00:14:05.546 --> 00:14:08.782 line:-2 align:center
+we have to specify
+the colors explicitly.
+
+
+329
+00:14:08.782 --> 00:14:11.051 line:-2 align:center
+And color symbols do
+pick up the font sizes
+
+
+330
+00:14:11.051 --> 00:14:13.954 line:-2 align:center
+specified in the string,
+just like monochrome symbols.
+
+
+331
+00:14:15,222 --> 00:14:17,457 line:-2
+After these steps,
+we have the result that we want:
+
+
+332
+00:14:17,457 --> 00:14:19,793 line:-2
+a label with the right content,
+color, and size,
+
+
+333
+00:14:19,793 --> 00:14:22,896 line:-2
+thanks to the integration of
+symbols in attributed strings.
+
+
+334
+00:14:24,731 --> 00:14:26,800 line:-2
+We introduced three new color
+modes for SF Symbols
+
+
+335
+00:14:26,800 --> 00:14:28,769 line:-1
+in addition to the existing one,
+
+
+336
+00:14:28,769 --> 00:14:31,705 line:-2
+and we explained
+how to use them in your app.
+
+
+337
+00:14:31,705 --> 00:14:34,908 line:-2
+Symbols are a great way to add
+high-quality images to your app.
+
+
+338
+00:14:34,908 --> 00:14:36,743 line:-1
+Colored symbols expand on that,
+
+
+339
+00:14:36.743 --> 00:14:38.645 line:-2 align:center
+allowing
+for even more possibilities.
+
+
+340
+00:14:41,515 --> 00:14:43,984 line:0
+If you enjoyed this session,
+be sure to check out
+
+
+341
+00:14:43,984 --> 00:14:45,819 align:center
+a few related sessions.
+
+
+342
+00:14:45,819 --> 00:14:47,754 align:center
+Watch "What's new in
+SF Symbols"
+
+
+343
+00:14:47,754 --> 00:14:50,157 align:center
+for a primer on the
+new capabilities.
+
+
+344
+00:14:50,157 --> 00:14:52,826 align:center
+Or take a look at
+"SF Symbols in SwiftUI"
+
+
+345
+00:14:52,826 --> 00:14:54,328 align:center
+to see how you can use
+
+
+346
+00:14:54,328 --> 00:14:56,263 line:0
+the new symbols in SwiftUI.
+
+
+347
+00:14:57,097 --> 00:14:58,265 line:-1
+Thanks for watching,
+
+
+348
+00:14:58,265 --> 00:14:59,867 line:-2
+and now go build
+amazing apps!
+
+
+349
+00:14:59.867 --> 00:15:01.935 line:-1 align:center
+[upbeat music]
+

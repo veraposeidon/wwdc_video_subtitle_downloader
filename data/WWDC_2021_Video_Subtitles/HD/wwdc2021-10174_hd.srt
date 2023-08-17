@@ -1,0 +1,4483 @@
+2
+00:00:00,567 --> 00:00:07,541 line:-1
+[upbeat music]
+
+
+3
+00:00:09.042 --> 00:00:11.945 line:-2 align:center
+[Tori] Hello,
+and welcome to WWDC.
+
+
+4
+00:00:11.945 --> 00:00:14.381 line:-2 align:center
+I'm Tori, and I'm so excited
+to talk to you
+
+
+5
+00:00:14.381 --> 00:00:16.483 line:-2 align:center
+about the new features we
+have coming for your server
+
+
+6
+00:00:16,483 --> 00:00:19,686 line:-2
+and to help set some guidelines
+for running an effective server
+
+
+7
+00:00:19.686 --> 00:00:22.923 line:-2 align:center
+to track the status
+of all of your in-app purchases.
+
+
+8
+00:00:22.923 --> 00:00:24.258 line:-1 align:center
+So, let's dive right in.
+
+
+9
+00:00:24.992 --> 00:00:27.895 line:-2 align:center
+This session is part two
+of a three-session series
+
+
+10
+00:00:27.895 --> 00:00:30.097 line:-1 align:center
+focusing on in-app purchases.
+
+
+11
+00:00:30.097 --> 00:00:32.900 line:-2 align:center
+If you've not already watched
+"Meet StoreKit 2"
+
+
+12
+00:00:32.900 --> 00:00:35.269 line:-2 align:center
+or "Support customers
+and handle refunds,"
+
+
+13
+00:00:35,269 --> 00:00:37,638 line:-2
+I recommend you take
+a look after this session
+
+
+14
+00:00:37.638 --> 00:00:39.406 line:-1 align:center
+so you can get the full story.
+
+
+15
+00:00:39.907 --> 00:00:41.775 line:-2 align:center
+For this session,
+we're going to focus on
+
+
+16
+00:00:41,775 --> 00:00:44,077 line:-2
+the server and how you
+can build your server
+
+
+17
+00:00:44,077 --> 00:00:46,079 line:-1
+to manage your in-app purchases.
+
+
+18
+00:00:46.079 --> 00:00:49.216 line:-2 align:center
+To get us started in this
+session, let's first talk about
+
+
+19
+00:00:49,216 --> 00:00:52,219 line:-2
+some of the reasons
+it's useful to have a server.
+
+
+20
+00:00:52,219 --> 00:00:55,155 line:-2
+Having a server is useful
+for several reasons,
+
+
+21
+00:00:55.155 --> 00:00:57.357 line:-2 align:center
+and, in the case of in-app
+purchase,
+
+
+22
+00:00:57,357 --> 00:00:59,793 line:-2
+most of them revolve
+around tracking status.
+
+
+23
+00:00:59,793 --> 00:01:03,297 line:-2
+When you have a server, we're
+able to notify you in real time
+
+
+24
+00:01:03,297 --> 00:01:06,033 line:-2
+when the status of one of your
+in-app purchases changes
+
+
+25
+00:01:06,033 --> 00:01:07,734 line:-2
+through
+App Store server notifications,
+
+
+26
+00:01:07.734 --> 00:01:09.803 line:-1 align:center
+and you can call us on-demand
+
+
+27
+00:01:09.803 --> 00:01:14.007 line:-2 align:center
+to check status at any time
+using server-to-server APIs.
+
+
+28
+00:01:14.007 --> 00:01:16.276 line:-2 align:center
+Having a server allows you
+to validate
+
+
+29
+00:01:16,276 --> 00:01:20,347 line:-2
+customer access to your content,
+even if their device is offline
+
+
+30
+00:01:20.347 --> 00:01:23.217 line:-2 align:center
+or if the status changes
+outside the app,
+
+
+31
+00:01:23.217 --> 00:01:24.685 line:-1 align:center
+so you know if your customer
+
+
+32
+00:01:24,685 --> 00:01:26,854 line:-2
+is still subscribed
+after a renewal
+
+
+33
+00:01:26.854 --> 00:01:29.723 line:-2 align:center
+or if the coins they bought
+in your game have been refunded.
+
+
+34
+00:01:29.723 --> 00:01:32.426 line:-2 align:center
+If you already have a server,
+you may have set one up
+
+
+35
+00:01:32,426 --> 00:01:34,127 line:-1
+for some of these reasons.
+
+
+36
+00:01:34.127 --> 00:01:36.830 line:-2 align:center
+If you don't have a server and
+are thinking of building one,
+
+
+37
+00:01:36.830 --> 00:01:39.099 line:-2 align:center
+these are strong reasons
+to consider,
+
+
+38
+00:01:39.099 --> 00:01:41.101 line:-2 align:center
+as they give you more
+control of your content.
+
+
+39
+00:01:41,101 --> 00:01:42,903 line:0
+Even when you have a server,
+
+
+40
+00:01:42,903 --> 00:01:45,739 line:0
+our story still begins
+on an iPhone, iPad,
+
+
+41
+00:01:45,739 --> 00:01:48,509 align:center
+or other device
+with an in-app purchase.
+
+
+42
+00:01:48,509 --> 00:01:51,612 line:0
+When you send information about
+that purchase to your server,
+
+
+43
+00:01:51,612 --> 00:01:54,014 line:0
+including things like
+the transactionId,
+
+
+44
+00:01:54,014 --> 00:01:56,517 align:center
+originalTransactionId,
+and the receipt,
+
+
+45
+00:01:56,517 --> 00:01:59,286 align:center
+you're now able to track
+that purchase from your server
+
+
+46
+00:01:59,286 --> 00:02:02,189 line:0
+by communicating
+directly with our server.
+
+
+47
+00:02:02,189 --> 00:02:05,225 align:center
+Today, this involves using
+APIs like verifyReceipt
+
+
+48
+00:02:05,225 --> 00:02:08,095 line:0
+or frameworks like App Store
+server notifications.
+
+
+49
+00:02:08,095 --> 00:02:10,297 line:0
+We only want to make
+integrating with our server
+
+
+50
+00:02:10,297 --> 00:02:11,765 line:0
+even better for you,
+
+
+51
+00:02:11,765 --> 00:02:13,767 line:0
+which brings us
+to today's content.
+
+
+52
+00:02:13.767 --> 00:02:15.736 line:-1 align:center
+I'll review all of the changes
+
+
+53
+00:02:15.736 --> 00:02:17.437 line:-2 align:center
+we have coming
+on the server side
+
+
+54
+00:02:17,437 --> 00:02:19,439 line:-2
+and how you can
+integrate with these
+
+
+55
+00:02:19,439 --> 00:02:22,075 line:-2
+to build a better,
+stronger server.
+
+
+56
+00:02:22,075 --> 00:02:24,878 line:-2
+To start with, I will go through
+validating access
+
+
+57
+00:02:24,878 --> 00:02:26,747 line:-1
+with App Store Receipts,
+
+
+58
+00:02:26,747 --> 00:02:30,551 line:-2
+tracking status
+with App Store Server APIs,
+
+
+59
+00:02:30,551 --> 00:02:32,052 line:-1
+then I will dive into
+
+
+60
+00:02:32.052 --> 00:02:33.987 line:-2 align:center
+how you can track status
+passively
+
+
+61
+00:02:33,987 --> 00:02:35,889 line:-2
+with App Store
+server notifications.
+
+
+62
+00:02:36,823 --> 00:02:38,992 line:-2
+I will also go over
+what this means
+
+
+63
+00:02:38,992 --> 00:02:40,761 line:-1
+for managing family sharing
+
+
+64
+00:02:40,761 --> 00:02:43,730 line:-2
+and how you can
+test your server in sandbox.
+
+
+65
+00:02:45,599 --> 00:02:47,601 line:-2
+Let's get started with
+validating status
+
+
+66
+00:02:47,601 --> 00:02:49,203 line:-1
+using receipts.
+
+
+67
+00:02:49.203 --> 00:02:52.573 line:-2 align:center
+Today, our receipts are in the
+unified app receipt format.
+
+
+68
+00:02:52,573 --> 00:02:54,541 line:-2
+To get the JSON version
+of the receipt,
+
+
+69
+00:02:54.541 --> 00:02:56.043 line:-1 align:center
+you either have to do
+
+
+70
+00:02:56,043 --> 00:02:58,812 line:-2
+an on-device receipt
+verification in your app or,
+
+
+71
+00:02:58.812 --> 00:03:00.914 line:-2 align:center
+since we're talking about
+the server,
+
+
+72
+00:03:00,914 --> 00:03:04,251 line:-2
+call our server-to-server
+verifyReceipt endpoint.
+
+
+73
+00:03:04,251 --> 00:03:06,019 line:0
+When you call us
+server-to-server,
+
+
+74
+00:03:06,019 --> 00:03:09,489 line:0
+you get this decoded receipt,
+plus any new transactions
+
+
+75
+00:03:09,489 --> 00:03:11,491 align:center
+in a latest_receipt_info
+section,
+
+
+76
+00:03:11,491 --> 00:03:13,260 line:0
+upcoming renewal information
+
+
+77
+00:03:13,260 --> 00:03:15,329 line:0
+in a pending_renewal_info
+section,
+
+
+78
+00:03:15,329 --> 00:03:16,997 line:0
+and a latest_receipt.
+
+
+79
+00:03:16,997 --> 00:03:19,867 line:0
+This receipt can be huge,
+and it contains transaction
+
+
+80
+00:03:19,867 --> 00:03:22,970 align:center
+from your entire app, whether
+they are non-consumables,
+
+
+81
+00:03:22,970 --> 00:03:27,207 line:0
+consumables, subscriptions,
+or non-renewing subscriptions.
+
+
+82
+00:03:27,207 --> 00:03:29,076 line:0
+This provides you
+with a ton of information,
+
+
+83
+00:03:29,076 --> 00:03:32,479 align:center
+but we wonder if it can be
+too much.
+
+
+84
+00:03:32,479 --> 00:03:34,281 line:0
+Additionally,
+with StoreKit 2,
+
+
+85
+00:03:34,281 --> 00:03:37,651 align:center
+we're introducing new signed
+transactions in a JWS,
+
+
+86
+00:03:37,651 --> 00:03:39,520 line:0
+or JSON web signature,
+
+
+87
+00:03:39,520 --> 00:03:42,389 align:center
+format on the client side,
+and we want to provide
+
+
+88
+00:03:42,389 --> 00:03:45,058 line:0
+the same thing to you
+on the server.
+
+
+89
+00:03:45.058 --> 00:03:47.594 line:-2 align:center
+Why did we decide to introduce
+signed transactions?
+
+
+90
+00:03:47,594 --> 00:03:49,997 line:-2
+At Apple,
+we care about security.
+
+
+91
+00:03:49.997 --> 00:03:52.633 line:-2 align:center
+Using JWS to sign these
+transactions
+
+
+92
+00:03:52.633 --> 00:03:54.201 line:-1 align:center
+will increase security
+
+
+93
+00:03:54,201 --> 00:03:57,104 line:-2
+through signing
+and signature verification.
+
+
+94
+00:03:57,104 --> 00:03:59,406 line:-2
+Additionally,
+the transactions are easy
+
+
+95
+00:03:59.406 --> 00:04:03.443 line:-2 align:center
+to decode and to verify,
+so much so that you can do it
+
+
+96
+00:04:03.443 --> 00:04:06.280 line:-2 align:center
+on your server
+without having to call us.
+
+
+97
+00:04:06.280 --> 00:04:09.216 line:-2 align:center
+Let's take a look at these
+signed transactions now.
+
+
+98
+00:04:09.216 --> 00:04:11.885 line:-2 align:center
+Our signed transactions
+consist of three strings
+
+
+99
+00:04:11.885 --> 00:04:13.520 line:-1 align:center
+separated by a period.
+
+
+100
+00:04:13,520 --> 00:04:16,690 line:-2
+The first string is
+a base64-encoded JSON header,
+
+
+101
+00:04:16,690 --> 00:04:19,426 line:-2
+then a base64-encoded JSON
+payload,
+
+
+102
+00:04:19,426 --> 00:04:21,461 line:-1
+followed by a signature.
+
+
+103
+00:04:21,461 --> 00:04:23,497 line:-1
+If you base64 decode the header,
+
+
+104
+00:04:23,497 --> 00:04:25,632 line:-2
+it contains the signing
+algorithm we used,
+
+
+105
+00:04:25.632 --> 00:04:28.035 line:-1 align:center
+as well as an x5C claim.
+
+
+106
+00:04:28.035 --> 00:04:30.437 line:-2 align:center
+This contains
+the certificate chain you need
+
+
+107
+00:04:30,437 --> 00:04:32,606 line:-1
+to verify the signature.
+
+
+108
+00:04:32,606 --> 00:04:34,942 line:-2
+We'll get back to verifying
+the signature in a bit.
+
+
+109
+00:04:34,942 --> 00:04:38,212 line:0
+Next, if you base64
+decode the payload,
+
+
+110
+00:04:38,212 --> 00:04:40,214 align:center
+you'll see the receipt JSON.
+
+
+111
+00:04:40,214 --> 00:04:43,517 line:0
+That means all you need to do
+to decode the transaction
+
+
+112
+00:04:43,517 --> 00:04:45,752 line:0
+is base64 decode the payload,
+
+
+113
+00:04:45,752 --> 00:04:48,455 line:0
+a simple operation that you
+can do on your own
+
+
+114
+00:04:48,455 --> 00:04:50,190 align:center
+on your server.
+
+
+115
+00:04:50,190 --> 00:04:52,793 align:center
+Let's take a quick look at
+the decoded transaction.
+
+
+116
+00:04:52,793 --> 00:04:54,895 align:center
+Just glancing at it,
+you may notice that some
+
+
+117
+00:04:54,895 --> 00:04:57,798 align:center
+data types have changed from
+strings in the previous receipt
+
+
+118
+00:04:57,798 --> 00:05:01,535 line:0
+to more appropriate data types,
+like numbers or booleans.
+
+
+119
+00:05:01.535 --> 00:05:04.071 line:-2 align:center
+Also notice that we have
+reduced date formats
+
+
+120
+00:05:04,071 --> 00:05:06,974 line:-2
+to only one,
+milliseconds since epoch.
+
+
+121
+00:05:06.974 --> 00:05:09.209 line:-2 align:center
+We've also added
+a few new fields.
+
+
+122
+00:05:09,209 --> 00:05:11,078 line:-2
+We've added a field
+called "type,"
+
+
+123
+00:05:11,078 --> 00:05:13,914 line:-2
+which tells you the content type
+the transaction applies to.
+
+
+124
+00:05:13.914 --> 00:05:17.150 line:-2 align:center
+We also added a field called
+"appAccountToken."
+
+
+125
+00:05:17,150 --> 00:05:20,120 line:-2
+When you provide this value
+to StoreKit at buy time
+
+
+126
+00:05:20.120 --> 00:05:23.557 line:-2 align:center
+in your StoreKit 2 app,
+we persist it on the server
+
+
+127
+00:05:23,557 --> 00:05:26,827 line:-2
+to return it in each
+of your transactions.
+
+
+128
+00:05:26,827 --> 00:05:28,195 line:-1
+We will also return this
+
+
+129
+00:05:28.195 --> 00:05:30.364 line:-2 align:center
+not only in the new
+signed transactions,
+
+
+130
+00:05:30,364 --> 00:05:33,400 line:-2
+but also in our existing
+unified app receipt
+
+
+131
+00:05:33,400 --> 00:05:35,169 line:-1
+for each transaction.
+
+
+132
+00:05:35,169 --> 00:05:36,937 line:-2
+The next two fields
+I want to call out here
+
+
+133
+00:05:36.937 --> 00:05:40.107 line:-2 align:center
+aren't really new,
+but rather renamed.
+
+
+134
+00:05:40.107 --> 00:05:42.075 line:-2 align:center
+We have renamed
+cancellation_date
+
+
+135
+00:05:42.075 --> 00:05:44.511 line:-2 align:center
+and cancellation_reason
+to revocation_date
+
+
+136
+00:05:44,511 --> 00:05:47,080 line:-2
+and revocation_reason
+to make it more clear
+
+
+137
+00:05:47,080 --> 00:05:49,783 line:-2
+that the presence of these
+fields indicate that service
+
+
+138
+00:05:49,783 --> 00:05:52,853 line:-2
+should be revoked,
+as of the revocation date.
+
+
+139
+00:05:52.853 --> 00:05:54.922 line:-2 align:center
+These last two fields
+may look new
+
+
+140
+00:05:54,922 --> 00:05:56,757 line:-1
+but are really a simplification
+
+
+141
+00:05:56,757 --> 00:05:59,426 line:-2
+of some information from
+our previous receipt.
+
+
+142
+00:05:59,426 --> 00:06:02,996 line:-2
+We've combined isTrialPeriod,
+isIntroOfferPeriod,
+
+
+143
+00:06:02,996 --> 00:06:06,567 line:-2
+promotionalOfferIdentifier,
+and offerCodeRefName
+
+
+144
+00:06:06,567 --> 00:06:10,370 line:-2
+into offerType
+and offerIdentifier.
+
+
+145
+00:06:10,370 --> 00:06:12,940 line:-2
+offerType tells you what
+type of offer your customer
+
+
+146
+00:06:12,940 --> 00:06:16,677 line:-2
+has applied to this period,
+with 1 for an intro offer,
+
+
+147
+00:06:16,677 --> 00:06:21,081 line:-2
+2 for a subscription offer,
+and 3 for an offer code.
+
+
+148
+00:06:21.081 --> 00:06:24.218 line:-2 align:center
+If the offer type is 2 or 3,
+you'll also see a value
+
+
+149
+00:06:24,218 --> 00:06:26,186 line:-1
+in the offer identifier field
+
+
+150
+00:06:26.186 --> 00:06:28.322 line:-2 align:center
+with either
+the promotional offer ID
+
+
+151
+00:06:28,322 --> 00:06:30,324 line:-1
+or the offerCodeRefName.
+
+
+152
+00:06:30.324 --> 00:06:32.259 line:-2 align:center
+Now, I want to talk about
+verifying
+
+
+153
+00:06:32.259 --> 00:06:35.095 line:-2 align:center
+the signature portion of
+the signed transaction info.
+
+
+154
+00:06:35.095 --> 00:06:38.432 line:-2 align:center
+Verifying the signature
+is an option for you to validate
+
+
+155
+00:06:38.432 --> 00:06:41.335 line:-2 align:center
+that the transaction came from
+Apple and is trustworthy.
+
+
+156
+00:06:41,335 --> 00:06:44,404 line:-2
+If you only want to see the
+contents of the transaction,
+
+
+157
+00:06:44.404 --> 00:06:46.440 line:-1 align:center
+this step is not required.
+
+
+158
+00:06:46,440 --> 00:06:48,876 line:-2
+However,
+to verify the signature,
+
+
+159
+00:06:48,876 --> 00:06:50,944 line:-2
+you will need to use
+the claims available
+
+
+160
+00:06:50.944 --> 00:06:54.214 line:-2 align:center
+in the header portion
+of the signed transaction info.
+
+
+161
+00:06:54,214 --> 00:06:57,651 line:-2
+Use the alg claim to know what
+signing algorithm we used,
+
+
+162
+00:06:57,651 --> 00:07:01,922 line:-2
+and use the certificate chain
+in the array in the x5c claim.
+
+
+163
+00:07:03.490 --> 00:07:05.158 line:-1 align:center
+Once you have these two things,
+
+
+164
+00:07:05,158 --> 00:07:07,494 line:-2
+you can use your favorite
+cryptographic library
+
+
+165
+00:07:07,494 --> 00:07:10,430 line:-2
+to verify the signature
+of the signed transaction info.
+
+
+166
+00:07:10,430 --> 00:07:13,500 line:-2
+So that covers our changes
+for App Store Receipts,
+
+
+167
+00:07:13,500 --> 00:07:16,737 line:-2
+or, as we call them now,
+signed transactions.
+
+
+168
+00:07:18.138 --> 00:07:21.508 line:-2 align:center
+Now, let's move on to how you
+can check status with APIs.
+
+
+169
+00:07:21,508 --> 00:07:25,145 line:-2
+So while you don't need an API
+like today's verifyReceipt
+
+
+170
+00:07:25,145 --> 00:07:27,848 line:-2
+to verify the validity
+of your signed transactions
+
+
+171
+00:07:27,848 --> 00:07:29,850 line:-1
+or to decode the transactions,
+
+
+172
+00:07:29.850 --> 00:07:31.919 line:-1 align:center
+we still wanted to build APIs
+
+
+173
+00:07:31.919 --> 00:07:33.520 line:-2 align:center
+that would help you
+on your server.
+
+
+174
+00:07:33.520 --> 00:07:36.490 line:-2 align:center
+That is why we're introducing
+a brand-new library
+
+
+175
+00:07:36,490 --> 00:07:40,160 line:-2
+of App Store Server APIs
+this year at WWDC
+
+
+176
+00:07:40,160 --> 00:07:42,329 line:-2
+that will provide you
+with some new features
+
+
+177
+00:07:42,329 --> 00:07:45,065 line:-2
+previously unavailable
+to you on your server
+
+
+178
+00:07:45.065 --> 00:07:47.701 line:-2 align:center
+and will also make use of our
+new signed transactions.
+
+
+179
+00:07:47.701 --> 00:07:50.571 line:-2 align:center
+So we're going to talk
+about two brand-new APIs
+
+
+180
+00:07:50,571 --> 00:07:53,440 line:-2
+right now:
+the subscription status API,
+
+
+181
+00:07:53,440 --> 00:07:55,809 line:-2
+and the in-app
+purchase history API.
+
+
+182
+00:07:55,809 --> 00:07:58,879 line:-2
+First, I wanna talk about
+the subscription status API.
+
+
+183
+00:07:58.879 --> 00:08:02.049 line:-2 align:center
+The subscription status API
+provides the latest status
+
+
+184
+00:08:02,049 --> 00:08:04,318 line:-2
+of your auto-renewable
+subscriptions,
+
+
+185
+00:08:04.318 --> 00:08:06.653 line:-2 align:center
+indicated by
+an originalTransactionId
+
+
+186
+00:08:06.653 --> 00:08:07.821 line:-1 align:center
+from your app.
+
+
+187
+00:08:07,821 --> 00:08:09,957 line:-2
+With this API,
+you'll get a quick answer
+
+
+188
+00:08:09.957 --> 00:08:12.125 line:-1 align:center
+as to your subscriber's status.
+
+
+189
+00:08:12,125 --> 00:08:14,094 line:-2
+You'll quickly know
+whether their subscription
+
+
+190
+00:08:14.094 --> 00:08:16.663 line:-2 align:center
+is active, expired,
+in a grace period,
+
+
+191
+00:08:16,663 --> 00:08:19,566 line:-2
+or other states,
+with one simple check.
+
+
+192
+00:08:19.566 --> 00:08:21.401 line:-1 align:center
+Let's take a look at it now.
+
+
+193
+00:08:21.401 --> 00:08:24.605 line:-2 align:center
+The request to this API
+is simple, requiring only
+
+
+194
+00:08:24,605 --> 00:08:27,608 line:-2
+an originalTransactionId
+in the URL.
+
+
+195
+00:08:27,608 --> 00:08:30,210 line:-2
+The response from this API
+contains a status
+
+
+196
+00:08:30,210 --> 00:08:32,679 line:-2
+for every subscription your
+customer is subscribed to
+
+
+197
+00:08:32.679 --> 00:08:34.381 line:-1 align:center
+in your app,
+
+
+198
+00:08:34.381 --> 00:08:37.017 line:-2 align:center
+grouped by
+a subscriptionGroupIdentifier.
+
+
+199
+00:08:37.017 --> 00:08:39.019 line:-2 align:center
+For each
+subscriptionGroupIdentifier,
+
+
+200
+00:08:39,019 --> 00:08:42,756 line:-2
+we provide a list of the latest
+transactions, with an entry
+
+
+201
+00:08:42,756 --> 00:08:46,860 line:-2
+for each originalTransactionId
+in the subscription group.
+
+
+202
+00:08:46.860 --> 00:08:49.796 line:-2 align:center
+Each entry in this array
+contains a status,
+
+
+203
+00:08:49.796 --> 00:08:52.165 line:-1 align:center
+the originalTransactionId,
+
+
+204
+00:08:52.165 --> 00:08:54.535 line:-1 align:center
+the signedTransactionInfo,
+
+
+205
+00:08:54,535 --> 00:08:56,703 line:-1
+and a signedRenewalInfo,
+
+
+206
+00:08:56,703 --> 00:08:59,907 line:-1
+also signed in a JWS format.
+
+
+207
+00:08:59.907 --> 00:09:02.376 line:-2 align:center
+Let's take a closer look
+at that status field now.
+
+
+208
+00:09:03,377 --> 00:09:05,612 align:center
+The status field will give you
+a quick answer
+
+
+209
+00:09:05,612 --> 00:09:07,548 line:0
+as to the status
+of your subscription
+
+
+210
+00:09:07,548 --> 00:09:08,949 align:center
+so you can know whether to
+
+
+211
+00:09:08,949 --> 00:09:11,552 align:center
+unlock service
+for your subscriber.
+
+
+212
+00:09:11,552 --> 00:09:15,222 line:0
+We're starting with five
+possible values for status:
+
+
+213
+00:09:15,222 --> 00:09:17,925 align:center
+1, meaning that the subscription
+is active;
+
+
+214
+00:09:17,925 --> 00:09:21,061 line:0
+2, meaning that the subscription
+is expired;
+
+
+215
+00:09:21,061 --> 00:09:24,665 align:center
+3, meaning that the subscription
+is in a billing retry period;
+
+
+216
+00:09:24,665 --> 00:09:28,001 align:center
+4, meaning that the subscription
+is in a grace period;
+
+
+217
+00:09:28,001 --> 00:09:31,271 line:0
+and 5, meaning that
+the subscription access
+
+
+218
+00:09:31,271 --> 00:09:33,607 align:center
+has been revoked
+due to a cancellation
+
+
+219
+00:09:33,607 --> 00:09:35,175 line:0
+or some other event.
+
+
+220
+00:09:35.175 --> 00:09:38.111 line:-2 align:center
+Looking at the status field
+gives you a quick answer
+
+
+221
+00:09:38,111 --> 00:09:39,947 line:-1
+about your subscription.
+
+
+222
+00:09:39,947 --> 00:09:42,182 line:-2
+For more information
+on that status,
+
+
+223
+00:09:42,182 --> 00:09:45,319 line:-2
+you can look at the payload
+of the signed transaction info
+
+
+224
+00:09:45,319 --> 00:09:48,222 line:-2
+and the payload
+of the signed renewal info.
+
+
+225
+00:09:48,222 --> 00:09:51,625 line:-2
+To decode the signedRenewalInfo,
+follow the same steps
+
+
+226
+00:09:51.625 --> 00:09:54.294 line:-2 align:center
+as you would for
+the signed transaction info
+
+
+227
+00:09:54,294 --> 00:09:56,964 line:-2
+by base64 decoding
+the payload portion.
+
+
+228
+00:09:58.599 --> 00:10:00.701 line:-2 align:center
+You can additionally
+verify the signature
+
+
+229
+00:10:00,701 --> 00:10:03,270 line:-2
+of the signedRenewalInfo
+in the same manner,
+
+
+230
+00:10:03,270 --> 00:10:04,972 line:-1
+using the header.
+
+
+231
+00:10:04,972 --> 00:10:08,141 line:-2
+Once decoded, you will see
+something like this.
+
+
+232
+00:10:08.141 --> 00:10:11.044 line:-2 align:center
+The renewal info contains
+the same fields we offer
+
+
+233
+00:10:11.044 --> 00:10:14.848 line:-2 align:center
+in the pending renewal info
+section of verifyReceipt today
+
+
+234
+00:10:14.848 --> 00:10:18.318 line:-2 align:center
+with some updates such as
+including only one date format
+
+
+235
+00:10:18,318 --> 00:10:22,289 line:-2
+and making some fields booleans
+or numbers where applicable.
+
+
+236
+00:10:22,289 --> 00:10:25,325 line:-2
+We will also be adding
+our new fields offerType
+
+
+237
+00:10:25,325 --> 00:10:28,595 line:-2
+and offerIdentifier
+to the signedRenewalInfo.
+
+
+238
+00:10:28.595 --> 00:10:30.764 line:-2 align:center
+This will let you know
+if the customer plans to
+
+
+239
+00:10:30,764 --> 00:10:33,066 line:-2
+redeem an offer
+at their next renewal.
+
+
+240
+00:10:33,066 --> 00:10:35,802 line:-2
+In addition to the subscription
+status API,
+
+
+241
+00:10:35,802 --> 00:10:39,039 line:-2
+we want to provide a way for you
+to get all of the transactions
+
+
+242
+00:10:39.039 --> 00:10:40.707 line:-1 align:center
+associated with your app,
+
+
+243
+00:10:40.707 --> 00:10:43.710 line:-2 align:center
+much like we provide in the
+latest_receipt_info section
+
+
+244
+00:10:43,710 --> 00:10:45,946 line:-1
+of verifyReceipt today.
+
+
+245
+00:10:45,946 --> 00:10:48,215 line:-2
+For this reason,
+we're also adding
+
+
+246
+00:10:48,215 --> 00:10:50,584 line:-1
+an in-app purchase history API.
+
+
+247
+00:10:50.584 --> 00:10:53.787 line:-2 align:center
+The in-app purchase history API
+will provide the history of all
+
+
+248
+00:10:53.787 --> 00:10:56.557 line:-2 align:center
+transactions for your app,
+much like you receive
+
+
+249
+00:10:56,557 --> 00:11:00,360 line:-2
+in the latest_receipt_info
+section of verifyReceipt today.
+
+
+250
+00:11:00,360 --> 00:11:02,829 line:-2
+The key difference here
+is each transaction
+
+
+251
+00:11:02,829 --> 00:11:05,799 line:-2
+will be in the new signed
+transaction info format,
+
+
+252
+00:11:05,799 --> 00:11:07,801 line:-1
+and the API will be paginated
+
+
+253
+00:11:07.801 --> 00:11:10.170 line:-2 align:center
+to control the size of
+the response you receive
+
+
+254
+00:11:10.170 --> 00:11:12.372 line:-1 align:center
+from the App Store.
+
+
+255
+00:11:12,372 --> 00:11:13,974 line:-1
+The initial request for this is,
+
+
+256
+00:11:13.974 --> 00:11:17.144 line:-2 align:center
+like the subscription
+status API, quite simple.
+
+
+257
+00:11:17,144 --> 00:11:20,314 line:-2
+We require only
+an originalTransactionId
+
+
+258
+00:11:20,314 --> 00:11:22,416 line:-2
+from you
+to process your request.
+
+
+259
+00:11:23,350 --> 00:11:26,086 line:-2
+In the response
+you'll receive app metadata,
+
+
+260
+00:11:26,086 --> 00:11:28,589 line:-2
+like your
+app's Apple ID and bundle ID,
+
+
+261
+00:11:28,589 --> 00:11:32,025 line:-2
+and an array of the latest
+20 transactions for your app
+
+
+262
+00:11:32,025 --> 00:11:34,862 line:-2
+in our new signed
+transaction info format.
+
+
+263
+00:11:34.862 --> 00:11:38.599 line:-2 align:center
+We return 20 signed transaction
+infos to you per request.
+
+
+264
+00:11:38.599 --> 00:11:41.935 line:-2 align:center
+If you have more transactions,
+look to the hasMore
+
+
+265
+00:11:41.935 --> 00:11:44.638 line:-2 align:center
+and revision values
+in the response.
+
+
+266
+00:11:44.638 --> 00:11:45.873 line:-1 align:center
+hasMore will be true
+
+
+267
+00:11:45.873 --> 00:11:49.109 line:-2 align:center
+if there are more transactions
+remaining for your app.
+
+
+268
+00:11:49,109 --> 00:11:51,578 align:center
+In this case,
+make another request,
+
+
+269
+00:11:51,578 --> 00:11:54,414 line:0
+passing the revision token
+as a query parameter,
+
+
+270
+00:11:54,414 --> 00:11:56,884 align:center
+to get the next 20 transactions.
+
+
+271
+00:11:56,884 --> 00:11:59,786 line:0
+Repeat this
+until hasMore is false.
+
+
+272
+00:11:59.786 --> 00:12:01.588 line:-1 align:center
+Now let's pivot and talk about
+
+
+273
+00:12:01.588 --> 00:12:04.057 line:-2 align:center
+how all of the App Store
+Server APIs
+
+
+274
+00:12:04.057 --> 00:12:06.126 line:-2 align:center
+will be consistent
+with each other.
+
+
+275
+00:12:06,126 --> 00:12:11,064 line:-2
+They will all be behind JWT — or
+JSON web token — authentication,
+
+
+276
+00:12:11,064 --> 00:12:13,500 line:-2
+support our
+new signed transactions,
+
+
+277
+00:12:13,500 --> 00:12:16,737 line:-2
+and feature JSON request
+and response formats.
+
+
+278
+00:12:16,737 --> 00:12:20,207 line:-2
+And best of all, they all key
+off of an originalTransactionId
+
+
+279
+00:12:20,207 --> 00:12:23,544 line:-2
+that you provide in the request,
+rather than requiring
+
+
+280
+00:12:23,544 --> 00:12:26,180 line:-2
+a receipt and a shared secret
+in the request.
+
+
+281
+00:12:26,180 --> 00:12:29,316 line:-2
+Now, I want to cover
+JWT authentication.
+
+
+282
+00:12:29.316 --> 00:12:31.518 line:-2 align:center
+All of our
+new App Store Server APIs
+
+
+283
+00:12:31.518 --> 00:12:35.889 line:-2 align:center
+will make use of JSON Web Token,
+or JWT, authentication.
+
+
+284
+00:12:35.889 --> 00:12:38.058 line:-2 align:center
+We chose this
+to increase the security
+
+
+285
+00:12:38.058 --> 00:12:41.328 line:-2 align:center
+of communication between
+our server and yours.
+
+
+286
+00:12:41,328 --> 00:12:44,565 line:-2
+To generate this JWT,
+you will need to download
+
+
+287
+00:12:44.565 --> 00:12:46.834 line:-2 align:center
+a private key
+from App Store Connect.
+
+
+288
+00:12:46,834 --> 00:12:49,536 line:-2
+This process
+will automatically register
+
+
+289
+00:12:49.536 --> 00:12:51.405 line:-1 align:center
+the public key with our server.
+
+
+290
+00:12:51,405 --> 00:12:54,842 line:-2
+Then you must sign the token
+using the ES256 algorithm
+
+
+291
+00:12:54,842 --> 00:12:56,543 line:-1
+before calling our server.
+
+
+292
+00:12:56.543 --> 00:12:59.413 line:-2 align:center
+To generate your private
+key in App Store Connect,
+
+
+293
+00:12:59,413 --> 00:13:01,582 line:-2
+navigate to
+the Users and Access page
+
+
+294
+00:13:01,582 --> 00:13:03,584 line:-1
+and visit the Keys tab.
+
+
+295
+00:13:03,584 --> 00:13:06,053 line:-2
+Select the in-app
+purchase keys option,
+
+
+296
+00:13:06,053 --> 00:13:08,222 line:-1
+and you'll see a page like this.
+
+
+297
+00:13:08.222 --> 00:13:10.657 line:-1 align:center
+Add a key and give it a name.
+
+
+298
+00:13:10,657 --> 00:13:12,392 line:-1
+Save the key in a safe place,
+
+
+299
+00:13:12,392 --> 00:13:14,461 line:-2
+as you can only download
+it once,
+
+
+300
+00:13:14.461 --> 00:13:16.964 line:-1 align:center
+and take note of the key ID.
+
+
+301
+00:13:16.964 --> 00:13:20.701 line:-2 align:center
+Now, let's take a look at what
+this JWT actually looks like.
+
+
+302
+00:13:20.701 --> 00:13:23.170 line:-1 align:center
+A JWT consists of three parts:
+
+
+303
+00:13:23,170 --> 00:13:26,039 line:-2
+a header,
+a payload, and a signature.
+
+
+304
+00:13:26,039 --> 00:13:28,308 line:-2
+In the header,
+you should include the key ID
+
+
+305
+00:13:28,308 --> 00:13:30,110 line:-1
+of your private key
+
+
+306
+00:13:30,110 --> 00:13:32,045 line:-2
+and the algorithm
+used for signing.
+
+
+307
+00:13:32,045 --> 00:13:34,481 line:-2
+We require an elliptic curve
+signature
+
+
+308
+00:13:34.481 --> 00:13:38.785 line:-1 align:center
+with a SHA 256 hash, or ES256.
+
+
+309
+00:13:38,785 --> 00:13:40,854 line:-2
+You will also include
+the type of the token,
+
+
+310
+00:13:40,854 --> 00:13:44,191 line:-2
+which, in this case,
+is always JWT.
+
+
+311
+00:13:44,191 --> 00:13:46,226 line:-2
+The payload should
+include your issuer ID.
+
+
+312
+00:13:46.226 --> 00:13:49.196 line:-2 align:center
+You can find this value
+in App Store Connect.
+
+
+313
+00:13:49,196 --> 00:13:51,365 line:0
+You will include the time
+the token was issued
+
+
+314
+00:13:51,365 --> 00:13:55,235 line:0
+and the time it should expire,
+in seconds since epoch.
+
+
+315
+00:13:55,235 --> 00:13:57,337 line:0
+The difference between
+these two times should be
+
+
+316
+00:13:57,337 --> 00:13:59,239 line:0
+no more than an hour.
+
+
+317
+00:13:59,239 --> 00:14:02,576 line:0
+Include the audience, which is
+always appstoreconnect-v1.
+
+
+318
+00:14:03,677 --> 00:14:07,714 line:0
+You'll have to generate a nonce,
+or a one-time unique string.
+
+
+319
+00:14:07,714 --> 00:14:10,951 align:center
+Finally, you'll have
+to include the bundle identifier
+
+
+320
+00:14:10,951 --> 00:14:12,052 align:center
+of your app.
+
+
+321
+00:14:12,052 --> 00:14:14,121 line:0
+Once you have all of this
+information,
+
+
+322
+00:14:14,121 --> 00:14:16,623 line:0
+you have to implement
+the signing of this token
+
+
+323
+00:14:16,623 --> 00:14:19,393 line:0
+using the ES256 algorithm,
+
+
+324
+00:14:19,393 --> 00:14:23,597 line:0
+or an elliptic curve signature
+with a SHA 256 hash.
+
+
+325
+00:14:23,597 --> 00:14:26,900 line:-2
+Before I move on,
+let's review the key takeaways
+
+
+326
+00:14:26,900 --> 00:14:28,535 line:-1
+of our App Store Server APIs.
+
+
+327
+00:14:28,535 --> 00:14:31,438 line:-2
+First, we've separated
+determining status
+
+
+328
+00:14:31.438 --> 00:14:34.041 line:-2 align:center
+from looking up
+the history of transactions,
+
+
+329
+00:14:34.041 --> 00:14:36.310 line:-1 align:center
+as these are separate functions.
+
+
+330
+00:14:36,310 --> 00:14:38,278 line:-1
+Next, these APIs require
+
+
+331
+00:14:38,278 --> 00:14:41,315 line:-2
+only the originalTransactionId
+in the request,
+
+
+332
+00:14:41,315 --> 00:14:44,551 line:-2
+meaning that you can take the
+signed transactions you receive,
+
+
+333
+00:14:44.551 --> 00:14:48.021 line:-2 align:center
+either from your app or from
+a response from our server,
+
+
+334
+00:14:48,021 --> 00:14:50,424 line:-2
+store the fields
+you're interested in,
+
+
+335
+00:14:50,424 --> 00:14:52,559 line:-1
+including originalTransactionId,
+
+
+336
+00:14:52,559 --> 00:14:55,596 line:-2
+and then get rid of the signed
+transaction info.
+
+
+337
+00:14:55.596 --> 00:14:58.232 line:-2 align:center
+There is no need to store signed
+transactions anymore
+
+
+338
+00:14:58.232 --> 00:15:01.602 line:-2 align:center
+as we have guided you to do
+with receipts in the past.
+
+
+339
+00:15:01.602 --> 00:15:04.738 line:-2 align:center
+So that covers how you can
+check your customer status
+
+
+340
+00:15:04.738 --> 00:15:07.441 line:-2 align:center
+with our new
+App Store Server APIs.
+
+
+341
+00:15:07.441 --> 00:15:09.743 line:-2 align:center
+Now, I want to go over
+how we are making
+
+
+342
+00:15:09,743 --> 00:15:12,312 line:-2
+our App Store server
+notifications consistent
+
+
+343
+00:15:12,312 --> 00:15:15,849 line:-2
+and how you can track
+status using notifications.
+
+
+344
+00:15:15,849 --> 00:15:17,818 line:-2
+Let's first start
+with a quick review
+
+
+345
+00:15:17.818 --> 00:15:19.820 line:-2 align:center
+of App Store
+server notifications.
+
+
+346
+00:15:19,820 --> 00:15:22,322 line:-2
+We've discussed App Store
+server notifications
+
+
+347
+00:15:22.322 --> 00:15:25.692 line:-2 align:center
+for a few years now, so
+let's review why they're useful.
+
+
+348
+00:15:25,692 --> 00:15:28,061 line:-2
+With App Store server
+notifications,
+
+
+349
+00:15:28,061 --> 00:15:29,997 line:-1
+you can receive notifications
+
+
+350
+00:15:29.997 --> 00:15:32.733 line:-2 align:center
+when the status of one of your
+transactions changes
+
+
+351
+00:15:32,733 --> 00:15:35,135 line:-1
+directly from the App Store.
+
+
+352
+00:15:35.135 --> 00:15:37.004 line:-2 align:center
+When you
+receive the notification,
+
+
+353
+00:15:37,004 --> 00:15:39,506 line:-2
+you can update
+your status immediately,
+
+
+354
+00:15:39,506 --> 00:15:43,477 line:-2
+without your customer having
+to open the app on their phone.
+
+
+355
+00:15:43.477 --> 00:15:45.379 line:-2 align:center
+With App Store server
+notifications,
+
+
+356
+00:15:45,379 --> 00:15:47,781 line:-2
+you also don't need
+to call us for status.
+
+
+357
+00:15:47,781 --> 00:15:50,551 line:-2
+We'll just tell you
+when something changes.
+
+
+358
+00:15:50.551 --> 00:15:52.686 line:-2 align:center
+They are one of the most
+powerful tools
+
+
+359
+00:15:52,686 --> 00:15:55,255 line:-2
+your server
+can take advantage of.
+
+
+360
+00:15:55,255 --> 00:15:56,623 line:-1
+Our goal for this year
+
+
+361
+00:15:56,623 --> 00:15:58,792 line:-2
+is to make App Store
+server notifications
+
+
+362
+00:15:58.792 --> 00:16:02.062 line:-2 align:center
+even more powerful
+by making use of our new,
+
+
+363
+00:16:02.062 --> 00:16:05.032 line:-1 align:center
+easy-to-use signed transactions.
+
+
+364
+00:16:05,032 --> 00:16:08,235 line:-2
+In addition to this,
+we will update the notifications
+
+
+365
+00:16:08,235 --> 00:16:10,470 line:-2
+to make sure only one
+notification is sent
+
+
+366
+00:16:10,470 --> 00:16:12,406 line:-1
+for one user action,
+
+
+367
+00:16:12.406 --> 00:16:14.208 line:-1 align:center
+we will update the payload,
+
+
+368
+00:16:14.208 --> 00:16:16.410 line:-2 align:center
+and the entire payload
+will be signed
+
+
+369
+00:16:16,410 --> 00:16:19,446 line:-1
+using JWS to enhance security.
+
+
+370
+00:16:19.446 --> 00:16:22.282 line:-2 align:center
+We'll also allow you to opt in
+to the v2 notifications
+
+
+371
+00:16:22.282 --> 00:16:24.551 line:-2 align:center
+when you're ready
+and will continue sending
+
+
+372
+00:16:24.551 --> 00:16:27.521 line:-2 align:center
+the existing notifications
+for some time.
+
+
+373
+00:16:27.521 --> 00:16:31.391 line:-2 align:center
+This is our current notification
+offering for v1 notifications.
+
+
+374
+00:16:31.391 --> 00:16:33.160 line:-1 align:center
+There are 11 total types,
+
+
+375
+00:16:33,160 --> 00:16:36,296 line:-2
+including everything
+from INITIAL_BUY to REVOKE.
+
+
+376
+00:16:36.296 --> 00:16:37.965 line:-1 align:center
+With v2 notifications,
+
+
+377
+00:16:37,965 --> 00:16:40,701 line:-2
+we're deprecating
+four of our notification types:
+
+
+378
+00:16:40,701 --> 00:16:43,170 line:-2
+INITIAL_BUY,
+INTERACTIVE_RENEWAL,
+
+
+379
+00:16:43,170 --> 00:16:45,639 line:-2
+CANCEL,
+and PRICE_INCREASE_CONSENT.
+
+
+380
+00:16:45,639 --> 00:16:50,244 align:center
+But we're adding five new types:
+SUBSCRIBED, OFFER_REDEEMED,
+
+
+381
+00:16:50,244 --> 00:16:54,414 line:0
+EXPIRED, GRACE_PERIOD_EXPIRED,
+and PRICE_INCREASE.
+
+
+382
+00:16:54,414 --> 00:16:56,517 line:-2
+In addition to the new
+notification types,
+
+
+383
+00:16:56.517 --> 00:17:00.153 line:-2 align:center
+we're adding a new field called
+"substate" to the notification.
+
+
+384
+00:17:00.153 --> 00:17:03.223 line:-2 align:center
+This will help you narrow a more
+general notification type
+
+
+385
+00:17:03,223 --> 00:17:05,692 line:-1
+to a specific user action.
+
+
+386
+00:17:05.692 --> 00:17:07.394 line:-2 align:center
+Currently,
+substates apply to
+
+
+387
+00:17:07.394 --> 00:17:10.230 line:-2 align:center
+six of our v2 notification
+types:
+
+
+388
+00:17:10.230 --> 00:17:13.166 line:-2 align:center
+SUBSCRIBED,
+DID_CHANGE_RENEWAL_STATUS,
+
+
+389
+00:17:13.166 --> 00:17:16.170 line:-1 align:center
+DID_CHANGE_RENEWAL_PREFERENCES,
+
+
+390
+00:17:16,170 --> 00:17:18,906 line:-1
+OFFER_REDEEMED, EXPIRED,
+
+
+391
+00:17:18.906 --> 00:17:20.541 line:-1 align:center
+and PRICE_INCREASE.
+
+
+392
+00:17:20,541 --> 00:17:22,442 line:-2
+Let's take a look
+at some examples
+
+
+393
+00:17:22,442 --> 00:17:25,679 line:-2
+of how substates apply
+to these notification types.
+
+
+394
+00:17:25.679 --> 00:17:28.615 line:-2 align:center
+First, I want to talk about
+the SUBSCRIBED notification
+
+
+395
+00:17:28,615 --> 00:17:30,717 line:-1
+and its substates.
+
+
+396
+00:17:30,717 --> 00:17:32,986 line:-2
+When a customer makes
+a first-time purchase,
+
+
+397
+00:17:32.986 --> 00:17:37.124 line:-2 align:center
+you will receive SUBSCRIBED
+with a substate of INITIAL_BUY.
+
+
+398
+00:17:37.124 --> 00:17:39.993 line:-2 align:center
+When a customer resubscribes
+to the same SKU
+
+
+399
+00:17:39.993 --> 00:17:41.695 line:-1 align:center
+or a different SKU,
+
+
+400
+00:17:41,695 --> 00:17:45,199 line:-2
+you will receive SUBSCRIBED
+with a substate of RESUBSCRIBE,
+
+
+401
+00:17:45,199 --> 00:17:46,900 line:-1
+as long as the subscription
+
+
+402
+00:17:46.900 --> 00:17:49.203 line:-2 align:center
+is within the same
+subscription group.
+
+
+403
+00:17:49.203 --> 00:17:51.305 line:-2 align:center
+One of our
+new notification types
+
+
+404
+00:17:51,305 --> 00:17:52,940 line:-1
+without an equivalent type
+
+
+405
+00:17:52.940 --> 00:17:55.209 line:-2 align:center
+in v1 App Store
+server notifications
+
+
+406
+00:17:55,209 --> 00:17:57,110 line:-2
+is the
+OFFER_REDEEMED notification.
+
+
+407
+00:17:57.110 --> 00:17:59.813 line:-2 align:center
+So I want to take a look
+at this example.
+
+
+408
+00:17:59,813 --> 00:18:01,415 line:-1
+OFFER_REDEEMED is received
+
+
+409
+00:18:01,415 --> 00:18:04,618 line:-2
+whenever a customer redeems
+a promotional offer.
+
+
+410
+00:18:04,618 --> 00:18:07,754 line:-2
+If the customer redeems an offer
+for a first-time purchase,
+
+
+411
+00:18:07.754 --> 00:18:12.259 line:-2 align:center
+you'll receive OFFER_REDEEMED
+with a substate of INITIAL_BUY.
+
+
+412
+00:18:12.259 --> 00:18:14.895 line:-2 align:center
+If the customer redeems
+an offer to resubscribe
+
+
+413
+00:18:14,895 --> 00:18:17,164 line:-2
+to the same
+inactive subscription,
+
+
+414
+00:18:17,164 --> 00:18:21,401 line:-2
+you'll receive OFFER_REDEEMED
+with a substate of RESUBSCRIBE.
+
+
+415
+00:18:21,401 --> 00:18:23,103 line:-2
+If the customer
+redeems an offer
+
+
+416
+00:18:23,103 --> 00:18:25,138 line:-2
+to upgrade
+their active subscription,
+
+
+417
+00:18:25.138 --> 00:18:29.009 line:-2 align:center
+you'll receive OFFER_REDEEMED
+with a substate of UPGRADE.
+
+
+418
+00:18:29.009 --> 00:18:30.911 line:-2 align:center
+If the customer
+redeems an offer
+
+
+419
+00:18:30.911 --> 00:18:33.213 line:-2 align:center
+to downgrade
+their active subscription,
+
+
+420
+00:18:33.213 --> 00:18:37.251 line:-2 align:center
+you'll receive OFFER_REDEEMED
+with a substate of DOWNGRADE.
+
+
+421
+00:18:37,251 --> 00:18:40,320 align:center
+Additionally,
+if the customer redeems an offer
+
+
+422
+00:18:40,320 --> 00:18:42,523 line:0
+to resubscribe to their
+active subscription
+
+
+423
+00:18:42,523 --> 00:18:45,359 line:0
+after canceling within
+the same period,
+
+
+424
+00:18:45,359 --> 00:18:47,594 line:0
+you will receive OFFER_REDEEMED
+
+
+425
+00:18:47,594 --> 00:18:49,730 line:0
+with a substate
+of AUTO_RENEW_ENABLED.
+
+
+426
+00:18:50.597 --> 00:18:52.466 line:-1 align:center
+Now, let's look at EXPIRED.
+
+
+427
+00:18:52,466 --> 00:18:54,334 line:-2
+With the new EXPIRED
+notification type,
+
+
+428
+00:18:54,334 --> 00:18:57,371 line:-2
+you'll receive EXPIRED
+when the subscription expires
+
+
+429
+00:18:57,371 --> 00:18:59,940 line:-2
+after the customer
+has disabled auto renew
+
+
+430
+00:18:59.940 --> 00:19:02.142 line:-1 align:center
+with a substate of VOLUNTARY.
+
+
+431
+00:19:02,142 --> 00:19:05,112 line:-2
+If a subscription expires
+because the billing retry period
+
+
+432
+00:19:05.112 --> 00:19:07.948 line:-2 align:center
+has ended without
+a successful recovery,
+
+
+433
+00:19:07.948 --> 00:19:11.618 line:-2 align:center
+you will receive EXPIRED with
+a substate of BILLING_RETRY.
+
+
+434
+00:19:11,618 --> 00:19:15,189 line:-2
+Additionally, if a subscription
+expires because the customer
+
+
+435
+00:19:15,189 --> 00:19:17,191 line:-2
+has not consented
+to a price increase,
+
+
+436
+00:19:17.191 --> 00:19:21.395 line:-2 align:center
+you'll receive EXPIRED with a
+substate of PRICE_INCREASE.
+
+
+437
+00:19:21,395 --> 00:19:24,064 line:-2
+So combining the
+v2 notification types,
+
+
+438
+00:19:24,064 --> 00:19:25,866 line:-1
+plus their applicable substates,
+
+
+439
+00:19:25,866 --> 00:19:28,235 line:-1
+we now cover over 20 different
+
+
+440
+00:19:28.235 --> 00:19:30.737 line:-1 align:center
+customer life cycle events.
+
+
+441
+00:19:30.737 --> 00:19:33.907 line:-2 align:center
+Just looking at the notification
+type should be enough
+
+
+442
+00:19:33.907 --> 00:19:36.944 line:-2 align:center
+to get a general idea of what
+has changed in your purchase,
+
+
+443
+00:19:36,944 --> 00:19:38,579 line:-1
+but looking at the substate
+
+
+444
+00:19:38.579 --> 00:19:40.781 line:-2 align:center
+will help you get
+a more specific state
+
+
+445
+00:19:40,781 --> 00:19:42,983 line:-2
+if you want to go into
+more detail.
+
+
+446
+00:19:42,983 --> 00:19:46,019 line:-2
+Now let's take a quick look
+at the new payload.
+
+
+447
+00:19:46,019 --> 00:19:48,422 line:-2
+For v2 notifications
+we will always include
+
+
+448
+00:19:48.422 --> 00:19:50.090 line:-1 align:center
+the same set of fields,
+
+
+449
+00:19:50,090 --> 00:19:52,593 line:-2
+regardless
+of the notification type.
+
+
+450
+00:19:52,593 --> 00:19:55,028 line:-2
+The notification type,
+the subtype,
+
+
+451
+00:19:55.028 --> 00:19:56.997 line:-1 align:center
+the notification version,
+
+
+452
+00:19:56,997 --> 00:20:00,501 line:-2
+which will be 2 if you
+subscribed to v2 notifications,
+
+
+453
+00:20:00,501 --> 00:20:03,704 line:-2
+the environment
+the notification applies to,
+
+
+454
+00:20:03.704 --> 00:20:06.240 line:-2 align:center
+some app metadata
+like bundle ID,
+
+
+455
+00:20:06,240 --> 00:20:09,610 line:-2
+the app Apple ID,
+and bundle version,
+
+
+456
+00:20:09,610 --> 00:20:12,012 line:-2
+the latest transaction
+for the affected in-app
+
+
+457
+00:20:12,012 --> 00:20:14,681 line:-2
+in our new signedTransactionInfo
+format,
+
+
+458
+00:20:14,681 --> 00:20:16,750 line:-2
+and the latest renewal info
+for the in-app
+
+
+459
+00:20:16,750 --> 00:20:18,886 line:-2
+in our new
+signedRenewalInfo format.
+
+
+460
+00:20:18,886 --> 00:20:22,122 line:-2
+These changes will make the
+notifications easier to parse
+
+
+461
+00:20:22,122 --> 00:20:24,124 line:-1
+and hopefully easier to adopt
+
+
+462
+00:20:24,124 --> 00:20:26,560 line:-2
+as they make use of our
+new signed transactions
+
+
+463
+00:20:26,560 --> 00:20:28,462 line:-1
+and only contain information
+
+
+464
+00:20:28,462 --> 00:20:30,764 line:-2
+about the affected
+in-app purchase.
+
+
+465
+00:20:30.764 --> 00:20:32.165 line:-1 align:center
+As I mentioned earlier,
+
+
+466
+00:20:32.165 --> 00:20:33.934 line:-2 align:center
+the entire payload
+will be signed
+
+
+467
+00:20:33,934 --> 00:20:35,536 line:-2
+to increase the security
+and trustworthiness
+
+
+468
+00:20:35,536 --> 00:20:37,437 line:-1
+of our notifications.
+
+
+469
+00:20:37,437 --> 00:20:40,307 line:-2
+The payload we just saw is
+unsigned for readability,
+
+
+470
+00:20:40.307 --> 00:20:42.042 line:-2 align:center
+but the signing
+will be similar
+
+
+471
+00:20:42.042 --> 00:20:44.912 line:-2 align:center
+to how we are signing
+transactions and renewal info
+
+
+472
+00:20:44.912 --> 00:20:46.880 line:-1 align:center
+in a JWS format.
+
+
+473
+00:20:46,880 --> 00:20:49,349 line:-2
+We want you to be able
+to opt in to v2 notifications
+
+
+474
+00:20:49.349 --> 00:20:50.884 line:-1 align:center
+when you're ready.
+
+
+475
+00:20:50,884 --> 00:20:52,819 line:-2
+For this reason,
+we're adding an option
+
+
+476
+00:20:52.819 --> 00:20:55.289 line:-2 align:center
+to the notification URL
+in App Store Connect
+
+
+477
+00:20:55,289 --> 00:20:56,990 line:-1
+to allow you to select
+
+
+478
+00:20:56.990 --> 00:20:59.693 line:-2 align:center
+your App Store server
+notification version.
+
+
+479
+00:20:59,693 --> 00:21:02,462 line:-2
+To do this,
+go to your App's page
+
+
+480
+00:21:02.462 --> 00:21:03.697 line:-1 align:center
+and scroll to the new
+
+
+481
+00:21:03,697 --> 00:21:06,233 line:-2
+App Store Server Notifications
+section.
+
+
+482
+00:21:06.233 --> 00:21:09.036 line:-2 align:center
+If you select the production
+server URL,
+
+
+483
+00:21:09,036 --> 00:21:11,605 line:-2
+you now have the option
+to choose version 1
+
+
+484
+00:21:11.605 --> 00:21:15.108 line:-2 align:center
+or version 2 App Store
+server notifications.
+
+
+485
+00:21:15,108 --> 00:21:17,211 line:-2
+When these changes launch
+later this year,
+
+
+486
+00:21:17,211 --> 00:21:18,712 line:-1
+you'll be able to opt in
+
+
+487
+00:21:18.712 --> 00:21:21.748 line:-2 align:center
+to version 2 App Store
+server notifications.
+
+
+488
+00:21:21,748 --> 00:21:24,284 line:-2
+So now, I want to go over
+some example scenarios
+
+
+489
+00:21:24,284 --> 00:21:26,954 line:-2
+using our new App Store
+server notifications,
+
+
+490
+00:21:26,954 --> 00:21:30,457 line:-2
+starting with the first-time
+purchase of a subscription.
+
+
+491
+00:21:30,457 --> 00:21:32,759 line:-2
+For a first-time subscription
+purchase in your app,
+
+
+492
+00:21:32.759 --> 00:21:34.995 line:-2 align:center
+you'll receive a signed
+transaction info
+
+
+493
+00:21:34,995 --> 00:21:36,797 line:-1
+as a result of the purchase.
+
+
+494
+00:21:36.797 --> 00:21:39.166 line:-2 align:center
+You can choose to verify
+this on your app
+
+
+495
+00:21:39,166 --> 00:21:41,101 line:-2
+and send
+the originalTransactionId
+
+
+496
+00:21:41,101 --> 00:21:43,203 line:-2
+and other relevant fields
+to your server
+
+
+497
+00:21:43.203 --> 00:21:45.205 line:-2 align:center
+or send the signed
+transaction info
+
+
+498
+00:21:45.205 --> 00:21:47.040 line:-2 align:center
+to your server
+for verification
+
+
+499
+00:21:47.040 --> 00:21:50.444 line:-2 align:center
+and choose which fields to store
+in your database at that time.
+
+
+500
+00:21:50,444 --> 00:21:52,412 line:-2
+Around the same time,
+you'll receive
+
+
+501
+00:21:52,412 --> 00:21:56,149 line:-2
+a SUBSCRIBED notification
+with a substate of INITIAL_BUY.
+
+
+502
+00:21:56,149 --> 00:21:59,052 line:-2
+Now that the signed transaction
+info in the notification
+
+
+503
+00:21:59.052 --> 00:22:01.188 line:-1 align:center
+contains the app account token,
+
+
+504
+00:22:01,188 --> 00:22:03,457 line:-2
+you can immediately link
+this notification
+
+
+505
+00:22:03,457 --> 00:22:04,958 line:-1
+to your in-app user,
+
+
+506
+00:22:04,958 --> 00:22:07,361 line:-2
+even if communication
+is lost between your server
+
+
+507
+00:22:07.361 --> 00:22:09.830 line:-1 align:center
+and your app after the purchase.
+
+
+508
+00:22:09.830 --> 00:22:11.398 line:-2 align:center
+There's no need to call
+our server
+
+
+509
+00:22:11.398 --> 00:22:13.967 line:-2 align:center
+to verify
+the signed transaction info.
+
+
+510
+00:22:13,967 --> 00:22:15,869 align:center
+You may call our server
+at any time
+
+
+511
+00:22:15,869 --> 00:22:19,206 align:center
+if you wish to check the status
+or in-app purchase history API
+
+
+512
+00:22:19,206 --> 00:22:22,809 line:0
+by sending us
+the originalTransactionId.
+
+
+513
+00:22:22.809 --> 00:22:25.345 line:-2 align:center
+Now I've covered
+purchasing a subscription.
+
+
+514
+00:22:25,345 --> 00:22:27,481 line:-2
+Let's move onto
+subscription renewal.
+
+
+515
+00:22:27.481 --> 00:22:30.617 line:-2 align:center
+Now we've reached the renewal
+of this subscription.
+
+
+516
+00:22:30.617 --> 00:22:32.686 line:-2 align:center
+If this subscription
+renews successfully,
+
+
+517
+00:22:32.686 --> 00:22:35.756 line:-2 align:center
+you will receive
+a notification type DID_RENEW.
+
+
+518
+00:22:35,756 --> 00:22:38,358 line:-2
+You can look at the signed
+transaction info
+
+
+519
+00:22:38,358 --> 00:22:40,360 line:-2
+and the signed renewal info
+in the payload
+
+
+520
+00:22:40,360 --> 00:22:42,963 line:-2
+to verify the next renewal date
+of your subscription
+
+
+521
+00:22:42,963 --> 00:22:45,132 line:-2
+and your customer's
+renewal preferences
+
+
+522
+00:22:45,132 --> 00:22:47,000 line:-1
+for their next renewal.
+
+
+523
+00:22:47,000 --> 00:22:48,535 line:-1
+You can also schedule a job
+
+
+524
+00:22:48,535 --> 00:22:50,604 line:-2
+to call our subscription
+status API
+
+
+525
+00:22:50.604 --> 00:22:52.239 line:-2 align:center
+to check the status
+of your subscription
+
+
+526
+00:22:52.239 --> 00:22:55.876 line:-2 align:center
+at its renewal time
+as a fail-over mechanism.
+
+
+527
+00:22:55,876 --> 00:22:58,011 line:-2
+Once again,
+there's no need to call us
+
+
+528
+00:22:58.011 --> 00:23:01.915 line:-2 align:center
+to verify the transaction
+you receive in the notification.
+
+
+529
+00:23:01,915 --> 00:23:05,185 line:-2
+Of course, auto-renew doesn't
+always go according to plan,
+
+
+530
+00:23:05,185 --> 00:23:07,921 line:-2
+especially if there
+is a billing issue.
+
+
+531
+00:23:07,921 --> 00:23:11,024 line:-2
+So now, I want to cover grace
+period and billing retry.
+
+
+532
+00:23:11.024 --> 00:23:13.093 line:-2 align:center
+Now let's suppose
+that your subscription
+
+
+533
+00:23:13,093 --> 00:23:15,062 line:-1
+did not renew as expected.
+
+
+534
+00:23:15.062 --> 00:23:16.930 line:-2 align:center
+When this happens,
+we notify you
+
+
+535
+00:23:16,930 --> 00:23:19,600 line:-2
+with a DID_FAIL_TO_RENEW
+notification.
+
+
+536
+00:23:19.600 --> 00:23:21.835 line:-2 align:center
+If you have grace period
+enabled
+
+
+537
+00:23:21,835 --> 00:23:23,871 line:-2
+and the subscription
+exits the grace period
+
+
+538
+00:23:23,871 --> 00:23:26,607 line:-2
+without renewing successfully,
+we send you
+
+
+539
+00:23:26.607 --> 00:23:28.709 line:-2 align:center
+a GRACE_PERIOD_EXPIRED
+notification,
+
+
+540
+00:23:28.709 --> 00:23:30.477 line:-2 align:center
+and you can know
+that your customer
+
+
+541
+00:23:30.477 --> 00:23:32.746 line:-2 align:center
+has entered
+the billing retry period.
+
+
+542
+00:23:32,746 --> 00:23:34,848 line:-2
+If the subscription
+still is not recovered
+
+
+543
+00:23:34.848 --> 00:23:36.783 line:-1 align:center
+during the billing retry period,
+
+
+544
+00:23:36.783 --> 00:23:38.752 line:-2 align:center
+we'll send you
+an EXPIRED notification
+
+
+545
+00:23:38,752 --> 00:23:41,421 line:-2
+with a substage
+of BILLING_RETRY.
+
+
+546
+00:23:41,421 --> 00:23:43,924 line:-2
+If we recover the billing
+of the subscription
+
+
+547
+00:23:43.924 --> 00:23:46.627 line:-2 align:center
+during the grace period
+or the billing retry period,
+
+
+548
+00:23:46,627 --> 00:23:49,930 line:-2
+we'll send you
+a DID_RECOVER notification.
+
+
+549
+00:23:49,930 --> 00:23:51,765 line:-2
+No matter
+the outcome of the renewal,
+
+
+550
+00:23:51,765 --> 00:23:55,102 align:center
+we notify you of the result
+with a v2 notification,
+
+
+551
+00:23:55,102 --> 00:23:59,239 line:0
+containing a signed transaction
+info and signed renewal info.
+
+
+552
+00:23:59,239 --> 00:24:01,942 line:0
+You can call the subscription
+status or history API
+
+
+553
+00:24:01,942 --> 00:24:03,944 line:0
+at any point in this process
+
+
+554
+00:24:03,944 --> 00:24:06,947 align:center
+to double check
+your subscription status.
+
+
+555
+00:24:06.947 --> 00:24:08.749 line:-1 align:center
+Now, we realize subscriptions
+
+
+556
+00:24:08,749 --> 00:24:11,685 line:-2
+are not the only thing customers
+will purchase in your app.
+
+
+557
+00:24:11,685 --> 00:24:14,321 line:-2
+So now let's pivot
+and cover what to expect
+
+
+558
+00:24:14.321 --> 00:24:16.623 line:-2 align:center
+during a first-time purchase
+of a consumable.
+
+
+559
+00:24:16,623 --> 00:24:19,693 line:-2
+For a first-time purchase
+for a consumable on your app,
+
+
+560
+00:24:19,693 --> 00:24:22,129 line:-2
+you'll receive a signed
+transaction info
+
+
+561
+00:24:22,129 --> 00:24:23,964 line:-1
+as a result of the purchase.
+
+
+562
+00:24:23,964 --> 00:24:25,966 line:-2
+You can choose to verify this
+on your app
+
+
+563
+00:24:25.966 --> 00:24:28.001 line:-2 align:center
+and send
+the originalTransactionId
+
+
+564
+00:24:28.001 --> 00:24:30.037 line:-2 align:center
+and other relevant
+fields to your server
+
+
+565
+00:24:30,037 --> 00:24:32,606 line:-2
+or send the signed transaction
+info to your server
+
+
+566
+00:24:32,606 --> 00:24:34,241 line:-1
+for verification
+
+
+567
+00:24:34,241 --> 00:24:37,110 line:-2
+and choose which fields to store
+in your database at that time.
+
+
+568
+00:24:37,110 --> 00:24:40,147 line:-2
+Keep note of the
+originalTransactionId always,
+
+
+569
+00:24:40,147 --> 00:24:42,349 line:-1
+as you might need it later.
+
+
+570
+00:24:42.349 --> 00:24:44.918 line:-2 align:center
+For consumables
+and other content types
+
+
+571
+00:24:44,918 --> 00:24:47,888 line:-2
+like non-consumables
+and non-renewing subscriptions,
+
+
+572
+00:24:47.888 --> 00:24:50.924 line:-2 align:center
+not much changes over the
+life cycle of that purchase
+
+
+573
+00:24:50,924 --> 00:24:53,627 line:-2
+unless the customer
+requests a refund.
+
+
+574
+00:24:53.627 --> 00:24:56.163 line:-2 align:center
+So I want to cover
+that case now.
+
+
+575
+00:24:56,163 --> 00:24:58,632 line:-2
+Now, suppose your customer
+requests a refund
+
+
+576
+00:24:58,632 --> 00:25:00,734 line:-1
+for their consumable purchase.
+
+
+577
+00:25:00.734 --> 00:25:02.936 line:-2 align:center
+We'll send you
+a REFUND notification,
+
+
+578
+00:25:02.936 --> 00:25:06.306 line:-2 align:center
+containing the revocation
+date and revocation reason
+
+
+579
+00:25:06,306 --> 00:25:08,408 line:-1
+in the signed transaction info.
+
+
+580
+00:25:08,408 --> 00:25:10,210 line:-2
+You can know to stop
+providing access
+
+
+581
+00:25:10.210 --> 00:25:13.847 line:-2 align:center
+to the consumable purchase
+after the revocation date.
+
+
+582
+00:25:13,847 --> 00:25:15,749 line:-2
+Should you be concerned
+about the status
+
+
+583
+00:25:15,749 --> 00:25:17,885 line:-2
+of your consumable purchase
+at any time,
+
+
+584
+00:25:17,885 --> 00:25:19,987 align:center
+you can call the in-app
+history API
+
+
+585
+00:25:19,987 --> 00:25:21,955 align:center
+and look for it
+in the response.
+
+
+586
+00:25:21,955 --> 00:25:24,391 line:0
+Canceled consumables
+will always be included,
+
+
+587
+00:25:24,391 --> 00:25:27,561 line:0
+so you will know if the
+transaction status has changed.
+
+
+588
+00:25:27.561 --> 00:25:30.163 line:-2 align:center
+Now I want to talk about
+outages.
+
+
+589
+00:25:30.163 --> 00:25:32.332 line:-2 align:center
+Sometimes,
+despite best efforts,
+
+
+590
+00:25:32,332 --> 00:25:34,535 line:-2
+you may experience
+an outage on your server.
+
+
+591
+00:25:34,535 --> 00:25:36,770 line:-2
+Now I'll cover how you
+can help your server
+
+
+592
+00:25:36,770 --> 00:25:38,906 line:-1
+recover from an outage.
+
+
+593
+00:25:38,906 --> 00:25:40,841 line:-2
+If you experience
+an outage on your server
+
+
+594
+00:25:40.841 --> 00:25:43.277 line:-2 align:center
+and you miss App Store
+server notifications,
+
+
+595
+00:25:43,277 --> 00:25:46,580 line:-2
+you'll want to know what
+has changed in the interim.
+
+
+596
+00:25:46.580 --> 00:25:49.550 line:-2 align:center
+The in-app history API
+is your solution here.
+
+
+597
+00:25:49.550 --> 00:25:51.852 line:-2 align:center
+Simply call the API
+for each customer,
+
+
+598
+00:25:51.852 --> 00:25:54.221 line:-2 align:center
+providing
+any originalTransactionId
+
+
+599
+00:25:54.221 --> 00:25:55.656 line:-2 align:center
+from your app,
+and you'll get
+
+
+600
+00:25:55,656 --> 00:25:57,958 line:-2
+the latest history
+of transactions for your app
+
+
+601
+00:25:57.958 --> 00:26:00.294 line:-1 align:center
+so you can update your server.
+
+
+602
+00:26:00,294 --> 00:26:02,696 line:0
+You can then call
+the subscription status API
+
+
+603
+00:26:02,696 --> 00:26:04,565 line:0
+to get the latest
+subscription status
+
+
+604
+00:26:04,565 --> 00:26:06,300 line:0
+for each
+of your subscriptions.
+
+
+605
+00:26:06,300 --> 00:26:09,236 line:-2
+Now I want to cover
+one final case--
+
+
+606
+00:26:09.236 --> 00:26:11.538 line:-2 align:center
+migrating to signed
+transactions on your server.
+
+
+607
+00:26:11,538 --> 00:26:13,040 line:-1
+This is especially important
+
+
+608
+00:26:13.040 --> 00:26:15.742 line:-2 align:center
+if you'll be ready to update
+your server before your app
+
+
+609
+00:26:15,742 --> 00:26:18,111 line:-2
+or if you're still receiving
+the unified app receipt
+
+
+610
+00:26:18,111 --> 00:26:19,813 line:-1
+from older versions of your app.
+
+
+611
+00:26:19,813 --> 00:26:23,550 line:-2
+Migrating to signed transactions
+on your server is easy,
+
+
+612
+00:26:23.550 --> 00:26:26.153 line:-2 align:center
+as it only requires
+an originalTransactionId.
+
+
+613
+00:26:26.153 --> 00:26:28.755 line:-2 align:center
+You can easily convert
+the unified app receipts
+
+
+614
+00:26:28,755 --> 00:26:32,025 line:-2
+your server receives
+from your app to JWS receipts
+
+
+615
+00:26:32,025 --> 00:26:35,863 line:-2
+so your server can be compatible
+with our App Store server APIs
+
+
+616
+00:26:35.863 --> 00:26:38.432 line:-2 align:center
+and App Store server
+notifications.
+
+
+617
+00:26:38,432 --> 00:26:40,901 line:-2
+To do this,
+first call verifyReceipt
+
+
+618
+00:26:40.901 --> 00:26:42.402 line:-1 align:center
+with the unified app receipt
+
+
+619
+00:26:42.402 --> 00:26:45.239 line:-2 align:center
+and pull all of the unique
+originalTransactionIds
+
+
+620
+00:26:45,239 --> 00:26:46,540 line:-1
+from the response.
+
+
+621
+00:26:46,540 --> 00:26:48,308 align:center
+Call the in-app
+purchase history API
+
+
+622
+00:26:48,308 --> 00:26:50,511 line:0
+for one of these
+originalTransactionIds
+
+
+623
+00:26:50,511 --> 00:26:54,181 align:center
+to get the history for your app
+in signed transactions.
+
+
+624
+00:26:54,181 --> 00:26:56,316 line:0
+Then call
+the subscription status API
+
+
+625
+00:26:56,316 --> 00:26:59,019 align:center
+for a subscription
+originalTransactionId
+
+
+626
+00:26:59,019 --> 00:27:02,289 line:0
+to get signed transactions
+and signedRenewalInformation
+
+
+627
+00:27:02,289 --> 00:27:04,825 line:0
+for all of your customer
+subscriptions.
+
+
+628
+00:27:04,825 --> 00:27:06,460 align:center
+Write down any relevant data
+
+
+629
+00:27:06,460 --> 00:27:08,295 line:0
+from the payload of
+the signed transaction,
+
+
+630
+00:27:08,295 --> 00:27:11,064 line:0
+and you're all set to continue
+using these APIs
+
+
+631
+00:27:11,064 --> 00:27:14,635 line:0
+and to receive v2 App Store
+server notifications.
+
+
+632
+00:27:14,635 --> 00:27:17,471 line:-2
+So now I've covered all of
+the changes we have coming
+
+
+633
+00:27:17,471 --> 00:27:19,306 line:-2
+for App Store Server
+Notifications
+
+
+634
+00:27:19.306 --> 00:27:20.974 line:-2 align:center
+and how you can
+use notifications
+
+
+635
+00:27:20,974 --> 00:27:22,743 line:-1
+to check your customer status.
+
+
+636
+00:27:24,011 --> 00:27:26,346 line:-2
+Now I want to talk about
+how we are making it
+
+
+637
+00:27:26,346 --> 00:27:29,416 line:-2
+even easier for you
+to manage family sharing
+
+
+638
+00:27:29,416 --> 00:27:31,952 line:-2
+for in-app purchases
+from your server.
+
+
+639
+00:27:31,952 --> 00:27:35,222 line:-2
+Family sharing for in-app
+purchases is currently supported
+
+
+640
+00:27:35.222 --> 00:27:38.792 line:-2 align:center
+for auto-renewable subscriptions
+and non-consumable purchases,
+
+
+641
+00:27:38.792 --> 00:27:40.794 line:-2 align:center
+if you have enabled
+family sharing
+
+
+642
+00:27:40.794 --> 00:27:43.564 line:-2 align:center
+for that in-app purchase
+in App Store Connect.
+
+
+643
+00:27:43,564 --> 00:27:47,134 line:-2
+Right now, we provide a field
+called inAppOwnershipType
+
+
+644
+00:27:47.134 --> 00:27:51.071 line:-2 align:center
+to indicate if a transaction is
+family shared or purchased,
+
+
+645
+00:27:51.071 --> 00:27:53.540 line:-2 align:center
+and we support a subset
+of notifications
+
+
+646
+00:27:53,540 --> 00:27:56,677 line:-2
+for family members:
+REVOKE, DID_RECOVER,
+
+
+647
+00:27:56,677 --> 00:27:58,612 line:-1
+and DID_FAIL_TO_RENEW.
+
+
+648
+00:27:58.612 --> 00:28:00.647 line:-2 align:center
+The in-app ownership
+type field
+
+
+649
+00:28:00.647 --> 00:28:03.083 line:-2 align:center
+and the existing supported
+notification types
+
+
+650
+00:28:03,083 --> 00:28:05,552 line:-2
+will remain with our
+new signed transactions
+
+
+651
+00:28:05.552 --> 00:28:08.121 line:-2 align:center
+and App Store
+server notifications v2.
+
+
+652
+00:28:08,121 --> 00:28:10,324 line:-1
+However, coming later this year,
+
+
+653
+00:28:10,324 --> 00:28:13,293 line:-2
+we're adding more support for
+App Store server notifications
+
+
+654
+00:28:13.293 --> 00:28:14.928 line:-1 align:center
+for family members.
+
+
+655
+00:28:14.928 --> 00:28:17.097 line:-2 align:center
+For v1 notifications,
+we're adding
+
+
+656
+00:28:17,097 --> 00:28:19,166 line:-1
+DID_CHANGE_RENEWAL_STATUS,
+
+
+657
+00:28:19.166 --> 00:28:21.435 line:-1 align:center
+DID_CHANGE_RENEWAL_PREF,
+
+
+658
+00:28:21.435 --> 00:28:24.238 line:-2 align:center
+DID_RENEW,
+and INTERACTIVE_RENEWAL.
+
+
+659
+00:28:24,238 --> 00:28:26,039 line:-1
+For v2 notifications,
+
+
+660
+00:28:26,039 --> 00:28:28,876 line:-2
+we're adding even more support
+for family members.
+
+
+661
+00:28:28.876 --> 00:28:31.278 line:-2 align:center
+In addition
+to DID_CHANGE_RENEWAL_STATUS,
+
+
+662
+00:28:31.278 --> 00:28:34.114 line:-2 align:center
+DID_CHANGE_RENEWAL_PREF,
+and DID_RENEW,
+
+
+663
+00:28:34.114 --> 00:28:37.885 line:-2 align:center
+we're adding support for
+SUBSCRIBED, EXPIRED,
+
+
+664
+00:28:37,885 --> 00:28:41,121 line:0
+GRACE_PERIOD_EXPIRED,
+and OFFER_REDEEMED
+
+
+665
+00:28:41,121 --> 00:28:44,658 align:center
+for purchasers
+as well as for family members.
+
+
+666
+00:28:44,658 --> 00:28:47,561 line:0
+This will make it even easier
+for you to track the status
+
+
+667
+00:28:47,561 --> 00:28:49,129 align:center
+of all your customers,
+
+
+668
+00:28:49,129 --> 00:28:51,298 align:center
+both purchasers
+and family members,
+
+
+669
+00:28:51,298 --> 00:28:53,600 line:0
+through App Store
+server notifications.
+
+
+670
+00:28:53,600 --> 00:28:56,203 line:-2
+So with the changes
+we have coming for notifications
+
+
+671
+00:28:56.203 --> 00:28:57.671 line:-1 align:center
+for family members this year,
+
+
+672
+00:28:57.671 --> 00:29:00.807 line:-2 align:center
+this should make managing family
+sharing for in-app purchases
+
+
+673
+00:29:00,807 --> 00:29:02,576 line:-1
+even easier for you
+
+
+674
+00:29:02,576 --> 00:29:06,213 line:-2
+when coupled with our existing
+family sharing functionality.
+
+
+675
+00:29:06.213 --> 00:29:09.249 line:-2 align:center
+Now I want to wrap up
+with one more thing:
+
+
+676
+00:29:09,249 --> 00:29:11,885 line:-1
+testing your server in sandbox.
+
+
+677
+00:29:11.885 --> 00:29:14.955 line:-2 align:center
+We want you to feel confident
+in your app and your server.
+
+
+678
+00:29:14.955 --> 00:29:16.456 line:-1 align:center
+So we want you to be able
+
+
+679
+00:29:16,456 --> 00:29:19,126 line:-2
+to integrate with our new
+App Store Server APIs
+
+
+680
+00:29:19,126 --> 00:29:21,628 line:-2
+and App Store server
+notifications in sandbox
+
+
+681
+00:29:21.628 --> 00:29:23.197 line:-1 align:center
+before production.
+
+
+682
+00:29:23,197 --> 00:29:26,200 line:-2
+For the App Store Server APIs
+we discussed today,
+
+
+683
+00:29:26.200 --> 00:29:28.569 line:-2 align:center
+that means that they
+are fully testable in sandbox,
+
+
+684
+00:29:28,569 --> 00:29:31,138 line:-1
+and live, starting now!
+
+
+685
+00:29:31.138 --> 00:29:33.440 line:-2 align:center
+This includes
+the subscription status API
+
+
+686
+00:29:33,440 --> 00:29:35,776 line:-2
+and the in-app
+purchase history API.
+
+
+687
+00:29:35.776 --> 00:29:37.144 line:-1 align:center
+In addition to this,
+
+
+688
+00:29:37,144 --> 00:29:40,480 line:-2
+we're adding a few other
+new features in sandbox.
+
+
+689
+00:29:40,480 --> 00:29:42,616 line:-2
+Coming later this year,
+you will be able to add
+
+
+690
+00:29:42.616 --> 00:29:46.653 line:-2 align:center
+a sandbox-specific notification
+URL in App Store Connect.
+
+
+691
+00:29:46,653 --> 00:29:49,456 line:-2
+With this addition,
+you can keep your production
+
+
+692
+00:29:49,456 --> 00:29:52,793 line:-2
+and sandbox notifications
+completely separate.
+
+
+693
+00:29:52,793 --> 00:29:55,128 line:-2
+Additionally,
+you'll also be able to choose
+
+
+694
+00:29:55,128 --> 00:29:57,497 line:-2
+your sandbox notification
+version
+
+
+695
+00:29:57,497 --> 00:30:02,002 line:-2
+so you can test v2 notifications
+in sandbox before production.
+
+
+696
+00:30:02,002 --> 00:30:05,572 line:-2
+Last year, we brought you some
+exciting sandbox improvements,
+
+
+697
+00:30:05,572 --> 00:30:07,941 line:-1
+like resetting trial eligibility
+
+
+698
+00:30:07,941 --> 00:30:11,144 line:-2
+and providing a Manage
+Subscriptions page in sandbox.
+
+
+699
+00:30:11,144 --> 00:30:14,548 line:-2
+We want to continue making
+testing in sandbox easier
+
+
+700
+00:30:14,548 --> 00:30:17,584 line:-2
+and are adding a few new
+enhancements this year.
+
+
+701
+00:30:17.584 --> 00:30:22.256 line:-2 align:center
+These are clearing purchase
+history for a sandbox Apple ID,
+
+
+702
+00:30:22.256 --> 00:30:24.324 line:-1 align:center
+changing sandbox account region,
+
+
+703
+00:30:24,324 --> 00:30:27,594 line:-2
+and adjusting subscription
+renewal rate in sandbox.
+
+
+704
+00:30:27.594 --> 00:30:30.597 line:-2 align:center
+Additionally,
+as a security enhancement,
+
+
+705
+00:30:30.597 --> 00:30:33.033 line:-2 align:center
+we are returning an error
+from verifyReceipt
+
+
+706
+00:30:33,033 --> 00:30:34,668 line:-1
+for TestFlight receipts
+
+
+707
+00:30:34.668 --> 00:30:38.172 line:-2 align:center
+when we detect the customer
+is no longer a TestFlight user.
+
+
+708
+00:30:38.172 --> 00:30:40.774 line:-2 align:center
+These new sandbox enhancements
+will be accessible
+
+
+709
+00:30:40.774 --> 00:30:43.977 line:-2 align:center
+from the Sandbox Testers page
+in App Store Connect.
+
+
+710
+00:30:43,977 --> 00:30:46,880 line:-2
+To clear purchase history,
+select edit,
+
+
+711
+00:30:46,880 --> 00:30:48,715 line:-1
+then toggle a tester,
+
+
+712
+00:30:48,715 --> 00:30:51,785 line:-2
+and select the clear
+purchase history button.
+
+
+713
+00:30:51.785 --> 00:30:54.688 line:-2 align:center
+Once you confirm clearing
+purchase history for a tester,
+
+
+714
+00:30:54.688 --> 00:30:56.857 line:-1 align:center
+the action cannot be reversed.
+
+
+715
+00:30:56.857 --> 00:31:00.294 line:-2 align:center
+So remember the testers
+you've selected this option for.
+
+
+716
+00:31:00,294 --> 00:31:01,528 line:-1
+Clearing purchase history
+
+
+717
+00:31:01,528 --> 00:31:03,564 line:-2
+is a powerful new
+testing tool for you
+
+
+718
+00:31:03,564 --> 00:31:05,599 line:-2
+that enables you
+to purchase something again
+
+
+719
+00:31:05,599 --> 00:31:08,035 line:-1
+without creating a new account.
+
+
+720
+00:31:08,035 --> 00:31:09,970 line:-2
+It also allows you
+to have a fresh,
+
+
+721
+00:31:09,970 --> 00:31:12,239 line:-1
+empty receipt for testing.
+
+
+722
+00:31:12,239 --> 00:31:13,807 line:-1
+To change account region
+
+
+723
+00:31:13.807 --> 00:31:15.709 line:-2 align:center
+or adjust subscription
+renewal rate,
+
+
+724
+00:31:15.709 --> 00:31:17.911 line:-2 align:center
+navigate back to
+the testers page
+
+
+725
+00:31:17,911 --> 00:31:20,113 line:-1
+and select a tester row.
+
+
+726
+00:31:21,381 --> 00:31:22,683 line:-1
+In the tester settings,
+
+
+727
+00:31:22,683 --> 00:31:25,686 line:-2
+you will see the new options
+to change App Store region
+
+
+728
+00:31:25.686 --> 00:31:27.921 line:-2 align:center
+and to adjust
+subscription renewal rate.
+
+
+729
+00:31:29,089 --> 00:31:31,592 line:-2
+You can change the account
+region for a tester
+
+
+730
+00:31:31,592 --> 00:31:34,194 line:-1
+by selecting the desired region.
+
+
+731
+00:31:34,194 --> 00:31:39,132 line:-2
+This makes it possible to test
+in 175 storefronts in sandbox,
+
+
+732
+00:31:39,132 --> 00:31:42,302 line:-1
+all with one tester account.
+
+
+733
+00:31:42.302 --> 00:31:43.837 line:-1 align:center
+Our final new sandbox feature
+
+
+734
+00:31:43,837 --> 00:31:47,107 line:-2
+is adjusting your subscription
+renewal rate in sandbox.
+
+
+735
+00:31:47,107 --> 00:31:50,344 line:-2
+To edit this,
+select your desired renewal rate
+
+
+736
+00:31:50.344 --> 00:31:51.812 line:-1 align:center
+from the drop-down.
+
+
+737
+00:31:51,812 --> 00:31:55,182 line:-2
+Right now, a month correlates
+to 5 minutes in sandbox.
+
+
+738
+00:31:55.182 --> 00:31:56.984 line:-2 align:center
+We'll give you
+some more options
+
+
+739
+00:31:56,984 --> 00:32:00,420 line:-2
+to adjust the renewal rate
+for your testers.
+
+
+740
+00:32:00.420 --> 00:32:02.089 line:-2 align:center
+Adjusting the subscription
+renewal rate
+
+
+741
+00:32:02,089 --> 00:32:05,125 line:-2
+gives you more time to do things
+like cancel, upgrade,
+
+
+742
+00:32:05.125 --> 00:32:07.027 line:-1 align:center
+or downgrade a subscription,
+
+
+743
+00:32:07,027 --> 00:32:09,296 line:-2
+and it allows you to rapidly
+speed up renewals
+
+
+744
+00:32:09.296 --> 00:32:12.165 line:-2 align:center
+to simulate
+longer-term customers.
+
+
+745
+00:32:12.165 --> 00:32:15.235 line:-2 align:center
+That is everything we have
+coming to sandbox this year.
+
+
+746
+00:32:15.235 --> 00:32:18.005 line:-2 align:center
+We hope you love testing
+with these new features.
+
+
+747
+00:32:18,005 --> 00:32:20,641 line:-2
+So we've covered a lot
+of new information today,
+
+
+748
+00:32:20.641 --> 00:32:23.777 line:-2 align:center
+and now I want you to be
+able to explore all of it.
+
+
+749
+00:32:23,777 --> 00:32:25,779 line:-2
+I hope you take some time
+to update your apps
+
+
+750
+00:32:25.779 --> 00:32:29.116 line:-2 align:center
+and servers
+to adopt our new JWS receipts.
+
+
+751
+00:32:29.116 --> 00:32:31.785 line:-2 align:center
+Make use of our new
+App Store Server APIs,
+
+
+752
+00:32:31,785 --> 00:32:34,621 line:-2
+especially in sandbox,
+where they are live right now.
+
+
+753
+00:32:34,621 --> 00:32:36,990 line:-2
+And enroll in App Store
+server notifications
+
+
+754
+00:32:36,990 --> 00:32:38,892 line:-1
+if you haven't already
+
+
+755
+00:32:38,892 --> 00:32:42,262 line:-2
+and get ready for the v2
+update coming later this year.
+
+
+756
+00:32:42.262 --> 00:32:45.399 line:-2 align:center
+Our new sandbox enhancements
+are also coming later this year.
+
+
+757
+00:32:45.399 --> 00:32:49.136 line:-2 align:center
+Make use of these to enhance
+your sandbox testing experience.
+
+
+758
+00:32:49,136 --> 00:32:51,839 align:center
+Finally, check out
+the other two sessions
+
+
+759
+00:32:51,839 --> 00:32:53,507 line:0
+from this year in this series,
+
+
+760
+00:32:53,507 --> 00:32:57,244 line:0
+"Meet StoreKit 2" and "Support
+customers and handle refunds."
+
+
+761
+00:32:57,244 --> 00:33:00,180 align:center
+For more background on App Store
+server notifications
+
+
+762
+00:33:00,180 --> 00:33:02,015 line:0
+and how you can set them up,
+
+
+763
+00:33:02,015 --> 00:33:04,117 align:center
+check out "What's new with
+in-app purchase"
+
+
+764
+00:33:04,117 --> 00:33:06,320 line:0
+from WWDC 2020
+
+
+765
+00:33:06,320 --> 00:33:09,790 align:center
+and "In-app purchases and using
+server-to-server notifications"
+
+
+766
+00:33:09,790 --> 00:33:12,926 align:center
+from WWDC 2019.
+
+
+767
+00:33:12,926 --> 00:33:15,929 line:-2
+Our receipts, APIs,
+and notifications
+
+
+768
+00:33:15.929 --> 00:33:18.031 line:-2 align:center
+are three powerful tools
+you have
+
+
+769
+00:33:18.031 --> 00:33:20.400 line:-2 align:center
+to manage your in-app purchases
+from your server.
+
+
+770
+00:33:20,400 --> 00:33:23,003 line:-2
+By taking advantage of these,
+you can make your server
+
+
+771
+00:33:23.003 --> 00:33:25.806 line:-2 align:center
+and your app
+more powerful than ever.
+
+
+772
+00:33:25,806 --> 00:33:28,108 line:-2
+Please take advantage
+of all the new features
+
+
+773
+00:33:28.108 --> 00:33:29.910 line:-1 align:center
+we've gone over today,
+
+
+774
+00:33:29.910 --> 00:33:31.879 line:-2 align:center
+and we look forward
+to hearing your feedback.
+
+
+775
+00:33:31.879 --> 00:33:33.514 line:-2 align:center
+Thanks so much
+for listening today,
+
+
+776
+00:33:33,514 --> 00:33:37,050 line:-1
+and enjoy the rest of WWDC.
+
+
+777
+00:33:37,050 --> 00:33:39,086 line:-1
+[upbeat music]
+

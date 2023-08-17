@@ -1,0 +1,2761 @@
+1
+00:00:03,836 --> 00:00:06,673 line:-1
+Hello and welcome to WWDC.
+
+
+2
+00:00:08,876 --> 00:00:11,411 line:0
+Welcome to "Modern Cell Configuration."
+
+
+3
+00:00:11,478 --> 00:00:14,548 line:0
+I'm Tyler Fox,
+an engineer on the UIKit team.
+
+
+4
+00:00:14,615 --> 00:00:19,319 line:-2
+In iOS 14, we're bringing brand-new
+features to UICollectionView
+
+
+5
+00:00:19,386 --> 00:00:21,955 line:-2
+by building on top of
+foundational technologies,
+
+
+6
+00:00:22,022 --> 00:00:25,325 line:-2
+which can be broadly organized
+into three categories:
+
+
+7
+00:00:25,392 --> 00:00:27,327 line:-1
+the way that you populate data,
+
+
+8
+00:00:27,394 --> 00:00:29,329 line:-1
+the way that you define your layout
+
+
+9
+00:00:29,396 --> 00:00:31,798 line:-1
+and the way that you display content.
+
+
+10
+00:00:31,865 --> 00:00:36,537 line:0
+Check out the "Advances in
+Collection View" session from WWDC 20
+
+
+11
+00:00:36,603 --> 00:00:39,473 line:0
+for an introduction
+to all of these new features.
+
+
+12
+00:00:40,474 --> 00:00:44,444 line:-2
+In this session, we're going to be
+focusing on View Configuration,
+
+
+13
+00:00:44,511 --> 00:00:48,749 line:-2
+new APIs to configure the content
+and styling of your cells.
+
+
+14
+00:00:49,650 --> 00:00:51,685 line:-1
+We'll start by covering the basics
+
+
+15
+00:00:51,752 --> 00:00:56,523 line:-2
+and seeing how easy it is to use these
+new configurations to set up your cells.
+
+
+16
+00:00:58,025 --> 00:01:02,596 line:-2
+Next, we'll dive into a new concept
+called "configuration state,"
+
+
+17
+00:01:02,663 --> 00:01:04,765 line:-1
+which works together with configurations
+
+
+18
+00:01:04,831 --> 00:01:08,335 line:-2
+to make it easy to get different
+appearances for different states.
+
+
+19
+00:01:09,803 --> 00:01:13,807 line:-2
+Finally, we'll take a closer look
+at the two configuration types,
+
+
+20
+00:01:13,874 --> 00:01:17,144 line:-2
+background configurations
+and content configurations,
+
+
+21
+00:01:17,211 --> 00:01:19,713 line:-1
+and cover using those in more detail.
+
+
+22
+00:01:20,214 --> 00:01:24,418 line:-2
+Before we get into any of these
+modern cell configuration APIs,
+
+
+23
+00:01:24,484 --> 00:01:26,553 line:-1
+let's take a quick look at an example
+
+
+24
+00:01:26,620 --> 00:01:30,691 line:-2
+of how you would configure
+a table view cell in iOS 13.
+
+
+25
+00:01:31,959 --> 00:01:36,096 line:-2
+If you've ever used UITableView before,
+this should look very familiar.
+
+
+26
+00:01:36,730 --> 00:01:41,435 line:-2
+Here, we're using the built-in
+imageView and textLabel properties
+
+
+27
+00:01:41,502 --> 00:01:44,872 line:-2
+on UITableViewCell
+to display an image and some text.
+
+
+28
+00:01:45,572 --> 00:01:49,610 line:-2
+This is a simple example
+of what we mean by cell configuration.
+
+
+29
+00:01:50,077 --> 00:01:54,581 line:-2
+With that in mind, let's take a look
+at how you would do the same thing
+
+
+30
+00:01:54,648 --> 00:01:57,184 line:-1
+using the new configuration APIs.
+
+
+31
+00:01:58,585 --> 00:02:02,723 line:-2
+This is how you configure a cell
+using a content configuration.
+
+
+32
+00:02:03,323 --> 00:02:07,694 line:-2
+It looks pretty similar to what we had
+before, but with two new lines of code.
+
+
+33
+00:02:08,362 --> 00:02:10,531 line:-1
+Let's break it down.
+
+
+34
+00:02:10,597 --> 00:02:15,035 line:-2
+The first thing that we do is ask the cell
+for a defaultContentConfiguration.
+
+
+35
+00:02:15,736 --> 00:02:20,407 line:-2
+This always returns a fresh configuration
+without any content set on it.
+
+
+36
+00:02:21,175 --> 00:02:24,244 line:-2
+But this configuration
+does have default styling,
+
+
+37
+00:02:24,311 --> 00:02:26,980 line:-1
+based on the cell and table view style.
+
+
+38
+00:02:27,948 --> 00:02:29,917 line:-1
+We'll talk more about the styling
+
+
+39
+00:02:29,983 --> 00:02:32,953 line:-2
+and other features
+of content configurations shortly.
+
+
+40
+00:02:33,987 --> 00:02:38,192 line:-2
+For now, we'll just set the image and text
+on the content configuration.
+
+
+41
+00:02:38,725 --> 00:02:40,994 line:-1
+This part should feel very familiar.
+
+
+42
+00:02:41,695 --> 00:02:45,032 line:-2
+Now that we've set up our content,
+there's one final step.
+
+
+43
+00:02:45,933 --> 00:02:47,835 line:-1
+We apply the configuration to the cell
+
+
+44
+00:02:47,901 --> 00:02:50,838 line:-2
+by setting it
+to the contentConfiguration property.
+
+
+45
+00:02:51,438 --> 00:02:52,973 line:-1
+As soon as we do this,
+
+
+46
+00:02:53,040 --> 00:02:57,077 line:-2
+the cell is updated to display
+the image and text that we specified.
+
+
+47
+00:02:57,978 --> 00:03:01,181 line:-2
+Now, before this line of code,
+setting the image and text
+
+
+48
+00:03:01,248 --> 00:03:04,551 line:-2
+only changed our local copy
+of the configuration
+
+
+49
+00:03:04,618 --> 00:03:06,920 line:-1
+stored in this "content" variable.
+
+
+50
+00:03:07,588 --> 00:03:09,923 line:-2
+Because we're using
+a content configuration,
+
+
+51
+00:03:09,990 --> 00:03:14,161 line:-2
+we never directly touch
+a UIImageView or UILabel.
+
+
+52
+00:03:14,228 --> 00:03:17,731 line:-2
+All of the properties
+are set on the configuration itself.
+
+
+53
+00:03:18,298 --> 00:03:22,169 line:-2
+So, what have we gained by using a
+content configuration to set up our cell?
+
+
+54
+00:03:22,936 --> 00:03:28,242 line:-2
+Well, for one, the code that you see here
+to configure a table view cell
+
+
+55
+00:03:28,308 --> 00:03:33,180 line:-2
+is actually the same code you would use
+to configure any cell,
+
+
+56
+00:03:33,247 --> 00:03:35,249 line:-1
+such as a collection view cell.
+
+
+57
+00:03:35,315 --> 00:03:40,454 line:-2
+In fact, the same code works for any view
+that supports content configurations,
+
+
+58
+00:03:40,521 --> 00:03:44,892 line:-2
+even ones that aren't cells,
+such as table view headers and footers.
+
+
+59
+00:03:45,526 --> 00:03:46,927 line:-1
+How is this possible?
+
+
+60
+00:03:47,694 --> 00:03:50,664 line:-2
+This works because
+configurations are composable.
+
+
+61
+00:03:51,532 --> 00:03:56,036 line:-2
+Instead of all of the functionality
+being baked into the cell class itself,
+
+
+62
+00:03:56,103 --> 00:03:58,372 line:-1
+like it was with UITableViewCell,
+
+
+63
+00:03:58,438 --> 00:04:01,241 line:-2
+these standard cell layouts
+and appearances
+
+
+64
+00:04:01,308 --> 00:04:04,077 line:-1
+are now available as independent pieces
+
+
+65
+00:04:04,144 --> 00:04:07,981 line:-2
+that can plug right into any cell
+or view that supports them.
+
+
+66
+00:04:09,917 --> 00:04:12,085 line:-1
+Let's run this code to see how it looks
+
+
+67
+00:04:12,152 --> 00:04:16,089 line:-2
+and learn what other benefits we get
+from using configurations.
+
+
+68
+00:04:17,690 --> 00:04:20,994 line:-2
+There's our cell,
+inside of a collection view list,
+
+
+69
+00:04:21,060 --> 00:04:25,332 line:-2
+using the new sidebar appearance
+for multi-column iPad apps.
+
+
+70
+00:04:26,166 --> 00:04:30,437 line:-2
+You can see that the cell has the
+star image and text that we configured.
+
+
+71
+00:04:31,338 --> 00:04:35,175 line:-2
+Now, things get more interesting
+when we start to interact with this cell.
+
+
+72
+00:04:35,242 --> 00:04:39,813 line:-2
+When I touch down on the cell,
+it shows the highlighted appearance.
+
+
+73
+00:04:39,880 --> 00:04:43,183 line:-2
+And when I lift up,
+the cell becomes selected.
+
+
+74
+00:04:44,184 --> 00:04:48,255 line:-2
+But these are just a couple of the
+different states that the cell can be in,
+
+
+75
+00:04:48,322 --> 00:04:50,490 line:-1
+so let's add some more cells
+
+
+76
+00:04:50,557 --> 00:04:54,027 line:-2
+and manually put them into
+a bunch of different states
+
+
+77
+00:04:54,094 --> 00:04:56,463 line:-1
+to see how the cell's appearance changes.
+
+
+78
+00:04:57,231 --> 00:04:59,433 line:-1
+Here's the same content configuration,
+
+
+79
+00:04:59,499 --> 00:05:03,303 line:-2
+but applied to all of these
+different cells in different states.
+
+
+80
+00:05:03,370 --> 00:05:08,609 line:-2
+Let me swap out the text in these cells
+to indicate which state each cell is in.
+
+
+81
+00:05:09,610 --> 00:05:13,514 line:-2
+As you can see here, the default styling
+for a sidebar list cell
+
+
+82
+00:05:13,580 --> 00:05:16,149 line:-1
+varies significantly in different states.
+
+
+83
+00:05:16,783 --> 00:05:19,353 line:-2
+By using configurations
+to set up our cell,
+
+
+84
+00:05:19,419 --> 00:05:22,856 line:-2
+we get all of these
+different appearances automatically.
+
+
+85
+00:05:23,590 --> 00:05:26,260 line:-2
+We'll talk more about
+how this works in a bit.
+
+
+86
+00:05:27,327 --> 00:05:30,330 line:-2
+So, we've gotten a taste
+of these new configurations,
+
+
+87
+00:05:30,397 --> 00:05:32,299 line:-1
+but what are they exactly?
+
+
+88
+00:05:33,667 --> 00:05:38,005 line:-2
+A configuration describes the appearance
+of a view for a specific state:
+
+
+89
+00:05:38,739 --> 00:05:42,709 line:-2
+things like the content, styling,
+metrics and behavior.
+
+
+90
+00:05:43,944 --> 00:05:47,481 line:-2
+By itself, a configuration
+is just a bunch of properties.
+
+
+91
+00:05:48,015 --> 00:05:52,252 line:-2
+It doesn't do anything until you apply it
+to a view or a cell to render.
+
+
+92
+00:05:53,487 --> 00:05:57,424 line:-2
+And as we've already discussed,
+configurations are composable:
+
+
+93
+00:05:57,991 --> 00:06:02,162 line:-2
+they can be used with any type of cell
+or view that supports them.
+
+
+94
+00:06:02,229 --> 00:06:04,798 line:-2
+Now, there are two types
+of configurations,
+
+
+95
+00:06:04,865 --> 00:06:08,235 line:-1
+background and content configurations.
+
+
+96
+00:06:08,302 --> 00:06:12,673 line:-2
+Let's look at some of the features that
+these two system configurations provide.
+
+
+97
+00:06:13,907 --> 00:06:16,677 line:-2
+Background configurations
+have a number of properties
+
+
+98
+00:06:16,743 --> 00:06:20,180 line:-2
+to let you quickly specify
+common background appearances.
+
+
+99
+00:06:20,681 --> 00:06:22,816 line:-1
+With just a couple lines of code,
+
+
+100
+00:06:22,883 --> 00:06:25,485 line:-2
+you can customize
+the background fill color,
+
+
+101
+00:06:25,552 --> 00:06:28,388 line:-1
+set a visual effect to get a nice blur
+
+
+102
+00:06:28,455 --> 00:06:30,824 line:-1
+and add a stroke and some rounded corners.
+
+
+103
+00:06:31,859 --> 00:06:34,061 line:-2
+And if you want to do something
+more custom,
+
+
+104
+00:06:34,127 --> 00:06:36,864 line:-2
+you can do that
+by providing your own view.
+
+
+105
+00:06:37,698 --> 00:06:41,068 line:-2
+List content configurations
+give you the standard layouts
+
+
+106
+00:06:41,134 --> 00:06:43,570 line:-1
+for cells, headers and footers,
+
+
+107
+00:06:43,637 --> 00:06:47,975 line:-2
+much like the familiar UITableViewCell
+styles you have today.
+
+
+108
+00:06:48,809 --> 00:06:52,212 line:-2
+But list content configurations
+are even more powerful.
+
+
+109
+00:06:52,779 --> 00:06:57,251 line:-2
+They support an image, text
+and optional secondary text
+
+
+110
+00:06:57,317 --> 00:07:01,588 line:-2
+and expose many properties
+for you to customize for each of those.
+
+
+111
+00:07:02,523 --> 00:07:05,025 line:-1
+They also offer higher-level behaviors,
+
+
+112
+00:07:05,092 --> 00:07:09,129 line:-2
+such as flexible layouts
+to display larger amounts of text
+
+
+113
+00:07:09,196 --> 00:07:12,900 line:-2
+and special layout modes
+for Accessibility text sizes.
+
+
+114
+00:07:14,067 --> 00:07:17,671 line:-2
+These two configuration types
+go hand in hand
+
+
+115
+00:07:17,738 --> 00:07:20,207 line:-1
+and have some common design principles.
+
+
+116
+00:07:21,909 --> 00:07:26,313 line:-2
+One of the most important principles
+is that configurations are lightweight
+
+
+117
+00:07:26,380 --> 00:07:28,582 line:-1
+and very inexpensive to create.
+
+
+118
+00:07:29,149 --> 00:07:31,118 line:-1
+They're value types in Swift,
+
+
+119
+00:07:31,185 --> 00:07:35,822 line:-2
+which means whenever you
+have a configuration, it's yours alone,
+
+
+120
+00:07:35,889 --> 00:07:38,325 line:-2
+and changes that you make
+to your configuration
+
+
+121
+00:07:38,392 --> 00:07:42,496 line:-2
+don't affect anything else until you
+set that configuration to the cell.
+
+
+122
+00:07:43,897 --> 00:07:46,033 line:-1
+Because configurations are lightweight,
+
+
+123
+00:07:46,099 --> 00:07:48,802 line:-2
+you should always start
+with a fresh configuration,
+
+
+124
+00:07:48,869 --> 00:07:50,537 line:-1
+such as by asking the cell
+
+
+125
+00:07:50,604 --> 00:07:53,640 line:-2
+for its defaultContentConfiguration
+as you see here.
+
+
+126
+00:07:54,608 --> 00:07:58,312 line:-2
+This applies not only the first time
+you configure the cell,
+
+
+127
+00:07:58,378 --> 00:08:03,083 line:-2
+but also whenever you want to update
+a cell that has already been configured.
+
+
+128
+00:08:03,851 --> 00:08:07,187 line:-2
+Each time, just start
+with a fresh configuration
+
+
+129
+00:08:07,254 --> 00:08:09,423 line:-1
+and set it up for the new state.
+
+
+130
+00:08:10,090 --> 00:08:11,859 line:-1
+When you're using configurations,
+
+
+131
+00:08:11,925 --> 00:08:14,728 line:-2
+you don't need to think about
+the old state at all.
+
+
+132
+00:08:15,429 --> 00:08:19,433 line:-2
+Don't worry about whether
+an old configuration was already applied,
+
+
+133
+00:08:19,499 --> 00:08:24,004 line:-2
+and you shouldn't try to get the existing
+configuration first to make changes to it.
+
+
+134
+00:08:24,705 --> 00:08:27,341 line:-2
+Just start with a fresh configuration
+each time,
+
+
+135
+00:08:27,407 --> 00:08:30,511 line:-2
+set it up the way you want
+and then apply it to the cell.
+
+
+136
+00:08:31,478 --> 00:08:34,481 line:-2
+If you've been using UIKit
+for a long time,
+
+
+137
+00:08:34,548 --> 00:08:37,150 line:-1
+this might feel a bit different at first.
+
+
+138
+00:08:37,551 --> 00:08:41,188 line:-2
+But once you start thinking this way,
+it's incredibly liberating.
+
+
+139
+00:08:41,855 --> 00:08:44,591 line:-2
+When you apply a configuration
+to the cell,
+
+
+140
+00:08:44,658 --> 00:08:48,095 line:-2
+UIKit is going to do all
+of the heavy lifting for you.
+
+
+141
+00:08:48,829 --> 00:08:53,534 line:-2
+It will figure out what's changed and
+efficiently update the views as needed.
+
+
+142
+00:08:54,067 --> 00:08:56,503 line:-1
+As you saw when we ran the code earlier,
+
+
+143
+00:08:57,037 --> 00:09:01,074 line:-2
+configurations give you the default
+appearance for many different states.
+
+
+144
+00:09:01,742 --> 00:09:06,213 line:-2
+But configurations are also built
+on top of robust infrastructure
+
+
+145
+00:09:06,280 --> 00:09:09,550 line:-2
+that you can use to customize
+the appearance for these states,
+
+
+146
+00:09:09,616 --> 00:09:12,419 line:-2
+which we'll talk about
+in more detail shortly.
+
+
+147
+00:09:14,054 --> 00:09:17,824 line:-2
+Configurations also give you access
+to advanced behaviors
+
+
+148
+00:09:17,891 --> 00:09:19,459 line:-1
+in just a couple lines of code.
+
+
+149
+00:09:20,227 --> 00:09:23,330 line:-2
+Let's say you want to animate
+a change to your background appearance.
+
+
+150
+00:09:23,897 --> 00:09:28,969 line:-2
+All you have to do is set a new background
+configuration inside an animation.
+
+
+151
+00:09:31,305 --> 00:09:33,807 line:-1
+Configurations aren't just easy to use,
+
+
+152
+00:09:33,874 --> 00:09:38,011 line:-2
+their design actually eliminates
+entire classes of bugs,
+
+
+153
+00:09:38,078 --> 00:09:41,782 line:-2
+especially when you're dealing with
+complex states and transitions.
+
+
+154
+00:09:42,583 --> 00:09:46,954 line:-2
+You always know that the currently applied
+configuration is the truth,
+
+
+155
+00:09:47,020 --> 00:09:49,056 line:-1
+and when you set a new configuration,
+
+
+156
+00:09:49,122 --> 00:09:52,025 line:-2
+that new configuration
+is applied all at once.
+
+
+157
+00:09:54,027 --> 00:09:58,398 line:-2
+Finally, configurations are built
+from the ground up for performance,
+
+
+158
+00:09:58,465 --> 00:10:02,302 line:-2
+which is especially important
+to ensure smooth scrolling.
+
+
+159
+00:10:03,136 --> 00:10:07,241 line:-2
+Because UIKit is responsible
+for managing the views and rendering,
+
+
+160
+00:10:07,307 --> 00:10:10,844 line:-2
+we're able to implement
+many internal performance optimizations
+
+
+161
+00:10:10,911 --> 00:10:14,147 line:-1
+under the hood, which you get for free.
+
+
+162
+00:10:14,615 --> 00:10:17,951 line:-2
+Now that you're familiar
+with the basics of configurations,
+
+
+163
+00:10:18,018 --> 00:10:22,022 line:-2
+let's talk about a new concept
+that works together with them,
+
+
+164
+00:10:22,089 --> 00:10:24,258 line:-1
+called configuration state.
+
+
+165
+00:10:25,292 --> 00:10:28,195 line:-2
+Configuration state represents
+the various inputs
+
+
+166
+00:10:28,262 --> 00:10:31,698 line:-2
+that you use to configure
+your cells and views.
+
+
+167
+00:10:31,765 --> 00:10:34,001 line:-1
+What kind of inputs are we talking about?
+
+
+168
+00:10:34,902 --> 00:10:38,071 line:-2
+One of the most common inputs
+that determines how you set up your views
+
+
+169
+00:10:38,138 --> 00:10:40,707 line:-1
+are traits from UITraitCollection.
+
+
+170
+00:10:40,774 --> 00:10:44,478 line:-2
+These are things like the size class,
+user interface style
+
+
+171
+00:10:44,545 --> 00:10:46,346 line:-1
+and the content size category.
+
+
+172
+00:10:46,880 --> 00:10:48,282 line:-1
+On top of those traits,
+
+
+173
+00:10:48,348 --> 00:10:52,553 line:-2
+your cells and views exist
+in a variety of different states.
+
+
+174
+00:10:53,120 --> 00:10:57,558 line:-2
+Maybe your cell is selected
+or is a target for drag and drop
+
+
+175
+00:10:57,624 --> 00:10:59,860 line:-1
+or maybe it's temporarily disabled.
+
+
+176
+00:11:00,661 --> 00:11:05,299 line:-2
+These are just some of the different
+states that are common in UIKit.
+
+
+177
+00:11:05,365 --> 00:11:09,503 line:-2
+And on top of these states,
+your app has its own custom states.
+
+
+178
+00:11:10,204 --> 00:11:13,674 line:-2
+These are all of the different
+pieces of state that you use
+
+
+179
+00:11:13,740 --> 00:11:16,877 line:-2
+which are specific
+to your app and its domain.
+
+
+180
+00:11:16,944 --> 00:11:19,613 line:-1
+For example, when configuring cells,
+
+
+181
+00:11:19,680 --> 00:11:24,718 line:-2
+a messaging app might need to know
+whether a message is archived or flagged,
+
+
+182
+00:11:24,785 --> 00:11:28,789 line:-2
+and a payment app might show
+which transactions are processed.
+
+
+183
+00:11:29,590 --> 00:11:33,060 line:-2
+If you use a view model
+to populate your cells with content,
+
+
+184
+00:11:33,126 --> 00:11:36,763 line:-2
+you can also think of that view model
+as a custom state as well.
+
+
+185
+00:11:37,231 --> 00:11:40,868 line:-2
+All of these things are what make up
+configuration state:
+
+
+186
+00:11:40,934 --> 00:11:46,139 line:-2
+a collection of all the different traits,
+states and your own custom states,
+
+
+187
+00:11:46,206 --> 00:11:48,141 line:-1
+wrapped together in one place.
+
+
+188
+00:11:49,409 --> 00:11:51,678 line:-2
+So, where do you find
+a configuration state?
+
+
+189
+00:11:52,846 --> 00:11:56,550 line:-2
+Each cell, header and footer
+in your collection or table view
+
+
+190
+00:11:56,617 --> 00:11:58,652 line:-1
+has its own configuration state.
+
+
+191
+00:11:59,286 --> 00:12:01,154 line:-1
+There are three cells shown here,
+
+
+192
+00:12:01,221 --> 00:12:05,125 line:-2
+and each one might have different things
+in its configuration state.
+
+
+193
+00:12:06,894 --> 00:12:08,962 line:-2
+So, what does a configuration state
+look like?
+
+
+194
+00:12:09,630 --> 00:12:12,299 line:-2
+Well, there are two different types,
+as you can see here.
+
+
+195
+00:12:12,366 --> 00:12:16,136 line:-2
+There's a configuration state type
+for views, like this header,
+
+
+196
+00:12:16,203 --> 00:12:18,238 line:-1
+and there's a different type for cells.
+
+
+197
+00:12:20,274 --> 00:12:23,210 line:-2
+Here's what a view configuration state
+looks like.
+
+
+198
+00:12:23,277 --> 00:12:25,012 line:-1
+It starts with a trait collection
+
+
+199
+00:12:25,779 --> 00:12:27,714 line:-1
+and then we have four different states--
+
+
+200
+00:12:27,781 --> 00:12:31,885 line:-2
+highlighted, selected,
+disabled and focused.
+
+
+201
+00:12:31,952 --> 00:12:33,987 line:-1
+These are just simple Booleans.
+
+
+202
+00:12:35,055 --> 00:12:37,758 line:-2
+And finally,
+we have optional custom states.
+
+
+203
+00:12:38,258 --> 00:12:43,230 line:-2
+This is key-value storage for you
+to add any extra states or data
+
+
+204
+00:12:43,297 --> 00:12:45,732 line:-2
+that you want to use
+when configuring your view.
+
+
+205
+00:12:47,234 --> 00:12:49,236 line:-1
+So, that's view configuration state.
+
+
+206
+00:12:49,937 --> 00:12:52,039 line:-1
+What about cell configuration state?
+
+
+207
+00:12:53,040 --> 00:12:57,811 line:-2
+Well, cell configuration state just takes
+everything from view configuration state
+
+
+208
+00:12:57,878 --> 00:13:01,882 line:-2
+and adds some additional states
+that are specific to cells,
+
+
+209
+00:13:01,949 --> 00:13:05,586 line:-2
+whether the cell is editing,
+swiped or expanded,
+
+
+210
+00:13:05,652 --> 00:13:08,655 line:-2
+as well as some states
+specific to drag and drop.
+
+
+211
+00:13:10,123 --> 00:13:14,161 line:-2
+One of the most important things
+you can do with configuration state
+
+
+212
+00:13:14,228 --> 00:13:17,731 line:-2
+is use it to update configurations
+for new states.
+
+
+213
+00:13:17,798 --> 00:13:20,801 line:-2
+You can ask any background
+or content configuration
+
+
+214
+00:13:20,868 --> 00:13:25,472 line:-2
+to return an updated version of itself
+for a different configuration state.
+
+
+215
+00:13:26,039 --> 00:13:29,009 line:-2
+This will return a new copy
+of the configuration,
+
+
+216
+00:13:29,076 --> 00:13:32,212 line:-2
+with its properties updated
+to reflect the new state.
+
+
+217
+00:13:33,514 --> 00:13:38,552 line:-2
+For example, a background configuration
+might change its background color,
+
+
+218
+00:13:38,619 --> 00:13:43,457 line:-2
+and a content configuration might change
+the image tint color and text color.
+
+
+219
+00:13:44,391 --> 00:13:49,863 line:-2
+When you ask for an updated configuration,
+the original configuration doesn't change.
+
+
+220
+00:13:50,531 --> 00:13:54,968 line:-2
+And if you customized any of the
+properties on the original configuration,
+
+
+221
+00:13:55,035 --> 00:13:59,173 line:-2
+those properties will remain the same
+on the updated configuration.
+
+
+222
+00:13:59,573 --> 00:14:02,142 line:-2
+You can think of the properties
+on a configuration
+
+
+223
+00:14:02,209 --> 00:14:05,312 line:-1
+as becoming "locked" once you've set them.
+
+
+224
+00:14:05,913 --> 00:14:08,415 line:-2
+Recall the demo
+from the beginning of this session,
+
+
+225
+00:14:08,482 --> 00:14:10,918 line:-1
+where we saw our content configuration
+
+
+226
+00:14:10,984 --> 00:14:13,253 line:-2
+updating its appearance
+for different states.
+
+
+227
+00:14:14,555 --> 00:14:18,892 line:-2
+That worked because
+of automatic configuration updates.
+
+
+228
+00:14:19,893 --> 00:14:24,164 line:-2
+By default, when you set a background
+or content configuration on the cell,
+
+
+229
+00:14:24,698 --> 00:14:27,768 line:-2
+any time the cell's
+configuration state changes,
+
+
+230
+00:14:27,835 --> 00:14:30,604 line:-2
+it will automatically ask
+the configuration
+
+
+231
+00:14:30,671 --> 00:14:33,173 line:-1
+to return an updated version of itself
+
+
+232
+00:14:33,240 --> 00:14:36,743 line:-2
+and then reapply that new configuration
+back to the cell.
+
+
+233
+00:14:37,711 --> 00:14:40,480 line:-2
+These properties
+let you control this behavior.
+
+
+234
+00:14:43,350 --> 00:14:48,121 line:-2
+Now, automatic updates are great
+to get the default styling for each state,
+
+
+235
+00:14:48,188 --> 00:14:51,592 line:-2
+but if you want to customize
+the appearance for different states,
+
+
+236
+00:14:51,658 --> 00:14:53,861 line:-1
+you can disable automatic updates
+
+
+237
+00:14:53,927 --> 00:14:56,797 line:-2
+and update the configurations yourself
+instead.
+
+
+238
+00:14:57,898 --> 00:15:01,535 line:-2
+But where should you put your code
+that updates these configurations?
+
+
+239
+00:15:02,636 --> 00:15:06,406 line:-2
+Well, we have a brand-new method
+on collection and table view cells,
+
+
+240
+00:15:06,473 --> 00:15:09,409 line:-1
+called updateConfiguration(using state.
+
+
+241
+00:15:10,544 --> 00:15:14,748 line:-2
+This is a method for you to override
+in your cell subclass,
+
+
+242
+00:15:14,815 --> 00:15:17,985 line:-2
+where you can put your code
+to configure the cell
+
+
+243
+00:15:18,051 --> 00:15:20,220 line:-1
+based on the state that's passed in.
+
+
+244
+00:15:21,488 --> 00:15:25,592 line:-2
+This method is always called
+before your cell first displays
+
+
+245
+00:15:25,659 --> 00:15:30,531 line:-2
+and will be called again any time
+the configuration state may have changed,
+
+
+246
+00:15:30,597 --> 00:15:33,200 line:-2
+so you can configure yourself
+for the new state.
+
+
+247
+00:15:34,067 --> 00:15:36,637 line:-2
+Remember,
+when you're using configurations,
+
+
+248
+00:15:36,703 --> 00:15:39,206 line:-2
+you don't need to worry
+about the old state.
+
+
+249
+00:15:39,273 --> 00:15:42,075 line:-1
+Just get a fresh configuration each time,
+
+
+250
+00:15:42,142 --> 00:15:44,478 line:-2
+set its properties
+and apply it to your cell.
+
+
+251
+00:15:45,779 --> 00:15:49,750 line:-2
+Configurations work best
+when there's a single place in your code
+
+
+252
+00:15:49,816 --> 00:15:52,886 line:-2
+that handles setting them up
+and applying them to your cell.
+
+
+253
+00:15:53,754 --> 00:15:56,590 line:-1
+If you're using a custom cell subclass,
+
+
+254
+00:15:56,657 --> 00:16:00,294 line:-2
+this new method,
+updateConfiguration(using state,
+
+
+255
+00:16:00,360 --> 00:16:02,095 line:-1
+is the best place to do that.
+
+
+256
+00:16:02,896 --> 00:16:05,199 line:-1
+This method is also a great place
+
+
+257
+00:16:05,265 --> 00:16:08,602 line:-2
+to centralize any other setup
+or updates to your cell.
+
+
+258
+00:16:09,570 --> 00:16:13,874 line:-2
+For example, if you're using
+the new collection view list cell,
+
+
+259
+00:16:13,941 --> 00:16:18,445 line:-2
+you can use this method to update
+the tint color of your cell accessories
+
+
+260
+00:16:18,512 --> 00:16:19,546 line:-1
+for different states.
+
+
+261
+00:16:20,814 --> 00:16:23,884 line:-2
+And if you need to reconfigure your cell
+for any reason,
+
+
+262
+00:16:23,951 --> 00:16:28,355 line:-2
+just call setNeedsUpdateConfiguration
+to request an update.
+
+
+263
+00:16:30,257 --> 00:16:35,395 line:-2
+Let's take a look at an example of how to
+use this method to set up our cell
+
+
+264
+00:16:35,462 --> 00:16:38,298 line:-2
+and manually update configurations
+for different states.
+
+
+265
+00:16:39,867 --> 00:16:42,603 line:-1
+First, we'll get a fresh configuration
+
+
+266
+00:16:42,669 --> 00:16:46,473 line:-2
+by asking the cell
+for its default content configuration.
+
+
+267
+00:16:46,540 --> 00:16:49,543 line:-2
+And we'll immediately update that
+for the new state.
+
+
+268
+00:16:50,477 --> 00:16:52,713 line:-1
+This is going to give us a configuration
+
+
+269
+00:16:52,779 --> 00:16:55,282 line:-2
+with the system default styling
+for this state.
+
+
+270
+00:16:56,683 --> 00:17:00,087 line:-2
+Next, we'll set
+the configuration's image and text,
+
+
+271
+00:17:00,153 --> 00:17:02,256 line:-1
+for the item that our cell is displaying.
+
+
+272
+00:17:03,690 --> 00:17:06,693 line:-2
+And now we're ready to
+apply our customizations.
+
+
+273
+00:17:07,394 --> 00:17:11,565 line:-2
+Here, we're checking to see
+if the state is highlighted or selected,
+
+
+274
+00:17:11,632 --> 00:17:15,368 line:-2
+and if it is, we're setting the image
+and text colors to white.
+
+
+275
+00:17:16,435 --> 00:17:19,873 line:-2
+For any other states,
+we don't set the colors at all,
+
+
+276
+00:17:19,940 --> 00:17:23,010 line:-2
+which means we're using
+the configuration's default colors.
+
+
+277
+00:17:24,511 --> 00:17:27,848 line:-2
+Finally, we set our new configuration
+to the cell.
+
+
+278
+00:17:28,649 --> 00:17:29,816 line:-1
+And that's it.
+
+
+279
+00:17:29,883 --> 00:17:33,620 line:-2
+This method will get called again
+any time the state changes
+
+
+280
+00:17:33,687 --> 00:17:37,491 line:-2
+and will apply a new configuration
+for the new state each time.
+
+
+281
+00:17:38,692 --> 00:17:41,995 line:-2
+So this is how you customize
+the content configuration's appearance
+
+
+282
+00:17:42,062 --> 00:17:43,630 line:-1
+for different states.
+
+
+283
+00:17:43,697 --> 00:17:47,701 line:-2
+We could similarly customize
+the background configuration here as well.
+
+
+284
+00:17:49,269 --> 00:17:50,404 line:-1
+Now in this example,
+
+
+285
+00:17:50,470 --> 00:17:54,274 line:-2
+we set different colors
+for the image and text in certain states.
+
+
+286
+00:17:55,108 --> 00:17:58,979 line:-2
+But there's another way to change the
+appearance of colors in different states
+
+
+287
+00:17:59,046 --> 00:18:02,149 line:-2
+using a new type
+called a color transformer.
+
+
+288
+00:18:02,916 --> 00:18:07,287 line:-2
+A color transformer takes in one color
+and returns a different color
+
+
+289
+00:18:07,354 --> 00:18:09,790 line:-2
+by modifying the original color
+in some way.
+
+
+290
+00:18:10,657 --> 00:18:13,126 line:-2
+For example,
+you might have a color transformer
+
+
+291
+00:18:13,193 --> 00:18:15,696 line:-2
+that returns
+a grayscale version of a color.
+
+
+292
+00:18:16,763 --> 00:18:19,333 line:-2
+So a color transformer
+is just a simple function.
+
+
+293
+00:18:20,067 --> 00:18:22,369 line:-1
+But color transformers are very powerful,
+
+
+294
+00:18:22,436 --> 00:18:24,805 line:-2
+because you can produce
+many different variants
+
+
+295
+00:18:24,872 --> 00:18:28,075 line:-2
+from the same input color
+with different color transformers.
+
+
+296
+00:18:28,909 --> 00:18:31,311 line:-1
+This is how color transformers can be used
+
+
+297
+00:18:31,378 --> 00:18:33,981 line:-2
+to create different appearances
+for different states.
+
+
+298
+00:18:34,548 --> 00:18:38,385 line:-2
+Some of the default configurations
+for certain styles and states
+
+
+299
+00:18:38,452 --> 00:18:41,088 line:-1
+will have a preset color transformer,
+
+
+300
+00:18:41,154 --> 00:18:43,857 line:-2
+in order to produce
+a specific appearance for that state.
+
+
+301
+00:18:44,491 --> 00:18:47,561 line:-2
+The color transformer
+combines with the input color
+
+
+302
+00:18:47,628 --> 00:18:50,564 line:-2
+to produce the resolved color
+that you actually see.
+
+
+303
+00:18:51,565 --> 00:18:54,401 line:-2
+Now that you understand
+how configurations can produce
+
+
+304
+00:18:54,468 --> 00:18:56,537 line:-1
+updated appearances for different states,
+
+
+305
+00:18:57,304 --> 00:19:00,174 line:-2
+let's cover some of the details
+that you need to know
+
+
+306
+00:19:00,240 --> 00:19:03,310 line:-2
+when using background
+and content configurations.
+
+
+307
+00:19:04,745 --> 00:19:07,648 line:-2
+Collection view list cells,
+table view cells
+
+
+308
+00:19:07,714 --> 00:19:10,050 line:-1
+and table view headers and footers
+
+
+309
+00:19:10,117 --> 00:19:13,554 line:-2
+all set up a default
+background configuration automatically,
+
+
+310
+00:19:14,121 --> 00:19:17,157 line:-2
+based on the style of the containing list
+or table view.
+
+
+311
+00:19:18,091 --> 00:19:21,328 line:-2
+So typically, you won't need to do
+anything at all
+
+
+312
+00:19:21,395 --> 00:19:23,730 line:-1
+to get the background appearance you want.
+
+
+313
+00:19:24,298 --> 00:19:26,834 line:-2
+Now, content configurations
+work a little differently.
+
+
+314
+00:19:27,568 --> 00:19:31,171 line:-2
+Instead of the cell
+automatically applying one by default,
+
+
+315
+00:19:31,238 --> 00:19:35,676 line:-2
+you can use the defaultContent
+Configuration method on the cell
+
+
+316
+00:19:35,742 --> 00:19:39,413 line:-2
+to get a fresh configuration
+based on the cell's style,
+
+
+317
+00:19:39,479 --> 00:19:41,615 line:-1
+as you've seen in the earlier examples.
+
+
+318
+00:19:43,684 --> 00:19:47,087 line:-2
+But for both background
+and content configurations,
+
+
+319
+00:19:47,154 --> 00:19:49,923 line:-2
+you can easily request
+the default configuration
+
+
+320
+00:19:49,990 --> 00:19:51,792 line:-1
+for any style that you'd like
+
+
+321
+00:19:51,859 --> 00:19:55,028 line:0
+by going directly
+to the UIBackgroundConfiguration
+
+
+322
+00:19:55,095 --> 00:19:57,865 line:0
+and UIListContentConfiguration types.
+
+
+323
+00:19:58,632 --> 00:20:01,034 line:0
+Here you can see examples
+of how to do this
+
+
+324
+00:20:01,101 --> 00:20:03,670 line:0
+for a sidebar style list cell.
+
+
+325
+00:20:03,737 --> 00:20:05,305 line:-1
+And there are similar methods
+
+
+326
+00:20:05,372 --> 00:20:09,142 line:-2
+for the other different styles
+of cells, headers and footers.
+
+
+327
+00:20:10,310 --> 00:20:14,181 line:-2
+How about we take a look at some
+of these different styles in action?
+
+
+328
+00:20:16,149 --> 00:20:19,286 line:-1
+Here we have a list of sticker categories.
+
+
+329
+00:20:19,353 --> 00:20:23,423 line:-2
+This list is currently configured
+with the sidebar appearance,
+
+
+330
+00:20:23,490 --> 00:20:27,928 line:-2
+so all of our cells have default
+background and content configurations
+
+
+331
+00:20:27,995 --> 00:20:29,463 line:-1
+that match that style.
+
+
+332
+00:20:30,264 --> 00:20:33,634 line:-2
+You can see the cells update
+their background and content appearance
+
+
+333
+00:20:33,700 --> 00:20:35,802 line:-2
+for different states
+as I interact with them.
+
+
+334
+00:20:37,471 --> 00:20:41,208 line:-2
+But the sidebar style is just one
+of the appearances that we can use
+
+
+335
+00:20:41,275 --> 00:20:42,876 line:-1
+for our collection view list.
+
+
+336
+00:20:43,744 --> 00:20:45,746 line:-1
+Let's take a look at what happens
+
+
+337
+00:20:45,812 --> 00:20:48,849 line:-2
+if we configure this
+with some different appearances.
+
+
+338
+00:20:49,750 --> 00:20:54,154 line:-2
+Here's the same list,
+configured with the grouped appearance.
+
+
+339
+00:20:54,221 --> 00:20:56,924 line:-1
+And this is the inset grouped appearance.
+
+
+340
+00:20:58,225 --> 00:21:00,294 line:-1
+And here's the plain appearance.
+
+
+341
+00:21:00,360 --> 00:21:03,263 line:-2
+You probably recognize these styles
+from UITableView.
+
+
+342
+00:21:04,264 --> 00:21:07,100 line:-2
+Collection view list
+supports some new styles,
+
+
+343
+00:21:07,167 --> 00:21:09,269 line:-1
+such as this sidebar plain appearance
+
+
+344
+00:21:10,103 --> 00:21:13,006 line:-2
+and the original sidebar appearance
+that we started with.
+
+
+345
+00:21:13,674 --> 00:21:18,011 line:-2
+All of the visual styling that you see
+for these different list appearances
+
+
+346
+00:21:18,078 --> 00:21:21,748 line:-2
+is coming from the default
+background and content configurations.
+
+
+347
+00:21:22,583 --> 00:21:25,185 line:-1
+Now let's switch back to the group style,
+
+
+348
+00:21:25,252 --> 00:21:28,188 line:-2
+so we can see the individual cells
+more clearly
+
+
+349
+00:21:28,255 --> 00:21:32,659 line:-2
+and take a look at how they respond
+to different dynamic type sizes
+
+
+350
+00:21:32,726 --> 00:21:35,262 line:-1
+by changing the system text size setting.
+
+
+351
+00:21:36,129 --> 00:21:37,731 line:-1
+You can see that by default,
+
+
+352
+00:21:37,798 --> 00:21:40,601 line:-2
+everything responds dynamically
+to these changes.
+
+
+353
+00:21:41,168 --> 00:21:42,836 line:-1
+As we increase the text size,
+
+
+354
+00:21:42,903 --> 00:21:45,739 line:-2
+the entire layout adjusts
+to accommodate that.
+
+
+355
+00:21:46,607 --> 00:21:50,110 line:-2
+And if we switch on
+the largest Accessibility text sizes,
+
+
+356
+00:21:50,177 --> 00:21:53,413 line:-2
+you'll see that the cell layouts
+use a special mode
+
+
+357
+00:21:53,480 --> 00:21:55,816 line:-1
+where the text wraps around the image
+
+
+358
+00:21:55,883 --> 00:21:59,152 line:-2
+in order to maximize
+the space available for the content.
+
+
+359
+00:22:00,187 --> 00:22:02,956 line:-2
+Content configurations are built
+from the ground up
+
+
+360
+00:22:03,023 --> 00:22:05,492 line:-1
+to support dynamic layouts like this.
+
+
+361
+00:22:05,559 --> 00:22:08,795 line:-2
+So let's take a quick look under the hood
+at how that works.
+
+
+362
+00:22:10,597 --> 00:22:14,768 line:-2
+Content configurations are designed
+to be used with self-sizing cells,
+
+
+363
+00:22:14,835 --> 00:22:16,803 line:-1
+where their height can be flexible,
+
+
+364
+00:22:16,870 --> 00:22:20,040 line:-2
+depending on
+the exact configuration and environment.
+
+
+365
+00:22:20,908 --> 00:22:23,844 line:-2
+This is important to ensure
+that your app looks great
+
+
+366
+00:22:23,911 --> 00:22:28,749 line:-2
+when running on different device sizes,
+at different dynamic type sizes
+
+
+367
+00:22:28,815 --> 00:22:31,518 line:-2
+and with different amounts
+and types of content.
+
+
+368
+00:22:32,219 --> 00:22:36,557 line:-2
+Content configurations give you control
+over the layout margins,
+
+
+369
+00:22:36,623 --> 00:22:37,991 line:-1
+shown in blue here,
+
+
+370
+00:22:38,058 --> 00:22:41,461 line:-2
+and various padding properties,
+shown in orange.
+
+
+371
+00:22:42,129 --> 00:22:44,164 line:-1
+Together with the actual content,
+
+
+372
+00:22:44,231 --> 00:22:46,867 line:-2
+these are what determine
+the intrinsic height
+
+
+373
+00:22:46,934 --> 00:22:49,803 line:-1
+and affect how the cell self-sizes.
+
+
+374
+00:22:50,337 --> 00:22:52,973 line:-2
+Instead of trying
+to enforce a fixed height,
+
+
+375
+00:22:53,040 --> 00:22:56,243 line:-2
+you should use these properties
+on the content configuration
+
+
+376
+00:22:56,310 --> 00:23:00,614 line:-2
+to influence the layout and allow
+the height to adjust dynamically.
+
+
+377
+00:23:01,281 --> 00:23:04,117 line:-2
+There's one more layout concept
+that you should know about.
+
+
+378
+00:23:04,585 --> 00:23:07,054 line:-1
+Let's see how it works in an example.
+
+
+379
+00:23:07,120 --> 00:23:09,256 line:-1
+Here we have three different cells,
+
+
+380
+00:23:09,323 --> 00:23:13,994 line:-2
+each using a content configuration
+with an image and some text.
+
+
+381
+00:23:14,061 --> 00:23:16,396 line:-1
+Right now, everything looks pretty good.
+
+
+382
+00:23:17,064 --> 00:23:20,367 line:-2
+But say we want to use
+some different images in these cells.
+
+
+383
+00:23:21,635 --> 00:23:25,305 line:-2
+The problem is that
+the images aren't exactly the same size.
+
+
+384
+00:23:25,372 --> 00:23:27,641 line:-1
+They have slightly different widths.
+
+
+385
+00:23:27,708 --> 00:23:31,845 line:-2
+So the images and the text
+aren't aligned across cells anymore.
+
+
+386
+00:23:31,912 --> 00:23:36,116 line:-2
+The reason that this happened
+is because the images are leading aligned,
+
+
+387
+00:23:36,183 --> 00:23:39,586 line:-2
+and the text is positioned
+with the same amount of padding
+
+
+388
+00:23:39,653 --> 00:23:41,955 line:-1
+from the trailing edge of each image.
+
+
+389
+00:23:42,022 --> 00:23:44,458 line:-2
+To get the right alignment
+across these cells,
+
+
+390
+00:23:44,525 --> 00:23:49,630 line:-2
+we need to specify what we call
+a reserved layout size for each image.
+
+
+391
+00:23:50,764 --> 00:23:54,168 line:-2
+If we set the same reserved layout width
+for the image
+
+
+392
+00:23:54,234 --> 00:23:56,203 line:-1
+on each content configuration,
+
+
+393
+00:23:56,270 --> 00:23:58,906 line:-2
+what that does
+is horizontally center the image
+
+
+394
+00:23:58,972 --> 00:24:01,475 line:-1
+inside that reserved amount of space.
+
+
+395
+00:24:01,542 --> 00:24:06,380 line:-2
+In this illustration, the distance
+between the two red-dotted lines
+
+
+396
+00:24:06,446 --> 00:24:09,249 line:-2
+is the reserved layout width
+for each image.
+
+
+397
+00:24:09,316 --> 00:24:13,287 line:-2
+The reserved layout size does not affect
+the actual size of the image.
+
+
+398
+00:24:13,353 --> 00:24:16,290 line:-2
+And if the image is larger than
+the reserved layout size,
+
+
+399
+00:24:16,356 --> 00:24:19,126 line:-2
+it will be allowed to extend
+outside of that area.
+
+
+400
+00:24:19,826 --> 00:24:24,364 line:-2
+Using a reserved layout size for the image
+also correctly aligns the text,
+
+
+401
+00:24:24,431 --> 00:24:28,769 line:-2
+because the text is positioned relative
+to the same reserved layout area
+
+
+402
+00:24:28,836 --> 00:24:30,671 line:-1
+for the image in each cell.
+
+
+403
+00:24:30,737 --> 00:24:32,372 line:-1
+If you're using symbol images,
+
+
+404
+00:24:32,439 --> 00:24:36,810 line:-2
+UIKit applies a standard
+reserved layout size automatically,
+
+
+405
+00:24:36,877 --> 00:24:40,781 line:-2
+which you can request manually
+for non-symbol images if needed.
+
+
+406
+00:24:41,248 --> 00:24:45,319 line:-2
+So that's what you need to know
+about list content configuration layout.
+
+
+407
+00:24:46,220 --> 00:24:49,289 line:-2
+Let's go over a few important details
+to keep in mind
+
+
+408
+00:24:49,356 --> 00:24:51,692 line:-1
+as you start adopting configurations.
+
+
+409
+00:24:52,893 --> 00:24:56,430 line:-2
+If you have existing code
+that you're updating and migrating over,
+
+
+410
+00:24:56,496 --> 00:24:59,600 line:-2
+keep in mind that configurations
+are mutually exclusive
+
+
+411
+00:24:59,666 --> 00:25:01,068 line:-1
+with some existing properties.
+
+
+412
+00:25:02,102 --> 00:25:04,204 line:-1
+Setting a background configuration
+
+
+413
+00:25:04,271 --> 00:25:09,109 line:-2
+always resets the background color
+and background view properties to nil.
+
+
+414
+00:25:09,710 --> 00:25:12,212 line:-2
+And the same thing applies
+the other way around.
+
+
+415
+00:25:13,046 --> 00:25:16,216 line:-2
+So make sure that you don't mix
+a background configuration
+
+
+416
+00:25:16,283 --> 00:25:19,620 line:-2
+with other code still setting
+these other background properties
+
+
+417
+00:25:19,686 --> 00:25:20,854 line:-1
+on the same cell.
+
+
+418
+00:25:22,256 --> 00:25:25,659 line:-2
+And specifically for those of you
+using UITableView,
+
+
+419
+00:25:26,293 --> 00:25:31,031 line:-2
+content configurations supersede
+the built-in subviews of cells,
+
+
+420
+00:25:31,098 --> 00:25:32,666 line:-1
+headers and footers,
+
+
+421
+00:25:32,733 --> 00:25:36,737 line:-2
+like the imageView, textLabel
+and detailTextLabel.
+
+
+422
+00:25:37,804 --> 00:25:42,476 line:-2
+These legacy content properties
+will be deprecated in a future release,
+
+
+423
+00:25:42,543 --> 00:25:45,712 line:-2
+so we encourage you
+to adopt content configurations
+
+
+424
+00:25:45,779 --> 00:25:49,183 line:-2
+to take advantage
+of their more powerful features
+
+
+425
+00:25:49,249 --> 00:25:51,685 line:-1
+and enhanced customizability.
+
+
+426
+00:25:51,752 --> 00:25:53,487 line:-1
+The background configuration
+
+
+427
+00:25:53,554 --> 00:25:56,890 line:-2
+and list content configuration types
+that we've covered today
+
+
+428
+00:25:56,957 --> 00:25:58,859 line:-1
+are incredibly powerful.
+
+
+429
+00:25:58,926 --> 00:26:03,530 line:-2
+But there are still going to be times
+when you need to do something more custom.
+
+
+430
+00:26:04,431 --> 00:26:08,368 line:-2
+With configurations,
+you have more options than ever before.
+
+
+431
+00:26:09,970 --> 00:26:12,606 line:-2
+In addition
+to the list content configuration,
+
+
+432
+00:26:13,106 --> 00:26:17,845 line:-2
+we're also giving you access
+to the associated list content view,
+
+
+433
+00:26:17,911 --> 00:26:20,214 line:-1
+which implements all of the rendering.
+
+
+434
+00:26:21,114 --> 00:26:25,385 line:-2
+You just create or update this view
+using the configuration,
+
+
+435
+00:26:25,953 --> 00:26:30,991 line:-2
+and then you can add it as a subview
+right alongside your own custom views.
+
+
+436
+00:26:31,925 --> 00:26:35,929 line:-2
+This lets you take advantage
+of all the content configuration features
+
+
+437
+00:26:36,430 --> 00:26:38,999 line:-1
+and combine the list content view
+
+
+438
+00:26:39,066 --> 00:26:42,069 line:-2
+with your own additional custom views
+next to it,
+
+
+439
+00:26:42,503 --> 00:26:45,038 line:-1
+such as an extra image view or a label.
+
+
+440
+00:26:46,173 --> 00:26:50,444 line:-2
+And because the list content view
+is just a regular UIView,
+
+
+441
+00:26:50,511 --> 00:26:53,313 line:-2
+you can actually use it
+by itself anywhere,
+
+
+442
+00:26:53,881 --> 00:26:56,583 line:-2
+even outside of a collection
+or table view,
+
+
+443
+00:26:56,650 --> 00:26:59,152 line:-1
+such as in a plain UIStackView.
+
+
+444
+00:27:00,087 --> 00:27:04,091 line:-2
+But what about cases
+when you aren't building a list at all,
+
+
+445
+00:27:04,558 --> 00:27:06,960 line:-1
+or want to do something completely custom?
+
+
+446
+00:27:07,895 --> 00:27:10,197 line:-1
+Configurations have got you covered.
+
+
+447
+00:27:11,365 --> 00:27:12,432 line:-1
+Even when you're building
+
+
+448
+00:27:12,499 --> 00:27:15,936 line:-2
+a completely custom view hierarchy
+inside your cells,
+
+
+449
+00:27:16,003 --> 00:27:19,173 line:-2
+you can still use
+the system configurations to help.
+
+
+450
+00:27:20,140 --> 00:27:22,643 line:-1
+Because configurations are so lightweight,
+
+
+451
+00:27:23,043 --> 00:27:26,046 line:-2
+you can use them as a source
+of default values
+
+
+452
+00:27:26,113 --> 00:27:32,019 line:-2
+for things like fonts, colors and margins
+that you copy over to your custom views,
+
+
+453
+00:27:32,553 --> 00:27:36,023 line:-2
+even if you never apply
+the configuration directly itself.
+
+
+454
+00:27:37,591 --> 00:27:39,927 line:-1
+And for more advanced use cases,
+
+
+455
+00:27:39,993 --> 00:27:44,198 line:-2
+you can create a completely custom
+content configuration type
+
+
+456
+00:27:44,798 --> 00:27:47,668 line:-2
+with a paired content view class
+that renders it,
+
+
+457
+00:27:48,435 --> 00:27:52,072 line:-2
+and then use your custom configuration
+with any cell
+
+
+458
+00:27:52,139 --> 00:27:55,676 line:-2
+the same way that you would
+use a list content configuration.
+
+
+459
+00:27:56,743 --> 00:27:58,445 line:-1
+With a custom configuration,
+
+
+460
+00:27:58,512 --> 00:28:02,316 line:-2
+you can take advantage of all the features
+that we've talked about,
+
+
+461
+00:28:02,382 --> 00:28:05,419 line:-2
+including
+allowing your custom configuration
+
+
+462
+00:28:05,485 --> 00:28:08,622 line:-2
+to automatically update itself
+for new states.
+
+
+463
+00:28:09,122 --> 00:28:13,227 line:-2
+No matter how complex
+or custom your cells are,
+
+
+464
+00:28:13,727 --> 00:28:17,831 line:-2
+you'll be able to take advantage
+of the power of configurations.
+
+
+465
+00:28:18,498 --> 00:28:22,603 line:-2
+We've covered all the essentials
+of modern cell configuration.
+
+
+466
+00:28:23,437 --> 00:28:27,941 line:-2
+You've seen how easy it is to use
+background and content configurations
+
+
+467
+00:28:28,008 --> 00:28:30,110 line:-1
+and how you can use the same code
+
+
+468
+00:28:30,177 --> 00:28:33,380 line:-2
+to configure a collection view cell
+or a table view cell.
+
+
+469
+00:28:34,381 --> 00:28:38,185 line:-2
+Configurations let you focus
+on what you want to display
+
+
+470
+00:28:38,252 --> 00:28:41,188 line:-2
+without worrying
+about how to update all of your views.
+
+
+471
+00:28:41,688 --> 00:28:44,258 line:-2
+You just start
+with a fresh configuration each time,
+
+
+472
+00:28:44,725 --> 00:28:47,828 line:-2
+set it up the way you want
+and apply it to your cell,
+
+
+473
+00:28:47,895 --> 00:28:49,997 line:-1
+letting UIKit take care of the rest.
+
+
+474
+00:28:50,964 --> 00:28:53,567 line:-2
+You've seen how configurations
+can be updated
+
+
+475
+00:28:53,634 --> 00:28:58,505 line:-2
+using configuration state to produce
+a wide variety of different appearances
+
+
+476
+00:28:58,572 --> 00:29:01,942 line:-2
+and how you can use configuration state
+when setting up your cells.
+
+
+477
+00:29:03,110 --> 00:29:06,013 line:-2
+And everything
+that we've talked about today is designed
+
+
+478
+00:29:06,079 --> 00:29:09,616 line:-2
+to be composable and extensible
+to meet your needs.
+
+
+479
+00:29:10,584 --> 00:29:15,255 line:-2
+So go download the sample app
+and give these new APIs a try,
+
+
+480
+00:29:15,322 --> 00:29:18,559 line:-2
+then start using
+content and background configurations
+
+
+481
+00:29:18,625 --> 00:29:21,795 line:-2
+to set up collection
+and table view cells in your app.
+
+
+482
+00:29:22,829 --> 00:29:27,968 line:-2
+Be sure to check out
+the collection view sessions from WWDC 20
+
+
+483
+00:29:28,035 --> 00:29:31,438 line:-2
+to learn more about building lists
+and much, much more.
+

@@ -1,0 +1,1735 @@
+2
+00:00:00.267 --> 00:00:03.270 line:-1 position:50%
+♪ Mellow instrumental
+hip-hip music ♪
+
+
+3
+00:00:03,270 --> 00:00:09,843 position:90% line:1 size:2%
+♪
+
+
+4
+00:00:09,843 --> 00:00:10,944 line:-1
+Hi, everyone.
+
+
+5
+00:00:10.944 --> 00:00:14.414 line:-1 position:50%
+I'm Jeff, an engineer
+on the SwiftUI team.
+
+
+6
+00:00:14.414 --> 00:00:16.149 line:-1 position:50%
+Today, I'm excited
+to talk to you
+
+
+7
+00:00:16.149 --> 00:00:19.519 line:-1 position:50%
+about bringing multiple windows
+to your SwiftUI app
+
+
+8
+00:00:19.519 --> 00:00:22.756 line:-1 position:50%
+on iPadOS and macOS.
+
+
+9
+00:00:22,756 --> 00:00:25,659 line:-1
+In this session,
+we'll open with an overview
+
+
+10
+00:00:25.659 --> 00:00:29.162 line:-1 position:50%
+of the various scene types
+in the SwiftUI lifecycle,
+
+
+11
+00:00:29.162 --> 00:00:32.799 line:-1 position:50%
+including a few new types
+we're introducing.
+
+
+12
+00:00:32,799 --> 00:00:35,135 line:-1
+Followed by showing
+how these scene types
+
+
+13
+00:00:35.135 --> 00:00:39.573 line:-1 position:50%
+can be composed together,
+by adding auxiliary scenes.
+
+
+14
+00:00:39,573 --> 00:00:42,643 line:-1
+Then we'll cover some
+new APIs for opening windows
+
+
+15
+00:00:42,643 --> 00:00:45,512 line:-1
+for a particular scene
+in your app.
+
+
+16
+00:00:45.512 --> 00:00:47.447 line:-1 position:50%
+And we'll wrap things up
+with a few ways
+
+
+17
+00:00:47,447 --> 00:00:51,018 line:-1
+for customizing an app's scenes.
+
+
+18
+00:00:51,018 --> 00:00:54,388 line:-1
+Let's start with an overview
+of the existing scene types
+
+
+19
+00:00:54.388 --> 00:00:57.057 line:-1 position:50%
+before digging in
+to some new ones.
+
+
+20
+00:00:57.057 --> 00:01:00.894 line:-1 position:50%
+You'll recall from previous
+sessions that apps in SwiftUI
+
+
+21
+00:01:00.894 --> 00:01:03.730 line:-1 position:50%
+are composed of scenes
+and views.
+
+
+22
+00:01:03.730 --> 00:01:08.001 line:-1 position:50%
+Scenes commonly represent their
+contents with a window onscreen.
+
+
+23
+00:01:08.001 --> 00:01:10.170 line:-1 position:50%
+For example,
+here is an app I've built
+
+
+24
+00:01:10,170 --> 00:01:12,205 line:-1
+to keep track of the books
+I'm reading.
+
+
+25
+00:01:12.205 --> 00:01:14.274 line:-1 position:50%
+It's defined as
+a single window group
+
+
+26
+00:01:14,274 --> 00:01:17,811 line:-1
+which shows my reading list
+in a platform-appropriate way.
+
+
+27
+00:01:17,811 --> 00:01:20,580 line:-1
+On platforms which support
+multiple windows,
+
+
+28
+00:01:20.580 --> 00:01:22.983 line:-1 position:50%
+such as iPadOS and macOS,
+
+
+29
+00:01:22.983 --> 00:01:26.753 line:-1 position:50%
+a scene can represent itself
+with several such windows.
+
+
+30
+00:01:26.753 --> 00:01:30.123 line:-1 position:50%
+The behaviors and
+representation of a scene vary
+
+
+31
+00:01:30,123 --> 00:01:32,359 line:-1
+based on the type used.
+
+
+32
+00:01:32.359 --> 00:01:35.262 line:-1 position:50%
+For example, a scene
+may only represent itself
+
+
+33
+00:01:35.262 --> 00:01:36.930 line:-1 position:50%
+with a single instance,
+
+
+34
+00:01:36.930 --> 00:01:39.433 line:-1 position:50%
+regardless of platform
+capabilities.
+
+
+35
+00:01:39,433 --> 00:01:41,868 line:-1
+Let's take a look at
+the current list of scene types
+
+
+36
+00:01:41,868 --> 00:01:43,136 line:-1
+in SwiftUI.
+
+
+37
+00:01:43.136 --> 00:01:47.007 line:-1 position:50%
+WindowGroup provides a way to
+build data-driven applications
+
+
+38
+00:01:47,007 --> 00:01:49,776 line:-1
+across all of Apple's platforms.
+
+
+39
+00:01:49.776 --> 00:01:52.512 line:-1 position:50%
+DocumentGroup lets you build
+document-based apps
+
+
+40
+00:01:52,512 --> 00:01:54,848 line:-1
+on iOS and macOS.
+
+
+41
+00:01:54,848 --> 00:01:57,050 line:-1
+And Settings
+defines an interface
+
+
+42
+00:01:57.050 --> 00:02:01.288 line:-1 position:50%
+for representing in-app settings
+values on macOS.
+
+
+43
+00:02:01.288 --> 00:02:03.290 line:-1 position:50%
+These scene types
+can be composed together
+
+
+44
+00:02:03.290 --> 00:02:05.492 line:-1 position:50%
+to extend your app's
+functionality.
+
+
+45
+00:02:05,492 --> 00:02:08,996 line:-1
+We're extending the list of
+scenes with two new additions.
+
+
+46
+00:02:08,996 --> 00:02:12,432 position:50%
+The first of which is Window,
+a scene which represents
+
+
+47
+00:02:12,432 --> 00:02:16,403 position:50%
+a single, unique window
+on all platforms;
+
+
+48
+00:02:16,403 --> 00:02:20,374 line:1
+as well as a new scene type
+for macOS: MenuBarExtra,
+
+
+49
+00:02:20,374 --> 00:02:24,578 line:1
+which renders as a persistent
+control in the system menu bar.
+
+
+50
+00:02:24,578 --> 00:02:26,179 position:50%
+As with the other
+scene types,
+
+
+51
+00:02:26,179 --> 00:02:27,914 position:50%
+you can use
+Window and MenuBarExtra
+
+
+52
+00:02:27,914 --> 00:02:30,450 position:50%
+both as a standalone scene,
+
+
+53
+00:02:30,450 --> 00:02:33,253 position:50%
+or composed with other scenes
+in your app.
+
+
+54
+00:02:33,253 --> 00:02:36,523 position:50%
+Unlike WindowGroup, the Window
+scene will only ever represent
+
+
+55
+00:02:36,523 --> 00:02:41,261 line:1
+its contents in a single,
+unique window instance.
+
+
+56
+00:02:41,261 --> 00:02:43,063 position:50%
+This characteristic
+can be useful
+
+
+57
+00:02:43,063 --> 00:02:46,500 position:50%
+when the contents of your scene
+represents some global app state
+
+
+58
+00:02:46,500 --> 00:02:48,969 position:50%
+that would not
+necessarily fit well
+
+
+59
+00:02:48,969 --> 00:02:52,806 position:50%
+with WindowGroups' multi-window
+presentation style
+
+
+60
+00:02:52,806 --> 00:02:54,908 line:1
+on macOS and iPadOS.
+
+
+61
+00:02:54,908 --> 00:02:58,011 position:50%
+For example,
+a game may wish to only allow
+
+
+62
+00:02:58,011 --> 00:03:01,314 position:50%
+for a single main window
+to render its contents.
+
+
+63
+00:03:01,314 --> 00:03:04,751 line:1
+MenuBarExtra is a new
+macOS-only scene type
+
+
+64
+00:03:04,751 --> 00:03:06,286 line:1
+which behaves
+a little differently
+
+
+65
+00:03:06,286 --> 00:03:08,088 position:50%
+from our other scenes.
+
+
+66
+00:03:08,088 --> 00:03:10,891 position:50%
+Rather than rendering
+its contents in a window,
+
+
+67
+00:03:10,891 --> 00:03:13,560 line:1
+it will place its label
+in the menu bar
+
+
+68
+00:03:13,560 --> 00:03:17,431 position:50%
+and show its contents
+in either a menu or window
+
+
+69
+00:03:17,431 --> 00:03:19,332 line:1
+which is anchored to the label.
+
+
+70
+00:03:19,332 --> 00:03:21,435 position:50%
+Additionally,
+it will be useable
+
+
+71
+00:03:21,435 --> 00:03:24,671 line:1
+as long as its associated app
+is running,
+
+
+72
+00:03:24,671 --> 00:03:27,474 position:50%
+regardless of whether
+that app is frontmost.
+
+
+73
+00:03:27,474 --> 00:03:31,511 position:50%
+MenuBarExtra is great for
+creating standalone utility apps
+
+
+74
+00:03:31,511 --> 00:03:34,481 line:1
+that provide easy access
+to their functionality.
+
+
+75
+00:03:34,481 --> 00:03:36,450 position:50%
+Or it can be composed
+with other scenes
+
+
+76
+00:03:36,450 --> 00:03:41,321 line:1
+to provide an alternate way to
+access your app's functionality.
+
+
+77
+00:03:41,321 --> 00:03:45,225 line:1
+It also supports two rendering
+styles: the default style,
+
+
+78
+00:03:45,225 --> 00:03:47,594 line:1
+which shows the contents
+in a menu
+
+
+79
+00:03:47,594 --> 00:03:50,363 position:50%
+which pulls down
+from the menu bar,
+
+
+80
+00:03:50,363 --> 00:03:53,500 position:50%
+as well as a style
+that presents its contents
+
+
+81
+00:03:53,500 --> 00:03:56,903 line:1
+in a chromeless window
+anchored to the menu bar.
+
+
+82
+00:03:56.903 --> 00:03:59.873 line:-1 position:50%
+With the addition of
+these two new scene types,
+
+
+83
+00:03:59.873 --> 00:04:04.077 line:-1 position:50%
+SwiftUI apps can represent an
+even richer set of functionality
+
+
+84
+00:04:04,077 --> 00:04:07,047 line:-1
+across all of our platforms.
+
+
+85
+00:04:07,047 --> 00:04:09,816 line:-1
+Let's see how these new APIs
+can be used
+
+
+86
+00:04:09.816 --> 00:04:13.320 line:-1 position:50%
+in conjunction with our
+existing scene types.
+
+
+87
+00:04:13,320 --> 00:04:15,288 line:-1
+Here's the definition
+of my BookClub app
+
+
+88
+00:04:15,288 --> 00:04:17,023 line:-1
+that I showed earlier.
+
+
+89
+00:04:17.023 --> 00:04:19.826 line:-1 position:50%
+It currently consists
+of a single window group.
+
+
+90
+00:04:19,826 --> 00:04:22,696 line:-1
+On macOS, my BookClub app
+could benefit
+
+
+91
+00:04:22.696 --> 00:04:24.431 line:-1 position:50%
+from an additional window
+
+
+92
+00:04:24.431 --> 00:04:27.200 line:-1 position:50%
+to display our reading activity
+over time.
+
+
+93
+00:04:27,200 --> 00:04:31,271 line:-1
+This is a great example
+of how macOS apps can make use
+
+
+94
+00:04:31.271 --> 00:04:33.240 line:-1 position:50%
+of the additional
+screen real estate
+
+
+95
+00:04:33.240 --> 00:04:35.208 line:-1 position:50%
+and flexible windowing
+arrangements
+
+
+96
+00:04:35,208 --> 00:04:37,177 line:-1
+present on that platform.
+
+
+97
+00:04:37.177 --> 00:04:39.146 line:-1 position:50%
+We'll add an auxiliary scene
+to our app
+
+
+98
+00:04:39.146 --> 00:04:41.214 line:-1 position:50%
+for representing this interface.
+
+
+99
+00:04:41,214 --> 00:04:43,583 line:-1
+Our Activity window's data
+is derived
+
+
+100
+00:04:43.583 --> 00:04:45.719 line:-1 position:50%
+from our overall app state,
+
+
+101
+00:04:45,719 --> 00:04:48,855 line:-1
+so a window scene
+is the ideal choice for it.
+
+
+102
+00:04:48.855 --> 00:04:50.657 line:-1 position:50%
+Opening multiple windows
+with the same state
+
+
+103
+00:04:50,657 --> 00:04:52,726 line:-1
+would not fit well
+with our design.
+
+
+104
+00:04:52.726 --> 00:04:55.962 line:-1 position:50%
+The title provided to our scene
+will be used as the label
+
+
+105
+00:04:55.962 --> 00:05:00.834 line:-1 position:50%
+for a menu item which is added
+to a section of the Window menu.
+
+
+106
+00:05:00.834 --> 00:05:04.137 line:-1 position:50%
+When selecting this item, the
+scene's window will be opened
+
+
+107
+00:05:04.137 --> 00:05:05.872 line:-1 position:50%
+if not already so.
+
+
+108
+00:05:05.872 --> 00:05:08.408 line:-1 position:50%
+Otherwise, it will be
+brought to the front.
+
+
+109
+00:05:08,408 --> 00:05:10,544 line:-1
+Now that we've covered
+adding an auxiliary scene
+
+
+110
+00:05:10.544 --> 00:05:12.179 line:-1 position:50%
+to our BookClub app,
+
+
+111
+00:05:12.179 --> 00:05:15.248 line:-1 position:50%
+I'd like to discuss some of
+the new scene presentation APIs
+
+
+112
+00:05:15.248 --> 00:05:18.318 line:-1 position:50%
+we're adding and how you can
+integrate them into your app
+
+
+113
+00:05:18,318 --> 00:05:21,221 line:-1
+to provide richer experiences.
+
+
+114
+00:05:21.221 --> 00:05:24.357 line:-1 position:50%
+Our BookClub app has a context
+menu that can be invoked
+
+
+115
+00:05:24.357 --> 00:05:26.693 line:-1 position:50%
+for any book
+in our Content List pane.
+
+
+116
+00:05:26,693 --> 00:05:28,828 position:50%
+This context menu
+will include a button
+
+
+117
+00:05:28,828 --> 00:05:31,464 position:50%
+for triggering
+our window presentation.
+
+
+118
+00:05:31,464 --> 00:05:33,500 line:1
+We'll fill in the details
+shortly.
+
+
+119
+00:05:33.500 --> 00:05:36.169 line:-1 position:50%
+SwiftUI provides several
+new callable types
+
+
+120
+00:05:36,169 --> 00:05:39,039 line:-1
+via the environment
+for presenting windows
+
+
+121
+00:05:39,039 --> 00:05:41,908 line:-1
+tied to the scenes
+your app defines.
+
+
+122
+00:05:41,908 --> 00:05:44,578 line:-1
+The first of these
+is openWindow action,
+
+
+123
+00:05:44,578 --> 00:05:45,712 line:-1
+which can present windows
+
+
+124
+00:05:45,712 --> 00:05:49,216 line:-1
+for either a WindowGroup
+or window scene.
+
+
+125
+00:05:49.216 --> 00:05:52.652 line:-1 position:50%
+The identifier passed
+to the action must match
+
+
+126
+00:05:52,652 --> 00:05:56,056 line:-1
+an identifier for a scene
+defined in your app.
+
+
+127
+00:05:56.056 --> 00:06:00.060 line:-1 position:50%
+openWindow action can also take
+a presentation value,
+
+
+128
+00:06:00,060 --> 00:06:03,330 line:-1
+which the presented scene will
+use to display its contents.
+
+
+129
+00:06:03.330 --> 00:06:06.999 line:-1 position:50%
+This form of the action is only
+supported by WindowGroup,
+
+
+130
+00:06:06.999 --> 00:06:10.203 line:-1 position:50%
+using a new initializer that
+we'll take a look at shortly.
+
+
+131
+00:06:10.203 --> 00:06:12.339 line:-1 position:50%
+The type of the value
+must match
+
+
+132
+00:06:12.339 --> 00:06:15.775 line:-1 position:50%
+against the type provided
+to the scene's initializer.
+
+
+133
+00:06:15,775 --> 00:06:17,944 line:-1
+There are also two callable
+types in the environment
+
+
+134
+00:06:17.944 --> 00:06:22.349 line:-1 position:50%
+for presenting document windows:
+newDocument action,
+
+
+135
+00:06:22.349 --> 00:06:24.384 line:-1 position:50%
+which supports opening
+new document windows
+
+
+136
+00:06:24.384 --> 00:06:28.255 line:-1 position:50%
+for both FileDocuments
+and ReferenceFileDocuments.
+
+
+137
+00:06:28.255 --> 00:06:31.358 line:-1 position:50%
+This action requires that the
+corresponding DocumentGroup
+
+
+138
+00:06:31,358 --> 00:06:34,894 line:-1
+in your app is defined
+with an editor role.
+
+
+139
+00:06:34,894 --> 00:06:37,397 position:50%
+The document provided
+to this action will be created
+
+
+140
+00:06:37,397 --> 00:06:39,933 line:1
+each time the window
+is presented.
+
+
+141
+00:06:39,933 --> 00:06:43,236 line:-1
+For presenting document windows
+where the contents are provided
+
+
+142
+00:06:43.236 --> 00:06:45.772 line:-1 position:50%
+by an existing file on disk,
+
+
+143
+00:06:45,772 --> 00:06:48,008 line:-1
+there is the openDocument
+action.
+
+
+144
+00:06:48.008 --> 00:06:51.711 line:-1 position:50%
+This action takes a URL
+to the file you wish to open.
+
+
+145
+00:06:51.711 --> 00:06:53.747 line:-1 position:50%
+Your app must define
+a DocumentGroup
+
+
+146
+00:06:53,747 --> 00:06:55,282 line:-1
+for presenting the window,
+
+
+147
+00:06:55,282 --> 00:06:57,917 line:-1
+and the document type
+for that group must allow
+
+
+148
+00:06:57.917 --> 00:07:01.588 line:-1 position:50%
+for reading the type of the file
+at the provided URL.
+
+
+149
+00:07:01.588 --> 00:07:03.857 line:-1 position:50%
+Revisiting our button, we'll add
+
+
+150
+00:07:03,857 --> 00:07:06,860 line:-1
+the openWindow environment
+property to our view.
+
+
+151
+00:07:06,860 --> 00:07:10,096 line:-1
+Since this type is a callable,
+we can just call it directly
+
+
+152
+00:07:10.096 --> 00:07:11.965 line:-1 position:50%
+from our button's action.
+
+
+153
+00:07:11,965 --> 00:07:15,101 line:-1
+Our Book type conforms
+to identifiable,
+
+
+154
+00:07:15,101 --> 00:07:18,872 line:-1
+so we'll pass its identifier
+as the value to present.
+
+
+155
+00:07:18,872 --> 00:07:22,242 line:-1
+Now, before we move on, I'd like
+to discuss the values passed
+
+
+156
+00:07:22,242 --> 00:07:23,977 line:-1
+to the openWindow action.
+
+
+157
+00:07:23,977 --> 00:07:26,980 line:-1
+I noted that I'm passing
+the book's identifier,
+
+
+158
+00:07:26.980 --> 00:07:30.183 line:-1 position:50%
+which is a value
+of the UUID type.
+
+
+159
+00:07:30.183 --> 00:07:32.986 line:-1 position:50%
+In general,
+you'll want to prefer to use
+
+
+160
+00:07:32.986 --> 00:07:35.422 line:-1 position:50%
+your model's identifier
+like this,
+
+
+161
+00:07:35.422 --> 00:07:37.424 line:-1 position:50%
+rather than the value itself.
+
+
+162
+00:07:37,424 --> 00:07:39,826 line:-1
+Note that our Book type
+is a value type.
+
+
+163
+00:07:39.826 --> 00:07:43.530 line:-1 position:50%
+As such, if we were to use it
+as the presented value,
+
+
+164
+00:07:43.530 --> 00:07:45.665 line:-1 position:50%
+our new window would get
+a copy of the one
+
+
+165
+00:07:45,665 --> 00:07:47,967 line:-1
+which originated
+the presentation.
+
+
+166
+00:07:47,967 --> 00:07:50,904 line:-1
+Any edits to either one
+will not affect the other.
+
+
+167
+00:07:50,904 --> 00:07:53,640 line:-1
+Using the book's identifier
+lets our model store
+
+
+168
+00:07:53,640 --> 00:07:56,309 line:-1
+be the source of truth
+for these values instead
+
+
+169
+00:07:56.309 --> 00:07:59.379 line:-1 position:50%
+by providing multiple
+bindings to a single value.
+
+
+170
+00:07:59,379 --> 00:08:01,548 position:50%
+For more info
+on value type semantics,
+
+
+171
+00:08:01,548 --> 00:08:03,750 position:50%
+please see
+the developer documentation.
+
+
+172
+00:08:03,750 --> 00:08:06,219 line:-1
+The type being presented
+must also conform
+
+
+173
+00:08:06,219 --> 00:08:10,123 line:-1
+to both the Hashable
+and Codable protocols.
+
+
+174
+00:08:10.123 --> 00:08:13.693 line:-1 position:50%
+Hashable conformance is needed
+to associate the presented value
+
+
+175
+00:08:13,693 --> 00:08:15,195 line:-1
+with an open window;
+
+
+176
+00:08:15,195 --> 00:08:17,664 line:-1
+while Codable
+conformance is required
+
+
+177
+00:08:17.664 --> 00:08:20.200 line:-1 position:50%
+in order to persist
+the presented value
+
+
+178
+00:08:20,200 --> 00:08:21,501 line:-1
+for state restoration.
+
+
+179
+00:08:21,501 --> 00:08:23,036 line:-1
+I'll discuss both
+of these behaviors
+
+
+180
+00:08:23.036 --> 00:08:24.871 line:-1 position:50%
+in more detail shortly.
+
+
+181
+00:08:24,871 --> 00:08:29,109 position:50%
+Lastly, when possible, prefer
+passing lightweight values.
+
+
+182
+00:08:29,109 --> 00:08:32,445 position:50%
+Our book's identifier is
+another great example of this.
+
+
+183
+00:08:32,445 --> 00:08:35,181 position:50%
+Since the value will be
+persisted by SwiftUI
+
+
+184
+00:08:35,181 --> 00:08:38,118 position:50%
+for state restoration,
+using smaller values
+
+
+185
+00:08:38,118 --> 00:08:41,688 position:50%
+will result in greater
+responsiveness of your app.
+
+
+186
+00:08:41.688 --> 00:08:44.090 line:-1 position:50%
+Now, our button now has
+the necessary pieces
+
+
+187
+00:08:44,090 --> 00:08:45,959 line:-1
+to present our detail windows,
+
+
+188
+00:08:45,959 --> 00:08:48,128 line:-1
+but nothing will show
+when it is selected.
+
+
+189
+00:08:48,128 --> 00:08:51,498 line:-1
+This is because we've told
+SwiftUI to present a window
+
+
+190
+00:08:51.498 --> 00:08:53.333 line:-1 position:50%
+for a certain data type,
+
+
+191
+00:08:53.333 --> 00:08:56.169 line:-1 position:50%
+but haven't defined a scene
+in our app that reflects that.
+
+
+192
+00:08:56,169 --> 00:08:58,505 line:-1
+Let's head back to our app
+and make that change now.
+
+
+193
+00:08:58,505 --> 00:09:00,540 line:-1
+Alongside our primary
+WindowGroup
+
+
+194
+00:09:00,540 --> 00:09:02,242 line:-1
+and auxiliary window,
+
+
+195
+00:09:02,242 --> 00:09:04,177 line:-1
+we'll add
+an additional WindowGroup
+
+
+196
+00:09:04.177 --> 00:09:05.912 line:-1 position:50%
+for handling our book details.
+
+
+197
+00:09:05.912 --> 00:09:09.582 line:-1 position:50%
+Our book details WindowGroup
+uses a new initializer.
+
+
+198
+00:09:09.582 --> 00:09:12.118 line:-1 position:50%
+In addition to the title,
+we're noting that this group
+
+
+199
+00:09:12.118 --> 00:09:15.021 line:-1 position:50%
+presents data
+for the Book.ID type --
+
+
+200
+00:09:15,021 --> 00:09:16,956 line:-1
+in our case, UUIDs.
+
+
+201
+00:09:16.956 --> 00:09:19.592 line:-1 position:50%
+This type should match
+the value that we are passing
+
+
+202
+00:09:19,592 --> 00:09:22,595 line:-1
+to the openWindow action
+we added earlier.
+
+
+203
+00:09:22,595 --> 00:09:24,164 line:-1
+When a given value is provided
+
+
+204
+00:09:24,164 --> 00:09:26,533 line:-1
+to the WindowGroup
+for presentation,
+
+
+205
+00:09:26.533 --> 00:09:30.103 line:-1 position:50%
+SwiftUI will create a new
+child scene for that value,
+
+
+206
+00:09:30.103 --> 00:09:32.405 line:-1 position:50%
+and the root content
+of that scene's window
+
+
+207
+00:09:32,405 --> 00:09:36,943 line:-1
+will be defined by that value,
+using the group's view builder.
+
+
+208
+00:09:36.943 --> 00:09:40.680 line:-1 position:50%
+Each unique presented value
+will create a new scene.
+
+
+209
+00:09:40,680 --> 00:09:43,583 line:-1
+The value's equality
+will be used to determine
+
+
+210
+00:09:43,583 --> 00:09:45,685 line:-1
+if a new window
+should be created
+
+
+211
+00:09:45,685 --> 00:09:48,054 line:-1
+or if an existing window
+can be reused.
+
+
+212
+00:09:48.054 --> 00:09:50.190 line:-1 position:50%
+When openWindow
+presents a value
+
+
+213
+00:09:50.190 --> 00:09:53.092 line:-1 position:50%
+for which a window
+already exists,
+
+
+214
+00:09:53.092 --> 00:09:56.463 line:-1 position:50%
+the group will use that window
+rather than creating a new one.
+
+
+215
+00:09:56.463 --> 00:09:58.865 line:-1 position:50%
+Using our BookClub app
+as an example,
+
+
+216
+00:09:58.865 --> 00:10:01.501 line:-1 position:50%
+selecting the context menu
+action for a book
+
+
+217
+00:10:01,501 --> 00:10:04,404 line:-1
+which has already
+been presented in a window
+
+
+218
+00:10:04.404 --> 00:10:07.040 line:-1 position:50%
+will result in that window
+being ordered front,
+
+
+219
+00:10:07.040 --> 00:10:09.542 line:-1 position:50%
+rather than a second window
+showing the same book.
+
+
+220
+00:10:09.542 --> 00:10:12.712 line:-1 position:50%
+The presented value will also
+be automatically persisted
+
+
+221
+00:10:12.712 --> 00:10:16.216 line:-1 position:50%
+by SwiftUI for the purposes
+of state restoration.
+
+
+222
+00:10:16.216 --> 00:10:18.284 line:-1 position:50%
+Your view will be
+given a binding
+
+
+223
+00:10:18,284 --> 00:10:20,687 line:-1
+to the initial presented value.
+
+
+224
+00:10:20,687 --> 00:10:22,722 line:-1
+This binding can be modified
+at any time
+
+
+225
+00:10:22,722 --> 00:10:24,057 line:-1
+while the window is open.
+
+
+226
+00:10:24.057 --> 00:10:26.926 line:-1 position:50%
+When the scene is recreated
+for state restoration,
+
+
+227
+00:10:26.926 --> 00:10:29.429 line:-1 position:50%
+SwiftUI will pass
+the most recent value
+
+
+228
+00:10:29.429 --> 00:10:31.931 line:-1 position:50%
+to the window's Content view.
+
+
+229
+00:10:31.931 --> 00:10:36.336 line:-1 position:50%
+Here, we're giving the Book.ID
+binding to our detail view,
+
+
+230
+00:10:36.336 --> 00:10:38.571 line:-1 position:50%
+which can look up
+the specified item
+
+
+231
+00:10:38.571 --> 00:10:40.707 line:-1 position:50%
+in our model store
+for display.
+
+
+232
+00:10:40.707 --> 00:10:42.342 line:-1 position:50%
+With all our pieces in place,
+
+
+233
+00:10:42,342 --> 00:10:45,211 line:-1
+we can now select
+our context menu item
+
+
+234
+00:10:45.211 --> 00:10:48.114 line:-1 position:50%
+and view our book details
+in its own window.
+
+
+235
+00:10:48.114 --> 00:10:50.683 line:-1 position:50%
+Lastly, I'd like to go over
+some of the ways
+
+
+236
+00:10:50,683 --> 00:10:54,320 line:-1
+in which you can customize
+the scenes in your app.
+
+
+237
+00:10:54.320 --> 00:10:57.590 line:-1 position:50%
+Because we've defined our app
+with two WindowGroup scenes --
+
+
+238
+00:10:57.590 --> 00:10:59.192 line:-1 position:50%
+one for the main viewer window
+
+
+239
+00:10:59.192 --> 00:11:01.160 line:-1 position:50%
+and one for our
+detail windows --
+
+
+240
+00:11:01.160 --> 00:11:04.297 line:-1 position:50%
+SwiftUI by default
+will add a menu item
+
+
+241
+00:11:04.297 --> 00:11:06.633 line:-1 position:50%
+for each group in the File menu.
+
+
+242
+00:11:06.633 --> 00:11:08.234 line:-1 position:50%
+The menu item
+for our detail window
+
+
+243
+00:11:08.234 --> 00:11:10.670 line:-1 position:50%
+doesn't quite fit
+our use case, however.
+
+
+244
+00:11:10.670 --> 00:11:13.406 line:-1 position:50%
+I'd prefer that the windows
+can only be opened
+
+
+245
+00:11:13.406 --> 00:11:16.376 line:-1 position:50%
+via the context menu
+that was added earlier.
+
+
+246
+00:11:16,376 --> 00:11:19,612 position:50%
+A new scene modifier,
+commandsRemoved,
+
+
+247
+00:11:19,612 --> 00:11:21,781 position:50%
+allows you to modify a scene
+
+
+248
+00:11:21,781 --> 00:11:25,251 position:50%
+such that it will no longer
+provide its default commands,
+
+
+249
+00:11:25,251 --> 00:11:26,953 position:50%
+like the one in the File menu.
+
+
+250
+00:11:26,953 --> 00:11:30,890 line:1
+After applying this modifier,
+our File menu now only contains
+
+
+251
+00:11:30,890 --> 00:11:34,994 position:50%
+an item for opening windows
+for the primary WindowGroup.
+
+
+252
+00:11:34.994 --> 00:11:37.063 line:-1 position:50%
+I'm not quite happy
+with the current presentation
+
+
+253
+00:11:37.063 --> 00:11:40.967 line:-1 position:50%
+of the auxiliary window scene
+for showing my reading activity,
+
+
+254
+00:11:40,967 --> 00:11:43,136 line:-1
+so let's focus on that next.
+
+
+255
+00:11:43.136 --> 00:11:46.272 line:-1 position:50%
+Since I'm going to apply
+a few modifiers to it,
+
+
+256
+00:11:46.272 --> 00:11:48.575 line:-1 position:50%
+I'll extract it out
+into a custom scene,
+
+
+257
+00:11:48.575 --> 00:11:50.843 line:-1 position:50%
+which will keep
+my app definition cleaner.
+
+
+258
+00:11:50,843 --> 00:11:53,546 line:-1
+Absent any previous state
+for a window,
+
+
+259
+00:11:53.546 --> 00:11:57.784 line:-1 position:50%
+SwiftUI will by default place it
+in the center of the screen.
+
+
+260
+00:11:57.784 --> 00:11:59.786 line:-1 position:50%
+I'd prefer it
+if the Reading Activity
+
+
+261
+00:11:59,786 --> 00:12:03,089 line:-1
+was placed in a different
+location by default, however.
+
+
+262
+00:12:03.089 --> 00:12:05.625 line:-1 position:50%
+By adding the new
+defaultPosition modifier,
+
+
+263
+00:12:05.625 --> 00:12:08.227 line:-1 position:50%
+I can specify
+a position to be used
+
+
+264
+00:12:08,227 --> 00:12:11,030 line:-1
+when no previous state
+is available.
+
+
+265
+00:12:11,030 --> 00:12:14,200 line:-1
+This position is relative
+to the screen size
+
+
+266
+00:12:14.200 --> 00:12:17.136 line:-1 position:50%
+and will place the window
+in the appropriate location
+
+
+267
+00:12:17,136 --> 00:12:19,772 line:-1
+taking into account
+the current locale.
+
+
+268
+00:12:19.772 --> 00:12:22.742 line:-1 position:50%
+This new position helps
+differentiate my Activity window
+
+
+269
+00:12:22.742 --> 00:12:25.578 line:-1 position:50%
+from the other viewing windows
+on the screen.
+
+
+270
+00:12:25.578 --> 00:12:27.146 line:-1 position:50%
+I'd also like my Activity window
+
+
+271
+00:12:27.146 --> 00:12:31.417 line:-1 position:50%
+to show at a certain size by
+default, but still be resizable.
+
+
+272
+00:12:31,417 --> 00:12:33,553 line:-1
+Alongside the defaultPosition,
+
+
+273
+00:12:33,553 --> 00:12:36,089 line:-1
+I'll add the defaultSize
+modifier.
+
+
+274
+00:12:36.089 --> 00:12:39.826 line:-1 position:50%
+The value provided to it will
+be given to the layout system
+
+
+275
+00:12:39,826 --> 00:12:43,162 line:-1
+to derive an initial size
+for the window.
+
+
+276
+00:12:43,162 --> 00:12:46,299 line:-1
+Now that I've customized
+the presentation of my window,
+
+
+277
+00:12:46,299 --> 00:12:49,469 line:-1
+let's add one more modifier
+to customize its behavior.
+
+
+278
+00:12:49,469 --> 00:12:52,538 line:-1
+The keyboardShortcut modifier
+has been expanded
+
+
+279
+00:12:52.538 --> 00:12:54.674 line:-1 position:50%
+to work on scene types as well.
+
+
+280
+00:12:54.674 --> 00:12:56.376 line:-1 position:50%
+When used at the scene level,
+
+
+281
+00:12:56,376 --> 00:12:58,611 line:-1
+this modifier affects
+the command
+
+
+282
+00:12:58.611 --> 00:12:59.812 line:-1 position:50%
+which creates a new window.
+
+
+283
+00:12:59,812 --> 00:13:03,483 line:-1
+Here, I've modified my Activity
+window so that it can be opened
+
+
+284
+00:13:03.483 --> 00:13:06.786 line:-1 position:50%
+with the shortcut
+Option-Command-0.
+
+
+285
+00:13:06,786 --> 00:13:09,756 line:-1
+This can be a great way
+to customize your app
+
+
+286
+00:13:09,756 --> 00:13:13,226 line:-1
+by providing shortcuts
+to commonly used scenes
+
+
+287
+00:13:13,226 --> 00:13:16,629 line:-1
+and can also be used to
+customize the default shortcut
+
+
+288
+00:13:16.629 --> 00:13:18.031 line:-1 position:50%
+of Command-N,
+
+
+289
+00:13:18,031 --> 00:13:21,134 line:-1
+which is added to the primary
+WindowGroup in your app.
+
+
+290
+00:13:21.134 --> 00:13:23.202 line:-1 position:50%
+This closes our tour
+of the new scene
+
+
+291
+00:13:23.202 --> 00:13:25.638 line:-1 position:50%
+and windowing functionality
+in SwiftUI.
+
+
+292
+00:13:25.638 --> 00:13:28.641 line:-1 position:50%
+We're really excited about
+the potential of these new APIs
+
+
+293
+00:13:28,641 --> 00:13:29,809 line:-1
+and hope you are too!
+
+
+294
+00:13:29,809 --> 00:13:32,311 position:50%
+For more great info on
+how to add functionality
+
+
+295
+00:13:32,311 --> 00:13:35,114 line:1
+to your iPadOS and macOS apps,
+
+
+296
+00:13:35,114 --> 00:13:37,450 position:50%
+please check out
+these other sessions:
+
+
+297
+00:13:37,450 --> 00:13:40,353 position:50%
+"SwiftUI on iPad:
+Organize your interface"
+
+
+298
+00:13:40,353 --> 00:13:43,823 position:50%
+and "SwiftUI on iPad:
+Add toolbars, titles, and more."
+
+
+299
+00:13:44,924 --> 00:13:46,526 line:-1
+Thanks for watching.
+
+
+300
+00:13:46,526 --> 00:13:50,997 line:1 size:2% position:90%
+♪
+

@@ -1,0 +1,2229 @@
+2
+00:00:00.334 --> 00:00:03.337 line:-1
+[upbeat music]
+
+
+3
+00:00:03.370 --> 00:00:09.610 line:-1
+♪ ♪
+
+
+4
+00:00:09.643 --> 00:00:10.511 line:-1
+[Prashant] Hi, everyone!
+
+
+5
+00:00:10.544 --> 00:00:13.013 line:-2
+I'm Prashant,
+an AVFoundation Engineer.
+
+
+6
+00:00:13.046 --> 00:00:15.816 line:-1
+Welcome to WWDC21.
+
+
+7
+00:00:15.849 --> 00:00:17.484 line:-1
+In recent years, the popularity
+
+
+8
+00:00:17.518 --> 00:00:19.453 line:-2
+of over-the-top
+streaming services
+
+
+9
+00:00:19.486 --> 00:00:21.655 line:-2
+have approached that
+of linear television.
+
+
+10
+00:00:21.688 --> 00:00:23.490 line:-2
+Depending on the market
+that you're in,
+
+
+11
+00:00:23.524 --> 00:00:26.994 line:-2
+your users might actually prefer
+free ad-supported content
+
+
+12
+00:00:27.027 --> 00:00:29.596 line:-2
+over ad-free content
+that they need to pay for.
+
+
+13
+00:00:29.630 --> 00:00:31.365 line:-2
+So if you're interested
+in including ads
+
+
+14
+00:00:31.398 --> 00:00:33.867 line:-2
+and other interstitials
+in your HLS streams,
+
+
+15
+00:00:33.901 --> 00:00:35.769 line:-2
+you've tuned in
+to the right session.
+
+
+16
+00:00:35.802 --> 00:00:37.738 line:-2
+Before we dive in,
+let's quickly review
+
+
+17
+00:00:37.771 --> 00:00:39.173 line:-1
+some of the existing mechanisms
+
+
+18
+00:00:39.206 --> 00:00:41.475 line:-2
+for inserting ads
+in HLS streams.
+
+
+19
+00:00:41.508 --> 00:00:43.510 line:-2
+You could perform
+server side ad insertion
+
+
+20
+00:00:43.544 --> 00:00:45.512 line:-1
+using DISCONTINUITY tags.
+
+
+21
+00:00:45.546 --> 00:00:48.148 line:-2
+This is a fairly static scheme
+in that the ad segments
+
+
+22
+00:00:48.182 --> 00:00:50.617 line:-2
+are stitched together
+with the content segments,
+
+
+23
+00:00:50.651 --> 00:00:51.919 line:-2
+and this stitching
+has to be done
+
+
+24
+00:00:51.952 --> 00:00:54.855 line:-2
+even before the playlist
+is vended to the user.
+
+
+25
+00:00:54.888 --> 00:00:56.390 line:-2
+As you might imagine,
+this doesn't allow
+
+
+26
+00:00:56.423 --> 00:00:57.858 line:-2
+for late binding
+of your ad assets
+
+
+27
+00:00:57.891 --> 00:00:59.826 line:-2
+where you'd like for an ad
+to be decisioned
+
+
+28
+00:00:59.860 --> 00:01:02.029 line:-2
+as the user is approaching
+the ad marker
+
+
+29
+00:01:02.062 --> 00:01:04.464 line:-2
+or even rebinding,
+say, when a user navigates
+
+
+30
+00:01:04.498 --> 00:01:06.466 line:-2
+to a portion of the video
+that they've already watched,
+
+
+31
+00:01:06.500 --> 00:01:08.902 line:-2
+they're going to see
+the same ad all over again.
+
+
+32
+00:01:08.936 --> 00:01:11.638 line:-2
+Since HLS operates
+at a segment granularity,
+
+
+33
+00:01:11.672 --> 00:01:13.507 line:-1
+transitions to and from ad pods
+
+
+34
+00:01:13.540 --> 00:01:15.576 line:-2
+need to happen
+at segment boundaries.
+
+
+35
+00:01:15.609 --> 00:01:17.110 line:-2
+If your ad marker
+happens to be present
+
+
+36
+00:01:17.144 --> 00:01:18.946 line:-1
+in the middle a content segment,
+
+
+37
+00:01:18.979 --> 00:01:20.547 line:-2
+you'd have to split up
+that segment
+
+
+38
+00:01:20.581 --> 00:01:22.482 line:-1
+in order to stitch in the ad.
+
+
+39
+00:01:22.516 --> 00:01:25.519 line:-2
+Oftentimes, the number of
+quality tiers would be different
+
+
+40
+00:01:25.552 --> 00:01:28.121 line:-2
+between your primary
+and interstitial assets.
+
+
+41
+00:01:28.155 --> 00:01:29.556 line:-2
+In order to stitch
+the ad together
+
+
+42
+00:01:29.590 --> 00:01:31.625 line:-2
+with all the primary
+quality tiers,
+
+
+43
+00:01:31.658 --> 00:01:32.993 line:-2
+the ads would need
+to be conditioned
+
+
+44
+00:01:33.026 --> 00:01:34.761 line:-1
+to match the content encoding.
+
+
+45
+00:01:34.795 --> 00:01:36.864 line:-2
+And you'd also want to make sure
+that the ads use
+
+
+46
+00:01:36.897 --> 00:01:39.766 line:-2
+the same codecs
+as the primary content.
+
+
+47
+00:01:39.800 --> 00:01:42.402 line:-2
+And in live streaming scenarios,
+your packager might
+
+
+48
+00:01:42.436 --> 00:01:44.571 line:-2
+have to do a lot
+of back-end bookkeeping.
+
+
+49
+00:01:44.605 --> 00:01:46.673 line:-2
+Your ads and interstitials
+would mostly be
+
+
+50
+00:01:46.707 --> 00:01:48.308 line:-1
+video-on-demand streams.
+
+
+51
+00:01:48.342 --> 00:01:49.977 line:-2
+But the packager would have
+to spool these out
+
+
+52
+00:01:50.010 --> 00:01:51.178 line:-1
+on a per-segment basis
+
+
+53
+00:01:51.211 --> 00:01:53.447 line:-2
+for the entirety
+of the ad break.
+
+
+54
+00:01:53.480 --> 00:01:55.616 line:-2
+You could also insert ads
+on the client side.
+
+
+55
+00:01:55.649 --> 00:01:57.951 line:-2
+Until now, we didn't have
+an official recommendation
+
+
+56
+00:01:57.985 --> 00:01:59.419 line:-1
+on how this can be done.
+
+
+57
+00:01:59.453 --> 00:02:00.888 line:-2
+One of the more
+popular approaches
+
+
+58
+00:02:00.921 --> 00:02:02.289 line:-1
+is to use a two-player scheme
+
+
+59
+00:02:02.322 --> 00:02:04.825 line:-2
+where one player would present
+the primary content
+
+
+60
+00:02:04.858 --> 00:02:07.261 line:-2
+while the other would
+present the interstitials.
+
+
+61
+00:02:07.294 --> 00:02:09.696 line:-2
+And transitions are achieved
+by coordinating playback
+
+
+62
+00:02:09.730 --> 00:02:11.365 line:-2
+between the two players
+and by managing
+
+
+63
+00:02:11.398 --> 00:02:13.333 line:-1
+player view hierarchies.
+
+
+64
+00:02:13.367 --> 00:02:14.368 line:-1
+While this works well,
+
+
+65
+00:02:14.401 --> 00:02:16.336 line:-2
+the issues here are
+mostly on the performance side.
+
+
+66
+00:02:16,370 --> 00:02:18,505
+If buffering is not
+properly coordinated
+
+
+67
+00:02:18,539 --> 00:02:19,907
+between the two players,
+
+
+68
+00:02:19,940 --> 00:02:21,708
+pre-fetching your ad
+would impact
+
+
+69
+00:02:21,742 --> 00:02:23,043
+the adaptive
+bit rate performance
+
+
+70
+00:02:23,076 --> 00:02:25,112
+of the primary content stream.
+
+
+71
+00:02:25,145 --> 00:02:27,414
+And features like
+Picture in Picture and AirPlay
+
+
+72
+00:02:27,447 --> 00:02:28,715
+are really hard to do well
+
+
+73
+00:02:28,749 --> 00:02:31,718
+with these
+custom player approaches.
+
+
+74
+00:02:31.752 --> 00:02:33.987 line:-2
+This year, we've addressed
+all these concerns
+
+
+75
+00:02:34.021 --> 00:02:35.956 line:-2
+and in general attempted
+to make ad insertion
+
+
+76
+00:02:35.989 --> 00:02:37.424 line:-1
+a lot more simple.
+
+
+77
+00:02:37.457 --> 00:02:39.526 line:-2
+We're introducing
+HLS interstitials
+
+
+78
+00:02:39.560 --> 00:02:41.595 line:-2
+where ads are treated
+as separate assets
+
+
+79
+00:02:41.628 --> 00:02:44.364 line:-2
+that can be scheduled
+onto a program timeline.
+
+
+80
+00:02:44.398 --> 00:02:47.100 line:-2
+Ads are no longer stitched in
+with DISCONTINUITY tags.
+
+
+81
+00:02:47.134 --> 00:02:49.369 line:-2
+Instead they remain
+as self-contained assets
+
+
+82
+00:02:49.403 --> 00:02:52.406 line:-2
+that can be referenced
+via their master playlist.
+
+
+83
+00:02:52.439 --> 00:02:54.641 line:-2
+As we'll soon see,
+this scheme is dynamic,
+
+
+84
+00:02:54.675 --> 00:02:55.876 line:-1
+allowing for late binding
+
+
+85
+00:02:55.909 --> 00:02:58.245 line:-2
+and even rebinding
+to your ad inventory.
+
+
+86
+00:02:58.278 --> 00:03:00.547 line:-2
+You're no longer constrained
+to segment boundaries.
+
+
+87
+00:03:00.581 --> 00:03:02.716 line:-2
+You could arbitrarily
+place ads anywhere
+
+
+88
+00:03:02.749 --> 00:03:04.785 line:-1
+on the program timeline.
+
+
+89
+00:03:04.818 --> 00:03:07.688 line:-2
+HLS interstitials
+in conjunction with AVKit
+
+
+90
+00:03:07.721 --> 00:03:10.290 line:-2
+offers built-in support
+for navigation restrictions
+
+
+91
+00:03:10.324 --> 00:03:12.092 line:-1
+on tvOS.
+
+
+92
+00:03:12.125 --> 00:03:13.961 line:-2
+We also have built-in support
+for AirPlay
+
+
+93
+00:03:13.994 --> 00:03:15.128 line:-1
+and Picture in Picture.
+
+
+94
+00:03:15.162 --> 00:03:17.397 line:-2
+All your scheduled ads
+and interstitials will be
+
+
+95
+00:03:17.431 --> 00:03:19.967 line:-2
+carried over
+the AirPlay session.
+
+
+96
+00:03:20.000 --> 00:03:21.535 line:-1
+We also coordinate buffering
+
+
+97
+00:03:21.568 --> 00:03:23.103 line:-2
+and the use
+of other system resources
+
+
+98
+00:03:23.136 --> 00:03:25.339 line:-2
+between the primary
+and interstitial players
+
+
+99
+00:03:25.372 --> 00:03:28.141 line:-2
+so as to achieve
+seamless transitions.
+
+
+100
+00:03:28.175 --> 00:03:30.210 line:-2
+Now let's take a look
+at a typical playback flow
+
+
+101
+00:03:30.244 --> 00:03:32.479 line:-2
+when we present some
+video-on-demand content
+
+
+102
+00:03:32.513 --> 00:03:34.781 line:-2
+along with ads
+using HLS interstitials.
+
+
+103
+00:03:36,850 --> 00:03:39,686
+The blue bar in this picture
+represents your main content,
+
+
+104
+00:03:39,720 --> 00:03:41,054
+and the orange and green bars
+
+
+105
+00:03:41,088 --> 00:03:44,124
+are the ads that you'd like
+to schedule during playback.
+
+
+106
+00:03:44,157 --> 00:03:46,793
+Now, the primary would play
+up until the ad marker,
+
+
+107
+00:03:46,827 --> 00:03:48,262
+at which point it would pause,
+
+
+108
+00:03:48,295 --> 00:03:50,430
+and the first ad
+would start playing.
+
+
+109
+00:03:50,464 --> 00:03:51,965
+Once the first ad plays out,
+
+
+110
+00:03:51,999 --> 00:03:54,268
+the second ad would
+immediately follow.
+
+
+111
+00:03:54,301 --> 00:03:56,503
+After the second ad,
+the primary would resume
+
+
+112
+00:03:56,537 --> 00:03:58,605
+from where it left off.
+
+
+113
+00:03:58.639 --> 00:04:01.041 line:-2
+Now let's take a look
+at the buffering sequence.
+
+
+114
+00:04:01,074 --> 00:04:02,543
+We start
+by buffering the primary
+
+
+115
+00:04:02,576 --> 00:04:04,311
+up until the start time
+of the first ad.
+
+
+116
+00:04:04,344 --> 00:04:05,946
+Now we'd pre-buffer
+the first ad,
+
+
+117
+00:04:05,979 --> 00:04:08,749
+making it possible to achieve
+a smooth transition.
+
+
+118
+00:04:08,782 --> 00:04:10,384
+After this has
+completely buffered,
+
+
+119
+00:04:10,417 --> 00:04:12,252
+we'd pre-buffer the second ad.
+
+
+120
+00:04:12,286 --> 00:04:14,555
+And after the second ad
+has completely buffered,
+
+
+121
+00:04:14,588 --> 00:04:16,223
+we'd start buffering
+the primary again
+
+
+122
+00:04:16,256 --> 00:04:18,959
+so that we switch back
+seamlessly.
+
+
+123
+00:04:18,992 --> 00:04:21,595
+The playback flow
+for live scenarios is similar,
+
+
+124
+00:04:21,628 --> 00:04:23,197
+except that we'd rejoin
+the primary
+
+
+125
+00:04:23,230 --> 00:04:25,799
+after jumping forward
+by the ad duration.
+
+
+126
+00:04:25,832 --> 00:04:28,802
+This is so that we remain
+in sync with the live edge.
+
+
+127
+00:04:28,836 --> 00:04:31,038
+And this also adopts
+a similar buffering strategy
+
+
+128
+00:04:31,071 --> 00:04:33,874
+such that seamless transitions
+are possible.
+
+
+129
+00:04:33,907 --> 00:04:38,011
+So how would you schedule ads
+with HLS interstitials?
+
+
+130
+00:04:38,045 --> 00:04:41,548
+You can now do server side ad
+insertion using DATERANGE tags.
+
+
+131
+00:04:41,582 --> 00:04:43,851
+For this, we're introducing
+a new date range class
+
+
+132
+00:04:43,884 --> 00:04:45,619
+with attributes.
+
+
+133
+00:04:45,652 --> 00:04:47,921
+This playlist is carrying
+timing information
+
+
+134
+00:04:47,955 --> 00:04:49,790
+through a PROGRAM-DATE-TIME tag.
+
+
+135
+00:04:49,823 --> 00:04:51,425
+These tags are now mandatory
+
+
+136
+00:04:51,458 --> 00:04:55,262
+since the ad schedule is now
+specified using dates.
+
+
+137
+00:04:55,295 --> 00:04:58,098
+Here we see an ad lined up
+using the DATERANGE tag,
+
+
+138
+00:04:58,131 --> 00:05:02,102
+with the class set
+to com.apple.hls.interstitial.
+
+
+139
+00:05:02,135 --> 00:05:05,272
+The ID attribute
+uniquely identifies the event.
+
+
+140
+00:05:05,305 --> 00:05:07,274
+START-DATE is where
+you'd like for the ad
+
+
+141
+00:05:07,307 --> 00:05:08,976
+to start
+in the primary timeline.
+
+
+142
+00:05:09,009 --> 00:05:10,477
+Here we see
+that the ad is scheduled
+
+
+143
+00:05:10,511 --> 00:05:12,646
+at 5 seconds into playback.
+
+
+144
+00:05:12,679 --> 00:05:16,116
+The DURATION attribute specifies
+the duration of the ad.
+
+
+145
+00:05:16,149 --> 00:05:19,186
+The X-ASSET-URI attribute
+specifies the URI
+
+
+146
+00:05:19,219 --> 00:05:21,455
+of the ad's master playlist.
+
+
+147
+00:05:21,488 --> 00:05:24,324
+And the X-RESUME-OFFSET
+attribute specifies the offset
+
+
+148
+00:05:24,358 --> 00:05:28,362
+from the START-DATE, where you'd
+like primary playback to resume.
+
+
+149
+00:05:28,395 --> 00:05:30,030
+A resume offset of 0 would mean
+
+
+150
+00:05:30,063 --> 00:05:33,300
+that the primary would resume
+from where it left off.
+
+
+151
+00:05:33,333 --> 00:05:35,202
+If the resume offset attribute
+is absent,
+
+
+152
+00:05:35,235 --> 00:05:36,737
+we'd rejoin
+the primary at an offset
+
+
+153
+00:05:36,770 --> 00:05:38,672
+which equals the ad duration.
+
+
+154
+00:05:38,705 --> 00:05:41,475
+This is probably what you'd
+want to do for live scenarios.
+
+
+155
+00:05:43,010 --> 00:05:45,445
+Sometimes you might wish
+to skip over in-stream ads
+
+
+156
+00:05:45,479 --> 00:05:46,547
+as shown here.
+
+
+157
+00:05:46,580 --> 00:05:48,482
+For that, you'd simply specify
+the resume offset
+
+
+158
+00:05:48,515 --> 00:05:51,385
+to be the duration
+of the in-stream ad.
+
+
+159
+00:05:51,418 --> 00:05:54,254
+You can schedule multiple ads
+using DATERANGE tags.
+
+
+160
+00:05:54,288 --> 00:05:55,956
+Here we see
+the first ad scheduled
+
+
+161
+00:05:55,989 --> 00:05:57,724
+at 5 seconds into the primary
+
+
+162
+00:05:57,758 --> 00:06:00,427
+and the second one
+at 10 seconds.
+
+
+163
+00:06:00,460 --> 00:06:02,229
+You can schedule
+back-to-back ads
+
+
+164
+00:06:02,262 --> 00:06:05,098
+simply by specifying the same
+start time for each of them.
+
+
+165
+00:06:05,132 --> 00:06:06,834
+Here we see
+that the first ad starts
+
+
+166
+00:06:06,867 --> 00:06:10,003
+at 5 seconds into playback,
+and so does the second.
+
+
+167
+00:06:10,037 --> 00:06:11,572
+The ads would be
+displayed in the order
+
+
+168
+00:06:11,605 --> 00:06:13,574
+that they appear
+in the playlist.
+
+
+169
+00:06:13,607 --> 00:06:16,543
+These approaches where you use
+the X-ASSET-URI attribute
+
+
+170
+00:06:16,577 --> 00:06:18,545
+to reference your ad
+would require you
+
+
+171
+00:06:18,579 --> 00:06:20,314
+to define your ad pod
+when you're adding
+
+
+172
+00:06:20,347 --> 00:06:22,249
+the DATERANGE tag
+to the playlist.
+
+
+173
+00:06:22,282 --> 00:06:23,951
+But you could defer
+that decision
+
+
+174
+00:06:23,984 --> 00:06:26,820
+using the X-ASSET-LIST
+attribute.
+
+
+175
+00:06:26,854 --> 00:06:29,489
+The X-ASSET-LIST points
+to a JSON object
+
+
+176
+00:06:29,523 --> 00:06:32,893
+that contains
+the event schedule.
+
+
+177
+00:06:32.926 --> 00:06:35.262 line:-2
+The object has
+an ASSETS array that specifies
+
+
+178
+00:06:35.295 --> 00:06:38.232 line:-2
+the list of interstitials,
+with each entry specifying
+
+
+179
+00:06:38.265 --> 00:06:41.702 line:-2
+the URI of the master playlist
+and the duration.
+
+
+180
+00:06:41.735 --> 00:06:44.071 line:-2
+Note that this JSON object
+would be fetched
+
+
+181
+00:06:44.104 --> 00:06:45.339 line:-1
+only at buffering time,
+
+
+182
+00:06:45.372 --> 00:06:48.342 line:-2
+allowing for late binding
+to your ad inventory.
+
+
+183
+00:06:48.375 --> 00:06:50.777 line:-2
+Usually, ads would play out
+fully to the end.
+
+
+184
+00:06:50.811 --> 00:06:52.279 line:-2
+However,
+you can specify an end time
+
+
+185
+00:06:52.312 --> 00:06:55.215 line:-2
+for your ad using
+the X-PLAYOUT-LIMIT attribute.
+
+
+186
+00:06:55.249 --> 00:06:56.950 line:-2
+You can use
+this attribute to implement
+
+
+187
+00:06:56.984 --> 00:06:59.620 line:-2
+early return scenarios
+in live broadcasts.
+
+
+188
+00:06:59.653 --> 00:07:01.321 line:-2
+An early return is where
+you'd like to interrupt
+
+
+189
+00:07:01.355 --> 00:07:04.091 line:-2
+your ad break in order
+to return to the live feed.
+
+
+190
+00:07:04.124 --> 00:07:05.993 line:-2
+This could be due
+to a breaking news scenario,
+
+
+191
+00:07:06.026 --> 00:07:08.228 line:-2
+or maybe there was some sudden
+excitement on the sports field
+
+
+192
+00:07:08.262 --> 00:07:10.464 line:-2
+that you don't want your viewers
+to miss out on.
+
+
+193
+00:07:10.497 --> 00:07:12.966 line:-2
+So how would you use this
+to implement early return?
+
+
+194
+00:07:13,000 --> 00:07:16,103
+Here we have a live playlist
+that contains six segments.
+
+
+195
+00:07:16,136 --> 00:07:18,672
+The live edge
+is at the end of segment six.
+
+
+196
+00:07:18,705 --> 00:07:20,040
+Now the playhead
+would usually be
+
+
+197
+00:07:20,073 --> 00:07:22,376
+three target durations
+behind the live edge.
+
+
+198
+00:07:22,409 --> 00:07:25,345
+In this case, it's at the end
+of segment three.
+
+
+199
+00:07:25,379 --> 00:07:27,447
+At this point,
+a 15-second ad spot
+
+
+200
+00:07:27,481 --> 00:07:29,750
+is decisioned
+to follow segment six.
+
+
+201
+00:07:29,783 --> 00:07:32,619
+So the playlist update actually
+contains all six segments
+
+
+202
+00:07:32,653 --> 00:07:35,822
+along with a DATERANGE tag
+carrying the ad schedule.
+
+
+203
+00:07:35,856 --> 00:07:37,925
+In the next update,
+the playhead would've moved
+
+
+204
+00:07:37,958 --> 00:07:39,493
+to the end of segment four,
+
+
+205
+00:07:39,526 --> 00:07:42,129
+and the ad is still scheduled
+to follow segment six.
+
+
+206
+00:07:42,162 --> 00:07:45,699
+The shaded segment seven here
+simply represents the ad break.
+
+
+207
+00:07:45,732 --> 00:07:47,801
+In the following update,
+the playhead has moved
+
+
+208
+00:07:47,835 --> 00:07:50,504
+to the end of segment five,
+and in the next update,
+
+
+209
+00:07:50,537 --> 00:07:52,673
+we're at the beginning
+of the ad break.
+
+
+210
+00:07:52,706 --> 00:07:56,143
+If you don't do anything, the ad
+would play out for 15 seconds.
+
+
+211
+00:07:56,176 --> 00:07:57,978
+But if you want to schedule
+an early return,
+
+
+212
+00:07:58,011 --> 00:08:00,547
+say, after 12 seconds,
+you'd simply specify
+
+
+213
+00:08:00,581 --> 00:08:02,416
+the play-out limit to be that.
+
+
+214
+00:08:02,449 --> 00:08:04,251
+Now your ad would play
+for 12 seconds
+
+
+215
+00:08:04,284 --> 00:08:07,855
+before returning to the program.
+
+
+216
+00:08:07.888 --> 00:08:09.656 line:-2
+Oftentimes
+for contractual reasons,
+
+
+217
+00:08:09.690 --> 00:08:11.124 line:-1
+you'd want to prevent your user
+
+
+218
+00:08:11.158 --> 00:08:13.527 line:-2
+from jumping over
+or skipping through the ads.
+
+
+219
+00:08:13.560 --> 00:08:15.729 line:-2
+You can specify
+navigation restrictions
+
+
+220
+00:08:15.762 --> 00:08:17.798 line:-1
+using the X-RESTRICT attribute.
+
+
+221
+00:08:17.831 --> 00:08:20.767 line:-2
+X-RESTRICT with a value jump
+would prevent a user to seek
+
+
+222
+00:08:20.801 --> 00:08:23.604 line:-2
+from a time before the ad
+to a time after the ad.
+
+
+223
+00:08:23.637 --> 00:08:26.173 line:-2
+An X-RESTRICT with a value skip
+would prevent one
+
+
+224
+00:08:26.206 --> 00:08:29.543 line:-2
+from playing the ad at a rate
+different from what is desired.
+
+
+225
+00:08:29,576 --> 00:08:32,279
+Note that these restrictions
+are enforced by the UI.
+
+
+226
+00:08:32,312 --> 00:08:34,581
+On tvOS,
+they're enforced by AVKit.
+
+
+227
+00:08:34,615 --> 00:08:36,583
+And they should be
+available to you if you use
+
+
+228
+00:08:36,617 --> 00:08:39,887
+the AVPlayerViewController
+for your video presentation.
+
+
+229
+00:08:39,920 --> 00:08:42,623
+When you're on other platforms
+or if you're not using AVKit,
+
+
+230
+00:08:42,656 --> 00:08:46,326
+it's up to your application
+to enforce these restrictions.
+
+
+231
+00:08:46.360 --> 00:08:47.895 line:-2
+Now that we've seen
+how you could schedule
+
+
+232
+00:08:47.928 --> 00:08:50.097 line:-2
+server side ads
+using DATERANGE tags,
+
+
+233
+00:08:50.130 --> 00:08:53.033 line:-2
+let's see how you can monitor
+their progress at the client.
+
+
+234
+00:08:53.066 --> 00:08:56.203 line:-2
+For this, we're introducing
+two new AVFoundation objects:
+
+
+235
+00:08:56.236 --> 00:08:58.338 line:-2
+the
+AVPlayerInterstitialEventMonitor
+
+
+236
+00:08:58.372 --> 00:09:00.240 line:-2
+that notifies the client
+when an interstitial
+
+
+237
+00:09:00.274 --> 00:09:01.909 line:-1
+is scheduled or playing
+
+
+238
+00:09:01.942 --> 00:09:04.178 line:-2
+and the
+AVPlayerInterstitialEvent object
+
+
+239
+00:09:04.211 --> 00:09:06.313 line:-2
+which contains
+all the information necessary
+
+
+240
+00:09:06.346 --> 00:09:10.284 line:-2
+to place ads
+on a player item's timeline.
+
+
+241
+00:09:10.317 --> 00:09:12.319 line:-2
+The
+AVPlayerInterstitialEventMonitor
+
+
+242
+00:09:12.352 --> 00:09:13.987 line:-1
+has the following properties:
+
+
+243
+00:09:14.021 --> 00:09:16.924 line:-2
+a primary player that is playing
+your primary asset,
+
+
+244
+00:09:16.957 --> 00:09:18.525 line:-2
+a handle
+to the interstitial player
+
+
+245
+00:09:18.559 --> 00:09:21.695 line:-2
+that you can use
+to monitor playback of the ads,
+
+
+246
+00:09:21.728 --> 00:09:23.030 line:-2
+an events array
+which is an array
+
+
+247
+00:09:23.063 --> 00:09:25.966 line:-2
+of AVPlayerInterstitialEvent
+objects that represent
+
+
+248
+00:09:25.999 --> 00:09:28.135 line:-2
+the different interstitials
+set on the player.
+
+
+249
+00:09:28.168 --> 00:09:29.203 line:-1
+We'll get to the description
+
+
+250
+00:09:29.236 --> 00:09:32.539 line:-2
+of the AVPlayerInterstitialEvent
+object shortly.
+
+
+251
+00:09:32.573 --> 00:09:34.107 line:-1
+A handle to the currentEvent.
+
+
+252
+00:09:34.141 --> 00:09:35.742 line:-2
+So this would be valid
+when an interstitial
+
+
+253
+00:09:35.776 --> 00:09:38.378 line:-1
+is playing and null otherwise.
+
+
+254
+00:09:38.412 --> 00:09:40.914 line:-2
+And then we have
+the eventsDidChangeNotification
+
+
+255
+00:09:40.948 --> 00:09:43.183 line:-2
+which would fire when
+the event schedule changes,
+
+
+256
+00:09:43.217 --> 00:09:46.019 line:-2
+and finally the currentEvent-
+DidChangeNotification
+
+
+257
+00:09:46.053 --> 00:09:47.454 line:-2
+which would fire
+when we transition
+
+
+258
+00:09:47.487 --> 00:09:49.990 line:-1
+to and from interstitials.
+
+
+259
+00:09:50.023 --> 00:09:52.759 line:-2
+The AVPlayerInterstitialEvent
+object that describes
+
+
+260
+00:09:52.793 --> 00:09:55.195 line:-2
+an interstitial event has
+properties that are basically
+
+
+261
+00:09:55.229 --> 00:09:58.632 line:-2
+analogues of the DATERANGE
+attributes that we saw earlier.
+
+
+262
+00:09:58.665 --> 00:10:01.001 line:-2
+The primaryItem represents
+your primary asset
+
+
+263
+00:10:01.034 --> 00:10:04.304 line:-2
+on whose timeline you'd like
+to schedule the interstitials.
+
+
+264
+00:10:04.338 --> 00:10:06.874 line:-2
+The identifier is similar
+to the ID attribute
+
+
+265
+00:10:06.907 --> 00:10:09.476 line:-2
+and this uniquely identifies
+the event.
+
+
+266
+00:10:09.510 --> 00:10:11.678 line:-2
+The time and date fields
+specify the start time
+
+
+267
+00:10:11.712 --> 00:10:14.681 line:-2
+of the interstitial in media
+time and date respectively.
+
+
+268
+00:10:14.715 --> 00:10:17.384 line:-2
+This would be like
+the START-DATE attribute.
+
+
+269
+00:10:17.417 --> 00:10:19.786 line:-2
+We'd use a copy
+of the template items to create
+
+
+270
+00:10:19.820 --> 00:10:22.990 line:-2
+the interstitial player items
+that'd represent your ad pod.
+
+
+271
+00:10:23.023 --> 00:10:24.858 line:-2
+So this is similar
+to the ASSET-LIST attribute
+
+
+272
+00:10:24.892 --> 00:10:26.793 line:-1
+that we saw earlier.
+
+
+273
+00:10:26.827 --> 00:10:28.629 line:-2
+The restrictions property
+would specify
+
+
+274
+00:10:28.662 --> 00:10:31.732 line:-2
+the navigation restrictions
+for your interstitials.
+
+
+275
+00:10:31.765 --> 00:10:33.367 line:-2
+Then we have
+the resumptionOffset
+
+
+276
+00:10:33.400 --> 00:10:35.669 line:-2
+and playoutLimit
+properties that are similar
+
+
+277
+00:10:35.702 --> 00:10:37.571 line:-1
+to their DATERANGE counterparts.
+
+
+278
+00:10:37.604 --> 00:10:41.375 line:-2
+And finally we have a dictionary
+of userDefinedAttributes.
+
+
+279
+00:10:41,408 --> 00:10:43,710
+So you can specify
+custom attributes
+
+
+280
+00:10:43,744 --> 00:10:44,912
+in the DATERANGE tag,
+
+
+281
+00:10:44,945 --> 00:10:47,381
+and these would be surfaced
+to your client application
+
+
+282
+00:10:47,414 --> 00:10:50,217
+through the
+userDefinedAttributes property.
+
+
+283
+00:10:50,250 --> 00:10:52,619
+For instance, you might include
+a beacon URL
+
+
+284
+00:10:52,653 --> 00:10:54,021
+and other custom attributes
+
+
+285
+00:10:54,054 --> 00:10:57,057
+for reporting
+ad playback metrics.
+
+
+286
+00:10:57.090 --> 00:10:59.760 line:-2
+Here's some example code
+that shows how you might use
+
+
+287
+00:10:59.793 --> 00:11:03.764 line:-2
+these APIs to update your UI
+when an interstitial is playing.
+
+
+288
+00:11:03.797 --> 00:11:06.667 line:-2
+You create an AVPlayer
+to play your primary content.
+
+
+289
+00:11:06.700 --> 00:11:08.802 line:-2
+So this content has
+interstitials scheduled
+
+
+290
+00:11:08.836 --> 00:11:11.004 line:-1
+using the DATERANGE tags.
+
+
+291
+00:11:11.038 --> 00:11:13.841 line:-2
+And then create an
+AVPlayerInterstitialEventMonitor
+
+
+292
+00:11:13.874 --> 00:11:15.342 line:-1
+and set it on the player.
+
+
+293
+00:11:15.375 --> 00:11:16.376 line:-1
+You then subscribe
+
+
+294
+00:11:16.410 --> 00:11:18.812 line:-2
+to the currentEvent-
+DidChangeNotification
+
+
+295
+00:11:18.846 --> 00:11:21.515 line:-2
+to inform your application
+when the player transitions
+
+
+296
+00:11:21.548 --> 00:11:23.417 line:-1
+in and out of interstitials.
+
+
+297
+00:11:23.450 --> 00:11:25.219 line:-2
+And when
+that notification fires,
+
+
+298
+00:11:25.252 --> 00:11:27.688 line:-1
+you simply update your UI.
+
+
+299
+00:11:27.721 --> 00:11:29.823 line:-2
+Sometimes you might want
+to schedule ads
+
+
+300
+00:11:29.857 --> 00:11:31.758 line:-2
+on the client side.
+For that, we're introducing
+
+
+301
+00:11:31.792 --> 00:11:33.961 line:-2
+the AVPlayer-
+InterstitialEventController
+
+
+302
+00:11:33.994 --> 00:11:38.332 line:-2
+that lets you programmatically
+set events on an AVPlayer.
+
+
+303
+00:11:38.365 --> 00:11:41.969 line:-2
+This object inherits from the
+AVPlayerInterstitialEventMonitor
+
+
+304
+00:11:42.002 --> 00:11:44.137 line:-2
+and so has a lot
+of properties in common.
+
+
+305
+00:11:44.171 --> 00:11:45.672 line:-1
+One thing to note is that while
+
+
+306
+00:11:45.706 --> 00:11:48.542 line:-2
+the events property
+is read-only at the monitor,
+
+
+307
+00:11:48.575 --> 00:11:50.711 line:-2
+it is a read-write property
+at the controller,
+
+
+308
+00:11:50.744 --> 00:11:53.714 line:-2
+thus letting you
+programatically schedule events.
+
+
+309
+00:11:53.747 --> 00:11:56.350 line:-2
+And this also has
+the cancelCurrentEvent API
+
+
+310
+00:11:56.383 --> 00:11:57.384 line:-1
+that lets you cancel
+
+
+311
+00:11:57.417 --> 00:12:00.454 line:-2
+the currently playing
+interstitial.
+
+
+312
+00:12:00.487 --> 00:12:02.689 line:-2
+In this sample,
+we see how one might schedule
+
+
+313
+00:12:02.723 --> 00:12:05.692 line:-2
+an ad pod containing two ads
+on an AVPlayer.
+
+
+314
+00:12:05.726 --> 00:12:09.229 line:-2
+You create an AVPlayer
+to play your primary asset.
+
+
+315
+00:12:09.263 --> 00:12:11.965 line:-2
+You then create an AVPlayer-
+InterstitialEventController
+
+
+316
+00:12:11.999 --> 00:12:14.067 line:-1
+and set it on the AVPlayer.
+
+
+317
+00:12:14.101 --> 00:12:16.170 line:-2
+You create
+an array of AVPlayer items
+
+
+318
+00:12:16.203 --> 00:12:18.105 line:-1
+that represent your ad pod.
+
+
+319
+00:12:18.138 --> 00:12:20.007 line:-2
+Then create
+an AVPlayerInterstitialEvent
+
+
+320
+00:12:20.040 --> 00:12:21.441 line:-1
+object where you specify
+
+
+321
+00:12:21.475 --> 00:12:23.844 line:-2
+the primaryItem to be
+the player's current item,
+
+
+322
+00:12:23.877 --> 00:12:26.346 line:-2
+as this represents
+your movie asset,
+
+
+323
+00:12:26.380 --> 00:12:27.681 line:-1
+the start time in this example,
+
+
+324
+00:12:27.714 --> 00:12:29.950 line:-1
+some 10 seconds into playback,
+
+
+325
+00:12:29.983 --> 00:12:31.685 line:-2
+and the templateItems
+to be the ad pod
+
+
+326
+00:12:31.718 --> 00:12:33.520 line:-1
+that we created earlier.
+
+
+327
+00:12:33.554 --> 00:12:35.923 line:-2
+And after the object is created,
+you simply set it
+
+
+328
+00:12:35.956 --> 00:12:38.725 line:-2
+on the events property
+of the controller.
+
+
+329
+00:12:38.759 --> 00:12:40.761 line:-3
+You might notice
+that just before we set
+
+
+330
+00:12:40.794 --> 00:12:42.896 line:-2
+the player
+on the AVPlayerViewController,
+
+
+331
+00:12:42.930 --> 00:12:44.865 line:-2
+we set the
+currentItem.translates-
+
+
+332
+00:12:44.898 --> 00:12:47.467 line:-2
+PlayerInterstitialEvents
+property to true.
+
+
+333
+00:12:47.501 --> 00:12:50.404 line:-2
+When this is set, AVKit
+would place navigation markers
+
+
+334
+00:12:50.437 --> 00:12:55.442 line:-2
+on the timeline and also enforce
+navigation restrictions on tvOS.
+
+
+335
+00:12:55.475 --> 00:12:56.743 line:-1
+Now let's cut to a demo
+
+
+336
+00:12:56.777 --> 00:12:58.679 line:-2
+where we go over
+AVKit integration
+
+
+337
+00:12:58.712 --> 00:13:01.215 line:-1
+with HLS interstitials on tvOS.
+
+
+338
+00:13:02,883 --> 00:13:04,651
+Here we have an ad
+scheduled to start
+
+
+339
+00:13:04,685 --> 00:13:06,920
+at some 40 seconds
+into playback.
+
+
+340
+00:13:06,954 --> 00:13:09,990
+And this ad has no
+navigation restrictions set.
+
+
+341
+00:13:10,023 --> 00:13:12,926
+You can see that the ad marker
+is visible on the timeline.
+
+
+342
+00:13:15,963 --> 00:13:18,298
+As the ad is playing,
+a countdown timer appears
+
+
+343
+00:13:18,332 --> 00:13:20,501
+over the playhead.
+
+
+344
+00:13:20,534 --> 00:13:22,402
+And since this ad has
+no restrictions set,
+
+
+345
+00:13:22,436 --> 00:13:24,238
+as I glide my hand
+over to the edge
+
+
+346
+00:13:24,271 --> 00:13:27,274
+of the Apple TV remote,
+I'd get an option to skip.
+
+
+347
+00:13:27,307 --> 00:13:29,443
+And doing so would cause us
+to skip out of the ad
+
+
+348
+00:13:29,476 --> 00:13:32,446
+and go back to the primary.
+
+
+349
+00:13:32.479 --> 00:13:34.581 line:-2
+Now for this one,
+we have the same setup,
+
+
+350
+00:13:34.615 --> 00:13:36.783 line:-2
+but the ad has
+the skip restriction set.
+
+
+351
+00:13:40,754 --> 00:13:42,122
+So now when the ad plays,
+
+
+352
+00:13:42,155 --> 00:13:44,658
+you will not see an option
+to skip out of the ad.
+
+
+353
+00:13:44,691 --> 00:13:46,760
+You will have to wait
+for it to play out completely
+
+
+354
+00:13:46,793 --> 00:13:49,463
+before returning to the primary.
+
+
+355
+00:13:49,496 --> 00:13:51,164
+[announcer]
+Tom Hanks in "Greyhound."
+
+
+356
+00:13:51,198 --> 00:13:55,302
+Rated PG-13.
+Exclusively on Apple TV+.
+
+
+357
+00:13:55,335 --> 00:13:56,370
+[person] Thank you, Josh.
+
+
+358
+00:13:57.104 --> 00:13:59.907 line:-2
+[Prashant] Here we have two ads
+as we see on this timeline.
+
+
+359
+00:13:59,940 --> 00:14:02,009
+The first with no
+navigation restrictions
+
+
+360
+00:14:02,042 --> 00:14:04,545
+and the second
+with a jump restriction.
+
+
+361
+00:14:04,578 --> 00:14:07,247
+So when we attempt
+to jump past both the ads...
+
+
+362
+00:14:10,918 --> 00:14:12,219
+We see that the playhead snaps
+
+
+363
+00:14:12,252 --> 00:14:14,588
+to the restricted ad marker
+while the ad plays.
+
+
+364
+00:14:15,756 --> 00:14:17,824
+[Tom] We'll bring hell down
+from on high.
+
+
+365
+00:14:20,561 --> 00:14:22,196
+[announcer] Tom Hanks
+in "Greyhound."
+
+
+366
+00:14:22,229 --> 00:14:26,433
+Rated PG-13.
+Exclusively on Apple TV+.
+
+
+367
+00:14:26,466 --> 00:14:27,835
+[Prashant] And after the ad
+plays out,
+
+
+368
+00:14:27,868 --> 00:14:30,204
+we'd resume
+from the seek location.
+
+
+369
+00:14:31.605 --> 00:14:33.207 line:-1
+To wrap up, you can now schedule
+
+
+370
+00:14:33.240 --> 00:14:35.776 line:-2
+server side ads
+using DATERANGE tags.
+
+
+371
+00:14:35,809 --> 00:14:37,978
+You'd want to specify
+the resume offset to be 0
+
+
+372
+00:14:38,011 --> 00:14:40,247
+for video-on-demand streams
+such that you'd rejoin
+
+
+373
+00:14:40,280 --> 00:14:42,449
+the program
+from where you left off.
+
+
+374
+00:14:42,482 --> 00:14:44,551
+And you could skip
+this attribute for live streams
+
+
+375
+00:14:44,585 --> 00:14:46,920
+so that we rejoin
+at the live edge.
+
+
+376
+00:14:46,954 --> 00:14:49,523
+You can use the X-ASSET-LIST
+attribute for late binding
+
+
+377
+00:14:49,556 --> 00:14:51,024
+of your ad assets,
+
+
+378
+00:14:51,058 --> 00:14:52,926
+schedule early return
+in live broadcasts
+
+
+379
+00:14:52,960 --> 00:14:55,262
+using the X-PLAYOUT-LIMIT
+attribute,
+
+
+380
+00:14:55,295 --> 00:14:57,331
+and specify
+navigation restrictions
+
+
+381
+00:14:57,364 --> 00:14:59,633
+with the X-RESTRICT attribute.
+
+
+382
+00:14:59,666 --> 00:15:01,768
+To monitor ad playback
+on the client side,
+
+
+383
+00:15:01,802 --> 00:15:04,371
+you'd use the AVPlayer-
+InterstitialEventMonitor.
+
+
+384
+00:15:04,404 --> 00:15:06,139
+And you can
+programatically set ads
+
+
+385
+00:15:06,173 --> 00:15:08,876
+using the AVPlayer-
+InterstitialEventController.
+
+
+386
+00:15:08.909 --> 00:15:13.013 line:-2
+Thank you for watching
+and enjoy the rest of WWDC21.
+

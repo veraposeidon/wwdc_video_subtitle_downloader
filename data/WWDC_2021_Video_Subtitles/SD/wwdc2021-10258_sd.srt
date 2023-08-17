@@ -1,0 +1,1943 @@
+2
+00:00:02.002 --> 00:00:05.005 line:-1
+[music]
+
+
+3
+00:00:09.376 --> 00:00:11.845 line:-2
+[Anubhav]
+Hi, my name is Anubhav,
+
+
+4
+00:00:11.879 --> 00:00:15.182 line:-2
+and I'm an engineer
+on the OS Performance Team.
+
+
+5
+00:00:15.215 --> 00:00:19.286 line:-2
+Today, I'm excited to share how
+you can understand
+
+
+6
+00:00:19.319 --> 00:00:22.923 line:-2
+and eliminate hangs
+from your application.
+
+
+7
+00:00:22.956 --> 00:00:27.160 line:-1
+We'll break this talk into four sections,
+
+
+8
+00:00:27.194 --> 00:00:29.696 line:-2
+starting with understanding,
+"what is a hang?"
+
+
+9
+00:00:29.730 --> 00:00:32.266 line:-2
+We'll then talk about
+the common causes for hangs
+
+
+10
+00:00:32.299 --> 00:00:35.736 line:-1
+and what to look out for when developing.
+
+
+11
+00:00:35.769 --> 00:00:41.975 line:-2
+After that, we'll discuss tools
+you can use to monitor and diagnose hangs.
+
+
+12
+00:00:42.009 --> 00:00:46.079 line:-2
+Finally, we will learn common
+strategies to eliminate hangs,
+
+
+13
+00:00:46.113 --> 00:00:50.584 line:-2
+and how to choose which ones
+work best for your app.
+
+
+14
+00:00:50.617 --> 00:00:53.120 line:-1
+Let's jump right in.
+
+
+15
+00:00:53.153 --> 00:00:55.923 line:-2
+Let's take a look at my new recipe app,
+Desserted,
+
+
+16
+00:00:55.956 --> 00:00:57.758 line:-2
+an application
+that shows you how to make
+
+
+17
+00:00:57.791 --> 00:01:00.794 line:-1
+my favorite drinks and desserts.
+
+
+18
+00:01:00.827 --> 00:01:03.497 line:-1
+This Mango Tango smoothie looks great.
+
+
+19
+00:01:03.530 --> 00:01:06.433 line:-1
+I'll tap on it to see how it's made.
+
+
+20
+00:01:06.466 --> 00:01:08.168 line:-1
+Hmm.
+
+
+21
+00:01:08.202 --> 00:01:10.270 line:-1
+Looks like nothing is happening.
+
+
+22
+00:01:10.304 --> 00:01:13.240 line:-1
+Wow. That took a lot longer than expected.
+
+
+23
+00:01:13.273 --> 00:01:16.476 line:-2
+The app was just stuck
+and would not accept any of my touches
+
+
+24
+00:01:16.510 --> 00:01:17.878 line:-1
+for a few seconds.
+
+
+25
+00:01:19.313 --> 00:01:24.351 line:-2
+This experience can be described as
+"laggy," "slow," or "stuck."
+
+
+26
+00:01:24.384 --> 00:01:27.988 line:-2
+These are
+not words that me, or anyone else,
+
+
+27
+00:01:28.021 --> 00:01:30.657 line:-1
+wants used to describe their app.
+
+
+28
+00:01:30.691 --> 00:01:35.262 line:-2
+At Apple, we call this
+period of unresponsiveness, a "hang."
+
+
+29
+00:01:36.630 --> 00:01:40.133 line:-2
+To understand a hang,
+and what was happening in Desserted,
+
+
+30
+00:01:40.167 --> 00:01:44.137 line:-2
+we must first understand
+what an app's main runloop is.
+
+
+31
+00:01:45.772 --> 00:01:50.143 line:-2
+The main runloop is a loop
+your application's main thread enters
+
+
+32
+00:01:50.177 --> 00:01:53.547 line:-2
+to run event handlers
+in response to incoming events,
+
+
+33
+00:01:53.580 --> 00:01:56.216 line:-1
+primarily user interactions.
+
+
+34
+00:01:56.250 --> 00:02:00.554 line:-2
+When a user interacts with an app,
+the runloop receives the event,
+
+
+35
+00:02:00.587 --> 00:02:02.222 line:-1
+processes it,
+
+
+36
+00:02:02.256 --> 00:02:06.026 line:-1
+and then updates the UI, if required.
+
+
+37
+00:02:06.059 --> 00:02:11.465 line:-2
+This all happens in one turn
+of the runloop, and on the main thread.
+
+
+38
+00:02:11.498 --> 00:02:16.470 line:-1
+This process repeats for each user input.
+
+
+39
+00:02:16,503 --> 00:02:21,808
+This is how the main thread would
+look like with one turn of the runloop.
+
+
+40
+00:02:23,644 --> 00:02:28,248
+If processing the event takes a long time,
+there'll be a delay
+
+
+41
+00:02:28,282 --> 00:02:33,420
+between the user input and any UI update.
+
+
+42
+00:02:33,453 --> 00:02:36,723
+To make matters worse,
+events are buffered
+
+
+43
+00:02:36,757 --> 00:02:41,295
+and cannot be handled by
+the main thread during a hang.
+
+
+44
+00:02:41,328 --> 00:02:45,098
+If I interact with an app during a hang,
+that event is not handled
+
+
+45
+00:02:45,132 --> 00:02:48,035
+until the current hang first terminates…
+
+
+46
+00:02:48,068 --> 00:02:51,872
+…compounding hangs, one on top of another.
+
+
+47
+00:02:52.906 --> 00:02:58.946 line:-2
+In general, a delay of over
+one second will always look like a hang,
+
+
+48
+00:02:58.979 --> 00:03:02.783 line:-2
+though a shorter
+delay can be perceived as one.
+
+
+49
+00:03:02.816 --> 00:03:08.388 line:-2
+For example, a half-second delay
+while scrolling is jarring,
+
+
+50
+00:03:08.422 --> 00:03:12.893 line:-2
+but the same delay is far less
+noticeable when entering a view.
+
+
+51
+00:03:14.294 --> 00:03:19.967 line:-2
+By eliminating hangs, your apps
+will be snappy, quick, and responsive.
+
+
+52
+00:03:21.802 --> 00:03:27.107 line:-2
+Now that we know a hang is,
+let's look into what commonly causes them.
+
+
+53
+00:03:29.009 --> 00:03:33.647 line:-2
+A hang occurs when there's too
+much work being done on the main thread.
+
+
+54
+00:03:33,680 --> 00:03:37,818
+To determine exactly what that work is,
+we have to look at what the main thread
+
+
+55
+00:03:37,851 --> 00:03:41,522
+is doing while processing the event.
+
+
+56
+00:03:41,555 --> 00:03:44,658
+This time can be split into two cases.
+
+
+57
+00:03:44,691 --> 00:03:47,628
+Either the main thread
+itself is busy doing work--
+
+
+58
+00:03:47,661 --> 00:03:50,731
+this can be a single long
+task or many short ones--
+
+
+59
+00:03:50,764 --> 00:03:55,903
+or the main thread is blocked
+by another thread or system resource.
+
+
+60
+00:03:55,936 --> 00:04:02,042
+Let's start by looking at common causes
+for the main thread being busy.
+
+
+61
+00:04:02.075 --> 00:04:06.647 line:-2
+Proactively doing work is doing
+more than whats necessary to update UI,
+
+
+62
+00:04:06.680 --> 00:04:08.916 line:-1
+keeping the main thread busy for longer.
+
+
+63
+00:04:10.250 --> 00:04:13.987 line:-2
+In Desserted,
+the Recipe View only displays image tiles
+
+
+64
+00:04:14.021 --> 00:04:17.257 line:-2
+for four out of
+the many ingredient images.
+
+
+65
+00:04:17.291 --> 00:04:21.428 line:-2
+If the main thread were to load
+all ingredient images at once,
+
+
+66
+00:04:21.461 --> 00:04:27.668 line:-2
+it would spend time reading, preparing,
+and compositing each and every image.
+
+
+67
+00:04:27.701 --> 00:04:31.538 line:-2
+Most of the work that's happening
+won't even affect what a user sees.
+
+
+68
+00:04:32.940 --> 00:04:36.543 line:-2
+The view only shows four images,
+and only those four need
+
+
+69
+00:04:36.577 --> 00:04:38.412 line:-1
+to be immediately generated.
+
+
+70
+00:04:40.414 --> 00:04:44.618 line:-2
+Another cause for hangs is performing
+irrelevant work on the main thread.
+
+
+71
+00:04:44.651 --> 00:04:48.822 line:-2
+Note that the main thread services blocks
+from the main dispatch queue,
+
+
+72
+00:04:48.856 --> 00:04:53.427 line:-2
+but it can also service blocks
+from other queues via dispatch sync.
+
+
+73
+00:04:53.460 --> 00:04:56.597 line:-2
+Anytime a queue dispatch
+syncs onto another queue,
+
+
+74
+00:04:56.630 --> 00:05:03.103 line:-2
+all pending blocks on the other queue have
+to execute before the newly enqueued one.
+
+
+75
+00:05:03.136 --> 00:05:06.473 line:-2
+Consider an app with a low
+priority serial dispatch queue,
+
+
+76
+00:05:06.507 --> 00:05:08.942 line:-1
+perhaps a maintenance queue.
+
+
+77
+00:05:08.976 --> 00:05:13.146 line:-2
+If the main thread dispatch
+synced a block onto the maintenanceQueue,
+
+
+78
+00:05:13,180 --> 00:05:15,349
+it would have
+to wait for all pending blocks
+
+
+79
+00:05:15,382 --> 00:05:20,087
+on that queue to execute
+before the enqueued block runs.
+
+
+80
+00:05:20,120 --> 00:05:24,091
+Only a fraction of time was spent
+doing work meant for the main thread.
+
+
+81
+00:05:26.059 --> 00:05:30.731 line:-2
+Similarly, if a block is dispatched
+onto the main queue from another queue,
+
+
+82
+00:05:30.764 --> 00:05:33.534 line:-2
+that block has
+to execute on the main thread.
+
+
+83
+00:05:35.636 --> 00:05:40.107 line:-2
+This holds even if the block is
+enqueued via a dispatch async.
+
+
+84
+00:05:42.009 --> 00:05:45.979 line:-2
+One more cause for hangs
+is using suboptimal API.
+
+
+85
+00:05:46.013 --> 00:05:48.549 line:-1
+There are many ways to accomplish a task.
+
+
+86
+00:05:48.582 --> 00:05:53.754 line:-2
+Be sure to read API docs so you can
+use the best one for the task at hand.
+
+
+87
+00:05:55.222 --> 00:05:59.793 line:-2
+Desserted adds rounded corners
+to all images in the recipe view,
+
+
+88
+00:05:59.826 --> 00:06:03.564 line:-2
+though doing so also adds
+latency when entering this view.
+
+
+89
+00:06:04.898 --> 00:06:08.502 line:-2
+To add rounded corners,
+Desserted uses a bitmap-based
+
+
+90
+00:06:08.535 --> 00:06:11.939 line:-2
+graphics context
+to convert an image to a bitmap,
+
+
+91
+00:06:11.972 --> 00:06:17.377 line:-2
+apply a UIBezier path on that bitmap,
+then convert that bitmap back to an image.
+
+
+92
+00:06:17.411 --> 00:06:21.582 line:-2
+This set of operations is CPU intensive,
+uses lots of memory,
+
+
+93
+00:06:21.615 --> 00:06:23.817 line:-1
+and can take a long time.
+
+
+94
+00:06:23.851 --> 00:06:27.120 line:-2
+This is because the wrong hardware
+is being used for the job.
+
+
+95
+00:06:27.154 --> 00:06:30.891 line:-2
+Instead of using the CPU,
+I should leverage the GPU.
+
+
+96
+00:06:32.559 --> 00:06:36.330 line:-2
+By using CoreAnimation methods on a layer,
+adding rounded corners
+
+
+97
+00:06:36.363 --> 00:06:38.732 line:-1
+is easy and instant.
+
+
+98
+00:06:38.765 --> 00:06:43.136 line:-2
+This is just one example of using
+the wrong API for the job at hand.
+
+
+99
+00:06:44,838 --> 00:06:47,774
+Now that we've looked into some
+common reasons the main thread
+
+
+100
+00:06:47,808 --> 00:06:51,912
+of an app can be busy,
+let's investigate why it can be blocked.
+
+
+101
+00:06:53.780 --> 00:07:00.587 line:-2
+Synchronous APIs block execution from
+the time they're called to the time they return.
+
+
+102
+00:07:00.621 --> 00:07:05.792 line:-2
+These should not be used on the main
+thread if the API does a lot of work
+
+
+103
+00:07:05.826 --> 00:07:10.230 line:-2
+or has the potential to block
+for a long period of time.
+
+
+104
+00:07:10.264 --> 00:07:15.035 line:-2
+Apart from delays, these also
+add an additional point of failure.
+
+
+105
+00:07:16.770 --> 00:07:19.873 line:-2
+One such case is if
+the main thread of an app
+
+
+106
+00:07:19.907 --> 00:07:23.110 line:-1
+makes synchronous requests to the network.
+
+
+107
+00:07:23.143 --> 00:07:27.915 line:-2
+For those with 5G,
+there may not be any delay.
+
+
+108
+00:07:27.948 --> 00:07:32.419 line:-2
+For those with slower network speeds,
+this may take longer.
+
+
+109
+00:07:32.452 --> 00:07:37.791 line:-2
+And for those with very bad signal,
+this may hang indefinitely.
+
+
+110
+00:07:37.824 --> 00:07:41.228 line:-2
+There's no guarantee
+on how long this can take,
+
+
+111
+00:07:41.261 --> 00:07:46.033 line:-2
+which is why such synchronous operations
+should be avoided on the main thread.
+
+
+112
+00:07:47.868 --> 00:07:51.905 line:-2
+Another way to block the main
+thread is on a system resource,
+
+
+113
+00:07:51.939 --> 00:07:54.474 line:-1
+as these are often constrained.
+
+
+114
+00:07:54.508 --> 00:08:00.380 line:-2
+File I/O is one of the most commonly used,
+and contended, system resources.
+
+
+115
+00:08:00.414 --> 00:08:05.252 line:-2
+Latencies are dependent on hardware,
+and other reads and writes happening
+
+
+116
+00:08:05.285 --> 00:08:10.357 line:-2
+at the same time, things that can
+be beyond the app's control.
+
+
+117
+00:08:10.390 --> 00:08:14.528 line:-2
+So, apps need to do what
+they can to defend against hangs
+
+
+118
+00:08:14.561 --> 00:08:17.164 line:-1
+by avoiding I/O on the main thread.
+
+
+119
+00:08:18,899 --> 00:08:24,471
+Data stores, which do not support
+concurrency, are especially problematic.
+
+
+120
+00:08:24,505 --> 00:08:29,910
+If the main thread attempts to read from
+one while writes are already occurring,
+
+
+121
+00:08:29,943 --> 00:08:35,916
+that read would be pushed out until all
+writers complete, which may be unbounded.
+
+
+122
+00:08:38.619 --> 00:08:41.822 line:-2
+Another cause
+for hangs is synchronization.
+
+
+123
+00:08:41.855 --> 00:08:46.727 line:-2
+By definition, synchronization primitives
+can block execution,
+
+
+124
+00:08:46.760 --> 00:08:49.496 line:-2
+so it is important to limit,
+and be cautious of,
+
+
+125
+00:08:49.530 --> 00:08:51.632 line:-1
+synchronizing from the main thread.
+
+
+126
+00:08:53.267 --> 00:08:56.170 line:-2
+The thread it synchronizes with
+can take a long time
+
+
+127
+00:08:56.203 --> 00:08:59.640 line:-1
+to release an implicit or explicit lock.
+
+
+128
+00:08:59.673 --> 00:09:02.376 line:-2
+These are some common primitives to look
+out for,
+
+
+129
+00:09:02.409 --> 00:09:05.012 line:-1
+including the @synchronized directive,
+
+
+130
+00:09:05.045 --> 00:09:10.684 line:-2
+dispatch sync,
+os unfair lock, and posix locks.
+
+
+131
+00:09:10.717 --> 00:09:14.221 line:-1
+Specifically, be aware of semaphore use,
+
+
+132
+00:09:14.254 --> 00:09:19.293 line:-2
+as they do not propagate priority
+and can lengthen a hang due to preemption.
+
+
+133
+00:09:19.326 --> 00:09:23.964 line:-2
+A common anti-pattern is when
+trying to make asynchronous API
+
+
+134
+00:09:23.997 --> 00:09:27.034 line:-2
+act synchronous
+by waiting on a semaphore.
+
+
+135
+00:09:27.067 --> 00:09:30.437 line:-2
+This should always be
+avoided on the main thread.
+
+
+136
+00:09:31.972 --> 00:09:37.444 line:-2
+One more way to block the main thread
+is by doing work, IPC,
+
+
+137
+00:09:37.477 --> 00:09:41.048 line:-2
+or using system resources
+to fetch the value of something
+
+
+138
+00:09:41.081 --> 00:09:42.916 line:-1
+which doesn't change often.
+
+
+139
+00:09:44.418 --> 00:09:48.088 line:-2
+In Desserted,
+there's an icon for a social feature,
+
+
+140
+00:09:48.121 --> 00:09:52.459 line:-2
+which is only shown if I have
+added a contact as a friend.
+
+
+141
+00:09:52.492 --> 00:09:59.633 line:-2
+Querying all contacts on every
+tap into this view is one way to check,
+
+
+142
+00:09:59.666 --> 00:10:03.170 line:-2
+though it adds unnecessary overhead
+and delays,
+
+
+143
+00:10:03.203 --> 00:10:05.839 line:-2
+since the main thread
+blocks on frameworks,
+
+
+144
+00:10:05.873 --> 00:10:10.110 line:-2
+which are performing
+expensive operations under the hood.
+
+
+145
+00:10:10.143 --> 00:10:14.915 line:-2
+Furthermore, the value I'm fetching
+does not change often,
+
+
+146
+00:10:14.948 --> 00:10:21.355 line:-2
+so querying this frequently is unnecessary
+and adds burden on system resources.
+
+
+147
+00:10:23,390 --> 00:10:28,629
+The state of system resources,
+such as CPU, memory, and storage
+
+
+148
+00:10:28,662 --> 00:10:31,832
+play a large part in when hangs occur.
+
+
+149
+00:10:31,865 --> 00:10:36,537
+Different hardware and device conditions
+in the field mean real world scenarios
+
+
+150
+00:10:36,570 --> 00:10:41,708
+will be significantly different than those
+encountered while testing on desk.
+
+
+151
+00:10:41,742 --> 00:10:45,479
+It is important you do what
+you can to defend against these cases
+
+
+152
+00:10:45,512 --> 00:10:49,316
+by having robust tests
+and using the oldest-supported hardware
+
+
+153
+00:10:49,349 --> 00:10:51,685
+as a benchmark.
+
+
+154
+00:10:51.718 --> 00:10:56.456 line:-2
+The high-level cause for hangs
+is too much work being done on,
+
+
+155
+00:10:56.490 --> 00:10:59.193 line:-1
+or on behalf of, the main thread.
+
+
+156
+00:10:59.226 --> 00:11:02.863 line:-2
+To ensure performance,
+it's important the main thread
+
+
+157
+00:11:02.896 --> 00:11:08.001 line:-2
+of your application focuses
+on what's necessary to update UI.
+
+
+158
+00:11:09.236 --> 00:11:14.608 line:-2
+Now that you know common causes for hangs,
+let's talk about some helpful tools
+
+
+159
+00:11:14.641 --> 00:11:19.746 line:-2
+you can use to monitor
+and triage hangs in your app,
+
+
+160
+00:11:19.780 --> 00:11:22.683 line:-1
+both during development and production.
+
+
+161
+00:11:23,917 --> 00:11:27,921
+In order to triage a hang, you would want
+to know what your app is doing
+
+
+162
+00:11:27,955 --> 00:11:29,890
+during that time.
+
+
+163
+00:11:29,923 --> 00:11:32,726
+The time profiler instrument
+lets you do that
+
+
+164
+00:11:32,759 --> 00:11:36,697
+by showing your application’s
+callstacks over time,
+
+
+165
+00:11:36,730 --> 00:11:40,000
+indicating exactly what's executing.
+
+
+166
+00:11:40,033 --> 00:11:45,639
+The system trace instrument adds
+more context with data on system calls,
+
+
+167
+00:11:45,672 --> 00:11:51,812
+VM faults, I/O, as well as inter
+and intra-process interactions.
+
+
+168
+00:11:51,845 --> 00:11:58,519
+For more information, check out the
+"System Trace in Depth" talk from 2016.
+
+
+169
+00:11:58,552 --> 00:12:02,890
+Now, I'll use the time profiler
+and system trace instruments
+
+
+170
+00:12:02,923 --> 00:12:05,959
+to find what's causing Desserted to hang.
+
+
+171
+00:12:07.427 --> 00:12:13.567 line:-2
+After taking a trace of the hang, here's
+how it looks like opened in Instruments.
+
+
+172
+00:12:13.600 --> 00:12:17.671 line:-2
+In the system trace output,
+the red line indicates system calls,
+
+
+173
+00:12:17.704 --> 00:12:20.841 line:-2
+the purple graph
+indicates virtual memory faults,
+
+
+174
+00:12:20.874 --> 00:12:26.747 line:-2
+and the horizontal blue bar indicates
+the main thread is busy doing work.
+
+
+175
+00:12:26.780 --> 00:12:31.084 line:-1
+The next step is to see what this work is.
+
+
+176
+00:12:31.118 --> 00:12:36.056 line:-2
+The time profiler
+allows you to do just that.
+
+
+177
+00:12:36.089 --> 00:12:40.494 line:-2
+It presents a call tree
+by aggregating main-thread callstacks
+
+
+178
+00:12:40.527 --> 00:12:45.332 line:-1
+for the duration of the 4.7 second hang.
+
+
+179
+00:12:45.365 --> 00:12:50.737 line:-2
+The highlighted portion of the tree
+illustrates that 4.6 seconds of this hang
+
+
+180
+00:12:50.771 --> 00:12:55.309 line:-2
+was due to a loadAllMessages
+method in the Recipe View.
+
+
+181
+00:12:55.342 --> 00:12:58.111 line:-1
+This pattern looks familiar.
+
+
+182
+00:12:58.145 --> 00:13:01.315 line:-2
+Desserted might be loading
+in more images than needed.
+
+
+183
+00:13:02,683 --> 00:13:06,153
+Once your application has shipped,
+you can use MetricKit
+
+
+184
+00:13:06,186 --> 00:13:09,456
+to collect call trees for hangs
+hit in the field.
+
+
+185
+00:13:09,489 --> 00:13:14,294
+This enables you to prioritize fixes
+based on which issues customers
+
+
+186
+00:13:14,328 --> 00:13:16,630
+are most commonly hitting.
+
+
+187
+00:13:16,663 --> 00:13:18,866
+To learn how to use MetricKit for hangs,
+
+
+188
+00:13:18,899 --> 00:13:23,437
+check out the "What's new
+in MetricKit" talk from 2020.
+
+
+189
+00:13:23,470 --> 00:13:27,541
+I've shipped Desserted and have
+some hang reports from MetricKit.
+
+
+190
+00:13:27,574 --> 00:13:32,179
+Let's look at one of them to see if
+it's similar to the hang we just triaged.
+
+
+191
+00:13:34.014 --> 00:13:36.650 line:-1
+MetricKit returns a call tree
+
+
+192
+00:13:36.683 --> 00:13:40.187 line:-2
+by aggregating callstacks
+taken during a hang.
+
+
+193
+00:13:40.220 --> 00:13:44.391 line:-2
+This tree format is similar
+to what the time profiler presents.
+
+
+194
+00:13:46.193 --> 00:13:49.496 line:-2
+The highlighted portion indicates
+this hang is different
+
+
+195
+00:13:49.530 --> 00:13:53.233 line:-2
+from the one we just
+investigated with Instruments.
+
+
+196
+00:13:53.267 --> 00:13:56.737 line:-2
+This one is due
+to a new social feature I added,
+
+
+197
+00:13:56.770 --> 00:14:00.274 line:-2
+which blocks on a dispatch
+queue querying contacts.
+
+
+198
+00:14:00.307 --> 00:14:03.810 line:-2
+Without MetricKit,
+I may not have found this issue,
+
+
+199
+00:14:03.844 --> 00:14:07.948 line:-1
+and it would still persist in the field.
+
+
+200
+00:14:07,981 --> 00:14:11,718
+When fixing hangs,
+it is important to baseline
+
+
+201
+00:14:11,752 --> 00:14:15,322
+and quantify the performance of your app.
+
+
+202
+00:14:15,355 --> 00:14:19,526
+The Xcode organizer does this
+by showing performance metrics,
+
+
+203
+00:14:19,560 --> 00:14:23,830
+including a chart displaying
+hang rate per app version.
+
+
+204
+00:14:23,864 --> 00:14:28,035
+This is especially helpful
+when triaging regressions.
+
+
+205
+00:14:28,068 --> 00:14:32,806
+Check out these two talks for more
+information on the Xcode Organizer.
+
+
+206
+00:14:33.807 --> 00:14:39.646 line:-2
+Now, let's go over some common strategies
+you can use to fix hangs in your app.
+
+
+207
+00:14:41.114 --> 00:14:45.986 line:-2
+Each of these strategies can
+address multiple causes for hangs.
+
+
+208
+00:14:46.019 --> 00:14:49.623 line:-2
+In order to know
+which fix is best for your app,
+
+
+209
+00:14:49.656 --> 00:14:53.093 line:-2
+you will need to look at
+their side affects and tradeoffs.
+
+
+210
+00:14:54.161 --> 00:14:58.165 line:-2
+To eliminate and defend against hangs,
+reduce the amount
+
+
+211
+00:14:58.198 --> 00:15:00.701 line:-1
+of work done on the main thread.
+
+
+212
+00:15:02.436 --> 00:15:05.372 line:-1
+This can be done in two ways.
+
+
+213
+00:15:05.405 --> 00:15:08.976 line:-2
+The first is to optimize
+the work already being done
+
+
+214
+00:15:09.009 --> 00:15:12.246 line:-2
+on the main thread
+to reduce execution time.
+
+
+215
+00:15:12.279 --> 00:15:17.584 line:-2
+The second is to move work off the main
+thread in a non-blocking manner
+
+
+216
+00:15:17.618 --> 00:15:19.786 line:-1
+to keep it responsive.
+
+
+217
+00:15:19.820 --> 00:15:23.790 line:-2
+Let's start by looking at ways
+to reduce main thread execution,
+
+
+218
+00:15:23.824 --> 00:15:26.627 line:-1
+starting with caching.
+
+
+219
+00:15:26.660 --> 00:15:31.932 line:-2
+Caches are a great way to quickly
+access frequently used assets
+
+
+220
+00:15:31.965 --> 00:15:34.601 line:-1
+or previously queried values.
+
+
+221
+00:15:34.635 --> 00:15:39.173 line:-2
+They're often an in-memory store,
+but can be persisted to disk,
+
+
+222
+00:15:39.206 --> 00:15:42.709 line:-1
+if needed across multiple app invocations.
+
+
+223
+00:15:42.743 --> 00:15:45.379 line:-1
+Formatted assets that can be needed later,
+
+
+224
+00:15:45.412 --> 00:15:48.015 line:-1
+like ingredient image tiles in Desserted,
+
+
+225
+00:15:48.048 --> 00:15:50.117 line:-1
+are great candidates for caching,
+
+
+226
+00:15:50.150 --> 00:15:54.821 line:-2
+since it's expensive to create
+these assets every time they're needed.
+
+
+227
+00:15:56,823 --> 00:16:01,795
+By caching these in an NSCache,
+the overhead of generating assets
+
+
+228
+00:16:01,828 --> 00:16:05,132
+is replaced by a quick memory read.
+
+
+229
+00:16:05,165 --> 00:16:07,935
+This would eliminate the hang
+we looked at in Instruments.
+
+
+230
+00:16:11,104 --> 00:16:16,443
+It is important to have an accurate cache
+invalidation mechanism to strike a balance
+
+
+231
+00:16:16,476 --> 00:16:20,948
+between having stale data
+and constantly updating a cache.
+
+
+232
+00:16:20,981 --> 00:16:26,587
+This work should happen asynchronously
+on a secondary dispatch queue
+
+
+233
+00:16:26,620 --> 00:16:29,690
+to keep the main thread responsive
+to events.
+
+
+234
+00:16:31.959 --> 00:16:37.431 line:-2
+Notification observers are another way
+to reduce work on the main thread.
+
+
+235
+00:16:37.464 --> 00:16:42.236 line:-2
+They allow your app to react
+to changes in a value or state,
+
+
+236
+00:16:42.269 --> 00:16:47.407 line:-2
+without having to do expensive,
+on-demand computation.
+
+
+237
+00:16:47.441 --> 00:16:52.012 line:-2
+Any class can post notifications,
+even your own.
+
+
+238
+00:16:52.045 --> 00:16:57.851 line:-2
+To find notifications from a specific
+class, check its API documentation.
+
+
+239
+00:16:57.885 --> 00:17:01.088 line:-2
+To find all observable
+system notifications,
+
+
+240
+00:17:01.121 --> 00:17:04.424 line:-2
+check out the Apple developer
+documentation page
+
+
+241
+00:17:04.458 --> 00:17:07.995 line:-1
+for NSNotification.Name.
+
+
+242
+00:17:08.028 --> 00:17:12.499 line:-2
+A great candidate for this is
+the social feature in Desserted.
+
+
+243
+00:17:13,901 --> 00:17:19,706
+By registering an observer for the
+abDatabaseChangedExternally notification,
+
+
+244
+00:17:19,740 --> 00:17:24,912
+the main thread no longer has to wait
+on querying contacts.
+
+
+245
+00:17:24,945 --> 00:17:28,682
+Once a notification comes in,
+the observer is invoked.
+
+
+246
+00:17:28,715 --> 00:17:31,952
+In this case,
+it'll be updating a cached value.
+
+
+247
+00:17:34,188 --> 00:17:38,458
+To keep the main thread responsive,
+these updates should be asynchronous,
+
+
+248
+00:17:38,492 --> 00:17:42,763
+which is achieved by dispatch_asyncing
+the handler to another queue.
+
+
+249
+00:17:44,598 --> 00:17:48,101
+Now, I provide the same feature as before,
+
+
+250
+00:17:48,135 --> 00:17:52,372
+but without the hang we saw
+in the MetricKit log.
+
+
+251
+00:17:52.406 --> 00:17:57.477 line:-2
+Another way to eliminate hangs
+is by moving work off the main thread.
+
+
+252
+00:17:57.511 --> 00:18:02.216 line:-2
+First, we need to determine
+what this work should be.
+
+
+253
+00:18:02.249 --> 00:18:07.721 line:-2
+In general, important tasks providing
+critical information for the UI
+
+
+254
+00:18:07.754 --> 00:18:10.424 line:-1
+should remain on the main thread.
+
+
+255
+00:18:10.457 --> 00:18:13.160 line:-2
+Furthermore,
+all views and view controllers
+
+
+256
+00:18:13.193 --> 00:18:17.664 line:-2
+have to be created, modified,
+and destroyed on the main thread.
+
+
+257
+00:18:18.465 --> 00:18:23.904 line:-2
+However, the computation needed
+to update a UI element can be
+
+
+258
+00:18:23.937 --> 00:18:27.541 line:-2
+offloaded to another thread,
+with a completion handler
+
+
+259
+00:18:27.574 --> 00:18:31.445 line:-2
+to perform the actual update
+on the main thread.
+
+
+260
+00:18:31.478 --> 00:18:37.184 line:-2
+This pattern is useful when
+computation is known to take a long time.
+
+
+261
+00:18:37.217 --> 00:18:42.556 line:-2
+Other less important, maintenance,
+or non-time-critical tasks
+
+
+262
+00:18:42.589 --> 00:18:46.026 line:-2
+should be performed asynchronously
+on another thread.
+
+
+263
+00:18:47.261 --> 00:18:51.865 line:-2
+These would then run at a lower
+scheduling priority and can take longer
+
+
+264
+00:18:51.899 --> 00:18:55.102 line:-2
+to complete than
+work that's on the main thread.
+
+
+265
+00:18:55.135 --> 00:18:59.139 line:-2
+This is intentional and reflects
+the idea that the main thread
+
+
+266
+00:18:59.173 --> 00:19:02.075 line:-1
+should only perform critical work.
+
+
+267
+00:19:03.143 --> 00:19:07.314 line:-2
+The most straightforward way to perform
+asynchronous operations
+
+
+268
+00:19:07.347 --> 00:19:11.051 line:-2
+from the main thread is to use
+asynchronous counterparts
+
+
+269
+00:19:11.084 --> 00:19:14.087 line:-1
+of synchronous APIs.
+
+
+270
+00:19:14,121 --> 00:19:16,356
+Let's take networking as an example.
+
+
+271
+00:19:18,158 --> 00:19:23,130
+By using async NSURL counterparts
+to synchronous networking APIs,
+
+
+272
+00:19:23,163 --> 00:19:27,067
+apps will be responsive.
+
+
+273
+00:19:27,100 --> 00:19:32,306
+Asynchronous APIs are often
+indicated by the word "asynchronously"
+
+
+274
+00:19:32,339 --> 00:19:35,976
+or the presence of a completion
+handler in the method name.
+
+
+275
+00:19:38.445 --> 00:19:42.916 line:-2
+Grand Central Dispatch is a powerful
+multi-threading mechanism,
+
+
+276
+00:19:42.950 --> 00:19:47.321 line:-2
+which you can leverage in cases
+where there aren't async API variants,
+
+
+277
+00:19:47.354 --> 00:19:51.925 line:-2
+or the code you want to move
+off the main thread is your own.
+
+
+278
+00:19:51.959 --> 00:19:55.929 line:-2
+Grand Central Dispatch provides
+simple mechanisms to move
+
+
+279
+00:19:55.963 --> 00:20:02.135 line:-2
+any block of work to another thread,
+both synchronously or asynchronously.
+
+
+280
+00:20:02.169 --> 00:20:08.542 line:-2
+This makes GCD incredibly effective at
+eliminating most general causes for hangs.
+
+
+281
+00:20:10,878 --> 00:20:14,715
+To perform a block of work
+asynchronously on another thread,
+
+
+282
+00:20:14,748 --> 00:20:18,151
+dispatch async that block
+to another dispatch queue.
+
+
+283
+00:20:19,553 --> 00:20:23,423
+A completion handler can be
+added within the asynced block
+
+
+284
+00:20:23,457 --> 00:20:25,959
+by dispatching back to the main queue.
+
+
+285
+00:20:28.395 --> 00:20:33.333 line:-2
+Grand Central Dispatch also
+enables you to pre-warm computation.
+
+
+286
+00:20:33.367 --> 00:20:38.138 line:-2
+By dispatch asyncing a task onto a queue,
+perhaps a prefetchQueue,
+
+
+287
+00:20:38.172 --> 00:20:44.344 line:-2
+the task will start executing while the
+main thread stays free to do other work.
+
+
+288
+00:20:44.378 --> 00:20:46.980 line:-2
+When these results are needed by
+the main thread,
+
+
+289
+00:20:47.014 --> 00:20:49.883 line:-2
+it can dispatch sync
+onto the prefetchQueue
+
+
+290
+00:20:49.917 --> 00:20:53.620 line:-1
+to wait for the task to complete.
+
+
+291
+00:20:53,654 --> 00:20:57,658
+We've just touched
+the surface of what GCD can do.
+
+
+292
+00:20:57,691 --> 00:21:03,096
+To learn more, check out the "Modernizing
+Grand Central Dispatch" talk from 2017.
+
+
+293
+00:21:05.232 --> 00:21:10.404 line:-2
+Let's understand some tradeoffs
+with the solutions we just talked about.
+
+
+294
+00:21:10.437 --> 00:21:13.807 line:-2
+Caches use memory,
+so you should be cognizant
+
+
+295
+00:21:13.841 --> 00:21:17.144 line:-2
+of their size
+to avoid large memory growth.
+
+
+296
+00:21:17.177 --> 00:21:22.149 line:-2
+It is also important to ensure there's an
+accurate invalidation mechanism
+
+
+297
+00:21:22.182 --> 00:21:24.852 line:-1
+so values are not stale.
+
+
+298
+00:21:24.885 --> 00:21:27.721 line:-1
+Notifications can be chatty.
+
+
+299
+00:21:27.754 --> 00:21:30.424 line:-2
+When observing one,
+it is important to consider
+
+
+300
+00:21:30.457 --> 00:21:34.928 line:-2
+the frequency at which
+that notification fires.
+
+
+301
+00:21:34.962 --> 00:21:40.367 line:-2
+Adding a filter before handling or
+coalescing multiple notifications
+
+
+302
+00:21:40.400 --> 00:21:43.537 line:-1
+will reduce CPU churn.
+
+
+303
+00:21:43.570 --> 00:21:47.541 line:-2
+When using asynchronous APIs,
+it is important to know whether
+
+
+304
+00:21:47.574 --> 00:21:51.545 line:-2
+the operation
+in question should be asynced,
+
+
+305
+00:21:51.578 --> 00:21:56.517 line:-2
+particularly by first checking
+whether it is crucial for a UI update,
+
+
+306
+00:21:56.550 --> 00:22:01.455 line:-2
+as the operating system
+deprioritizes asynced work.
+
+
+307
+00:22:01,488 --> 00:22:05,993
+When using Grand Central Dispatch
+to perform tasks asynchronously,
+
+
+308
+00:22:06,026 --> 00:22:11,131
+you are changing the order at
+which tasks in your code execute.
+
+
+309
+00:22:11,164 --> 00:22:16,503
+It is important to keep in mind
+what tasks have to be ordered on others
+
+
+310
+00:22:16,537 --> 00:22:19,573
+to ensure your app does not break.
+
+
+311
+00:22:19,606 --> 00:22:22,142
+Using dispatch_sync
+with serial queues
+
+
+312
+00:22:22,176 --> 00:22:26,947
+is a great way to synchronize operations
+when needed.
+
+
+313
+00:22:26,980 --> 00:22:31,952
+Compared to the severe impact
+hangs pose to user experience,
+
+
+314
+00:22:31,985 --> 00:22:34,821
+these tradeoffs are always worth it.
+
+
+315
+00:22:35.856 --> 00:22:39.293 line:-2
+Some thoughts to keep in mind
+while eliminating hangs
+
+
+316
+00:22:39.326 --> 00:22:42.930 line:-1
+are use Apple Frameworks and APIs.
+
+
+317
+00:22:42.963 --> 00:22:46.633 line:-2
+These are already compatible
+with a wide set of devices,
+
+
+318
+00:22:46.667 --> 00:22:52.372 line:-2
+are performant, and are constantly updated
+to be more efficient and effective.
+
+
+319
+00:22:52.406 --> 00:22:56.210 line:-2
+Perform improvements iteratively
+in your code.
+
+
+320
+00:22:56.243 --> 00:22:58.912 line:-2
+This way,
+you'll make targeted fixes,
+
+
+321
+00:22:58.946 --> 00:23:03.517 line:-2
+and be able to see
+the affects of individual changes.
+
+
+322
+00:23:03.550 --> 00:23:07.254 line:-2
+Be a good neighbor
+when using system resources.
+
+
+323
+00:23:07.287 --> 00:23:12.693 line:-2
+Using more resources than needed not only
+reduces the performance of your own app,
+
+
+324
+00:23:12.726 --> 00:23:15.729 line:-2
+but can also cause other
+slowdowns in the system.
+
+
+325
+00:23:16.697 --> 00:23:20.868 line:-2
+Together, we experienced
+how jarring hangs can be,
+
+
+326
+00:23:20.901 --> 00:23:25.839 line:-2
+and just how important it is
+to defend against hangs in your app.
+
+
+327
+00:23:25.873 --> 00:23:32.212 line:-2
+Going forward, set performance baselines
+of your app via the Xcode organizer.
+
+
+328
+00:23:32.246 --> 00:23:34.681 line:-1
+During development and code reviews,
+
+
+329
+00:23:34.715 --> 00:23:38.585 line:-2
+watch out for anti-patterns
+that can cause hangs.
+
+
+330
+00:23:38.619 --> 00:23:42.956 line:-2
+We discussed
+seven of the most common ones.
+
+
+331
+00:23:42.990 --> 00:23:48.529 line:-2
+Diagnose issues that come up with the time
+profiler and system trace instruments,
+
+
+332
+00:23:48.562 --> 00:23:55.335 line:-2
+using MetricKit to prioritize issues
+customers are most frequently hitting.
+
+
+333
+00:23:55.369 --> 00:24:01.441 line:-2
+Eliminate any hangs you find by
+using caches, observing notifications,
+
+
+334
+00:24:01.475 --> 00:24:08.248 line:-2
+looking for asynchronous alternatives, or taking
+advantage of Grand Central Dispatch.
+
+
+335
+00:24:08.282 --> 00:24:13.220 line:-2
+By following these steps, your apps
+will have even better performance
+
+
+336
+00:24:13.253 --> 00:24:17.090 line:-2
+to provide
+the best possible user experience.
+
+
+337
+00:24:17.124 --> 00:24:19.026 line:-1
+Thanks for hanging around.
+
+
+338
+00:24:19.059 --> 00:24:22.062 line:-1
+[music]
+

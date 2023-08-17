@@ -1,0 +1,1639 @@
+2
+00:00:00,501 --> 00:00:08,509 line:-1
+♪ ♪
+
+
+3
+00:00:09.309 --> 00:00:12.646 line:-2 align:center
+Hi, my name is Nik,
+and I'm an engineer on the Video team.
+
+
+4
+00:00:12.679 --> 00:00:16.049 line:-2 align:center
+Today I'm excited to talk to you
+about media metadata publishing
+
+
+5
+00:00:16,083 --> 00:00:17,684 line:-1
+and playback interactions.
+
+
+6
+00:00:17.718 --> 00:00:19.887 line:-1 align:center
+So what exactly does that mean?
+
+
+7
+00:00:19.920 --> 00:00:21.788 line:-2 align:center
+There are a number of places
+on Apple devices
+
+
+8
+00:00:21,822 --> 00:00:25,192 line:-2
+where playback information is displayed,
+and where playback can be controlled.
+
+
+9
+00:00:25,225 --> 00:00:28,562 line:-2
+For example, the Now Playing section
+of Control Center displays the artwork,
+
+
+10
+00:00:28,595 --> 00:00:32,165 line:-2
+title, and progress for media
+that is currently playing on the device.
+
+
+11
+00:00:32,199 --> 00:00:36,737 line:-2
+It also lets you play, pause,
+or even skip forward or backward.
+
+
+12
+00:00:36,770 --> 00:00:40,741 line:-2
+Expanding the Now Playing tile shows more
+details, like the artwork and progress.
+
+
+13
+00:00:40.774 --> 00:00:45.812 line:-2 align:center
+it also allows you to scrub
+and increase or decrease the volume.
+
+
+14
+00:00:45.846 --> 00:00:48.315 line:-2 align:center
+Lock Screen also displays
+the same information and controls,
+
+
+15
+00:00:48,348 --> 00:00:51,685 line:-2
+giving users a convenient place
+to check in on progress, pause,
+
+
+16
+00:00:51,718 --> 00:00:54,755 line:-2
+or even AirPlay to another device
+without needing to unlock.
+
+
+17
+00:00:57,424 --> 00:01:00,527 line:-2
+No matter what device is playing,
+the Now Playing app on Apple Watch
+
+
+18
+00:01:00,561 --> 00:01:01,895 line:-1
+provides the same experience.
+
+
+19
+00:01:01,929 --> 00:01:04,398 line:-1
+It even has an Apple TV remote built in.
+
+
+20
+00:01:05,866 --> 00:01:08,702 line:-2
+On tvOS when using AVKit,
+the info overlay
+
+
+21
+00:01:08.735 --> 00:01:11.905 line:-2 align:center
+when controls are presented
+will show title and chapter information.
+
+
+22
+00:01:11,939 --> 00:01:13,373 line:-1
+When you swipe down to the info pane,
+
+
+23
+00:01:13,407 --> 00:01:16,176 line:-2
+more details like the artwork
+and description are shown.
+
+
+24
+00:01:17,878 --> 00:01:21,114 line:-2
+Holding the TV button on
+your Apple TV remote shows Control Center,
+
+
+25
+00:01:21,148 --> 00:01:25,586 line:-2
+which like iOS has a Now Playing tile
+that also can be expanded.
+
+
+26
+00:01:25.619 --> 00:01:28.722 line:-2 align:center
+When audio content starts playing
+from the background on tvOS,
+
+
+27
+00:01:28.755 --> 00:01:30.657 line:-2 align:center
+be it from pressing the play button
+on the remote,
+
+
+28
+00:01:30,691 --> 00:01:33,660 line:-2
+or from selecting a track
+in the Music app from another device,
+
+
+29
+00:01:33.694 --> 00:01:38.365 line:-2 align:center
+a notification with the Now Playing
+information is presented.
+
+
+30
+00:01:38.398 --> 00:01:42.936 line:-2 align:center
+Additionally, after a brief period of
+inactivity on tvOS when playing audio,
+
+
+31
+00:01:42,970 --> 00:01:46,607 line:-2
+a full screen overlay showing
+what's currently playing is presented.
+
+
+32
+00:01:48.308 --> 00:01:52.112 line:-2 align:center
+Lastly, on iOS,
+the Control Other Speakers and TVs button
+
+
+33
+00:01:52.145 --> 00:01:54.815 line:-2 align:center
+lets you view the Now Playing information
+on all of your devices,
+
+
+34
+00:01:54,848 --> 00:01:56,950 line:-1
+as well as control playback.
+
+
+35
+00:01:58,352 --> 00:02:01,989 line:-2
+With the growing number of devices and UIs
+where Now Playing information is presented
+
+
+36
+00:02:02,022 --> 00:02:03,690 line:-1
+and where playback can be controlled from,
+
+
+37
+00:02:03.724 --> 00:02:05.759 line:-2 align:center
+properly publishing
+Now Playing information
+
+
+38
+00:02:05.792 --> 00:02:08.896 line:-2 align:center
+and responding to remote commands
+is more important than ever.
+
+
+39
+00:02:08.929 --> 00:02:10.898 line:-2 align:center
+Over the course
+of the rest of this session,
+
+
+40
+00:02:10.931 --> 00:02:12.900 line:-2 align:center
+we will cover responding
+to playback interactions
+
+
+41
+00:02:12,933 --> 00:02:15,936 line:-2
+in the form of remote commands,
+automatic metadata publishing,
+
+
+42
+00:02:15.969 --> 00:02:18.872 line:-2 align:center
+publishing with AVKit,
+and manual publishing.
+
+
+43
+00:02:18,906 --> 00:02:21,008 line:-2
+When using AVFoundation
+for media playback,
+
+
+44
+00:02:21.041 --> 00:02:22.876 line:-2 align:center
+the best way
+to publish Now Playing metadata
+
+
+45
+00:02:22.910 --> 00:02:27.347 line:-2 align:center
+and respond to playback interactions
+is using the MPNowPlayingSession class.
+
+
+46
+00:02:28,749 --> 00:02:31,852 line:-2
+Historically, this class has only
+been available on tvOS,
+
+
+47
+00:02:31.885 --> 00:02:34.621 line:-1 align:center
+but is now available on iOS 16.
+
+
+48
+00:02:36.523 --> 00:02:38.825 line:-2 align:center
+It is used to represent
+a distinct playback session,
+
+
+49
+00:02:38.859 --> 00:02:40.727 line:-1 align:center
+and offers control over Now Playing status
+
+
+50
+00:02:40,761 --> 00:02:44,398 line:-2
+if your app contains
+multiple active sessions.
+
+
+51
+00:02:44.431 --> 00:02:46.633 line:-2 align:center
+It supports both
+manual metadata publishing,
+
+
+52
+00:02:46.667 --> 00:02:50.537 line:-2 align:center
+as well as the new automatic publishing
+available in iOS and tvOS 16.
+
+
+53
+00:02:52,206 --> 00:02:55,475 line:-2
+MPNowPlayingSession shouldn't be used
+on tvOS when using AVKit,
+
+
+54
+00:02:55.509 --> 00:02:57.678 line:-2 align:center
+which has its own
+automatic publishing mechanisms
+
+
+55
+00:02:57,711 --> 00:02:59,613 line:-1
+we'll cover later in the session.
+
+
+56
+00:03:00.514 --> 00:03:03.016 line:-2 align:center
+Being the "Now Playing" app means
+that your app is what will populate
+
+
+57
+00:03:03.050 --> 00:03:05.219 line:-1 align:center
+Control Center, Lock Screen, etcetera,
+
+
+58
+00:03:05.252 --> 00:03:06.620 line:-1 align:center
+and receive the playback controls
+
+
+59
+00:03:06,653 --> 00:03:10,123 line:-2
+when the user, for example, presses
+pause from one of those interfaces.
+
+
+60
+00:03:10.157 --> 00:03:12.559 line:-2 align:center
+With MPNowPlayingSession,
+you can represent multiple
+
+
+61
+00:03:12,593 --> 00:03:15,229 line:-2
+concurrent playback sessions
+within a single app.
+
+
+62
+00:03:15,262 --> 00:03:17,064 line:-1
+However, when using multiple sessions,
+
+
+63
+00:03:17.097 --> 00:03:19.032 line:-2 align:center
+your app must promote one
+as the active session
+
+
+64
+00:03:19,066 --> 00:03:22,035 line:-2
+that will appear throughout the system
+when remote controlling your app.
+
+
+65
+00:03:22,069 --> 00:03:23,737 line:-1
+For example, with Picture in Picture
+
+
+66
+00:03:23,770 --> 00:03:25,772 line:-2
+you may have two
+concurrent playback sessions,
+
+
+67
+00:03:25.806 --> 00:03:27.574 line:-2 align:center
+where the full screen playback
+should be considered
+
+
+68
+00:03:27.608 --> 00:03:30.244 line:-1 align:center
+the active Now Playing session.
+
+
+69
+00:03:30,277 --> 00:03:34,548 line:-2
+The system also has a few heuristics
+to qualify apps as Now Playing eligible.
+
+
+70
+00:03:34.581 --> 00:03:38.151 line:-2 align:center
+First, you must register a handler
+for at least one remote command.
+
+
+71
+00:03:38.185 --> 00:03:41.655 line:-2 align:center
+As you can imagine, an app that won't
+respond to any playback interactions
+
+
+72
+00:03:41,688 --> 00:03:45,559 line:-2
+is most likely not an ideal candidate
+to show up as the Now Playing app.
+
+
+73
+00:03:45,592 --> 00:03:48,695 line:-2
+Second, your apps AVAudioSession
+must be configured
+
+
+74
+00:03:48.729 --> 00:03:52.032 line:-2 align:center
+with a non-mixable category
+and category option.
+
+
+75
+00:03:52.065 --> 00:03:54.668 line:-2 align:center
+Mixable playback categories
+and options are generally used
+
+
+76
+00:03:54,701 --> 00:03:57,471 line:-2
+when playing back notifications,
+and therefore this is a good indication
+
+
+77
+00:03:57.504 --> 00:04:01.808 line:-2 align:center
+to the system that whatever is playing is
+also not a good candidate for Now Playing.
+
+
+78
+00:04:01,842 --> 00:04:04,811 line:-2
+Here's a few examples
+to help understand playback sessions.
+
+
+79
+00:04:04,845 --> 00:04:07,281 line:-2
+In this example there is a single piece
+of content playing,
+
+
+80
+00:04:07,314 --> 00:04:10,951 line:-2
+so this would be represented
+using a single MPNowPlayingSession.
+
+
+81
+00:04:10,984 --> 00:04:14,188 line:-2
+If your app supports PiP,
+you would have two MPNowPlayingSessions:
+
+
+82
+00:04:14,221 --> 00:04:17,824 line:-2
+one for the main player,
+and one for the PiP playback.
+
+
+83
+00:04:17,858 --> 00:04:20,961 line:-2
+A more complex scenario would be
+a single MPNowPlayingSession
+
+
+84
+00:04:20.994 --> 00:04:22.362 line:-1 align:center
+that has several players.
+
+
+85
+00:04:22,396 --> 00:04:25,132 line:-2
+In this example, we have four players, one
+in each quadrant,
+
+
+86
+00:04:25.165 --> 00:04:27.801 line:-2 align:center
+showing different points of view
+for the same race.
+
+
+87
+00:04:27,835 --> 00:04:30,337 line:-2
+Players added to the same
+MPNowPlayingSession
+
+
+88
+00:04:30.370 --> 00:04:33.173 line:-1 align:center
+should always be part of the same content.
+
+
+89
+00:04:33.207 --> 00:04:36.476 line:-2 align:center
+And here's how each of these
+example sessions would be instantiated.
+
+
+90
+00:04:36.510 --> 00:04:38.879 line:-2 align:center
+The first, we're just playing
+a single piece of content,
+
+
+91
+00:04:38.912 --> 00:04:41.715 line:-2 align:center
+so we have the single session
+with the single player.
+
+
+92
+00:04:41.748 --> 00:04:44.051 line:-2 align:center
+The second example
+is using Picture-in-Picture,
+
+
+93
+00:04:44,084 --> 00:04:46,520 line:-2
+so we have two sessions,
+each with a single player.
+
+
+94
+00:04:46,553 --> 00:04:50,958 line:-2
+The first being the full screen content,
+and the second being the content in PiP.
+
+
+95
+00:04:50.991 --> 00:04:53.794 line:-2 align:center
+The last example, the multi-view race,
+is represented
+
+
+96
+00:04:53.827 --> 00:04:56.997 line:-1 align:center
+with a single session with four players.
+
+
+97
+00:04:57.030 --> 00:04:58.732 line:-1 align:center
+When an app does have multiple sessions,
+
+
+98
+00:04:58,765 --> 00:05:02,936 line:-2
+it's the apps responsibility for promoting
+a given session as active when applicable.
+
+
+99
+00:05:02.970 --> 00:05:05.606 line:-2 align:center
+For example,
+if media is playing in Picture-in-Picture,
+
+
+100
+00:05:05.639 --> 00:05:07.508 line:-1 align:center
+if the user expands it to be full screen,
+
+
+101
+00:05:07,541 --> 00:05:10,010 line:-2
+the previously full screen session
+should no longer be active,
+
+
+102
+00:05:10.043 --> 00:05:12.679 line:-2 align:center
+or Now Playing, and the PiP session
+that is now full screen
+
+
+103
+00:05:12.713 --> 00:05:13.947 line:-1 align:center
+should become active.
+
+
+104
+00:05:13.981 --> 00:05:17.184 line:-2 align:center
+This transition can be done
+by calling becomeActiveIfPossible
+
+
+105
+00:05:17,217 --> 00:05:20,787 line:-1
+on MPNowPlayingSession.
+
+
+106
+00:05:20,821 --> 00:05:23,090 line:-2
+Now that we've covered the basics
+of setting up instances
+
+
+107
+00:05:23,123 --> 00:05:26,260 line:-2
+of MPNowPlayingSession
+and controlling the Now Playing session,
+
+
+108
+00:05:26.293 --> 00:05:28.529 line:-2 align:center
+let's talk about receiving
+and responding to remote commands,
+
+
+109
+00:05:28,562 --> 00:05:31,298 line:-2
+be it from Lock Screen,
+or from a HomePod in another room.
+
+
+110
+00:05:31.331 --> 00:05:33.667 line:-2 align:center
+Let's start off with a basic example
+of registering
+
+
+111
+00:05:33.700 --> 00:05:35.402 line:-1 align:center
+for the play and pause command.
+
+
+112
+00:05:35,435 --> 00:05:37,771 line:-2
+Doing so will enable your app
+to receive callbacks
+
+
+113
+00:05:37.804 --> 00:05:40.674 line:-2 align:center
+when the user presses play or pause
+from another device,
+
+
+114
+00:05:40,707 --> 00:05:43,410 line:-1
+or issues that command using Siri.
+
+
+115
+00:05:43.443 --> 00:05:46.713 line:-2 align:center
+First, we instantiate
+our MPNowPlayingSession.
+
+
+116
+00:05:46,747 --> 00:05:48,081 line:-1
+Since we only have one session,
+
+
+117
+00:05:48,115 --> 00:05:50,918 line:-2
+we don't need to invoke
+the 'becomeActiveIfPossible' method.
+
+
+118
+00:05:50.951 --> 00:05:52.386 line:-1 align:center
+When you only have one session,
+
+
+119
+00:05:52,419 --> 00:05:56,256 line:-2
+it will be the default session
+when your app is the Now Playing app.
+
+
+120
+00:05:56,290 --> 00:06:00,594 line:-2
+Each MPNowPlayingSession instance has
+its own MPRemoteCommandCenter instance,
+
+
+121
+00:06:00.627 --> 00:06:02.563 line:-2 align:center
+which is used to declare
+which remote commands
+
+
+122
+00:06:02.596 --> 00:06:04.464 line:-1 align:center
+your playback session can respond to.
+
+
+123
+00:06:04.498 --> 00:06:07.167 line:-1 align:center
+Next we add a handler for the playCommand
+
+
+124
+00:06:07.201 --> 00:06:11.738 line:-2 align:center
+where we invoke the play method
+on our player, and return success.
+
+
+125
+00:06:11.772 --> 00:06:14.141 line:-1 align:center
+Then we do the same for the pauseCommand.
+
+
+126
+00:06:14,174 --> 00:06:17,010 line:-2
+You should add handlers
+for every command that your app supports
+
+
+127
+00:06:17,044 --> 00:06:20,280 line:-2
+and that is applicable
+for the currently playing content.
+
+
+128
+00:06:20.314 --> 00:06:23.350 line:-2 align:center
+Another example is the skip forward
+and skip backward command.
+
+
+129
+00:06:23,383 --> 00:06:25,886 line:-2
+This command should be used
+for most content,
+
+
+130
+00:06:25.919 --> 00:06:27.287 line:-1 align:center
+and wouldn't be applicable, for example,
+
+
+131
+00:06:27.321 --> 00:06:30.357 line:-2 align:center
+live streams
+where jumping forward isn't possible.
+
+
+132
+00:06:30.390 --> 00:06:32.860 line:-2 align:center
+First we have to indicate
+what our preferred intervals are,
+
+
+133
+00:06:32.893 --> 00:06:35.996 line:-2 align:center
+or the number of seconds we prefer
+to jump in either direction.
+
+
+134
+00:06:36.029 --> 00:06:38.365 line:-1 align:center
+In this case, we use 15 seconds.
+
+
+135
+00:06:38.398 --> 00:06:40.968 line:-2 align:center
+Then similar to what we did
+for the play and pause commands,
+
+
+136
+00:06:41.001 --> 00:06:43.504 line:-2 align:center
+we add a handler that will be invoked
+when the user presses
+
+
+137
+00:06:43.537 --> 00:06:47.174 line:-2 align:center
+the skip forward button
+or asks Siri to skip forward.
+
+
+138
+00:06:47.207 --> 00:06:51.078 line:-2 align:center
+In our handler, we will be receiving
+an MPSkipIntervalCommandEvent,
+
+
+139
+00:06:51,111 --> 00:06:54,481 line:-2
+so first we will cast the event
+to that type.
+
+
+140
+00:06:54.515 --> 00:06:57.584 line:-2 align:center
+We then calculate the new elapsed time
+by taking the current time,
+
+
+141
+00:06:57,618 --> 00:07:00,754 line:-2
+and the interval provided to us
+in the MPSkipIntervalCommandEvent,
+
+
+142
+00:07:00.787 --> 00:07:05.058 line:-2 align:center
+seek to it, and return success to indicate
+that we jumped to the new position.
+
+
+143
+00:07:05,092 --> 00:07:07,294 line:-2
+It's also possible
+that your app has situations
+
+
+144
+00:07:07.327 --> 00:07:09.096 line:-2 align:center
+where a command
+is temporarily not allowed,
+
+
+145
+00:07:09,129 --> 00:07:11,265 line:-2
+for example skipping forward
+while in an advertisement.
+
+
+146
+00:07:11,298 --> 00:07:14,568 line:-2
+In that case,
+the skipForwardCommand can be disabled.
+
+
+147
+00:07:14,601 --> 00:07:16,537 line:-2
+Now that we're responding
+to remote commands,
+
+
+148
+00:07:16.570 --> 00:07:18.972 line:-2 align:center
+we will cover
+automatic metadata publishing.
+
+
+149
+00:07:19.006 --> 00:07:22.376 line:-2 align:center
+Automatic publishing takes the hard work
+out of keeping metadata accurate
+
+
+150
+00:07:22,409 --> 00:07:25,312 line:-2
+by automatically maintaining
+metadata properties it can observe
+
+
+151
+00:07:25,345 --> 00:07:28,882 line:-2
+directly from the player such as duration,
+the current elapsed time,
+
+
+152
+00:07:28,916 --> 00:07:31,585 line:-1
+the playback state, and playback progress.
+
+
+153
+00:07:31,618 --> 00:07:34,388 line:-2
+If the content has ads baked into it
+that shouldn't contribute
+
+
+154
+00:07:34,421 --> 00:07:36,156 line:-1
+to the total duration and elapsed time,
+
+
+155
+00:07:36,190 --> 00:07:39,726 line:-2
+it can also take care of calculating
+the net time and report that instead.
+
+
+156
+00:07:39.760 --> 00:07:43.330 line:-2 align:center
+Other metadata such as the title,
+description, and artwork can be added
+
+
+157
+00:07:43,363 --> 00:07:47,434 line:-2
+to the AVPlayerItems directly
+using the nowPlayingInfo property.
+
+
+158
+00:07:47,467 --> 00:07:49,503 line:-2
+In this example,
+we will use automatic publishing
+
+
+159
+00:07:49.536 --> 00:07:52.639 line:-2 align:center
+to do the bulk of the work
+and set the title and artwork ourselves.
+
+
+160
+00:07:52,673 --> 00:07:55,776 line:-2
+First, we create
+a new MPMediaItemArtwork instance,
+
+
+161
+00:07:55.809 --> 00:07:57.144 line:-1 align:center
+passing in the artwork image.
+
+
+162
+00:07:57.177 --> 00:08:00.180 line:-2 align:center
+Most apps will perform a network request
+to fetch this.
+
+
+163
+00:08:00.214 --> 00:08:03.150 line:-2 align:center
+Then we set the string title
+of the content.
+
+
+164
+00:08:03.183 --> 00:08:04.985 line:-1 align:center
+Then we take our artwork and title
+
+
+165
+00:08:05.018 --> 00:08:06.987 line:-2 align:center
+and set them
+as the nowPlayingInfo dictionary
+
+
+166
+00:08:07,020 --> 00:08:10,457 line:-2
+on the current player item using
+MPMediaItemPropertyTitle
+
+
+167
+00:08:10.490 --> 00:08:12.893 line:-1 align:center
+and MPMediaItemPropertyArtwork.
+
+
+168
+00:08:12,926 --> 00:08:16,396 line:-2
+Now Playing metadata can consist of
+both MPMediaItemProperty's
+
+
+169
+00:08:16,430 --> 00:08:19,399 line:-1
+and MPNowPlayingInfoProperty's.
+
+
+170
+00:08:19,433 --> 00:08:22,102 line:-2
+Lastly, we create
+our MPNowPlayingSession instance
+
+
+171
+00:08:22,135 --> 00:08:23,270 line:-1
+passing in our player,
+
+
+172
+00:08:23,303 --> 00:08:26,740 line:-2
+and set automaticallyPublishNowPlayingInfo
+to true.
+
+
+173
+00:08:26,773 --> 00:08:29,376 line:-2
+Once automaticallyPublishNowPlayingInfo
+is set to true,
+
+
+174
+00:08:29.409 --> 00:08:32.279 line:-2 align:center
+the MPNowPlayingSession instance
+will begin observing the player
+
+
+175
+00:08:32,312 --> 00:08:33,814 line:-1
+for state changes such as scrubbing,
+
+
+176
+00:08:33.847 --> 00:08:37.050 line:-2 align:center
+play/pause events,
+or the current player item changing.
+
+
+177
+00:08:37.084 --> 00:08:40.120 line:-2 align:center
+Here's another example where we will show
+how to use automatic publishing
+
+
+178
+00:08:40.153 --> 00:08:42.789 line:-2 align:center
+for instances where
+ads are baked into the asset
+
+
+179
+00:08:42,823 --> 00:08:47,327 line:-2
+and you don't want the total duration or
+current elapsed time to include ad time.
+
+
+180
+00:08:47,361 --> 00:08:50,898 line:-2
+To do this, we'll create instances
+of MPAdTimeRange
+
+
+181
+00:08:50.931 --> 00:08:52.766 line:-1 align:center
+for every ad that we have baked in.
+
+
+182
+00:08:52,799 --> 00:08:55,502 line:-2
+In this example,
+we have a single 30-second ad
+
+
+183
+00:08:55.536 --> 00:08:56.837 line:-1 align:center
+that starts at the very beginning.
+
+
+184
+00:08:56.870 --> 00:09:01.909 line:-2 align:center
+So we create it with a starting point
+of zero, and a duration of 30 seconds.
+
+
+185
+00:09:01.942 --> 00:09:04.811 line:-2 align:center
+Similar to how we did the title
+and artwork earlier,
+
+
+186
+00:09:04,845 --> 00:09:09,082 line:-2
+we simply add an array of MPAdTimeRange's
+to the nowPlayingInfo dictionary
+
+
+187
+00:09:09,116 --> 00:09:14,154 line:-2
+on the player item using
+the MPNowPlayingInfoPropertyAdTimeRanges.
+
+
+188
+00:09:14,188 --> 00:09:17,724 line:-2
+Then just as we did before,
+create the MPNowPlayingSession
+
+
+189
+00:09:17.758 --> 00:09:19.993 line:-1 align:center
+and enable automatic publishing.
+
+
+190
+00:09:20.027 --> 00:09:22.729 line:-1 align:center
+Next is metadata publishing with AVKit.
+
+
+191
+00:09:22.763 --> 00:09:26.400 line:-2 align:center
+Publishing Now Playing metadata with AVKit
+on tvOS works very similar
+
+
+192
+00:09:26,433 --> 00:09:27,968 line:-1
+to MPNowPlayingSession:
+
+
+193
+00:09:28,001 --> 00:09:30,137 line:-2
+metadata is added
+directly to the AVPlayerItem,
+
+
+194
+00:09:30.170 --> 00:09:33.207 line:-2 align:center
+and values like elapsed time, duration,
+and playback state are published
+
+
+195
+00:09:33.240 --> 00:09:34.842 line:-1 align:center
+and kept up to date for you.
+
+
+196
+00:09:34.875 --> 00:09:37.377 line:-2 align:center
+The metadata gathered from the player
+and asset directly,
+
+
+197
+00:09:37,411 --> 00:09:40,480 line:-2
+combined with the metadata provided
+by your app on the AVPlayerItem
+
+
+198
+00:09:40.514 --> 00:09:43.417 line:-2 align:center
+are also used to populate the info pane
+in the player UI.
+
+
+199
+00:09:43.450 --> 00:09:47.554 line:-2 align:center
+AVKit also takes care of registering for
+and responding to remote commands.
+
+
+200
+00:09:47.588 --> 00:09:50.858 line:-2 align:center
+Using AVKit is the best and easiest way to
+integrate with the platform features
+
+
+201
+00:09:50,891 --> 00:09:55,562 line:-2
+we've discussed so far, as well as others
+such as AirPlay and Picture-in-Picture.
+
+
+202
+00:09:55.596 --> 00:09:59.466 line:-2 align:center
+Setting the metadata when using AVKit
+is done using the externalMetadata array
+
+
+203
+00:09:59.499 --> 00:10:03.637 line:-2 align:center
+on the AVPlayerItem, which consists of
+the AVMetadataItem instances
+
+
+204
+00:10:03,670 --> 00:10:05,138 line:-1
+to describe your content.
+
+
+205
+00:10:05,172 --> 00:10:08,342 line:-2
+You usually up setting three values
+on each AVMetadataItem.
+
+
+206
+00:10:08.375 --> 00:10:10.711 line:-1 align:center
+First, the identifier, which is the key
+
+
+207
+00:10:10.744 --> 00:10:14.381 line:-2 align:center
+to indicate what metadata
+the AVMetadataItem represents.
+
+
+208
+00:10:14.414 --> 00:10:18.285 line:-2 align:center
+For example,
+AVMetadataCommonIdentifierTitle
+
+
+209
+00:10:18.318 --> 00:10:21.788 line:-2 align:center
+for the content title,
+or AVMetadataCommonIdentifierArtwork
+
+
+210
+00:10:21,822 --> 00:10:23,357 line:-1
+for the artwork.
+
+
+211
+00:10:23,390 --> 00:10:24,992 line:-1
+Second is the value.
+
+
+212
+00:10:25,025 --> 00:10:27,160 line:-2
+For title, this would
+be a string containing the title.
+
+
+213
+00:10:27.194 --> 00:10:31.198 line:-2 align:center
+For artwork, this would be an NSData
+instance containing image data.
+
+
+214
+00:10:31.231 --> 00:10:34.735 line:-2 align:center
+The dataType is used to indicate
+the format of the artwork provided.
+
+
+215
+00:10:34.768 --> 00:10:36.537 line:-1 align:center
+If it contained JPEG data,
+
+
+216
+00:10:36,570 --> 00:10:40,274 line:-2
+kCMMetadatabaseDataType_JPEG
+would be used.
+
+
+217
+00:10:40,307 --> 00:10:44,378 line:-2
+Lastly, the extendedLanguageTag
+is used to indicate the language used
+
+
+218
+00:10:44,411 --> 00:10:47,014 line:-2
+for strings
+such as the title and description.
+
+
+219
+00:10:47,047 --> 00:10:49,917 line:-2
+Most of the time, the value
+"und" should be used here
+
+
+220
+00:10:49,950 --> 00:10:52,653 line:-2
+to ensure all audiences
+see the same values.
+
+
+221
+00:10:52,686 --> 00:10:55,923 line:-2
+You may be tempted to use
+"en-us" if the values are in English,
+
+
+222
+00:10:55,956 --> 00:10:58,992 line:-2
+but doing so would cause devices with
+the language set to any other language
+
+
+223
+00:10:59,026 --> 00:11:01,261 line:-1
+such as Spanish to not show the metadata.
+
+
+224
+00:11:02,262 --> 00:11:05,899 line:-2
+Here we have an example where
+we are setting the artwork and title.
+
+
+225
+00:11:05,933 --> 00:11:08,402 line:-2
+First, we grab the artwork image data
+from our bundle.
+
+
+226
+00:11:08.435 --> 00:11:11.471 line:-2 align:center
+Most apps will fetch this
+from a network resource.
+
+
+227
+00:11:11,505 --> 00:11:15,442 line:-2
+Then we instantiate
+a new mutable AVMetadataItem.
+
+
+228
+00:11:15,475 --> 00:11:18,712 line:-2
+We set the identifier
+to .commonIdentifierArtwork.
+
+
+229
+00:11:18,745 --> 00:11:23,183 line:-2
+Then we set the value as the raw
+artwork image data as NSData.
+
+
+230
+00:11:23.217 --> 00:11:24.651 line:-1 align:center
+Since the image data is JPEG,
+
+
+231
+00:11:24,685 --> 00:11:28,021 line:-2
+we set the dataType
+to kCMMetadataBaseDataType_JPEG.
+
+
+232
+00:11:28,055 --> 00:11:29,890 line:-1
+If your artwork was instead a PNG,
+
+
+233
+00:11:29.923 --> 00:11:33.193 line:-2 align:center
+you would use
+kCMMetadataBaseDataType_PNG.
+
+
+234
+00:11:33.227 --> 00:11:35.128 line:-2 align:center
+Because we want this metadata
+to be visible
+
+
+235
+00:11:35,162 --> 00:11:37,097 line:-1
+to users with devices set to any language,
+
+
+236
+00:11:37.130 --> 00:11:40.734 line:-2 align:center
+we set the extendedLanguageTag
+to "und," or "undefined."
+
+
+237
+00:11:40,767 --> 00:11:44,137 line:-2
+We then repeat the same steps for
+the title, using .commonIdentifierTitle,
+
+
+238
+00:11:44.171 --> 00:11:46.073 line:-1 align:center
+and the string title for the value,
+
+
+239
+00:11:46.106 --> 00:11:49.543 line:-2 align:center
+and "und" once again
+for the extendedLanguageTag.
+
+
+240
+00:11:49.576 --> 00:11:51.545 line:-2 align:center
+Once we've set up
+all of our metadata items,
+
+
+241
+00:11:51.578 --> 00:11:54.114 line:-2 align:center
+we add them to an array and
+set it to the AVPlayerItem's
+
+
+242
+00:11:54.147 --> 00:11:57.718 line:-1 align:center
+externalMetadata property.
+
+
+243
+00:11:57,751 --> 00:12:00,320 line:-2
+Now that we have the artwork and title
+added to the player item,
+
+
+244
+00:12:00.354 --> 00:12:05.425 line:-2 align:center
+you can see how this maps to what is shown
+in Control Center and Lock Screen on iOS.
+
+
+245
+00:12:05.459 --> 00:12:07.995 line:-2 align:center
+Like artwork, there are other
+metadata types that can be set
+
+
+246
+00:12:08.028 --> 00:12:11.532 line:-2 align:center
+such as the description,
+subtitle information, and content rating.
+
+
+247
+00:12:11,565 --> 00:12:13,634 line:-2
+Your app should set
+as many of these as possible
+
+
+248
+00:12:13,667 --> 00:12:17,604 line:-2
+to provide the user with
+as rich of an experience as possible.
+
+
+249
+00:12:17.638 --> 00:12:20.807 line:-2 align:center
+So far we've covered automatic publishing
+with MPNowPlayingSession
+
+
+250
+00:12:20,841 --> 00:12:22,276 line:-1
+and publishing with AVKit.
+
+
+251
+00:12:22,309 --> 00:12:24,811 line:-2
+But MPNowPlayingSession
+and its automatic publishing feature
+
+
+252
+00:12:24.845 --> 00:12:27.314 line:-2 align:center
+require passing
+an AVPlayer instance to it.
+
+
+253
+00:12:27,347 --> 00:12:31,785 line:-2
+That may not be an option for all apps,
+and manual publishing is still possible.
+
+
+254
+00:12:31,818 --> 00:12:35,055 line:-2
+Publishing manually requires
+that you provide values for all metadata.
+
+
+255
+00:12:35,088 --> 00:12:37,824 line:-2
+Unlike automatic publishing,
+information such as elapsed time
+
+
+256
+00:12:37.858 --> 00:12:40.360 line:-2 align:center
+and playback rate can't be determined
+by the system for you.
+
+
+257
+00:12:40.394 --> 00:12:43.764 line:-2 align:center
+This means that you have manual fine grain
+control over low level playback state,
+
+
+258
+00:12:43.797 --> 00:12:48.302 line:-2 align:center
+and your app is responsible for keeping
+it accurate over time as playback changes.
+
+
+259
+00:12:48.335 --> 00:12:51.071 line:-2 align:center
+Note that registering for
+and responding to remote commands
+
+
+260
+00:12:51,104 --> 00:12:52,406 line:-1
+is still required as well,
+
+
+261
+00:12:52.439 --> 00:12:54.975 line:-2 align:center
+and because we are not using
+MPNowPlayingSession,
+
+
+262
+00:12:55.008 --> 00:12:58.645 line:-2 align:center
+the shared instance
+of MPRemoteCommandCenter must be used.
+
+
+263
+00:12:58.679 --> 00:13:02.082 line:-2 align:center
+Here's a basic example showing how
+to update the Now Playing Info dictionary.
+
+
+264
+00:13:02,115 --> 00:13:06,019 line:-2
+First, we create an MPMediaItemArtwork
+instance containing the image,
+
+
+265
+00:13:06.053 --> 00:13:08.055 line:-2 align:center
+similar to what we did
+for automatic publishing.
+
+
+266
+00:13:08,088 --> 00:13:12,125 line:-2
+Then, we create a dictionary containing
+the metadata that we have available.
+
+
+267
+00:13:12.159 --> 00:13:17.064 line:-2 align:center
+In this case, we set the title, artwork,
+and the player values duration,
+
+
+268
+00:13:17,097 --> 00:13:19,399 line:-1
+elapsed time, and playback rate.
+
+
+269
+00:13:19,433 --> 00:13:21,768 line:-2
+We then set it on
+the MPNowPlayingInfoCenter
+
+
+270
+00:13:21.802 --> 00:13:23.670 line:-1 align:center
+default instance.
+
+
+271
+00:13:23,704 --> 00:13:27,074 line:-2
+Updates to this metadata should be made
+any time significant changes happen
+
+
+272
+00:13:27.107 --> 00:13:29.076 line:-2 align:center
+during playback,
+such as a play or pause,
+
+
+273
+00:13:29.109 --> 00:13:32.779 line:-2 align:center
+the user scrubs forwards or backwards,
+or a new piece of content begins playing.
+
+
+274
+00:13:32.813 --> 00:13:34.948 line:-2 align:center
+You do not need to update
+elapsed time periodically.
+
+
+275
+00:13:34.982 --> 00:13:37.484 line:-2 align:center
+The system will always infer
+the correct elapsed time
+
+
+276
+00:13:37,518 --> 00:13:41,054 line:-2
+based on how much time has passed
+since the last update.
+
+
+277
+00:13:41.088 --> 00:13:43.857 line:-2 align:center
+Now that you are familiar with all of
+the different ways to publish Now Playing
+
+
+278
+00:13:43,891 --> 00:13:47,494 line:-2
+metadata and respond to remote commands
+from other devices and interfaces,
+
+
+279
+00:13:47,528 --> 00:13:50,130 line:-2
+you should integrate to maximize
+the user experience.
+
+
+280
+00:13:50,163 --> 00:13:51,632 line:-1
+It's easier than ever.
+
+
+281
+00:13:51.665 --> 00:13:53.834 line:-1 align:center
+Existing integrations can benefit too–
+
+
+282
+00:13:53,867 --> 00:13:57,070 line:-2
+switching to automatic publishing is an
+easy way to prevent future regressions
+
+
+283
+00:13:57.104 --> 00:13:59.506 line:-2 align:center
+and minimize the amount of code
+you must maintain.
+
+
+284
+00:13:59,540 --> 00:14:03,410 line:-2
+For more information,
+see MediaPlayer on developer.apple.com.
+
+
+285
+00:14:03,443 --> 00:14:04,811 line:-1
+Thanks for watching.
+

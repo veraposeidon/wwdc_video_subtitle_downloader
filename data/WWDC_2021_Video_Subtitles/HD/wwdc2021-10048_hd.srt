@@ -1,0 +1,3436 @@
+2
+00:00:00.334 --> 00:00:03.337 line:-1
+[upbeat music]
+
+
+3
+00:00:03.370 --> 00:00:09.843 line:-1
+♪ ♪
+
+
+4
+00:00:09.877 --> 00:00:11.778 line:-2
+[Brett]
+Hello, my name is Brett Cato,
+
+
+5
+00:00:11.812 --> 00:00:14.882 line:-2
+and I’m an engineer
+on the System Experience team.
+
+
+6
+00:00:14.915 --> 00:00:17.284 line:-2
+Today we’re going to be
+talking about principles
+
+
+7
+00:00:17.317 --> 00:00:20.120 line:-2
+of great widgets,
+diving into some hot topics
+
+
+8
+00:00:20.153 --> 00:00:23.257 line:-2
+to help you build
+the best widgets possible.
+
+
+9
+00:00:23.290 --> 00:00:26.159 line:-2
+In iOS 14,
+we introduced WidgetKit.
+
+
+10
+00:00:26.193 --> 00:00:28.195 line:-2
+WidgetKit allows you
+to create beautiful,
+
+
+11
+00:00:28.228 --> 00:00:30.764 line:-2
+dynamic, multiplatform widgets
+right on the user’s
+
+
+12
+00:00:30.797 --> 00:00:35.402 line:-2
+Home Screen on iOS,
+iPadOS, and macOS.
+
+
+13
+00:00:37,738 --> 00:00:40,240
+Now, before we get started,
+if you missed any of the talks
+
+
+14
+00:00:40,274 --> 00:00:43,410
+from WWDC 2020, there are
+some really great ones,
+
+
+15
+00:00:43,443 --> 00:00:46,880
+like “Meet WidgetKit,”
+which provides an introduction
+
+
+16
+00:00:46,914 --> 00:00:50,584
+to the WidgetKit framework
+and its core concepts.
+
+
+17
+00:00:50,617 --> 00:00:53,020
+“Widgets code-along”
+is a three-part series
+
+
+18
+00:00:53,053 --> 00:00:55,355
+of building a widget
+with increasing complexity
+
+
+19
+00:00:55,389 --> 00:00:57,724
+from basic to advanced.
+
+
+20
+00:00:57,758 --> 00:01:00,460
+“Building SwiftUI views
+for widgets” details
+
+
+21
+00:01:00,494 --> 00:01:02,629
+how to get the most
+out of SwiftUI to build
+
+
+22
+00:01:02,663 --> 00:01:04,831
+adaptable views
+for your widgets.
+
+
+23
+00:01:04,865 --> 00:01:08,769
+Lastly, “Design great widgets”
+explores design considerations
+
+
+24
+00:01:08,802 --> 00:01:11,905
+from our human interface group
+with many, many examples.
+
+
+25
+00:01:13.841 --> 00:01:17.911 line:-2
+Today we’re gonna touch
+on two topics for great widgets:
+
+
+26
+00:01:17.945 --> 00:01:19.646 line:-1
+keeping them relevant
+
+
+27
+00:01:19.680 --> 00:01:22.816 line:-2
+and enabling
+widget customization.
+
+
+28
+00:01:22.850 --> 00:01:25.853 line:-2
+So let’s get started
+with relevance.
+
+
+29
+00:01:25.886 --> 00:01:27.354 line:-1
+There’s three types of relevance
+
+
+30
+00:01:27.387 --> 00:01:28.689 line:-2
+that we’re gonna discuss
+in depth
+
+
+31
+00:01:28.722 --> 00:01:30.490 line:-2
+to make sure your widget
+is up to date
+
+
+32
+00:01:30.524 --> 00:01:33.227 line:-2
+and can adapt
+to its environment.
+
+
+33
+00:01:33.260 --> 00:01:36.263 line:-2
+We’re gonna talk about time,
+presentation,
+
+
+34
+00:01:36.296 --> 00:01:39.266 line:-1
+and location relevance.
+
+
+35
+00:01:39.299 --> 00:01:41.568 line:-2
+At the heart
+of WidgetKit is the timeline.
+
+
+36
+00:01:41.602 --> 00:01:43.737 line:-2
+This is the core mechanism
+of Widgets
+
+
+37
+00:01:43.770 --> 00:01:45.706 line:-2
+to stay relevant
+throughout the day.
+
+
+38
+00:01:45.739 --> 00:01:49.009 line:-2
+A timeline is composed
+of one or more timeline entries.
+
+
+39
+00:01:49.042 --> 00:01:51.845 line:-2
+In this example,
+you can see three such entries,
+
+
+40
+00:01:51.879 --> 00:01:56.884 line:-2
+one at 9:00 AM,
+9:30 AM, and 10:00 AM.
+
+
+41
+00:01:56.917 --> 00:01:59.386 line:-2
+Now, when the system asks
+your widget for a timeline,
+
+
+42
+00:01:59.419 --> 00:02:02.322 line:-2
+the resulting timeline
+will be archived and its entries
+
+
+43
+00:02:02.356 --> 00:02:05.993 line:-2
+rendered at specific times
+you specify into the future.
+
+
+44
+00:02:06.026 --> 00:02:08.662 line:-2
+This lets the system have
+your user interface ready
+
+
+45
+00:02:08.695 --> 00:02:10.430 line:-2
+at a moment’s notice
+to be displayed
+
+
+46
+00:02:10.464 --> 00:02:12.499 line:-1
+right when the user needs it.
+
+
+47
+00:02:12.533 --> 00:02:14.768 line:-2
+Let’s look at some
+examples of timelines,
+
+
+48
+00:02:14.801 --> 00:02:16.603 line:-2
+starting from
+the most simplistic,
+
+
+49
+00:02:16.637 --> 00:02:19.439 line:-2
+and look at the type of content
+that might be in them.
+
+
+50
+00:02:20.841 --> 00:02:23.076 line:-2
+Here’s an example
+of the simplest timeline
+
+
+51
+00:02:23.110 --> 00:02:25.979 line:-2
+with just a single entry:
+Screen Time.
+
+
+52
+00:02:26.013 --> 00:02:28.882 line:-2
+Now, because Screen Time can’t
+predict or forecast data
+
+
+53
+00:02:28.916 --> 00:02:30.017 line:-1
+into the future
+
+
+54
+00:02:30.050 --> 00:02:32.619 line:-2
+and it’s strictly based
+on the statistical history
+
+
+55
+00:02:32.653 --> 00:02:35.322 line:-2
+of how the user’s device
+has been used,
+
+
+56
+00:02:35.355 --> 00:02:37.257 line:-2
+it really can’t leverage
+multiple entries
+
+
+57
+00:02:37.291 --> 00:02:40.627 line:-2
+in its timeline very well,
+so it just uses a single entry.
+
+
+58
+00:02:40.661 --> 00:02:43.730 line:-2
+This is the most simplistic
+timeline that you can have.
+
+
+59
+00:02:43.764 --> 00:02:46.166 line:-2
+That said, though,
+not all widgets need
+
+
+60
+00:02:46.200 --> 00:02:49.236 line:-2
+to be single entry,
+and in fact, in most cases,
+
+
+61
+00:02:49.269 --> 00:02:51.371 line:-2
+I’d encourage you to consider
+and question why you aren’t
+
+
+62
+00:02:51.405 --> 00:02:53.841 line:-2
+offering multiple entries
+in your timeline.
+
+
+63
+00:02:53.874 --> 00:02:56.109 line:-2
+If you have
+forward-looking content,
+
+
+64
+00:02:56.143 --> 00:02:59.213 line:-2
+have important dates
+or deadlines, or can forecast
+
+
+65
+00:02:59.246 --> 00:03:02.382 line:-2
+your content into the future,
+your widget should really be
+
+
+66
+00:03:02.416 --> 00:03:05.953 line:-2
+taking advantage of multiple
+entries in your timeline.
+
+
+67
+00:03:05.986 --> 00:03:07.621 line:-2
+Here’s another example
+from Weather.
+
+
+68
+00:03:07.654 --> 00:03:10.324 line:-2
+As you can see,
+Weather’s timeline provides
+
+
+69
+00:03:10.357 --> 00:03:13.527 line:-2
+multiple entries to last
+hours throughout the day.
+
+
+70
+00:03:13.560 --> 00:03:15.829 line:-2
+Now, the first entry here is
+the most accurate
+
+
+71
+00:03:15.863 --> 00:03:17.865 line:-2
+because it represents
+the current weather,
+
+
+72
+00:03:17.898 --> 00:03:20.167 line:-2
+and all the other
+subsequent entries represent
+
+
+73
+00:03:20.200 --> 00:03:22.970 line:-2
+forecast data at times
+later in the day.
+
+
+74
+00:03:23.003 --> 00:03:26.006 line:-2
+This extra forecast data
+is super useful
+
+
+75
+00:03:26.039 --> 00:03:28.675 line:-2
+as widget reloads aren’t
+guaranteed to reload
+
+
+76
+00:03:28.709 --> 00:03:30.844 line:-2
+at the exact time
+that you specify.
+
+
+77
+00:03:30.878 --> 00:03:33.113 line:-2
+And if a reload doesn’t hit
+that target date
+
+
+78
+00:03:33.146 --> 00:03:36.583 line:-2
+exactly when it’s desired,
+then now the system has
+
+
+79
+00:03:36.617 --> 00:03:38.986 line:-1
+additional forecasted content
+
+
+80
+00:03:39.019 --> 00:03:41.088 line:-2
+to tide over
+the user experience.
+
+
+81
+00:03:42.656 --> 00:03:44.458 line:-1
+Here’s an example from Photos.
+
+
+82
+00:03:44.491 --> 00:03:46.260 line:-2
+You can see
+that the Photos timeline
+
+
+83
+00:03:46.293 --> 00:03:48.996 line:-2
+provides a number
+of personal and relevant photos
+
+
+84
+00:03:49.029 --> 00:03:51.331 line:-2
+to appear
+at specific times of the day.
+
+
+85
+00:03:51.365 --> 00:03:55.002 line:-2
+For me, these are some really,
+really great memories.
+
+
+86
+00:03:55.035 --> 00:03:56.770 line:-2
+And now,
+while the widget reloads
+
+
+87
+00:03:56.803 --> 00:03:59.039 line:-2
+only a couple times a day,
+it really gives the feeling
+
+
+88
+00:03:59.072 --> 00:04:01.008 line:-2
+of being lively throughout
+by presenting
+
+
+89
+00:04:01.041 --> 00:04:05.579 line:-2
+new and fresh content from these
+multiple timeline entries.
+
+
+90
+00:04:05.612 --> 00:04:08.115 line:-2
+As you can see here,
+even if you don’t have
+
+
+91
+00:04:08.148 --> 00:04:10.083 line:-2
+data that’s forecastable
+like weather,
+
+
+92
+00:04:10.117 --> 00:04:13.220 line:-2
+as in this example with Photos,
+you can still incorporate
+
+
+93
+00:04:13.253 --> 00:04:15.622 line:-2
+content that’s relevant
+to the user in a way
+
+
+94
+00:04:15.656 --> 00:04:18.358 line:-2
+that can surprise and delight
+by leveraging
+
+
+95
+00:04:18.392 --> 00:04:20.627 line:-2
+these multiple entries
+in your timeline.
+
+
+96
+00:04:22.196 --> 00:04:24.264 line:-2
+Now, because some widgets
+are viewed more than others,
+
+
+97
+00:04:24.298 --> 00:04:27.334 line:-2
+we decided to give widgets
+a fairness factor for updates.
+
+
+98
+00:04:27.367 --> 00:04:30.103 line:-1
+We call this an update budget.
+
+
+99
+00:04:30.137 --> 00:04:33.574 line:-2
+Budgets are allocated
+and accumulated through the day,
+
+
+100
+00:04:33.607 --> 00:04:37.878 line:-2
+and they’re heavily influenced
+by user viewing habits.
+
+
+101
+00:04:37.911 --> 00:04:40.314 line:-2
+A frequently viewed widget
+can be expected to receive
+
+
+102
+00:04:40.347 --> 00:04:42.683 line:-2
+somewhere in the ballpark
+of around 40 to 70
+
+
+103
+00:04:42.716 --> 00:04:46.386 line:-2
+background updates per day,
+which translates to an update
+
+
+104
+00:04:46.420 --> 00:04:49.189 line:-2
+roughly every 15 to 30 minutes
+if spaced evenly
+
+
+105
+00:04:49.223 --> 00:04:52.259 line:-2
+during the normal hours
+that a user is awake.
+
+
+106
+00:04:52.292 --> 00:04:55.095 line:-2
+However, of course
+not all reloads have to be
+
+
+107
+00:04:55.128 --> 00:04:57.764 line:-2
+evenly spaced like this,
+and our goal was to enable
+
+
+108
+00:04:57.798 --> 00:04:59.499 line:-2
+and support
+a varied update cadence
+
+
+109
+00:04:59.533 --> 00:05:01.201 line:-1
+for different requirements.
+
+
+110
+00:05:01.235 --> 00:05:03.871 line:-2
+For example,
+maybe you have a sports widget
+
+
+111
+00:05:03.904 --> 00:05:06.039 line:-2
+that’s largely idle
+until an upcoming game
+
+
+112
+00:05:06.073 --> 00:05:08.742 line:-2
+for a favorite team,
+and then it can receive a burst
+
+
+113
+00:05:08.775 --> 00:05:12.179 line:-2
+of score updates before,
+during, and even after the game.
+
+
+114
+00:05:14.214 --> 00:05:16.583 line:-2
+WidgetKit’s smart,
+and it may withhold updates
+
+
+115
+00:05:16.617 --> 00:05:18.018 line:-2
+when the user isn’t using
+the device
+
+
+116
+00:05:18.051 --> 00:05:21.488 line:-2
+for extended periods of time
+like when the user’s sleeping.
+
+
+117
+00:05:21.522 --> 00:05:24.258 line:-2
+Otherwise,
+widget updates may be withheld
+
+
+118
+00:05:24.291 --> 00:05:27.427 line:-2
+until budgets become available
+for a particular widget.
+
+
+119
+00:05:27.461 --> 00:05:30.030 line:-2
+All that said,
+though, reloads are not
+
+
+120
+00:05:30.063 --> 00:05:31.932 line:-1
+an every second operation.
+
+
+121
+00:05:31.965 --> 00:05:33.700 line:-1
+Widgets are not about creating
+
+
+122
+00:05:33.734 --> 00:05:36.737 line:-2
+a live running experience
+on the Home Screen.
+
+
+123
+00:05:36.770 --> 00:05:39.273 line:-2
+Now, there’s numerous ways
+that your widgets
+
+
+124
+00:05:39.306 --> 00:05:41.141 line:-1
+will refresh throughout the day.
+
+
+125
+00:05:41.175 --> 00:05:43.010 line:-2
+And we’re gonna walk
+through each of these briefly
+
+
+126
+00:05:43.043 --> 00:05:44.545 line:-1
+to understand what they are,
+
+
+127
+00:05:44.578 --> 00:05:46.813 line:-2
+how they work,
+and how they function
+
+
+128
+00:05:46.847 --> 00:05:50.284 line:-2
+relative to the budget
+that we just introduced.
+
+
+129
+00:05:50.317 --> 00:05:52.452 line:-2
+The first is
+the TimelineReloadPolicy,
+
+
+130
+00:05:52.486 --> 00:05:54.888 line:-1
+which is API in WidgetKit.
+
+
+131
+00:05:54.922 --> 00:05:56.456 line:-1
+This is the core mechanism
+
+
+132
+00:05:56.490 --> 00:05:59.059 line:-2
+for your reloads
+to occur automatically.
+
+
+133
+00:05:59.092 --> 00:06:00.527 line:-1
+When you provide a timeline,
+
+
+134
+00:06:00.561 --> 00:06:04.298 line:-2
+you also provide
+a reload policy alongside it.
+
+
+135
+00:06:04.331 --> 00:06:07.234 line:-2
+This reload policy informs
+the system when you’d like
+
+
+136
+00:06:07.267 --> 00:06:10.337 line:-2
+to automatically refresh
+your widget in the background.
+
+
+137
+00:06:10.370 --> 00:06:13.340 line:-2
+These automatic updates
+are budgeted and debited
+
+
+138
+00:06:13.373 --> 00:06:15.442 line:-2
+from your widget’s
+current available budget.
+
+
+139
+00:06:17.477 --> 00:06:20.347 line:-2
+Next is the WidgetCenter
+reload API.
+
+
+140
+00:06:20.380 --> 00:06:24.184 line:-2
+This is an API to refresh
+your widget when events occur
+
+
+141
+00:06:24.218 --> 00:06:26.887 line:-2
+that would invalidate
+your widget’s existing data.
+
+
+142
+00:06:26.920 --> 00:06:29.389 line:-2
+Now, normally,
+requests using this API would
+
+
+143
+00:06:29.423 --> 00:06:32.292 line:-2
+consume available budget,
+meaning that updates
+
+
+144
+00:06:32.326 --> 00:06:34.194 line:-2
+won’t occur
+until budget is available.
+
+
+145
+00:06:34.228 --> 00:06:37.931 line:-2
+However, there are a few
+situational exceptions that will
+
+
+146
+00:06:37.965 --> 00:06:42.336 line:-2
+make these reloads occur both
+immediately and budget-free.
+
+
+147
+00:06:42.369 --> 00:06:45.572 line:-2
+These are when your container
+app is foreground to the user
+
+
+148
+00:06:45.606 --> 00:06:48.809 line:-2
+or when your app is
+participating in a user session,
+
+
+149
+00:06:48.842 --> 00:06:51.178 line:-2
+like Navigation
+or Now Playing audio.
+
+
+150
+00:06:52.613 --> 00:06:55.549 line:-2
+This API is really
+supplemental to the automatic
+
+
+151
+00:06:55.582 --> 00:06:59.319 line:-2
+background updates from
+the TimelineReloadPolicy API.
+
+
+152
+00:06:59.353 --> 00:07:00.754 line:-1
+Your widgets can also update
+
+
+153
+00:07:00.787 --> 00:07:03.924 line:-2
+when a significant
+location change has occurred.
+
+
+154
+00:07:03.957 --> 00:07:06.460 line:-2
+When the system detects
+a significant location change
+
+
+155
+00:07:06.493 --> 00:07:08.195 line:-1
+and your widget uses location,
+
+
+156
+00:07:08.228 --> 00:07:10.898 line:-2
+the system will grant you
+a budget-free update.
+
+
+157
+00:07:10.931 --> 00:07:13.767 line:-2
+This refresh occurs when
+the user next views your widget
+
+
+158
+00:07:13.800 --> 00:07:17.237 line:-2
+so that location can be
+resolved appropriately.
+
+
+159
+00:07:17.271 --> 00:07:19.540 line:-2
+Now, note that this is
+not guaranteed to happen
+
+
+160
+00:07:19.573 --> 00:07:21.775 line:-2
+right when the location
+change occurs
+
+
+161
+00:07:21.808 --> 00:07:24.645 line:-2
+but, rather, the next time
+the user views the widget.
+
+
+162
+00:07:24.678 --> 00:07:27.948 line:-2
+We’ll talk a little bit more
+on location later.
+
+
+163
+00:07:27.981 --> 00:07:29.783 line:-2
+The system can
+refresh your widget, too,
+
+
+164
+00:07:29.816 --> 00:07:31.652 line:-2
+if its presentation
+environment changes.
+
+
+165
+00:07:31.685 --> 00:07:33.787 line:-2
+For example,
+maybe the user changes
+
+
+166
+00:07:33.820 --> 00:07:37.624 line:-2
+an Accessibility preference
+like dynamic text or bold text,
+
+
+167
+00:07:37.658 --> 00:07:39.693 line:-2
+there’s a language
+or region change,
+
+
+168
+00:07:39.726 --> 00:07:41.895 line:-2
+an iCloud or App Store
+account change,
+
+
+169
+00:07:41.929 --> 00:07:44.331 line:-2
+significant time change,
+and more.
+
+
+170
+00:07:44.364 --> 00:07:47.534 line:-2
+Lastly, due to budgeting,
+if a user has a widget
+
+
+171
+00:07:47.568 --> 00:07:50.037 line:-2
+that’s rarely seen,
+it may not receive
+
+
+172
+00:07:50.070 --> 00:07:53.340 line:-2
+as many updates as you,
+the developer, may prefer.
+
+
+173
+00:07:53.373 --> 00:07:55.843 line:-2
+The system knows
+what dates are in your timeline,
+
+
+174
+00:07:55.876 --> 00:07:57.778 line:-2
+what your preferred
+refresh time is,
+
+
+175
+00:07:57.811 --> 00:08:00.247 line:-2
+and general view history
+from the user.
+
+
+176
+00:08:00.280 --> 00:08:02.416 line:-2
+The system may grant
+a budget-free reload
+
+
+177
+00:08:02.449 --> 00:08:04.251 line:-2
+if it thinks the data
+may be stale
+
+
+178
+00:08:04.284 --> 00:08:05.786 line:-1
+when it’s viewed by the user.
+
+
+179
+00:08:05.819 --> 00:08:08.288 line:-2
+Of course, all these
+system-initiated updates
+
+
+180
+00:08:08.322 --> 00:08:10.324 line:-1
+are always budget-free.
+
+
+181
+00:08:10.357 --> 00:08:13.527 line:-2
+As we learned just a moment ago,
+each timeline comes paired
+
+
+182
+00:08:13.560 --> 00:08:15.262 line:-2
+with a reload policy
+that describes
+
+
+183
+00:08:15.295 --> 00:08:18.398 line:-2
+when it should automatically
+update in the background.
+
+
+184
+00:08:18.432 --> 00:08:21.869 line:-2
+WidgetKit offers
+three choices here: atEnd,
+
+
+185
+00:08:21.902 --> 00:08:24.538 line:-1
+afterDate, and never.
+
+
+186
+00:08:24.571 --> 00:08:26.240 line:-2
+Which of these
+three reload policies
+
+
+187
+00:08:26.273 --> 00:08:28.175 line:-1
+are appropriate for your widget?
+
+
+188
+00:08:28.208 --> 00:08:30.377 line:-2
+Let’s dive in
+to talk about each one,
+
+
+189
+00:08:30.410 --> 00:08:33.413 line:-2
+with some examples for context,
+and we’ll talk about gotchas
+
+
+190
+00:08:33.447 --> 00:08:35.582 line:-2
+on what to be mindful about
+with each one.
+
+
+191
+00:08:37.384 --> 00:08:41.288 line:-2
+The first policy we’ll discuss
+is the atEnd reload policy.
+
+
+192
+00:08:41.321 --> 00:08:43.490 line:-2
+This policy will mark
+your widget eligible
+
+
+193
+00:08:43.524 --> 00:08:45.959 line:-2
+to be refreshed when
+the timeline comes to an end,
+
+
+194
+00:08:45.993 --> 00:08:49.496 line:-2
+that is, of course, when
+the last entry becomes relevant.
+
+
+195
+00:08:49.530 --> 00:08:53.200 line:-1
+In this case, it’s at 10:30 AM.
+
+
+196
+00:08:53.233 --> 00:08:55.836 line:-2
+Note, too,
+that this time is simply
+
+
+197
+00:08:55.869 --> 00:08:58.605 line:-2
+the time that the widget becomes
+eligible for refreshing,
+
+
+198
+00:08:58.639 --> 00:09:00.774 line:-2
+and it doesn’t guarantee
+that it’ll refresh
+
+
+199
+00:09:00.807 --> 00:09:03.510 line:-1
+exactly at this time.
+
+
+200
+00:09:03.544 --> 00:09:06.180 line:-2
+Further, if using atEnd
+with widgets that have
+
+
+201
+00:09:06.213 --> 00:09:08.849 line:-2
+single-entry timelines,
+like the Screen Time example
+
+
+202
+00:09:08.882 --> 00:09:11.685 line:-2
+we talked about before,
+the system will choose
+
+
+203
+00:09:11.718 --> 00:09:14.488 line:-2
+an appropriate time
+for your widget.
+
+
+204
+00:09:14.521 --> 00:09:17.991 line:-2
+atEnd is recommended if
+your widget already has content
+
+
+205
+00:09:18.025 --> 00:09:20.994 line:-2
+that extends beyond the life
+of its current timeline.
+
+
+206
+00:09:21.028 --> 00:09:22.696 line:-1
+I kind of like to think about it
+
+
+207
+00:09:22.729 --> 00:09:24.965 line:-2
+like viewing windows
+into your content.
+
+
+208
+00:09:24,998 --> 00:09:27,367
+Let’s look at an example.
+
+
+209
+00:09:27,401 --> 00:09:29,236
+Outlined here
+is the current timeline
+
+
+210
+00:09:29,269 --> 00:09:31,738
+for the Calendar widget
+on June 7th.
+
+
+211
+00:09:31,772 --> 00:09:33,740
+It has four entries.
+
+
+212
+00:09:33,774 --> 00:09:36,643
+I’ve included its past
+and future content to help
+
+
+213
+00:09:36,677 --> 00:09:38,712
+showcase the windows.
+
+
+214
+00:09:38,745 --> 00:09:41,648
+And as we change
+the timeline for June 8th,
+
+
+215
+00:09:41,682 --> 00:09:42,850
+you can see what I mean
+
+
+216
+00:09:42,883 --> 00:09:45,185
+by viewing a window
+into its content.
+
+
+217
+00:09:46,620 --> 00:09:48,889
+And again
+for the timeline for June 9th.
+
+
+218
+00:09:48,922 --> 00:09:50,724
+We’re just changing
+the perspective on the data
+
+
+219
+00:09:50,757 --> 00:09:53,861
+that’s already available
+and provided by the user.
+
+
+220
+00:09:53,894 --> 00:09:56,196
+This type of content
+is really where using
+
+
+221
+00:09:56,230 --> 00:09:58,065
+the atEnd policy shines.
+
+
+222
+00:10:00,200 --> 00:10:03,070
+Now, some examples of widgets
+that use the atEnd policy
+
+
+223
+00:10:03,103 --> 00:10:07,241
+include Reminders, Calendar,
+Photos, Tips, and more.
+
+
+224
+00:10:07.274 --> 00:10:10.811 line:-2
+Again, these are all widgets
+with endless content well known
+
+
+225
+00:10:10.844 --> 00:10:14.848 line:-2
+into the future where you can
+simply view a window into it.
+
+
+226
+00:10:14.882 --> 00:10:18.018 line:-2
+It’s not really a great fit
+for single-entry timelines
+
+
+227
+00:10:18.051 --> 00:10:20.787 line:-2
+because the system’s gonna
+choose a reload time for you,
+
+
+228
+00:10:20.821 --> 00:10:23.790 line:-2
+and it’s probably not
+what you want.
+
+
+229
+00:10:23.824 --> 00:10:26.593 line:-2
+AtEnd is also not recommended
+if your timeline has
+
+
+230
+00:10:26.627 --> 00:10:30.497 line:-2
+projected content that loses
+relevance or accuracy over time.
+
+
+231
+00:10:30.531 --> 00:10:32.366 line:-2
+We simply want
+your content to be
+
+
+232
+00:10:32.399 --> 00:10:34.468 line:-2
+the most relevant
+that it can be,
+
+
+233
+00:10:34.501 --> 00:10:36.503 line:-2
+and if we wait
+until the end of the timeline
+
+
+234
+00:10:36.537 --> 00:10:38.038 line:-2
+when things are
+the least relevant
+
+
+235
+00:10:38.071 --> 00:10:40.107 line:-1
+to become eligible for updating,
+
+
+236
+00:10:40.140 --> 00:10:43.810 line:-2
+then it just doesn’t lead
+to the best user experience.
+
+
+237
+00:10:43.844 --> 00:10:47.781 line:-2
+So that’s atEnd.
+Now, let’s talk about afterDate.
+
+
+238
+00:10:47.814 --> 00:10:50.017 line:-2
+The afterDate reload policy
+makes your widget
+
+
+239
+00:10:50.050 --> 00:10:53.887 line:-2
+eligible for reloading
+after the date that’s specified.
+
+
+240
+00:10:53.921 --> 00:10:56.223 line:-2
+With afterDate,
+you’re really in full control
+
+
+241
+00:10:56.256 --> 00:10:58.492 line:-1
+of the eligibility time.
+
+
+242
+00:10:58.525 --> 00:11:00.761 line:-2
+In this example,
+let’s pretend the timeline
+
+
+243
+00:11:00.794 --> 00:11:04.231 line:-2
+is valid from 9:00 AM
+to roughly 11:00 AM.
+
+
+244
+00:11:04.264 --> 00:11:07.601 line:-2
+A widget reload policy date
+of 9:30 AM was chosen
+
+
+245
+00:11:07.634 --> 00:11:09.603 line:-2
+because the widget’s
+forecast data
+
+
+246
+00:11:09.636 --> 00:11:12.573 line:-2
+starts to lose accuracy
+around 9:45 or so.
+
+
+247
+00:11:12.606 --> 00:11:15.876 line:-2
+This gives the widget
+plenty of runway after 9:30
+
+
+248
+00:11:15.909 --> 00:11:17.845 line:-1
+to still show its forecast data,
+
+
+249
+00:11:17.878 --> 00:11:20.414 line:-2
+even if it’s not reloaded
+immediately at 9:30.
+
+
+250
+00:11:21.582 --> 00:11:24.484 line:-2
+afterDate is most appropriate
+for content that can change
+
+
+251
+00:11:24.518 --> 00:11:27.988 line:-2
+unpredictably or unexpectedly
+throughout the day
+
+
+252
+00:11:28.021 --> 00:11:30.457 line:-2
+as well as for data
+whose accuracy or relevance
+
+
+253
+00:11:30.490 --> 00:11:31.992 line:-1
+changes periodically.
+
+
+254
+00:11:33.961 --> 00:11:36.129 line:-2
+Some examples of widgets
+that use afterDate
+
+
+255
+00:11:36.163 --> 00:11:40.701 line:-2
+include Stocks, Weather,
+News, Mail, and more.
+
+
+256
+00:11:40.734 --> 00:11:43.136 line:-2
+These are all widgets
+with content that can
+
+
+257
+00:11:43.170 --> 00:11:47.007 line:-2
+change unpredictably
+or unexpectedly through the day.
+
+
+258
+00:11:47.040 --> 00:11:49.943 line:-2
+Now, with afterDate,
+you have to really be careful
+
+
+259
+00:11:49.977 --> 00:11:52.679 line:-1
+of a few potential issues.
+
+
+260
+00:11:52.713 --> 00:11:54.982 line:-2
+Be cautious
+of near-immediate reloads.
+
+
+261
+00:11:55.015 --> 00:11:58.218 line:-2
+It can be valid to specify
+a date a minute or so away
+
+
+262
+00:11:58.252 --> 00:12:01.188 line:-2
+but usually only
+for very narrow windows of time.
+
+
+263
+00:12:01.221 --> 00:12:04.224 line:-2
+Asking for too many refreshes
+at this level of resolution
+
+
+264
+00:12:04.258 --> 00:12:06.493 line:-2
+can starve yourself
+of reloads later.
+
+
+265
+00:12:08.462 --> 00:12:11.365 line:-2
+Also be careful if you align
+widgets refresh dates
+
+
+266
+00:12:11.398 --> 00:12:12.933 line:-1
+across devices.
+
+
+267
+00:12:12.966 --> 00:12:15.402 line:-2
+For example,
+the U.S. Stock Market opens
+
+
+268
+00:12:15.435 --> 00:12:17.938 line:-1
+at 9:30 AM on the East Coast
+
+
+269
+00:12:17.971 --> 00:12:21.542 line:-2
+and you schedule a refresh
+at exactly 9:30 AM
+
+
+270
+00:12:21.575 --> 00:12:24.978 line:-2
+to fetch that initial data
+for the day from servers.
+
+
+271
+00:12:25.012 --> 00:12:27.181 line:-2
+Remember, your widget
+could be on thousands
+
+
+272
+00:12:27.214 --> 00:12:29.483 line:-2
+or even many millions
+of devices,
+
+
+273
+00:12:29.516 --> 00:12:30.884 line:-1
+potentially even multiple times
+
+
+274
+00:12:30.918 --> 00:12:33.921 line:-2
+on each of those devices
+as well.
+
+
+275
+00:12:33.954 --> 00:12:36.456 line:-2
+And if you have to have
+time-aligned data pulls
+
+
+276
+00:12:36.490 --> 00:12:38.892 line:-2
+like this,
+you really should consider
+
+
+277
+00:12:38.926 --> 00:12:41.995 line:-2
+adding some level
+of random jitter to these dates
+
+
+278
+00:12:42.029 --> 00:12:44.231 line:-2
+in addition to hitting
+caching servers.
+
+
+279
+00:12:44.264 --> 00:12:46.600 line:-2
+These are especially important
+to consider
+
+
+280
+00:12:46.633 --> 00:12:51.672 line:-2
+to avoid any potentially
+unplanned or unnecessary costs.
+
+
+281
+00:12:51.705 --> 00:12:54.208 line:-2
+Lastly, let’s talk about
+my favorite reload policy,
+
+
+282
+00:12:54.241 --> 00:12:56.476 line:-1
+which is never.
+
+
+283
+00:12:56.510 --> 00:12:59.246 line:-2
+The never reload policy
+is the simplest policy
+
+
+284
+00:12:59.279 --> 00:13:01.748 line:-2
+because it never
+automatically reloads.
+
+
+285
+00:13:01.782 --> 00:13:04.618 line:-2
+If your widget’s content
+can only change
+
+
+286
+00:13:04.651 --> 00:13:07.087 line:-2
+through its container
+application being foreground
+
+
+287
+00:13:07.120 --> 00:13:10.290 line:-2
+or through discrete events
+like push notifications,
+
+
+288
+00:13:10.324 --> 00:13:13.594 line:-2
+then never is a great choice
+for your widget.
+
+
+289
+00:13:13.627 --> 00:13:16.597 line:-2
+When using the never policy,
+you can keep your widget
+
+
+290
+00:13:16.630 --> 00:13:19.867 line:-2
+up to date solely with
+the WidgetCenter reload API
+
+
+291
+00:13:19.900 --> 00:13:23.370 line:-2
+from your container
+or other accessory extensions.
+
+
+292
+00:13:23.403 --> 00:13:26.073 line:-2
+This really minimizes
+reloads to happen
+
+
+293
+00:13:26.106 --> 00:13:29.376 line:-2
+only when necessary
+and it keeps minimal impact
+
+
+294
+00:13:29.409 --> 00:13:31.979 line:-2
+to your budget
+and to the user’s battery life.
+
+
+295
+00:13:32.012 --> 00:13:34.681 line:-2
+Never is also appropriate
+if your widget requires
+
+
+296
+00:13:34.715 --> 00:13:36.750 line:-2
+an explicit user condition
+in your app
+
+
+297
+00:13:36.783 --> 00:13:38.285 line:-1
+that hasn’t yet been satisfied.
+
+
+298
+00:13:38.318 --> 00:13:40.621 line:-2
+For example,
+maybe logging in to a service
+
+
+299
+00:13:40.654 --> 00:13:43.223 line:-2
+or purchasing
+some specific content.
+
+
+300
+00:13:43.257 --> 00:13:46.426 line:-2
+Consider never if your widget
+can’t produce meaningful content
+
+
+301
+00:13:46.460 --> 00:13:49.863 line:-2
+before these types of conditions
+are met in your app.
+
+
+302
+00:13:49.897 --> 00:13:52.032 line:-2
+Good examples of widgets
+that use the never policy
+
+
+303
+00:13:52.065 --> 00:13:55.302 line:-1
+include TV, Notes, Music,
+
+
+304
+00:13:55.335 --> 00:13:57.538 line:-1
+Podcasts, Contacts, and more.
+
+
+305
+00:13:57.571 --> 00:13:59.606 line:-2
+These are all widgets
+and apps that require
+
+
+306
+00:13:59.640 --> 00:14:03.243 line:-2
+user interaction in the app
+to drive content changes
+
+
+307
+00:14:03.277 --> 00:14:06.947 line:-2
+or they receive pushes
+for those content updates.
+
+
+308
+00:14:06.980 --> 00:14:10.751 line:-2
+In summary, leverage timeline
+entries to your advantage.
+
+
+309
+00:14:10.784 --> 00:14:14.154 line:-2
+Choose the correct
+reload policy for your widget,
+
+
+310
+00:14:14.188 --> 00:14:16.690 line:-2
+and use WidgetCenter’s
+reload API
+
+
+311
+00:14:16.723 --> 00:14:20.360 line:-2
+to reload timeline events
+on discrete events.
+
+
+312
+00:14:20.394 --> 00:14:24.298 line:-2
+All right, let’s move on
+to presentation relevance.
+
+
+313
+00:14:24.331 --> 00:14:26.900 line:-2
+Your widget may be presented
+in specific contexts
+
+
+314
+00:14:26.934 --> 00:14:29.236 line:-2
+on iOS or macOS
+that could result
+
+
+315
+00:14:29.269 --> 00:14:31.672 line:-2
+in your widget
+changing appearance.
+
+
+316
+00:14:31.705 --> 00:14:33.841 line:-2
+The widget may sometimes
+be rerendered
+
+
+317
+00:14:33.874 --> 00:14:35.976 line:-1
+without any timeline updates.
+
+
+318
+00:14:36.009 --> 00:14:37.878 line:-2
+And great widgets
+will always adapt
+
+
+319
+00:14:37.911 --> 00:14:40.414 line:-2
+to these presentation
+environments appropriately.
+
+
+320
+00:14:40.447 --> 00:14:42.416 line:-2
+So we’re gonna talk
+about color schemes,
+
+
+321
+00:14:42.449 --> 00:14:45.085 line:-2
+Dark and Light Mode,
+partial privacy redactions,
+
+
+322
+00:14:45.118 --> 00:14:49.223 line:-2
+which are new in iOS 15,
+and full-on privacy redactions.
+
+
+323
+00:14:50.858 --> 00:14:53.694 line:-2
+WidgetKit will automatically
+handle shifting your content
+
+
+324
+00:14:53.727 --> 00:14:56.964 line:-2
+between Light and Dark Mode
+as the system settings change.
+
+
+325
+00:14:56.997 --> 00:15:00.000 line:-2
+This is because we use
+the power of SwiftUI.
+
+
+326
+00:15:00.033 --> 00:15:01.635 line:-2
+Now think about
+how you want your widget
+
+
+327
+00:15:01.668 --> 00:15:04.505 line:-2
+to look in these
+respective contexts.
+
+
+328
+00:15:04.538 --> 00:15:07.474 line:-2
+Here you can see examples
+of Notes and Calendar
+
+
+329
+00:15:07.508 --> 00:15:10.978 line:-2
+in both the light
+and dark schemes.
+
+
+330
+00:15:11.011 --> 00:15:13.247 line:-2
+Remember, though,
+that not all widgets necessarily
+
+
+331
+00:15:13.280 --> 00:15:15.716 line:-2
+have to conform to Light
+and Dark Mode by changing
+
+
+332
+00:15:15.749 --> 00:15:17.651 line:-2
+their background
+and text colors.
+
+
+333
+00:15:17.684 --> 00:15:19.987 line:-2
+There are a few widgets,
+like Music and Stocks,
+
+
+334
+00:15:20.020 --> 00:15:22.089 line:-2
+for example,
+that don’t change their colors.
+
+
+335
+00:15:22.122 --> 00:15:24.191 line:-2
+If your application design
+is agnostic
+
+
+336
+00:15:24.224 --> 00:15:27.394 line:-2
+of this high contrast content
+of dark and light styles,
+
+
+337
+00:15:27.427 --> 00:15:28.729 line:-1
+then feel free to continue
+
+
+338
+00:15:28.762 --> 00:15:30.964 line:-2
+whatever color scheme
+makes sense for your widget.
+
+
+339
+00:15:33.267 --> 00:15:35.402 line:-2
+You can also preview
+color scheme changes
+
+
+340
+00:15:35.435 --> 00:15:38.238 line:-2
+to your widget in Xcode
+through Xcode Previews.
+
+
+341
+00:15:38.272 --> 00:15:39.840 line:-2
+Here’s a quick example
+of previewing
+
+
+342
+00:15:39.873 --> 00:15:42.643 line:-2
+a systemSmall widget
+in Light Mode.
+
+
+343
+00:15:44,511 --> 00:15:46,413
+And now in Dark Mode.
+
+
+344
+00:15:46,446 --> 00:15:48,282
+All we had to do was
+add the colorScheme
+
+
+345
+00:15:48,315 --> 00:15:50,017
+environment override to preview
+
+
+346
+00:15:50,050 --> 00:15:52,819
+how our widget would look
+in this environment.
+
+
+347
+00:15:52,853 --> 00:15:55,422
+And if you want the system
+standard background color
+
+
+348
+00:15:55,455 --> 00:15:57,491
+for Light and Dark Mode
+as shown here,
+
+
+349
+00:15:57,524 --> 00:15:59,793
+then use BackgroundStyle
+for your fill.
+
+
+350
+00:16:02.229 --> 00:16:04.831 line:-2
+Widgets are also subjected
+to presentation environments
+
+
+351
+00:16:04.865 --> 00:16:08.535 line:-2
+that can be privacy sensitive,
+like the Lock Screen on iOS.
+
+
+352
+00:16:08.569 --> 00:16:11.104 line:-2
+New in iOS 15,
+widgets can now redact
+
+
+353
+00:16:11.138 --> 00:16:14.007 line:-2
+partial content
+in these situations.
+
+
+354
+00:16:14.041 --> 00:16:15.776 line:-2
+Now, that may sound
+really confusing,
+
+
+355
+00:16:15.809 --> 00:16:17.277 line:-1
+so let’s give an example to see
+
+
+356
+00:16:17.311 --> 00:16:19.413 line:-2
+what the heck
+I’m talking about here.
+
+
+357
+00:16:20.714 --> 00:16:22.482 line:-2
+Let’s pretend we had
+a banking widget
+
+
+358
+00:16:22.516 --> 00:16:25.586 line:-2
+where I’m showing the balance
+available in a specific account.
+
+
+359
+00:16:25.619 --> 00:16:30.224 line:-2
+In this case, I have $128.45
+available in my account.
+
+
+360
+00:16:31.725 --> 00:16:34.895 line:-2
+Now, when we go to the Lock
+Screen and lock the device,
+
+
+361
+00:16:34.928 --> 00:16:37.564 line:-2
+this account balance still
+appears in iOS 14
+
+
+362
+00:16:37.598 --> 00:16:41.635 line:-2
+because WidgetKit really had
+no way to dynamically redact
+
+
+363
+00:16:41.668 --> 00:16:44.805 line:-2
+the balance information
+when the device became locked.
+
+
+364
+00:16:44.838 --> 00:16:47.307 line:-2
+However,
+that’s now changed in iOS 15,
+
+
+365
+00:16:47.341 --> 00:16:48.842 line:-2
+and you may now
+contextually mark
+
+
+366
+00:16:48.876 --> 00:16:52.212 line:-2
+specific views to be redacted
+in these situations.
+
+
+367
+00:16:52.246 --> 00:16:56.316 line:-2
+Now, to show you how to do that,
+all we do is, we simply insert
+
+
+368
+00:16:56,350 --> 00:16:58,218
+the .privacySensitive
+view modifier
+
+
+369
+00:16:58,252 --> 00:17:00,754
+on the text representing
+the balance amount.
+
+
+370
+00:17:00,787 --> 00:17:04,324
+So when not passcode locked,
+as you can see here,
+
+
+371
+00:17:04,358 --> 00:17:06,093
+the view still renders
+the balance amount
+
+
+372
+00:17:06,126 --> 00:17:08,529
+as you’d expect.
+
+
+373
+00:17:08,562 --> 00:17:10,864
+But when we now lock the device,
+
+
+374
+00:17:10,898 --> 00:17:13,667
+the balance amount becomes
+masked, or redacted.
+
+
+375
+00:17:15.102 --> 00:17:16.803 line:-2
+Be aware, too,
+that this modifier can be
+
+
+376
+00:17:16.837 --> 00:17:19.473 line:-2
+applied to any view,
+including container views
+
+
+377
+00:17:19.506 --> 00:17:21.275 line:-1
+like hstacks and vstacks.
+
+
+378
+00:17:21.308 --> 00:17:22.876 line:-1
+And if applied to a container,
+
+
+379
+00:17:22.910 --> 00:17:25.279 line:-2
+the entire container
+will be redacted.
+
+
+380
+00:17:26.480 --> 00:17:29.750 line:-2
+If your app leverages complete
+data protection that can’t be
+
+
+381
+00:17:29.783 --> 00:17:32.686 line:-2
+touched while an iOS device
+is passcode locked, for example,
+
+
+382
+00:17:32.719 --> 00:17:36.190 line:-2
+maybe your app is using
+Health data and you skipped
+
+
+383
+00:17:36.223 --> 00:17:38.859 line:-2
+building a widget
+or were scared to include it
+
+
+384
+00:17:38.892 --> 00:17:41.261 line:-2
+because you thought it had to be
+shown on the Lock Screen,
+
+
+385
+00:17:41.295 --> 00:17:43.197 line:-2
+then this feature
+is really for you.
+
+
+386
+00:17:44.698 --> 00:17:46.533 line:-2
+WidgetKit can
+automatically replace
+
+
+387
+00:17:46.567 --> 00:17:49.870 line:-2
+your active timeline content
+with your placeholder content
+
+
+388
+00:17:49.903 --> 00:17:51.738 line:-2
+when the device is
+passcode locked
+
+
+389
+00:17:51.772 --> 00:17:54.374 line:-1
+for a full redaction of content.
+
+
+390
+00:17:54.408 --> 00:17:57.010 line:-2
+And it can even withhold
+updates for the duration
+
+
+391
+00:17:57.044 --> 00:17:59.913 line:-2
+while the device is
+passcode locked.
+
+
+392
+00:17:59.947 --> 00:18:01.615 line:-2
+This is all possible
+when you adopt
+
+
+393
+00:18:01.648 --> 00:18:04.384 line:-2
+the default-data-protection
+entitlement listed here.
+
+
+394
+00:18:04.418 --> 00:18:06.687 line:-2
+Your timeline data will be
+stored per your wishes
+
+
+395
+00:18:06.720 --> 00:18:08.989 line:-2
+in that data class
+on the device.
+
+
+396
+00:18:09.022 --> 00:18:12.059 line:-2
+We really take your data
+privacy seriously here.
+
+
+397
+00:18:12.092 --> 00:18:15.162 line:-2
+Lastly, I want to talk
+about location relevancy.
+
+
+398
+00:18:15.195 --> 00:18:17.764 line:-2
+Widgets, like your app,
+can also provide
+
+
+399
+00:18:17.798 --> 00:18:18.966 line:-1
+contextual information
+
+
+400
+00:18:18.999 --> 00:18:21.134 line:-2
+for our current
+physical location
+
+
+401
+00:18:21.168 --> 00:18:23.270 line:-2
+or just simply locations
+that are relevant
+
+
+402
+00:18:23.303 --> 00:18:25.372 line:-2
+to the user
+in one way or another.
+
+
+403
+00:18:26.607 --> 00:18:28.976 line:-2
+If your application uses
+location normally,
+
+
+404
+00:18:29.009 --> 00:18:31.478 line:-2
+then it’s likely
+that your widget should too.
+
+
+405
+00:18:31.512 --> 00:18:33.547 line:-2
+Because widgets can have
+multiple instances
+
+
+406
+00:18:33.580 --> 00:18:35.549 line:-2
+on the Home screen
+and in Notification Center
+
+
+407
+00:18:35.582 --> 00:18:38.218 line:-2
+on the Mac,
+consider offering pre-selected
+
+
+408
+00:18:38.252 --> 00:18:40.554 line:-2
+and even searchable locations
+for your widgets
+
+
+409
+00:18:40.587 --> 00:18:42.523 line:-2
+in addition to using
+the current location
+
+
+410
+00:18:42.556 --> 00:18:44.625 line:-2
+just like we do
+with the Weather widget
+
+
+411
+00:18:44.658 --> 00:18:46.727 line:-1
+through the power of Intents.
+
+
+412
+00:18:46.760 --> 00:18:48.595 line:-2
+Now, to fetch current location
+in your widget,
+
+
+413
+00:18:48.629 --> 00:18:51.465 line:-2
+there’s only
+a few steps required.
+
+
+414
+00:18:51.498 --> 00:18:53.000 line:-1
+First, you need to specify
+
+
+415
+00:18:53.033 --> 00:18:56.403 line:-2
+the NSWidgetUsesLocation
+key in your Info.plist.
+
+
+416
+00:18:56.436 --> 00:18:58.005 line:-2
+This lets the system know
+that you’ll be
+
+
+417
+00:18:58.038 --> 00:19:01.441 line:-2
+using location
+from your widget extension.
+
+
+418
+00:19:01.475 --> 00:19:04.244 line:-2
+Secondly,
+use the CLLocationManager
+
+
+419
+00:19:04.278 --> 00:19:06.380 line:-2
+as you would normally,
+except this time
+
+
+420
+00:19:06.413 --> 00:19:10.317 line:-2
+from your TimelineProvider
+in your widget extension.
+
+
+421
+00:19:10.350 --> 00:19:12.653 line:-2
+Consider the resolution
+your widget requires,
+
+
+422
+00:19:12.686 --> 00:19:15.022 line:-2
+as it’s faster
+to resolve coarse location,
+
+
+423
+00:19:15.055 --> 00:19:16.990 line:-2
+and it can result
+in a better user experience
+
+
+424
+00:19:17.024 --> 00:19:19.159 line:-2
+if you don’t need
+super precise location.
+
+
+425
+00:19:19.193 --> 00:19:21.962 line:-2
+In general, the more precise
+the location requested,
+
+
+426
+00:19:21.995 --> 00:19:24.198 line:-2
+the longer it’s gonna take
+to resolve.
+
+
+427
+00:19:25.499 --> 00:19:27.901 line:-2
+Lastly, you can check
+whether the widget is authorized
+
+
+428
+00:19:27.935 --> 00:19:30.938 line:-2
+for location updates by using
+the isAuthorizedForWidgetUpdates
+
+
+429
+00:19:30.971 --> 00:19:33.674 line:-1
+API on the CLLocationManager.
+
+
+430
+00:19:33.707 --> 00:19:35.509 line:-2
+This’ll tell you
+whether the user has granted
+
+
+431
+00:19:35.542 --> 00:19:38.612 line:-2
+your widget permission
+to use location or not.
+
+
+432
+00:19:38.645 --> 00:19:39.713 line:-1
+Speaking of permissions,
+
+
+433
+00:19:39.746 --> 00:19:41.315 line:-2
+let’s look
+at location permissions
+
+
+434
+00:19:41.348 --> 00:19:44.184 line:-2
+for widgets in more detail
+to see how they work.
+
+
+435
+00:19:44,218 --> 00:19:46,453
+Permissions for the widget
+are generally shared
+
+
+436
+00:19:46,486 --> 00:19:48,155
+with its app container.
+
+
+437
+00:19:48,188 --> 00:19:50,524
+Here, you can see a list
+of the available location
+
+
+438
+00:19:50,557 --> 00:19:52,659
+permissions available
+from the Settings app.
+
+
+439
+00:19:54,528 --> 00:19:56,563
+If the user selects
+“While using app,”
+
+
+440
+00:19:56,597 --> 00:19:58,398
+the user’s location is available
+to the widget
+
+
+441
+00:19:58,432 --> 00:20:00,400
+only when the widget’s
+container app
+
+
+442
+00:20:00,434 --> 00:20:03,570
+is foreground to the user
+or other situations that would
+
+
+443
+00:20:03,604 --> 00:20:07,007
+consider the app to be in-use,
+like being in a nav session.
+
+
+444
+00:20:08,842 --> 00:20:11,612
+If the user selects
+“While using app or widgets,”
+
+
+445
+00:20:11,645 --> 00:20:14,014
+then location is available
+just the same as before
+
+
+446
+00:20:14,047 --> 00:20:17,351
+with “While using app,”
+but with an additional allowance
+
+
+447
+00:20:17,384 --> 00:20:19,620
+specific to the widget.
+
+
+448
+00:20:19,653 --> 00:20:22,356
+This allows the widget
+permissions to receive location
+
+
+449
+00:20:22,389 --> 00:20:26,193
+up to 15 minutes
+after a widget was last viewed.
+
+
+450
+00:20:26,226 --> 00:20:29,363
+And when location can’t be
+resolved with either of these
+
+
+451
+00:20:29,396 --> 00:20:32,432
+two permissions set,
+consider alternate content,
+
+
+452
+00:20:32,466 --> 00:20:35,402
+potentially even prior content
+if it’s available,
+
+
+453
+00:20:35,435 --> 00:20:36,770
+or simply indicating
+
+
+454
+00:20:36,803 --> 00:20:39,206
+that the location
+couldn’t be resolved.
+
+
+455
+00:20:41,108 --> 00:20:43,477
+If the user selects “Always”
+for the permission,
+
+
+456
+00:20:43,510 --> 00:20:45,345
+the widget will always have
+available permission
+
+
+457
+00:20:45,379 --> 00:20:48,015
+to access location.
+
+
+458
+00:20:48.048 --> 00:20:51.418 line:-2
+Finally, let’s talk about
+building customizable widgets.
+
+
+459
+00:20:51.451 --> 00:20:54.855 line:-2
+We’re gonna talk about size,
+kind, and configuration
+
+
+460
+00:20:54.888 --> 00:20:56.557 line:-2
+as a means for users
+to personalize
+
+
+461
+00:20:56.590 --> 00:20:58.659 line:-1
+their widget experience.
+
+
+462
+00:20:58.692 --> 00:21:00.594 line:-2
+Now, widgets come
+in all different sizes.
+
+
+463
+00:21:00.627 --> 00:21:03.197 line:-2
+And it’s recommended to support
+as many sizes as you can
+
+
+464
+00:21:03.230 --> 00:21:06.667 line:-2
+so that users have choice
+when placing their widgets.
+
+
+465
+00:21:06.700 --> 00:21:10.404 line:-2
+Remember that small variances do
+exist in sizing between devices,
+
+
+466
+00:21:10.437 --> 00:21:13.073 line:-2
+and it’s best to use
+system standard padding,
+
+
+467
+00:21:13.106 --> 00:21:16.643 line:-2
+margins, text styles,
+and text sizes when possible.
+
+
+468
+00:21:17.911 --> 00:21:19.379 line:-1
+Now, if you look at this iPad,
+
+
+469
+00:21:19.413 --> 00:21:22.349 line:-2
+it’s really transformed
+into a content showcase.
+
+
+470
+00:21:22.382 --> 00:21:25.752 line:-2
+If it’s not obvious, a new size
+has been added in iOS 15
+
+
+471
+00:21:25.786 --> 00:21:29.423 line:-2
+specifically for the iPad,
+and we call it Extra Large.
+
+
+472
+00:21:31.024 --> 00:21:32.826 line:-2
+Here it is
+so you can see it better.
+
+
+473
+00:21:32.860 --> 00:21:35.329 line:-2
+It’s the same height
+as the large widget but wider
+
+
+474
+00:21:35.362 --> 00:21:39.433 line:-2
+to showcase even more content
+that’s available on the iPad.
+
+
+475
+00:21:39,466 --> 00:21:41,969
+And here’s how you add it
+to your widget.
+
+
+476
+00:21:42,002 --> 00:21:44,137
+Here I’ve added it
+to an existing widget config
+
+
+477
+00:21:44,171 --> 00:21:46,306
+that already supports
+the systemLarge family.
+
+
+478
+00:21:47.207 --> 00:21:49.142 line:-1
+By default, if you don’t specify
+
+
+479
+00:21:49.176 --> 00:21:51.645 line:-2
+supported families
+on your widget configuration,
+
+
+480
+00:21:51.678 --> 00:21:54.348 line:-2
+then the new size will be
+supported automatically
+
+
+481
+00:21:54.381 --> 00:21:58.085 line:-2
+if you build with the iOS 15 SDK,
+or later.
+
+
+482
+00:22:00.687 --> 00:22:02.456 line:-2
+The next axis
+for personalization
+
+
+483
+00:22:02.489 --> 00:22:03.891 line:-1
+is the widget kind.
+
+
+484
+00:22:03.924 --> 00:22:06.493 line:-2
+Kinds of widgets offer
+different perspectives
+
+
+485
+00:22:06.527 --> 00:22:08.595 line:-1
+into your data or content.
+
+
+486
+00:22:08.629 --> 00:22:10.163 line:-2
+So think about
+what kinds of widgets
+
+
+487
+00:22:10.197 --> 00:22:12.299 line:-2
+might make the most sense
+in your app.
+
+
+488
+00:22:12.332 --> 00:22:16.670 line:-2
+The best way to describe these
+is really by example.
+
+
+489
+00:22:16.703 --> 00:22:18.839 line:-1
+Here’s an example from Clock.
+
+
+490
+00:22:18.872 --> 00:22:20.674 line:-2
+On the left,
+we have a City widget
+
+
+491
+00:22:20.707 --> 00:22:23.777 line:-2
+that tracks the time
+of a single city,
+
+
+492
+00:22:23.810 --> 00:22:25.779 line:-2
+and on the right,
+a World Clock widget
+
+
+493
+00:22:25.812 --> 00:22:27.614 line:-2
+that can accommodate
+many different cities
+
+
+494
+00:22:27.648 --> 00:22:30.050 line:-1
+in the same view.
+
+
+495
+00:22:30.083 --> 00:22:31.752 line:-2
+Here’s another example
+from Stocks.
+
+
+496
+00:22:31.785 --> 00:22:33.854 line:-2
+On the left,
+there’s a stock Symbol widget
+
+
+497
+00:22:33.887 --> 00:22:35.689 line:-2
+that shows the stock price
+for a given stock--
+
+
+498
+00:22:35.722 --> 00:22:37.257 line:-1
+in this case, Apple--
+
+
+499
+00:22:37.291 --> 00:22:40.894 line:-2
+and on the right,
+an Overview widget.
+
+
+500
+00:22:40.928 --> 00:22:43.230 line:-2
+The Overview widget
+will show a series of stocks
+
+
+501
+00:22:43.263 --> 00:22:45.632 line:-2
+reflected in the user’s
+Stocks app.
+
+
+502
+00:22:45.666 --> 00:22:49.269 line:-2
+So how do you publish these
+different kinds of widgets?
+
+
+503
+00:22:49.303 --> 00:22:52.806 line:-2
+Well, to publish multiple kinds
+of widgets is super trivial.
+
+
+504
+00:22:53.874 --> 00:22:56.476 line:-2
+Using that Stocks example
+from before,
+
+
+505
+00:22:56.510 --> 00:22:58.779 line:-2
+here I have a Symbol widget
+and an Overview widget
+
+
+506
+00:22:58.812 --> 00:23:00.247 line:-1
+in the top left.
+
+
+507
+00:23:00.280 --> 00:23:02.716 line:-2
+To publish these,
+you just return the different
+
+
+508
+00:23:02.749 --> 00:23:05.886 line:-2
+widget configurations
+in a WidgetBundle object
+
+
+509
+00:23:05.919 --> 00:23:08.789 line:-2
+and include the @main attribute
+to the WidgetBundle.
+
+
+510
+00:23:08.822 --> 00:23:11.058 line:-1
+It’s that easy.
+
+
+511
+00:23:11.091 --> 00:23:13.260 line:-2
+Note that the order
+that widgets are defined
+
+
+512
+00:23:13.293 --> 00:23:15.829 line:-2
+in the bundle
+is also very important.
+
+
+513
+00:23:15.863 --> 00:23:17.464 line:-2
+This order reflects
+how your widgets
+
+
+514
+00:23:17.497 --> 00:23:19.233 line:-2
+will appear
+in the widget gallery.
+
+
+515
+00:23:19.266 --> 00:23:21.535 line:-2
+So make sure
+that the first widget listed
+
+
+516
+00:23:21.568 --> 00:23:24.271 line:-1
+is your hero use case.
+
+
+517
+00:23:24.304 --> 00:23:26.240 line:-1
+Lastly, it’s not possible
+
+
+518
+00:23:26.273 --> 00:23:29.042 line:-2
+to dynamically publish
+or dynamically retract
+
+
+519
+00:23:29.076 --> 00:23:32.513 line:-2
+the availability of a widget
+once your app is installed.
+
+
+520
+00:23:32.546 --> 00:23:34.348 line:-2
+So some care and thought
+should be applied
+
+
+521
+00:23:34.381 --> 00:23:36.683 line:-2
+around the support
+of your widgets over time.
+
+
+522
+00:23:39.119 --> 00:23:40.854 line:-2
+The last axis
+for customizability
+
+
+523
+00:23:40.888 --> 00:23:42.389 line:-1
+is through configuration.
+
+
+524
+00:23:42.422 --> 00:23:44.191 line:-1
+And widgets support two types:
+
+
+525
+00:23:44.224 --> 00:23:47.160 line:-2
+static and Intent-based
+configurations.
+
+
+526
+00:23:47.194 --> 00:23:49.396 line:-2
+Static widget
+configurations deliver
+
+
+527
+00:23:49.429 --> 00:23:53.267 line:-2
+the same content
+for each widget instance.
+
+
+528
+00:23:53.300 --> 00:23:55.736 line:-2
+Remember that Stocks Overview
+example from before?
+
+
+529
+00:23:55.769 --> 00:23:58.505 line:-2
+Well, each one’s gonna show
+the exact same content
+
+
+530
+00:23:58.539 --> 00:24:02.309 line:-2
+even if they’re in different
+locations on the user’s device.
+
+
+531
+00:24:02.342 --> 00:24:04.611 line:-1
+Static widgets are super simple,
+
+
+532
+00:24:04.645 --> 00:24:07.181 line:-2
+and they’re elegant widget
+definitions because they take
+
+
+533
+00:24:07.214 --> 00:24:10.450 line:-2
+no configuration
+or setup from the user.
+
+
+534
+00:24:11.885 --> 00:24:14.821 line:-2
+On the other hand,
+Intent widget configurations
+
+
+535
+00:24:14.855 --> 00:24:18.458 line:-2
+deliver user-configured content
+for each instance.
+
+
+536
+00:24:18.492 --> 00:24:21.995 line:-2
+Check out these Stock Symbol
+widgets on the right.
+
+
+537
+00:24:22.029 --> 00:24:24.731 line:-2
+This user has configured
+many different instances,
+
+
+538
+00:24:24.765 --> 00:24:27.234 line:-2
+each showcasing
+a different stock.
+
+
+539
+00:24:27.267 --> 00:24:28.936 line:-2
+Now, this is
+some pretty sweet stuff.
+
+
+540
+00:24:28.969 --> 00:24:31.605 line:-2
+And a user could even combine
+these all into a stack
+
+
+541
+00:24:31.638 --> 00:24:34.808 line:-2
+of widgets on their Home Screen
+to flip through to save space.
+
+
+542
+00:24:35.742 --> 00:24:39.513 line:-2
+So how are these configured
+by the user, you might ask.
+
+
+543
+00:24:39.546 --> 00:24:41.181 line:-1
+Well, from a user’s perspective,
+
+
+544
+00:24:41.215 --> 00:24:44.351 line:-2
+the system will provide
+all the surrounding UI pieces.
+
+
+545
+00:24:44.384 --> 00:24:46.620 line:-2
+And after tapping on a widget
+in Edit mode
+
+
+546
+00:24:46.653 --> 00:24:48.155 line:-1
+that supports Intents,
+
+
+547
+00:24:48.188 --> 00:24:50.691 line:-2
+the configuration platter
+is shown.
+
+
+548
+00:24:50.724 --> 00:24:52.826 line:-2
+It presents a list
+of parameters from the Intent
+
+
+549
+00:24:52.860 --> 00:24:54.795 line:-1
+that the user can configure.
+
+
+550
+00:24:54.828 --> 00:24:57.097 line:-2
+And in this example,
+there’s a single parameter
+
+
+551
+00:24:57.130 --> 00:24:58.765 line:-2
+for the Symbol to track
+and its value
+
+
+552
+00:24:58.799 --> 00:25:02.069 line:-2
+is currently the string AAPL
+for the Apple stock.
+
+
+553
+00:25:02.102 --> 00:25:03.871 line:-2
+Now, once a user taps
+on a parameter,
+
+
+554
+00:25:03.904 --> 00:25:05.239 line:-1
+an input controller appears
+
+
+555
+00:25:05.272 --> 00:25:07.007 line:-2
+to collect the input
+from the user.
+
+
+556
+00:25:07.040 --> 00:25:10.210 line:-2
+And once completed, the widget
+will update automatically.
+
+
+557
+00:25:10.244 --> 00:25:13.213 line:-2
+Now, there’s a ton
+of customization that you can do
+
+
+558
+00:25:13.247 --> 00:25:15.315 line:-2
+with an Intent,
+and there’s a great talk
+
+
+559
+00:25:15.349 --> 00:25:18.352 line:-2
+from WWDC 2020 that I’ll share
+in a moment to help you
+
+
+560
+00:25:18.385 --> 00:25:20.787 line:-2
+get started if you want
+an Intent configuration.
+
+
+561
+00:25:20.821 --> 00:25:23.090 line:-2
+In the meantime,
+let’s just quickly highlight
+
+
+562
+00:25:23.123 --> 00:25:25.292 line:-2
+what the differences are
+between coding a widget
+
+
+563
+00:25:25.325 --> 00:25:28.228 line:-2
+based on Intents
+versus a static configuration.
+
+
+564
+00:25:29.329 --> 00:25:31.198 line:-2
+The static configuration’s
+really simple.
+
+
+565
+00:25:31.231 --> 00:25:33.800 line:-2
+You just instantiate
+a StaticConfiguration object
+
+
+566
+00:25:33.834 --> 00:25:36.470 line:-2
+with the standard
+TimelineProvider.
+
+
+567
+00:25:36.503 --> 00:25:40.440 line:-2
+Let’s contrast that
+with an Intent configuration.
+
+
+568
+00:25:40.474 --> 00:25:43.110 line:-2
+All that’s different here
+is that the StaticConfiguration
+
+
+569
+00:25:43.143 --> 00:25:45.312 line:-2
+is replaced
+by an IntentConfiguration,
+
+
+570
+00:25:45.345 --> 00:25:47.214 line:-2
+and the TimelineProvider
+is replaced
+
+
+571
+00:25:47.247 --> 00:25:49.316 line:-1
+by an IntentTimelineProvider.
+
+
+572
+00:25:49.349 --> 00:25:51.685 line:-2
+Each of these has
+a slightly modified interface
+
+
+573
+00:25:51.718 --> 00:25:54.087 line:-2
+to support Intents,
+and this is so you can receive
+
+
+574
+00:25:54.121 --> 00:25:57.057 line:-2
+the user-configured Intent
+when populating your timeline.
+
+
+575
+00:25:57,090 --> 00:25:59,726
+For a more detailed look
+at creating and configuring
+
+
+576
+00:25:59,760 --> 00:26:01,862
+Intents for widgets,
+including an overview
+
+
+577
+00:26:01,895 --> 00:26:03,597
+on the various
+data types supported
+
+
+578
+00:26:03,630 --> 00:26:05,866
+and what they look like
+from the config UI,
+
+
+579
+00:26:05,899 --> 00:26:08,335
+check out the “Add configuration
+and intelligence
+
+
+580
+00:26:08,368 --> 00:26:11,071
+to your widgets” talk
+from WWDC 2020.
+
+
+581
+00:26:12.506 --> 00:26:14.942 line:-2
+To wrap up,
+we’ve reviewed how great widgets
+
+
+582
+00:26:14.975 --> 00:26:16.877 line:-2
+make use
+of their timeline entries,
+
+
+583
+00:26:16.910 --> 00:26:20.581 line:-2
+master their reload policy,
+and adapt to their presentation
+
+
+584
+00:26:20.614 --> 00:26:23.016 line:-2
+and potentially
+physical environments.
+
+
+585
+00:26:23.050 --> 00:26:25.519 line:-2
+Plan to offer
+different sizes, kinds,
+
+
+586
+00:26:25.552 --> 00:26:27.554 line:-2
+and configurations
+to give a dynamic
+
+
+587
+00:26:27.588 --> 00:26:30.457 line:-2
+and personalizable experience
+to your users.
+
+
+588
+00:26:30.490 --> 00:26:32.125 line:-1
+Thank you.
+

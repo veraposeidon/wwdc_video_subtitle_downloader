@@ -1,0 +1,1304 @@
+1
+00:00:03,971 --> 00:00:06,573 line:-1
+Hello and welcome to WWDC.
+
+
+2
+00:00:08,074 --> 00:00:09,676 line:0
+My name is James Magahern.
+
+
+3
+00:00:09,743 --> 00:00:13,080 line:0
+I'm from the iOS Keyboards team,
+and I'm here to give you a brief primer
+
+
+4
+00:00:13,146 --> 00:00:16,884 line:0
+on how to make your app a first-class app
+on devices with hardware keyboards.
+
+
+5
+00:00:18,385 --> 00:00:23,290 line:-2
+iOS applications have always embraced
+user interfaces designed all around touch,
+
+
+6
+00:00:23,357 --> 00:00:26,226 line:-2
+which is a truly excellent way
+to interact with content.
+
+
+7
+00:00:26,293 --> 00:00:28,462 line:-2
+Discovering UI in your application
+is as easy
+
+
+8
+00:00:28,529 --> 00:00:30,264 line:-1
+as just showing something on the screen.
+
+
+9
+00:00:30,330 --> 00:00:33,000 line:-2
+iPad users
+with hardware keyboards attached, however,
+
+
+10
+00:00:33,066 --> 00:00:34,735 line:-1
+have become quite common.
+
+
+11
+00:00:34,801 --> 00:00:37,604 line:-2
+Embracing hardware-keyboard support
+in your application
+
+
+12
+00:00:37,671 --> 00:00:39,840 line:-2
+allows your users
+to become more productive
+
+
+13
+00:00:39,907 --> 00:00:42,776 line:-2
+and navigate your UI more quickly
+and ergonomically.
+
+
+14
+00:00:42,843 --> 00:00:45,279 line:-2
+They can leverage muscle memory
+to execute functions
+
+
+15
+00:00:45,345 --> 00:00:46,914 line:-1
+without even thinking about it.
+
+
+16
+00:00:46,980 --> 00:00:50,083 line:-2
+Also, by implementing
+standard system shortcuts,
+
+
+17
+00:00:50,150 --> 00:00:54,388 line:-2
+novice users can approach your application
+with a familiar, consistent interface
+
+
+18
+00:00:54,454 --> 00:00:56,823 line:-2
+armed with expectations
+brought from the Mac.
+
+
+19
+00:00:56,890 --> 00:00:58,458 line:-1
+To be a first-class app
+
+
+20
+00:00:58,525 --> 00:01:01,461 line:-2
+on a next-generation computing platform
+like the iPad,
+
+
+21
+00:01:01,528 --> 00:01:05,832 line:-2
+your application should excel at both
+touch and hardware-keyboard interactions.
+
+
+22
+00:01:08,335 --> 00:01:11,004 line:-2
+Here's a quick setup for what
+we're gonna be talking about today.
+
+
+23
+00:01:11,071 --> 00:01:13,841 line:-2
+Let's jump right in
+and talk about keyboard shortcuts.
+
+
+24
+00:01:14,441 --> 00:01:17,911 line:-2
+To go briefly over
+how keyboard shortcuts work on iOS,
+
+
+25
+00:01:17,978 --> 00:01:20,247 line:-1
+let's first talk about UIKeyCommand.
+
+
+26
+00:01:20,314 --> 00:01:22,316 line:-1
+UIKeyCommand is an object
+
+
+27
+00:01:22,382 --> 00:01:25,485 line:-2
+that represents a custom keyboard shortcut
+in your application.
+
+
+28
+00:01:25,552 --> 00:01:27,588 line:-2
+It has all the properties
+that you might expect,
+
+
+29
+00:01:27,654 --> 00:01:30,757 line:-2
+such as the discoverability title
+shown to the user,
+
+
+30
+00:01:30,824 --> 00:01:33,327 line:-2
+what keyboard input is required
+to invoke it,
+
+
+31
+00:01:33,393 --> 00:01:36,029 line:-1
+and optionally, a set of modifierFlags
+
+
+32
+00:01:36,096 --> 00:01:38,265 line:-2
+defining which modifier keys
+should be held.
+
+
+33
+00:01:38,799 --> 00:01:40,667 line:-1
+This fits together with your UI
+
+
+34
+00:01:40,734 --> 00:01:44,204 line:-2
+by returning an array of key commands
+via an overridable property
+
+
+35
+00:01:44,271 --> 00:01:47,074 line:-1
+called keyCommands on UIResponder,
+
+
+36
+00:01:47,140 --> 00:01:49,409 line:-2
+where you return an array
+of all the commands
+
+
+37
+00:01:49,476 --> 00:01:51,278 line:-1
+for that particular responder.
+
+
+38
+00:01:51,345 --> 00:01:55,616 line:-2
+Most common UIKit widgets
+are subclasses of UIResponder already,
+
+
+39
+00:01:55,682 --> 00:02:00,053 line:-2
+so in most cases, extending your
+application to include these key commands
+
+
+40
+00:02:00,120 --> 00:02:03,156 line:-2
+should be as simple
+as just overriding this one property
+
+
+41
+00:02:03,223 --> 00:02:05,292 line:-2
+and returning whatever key commands
+are relevant
+
+
+42
+00:02:05,359 --> 00:02:07,528 line:-1
+for that particular part of your UI.
+
+
+43
+00:02:07,594 --> 00:02:09,729 line:-2
+The way this all fits together
+in your application
+
+
+44
+00:02:09,795 --> 00:02:11,565 line:-1
+is via the responder chain.
+
+
+45
+00:02:11,632 --> 00:02:15,102 line:-2
+The responder chain loosely follows
+the view hierarchy of your application,
+
+
+46
+00:02:15,169 --> 00:02:17,604 line:-2
+with the UIApplication instance
+at the very end
+
+
+47
+00:02:17,671 --> 00:02:21,141 line:-2
+and the responder the user is currently
+interacting with at the beginning.
+
+
+48
+00:02:21,208 --> 00:02:24,444 line:0
+Your application's first responder
+is the UIResponder object
+
+
+49
+00:02:24,511 --> 00:02:27,181 line:0
+in which all keyboard events
+first funnel into.
+
+
+50
+00:02:27,247 --> 00:02:30,350 line:0
+If a responder in the chain isn't able
+to handle a particular event,
+
+
+51
+00:02:30,417 --> 00:02:32,352 line:0
+the event goes further up the chain.
+
+
+52
+00:02:32,419 --> 00:02:33,854 line:-1
+UIViews, for example,
+
+
+53
+00:02:33,921 --> 00:02:37,658 line:-2
+have their designated next responder
+in the chain as the view's superview.
+
+
+54
+00:02:38,659 --> 00:02:42,763 line:-2
+Key commands are then collected
+by the application from each responder
+
+
+55
+00:02:42,829 --> 00:02:45,332 line:-2
+via the keyCommands method
+that you override,
+
+
+56
+00:02:45,399 --> 00:02:47,668 line:-2
+starting with the application's
+first responder
+
+
+57
+00:02:47,734 --> 00:02:50,871 line:-2
+and ending up
+at the top-level UIApplication instance.
+
+
+58
+00:02:51,638 --> 00:02:54,441 line:-2
+Once all of your key commands
+are collected by the system,
+
+
+59
+00:02:54,508 --> 00:02:58,445 line:-2
+users will be able to discover them
+via the discoverability heads-up display,
+
+
+60
+00:02:58,512 --> 00:03:02,249 line:-2
+which is accessible by holding
+the Command key anywhere in the system.
+
+
+61
+00:03:02,316 --> 00:03:06,253 line:-2
+This is great, not only for your users
+to be able to discover keyboard shortcuts,
+
+
+62
+00:03:06,320 --> 00:03:07,988 line:-1
+but it's also handy during development
+
+
+63
+00:03:08,055 --> 00:03:10,924 line:-2
+to be able to test and inspect all of them
+in one place.
+
+
+64
+00:03:11,925 --> 00:03:14,761 line:-2
+Now let's take a look
+at how all this fits together in practice.
+
+
+65
+00:03:14,828 --> 00:03:16,864 line:-1
+Let's take the Music app as an example.
+
+
+66
+00:03:17,364 --> 00:03:20,767 line:-2
+When the Music app is in the foreground,
+the user can press the space bar
+
+
+67
+00:03:20,834 --> 00:03:23,670 line:-2
+to easily toggle the playback
+of the currently playing song.
+
+
+68
+00:03:24,505 --> 00:03:28,609 line:-2
+This works consistently across all apps
+that do media playback of any kind,
+
+
+69
+00:03:28,675 --> 00:03:31,111 line:-2
+such as when playing videos
+in the Photos app
+
+
+70
+00:03:31,178 --> 00:03:33,080 line:-1
+or for QuickTime videos in Safari.
+
+
+71
+00:03:33,747 --> 00:03:35,916 line:-2
+Following
+the model-view-controller pattern,
+
+
+72
+00:03:35,983 --> 00:03:40,354 line:-2
+the ideal place to define this behavior is
+in your custom view controller subclass.
+
+
+73
+00:03:41,154 --> 00:03:42,155 line:-1
+In this example,
+
+
+74
+00:03:42,222 --> 00:03:45,492 line:-2
+we have a player view controller
+subclass of UIViewController,
+
+
+75
+00:03:45,559 --> 00:03:47,861 line:-1
+which manages playback in our application
+
+
+76
+00:03:47,928 --> 00:03:50,397 line:-2
+and whose view contains things
+like the play button.
+
+
+77
+00:03:50,464 --> 00:03:53,233 line:-2
+Because all UIViewControllers
+are UIResponders,
+
+
+78
+00:03:53,300 --> 00:03:55,602 line:-2
+all I need to do
+is override a few methods here
+
+
+79
+00:03:55,669 --> 00:03:58,338 line:-2
+to allow this
+to start accepting keyboard shortcuts.
+
+
+80
+00:03:58,872 --> 00:04:02,309 line:-2
+First, override canBecomeFirstResponder
+and return true.
+
+
+81
+00:04:02,809 --> 00:04:06,547 line:-2
+Then, override viewDidAppear
+and call becomeFirstResponder
+
+
+82
+00:04:06,613 --> 00:04:10,484 line:-2
+to make sure this view controller
+is first responder when it first appears.
+
+
+83
+00:04:10,984 --> 00:04:13,420 line:-1
+Lastly, override the keyCommands property
+
+
+84
+00:04:13,487 --> 00:04:16,322 line:-2
+to return
+our custom space-bar keyboard shortcut.
+
+
+85
+00:04:16,390 --> 00:04:18,524 line:-2
+Here you can see
+we provide a localized string
+
+
+86
+00:04:18,591 --> 00:04:20,226 line:-1
+to show in the discoverability HUD
+
+
+87
+00:04:20,293 --> 00:04:23,630 line:-2
+which action to perform when it's invoked
+in the form of a selector
+
+
+88
+00:04:23,697 --> 00:04:25,566 line:-1
+and which input is required.
+
+
+89
+00:04:25,632 --> 00:04:28,535 line:-2
+In this case,
+a string just containing space
+
+
+90
+00:04:28,602 --> 00:04:30,571 line:-1
+to indicate this is for the space bar.
+
+
+91
+00:04:31,004 --> 00:04:33,006 line:-2
+You're getting really excited
+right about now,
+
+
+92
+00:04:33,073 --> 00:04:36,376 line:-2
+thinking about adding some commonly used
+keyboard shortcuts to your app
+
+
+93
+00:04:36,443 --> 00:04:38,445 line:-2
+that your users are expecting
+from other apps.
+
+
+94
+00:04:38,512 --> 00:04:41,748 line:-2
+For example, if you're working on
+a music library application,
+
+
+95
+00:04:41,815 --> 00:04:44,151 line:-2
+you'll want to add a few shortcuts
+that would make it faster
+
+
+96
+00:04:44,218 --> 00:04:46,186 line:-1
+to interact with songs and playlists,
+
+
+97
+00:04:46,253 --> 00:04:49,389 line:-1
+such as select all, copy, and paste.
+
+
+98
+00:04:49,857 --> 00:04:52,626 line:-2
+Or if you're working on
+an illustration app, for example,
+
+
+99
+00:04:52,693 --> 00:04:55,629 line:-2
+you'll want to have things like
+Command-Plus for zooming in
+
+
+100
+00:04:55,696 --> 00:04:57,898 line:-1
+and Command-Minus for zooming out.
+
+
+101
+00:04:57,965 --> 00:05:01,335 line:-2
+Well, fortunately, for many
+of these commonly used keyboard shortcuts,
+
+
+102
+00:05:01,401 --> 00:05:04,071 line:-2
+you don't even need to create
+a single UIKeyCommand.
+
+
+103
+00:05:04,137 --> 00:05:06,773 line:-2
+All you need to do
+is override a couple of methods.
+
+
+104
+00:05:06,840 --> 00:05:10,010 line:-2
+Every UIResponder subclass
+conforms to a protocol
+
+
+105
+00:05:10,077 --> 00:05:12,679 line:-1
+called UIResponderStandardEditActions,
+
+
+106
+00:05:12,746 --> 00:05:14,948 line:-2
+which can respond
+to any method listed here.
+
+
+107
+00:05:15,015 --> 00:05:17,684 line:-2
+All you need to do
+is override the relevant method.
+
+
+108
+00:05:17,751 --> 00:05:20,420 line:-2
+You don't have to create
+a single UIKeyCommand.
+
+
+109
+00:05:20,487 --> 00:05:21,622 line:-1
+Here's a quick example.
+
+
+110
+00:05:21,688 --> 00:05:25,759 line:-2
+In your UIResponder subclass,
+our UITableViewController subclass here,
+
+
+111
+00:05:25,826 --> 00:05:28,629 line:-2
+we just need to override
+the same two methods that we did before
+
+
+112
+00:05:28,695 --> 00:05:30,597 line:-2
+to make sure
+it can become first responder.
+
+
+113
+00:05:30,664 --> 00:05:32,299 line:-1
+As always, this will be required
+
+
+114
+00:05:32,366 --> 00:05:35,903 line:-2
+if you decide to implement this
+inside of your view controller subclass.
+
+
+115
+00:05:35,969 --> 00:05:39,439 line:-2
+Then you can override any of the methods
+mentioned on the previous slide,
+
+
+116
+00:05:39,506 --> 00:05:42,976 line:-2
+such us select all, copy, paste,
+and a few others,
+
+
+117
+00:05:43,043 --> 00:05:45,746 line:-2
+all without creating
+a single UIKeyCommand.
+
+
+118
+00:05:45,812 --> 00:05:49,816 line:-2
+Check out the documentation
+on UIResponderStandardEditActions
+
+
+119
+00:05:49,883 --> 00:05:52,252 line:-2
+for more commands
+and for more information.
+
+
+120
+00:05:52,886 --> 00:05:55,822 line:-2
+UIKeyCommand was designed
+with Catalyst in mind.
+
+
+121
+00:05:55,889 --> 00:06:00,327 line:-2
+Making all these new key commands work
+with the macOS Menu bar is extremely easy.
+
+
+122
+00:06:00,394 --> 00:06:03,997 line:-2
+For the UIResponderStandardEditActions
+I mentioned on the previous slide,
+
+
+123
+00:06:04,064 --> 00:06:05,532 line:-1
+you get those for free.
+
+
+124
+00:06:05,599 --> 00:06:07,501 line:-1
+But for custom UIKeyCommands,
+
+
+125
+00:06:07,568 --> 00:06:10,671 line:-2
+luckily, UIKeyCommand is a subclass
+of UICommand,
+
+
+126
+00:06:10,737 --> 00:06:14,208 line:-2
+which means this is easily integrated
+into the command-builder API
+
+
+127
+00:06:14,274 --> 00:06:16,343 line:-1
+that we introduced for macOS Catalina.
+
+
+128
+00:06:16,410 --> 00:06:20,948 line:0
+For more depth and for more information
+about how the command-builder API works,
+
+
+129
+00:06:21,014 --> 00:06:26,353 line:0
+check out the "Taking iPad Apps for Mac
+to the Next Level" session from WWDC 2019.
+
+
+130
+00:06:28,355 --> 00:06:29,857 line:-1
+The next thing I want to talk about
+
+
+131
+00:06:29,923 --> 00:06:33,527 line:-2
+is how hardware keyboards interact
+with table views and collection views.
+
+
+132
+00:06:34,127 --> 00:06:36,763 line:-2
+If you have a list of files,
+like in the Files app,
+
+
+133
+00:06:36,830 --> 00:06:39,366 line:-2
+your users will expect
+some common shortcuts from the Mac
+
+
+134
+00:06:39,433 --> 00:06:41,134 line:-1
+to also work on their iPads.
+
+
+135
+00:06:41,668 --> 00:06:45,239 line:-2
+For example, holding Shift
+and tapping on two list items
+
+
+136
+00:06:45,305 --> 00:06:47,908 line:-2
+to select a contiguous list of files
+should work.
+
+
+137
+00:06:49,076 --> 00:06:52,913 line:-2
+And secondly, holding Command
+and tapping multiple items in a list
+
+
+138
+00:06:52,980 --> 00:06:56,917 line:-2
+should extend the user's selection
+without having to enter edit mode first.
+
+
+139
+00:06:57,618 --> 00:06:59,453 line:-1
+Fortunately, it's extremely easy
+
+
+140
+00:06:59,520 --> 00:07:02,990 line:-2
+to implement this behavior
+your users expect in your application
+
+
+141
+00:07:03,056 --> 00:07:06,593 line:-2
+if you're already using UITableView
+or UICollectionView.
+
+
+142
+00:07:06,660 --> 00:07:08,395 line:-1
+All you need to do is implement
+
+
+143
+00:07:08,462 --> 00:07:12,599 line:-2
+shouldBeginMultipleSelection
+InteractionAt indexPath and return true.
+
+
+144
+00:07:13,567 --> 00:07:17,204 line:-2
+The system will then automatically
+put your table view into editing mode
+
+
+145
+00:07:17,271 --> 00:07:20,541 line:-2
+or your collection view
+into multiple selection mode
+
+
+146
+00:07:20,607 --> 00:07:24,011 line:-2
+and extend the user's currently selected
+set of index paths
+
+
+147
+00:07:24,077 --> 00:07:26,413 line:-1
+based on which modifier key has been held.
+
+
+148
+00:07:26,480 --> 00:07:28,048 line:-1
+Likewise, implement
+
+
+149
+00:07:28,115 --> 00:07:31,051 line:-2
+didBeginMultipleSelection
+InteractionAt indexPath
+
+
+150
+00:07:31,118 --> 00:07:33,420 line:-1
+to adapt your surrounding UI to the fact
+
+
+151
+00:07:33,487 --> 00:07:36,323 line:-2
+that it was automatically placed
+into editing mode.
+
+
+152
+00:07:36,390 --> 00:07:39,760 line:0
+To find out what else
+the multiple selection API can offer you,
+
+
+153
+00:07:39,826 --> 00:07:44,531 line:0
+check out the "Modernizing Your UI
+for iOS 13" session from 2019.
+
+
+154
+00:07:45,365 --> 00:07:47,634 line:-1
+Now, on to some new things for iOS 14,
+
+
+155
+00:07:47,701 --> 00:07:51,038 line:-2
+starting with some additions that we made
+to gesture recognizers.
+
+
+156
+00:07:51,104 --> 00:07:54,374 line:-2
+To start with another example,
+let's take a look at Numbers.
+
+
+157
+00:07:54,441 --> 00:07:58,078 line:-2
+One of the ways Numbers leverages
+the hardware keyboard on iPad
+
+
+158
+00:07:58,145 --> 00:07:59,913 line:-1
+to provide advanced functionality,
+
+
+159
+00:07:59,980 --> 00:08:02,282 line:-1
+is by allowing users to hold the Shift key
+
+
+160
+00:08:02,349 --> 00:08:05,519 line:-2
+while resizing a shape
+with their finger or the trackpad
+
+
+161
+00:08:05,586 --> 00:08:09,423 line:-2
+to constrain the scale
+of the selected shape to its aspect ratio.
+
+
+162
+00:08:09,489 --> 00:08:12,626 line:-2
+In addition, Numbers allows users
+to hold the Command key
+
+
+163
+00:08:12,693 --> 00:08:15,095 line:-2
+to select multiple objects
+by tapping on them,
+
+
+164
+00:08:15,162 --> 00:08:17,731 line:-2
+so you can move them all at once,
+for example.
+
+
+165
+00:08:17,798 --> 00:08:21,001 line:-1
+This is all possible because in iOS 13.4,
+
+
+166
+00:08:21,068 --> 00:08:23,303 line:-1
+when we introduced the new Magic Keyboard,
+
+
+167
+00:08:23,370 --> 00:08:27,841 line:-2
+we added a property on UIGestureRecognizer
+called modifierFlags,
+
+
+168
+00:08:27,908 --> 00:08:31,178 line:-2
+which allows any application
+to implement this kind of behavior.
+
+
+169
+00:08:31,245 --> 00:08:32,279 line:-1
+This property will be set
+
+
+170
+00:08:32,346 --> 00:08:35,082 line:-2
+to whatever modifier keys
+the user had been holding down
+
+
+171
+00:08:35,148 --> 00:08:37,717 line:-2
+when the gesture recognizer's
+state changes.
+
+
+172
+00:08:37,784 --> 00:08:41,621 line:-2
+So, if we're implementing something like
+what Numbers did in our example,
+
+
+173
+00:08:41,688 --> 00:08:43,823 line:-1
+all we need to do is consult this property
+
+
+174
+00:08:43,890 --> 00:08:46,326 line:-2
+when out gesture-recognizer callback
+is fired
+
+
+175
+00:08:46,393 --> 00:08:49,963 line:-2
+and do the appropriate action
+based on which modifier key is held.
+
+
+176
+00:08:50,030 --> 00:08:52,099 line:-2
+For more information
+about what else is new
+
+
+177
+00:08:52,165 --> 00:08:54,067 line:-1
+with events and gesture recognizers,
+
+
+178
+00:08:54,134 --> 00:08:57,738 line:0
+check out the "Handle Trackpad
+and Mouse Input" session.
+
+
+179
+00:08:57,804 --> 00:09:00,174 line:0
+The last thing I want to talk about
+is a new API
+
+
+180
+00:09:00,240 --> 00:09:02,276 line:0
+for responding to raw keyboard events.
+
+
+181
+00:09:02,976 --> 00:09:06,113 line:-2
+Embracing hardware-keyboard interactions
+within your application
+
+
+182
+00:09:06,180 --> 00:09:08,916 line:-2
+can give your users
+much more fine-grained control
+
+
+183
+00:09:08,982 --> 00:09:11,051 line:-1
+over certain aspects of your app.
+
+
+184
+00:09:11,118 --> 00:09:12,886 line:-1
+Back to Numbers as an example.
+
+
+185
+00:09:12,953 --> 00:09:16,023 line:-2
+Numbers leverages the accuracy
+of the hardware keyboard
+
+
+186
+00:09:16,089 --> 00:09:17,824 line:-1
+and matches expectations
+
+
+187
+00:09:17,891 --> 00:09:20,194 line:-2
+to allow users to be able
+to make small adjustments
+
+
+188
+00:09:20,260 --> 00:09:23,030 line:-1
+to shapes or layers using the arrow keys.
+
+
+189
+00:09:23,096 --> 00:09:25,566 line:-2
+This requires you to respond
+to a key-down event
+
+
+190
+00:09:25,632 --> 00:09:27,034 line:-1
+to start moving the object
+
+
+191
+00:09:27,100 --> 00:09:29,536 line:-2
+and a key-up event
+to stop moving the object.
+
+
+192
+00:09:29,603 --> 00:09:32,506 line:-2
+Both things are not possible
+with UIKeyCommands,
+
+
+193
+00:09:32,573 --> 00:09:35,175 line:-2
+which are only fired once
+after invoked by the user.
+
+
+194
+00:09:35,976 --> 00:09:39,046 line:-2
+Well, new in iOS,
+we've added the ability to respond
+
+
+195
+00:09:39,112 --> 00:09:42,850 line:-2
+to all key-down and key-up events
+from an attached hardware keyboard.
+
+
+196
+00:09:42,916 --> 00:09:44,885 line:-1
+Back to our friend, the responder chain,
+
+
+197
+00:09:44,952 --> 00:09:50,257 line:-2
+all this is done via UIResponder methods
+called pressesBegan and pressesEnded.
+
+
+198
+00:09:50,691 --> 00:09:52,893 line:-2
+You only need
+to override these two methods
+
+
+199
+00:09:52,960 --> 00:09:54,928 line:-1
+on your view or view controller
+
+
+200
+00:09:54,995 --> 00:09:59,166 line:-2
+to start getting notified
+as soon as a key goes down or is released.
+
+
+201
+00:09:59,233 --> 00:10:01,902 line:-2
+Again,
+using the model-view-controller pattern,
+
+
+202
+00:10:01,969 --> 00:10:04,938 line:-1
+we override pressesBegan and pressesEnded
+
+
+203
+00:10:05,005 --> 00:10:08,141 line:-2
+on something like
+our canvas view controller, for example.
+
+
+204
+00:10:08,208 --> 00:10:09,409 line:-1
+In pressesBegan,
+
+
+205
+00:10:09,476 --> 00:10:12,412 line:-2
+which is called when a key goes down
+on a hardware keyboard,
+
+
+206
+00:10:12,479 --> 00:10:16,083 line:-2
+we can check the key code
+to see which arrow key was pressed
+
+
+207
+00:10:16,149 --> 00:10:18,619 line:-2
+and perform the appropriate action
+in our app
+
+
+208
+00:10:18,685 --> 00:10:21,688 line:-2
+to start moving a shape continuously
+while the key is down.
+
+
+209
+00:10:22,422 --> 00:10:24,124 line:-1
+Then, in pressesEnded,
+
+
+210
+00:10:24,191 --> 00:10:27,661 line:-2
+simply perform whatever action in your app
+stops moving the shape.
+
+
+211
+00:10:27,728 --> 00:10:29,062 line:-1
+It's as easy as that.
+
+
+212
+00:10:29,129 --> 00:10:32,366 line:-2
+Likewise, similar to what we added
+for gesture recognizers,
+
+
+213
+00:10:32,432 --> 00:10:35,469 line:-2
+you can also check the modifierFlags
+for every key event
+
+
+214
+00:10:35,536 --> 00:10:37,404 line:-1
+and make adjustments as necessary.
+
+
+215
+00:10:37,471 --> 00:10:39,806 line:-2
+For example,
+allowing the user to hold Shift
+
+
+216
+00:10:39,873 --> 00:10:41,742 line:-1
+to select while moving something.
+
+
+217
+00:10:41,808 --> 00:10:45,345 line:-2
+In addition, we'll also notify you
+about key-down and key-up events
+
+
+218
+00:10:45,412 --> 00:10:47,581 line:-1
+with just the modifier keys as well.
+
+
+219
+00:10:47,648 --> 00:10:49,683 line:-1
+So finally, what you need to do next.
+
+
+220
+00:10:50,384 --> 00:10:51,451 line:-1
+Make sure your app works
+
+
+221
+00:10:51,518 --> 00:10:54,321 line:-2
+with all the common keyboard shortcuts
+your users expect.
+
+
+222
+00:10:55,088 --> 00:10:56,924 line:-1
+Enhance the functionality of your app
+
+
+223
+00:10:56,990 --> 00:10:59,426 line:-2
+with completely customized
+keyboard shortcuts
+
+
+224
+00:10:59,493 --> 00:11:01,295 line:-1
+to make your users more productive.
+
+
+225
+00:11:01,962 --> 00:11:06,166 line:-2
+Create menu items
+so your app feels right at home on macOS.
+
+
+226
+00:11:06,233 --> 00:11:09,469 line:-2
+And finally,
+use the new hardware-keyboard APIs
+
+
+227
+00:11:09,536 --> 00:11:12,206 line:-2
+to complete the awesome
+keyboard experience in your app.
+
+
+228
+00:11:12,639 --> 00:11:15,742 line:-2
+Thanks for watching.
+Be sure to like, comment and subscribe.
+
+
+229
+00:11:23,250 --> 00:11:24,985 line:-1
+I've completely lost it. I'm sorry.
+

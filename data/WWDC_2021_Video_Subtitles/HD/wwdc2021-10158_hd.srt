@@ -1,0 +1,2239 @@
+2
+00:00:02,102 --> 00:00:05,072 line:-1
+[upbeat music]
+
+
+3
+00:00:05.105 --> 00:00:09.743 line:-1 align:center
+♪ ♪
+
+
+4
+00:00:09.776 --> 00:00:10.744 line:-2 align:center
+[Peikang]
+Hi.
+
+
+5
+00:00:10,777 --> 00:00:13,347 line:-2
+My name is Peikang,
+and I’m from Video Coding
+
+
+6
+00:00:13.380 --> 00:00:14.848 line:-1 align:center
+and the Processing team.
+
+
+7
+00:00:14,882 --> 00:00:17,751 line:-2
+Welcome to “Exploring
+low-latency video encoding
+
+
+8
+00:00:17.784 --> 00:00:18.986 line:-1 align:center
+with Video Toolbox.”
+
+
+9
+00:00:20,220 --> 00:00:22,656 line:-2
+The low-latency encoding
+is very important
+
+
+10
+00:00:22.689 --> 00:00:24.591 line:-1 align:center
+for many video applications,
+
+
+11
+00:00:24,625 --> 00:00:27,794 line:-2
+especially real-time
+video communication apps.
+
+
+12
+00:00:27,828 --> 00:00:30,330 line:-2
+In this talk,
+I’m going to introduce
+
+
+13
+00:00:30.364 --> 00:00:32.733 line:-2 align:center
+a new encoding mode
+in Video Toolbox
+
+
+14
+00:00:32,766 --> 00:00:35,602 line:-1
+to achieve low-latency encoding.
+
+
+15
+00:00:35,636 --> 00:00:38,338 line:-2
+The goal
+of this new mode is to optimize
+
+
+16
+00:00:38,372 --> 00:00:42,309 line:-2
+the existing encoder pipeline
+for real-time applications.
+
+
+17
+00:00:42.342 --> 00:00:45.179 line:-2 align:center
+So what does a real-time
+video application require?
+
+
+18
+00:00:47.181 --> 00:00:49.516 line:-2 align:center
+We need to minimize
+the end-to-end latency
+
+
+19
+00:00:49.550 --> 00:00:51.585 line:-2 align:center
+in the communication
+so that people
+
+
+20
+00:00:51.618 --> 00:00:53.353 line:-2 align:center
+won’t be talking
+over each other.
+
+
+21
+00:00:54,922 --> 00:00:57,291 line:-2
+We need to enhance
+the interoperability
+
+
+22
+00:00:57,324 --> 00:00:59,259 line:-2
+by letting
+the video apps capable
+
+
+23
+00:00:59,293 --> 00:01:01,862 line:-2
+of communicating
+with more devices.
+
+
+24
+00:01:01.895 --> 00:01:04.298 line:-2 align:center
+The encoder pipeline
+should be efficient
+
+
+25
+00:01:04,331 --> 00:01:06,867 line:-2
+when there are more than one
+recipients in the call.
+
+
+26
+00:01:08,268 --> 00:01:10,137 line:-2
+The app
+needs to present the video
+
+
+27
+00:01:10.170 --> 00:01:11.872 line:-1 align:center
+in its best visual quality.
+
+
+28
+00:01:13,373 --> 00:01:15,709 line:-2
+We need a reliable mechanism
+to recover
+
+
+29
+00:01:15.742 --> 00:01:19.313 line:-2 align:center
+the communication from errors
+introduced by network loss.
+
+
+30
+00:01:20,681 --> 00:01:22,115 line:-1
+The low-latency video encoding
+
+
+31
+00:01:22,149 --> 00:01:24,117 line:-2
+that I’m going
+to talk about today
+
+
+32
+00:01:24,151 --> 00:01:27,187 line:-2
+will optimize
+in all these aspects.
+
+
+33
+00:01:27,221 --> 00:01:29,823 line:-2
+With this mode,
+your real-time application
+
+
+34
+00:01:29.857 --> 00:01:32.092 line:-2 align:center
+can achieve
+new levels of performance.
+
+
+35
+00:01:33.827 --> 00:01:36.263 line:-2 align:center
+In this talk,
+first I’m going to give
+
+
+36
+00:01:36.296 --> 00:01:39.499 line:-2 align:center
+an overview
+of low-latency video encoding.
+
+
+37
+00:01:39.533 --> 00:01:42.569 line:-2 align:center
+We can have the basic idea
+about how we achieve
+
+
+38
+00:01:42,603 --> 00:01:45,072 line:-1
+low latency in the pipeline.
+
+
+39
+00:01:45.105 --> 00:01:49.810 line:-2 align:center
+Then I’m going to show how
+to use VTCompressionSession APIs
+
+
+40
+00:01:49,843 --> 00:01:54,014 line:-2
+to build the pipeline and encode
+with low-latency mode.
+
+
+41
+00:01:54,047 --> 00:01:57,217 line:-2
+Finally, I will talk
+about multiple features
+
+
+42
+00:01:57,251 --> 00:02:00,454 line:-2
+we are introducing
+in low-latency mode.
+
+
+43
+00:02:00.487 --> 00:02:05.225 line:-2 align:center
+Let me first give an overview
+on low-latency video encoding.
+
+
+44
+00:02:05,259 --> 00:02:08,328 line:-2
+Here is a brief diagram
+of a video encoder pipeline
+
+
+45
+00:02:08.362 --> 00:02:10.497 line:-1 align:center
+on Apple’s platform.
+
+
+46
+00:02:10.531 --> 00:02:13.433 line:-2 align:center
+The Video Toolbox
+takes the CVImagebuffer
+
+
+47
+00:02:13,467 --> 00:02:15,369 line:-1
+as the input image.
+
+
+48
+00:02:15,402 --> 00:02:17,204 line:-1
+It asks the video encoder
+
+
+49
+00:02:17.237 --> 00:02:19.206 line:-2 align:center
+to perform
+compression algorithms
+
+
+50
+00:02:19.239 --> 00:02:23.210 line:-2 align:center
+such as H.264
+to reduce the size of raw data.
+
+
+51
+00:02:24,745 --> 00:02:26,947 line:-2
+The output compressed data
+is wrapped
+
+
+52
+00:02:26.980 --> 00:02:28.715 line:-1 align:center
+in CMSampleBuffer,
+
+
+53
+00:02:28.749 --> 00:02:30.951 line:-2 align:center
+and it can be transmitted
+through network
+
+
+54
+00:02:30,984 --> 00:02:33,253 line:-1
+for video communication.
+
+
+55
+00:02:33,287 --> 00:02:36,156 line:-2
+As we may notice
+from the previous diagram,
+
+
+56
+00:02:36,190 --> 00:02:38,525 line:-2
+the end-to-end latency
+can be affected
+
+
+57
+00:02:38.559 --> 00:02:41.695 line:-2 align:center
+by two factors:
+the processing time
+
+
+58
+00:02:41,728 --> 00:02:43,397 line:-2
+and the network
+transmission time.
+
+
+59
+00:02:44,932 --> 00:02:47,000 line:-1
+To minimize the processing time,
+
+
+60
+00:02:47.034 --> 00:02:50.604 line:-2 align:center
+the low-latency mode
+eliminates frame reordering.
+
+
+61
+00:02:50.637 --> 00:02:54.575 line:-2 align:center
+A one in, one out
+encoding pattern is followed.
+
+
+62
+00:02:54.608 --> 00:02:57.644 line:-2 align:center
+Also, the rate controller
+in this mode
+
+
+63
+00:02:57.678 --> 00:02:59.980 line:-2 align:center
+has a faster adaptation
+in response
+
+
+64
+00:03:00,013 --> 00:03:01,915 line:-1
+to the network change,
+
+
+65
+00:03:01,949 --> 00:03:04,418 line:-2
+so the delay caused
+by network congestion
+
+
+66
+00:03:04.451 --> 00:03:06.486 line:-1 align:center
+is minimized as well.
+
+
+67
+00:03:06,520 --> 00:03:10,290 line:-2
+With these two optimizations,
+we can already see
+
+
+68
+00:03:10,324 --> 00:03:14,728 line:-2
+obvious performance improvements
+compared with the default mode.
+
+
+69
+00:03:14,761 --> 00:03:17,431 line:-2
+The low-latency encoding
+can reduce the delay
+
+
+70
+00:03:17,464 --> 00:03:21,935 line:-2
+of up to 100 milliseconds
+for a 720p 30fps video.
+
+
+71
+00:03:21.969 --> 00:03:24.905 line:-2 align:center
+Such saving can be critical
+for video conferencing.
+
+
+72
+00:03:26,673 --> 00:03:29,376 line:-2
+As we reduce the latency,
+we can achieve
+
+
+73
+00:03:29,409 --> 00:03:31,378 line:-2
+a more efficient
+encoding pipeline
+
+
+74
+00:03:31.411 --> 00:03:33.480 line:-1 align:center
+for real-time communications
+
+
+75
+00:03:33,514 --> 00:03:36,183 line:-2
+like video conferencing
+and live broadcasting.
+
+
+76
+00:03:37.618 --> 00:03:40.654 line:-2 align:center
+Also, the low-latency mode
+always uses
+
+
+77
+00:03:40,687 --> 00:03:43,023 line:-2
+a hardware-accelerated
+video encoder
+
+
+78
+00:03:43,056 --> 00:03:45,425 line:-1
+in order to save powers.
+
+
+79
+00:03:45.459 --> 00:03:47.995 line:-2 align:center
+Note, the supported
+video codec type
+
+
+80
+00:03:48.028 --> 00:03:51.398 line:-1 align:center
+in this mode is H.264,
+
+
+81
+00:03:51.431 --> 00:03:55.502 line:-2 align:center
+and we’re bringing this feature
+on both iOS and macOS.
+
+
+82
+00:03:56.803 --> 00:04:00.641 line:-2 align:center
+Next, I want to talk about
+how to use low-latency mode
+
+
+83
+00:04:00,674 --> 00:04:02,776 line:-1
+with Video Toolbox.
+
+
+84
+00:04:02,809 --> 00:04:06,947 line:-2
+I’m going to first recap the use
+of VTCompressionSession
+
+
+85
+00:04:06.980 --> 00:04:08.382 line:-1 align:center
+and then show you the step
+
+
+86
+00:04:08,415 --> 00:04:11,652 line:-2
+we need
+to enable low-latency encoding.
+
+
+87
+00:04:11.685 --> 00:04:14.488 line:-2 align:center
+When we use
+VTCompressionSession,
+
+
+88
+00:04:14,521 --> 00:04:16,924 line:-2
+the first thing
+is to create the session
+
+
+89
+00:04:16,957 --> 00:04:19,459 line:-2
+with VTCompressionSessionCreate
+API.
+
+
+90
+00:04:21,361 --> 00:04:23,564 line:-2
+We can optionally
+config the session,
+
+
+91
+00:04:23,597 --> 00:04:25,199 line:-1
+such as target bit rate,
+
+
+92
+00:04:25.232 --> 00:04:28.402 line:-2 align:center
+through
+VTSessionSetProperty API.
+
+
+93
+00:04:28,435 --> 00:04:31,038 line:-2
+If the configuration
+is not provided,
+
+
+94
+00:04:31.071 --> 00:04:34.007 line:-2 align:center
+the encoder will operate
+with the default behavior.
+
+
+95
+00:04:35,709 --> 00:04:39,313 line:0
+After the session is created
+and properly configured,
+
+
+96
+00:04:39,346 --> 00:04:42,683 align:center
+we can pass the CVImageBuffer
+to the session with
+
+
+97
+00:04:42,716 --> 00:04:46,320 align:center
+VTCompressionSessionEncodeFrame
+call.
+
+
+98
+00:04:46,353 --> 00:04:48,655 line:0
+The encoded result
+can be retrieved
+
+
+99
+00:04:48,689 --> 00:04:49,990 align:center
+from the output handler
+
+
+100
+00:04:50,023 --> 00:04:51,925 align:center
+provided during
+the session creation.
+
+
+101
+00:04:53,660 --> 00:04:55,596 align:center
+Enabling low-latency encoding
+
+
+102
+00:04:55,629 --> 00:04:58,098 line:0
+in the compression session
+is easy.
+
+
+103
+00:04:58,131 --> 00:05:01,034 align:center
+The only change we need
+is in the session creation.
+
+
+104
+00:05:02,803 --> 00:05:06,073 line:-2
+Here is a code snippet
+showing how to do that.
+
+
+105
+00:05:06,106 --> 00:05:08,642 line:-2
+First we need
+a CFMutableDictionary
+
+
+106
+00:05:08,675 --> 00:05:11,144 line:-1
+for the encoderSpecification.
+
+
+107
+00:05:11.178 --> 00:05:14.181 line:-2 align:center
+The encoderSpecification
+is used to specify
+
+
+108
+00:05:14,214 --> 00:05:18,318 line:-2
+a particular video encoder
+that the session must use.
+
+
+109
+00:05:18,352 --> 00:05:22,489 line:-2
+And then we need to set
+EnableLowLatencyRateControl flag
+
+
+110
+00:05:22.523 --> 00:05:24.191 line:-1 align:center
+in the encoderSpecification.
+
+
+111
+00:05:25,759 --> 00:05:28,795 line:-2
+Finally, we need to give
+this encoderSpecification
+
+
+112
+00:05:28,829 --> 00:05:32,466 line:-2
+to VTCompressionSessionCreate,
+and the compression session
+
+
+113
+00:05:32,499 --> 00:05:34,735 line:-2
+will be operating
+in low-latency mode.
+
+
+114
+00:05:36,703 --> 00:05:39,506 line:-2
+The configuration step
+is the same as usual.
+
+
+115
+00:05:39.540 --> 00:05:42.209 line:-2 align:center
+For example,
+we can set the target bit rate
+
+
+116
+00:05:42,242 --> 00:05:44,178 line:-1
+with AverageBitRate property.
+
+
+117
+00:05:45,212 --> 00:05:49,149 line:-2
+OK, we’ve covered the basics
+of the low-latency mode
+
+
+118
+00:05:49.183 --> 00:05:51.251 line:-1 align:center
+with Video Toolbox.
+
+
+119
+00:05:51,285 --> 00:05:53,287 line:-2
+I’d like to move on
+to the new features
+
+
+120
+00:05:53,320 --> 00:05:55,522 line:-2
+in this mode
+that can further help you
+
+
+121
+00:05:55,556 --> 00:05:58,992 line:-2
+develop a real-time
+video application.
+
+
+122
+00:05:59,026 --> 00:06:01,828 line:-2
+So far, we’ve talked
+about the latency benefit
+
+
+123
+00:06:01,862 --> 00:06:04,431 line:-1
+by using the low-latency mode.
+
+
+124
+00:06:04,464 --> 00:06:07,000 line:-2
+The rest of the benefits
+can be achieved
+
+
+125
+00:06:07,034 --> 00:06:09,069 line:-2
+by the features
+I’m going introduce.
+
+
+126
+00:06:10,838 --> 00:06:13,907 line:-2
+The first feature
+is the new profiles.
+
+
+127
+00:06:13,941 --> 00:06:15,909 line:-2
+We enhanced
+the interoperability
+
+
+128
+00:06:15,943 --> 00:06:18,445 line:-2
+by adding two new profiles
+to the pipeline.
+
+
+129
+00:06:20.047 --> 00:06:24.017 line:-2 align:center
+And we are also excited to talk
+about temporal scalability.
+
+
+130
+00:06:24.051 --> 00:06:27.087 line:-2 align:center
+This feature can be very helpful
+in video conferencing.
+
+
+131
+00:06:28,655 --> 00:06:30,724 line:-2
+You can now have
+a fine-grained control
+
+
+132
+00:06:30.757 --> 00:06:32.159 line:-1 align:center
+over the image quality
+
+
+133
+00:06:32.192 --> 00:06:35.162 line:-2 align:center
+with max frame
+quantization parameter.
+
+
+134
+00:06:35,195 --> 00:06:38,165 line:-2
+Last, we want to improve
+the error resilience
+
+
+135
+00:06:38.198 --> 00:06:40.801 line:-2 align:center
+by adding the support
+of long-term reference.
+
+
+136
+00:06:42,202 --> 00:06:45,072 line:-2
+Let’s talk
+about the new profile support.
+
+
+137
+00:06:45,105 --> 00:06:47,741 line:-2
+Profile defines a group
+of coding algorithms
+
+
+138
+00:06:47,774 --> 00:06:50,978 line:-2
+that the decoder
+is capable to support.
+
+
+139
+00:06:51.011 --> 00:06:54.081 line:-2 align:center
+In order to communicate
+with the receiver side,
+
+
+140
+00:06:54,114 --> 00:06:56,149 line:-2
+the encoded bitstream
+should comply
+
+
+141
+00:06:56,183 --> 00:06:59,219 line:-2
+with the specific profile
+that the decoder supports.
+
+
+142
+00:07:00.721 --> 00:07:04.291 line:-2 align:center
+Here in Video Toolbox,
+we support a bunch of profiles,
+
+
+143
+00:07:04.324 --> 00:07:08.328 line:-2 align:center
+such as baseline profile,
+main profile, and high profile.
+
+
+144
+00:07:09,696 --> 00:07:13,133 line:-2
+Today we added
+two new profiles to the family:
+
+
+145
+00:07:13.166 --> 00:07:15.903 line:-2 align:center
+constrained baseline profile,
+CBP,
+
+
+146
+00:07:15,936 --> 00:07:18,272 line:-2
+and constrained
+high profile, CHP.
+
+
+147
+00:07:19.506 --> 00:07:23.043 line:-2 align:center
+CBP is primarily used
+for low-cost applications
+
+
+148
+00:07:23,076 --> 00:07:25,112 line:-2
+and CHP,
+on the other hand,
+
+
+149
+00:07:25,145 --> 00:07:29,416 line:-2
+has more advanced algorithms
+for better compression ratio.
+
+
+150
+00:07:29,449 --> 00:07:31,718 line:-2
+You should check
+the decoder capabilities
+
+
+151
+00:07:31.752 --> 00:07:34.254 line:-2 align:center
+in order to know
+which profile should be used.
+
+
+152
+00:07:35.889 --> 00:07:39.193 line:-2 align:center
+To request CBP,
+simply set ProfileLevel
+
+
+153
+00:07:39,226 --> 00:07:42,396 line:-2
+session property
+to ContrainedBaseLine_AutoLevel.
+
+
+154
+00:07:43.697 --> 00:07:46.333 line:-2 align:center
+Similarly,
+we can set the profile level
+
+
+155
+00:07:46.366 --> 00:07:49.269 line:-2 align:center
+to ContrainedHigh_AutoLevel
+to use CHP.
+
+
+156
+00:07:50.938 --> 00:07:54.408 line:-2 align:center
+Now let’s talk
+about temporal scalability.
+
+
+157
+00:07:54.441 --> 00:07:57.744 line:-2 align:center
+We can use temporal scalability
+to enhance the efficiency
+
+
+158
+00:07:57,778 --> 00:07:59,780 line:-1
+for multi-party video calls.
+
+
+159
+00:08:01.048 --> 00:08:03.350 line:-2 align:center
+Let us consider
+a simple, three-party
+
+
+160
+00:08:03,383 --> 00:08:05,652 line:-1
+video conferencing scenario.
+
+
+161
+00:08:05,686 --> 00:08:07,754 line:-2
+In this model,
+receiver "A" has
+
+
+162
+00:08:07.788 --> 00:08:11.225 line:-1 align:center
+a lower bandwidth of 600kbps,
+
+
+163
+00:08:11,258 --> 00:08:13,293 line:-2
+and receiver B
+has a higher bandwidth
+
+
+164
+00:08:13,327 --> 00:08:15,028 line:-1
+of 1,000kbps.
+
+
+165
+00:08:16,563 --> 00:08:20,901 line:0
+Normally, the sender needs
+to encode two sets of bitstreams
+
+
+166
+00:08:20,934 --> 00:08:23,403 align:center
+in order to meet
+the downlink bandwidth
+
+
+167
+00:08:23,437 --> 00:08:27,107 align:center
+of each receiver side.
+This may not be optimal.
+
+
+168
+00:08:28,575 --> 00:08:32,479 align:center
+The model can be more efficient
+with temporal scalability,
+
+
+169
+00:08:32,513 --> 00:08:34,581 line:0
+where the sender only needs
+to encode
+
+
+170
+00:08:34,615 --> 00:08:37,885 line:0
+one single bitstream
+but can be later divided
+
+
+171
+00:08:37,918 --> 00:08:38,919 line:0
+into two layers.
+
+
+172
+00:08:40.587 --> 00:08:42.956 line:-2 align:center
+Let me show you
+how this process works.
+
+
+173
+00:08:44,525 --> 00:08:48,262 line:-2
+Here is a sequence
+of encoded video frames
+
+
+174
+00:08:48.295 --> 00:08:51.064 line:-2 align:center
+where each of the frames
+uses the previous frame
+
+
+175
+00:08:51.098 --> 00:08:52.633 line:-1 align:center
+as predictive reference.
+
+
+176
+00:08:54,301 --> 00:08:58,105 line:-2
+We can pull half of the frames
+into another layer,
+
+
+177
+00:08:58,138 --> 00:09:01,475 line:-2
+and we can change the reference
+so that only the frames
+
+
+178
+00:09:01,508 --> 00:09:03,877 line:-2
+in the original layer
+are used for prediction.
+
+
+179
+00:09:05.512 --> 00:09:08.115 line:-2 align:center
+The original layer
+is called base layer,
+
+
+180
+00:09:08,148 --> 00:09:11,351 line:-2
+and the new constructed layer
+is called enhancement layer.
+
+
+181
+00:09:13,353 --> 00:09:16,089 align:center
+The enhancement layer
+can be used as a supplement
+
+
+182
+00:09:16,123 --> 00:09:19,026 align:center
+of the base layer in order
+to improve the frame rate.
+
+
+183
+00:09:20,360 --> 00:09:23,564 align:center
+For receiver "A,"
+we can send base layer frames
+
+
+184
+00:09:23.597 --> 00:09:27.534 line:-2 align:center
+because the base layer
+itself is decodable already.
+
+
+185
+00:09:27,568 --> 00:09:30,470 line:-2
+And more importantly,
+since the base layer
+
+
+186
+00:09:30.504 --> 00:09:33.507 line:-2 align:center
+contains only half
+of the frames,
+
+
+187
+00:09:33,540 --> 00:09:35,576 line:-2
+the transmitted data
+rate will be low.
+
+
+188
+00:09:37,344 --> 00:09:39,980 line:-2
+On the other hand,
+receiver B can enjoy
+
+
+189
+00:09:40,013 --> 00:09:43,417 line:-2
+a smoother video since it has
+a sufficient bandwidth
+
+
+190
+00:09:43.450 --> 00:09:46.920 line:-2 align:center
+to receive base layer frames
+and enhancement layer frames.
+
+
+191
+00:09:48,722 --> 00:09:50,858 line:-2
+Let me show you
+the videos encoded
+
+
+192
+00:09:50,891 --> 00:09:53,360 line:-1
+using temporal scalability.
+
+
+193
+00:09:53,393 --> 00:09:56,997 line:-2
+I’m going to play two videos,
+one from the base layer,
+
+
+194
+00:09:57.030 --> 00:09:59.333 line:-2 align:center
+and the other
+from the base layer together
+
+
+195
+00:09:59.366 --> 00:10:00.767 line:-1 align:center
+with the enhancement layer.
+
+
+196
+00:10:02,336 --> 00:10:05,472 line:-2
+The base layer itself
+can be played normally,
+
+
+197
+00:10:05,506 --> 00:10:08,275 line:-2
+but at the same time,
+we may notice the video
+
+
+198
+00:10:08,308 --> 00:10:09,510 line:-1
+is not quite smooth.
+
+
+199
+00:10:11,211 --> 00:10:13,280 line:-2
+We can immediately see
+the difference
+
+
+200
+00:10:13,313 --> 00:10:16,116 line:-1
+if we play the second video.
+
+
+201
+00:10:16,149 --> 00:10:18,118 line:-2
+The right video
+has a higher frame rate
+
+
+202
+00:10:18,151 --> 00:10:19,753 line:-1
+compared with the left one
+
+
+203
+00:10:19.786 --> 00:10:21.955 line:-2 align:center
+because it contains
+both base layer
+
+
+204
+00:10:21,989 --> 00:10:22,990 line:-1
+and enhancement layer.
+
+
+205
+00:10:24,458 --> 00:10:27,995 line:-2
+The left video has 50%
+of the input frame rate,
+
+
+206
+00:10:28,028 --> 00:10:31,832 line:-2
+and it uses 60%
+of the target bit rate.
+
+
+207
+00:10:31,865 --> 00:10:34,434 line:-2
+These two videos
+only require the encoder
+
+
+208
+00:10:34,468 --> 00:10:37,671 line:-2
+to encode one single bitstream
+at one time.
+
+
+209
+00:10:37.704 --> 00:10:40.207 line:-2 align:center
+This will be
+much more power efficient
+
+
+210
+00:10:40,240 --> 00:10:42,509 line:-2
+when we are doing
+multi-party video conferencing.
+
+
+211
+00:10:44,244 --> 00:10:46,680 line:-2
+Another benefit
+of temporal scalability
+
+
+212
+00:10:46,713 --> 00:10:48,949 line:-1
+is error resilience.
+
+
+213
+00:10:48.982 --> 00:10:50.317 line:-1 align:center
+As we can see,
+
+
+214
+00:10:50.350 --> 00:10:52.119 line:-2 align:center
+the frames
+in the enhancement layer
+
+
+215
+00:10:52,152 --> 00:10:54,488 line:-1
+are not used for prediction,
+
+
+216
+00:10:54,521 --> 00:10:57,191 line:-2
+so there is
+no dependency on these frames.
+
+
+217
+00:10:58,559 --> 00:11:01,929 line:-2
+This would mean if one
+or more enhancement layer frames
+
+
+218
+00:11:01,962 --> 00:11:04,631 line:-2
+are dropped
+during network transmission,
+
+
+219
+00:11:04,665 --> 00:11:07,334 line:-1
+other frames won’t be affected.
+
+
+220
+00:11:07,367 --> 00:11:09,770 line:-2
+This makes the whole session
+more robust.
+
+
+221
+00:11:11.572 --> 00:11:13.707 line:-2 align:center
+The way to enable
+temporal scalability
+
+
+222
+00:11:13,740 --> 00:11:15,843 line:-1
+is pretty straightforward.
+
+
+223
+00:11:15.876 --> 00:11:17.911 line:-2 align:center
+We created
+a new session property
+
+
+224
+00:11:17,945 --> 00:11:22,382 line:-2
+in low-latency mode called
+BaseLayerFrameRateFraction.
+
+
+225
+00:11:22,416 --> 00:11:26,119 line:-1
+Simply set this property to 0.5,
+
+
+226
+00:11:26,153 --> 00:11:28,622 line:-2
+meaning half of the input frames
+are assigned
+
+
+227
+00:11:28.655 --> 00:11:31.525 line:-2 align:center
+to base layer
+and the rest are assigned
+
+
+228
+00:11:31,558 --> 00:11:32,593 line:-1
+to enhancement layer.
+
+
+229
+00:11:34,328 --> 00:11:36,196 line:-2
+You can check
+the layer information
+
+
+230
+00:11:36.230 --> 00:11:38.932 line:-2 align:center
+from the sample
+buffer attachment.
+
+
+231
+00:11:38.966 --> 00:11:42.836 line:-2 align:center
+For base layer frames,
+the CMSampleAttachmentKey_
+
+
+232
+00:11:42.870 --> 00:11:45.973 line:-2 align:center
+IsDependedOnByOthers
+will be true,
+
+
+233
+00:11:46.006 --> 00:11:48.141 line:-1 align:center
+and otherwise it will be false.
+
+
+234
+00:11:49.877 --> 00:11:52.446 line:-2 align:center
+We also have the option
+to set the target bit rate
+
+
+235
+00:11:52.479 --> 00:11:54.581 line:-1 align:center
+for each layer.
+
+
+236
+00:11:54.615 --> 00:11:56.884 line:-2 align:center
+Remember that we use
+the session property
+
+
+237
+00:11:56,917 --> 00:11:59,653 line:-2
+AverageBitRate to config
+the target bit rate.
+
+
+238
+00:12:01,188 --> 00:12:04,491 line:-2
+After the target bit rate
+is configured, we can set
+
+
+239
+00:12:04,525 --> 00:12:07,261 line:-2
+the new BaseLayerBitRateFraction
+property
+
+
+240
+00:12:07,294 --> 00:12:09,796 line:-2
+to control the percentage
+of the target bit rate
+
+
+241
+00:12:09,830 --> 00:12:11,164 line:-1
+needed for the base layer.
+
+
+242
+00:12:12,399 --> 00:12:14,701 line:-1
+If this property is not set,
+
+
+243
+00:12:14,735 --> 00:12:18,438 line:-2
+a default value
+of 0.6 will be used.
+
+
+244
+00:12:18,472 --> 00:12:21,208 line:-2
+And we recommend the base layer
+bit rate fraction
+
+
+245
+00:12:21,241 --> 00:12:24,611 line:-1
+should range from 0.6 to 0.8.
+
+
+246
+00:12:26.513 --> 00:12:30.551 line:-2 align:center
+Now, let’s move to max frame
+quantization parameter,
+
+
+247
+00:12:30,584 --> 00:12:32,252 line:-1
+or max frame QP.
+
+
+248
+00:12:33,554 --> 00:12:37,591 line:-2
+Frame QP is used to regulate
+image quality and data rate.
+
+
+249
+00:12:39,092 --> 00:12:41,028 line:-1
+We can use low-frame QP
+
+
+250
+00:12:41.061 --> 00:12:43.830 line:-2 align:center
+to generate
+a high-quality image.
+
+
+251
+00:12:43,864 --> 00:12:46,433 line:-2
+The image size
+will be large in this case.
+
+
+252
+00:12:47,835 --> 00:12:50,737 line:-2
+On the other hand,
+we can use a high-frame QP
+
+
+253
+00:12:50,771 --> 00:12:53,207 line:-2
+to generate an image
+in low quality
+
+
+254
+00:12:53,240 --> 00:12:54,641 line:-1
+but with smaller size.
+
+
+255
+00:12:56.143 --> 00:12:59.613 line:-2 align:center
+In low-latency mode,
+the encoder adjusts frame QP
+
+
+256
+00:12:59.646 --> 00:13:02.583 line:-2 align:center
+using factors
+such as image complexity,
+
+
+257
+00:13:02.616 --> 00:13:04.952 line:-2 align:center
+input frame rate,
+video motion
+
+
+258
+00:13:04,985 --> 00:13:07,321 line:-2
+in order to produce
+the best visual quality
+
+
+259
+00:13:07.354 --> 00:13:10.591 line:-2 align:center
+under current target
+bit rate constraint.
+
+
+260
+00:13:10,624 --> 00:13:12,259 line:-1
+So we encourage to rely
+
+
+261
+00:13:12.292 --> 00:13:14.294 line:-2 align:center
+on the encoder’s
+default behavior
+
+
+262
+00:13:14,328 --> 00:13:15,963 line:-1
+for adjusting frame QP.
+
+
+263
+00:13:17,598 --> 00:13:19,733 align:center
+But in some cases
+where the client
+
+
+264
+00:13:19,766 --> 00:13:23,203 align:center
+has a specific requirement
+for the video quality,
+
+
+265
+00:13:23,237 --> 00:13:26,139 line:0
+we now let you
+control the max frame QP
+
+
+266
+00:13:26,173 --> 00:13:28,075 align:center
+that the encoder
+is allowed to use.
+
+
+267
+00:13:29,843 --> 00:13:33,347 align:center
+With the max frame QP,
+the encoder will always choose
+
+
+268
+00:13:33,380 --> 00:13:36,850 align:center
+the frame QP that is smaller
+than this limit,
+
+
+269
+00:13:36,884 --> 00:13:39,419 line:0
+so the client can have
+a fine-grained control
+
+
+270
+00:13:39,453 --> 00:13:40,721 align:center
+over the image quality.
+
+
+271
+00:13:42,389 --> 00:13:45,492 line:-2
+It’s worth mentioning
+that the regular rate control
+
+
+272
+00:13:45.526 --> 00:13:49.930 line:-2 align:center
+still works even with
+the max frame QP specified.
+
+
+273
+00:13:49.963 --> 00:13:52.766 line:-2 align:center
+If the encoder hits
+the max frame QP cap
+
+
+274
+00:13:52.799 --> 00:13:55.536 line:-2 align:center
+but is running
+out of bit rate budget,
+
+
+275
+00:13:55,569 --> 00:13:57,404 line:-1
+it will start dropping frames
+
+
+276
+00:13:57,437 --> 00:13:59,473 line:-2
+in order to maintain
+the target bit rate.
+
+
+277
+00:14:01,041 --> 00:14:04,411 line:-2
+One example of using
+this feature is to transmit
+
+
+278
+00:14:04,444 --> 00:14:06,813 line:-2
+screen content video
+over a poor network.
+
+
+279
+00:14:08,115 --> 00:14:11,552 line:-2
+You can make a trade-off
+by sacrificing the frame rate
+
+
+280
+00:14:11,585 --> 00:14:14,988 line:-2
+in order to send sharp
+screen content images.
+
+
+281
+00:14:15,022 --> 00:14:18,358 line:-2
+Setting max frame QP
+can meet this requirement.
+
+
+282
+00:14:20.327 --> 00:14:22.362 line:-1 align:center
+Let’s look at the interface.
+
+
+283
+00:14:22.396 --> 00:14:24.898 line:-2 align:center
+You can pass
+the max frame QP
+
+
+284
+00:14:24,932 --> 00:14:28,202 line:-2
+with the new session property
+MaxAllowedFrameQP.
+
+
+285
+00:14:29.937 --> 00:14:32.739 line:-2 align:center
+Keep in mind that the value
+of max frame QP
+
+
+286
+00:14:32,773 --> 00:14:36,276 line:-2
+must range from 1 to 51
+according to the standard.
+
+
+287
+00:14:38,545 --> 00:14:40,214 line:-2
+Let’s talk about
+the last feature
+
+
+288
+00:14:40.247 --> 00:14:42.616 line:-2 align:center
+we’ve developed
+in low-latency mode,
+
+
+289
+00:14:42,649 --> 00:14:43,917 line:-1
+long-term reference.
+
+
+290
+00:14:45,285 --> 00:14:48,388 line:-2
+Long-term reference or LTR
+can be used
+
+
+291
+00:14:48.422 --> 00:14:50.624 line:-1 align:center
+for error resilience.
+
+
+292
+00:14:50,657 --> 00:14:53,560 line:-2
+Let’s look at this diagram
+showing the encoder,
+
+
+293
+00:14:53,594 --> 00:14:55,762 line:-2
+sender client,
+and the receiver client
+
+
+294
+00:14:55,796 --> 00:14:56,797 line:-1
+in the pipeline.
+
+
+295
+00:14:58.365 --> 00:15:00.167 line:-1 align:center
+Suppose the video communication
+
+
+296
+00:15:00,200 --> 00:15:03,136 line:-2
+goes through a network
+with poor connection.
+
+
+297
+00:15:03,170 --> 00:15:04,605 line:-1
+Frame loss can happen
+
+
+298
+00:15:04,638 --> 00:15:06,273 line:-2
+because
+of the transmission error.
+
+
+299
+00:15:07.841 --> 00:15:11.044 line:-2 align:center
+When the receiver client
+detects a frame loss,
+
+
+300
+00:15:11,078 --> 00:15:14,381 line:-2
+it can request a refresh frame
+in order to reset the session.
+
+
+301
+00:15:16.550 --> 00:15:20.287 line:-2 align:center
+If the encoder gets the request,
+normally it will encode
+
+
+302
+00:15:20.320 --> 00:15:23.257 line:-2 align:center
+a key frame
+for the refresh purpose.
+
+
+303
+00:15:23.290 --> 00:15:25.559 line:-2 align:center
+But the key frame
+is usually quite large.
+
+
+304
+00:15:26.793 --> 00:15:28.929 line:-2 align:center
+A large key frame
+takes a longer time
+
+
+305
+00:15:28,962 --> 00:15:30,898 line:-1
+to get to the receiver.
+
+
+306
+00:15:30.931 --> 00:15:33.867 line:-2 align:center
+Since the network condition
+is already poor,
+
+
+307
+00:15:33,901 --> 00:15:37,304 line:-2
+a large frame could compound
+the network congestion issue.
+
+
+308
+00:15:38,605 --> 00:15:40,974 line:-2
+So, can we use
+a predictive frame
+
+
+309
+00:15:41,008 --> 00:15:43,777 line:-2
+instead of a key frame
+for refresh?
+
+
+310
+00:15:43,810 --> 00:15:45,512 line:-1
+The answer is yes,
+
+
+311
+00:15:45,546 --> 00:15:48,315 line:-2
+if we have
+frame acknowledgement.
+
+
+312
+00:15:48,348 --> 00:15:49,850 line:-1
+Let me show you how it works.
+
+
+313
+00:15:51,285 --> 00:15:55,889 line:-2
+First, we need to decide frames
+that require acknowledgement.
+
+
+314
+00:15:55.923 --> 00:16:00.260 line:-2 align:center
+We call these frames
+long-term reference, or LTR.
+
+
+315
+00:16:00.294 --> 00:16:03.330 line:-2 align:center
+This is the decision
+from the encoder.
+
+
+316
+00:16:03,363 --> 00:16:06,934 line:-2
+When the sender client
+transmits an LTR frame,
+
+
+317
+00:16:06,967 --> 00:16:09,136 line:-2
+it also needs to request
+acknowledgement
+
+
+318
+00:16:09,169 --> 00:16:10,737 line:-1
+from the receiver client.
+
+
+319
+00:16:12,306 --> 00:16:15,475 line:-2
+If the LTR frame
+is successfully received,
+
+
+320
+00:16:15,509 --> 00:16:17,778 line:-2
+an acknowledgement
+needs to be sent back.
+
+
+321
+00:16:19.913 --> 00:16:22.282 line:-2 align:center
+Once the sender client
+gets the acknowledgement
+
+
+322
+00:16:22,316 --> 00:16:25,352 line:-2
+and passes that information
+to the encoder,
+
+
+323
+00:16:25,385 --> 00:16:27,654 line:-2
+the encoder knows
+which LTR frames
+
+
+324
+00:16:27,688 --> 00:16:29,556 line:-2
+have been received
+by the other side.
+
+
+325
+00:16:30,824 --> 00:16:32,960 line:-2
+Let’s look at the bad network
+situation again.
+
+
+326
+00:16:34,261 --> 00:16:36,997 line:-2
+When the encoder
+gets the refresh request,
+
+
+327
+00:16:37.030 --> 00:16:39.199 line:-2 align:center
+since this time,
+the encoder has
+
+
+328
+00:16:39,233 --> 00:16:42,302 line:-2
+a bunch of acknowledged LTRs,
+it is able
+
+
+329
+00:16:42.336 --> 00:16:44.438 line:-2 align:center
+to encode a frame
+that is predicted
+
+
+330
+00:16:44,471 --> 00:16:46,773 line:-2
+from one of these
+acknowledged LTRs.
+
+
+331
+00:16:47,908 --> 00:16:51,545 line:-2
+A frame that is encoded
+in this way is called LTR-P.
+
+
+332
+00:16:53,013 --> 00:16:57,818 line:0
+Usually an LTR-P is much smaller
+in terms of encoded frame size
+
+
+333
+00:16:57,851 --> 00:16:59,987 align:center
+compared to a key frame,
+
+
+334
+00:17:00,020 --> 00:17:02,890 line:0
+so it is easier to transmit.
+
+
+335
+00:17:02.923 --> 00:17:07.027 line:-2 align:center
+Now, let’s talk about
+the APIs for LTR.
+
+
+336
+00:17:07,060 --> 00:17:09,530 line:-2
+Note that
+the frame acknowledgement
+
+
+337
+00:17:09,563 --> 00:17:12,633 line:-2
+needs to be handled
+by application layer.
+
+
+338
+00:17:12,666 --> 00:17:17,070 line:-2
+It can be done with mechanisms
+such as RPSI message
+
+
+339
+00:17:17,104 --> 00:17:19,439 line:-1
+in RTP Control Protocol.
+
+
+340
+00:17:20,774 --> 00:17:23,677 line:-2
+Here we’re only going
+to focus on how the encoder
+
+
+341
+00:17:23.710 --> 00:17:26.613 line:-2 align:center
+and the sender client
+communicate in this process.
+
+
+342
+00:17:28,348 --> 00:17:31,485 align:center
+Once you have enabled
+low-latency encoding,
+
+
+343
+00:17:31,518 --> 00:17:33,287 align:center
+you can enable this feature
+
+
+344
+00:17:33,320 --> 00:17:36,056 line:0
+by setting
+EnableLTR session property.
+
+
+345
+00:17:37,357 --> 00:17:40,093 align:center
+When an LTR frame is encoded,
+
+
+346
+00:17:40,127 --> 00:17:42,563 line:0
+the encoder will signal
+a unique frame token
+
+
+347
+00:17:42,596 --> 00:17:46,767 align:center
+in the sample attachment
+RequireLTRAcknowledgementToken.
+
+
+348
+00:17:48,335 --> 00:17:51,205 align:center
+The sender client
+is responsible for reporting
+
+
+349
+00:17:51,238 --> 00:17:53,974 align:center
+the acknowledged LTR frames
+to the encoder
+
+
+350
+00:17:54,007 --> 00:17:57,578 align:center
+through AcknowledgedLTRTokens
+frame property.
+
+
+351
+00:17:57,611 --> 00:18:00,280 align:center
+Since more than one
+acknowledgement can come
+
+
+352
+00:18:00,314 --> 00:18:03,050 line:0
+at a time,
+we need to use an array
+
+
+353
+00:18:03,083 --> 00:18:04,918 line:0
+to store these frame tokens.
+
+
+354
+00:18:06,520 --> 00:18:09,122 line:0
+You can request
+a refresh frame at any time
+
+
+355
+00:18:09,156 --> 00:18:12,492 line:0
+through ForceLTRRefresh
+frame property.
+
+
+356
+00:18:12,526 --> 00:18:15,495 line:0
+Once the encoder
+receives this request,
+
+
+357
+00:18:15,529 --> 00:18:18,632 line:0
+an LTR-P will be encoded.
+
+
+358
+00:18:18,665 --> 00:18:21,535 line:0
+If there is
+no acknowledged LTR available,
+
+
+359
+00:18:21,568 --> 00:18:24,671 align:center
+the encoder will generate
+a key frame in this case.
+
+
+360
+00:18:26.073 --> 00:18:27.040 line:-1 align:center
+All right.
+
+
+361
+00:18:27,074 --> 00:18:28,809 line:-2
+Now we’ve covered
+the new features
+
+
+362
+00:18:28.842 --> 00:18:30.644 line:-1 align:center
+in low-latency mode.
+
+
+363
+00:18:30,677 --> 00:18:33,080 line:-2
+We can talk about
+using these features together.
+
+
+364
+00:18:34.548 --> 00:18:37.551 line:-2 align:center
+For example,
+we can use temporal scalability
+
+
+365
+00:18:37,584 --> 00:18:39,686 line:-2
+and max frame
+quantization parameter
+
+
+366
+00:18:39,720 --> 00:18:42,856 line:-2
+for a group screen
+sharing application.
+
+
+367
+00:18:42,890 --> 00:18:44,091 line:-1
+The temporal scalability
+
+
+368
+00:18:44,124 --> 00:18:46,693 line:-2
+can efficiently
+generate output videos
+
+
+369
+00:18:46,727 --> 00:18:48,662 line:-1
+for each recipient,
+
+
+370
+00:18:48.695 --> 00:18:51.031 line:-2 align:center
+and we can lower
+the max frame QP
+
+
+371
+00:18:51.064 --> 00:18:54.101 line:-2 align:center
+for a sharper UI
+and text in the screen content.
+
+
+372
+00:18:55.502 --> 00:18:58.172 line:-2 align:center
+If the communication
+goes through a poor network
+
+
+373
+00:18:58,205 --> 00:19:00,807 line:-2
+and a refresh frame
+is needed to recover
+
+
+374
+00:19:00.841 --> 00:19:05.078 line:-2 align:center
+from the error,
+long-term reference can be used.
+
+
+375
+00:19:05.112 --> 00:19:09.449 line:-2 align:center
+And if the receiver can only
+decode constrained profiles,
+
+
+376
+00:19:09.483 --> 00:19:12.286 line:-2 align:center
+we can encode with
+constrained baseline profile
+
+
+377
+00:19:12.319 --> 00:19:14.154 line:-1 align:center
+or constrained high profile.
+
+
+378
+00:19:15.255 --> 00:19:16.223 line:-1 align:center
+OK.
+
+
+379
+00:19:16.256 --> 00:19:19.226 line:-1 align:center
+We’ve covered a few topics here.
+
+
+380
+00:19:19,259 --> 00:19:23,163 line:-2
+We’ve introduced a low-latency
+encoding mode in Video Toolbox.
+
+
+381
+00:19:24,531 --> 00:19:28,035 line:-2
+We’ve talked about how
+to use VTCompressionSession APIs
+
+
+382
+00:19:28.068 --> 00:19:30.537 line:-2 align:center
+to encode videos
+in low-latency mode.
+
+
+383
+00:19:31,805 --> 00:19:34,875 line:-2
+Besides the latency benefit,
+we also developed
+
+
+384
+00:19:34,908 --> 00:19:38,011 line:-2
+a bunch of new features
+to address the requirements
+
+
+385
+00:19:38.045 --> 00:19:40.214 line:-1 align:center
+for real-time video application.
+
+
+386
+00:19:40,247 --> 00:19:43,750 line:-2
+With all these improvements,
+I hope the low-latency mode
+
+
+387
+00:19:43.784 --> 00:19:46.286 line:-2 align:center
+can make your video app
+more amazing.
+
+
+388
+00:19:46,320 --> 00:19:50,624 line:-2
+Thanks for watching
+and have a great WWDC 2021.
+
+
+389
+00:19:50,657 --> 00:19:53,660 line:-1
+[upbeat music]
+

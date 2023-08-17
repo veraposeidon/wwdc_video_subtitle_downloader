@@ -1,0 +1,1687 @@
+1
+00:00:03,871 --> 00:00:06,507 line:-1
+Hello and welcome to WWDC.
+
+
+2
+00:00:07,808 --> 00:00:11,612 line:0
+Hi there, and welcome to my session,
+"Get Your Test Results Faster."
+
+
+3
+00:00:12,312 --> 00:00:14,481 line:0
+My name is Sean, and I'm an engineer
+
+
+4
+00:00:14,548 --> 00:00:16,884 line:0
+in the Developer Technologies group
+at Apple,
+
+
+5
+00:00:16,950 --> 00:00:20,754 line:0
+working on the XCTest framework
+and its Xcode integrations.
+
+
+6
+00:00:21,421 --> 00:00:25,859 line:-2
+This session is grounded in a concept
+called "The Testing Feedback Loop,"
+
+
+7
+00:00:25,926 --> 00:00:29,530 line:-2
+and in case this concept is new to you,
+I wanted to briefly take you through it.
+
+
+8
+00:00:29,997 --> 00:00:33,967 line:-2
+After this, we'll be going over
+some techniques and features within Xcode
+
+
+9
+00:00:34,034 --> 00:00:36,970 line:-2
+that you can use to speed up
+getting results from your tests.
+
+
+10
+00:00:38,405 --> 00:00:40,507 line:-2
+If you've ever written
+an automated test before,
+
+
+11
+00:00:40,574 --> 00:00:42,509 line:-2
+there's a good chance
+that you have an intuition
+
+
+12
+00:00:42,576 --> 00:00:44,278 line:-1
+of what the testing feedback loop is,
+
+
+13
+00:00:44,344 --> 00:00:47,214 line:-2
+and this is because writing a test
+is the beginning of the loop.
+
+
+14
+00:00:48,515 --> 00:00:51,485 line:-2
+The loop then continues
+into you running those tests,
+
+
+15
+00:00:51,552 --> 00:00:53,487 line:-1
+usually alongside some other tests.
+
+
+16
+00:00:54,588 --> 00:00:57,024 line:-2
+And then ends up
+with you interpreting the results,
+
+
+17
+00:00:57,090 --> 00:01:00,060 line:-2
+and making some decisions
+based on what's in your test report.
+
+
+18
+00:01:01,695 --> 00:01:04,631 line:-2
+Depending on your report,
+you may decide to write more tests
+
+
+19
+00:01:04,697 --> 00:01:07,701 line:-2
+because there are cases or features
+you're interested in covering.
+
+
+20
+00:01:08,335 --> 00:01:11,038 line:-2
+Or you may decide
+that you've written enough tests
+
+
+21
+00:01:11,104 --> 00:01:14,675 line:-2
+and the results give you confidence
+your code behaves as you expect.
+
+
+22
+00:01:14,741 --> 00:01:16,844 line:-2
+This confidence
+lets you move on to other tasks.
+
+
+23
+00:01:18,745 --> 00:01:21,014 line:-1
+Having short feedback loops is important
+
+
+24
+00:01:21,081 --> 00:01:23,784 line:-2
+because that means
+you get results from your tests faster.
+
+
+25
+00:01:23,851 --> 00:01:27,154 line:-2
+If your tests are faster, then you can get
+confidence in your code faster,
+
+
+26
+00:01:27,221 --> 00:01:30,424 line:-2
+which then means you can
+ship features to your users faster.
+
+
+27
+00:01:31,892 --> 00:01:34,461 line:-2
+Now, having gone over
+the test feedback loop,
+
+
+28
+00:01:34,528 --> 00:01:37,497 line:-2
+I wanted to let you know
+what we'll be going over today.
+
+
+29
+00:01:37,564 --> 00:01:39,967 line:-2
+We're first going to discuss
+some features in Xcode 12
+
+
+30
+00:01:40,033 --> 00:01:42,069 line:-2
+that will ensure your tests
+always complete.
+
+
+31
+00:01:42,636 --> 00:01:45,973 line:-2
+We'll also talk about how to use
+some diagnostics these features surface
+
+
+32
+00:01:46,039 --> 00:01:48,408 line:-2
+to figure out
+what may be breaking your feedback loops.
+
+
+33
+00:01:50,010 --> 00:01:51,345 line:-1
+Then we're going to talk about
+
+
+34
+00:01:51,411 --> 00:01:54,114 line:-2
+how you can get
+even faster results from your tests
+
+
+35
+00:01:54,181 --> 00:01:57,518 line:-2
+by using the test parallelization options
+available to you in Xcode 12.
+
+
+36
+00:01:58,352 --> 00:02:00,954 line:-2
+Now, let's ground this discussion
+in a real-world example.
+
+
+37
+00:02:02,256 --> 00:02:04,391 line:-2
+Imagine you're at work,
+looking at the results
+
+
+38
+00:02:04,458 --> 00:02:07,628 line:-2
+from a CI job that you kicked off
+on Friday before leaving the office.
+
+
+39
+00:02:08,495 --> 00:02:09,863 line:-1
+With a hot beverage in hand,
+
+
+40
+00:02:09,930 --> 00:02:12,766 line:-2
+you realize that your
+long-running test suite never finished.
+
+
+41
+00:02:14,234 --> 00:02:16,370 line:-2
+You'd probably feel like
+how this person looks--
+
+
+42
+00:02:16,436 --> 00:02:19,106 line:-2
+frustrated and a little upset
+that you need to start the week
+
+
+43
+00:02:19,173 --> 00:02:21,175 line:-2
+understanding why
+your tests aren't working.
+
+
+44
+00:02:22,643 --> 00:02:24,578 line:-1
+If we don't investigate this problem,
+
+
+45
+00:02:24,645 --> 00:02:28,482 line:-2
+our tests will continue to take longer
+and will intermittently not finish,
+
+
+46
+00:02:28,549 --> 00:02:31,952 line:-2
+which is gonna ruin our confidence
+in our tests and application code,
+
+
+47
+00:02:32,019 --> 00:02:34,221 line:-2
+and that's gonna hurt
+our ability to quickly deliver
+
+
+48
+00:02:34,288 --> 00:02:35,689 line:-1
+new features to our users.
+
+
+49
+00:02:37,324 --> 00:02:39,459 line:-2
+This is a very unfortunate
+situation to be in,
+
+
+50
+00:02:39,526 --> 00:02:43,130 line:-2
+but lucky for us, there are some features
+in Xcode 12 to help us out.
+
+
+51
+00:02:43,197 --> 00:02:44,398 line:-1
+So, let's look into it.
+
+
+52
+00:02:45,566 --> 00:02:47,734 line:-2
+We're gonna start
+with fixing the hang in our test suite,
+
+
+53
+00:02:47,801 --> 00:02:49,770 line:-2
+so we can always
+get feedback from our tests.
+
+
+54
+00:02:50,871 --> 00:02:52,773 line:-1
+Right now, the feedback loop is broken.
+
+
+55
+00:02:53,373 --> 00:02:56,877 line:-2
+Because our tests hung and never finished
+running, we never got our results,
+
+
+56
+00:02:57,578 --> 00:03:00,681 line:-2
+so we can't interpret them.
+We're left to cancel the tests
+
+
+57
+00:03:00,747 --> 00:03:03,951 line:-2
+and forfeit getting a complete
+understanding of our code base's quality.
+
+
+58
+00:03:05,719 --> 00:03:09,223 line:-2
+This image is from a result bundle
+from that CI job which never finished.
+
+
+59
+00:03:10,224 --> 00:03:12,593 line:-2
+It has an error message
+that says testing was canceled
+
+
+60
+00:03:12,659 --> 00:03:15,863 line:-2
+because we had to cancel the CI job,
+which isn't exactly actionable.
+
+
+61
+00:03:16,697 --> 00:03:19,666 line:-2
+I'm left wondering what exactly
+went wrong in the first place.
+
+
+62
+00:03:21,168 --> 00:03:25,372 line:-2
+Without much in terms of diagnostics
+to understand why our tests are hung,
+
+
+63
+00:03:25,439 --> 00:03:27,741 line:-2
+we can try thinking
+of a few causes offhand.
+
+
+64
+00:03:28,809 --> 00:03:30,511 line:-1
+A classic example is a deadlock,
+
+
+65
+00:03:30,577 --> 00:03:32,379 line:-1
+where two sections of code are waiting
+
+
+66
+00:03:32,446 --> 00:03:35,649 line:-2
+for the other to make forward progress,
+and therefore neither does.
+
+
+67
+00:03:36,950 --> 00:03:38,785 line:-1
+Even if our tests aren't stalled,
+
+
+68
+00:03:38,852 --> 00:03:41,922 line:-2
+their rate of progress may be so low
+that they're effectively stuck.
+
+
+69
+00:03:43,223 --> 00:03:45,158 line:-1
+Alternatively, this could just be due
+
+
+70
+00:03:45,225 --> 00:03:47,895 line:-2
+to poorly chosen time-out values
+in some application code,
+
+
+71
+00:03:48,762 --> 00:03:51,765 line:-2
+or it could be due
+to large amounts of CPU work
+
+
+72
+00:03:51,832 --> 00:03:55,035 line:-2
+that we're doing on the main thread
+of our app or framework we're testing.
+
+
+73
+00:03:56,170 --> 00:03:57,771 line:-1
+Available in Xcode 12, though,
+
+
+74
+00:03:57,838 --> 00:04:00,507 line:-2
+is a solution to our problem
+of hung tests.
+
+
+75
+00:04:00,574 --> 00:04:03,544 line:-2
+It's a new test-plan option
+called "executionTimeAllowance."
+
+
+76
+00:04:04,811 --> 00:04:07,748 line:-2
+executionTimeAllowance
+is a customizable feature
+
+
+77
+00:04:07,814 --> 00:04:10,284 line:-2
+that you can opt into
+when running your tests.
+
+
+78
+00:04:10,851 --> 00:04:13,187 line:-1
+When enabled, Xcode enforces a limit
+
+
+79
+00:04:13,253 --> 00:04:15,656 line:-2
+on the amount of time
+each individual test can take.
+
+
+80
+00:04:16,723 --> 00:04:20,661 line:-2
+When a test exceeds this limit,
+Xcode will first capture a spindump,
+
+
+81
+00:04:21,361 --> 00:04:23,397 line:-1
+then kill the tests that hung...
+
+
+82
+00:04:24,698 --> 00:04:27,968 line:-2
+then restart the test runner
+so that the rest of the suite can execute.
+
+
+83
+00:04:29,369 --> 00:04:31,638 line:-2
+We know it's not a great experience
+to try to guess
+
+
+84
+00:04:31,705 --> 00:04:33,674 line:-2
+at what could be causing
+our tests to hang.
+
+
+85
+00:04:34,241 --> 00:04:36,643 line:-2
+After all,
+our code base could be large and complex,
+
+
+86
+00:04:36,710 --> 00:04:39,379 line:-2
+and that doesn't lend itself
+to being easily reasoned about.
+
+
+87
+00:04:40,480 --> 00:04:44,184 line:-2
+Instead, we'd benefit from having
+some better diagnostics given to us
+
+
+88
+00:04:44,251 --> 00:04:46,186 line:-2
+so we can understand
+the cause a bit better.
+
+
+89
+00:04:47,087 --> 00:04:48,989 line:-1
+A spindump can help us out here a lot,
+
+
+90
+00:04:49,056 --> 00:04:52,659 line:-2
+and this is why executionTimeAllowance
+attaches them to your test report.
+
+
+91
+00:04:53,694 --> 00:04:57,898 line:-2
+A spindump shows you which functions
+each thread is spending the most time in.
+
+
+92
+00:04:58,732 --> 00:05:01,235 line:-2
+If our tests are stalled,
+a spindump would help us see
+
+
+93
+00:05:01,301 --> 00:05:03,303 line:-1
+what functions the issue may lie in.
+
+
+94
+00:05:05,138 --> 00:05:07,274 line:-2
+It's also possible
+to manually capture a spindump
+
+
+95
+00:05:07,341 --> 00:05:09,610 line:-1
+from Terminal using the spindump command,
+
+
+96
+00:05:09,676 --> 00:05:12,579 line:-2
+or from within Activity Monitor
+if you prefer a GUI.
+
+
+97
+00:05:13,780 --> 00:05:16,984 line:-2
+By default,
+each and every test will get ten minutes.
+
+
+98
+00:05:17,050 --> 00:05:20,387 line:-2
+If a test successfully finishes
+before that ten minutes elapses,
+
+
+99
+00:05:20,454 --> 00:05:22,523 line:-2
+the timer will get reset
+for the next test.
+
+
+100
+00:05:24,057 --> 00:05:27,761 line:-2
+If you need more time for all tests,
+you can customize the default allowance
+
+
+101
+00:05:27,828 --> 00:05:29,496 line:-1
+in your test plan's configuration.
+
+
+102
+00:05:30,697 --> 00:05:33,734 line:-2
+And if you need more time
+for a specific test or test class,
+
+
+103
+00:05:34,668 --> 00:05:36,870 line:-2
+you can use
+the executionTimeAllowance API
+
+
+104
+00:05:36,937 --> 00:05:39,840 line:-2
+to special-case a particular test
+or subclass.
+
+
+105
+00:05:41,208 --> 00:05:43,243 line:-1
+executionTimeAllowance is represented
+
+
+106
+00:05:43,310 --> 00:05:46,480 line:-2
+as a time-interval property
+on XCTestCase.
+
+
+107
+00:05:46,547 --> 00:05:48,749 line:-2
+It's important to note
+that time-allowance values
+
+
+108
+00:05:48,815 --> 00:05:50,350 line:-1
+will be rounded to the nearest minute.
+
+
+109
+00:05:50,417 --> 00:05:55,088 line:-2
+For values under 60 seconds,
+they'll be rounded up to 60 seconds,
+
+
+110
+00:05:55,155 --> 00:05:59,159 line:-2
+and for a value like 100 seconds,
+it would be rounded up to 120 seconds,
+
+
+111
+00:05:59,226 --> 00:06:00,928 line:-1
+since that's the nearest whole minute.
+
+
+112
+00:06:00,994 --> 00:06:03,931 line:-2
+Having gone over the new
+executionTimeAllowance feature,
+
+
+113
+00:06:03,997 --> 00:06:05,799 line:-2
+let's go through a quick demo
+of turning it on
+
+
+114
+00:06:05,866 --> 00:06:08,836 line:-2
+and using the spindump it attaches
+to fix our hung test.
+
+
+115
+00:06:10,904 --> 00:06:14,341 line:-2
+I have here in Xcode 12
+the test that was hanging in CI.
+
+
+116
+00:06:14,875 --> 00:06:17,878 line:-2
+It's a test called
+testUpdatingSmoothiesFromServer.
+
+
+117
+00:06:18,212 --> 00:06:21,248 line:-2
+And it's a test of a method
+called fetchSynchronouslyFromServer.
+
+
+118
+00:06:22,349 --> 00:06:24,718 line:-2
+I'm gonna try to reproduce
+the issue at my desk here
+
+
+119
+00:06:24,785 --> 00:06:26,820 line:-2
+and I'm gonna do that
+by pressing the play button
+
+
+120
+00:06:26,887 --> 00:06:28,288 line:-1
+in the source editor gutter.
+
+
+121
+00:06:31,491 --> 00:06:35,796 line:-2
+Now when I do this, I see the activity
+indicator in the Test Navigator spinning.
+
+
+122
+00:06:36,430 --> 00:06:39,833 line:-2
+If this test was working and not hung,
+it would execute immediately.
+
+
+123
+00:06:40,734 --> 00:06:41,802 line:-1
+I'm gonna stop the test
+
+
+124
+00:06:41,869 --> 00:06:43,904 line:-2
+because there's no use
+in waiting for it to stall.
+
+
+125
+00:06:45,873 --> 00:06:48,642 line:-2
+Now, I wanna turn on
+the executionTimeAllowance feature
+
+
+126
+00:06:48,709 --> 00:06:50,611 line:-1
+to get a spindump, so let's do that.
+
+
+127
+00:06:51,178 --> 00:06:55,082 line:-2
+I can do that
+by opening the test plan... menu,
+
+
+128
+00:06:55,148 --> 00:06:57,150 line:-1
+clicking the "Edit Test Plan" item,
+
+
+129
+00:06:57,885 --> 00:06:59,453 line:-1
+selecting configurations,
+
+
+130
+00:07:00,354 --> 00:07:01,788 line:-1
+turning test timeouts "on"...
+
+
+131
+00:07:04,424 --> 00:07:05,692 line:-1
+and then rerunning my test
+
+
+132
+00:07:05,759 --> 00:07:08,762 line:-2
+by pressing the play button again
+in the Test Navigator.
+
+
+133
+00:07:10,998 --> 00:07:14,201 line:-2
+This will generate
+a new report for me that I can use,
+
+
+134
+00:07:14,268 --> 00:07:16,470 line:-2
+and I can view that report
+in the navigator.
+
+
+135
+00:07:18,338 --> 00:07:21,074 line:-2
+If I go ahead and I open up
+the report that I just generated,
+
+
+136
+00:07:21,141 --> 00:07:25,179 line:-2
+I'm gonna see the same test as failing,
+but its failure reasoning is different.
+
+
+137
+00:07:25,879 --> 00:07:27,314 line:-1
+It's gonna say that it exceeded
+
+
+138
+00:07:27,381 --> 00:07:30,884 line:-2
+the test executionTimeAllowance
+of ten minutes, which is the default.
+
+
+139
+00:07:30,951 --> 00:07:32,953 line:-1
+And it's also going to attach a spindump.
+
+
+140
+00:07:33,554 --> 00:07:35,689 line:-2
+You can open that spindump
+by double-clicking it
+
+
+141
+00:07:35,756 --> 00:07:37,691 line:-1
+and it will open inside of an editor tab.
+
+
+142
+00:07:39,459 --> 00:07:42,329 line:-2
+Spindumps are generally
+broken up into two sections--
+
+
+143
+00:07:42,396 --> 00:07:44,631 line:-1
+a preamble, which contains metadata,
+
+
+144
+00:07:44,698 --> 00:07:46,667 line:-1
+and then a series of stack traces
+
+
+145
+00:07:46,733 --> 00:07:49,069 line:-2
+for each thread within the process
+that was sampled.
+
+
+146
+00:07:50,070 --> 00:07:52,339 line:-2
+Since we're sampling
+our test-runner process,
+
+
+147
+00:07:52,406 --> 00:07:55,342 line:-2
+I know that my test names
+should be somewhere in that spindump.
+
+
+148
+00:07:56,443 --> 00:08:02,115 line:-2
+If I do a quick find, I can rapidly find
+my test within the stack trace,
+
+
+149
+00:08:02,182 --> 00:08:04,685 line:-2
+and see that it's calling
+the method under test
+
+
+150
+00:08:04,751 --> 00:08:06,353 line:-1
+as well as a private helper method.
+
+
+151
+00:08:07,120 --> 00:08:09,590 line:-2
+After that,
+I can see that it's acquiring a lock,
+
+
+152
+00:08:09,656 --> 00:08:10,757 line:-1
+and then it's waiting.
+
+
+153
+00:08:11,658 --> 00:08:14,728 line:-2
+This suggests to me that the issue
+is in that helper method that we have.
+
+
+154
+00:08:15,562 --> 00:08:18,232 line:-2
+I'm gonna look at the code,
+and I'm gonna navigate to the code
+
+
+155
+00:08:18,298 --> 00:08:20,367 line:-1
+by opening up the Smoothie.swift file.
+
+
+156
+00:08:22,803 --> 00:08:26,139 line:-2
+Upon looking at this code,
+I can see that in this second method
+
+
+157
+00:08:26,206 --> 00:08:28,008 line:-1
+it's acquiring the same lock
+
+
+158
+00:08:28,075 --> 00:08:31,178 line:-2
+as our method under test,
+fetchSynchronouslyFromServer.
+
+
+159
+00:08:32,712 --> 00:08:35,249 line:-2
+It seems questionable to me
+that this helper method,
+
+
+160
+00:08:35,315 --> 00:08:37,985 line:-2
+which is just for
+performing a Get request,
+
+
+161
+00:08:38,051 --> 00:08:39,820 line:-1
+is acquiring a lock.
+
+
+162
+00:08:39,886 --> 00:08:42,789 line:-2
+And so I'm gonna try deleting
+this lock acquisition code from here
+
+
+163
+00:08:43,590 --> 00:08:45,392 line:-1
+to see if that fixes our deadlock.
+
+
+164
+00:08:46,126 --> 00:08:49,963 line:-2
+I'm going to reopen the Test Navigator
+by selecting the Test Navigator icon,
+
+
+165
+00:08:50,030 --> 00:08:52,099 line:-2
+and clicking
+the play button for our tests.
+
+
+166
+00:08:54,334 --> 00:08:57,838 line:0
+We see that the test immediately executes,
+indicating that we fixed the hang.
+
+
+167
+00:09:00,641 --> 00:09:03,243 line:-2
+Having demoed turning on
+time allowances for our project,
+
+
+168
+00:09:03,310 --> 00:09:05,345 line:-2
+let's talk about some ways
+you can customize them.
+
+
+169
+00:09:06,280 --> 00:09:09,550 line:-2
+There are two ways you can customize
+the default time allowance.
+
+
+170
+00:09:09,616 --> 00:09:13,053 line:-2
+The first, is using the test-plan setting,
+which is available in Xcode 12.
+
+
+171
+00:09:14,221 --> 00:09:16,456 line:0
+And the second,
+is using the xcodebuild option.
+
+
+172
+00:09:17,891 --> 00:09:19,726 line:-1
+Once you've enabled time allowances,
+
+
+173
+00:09:19,793 --> 00:09:22,162 line:-2
+there's a precedence order
+the configurations follow.
+
+
+174
+00:09:23,030 --> 00:09:25,532 line:-2
+This is so that you can set
+coarse-grained defaults
+
+
+175
+00:09:25,599 --> 00:09:28,035 line:-2
+and finer-grained values
+for special cases,
+
+
+176
+00:09:28,101 --> 00:09:30,470 line:-2
+such as CI jobs
+or long-running test suites.
+
+
+177
+00:09:32,105 --> 00:09:35,008 line:-2
+The TimeAllowance API
+has the highest precedence,
+
+
+178
+00:09:35,976 --> 00:09:39,613 line:-2
+while xcodebuild's TimeAllowance option
+has the second highest precedence.
+
+
+179
+00:09:41,181 --> 00:09:43,750 line:-2
+A Test plan setting
+has the third highest precedence,
+
+
+180
+00:09:44,518 --> 00:09:47,321 line:0
+and the system default of ten minutes
+has the lowest precedence,
+
+
+181
+00:09:47,387 --> 00:09:50,057 line:0
+and will be overridden
+by any of the other three options.
+
+
+182
+00:09:52,292 --> 00:09:55,262 line:-2
+With all of these ways to set
+a time allowance, a question emerges,
+
+
+183
+00:09:55,329 --> 00:09:58,899 line:-2
+which is, what happens
+if a test requests unlimited time?
+
+
+184
+00:10:00,234 --> 00:10:02,236 line:-2
+There's a way
+to prevent this from happening,
+
+
+185
+00:10:02,302 --> 00:10:05,105 line:-2
+and that's by enforcing
+a maximum allowance.
+
+
+186
+00:10:05,172 --> 00:10:08,375 line:-2
+Your test is guaranteed
+not to exceed this value,
+
+
+187
+00:10:08,442 --> 00:10:12,479 line:-2
+regardless of the configuration you set
+in test plans or through API calls.
+
+
+188
+00:10:13,881 --> 00:10:15,516 line:-1
+You can enforce a maximum allowance
+
+
+189
+00:10:15,582 --> 00:10:17,618 line:-1
+either via a setting in the test plan
+
+
+190
+00:10:17,684 --> 00:10:19,686 line:0
+or through an xcodebuild option.
+
+
+191
+00:10:21,989 --> 00:10:24,691 line:-2
+Having gone over how to use
+the new time-allowance features,
+
+
+192
+00:10:24,758 --> 00:10:26,593 line:-2
+we wanted to offer
+a couple of recommendations
+
+
+193
+00:10:26,660 --> 00:10:28,295 line:-1
+for how to get the most out of them.
+
+
+194
+00:10:29,296 --> 00:10:34,635 line:-2
+For starters, use time allowances
+specifically to guard against test hangs
+
+
+195
+00:10:34,701 --> 00:10:36,670 line:-2
+and ensure you get diagnostics
+when they do.
+
+
+196
+00:10:37,604 --> 00:10:39,940 line:-2
+If you're concerned about
+keeping your tests fast,
+
+
+197
+00:10:40,007 --> 00:10:42,576 line:-2
+we recommend using
+XCTest's performance APIs
+
+
+198
+00:10:42,643 --> 00:10:46,480 line:-2
+to automate testing for regressions
+in the performance of your code.
+
+
+199
+00:10:46,547 --> 00:10:49,416 line:-2
+And if you need to identify
+what parts of your code are slow,
+
+
+200
+00:10:49,483 --> 00:10:50,851 line:-1
+we recommend using Instruments
+
+
+201
+00:10:50,918 --> 00:10:53,220 line:-2
+to profile and understand
+your app's performance.
+
+
+202
+00:10:53,820 --> 00:10:55,923 line:-1
+Instruments provides a rich set of tools
+
+
+203
+00:10:55,989 --> 00:10:58,425 line:-2
+that will give you a lot of info
+that can help you figure out
+
+
+204
+00:10:58,492 --> 00:11:00,827 line:-2
+where to begin
+adding perf tests to your app code.
+
+
+205
+00:11:02,796 --> 00:11:05,098 line:0
+If you're interested
+in learning how to use Instruments,
+
+
+206
+00:11:05,165 --> 00:11:07,634 line:0
+check out this talk from WWDC 2019
+
+
+207
+00:11:07,701 --> 00:11:09,837 line:0
+entitled "Getting Started
+with Instruments."
+
+
+208
+00:11:11,672 --> 00:11:13,674 line:-1
+Now, having adopted time allowances,
+
+
+209
+00:11:13,740 --> 00:11:15,709 line:-2
+our feedback loop
+has gone from being broken
+
+
+210
+00:11:15,776 --> 00:11:18,412 line:-2
+during the "running tests" phase,
+to being complete.
+
+
+211
+00:11:19,079 --> 00:11:21,582 line:-2
+And what's more,
+is that we will now always get results
+
+
+212
+00:11:21,648 --> 00:11:23,951 line:-1
+if our tests unexpectedly hang or stall.
+
+
+213
+00:11:26,119 --> 00:11:28,121 line:-2
+We now have the ability
+to turn our attention
+
+
+214
+00:11:28,188 --> 00:11:30,490 line:-2
+to the fact that our tests
+take a lot of time,
+
+
+215
+00:11:30,557 --> 00:11:33,160 line:-2
+so let's dig into
+how we can speed up Fruta's test suite.
+
+
+216
+00:11:34,995 --> 00:11:37,164 line:-2
+Xcode 12 can help us
+shorten the loop even more
+
+
+217
+00:11:37,231 --> 00:11:39,700 line:-2
+by letting us run tests
+on multiple devices.
+
+
+218
+00:11:40,767 --> 00:11:42,603 line:-1
+This is a test report from Fruta.
+
+
+219
+00:11:42,669 --> 00:11:44,638 line:-1
+We see the results of about a dozen tests
+
+
+220
+00:11:44,705 --> 00:11:47,975 line:-2
+that took between a few hundred
+milliseconds to several minutes to run.
+
+
+221
+00:11:49,676 --> 00:11:52,813 line:-2
+Overall, our tests took
+just about 13 minutes to run,
+
+
+222
+00:11:53,480 --> 00:11:57,084 line:-2
+with many of these tests taking time on
+the order of minutes to complete running.
+
+
+223
+00:11:57,885 --> 00:12:00,754 line:-2
+This is a clue that we would
+benefit from parallel testing.
+
+
+224
+00:12:02,389 --> 00:12:05,459 line:-2
+Right now,
+Fruta is using non-distributed testing.
+
+
+225
+00:12:05,526 --> 00:12:07,961 line:-2
+That means each
+and every test case defined
+
+
+226
+00:12:08,028 --> 00:12:10,531 line:-1
+is executed serially on a run destination,
+
+
+227
+00:12:11,198 --> 00:12:13,634 line:-2
+and that will always take
+the most amount of time.
+
+
+228
+00:12:13,700 --> 00:12:14,868 line:-1
+You've likely experienced this
+
+
+229
+00:12:14,935 --> 00:12:18,772 line:-2
+if you have ever pressed Cmd+U in Xcode
+with parallelization disabled.
+
+
+230
+00:12:19,773 --> 00:12:21,441 line:-1
+A solution to speed this up is to use
+
+
+231
+00:12:21,508 --> 00:12:24,378 line:-2
+a feature we call
+parallel distributed testing.
+
+
+232
+00:12:25,379 --> 00:12:27,414 line:-2
+In the case of
+parallel distributed testing,
+
+
+233
+00:12:27,481 --> 00:12:31,852 line:-2
+xcodebuild will distribute tests
+to each run destination by class.
+
+
+234
+00:12:32,920 --> 00:12:35,556 line:0
+Each device will then run
+a single test class at a time.
+
+
+235
+00:12:39,259 --> 00:12:41,995 line:-2
+Once a run destination
+has finished running a class,
+
+
+236
+00:12:42,062 --> 00:12:45,666 line:-2
+xcodebuild continues to give it a new one
+until there aren't any left.
+
+
+237
+00:12:47,568 --> 00:12:51,538 line:-2
+It's very important to note
+that the allocation of test classes
+
+
+238
+00:12:51,605 --> 00:12:54,141 line:-1
+to run destinations is nondeterministic.
+
+
+239
+00:12:54,875 --> 00:12:58,679 line:-2
+If you're testing logic
+that is device- or OS-specific,
+
+
+240
+00:12:58,745 --> 00:13:01,982 line:-2
+this can lead to unexpected failures
+or skipped tests.
+
+
+241
+00:13:03,684 --> 00:13:07,454 line:-2
+When we first added support for
+parallel distributed testing to Xcode 10,
+
+
+242
+00:13:07,921 --> 00:13:10,591 line:-2
+the supported configuration matrix
+looked like
+
+
+243
+00:13:10,657 --> 00:13:15,762 line:-2
+unit tests on macOS, and unit and UI tests
+on iOS and tvOS simulators.
+
+
+244
+00:13:17,497 --> 00:13:20,067 line:0
+Starting with Xcode 12,
+the matrix now looks like this.
+
+
+245
+00:13:20,767 --> 00:13:22,836 line:0
+You have the ability
+to run tests in parallel
+
+
+246
+00:13:22,903 --> 00:13:26,507 line:0
+on physical iOS and tvOS devices
+via xcodebuild.
+
+
+247
+00:13:28,542 --> 00:13:30,611 line:-1
+To enable parallel distributed testing,
+
+
+248
+00:13:30,677 --> 00:13:33,447 line:-2
+set the parallel-testing-enabled flag
+to "YES,"
+
+
+249
+00:13:33,514 --> 00:13:36,416 line:-2
+then set the parallelize-tests-
+among-destinations flag.
+
+
+250
+00:13:37,684 --> 00:13:41,388 line:-2
+This makes xcodebuild divide your tests
+over the destinations you specify.
+
+
+251
+00:13:43,490 --> 00:13:48,896 line:0
+With just two devices, XCTest's own
+tests suites achieved a speed-up of 30%.
+
+
+252
+00:13:49,963 --> 00:13:52,232 line:0
+Just imagine what this
+would do for the Fruta app,
+
+
+253
+00:13:52,299 --> 00:13:54,001 line:0
+or your app with more devices.
+
+
+254
+00:13:55,869 --> 00:13:57,671 line:-1
+By adopting distributed testing,
+
+
+255
+00:13:57,738 --> 00:14:00,607 line:-2
+we've been able to take our long
+feedback loops on XCTest
+
+
+256
+00:14:00,674 --> 00:14:05,212 line:-2
+and shorten them, enabling us to write,
+run and analyze our tests faster.
+
+
+257
+00:14:06,947 --> 00:14:09,149 line:-2
+Now, we wanted to offer you
+a few recommendations
+
+
+258
+00:14:09,216 --> 00:14:12,286 line:-2
+for how you can leverage
+distributed testing in your own tests.
+
+
+259
+00:14:13,754 --> 00:14:15,822 line:-1
+Since test allocation is nondeterministic,
+
+
+260
+00:14:16,356 --> 00:14:20,294 line:-2
+it's ideal to use a device pool
+of identical devices and OS versions.
+
+
+261
+00:14:21,261 --> 00:14:24,131 line:-2
+This is so you can avoid
+difficult-to-reproduce test failures
+
+
+262
+00:14:24,198 --> 00:14:25,499 line:-1
+that may have been driven out
+
+
+263
+00:14:25,566 --> 00:14:28,769 line:-2
+due to the particular destination
+allocation xcodebuild made.
+
+
+264
+00:14:29,937 --> 00:14:33,507 line:-2
+If you are using a device pool
+of different devices and OS versions,
+
+
+265
+00:14:33,574 --> 00:14:37,811 line:-2
+then we recommend you prefer distributing
+tests that are agnostic to the devices
+
+
+266
+00:14:37,878 --> 00:14:39,646 line:-1
+and OS's they would be running on.
+
+
+267
+00:14:39,713 --> 00:14:43,650 line:-2
+For example, tests for a framework
+of pure business logic
+
+
+268
+00:14:43,717 --> 00:14:46,753 line:-2
+are less likely to encounter issues
+since they wouldn't be running code
+
+
+269
+00:14:46,820 --> 00:14:49,122 line:-2
+that depended on
+destination-specific details.
+
+
+270
+00:14:50,791 --> 00:14:54,728 line:-2
+Lastly, if you're interested in testing
+your code against more OS's and devices,
+
+
+271
+00:14:55,229 --> 00:14:58,632 line:-2
+for example, to prove that your
+app works with both iOS 13 and 14,
+
+
+272
+00:14:59,199 --> 00:15:01,735 line:-2
+then we recommend you use
+Parallel Destination testing.
+
+
+273
+00:15:02,569 --> 00:15:06,607 line:-2
+Destination testing runs the entirety
+of a test suite on a given destination,
+
+
+274
+00:15:06,673 --> 00:15:09,977 line:-2
+and does not distribute
+the individual tests across destinations.
+
+
+275
+00:15:12,112 --> 00:15:14,982 line:0
+If you're interested in learning more
+about destination testing,
+
+
+276
+00:15:15,048 --> 00:15:19,219 line:0
+and how tests are allocated, check out
+"What's New in Testing" from WWDC 2018.
+
+
+277
+00:15:21,021 --> 00:15:24,591 line:-2
+Now, as a result of focusing on
+our test report and using Xcode 12,
+
+
+278
+00:15:24,658 --> 00:15:28,128 line:-2
+our tests will no longer hang or stall,
+they'll give us more diagnostics
+
+
+279
+00:15:28,195 --> 00:15:31,532 line:-2
+should a test take an unexpected
+amount of time, and they're faster!
+
+
+280
+00:15:32,065 --> 00:15:35,602 line:-2
+In conclusion, we recommend
+you use Execution Time Allowances
+
+
+281
+00:15:35,669 --> 00:15:38,305 line:-2
+to ensure your tests always complete
+in the event they hang.
+
+
+282
+00:15:39,173 --> 00:15:42,309 line:-2
+Use spindumps for diagnosing
+application stalls and hangs,
+
+
+283
+00:15:42,376 --> 00:15:44,244 line:-1
+both for when your tests and app stall.
+
+
+284
+00:15:45,279 --> 00:15:48,015 line:-2
+Use parallel distributed testing
+to speed up your tests
+
+
+285
+00:15:48,081 --> 00:15:50,984 line:-2
+by running portions of your suite
+on different run destinations.
+
+
+286
+00:15:51,618 --> 00:15:53,253 line:-1
+And use parallel destination testing
+
+
+287
+00:15:53,320 --> 00:15:56,857 line:-2
+to simultaneously run your tests
+on more OS versions and devices.
+
+
+288
+00:15:57,791 --> 00:15:59,326 line:-1
+Do this to get faster feedback
+
+
+289
+00:15:59,393 --> 00:16:01,328 line:-2
+on whether your code
+is behaving as expected
+
+
+290
+00:16:01,395 --> 00:16:03,063 line:-1
+between different OS's and devices.
+
+
+291
+00:16:04,998 --> 00:16:08,001 line:-2
+Thank you all so very much
+for joining me during this session.
+
+
+292
+00:16:08,068 --> 00:16:11,171 line:-2
+We hope your test suites are fast,
+that their feedback is actionable,
+
+
+293
+00:16:11,572 --> 00:16:15,075 line:-1
+and that you enjoy the rest of WWDC 2020.
+

@@ -1,0 +1,3581 @@
+1
+00:00:03,871 --> 00:00:07,107 line:-1
+Hello and welcome to WWDC.
+
+
+2
+00:00:08,475 --> 00:00:12,713 line:0
+Hello and welcome
+to "Port Your Mac App to Apple Silicon."
+
+
+3
+00:00:12,779 --> 00:00:14,515 line:0
+My name is Kuba Mracek,
+
+
+4
+00:00:14,581 --> 00:00:18,118 line:0
+and I will be guiding you,
+Mac app developers,
+
+
+5
+00:00:18,185 --> 00:00:21,421 line:0
+through the journey of transitioning
+your apps to Apple Silicon.
+
+
+6
+00:00:22,022 --> 00:00:24,091 line:-1
+We will start with an overview
+
+
+7
+00:00:24,157 --> 00:00:27,661 line:-2
+of what the transition means for you
+and your apps.
+
+
+8
+00:00:27,728 --> 00:00:30,764 line:-2
+Then,
+we'll discuss building universal Mac apps
+
+
+9
+00:00:30,831 --> 00:00:33,200 line:-1
+and what problems you might hit there.
+
+
+10
+00:00:33,967 --> 00:00:37,971 line:-2
+I will show running, debugging,
+and testing on Apple Silicon,
+
+
+11
+00:00:38,038 --> 00:00:41,308 line:-2
+and we will talk about
+implications for plug-ins.
+
+
+12
+00:00:41,808 --> 00:00:45,979 line:-2
+Finally, I will mention a few tips
+for working with universal apps.
+
+
+13
+00:00:46,046 --> 00:00:47,648 line:-1
+So, let's jump in.
+
+
+14
+00:00:48,415 --> 00:00:51,618 line:-1
+The Mac is transitioning to Apple Silicon.
+
+
+15
+00:00:51,685 --> 00:00:55,856 line:-2
+You're probably wondering what exactly
+that means for you and your apps.
+
+
+16
+00:00:56,490 --> 00:00:57,925 line:-1
+Let's start with the basics.
+
+
+17
+00:00:58,659 --> 00:01:04,096 line:-2
+The native CPU architecture
+on Apple Silicon Macs is called arm64,
+
+
+18
+00:01:04,164 --> 00:01:07,234 line:-2
+which will sound familiar
+if you're developing for iOS.
+
+
+19
+00:01:07,835 --> 00:01:10,838 line:-1
+iOS devices use the same architecture.
+
+
+20
+00:01:11,572 --> 00:01:16,343 line:-2
+Apps can, of course, be built
+as native ARM code and run natively,
+
+
+21
+00:01:16,410 --> 00:01:21,281 line:-2
+but existing Intel apps continue to work
+on Apple Silicon Mac computers.
+
+
+22
+00:01:21,348 --> 00:01:24,718 line:-2
+The Rosetta translation
+will seamlessly run them.
+
+
+23
+00:01:26,186 --> 00:01:29,122 line:-1
+Arm64 is the primary topic for today
+
+
+24
+00:01:29,189 --> 00:01:33,126 line:-2
+because that's the new CPU architecture
+that your apps will use.
+
+
+25
+00:01:33,193 --> 00:01:35,162 line:-1
+And not just your GUI code.
+
+
+26
+00:01:35,229 --> 00:01:40,934 line:-2
+All user space programs will now be using
+arm64 as their CPU architecture.
+
+
+27
+00:01:43,403 --> 00:01:46,940 line:-2
+In this session,
+we will cover how to use Xcode 12
+
+
+28
+00:01:47,007 --> 00:01:51,879 line:-2
+to compile all your code to arm64
+to get it to run natively.
+
+
+29
+00:01:52,312 --> 00:01:55,983 line:-2
+So, I have an Apple Silicon Mac here,
+and I'm going to launch Xcode
+
+
+30
+00:01:56,049 --> 00:01:58,886 line:-2
+and open an existing project
+called Solar System.
+
+
+31
+00:02:00,053 --> 00:02:05,158 line:-2
+Let's focus on this area in the toolbar
+that contains the active Run Destination.
+
+
+32
+00:02:05,225 --> 00:02:09,496 line:-2
+It says "My Mac," but if I open it,
+it reveals more options.
+
+
+33
+00:02:11,331 --> 00:02:14,301 line:-1
+I can choose to run under Rosetta
+
+
+34
+00:02:14,368 --> 00:02:18,272 line:-2
+or to build a universal app
+for both Apple Silicon and Intel.
+
+
+35
+00:02:19,306 --> 00:02:24,244 line:-2
+Let's stick with building natively,
+and let's just build and run the app.
+
+
+36
+00:02:25,445 --> 00:02:29,383 line:0
+And there it is. Without any code changes
+or project settings tweaks,
+
+
+37
+00:02:29,449 --> 00:02:34,254 line:0
+the app builds and runs natively with just
+a press of the "run" button in Xcode.
+
+
+38
+00:02:34,321 --> 00:02:38,625 line:-2
+In Activity Monitor,
+I can verify the process type.
+
+
+39
+00:02:38,692 --> 00:02:42,162 line:-2
+So, under Solar System Mac
+in the Kind column,
+
+
+40
+00:02:42,229 --> 00:02:44,998 line:-1
+it shows as Apple CPU architecture.
+
+
+41
+00:02:45,065 --> 00:02:47,201 line:-1
+That means it does run natively.
+
+
+42
+00:02:49,336 --> 00:02:52,806 line:-2
+Xcode 12 handles
+the necessary project settings for you.
+
+
+43
+00:02:52,873 --> 00:02:56,777 line:-2
+You don't have to change build settings
+to select CPU architectures.
+
+
+44
+00:02:56,844 --> 00:03:01,281 line:-2
+And, as we've just seen, for apps
+that don't have portability issues,
+
+
+45
+00:03:01,348 --> 00:03:03,617 line:-2
+building a native version
+is often as simple
+
+
+46
+00:03:03,684 --> 00:03:06,220 line:-1
+as clicking the "run" button in Xcode.
+
+
+47
+00:03:07,120 --> 00:03:09,623 line:-2
+So, I recommend you just go ahead
+and try that.
+
+
+48
+00:03:09,690 --> 00:03:13,627 line:-2
+If your app works and runs correctly,
+your job is done.
+
+
+49
+00:03:14,161 --> 00:03:16,129 line:-1
+In case you do run into issues,
+
+
+50
+00:03:16,196 --> 00:03:19,499 line:-2
+I will be describing some common pitfalls
+later in this session.
+
+
+51
+00:03:21,268 --> 00:03:25,105 line:0
+We're also publishing
+an extensive porting documentation
+
+
+52
+00:03:25,172 --> 00:03:28,909 line:-1
+at developer.apple.com/documentation.
+
+
+53
+00:03:28,976 --> 00:03:32,312 line:-2
+And you can start
+with the page called Apple Silicon,
+
+
+54
+00:03:32,379 --> 00:03:35,249 line:-2
+and from there,
+you can navigate to other articles
+
+
+55
+00:03:35,315 --> 00:03:39,019 line:-2
+that cover many of the topics
+from this session in greater detail.
+
+
+56
+00:03:39,620 --> 00:03:41,555 line:-1
+The documentation is an excellent resource
+
+
+57
+00:03:41,622 --> 00:03:44,458 line:-2
+that will answer
+many of your porting questions.
+
+
+58
+00:03:46,026 --> 00:03:49,463 line:-2
+Let's discuss some basic concepts
+around Mac apps.
+
+
+59
+00:03:49,930 --> 00:03:53,667 line:-2
+Your apps,
+and basically all executable code,
+
+
+60
+00:03:53,734 --> 00:03:57,504 line:-1
+are stored in a file format called Mach-O.
+
+
+61
+00:03:57,571 --> 00:04:02,442 line:-2
+These files can either be targeting
+a single CPU architecture,
+
+
+62
+00:04:02,509 --> 00:04:06,813 line:-2
+let's say 64-bit Intel,
+or they can be universal.
+
+
+63
+00:04:06,880 --> 00:04:10,017 line:-2
+That means
+"Supports multiple CPU architectures."
+
+
+64
+00:04:11,752 --> 00:04:15,522 line:-2
+To examine a file on disk,
+you can use the "lipo" command,
+
+
+65
+00:04:15,589 --> 00:04:18,659 line:-1
+and I'll be showing how to do that later.
+
+
+66
+00:04:19,459 --> 00:04:20,694 line:-1
+Starting this year,
+
+
+67
+00:04:20,761 --> 00:04:25,165 line:-2
+Mac apps should be built and distributed
+as universal apps,
+
+
+68
+00:04:25,232 --> 00:04:29,903 line:-2
+built for both Apple Silicon
+and 64-bit Intel CPU architectures.
+
+
+69
+00:04:31,371 --> 00:04:36,310 line:-2
+If you have any existing Intel-only apps,
+or if, for some reason,
+
+
+70
+00:04:36,376 --> 00:04:39,179 line:-2
+you can't start building your app
+natively right away,
+
+
+71
+00:04:39,646 --> 00:04:42,516 line:-1
+Apple Silicon computers have Rosetta,
+
+
+72
+00:04:42,583 --> 00:04:46,119 line:-2
+a translation environment
+that can seamlessly run these.
+
+
+73
+00:04:46,186 --> 00:04:50,557 line:-2
+In Rosetta,
+the entire process is always translated.
+
+
+74
+00:04:50,624 --> 00:04:55,262 line:-2
+You cannot load native code
+into a translated process or vice versa.
+
+
+75
+00:04:55,929 --> 00:04:57,564 line:-1
+You also cannot use Rosetta
+
+
+76
+00:04:57,631 --> 00:05:02,402 line:-2
+for kernel extensions,
+AVX vector instructions or virtualization.
+
+
+77
+00:05:03,804 --> 00:05:07,307 line:-2
+Xcode fully supports building
+and running apps for Rosetta.
+
+
+78
+00:05:07,975 --> 00:05:09,776 line:-1
+Let's look at how that works.
+
+
+79
+00:05:12,045 --> 00:05:13,847 line:-1
+As we've noticed before,
+
+
+80
+00:05:13,914 --> 00:05:18,819 line:-2
+the Run Destination in Xcode
+allows you to target Rosetta.
+
+
+81
+00:05:19,686 --> 00:05:23,156 line:0
+Pressing "run"
+will build the code for Intel
+
+
+82
+00:05:23,223 --> 00:05:25,225 line:0
+and then run it in Rosetta.
+
+
+83
+00:05:26,493 --> 00:05:32,633 line:-2
+In Activity Monitor,
+the app shows as Intel CPU,
+
+
+84
+00:05:32,699 --> 00:05:34,835 line:-1
+so it is running in translation.
+
+
+85
+00:05:35,736 --> 00:05:38,205 line:-1
+All aspects of development from Xcode,
+
+
+86
+00:05:38,272 --> 00:05:41,808 line:-2
+including testing, debugging,
+and profiling are supported,
+
+
+87
+00:05:41,875 --> 00:05:44,278 line:-1
+and it's all translated on the fly.
+
+
+88
+00:05:44,344 --> 00:05:46,647 line:-2
+So if you perhaps
+happen to use the debugger
+
+
+89
+00:05:46,713 --> 00:05:49,449 line:-1
+to look at individual CPU instructions,
+
+
+90
+00:05:49,516 --> 00:05:52,386 line:-2
+you'll notice
+that they are Intel instructions.
+
+
+91
+00:05:52,452 --> 00:05:54,121 line:-1
+Don't be surprised by that.
+
+
+92
+00:05:54,188 --> 00:05:57,524 line:-2
+They're all being transparently translated
+by Rosetta.
+
+
+93
+00:05:58,258 --> 00:06:01,395 line:-2
+Let's now focus on getting your apps
+ported over
+
+
+94
+00:06:01,461 --> 00:06:05,032 line:-2
+to run natively
+on Apple Silicon Mac computers.
+
+
+95
+00:06:05,432 --> 00:06:09,636 line:-2
+And the first step here
+is building your apps as universal.
+
+
+96
+00:06:10,237 --> 00:06:14,641 line:-2
+Let me start by explaining why I think
+building your apps for Apple Silicon
+
+
+97
+00:06:14,708 --> 00:06:16,877 line:-1
+is actually going to a very easy task.
+
+
+98
+00:06:17,711 --> 00:06:23,183 line:-2
+First of all, the endianness
+of arm64 is the same as x86.
+
+
+99
+00:06:23,917 --> 00:06:27,187 line:-2
+So if you remember
+the PowerPC-to-Intel transition,
+
+
+100
+00:06:27,254 --> 00:06:31,024 line:-2
+you will not have to deal with any
+byte order swapping problems this time.
+
+
+101
+00:06:32,326 --> 00:06:36,263 line:-2
+Second, if you have any shared code
+with iOS apps,
+
+
+102
+00:06:36,330 --> 00:06:41,068 line:-2
+that code is almost certainly
+already fully ported to arm64
+
+
+103
+00:06:41,134 --> 00:06:46,139 line:-2
+because iOS uses the same CPU architecture
+as Apple Silicon Mac computers.
+
+
+104
+00:06:48,475 --> 00:06:51,778 line:-2
+And third,
+you can use any Mac that you already have
+
+
+105
+00:06:51,845 --> 00:06:53,747 line:-1
+to build apps as universal.
+
+
+106
+00:06:53,814 --> 00:06:57,351 line:-2
+Xcode 12, the SDK,
+and the entire toolchain
+
+
+107
+00:06:57,417 --> 00:06:59,152 line:-1
+fully support cross-compilation.
+
+
+108
+00:06:59,219 --> 00:07:02,956 line:-2
+That is, it's able to produce code
+for a different architecture
+
+
+109
+00:07:03,023 --> 00:07:05,325 line:-1
+than the one you're using Xcode on.
+
+
+110
+00:07:06,326 --> 00:07:09,296 line:-2
+I'm going to demonstrate
+some possible porting issues
+
+
+111
+00:07:09,363 --> 00:07:11,899 line:-2
+on this little utility app
+that I've been working on
+
+
+112
+00:07:11,965 --> 00:07:13,567 line:-1
+called NetworkBenchmarking.
+
+
+113
+00:07:13,634 --> 00:07:18,172 line:-2
+I have a copy of this app from last year,
+so it's Intel-only,
+
+
+114
+00:07:18,238 --> 00:07:21,909 line:-2
+and we see
+that in the Info Dialog in Finder,
+
+
+115
+00:07:21,975 --> 00:07:24,278 line:-1
+it shows as application Intel.
+
+
+116
+00:07:24,344 --> 00:07:28,849 line:-2
+But, as you can see, I can still run it,
+and it will run under Rosetta.
+
+
+117
+00:07:30,250 --> 00:07:34,221 line:-2
+The app lets me create
+a TCP server and a client.
+
+
+118
+00:07:34,288 --> 00:07:37,157 line:-1
+And I can start a benchmark.
+
+
+119
+00:07:37,991 --> 00:07:40,727 line:-2
+And while it's going,
+it's measuring the data throughput.
+
+
+120
+00:07:41,295 --> 00:07:44,298 line:-2
+The app is also showing
+a bunch of system information,
+
+
+121
+00:07:44,364 --> 00:07:47,334 line:-1
+like current CPU and memory usage.
+
+
+122
+00:07:47,401 --> 00:07:49,169 line:-1
+All that's pretty much all it does.
+
+
+123
+00:07:50,537 --> 00:07:53,207 line:-2
+Now, let's actually open the app
+in Xcode 12...
+
+
+124
+00:07:54,441 --> 00:07:57,544 line:-2
+and let's start bringing it over
+to be a native app.
+
+
+125
+00:07:58,145 --> 00:08:01,715 line:-2
+Let me briefly describe
+the overall structure of this project.
+
+
+126
+00:08:01,782 --> 00:08:03,383 line:-1
+It has a few targets inside,
+
+
+127
+00:08:03,450 --> 00:08:06,620 line:-2
+like this first one,
+which is the actual GUI of the app.
+
+
+128
+00:08:07,354 --> 00:08:09,656 line:-1
+And it's mostly high-level AppKit code,
+
+
+129
+00:08:09,723 --> 00:08:13,961 line:-2
+so I have things like an AppDelegate
+and a ViewController, et cetera.
+
+
+130
+00:08:15,162 --> 00:08:17,764 line:-2
+But then I also have
+a few more low-level components,
+
+
+131
+00:08:17,831 --> 00:08:21,602 line:-2
+like this TimeTools package
+and some networking libraries,
+
+
+132
+00:08:21,668 --> 00:08:23,537 line:-1
+and I even include a plug-in.
+
+
+133
+00:08:25,072 --> 00:08:28,775 line:-2
+Generally, you should expect
+that the high-level AppKit code
+
+
+134
+00:08:28,842 --> 00:08:31,812 line:-1
+shouldn't have any portability problems.
+
+
+135
+00:08:31,879 --> 00:08:35,816 line:-2
+But for the more low-level parts,
+we might need to make some fixes.
+
+
+136
+00:08:37,049 --> 00:08:38,519 line:-1
+So let's start building.
+
+
+137
+00:08:38,585 --> 00:08:44,825 line:-2
+Step one is to verify that the app still
+builds correctly for Intel with Xcode 12.
+
+
+138
+00:08:46,426 --> 00:08:51,532 line:-2
+So let me select My Mac Rosetta
+as the Run Destination and hit "build."
+
+
+139
+00:08:54,668 --> 00:08:57,371 line:0
+In my case, the app will build fine.
+
+
+140
+00:08:58,172 --> 00:09:00,774 line:0
+Generally,
+this shouldn't produce any errors,
+
+
+141
+00:09:00,841 --> 00:09:03,377 line:-1
+but there's one case I want to point out.
+
+
+142
+00:09:04,144 --> 00:09:09,283 line:-2
+Native page size is different between
+Intel machines and Apple Silicon systems.
+
+
+143
+00:09:09,816 --> 00:09:15,088 line:-2
+If you use the PAGE_SIZE macro,
+it's no longer a compile-time constant,
+
+
+144
+00:09:15,155 --> 00:09:17,758 line:-2
+so you might see a build failure
+because of that.
+
+
+145
+00:09:18,926 --> 00:09:20,827 line:-1
+The fix is very easy.
+
+
+146
+00:09:20,894 --> 00:09:25,265 line:-2
+Either use PAGE_MAX_SIZE
+for a compile-time upper bound,
+
+
+147
+00:09:25,332 --> 00:09:29,336 line:-2
+or vm_page_size
+to read the value at runtime dynamically.
+
+
+148
+00:09:31,205 --> 00:09:35,576 line:-2
+Also note that Rosetta will be
+fully matching the Intel environment.
+
+
+149
+00:09:35,642 --> 00:09:37,711 line:-1
+The CPU on Apple Silicon Macs
+
+
+150
+00:09:37,778 --> 00:09:41,481 line:-2
+will support four-kilobyte pages
+for translated processes.
+
+
+151
+00:09:43,050 --> 00:09:45,052 line:-1
+Now, on to step two.
+
+
+152
+00:09:45,118 --> 00:09:47,621 line:-2
+Switch to build
+for the native architecture,
+
+
+153
+00:09:47,688 --> 00:09:49,656 line:-1
+and let's resolve errors.
+
+
+154
+00:09:50,757 --> 00:09:53,994 line:-2
+In Xcode, I will open
+the Run Destination menu again
+
+
+155
+00:09:54,061 --> 00:09:57,531 line:-2
+and select My Mac
+and perform another build.
+
+
+156
+00:09:59,499 --> 00:10:03,170 line:0
+This time, I do get a compile-time error.
+Let's look at it.
+
+
+157
+00:10:06,473 --> 00:10:09,343 line:-2
+It looks like that there's something wrong
+with this function
+
+
+158
+00:10:09,409 --> 00:10:14,281 line:-2
+called GetDefaultTimerClass,
+which is using preprocessor macros,
+
+
+159
+00:10:14,348 --> 00:10:19,086 line:-2
+these #if lines, to switch behavior
+between different platforms.
+
+
+160
+00:10:20,487 --> 00:10:23,824 line:-2
+This is a pretty common pattern.
+It's called target conditionals.
+
+
+161
+00:10:23,891 --> 00:10:27,160 line:-2
+But it looks like I've made a mistake
+when I wrote this code.
+
+
+162
+00:10:27,227 --> 00:10:32,199 line:0
+For this branch here,
+I wanted to target macOS and simulators,
+
+
+163
+00:10:32,266 --> 00:10:35,469 line:0
+but instead, my condition says x86_64.
+
+
+164
+00:10:35,536 --> 00:10:37,604 line:0
+That is, Intel CPUs.
+
+
+165
+00:10:37,671 --> 00:10:40,841 line:0
+Which used to be okay,
+but it's no longer correct.
+
+
+166
+00:10:41,808 --> 00:10:44,411 line:-2
+The right way to use
+target conditionals here
+
+
+167
+00:10:44,478 --> 00:10:46,880 line:-1
+is to express them in the right terms.
+
+
+168
+00:10:46,947 --> 00:10:49,483 line:-1
+If I want to target macOS and simulators,
+
+
+169
+00:10:49,550 --> 00:10:52,686 line:-1
+I should use TARGET_OS_OSX
+
+
+170
+00:10:53,420 --> 00:10:56,723 line:0
+or TARGET_OS_SIMULATOR.
+
+
+171
+00:10:59,259 --> 00:11:02,129 line:-2
+This problem is pretty common
+even in portable code.
+
+
+172
+00:11:02,196 --> 00:11:04,932 line:-2
+You should use
+the semantic target conditionals
+
+
+173
+00:11:04,998 --> 00:11:07,701 line:-2
+based on what
+you actually want to express.
+
+
+174
+00:11:07,768 --> 00:11:10,470 line:-2
+Here's a table
+with some common target conditionals.
+
+
+175
+00:11:10,938 --> 00:11:13,941 line:-2
+When you want to
+conditionally compile code for the Mac,
+
+
+176
+00:11:14,007 --> 00:11:19,713 line:-2
+use TARGET_OS_OSX,
+or #if os(macOS) in Swift code.
+
+
+177
+00:11:19,780 --> 00:11:23,250 line:-2
+Don't assume a CPU architecture
+implies the platform.
+
+
+178
+00:11:24,918 --> 00:11:28,055 line:-2
+When you want to
+conditionally compile code for Intel,
+
+
+179
+00:11:28,121 --> 00:11:34,695 line:-2
+use TARGET_CPU_X86_64,
+or #if arch(x86_64) in Swift.
+
+
+180
+00:11:35,362 --> 00:11:38,065 line:-1
+And similarly for the other cases.
+
+
+181
+00:11:38,131 --> 00:11:41,869 line:0
+Don't assume that a platform
+or running in the simulator
+
+
+182
+00:11:41,935 --> 00:11:44,404 line:0
+uses a specific CPU architecture.
+
+
+183
+00:11:46,039 --> 00:11:50,978 line:-2
+Related to this is any usage
+of CPU-specific code and assembly,
+
+
+184
+00:11:51,044 --> 00:11:56,049 line:-2
+either in-line in your Objective-C code
+or stand-alone assembly files.
+
+
+185
+00:11:56,116 --> 00:11:59,820 line:-2
+All such code needs
+to be properly guarded with #ifs
+
+
+186
+00:11:59,887 --> 00:12:02,589 line:-2
+and the right target conditionals
+I just mentioned.
+
+
+187
+00:12:04,191 --> 00:12:08,829 line:-2
+If you only have Intel implementations
+for some functions like this,
+
+
+188
+00:12:08,896 --> 00:12:12,766 line:-2
+you will need to provide
+a second implementation for Apple Silicon.
+
+
+189
+00:12:14,234 --> 00:12:15,802 line:-1
+However, in a lot of cases,
+
+
+190
+00:12:15,869 --> 00:12:19,673 line:-2
+you can just rely on
+OS-provided functionality instead.
+
+
+191
+00:12:19,740 --> 00:12:22,609 line:-2
+Use the Accelerate
+and Compression frameworks
+
+
+192
+00:12:22,676 --> 00:12:25,279 line:-2
+for high-performance
+optimized implementations
+
+
+193
+00:12:25,345 --> 00:12:28,315 line:-2
+of math functions
+and compression algorithms.
+
+
+194
+00:12:29,550 --> 00:12:32,686 line:-2
+Now that the code is fixed,
+let's build it again.
+
+
+195
+00:12:35,389 --> 00:12:39,026 line:0
+This time,
+I receive a different build-time issue.
+
+
+196
+00:12:39,092 --> 00:12:42,196 line:-2
+It's not a bug
+in any of the source code that I wrote,
+
+
+197
+00:12:42,262 --> 00:12:46,133 line:-2
+because the error message
+doesn't actually point to any source file.
+
+
+198
+00:12:46,200 --> 00:12:50,170 line:-2
+And if I click it,
+it only takes me to the Build Log.
+
+
+199
+00:12:50,237 --> 00:12:53,340 line:-2
+This time,
+it's the linker that's emitting the error.
+
+
+200
+00:12:54,274 --> 00:12:58,679 line:-2
+That leads us to step three:
+resolving link-time issues.
+
+
+201
+00:12:59,580 --> 00:13:02,316 line:-2
+The problem here
+is that my app fails to link.
+
+
+202
+00:13:02,950 --> 00:13:05,452 line:-1
+Let me switch to Errors Only
+
+
+203
+00:13:05,519 --> 00:13:08,322 line:-2
+so we can focus
+on what the linker is trying to tell me.
+
+
+204
+00:13:09,890 --> 00:13:13,427 line:-2
+"Undefined symbols
+for architecture arm64."
+
+
+205
+00:13:13,493 --> 00:13:17,798 line:-2
+And I see the symbol name,
+but it doesn't look familiar to me.
+
+
+206
+00:13:17,865 --> 00:13:20,934 line:-2
+This is not a symbol or class name
+from my code.
+
+
+207
+00:13:22,135 --> 00:13:24,238 line:-1
+The important part of the error message
+
+
+208
+00:13:24,304 --> 00:13:26,773 line:-2
+is actually the yellow warning
+right above it.
+
+
+209
+00:13:27,307 --> 00:13:28,642 line:-1
+Let's look at it.
+
+
+210
+00:13:29,743 --> 00:13:34,915 line:-2
+The linker says, "ignoring file
+when building for macOS-arm64
+
+
+211
+00:13:34,982 --> 00:13:39,686 line:-2
+but attempting to link
+with file built for macOS-x86_64."
+
+
+212
+00:13:40,521 --> 00:13:42,556 line:-1
+What this error means is that
+
+
+213
+00:13:42,623 --> 00:13:46,226 line:-2
+I'm depending on a binary framework
+that's not universal.
+
+
+214
+00:13:47,995 --> 00:13:50,497 line:-1
+This output also provides details.
+
+
+215
+00:13:50,564 --> 00:13:55,903 line:-2
+It mentions the offending framework name,
+and it prints the symbol name,
+
+
+216
+00:13:55,969 --> 00:13:58,272 line:-2
+in this case
+it's a Objective-C class name,
+
+
+217
+00:13:58,338 --> 00:14:01,508 line:-1
+and also the referencing object file.
+
+
+218
+00:14:01,575 --> 00:14:05,312 line:-2
+In my app, it's the AppDelegate file
+that uses this class.
+
+
+219
+00:14:06,713 --> 00:14:08,015 line:-1
+This is useful to know,
+
+
+220
+00:14:08,081 --> 00:14:12,653 line:-2
+because you might want to try
+to remove the dependency to make progress.
+
+
+221
+00:14:12,719 --> 00:14:17,090 line:-2
+So, to do in my app, I would go edit
+the AppDelegate source code.
+
+
+222
+00:14:18,425 --> 00:14:21,228 line:-2
+But again, in short,
+the problem here is that I have
+
+
+223
+00:14:21,295 --> 00:14:23,964 line:-2
+a pre-compiled binary framework
+in my project.
+
+
+224
+00:14:26,333 --> 00:14:30,437 line:-2
+Having pre-compiled binaries
+in your project will require some work.
+
+
+225
+00:14:30,504 --> 00:14:33,674 line:-2
+All static and dynamic libraries
+that you depend on
+
+
+226
+00:14:33,740 --> 00:14:38,278 line:-2
+will need to first be built universal
+before you can actually build your app.
+
+
+227
+00:14:39,079 --> 00:14:41,815 line:-2
+You'll need to contact vendors
+of those binaries
+
+
+228
+00:14:41,882 --> 00:14:45,252 line:-2
+and ask them to provide
+universal builds of them
+
+
+229
+00:14:45,319 --> 00:14:49,823 line:-2
+that contain both the Intel code
+and Apple Silicon code.
+
+
+230
+00:14:49,890 --> 00:14:53,227 line:-2
+Then you can replace your old binaries
+with the universal ones,
+
+
+231
+00:14:53,293 --> 00:14:56,230 line:-2
+and the linker will be actually able
+to link your app.
+
+
+232
+00:14:57,965 --> 00:14:59,499 line:-1
+To make incremental progress,
+
+
+233
+00:14:59,566 --> 00:15:03,871 line:-2
+you can consider temporarily removing
+that binary dependency,
+
+
+234
+00:15:03,937 --> 00:15:08,442 line:-2
+but don't forgot to put it back once you
+have a universal build of that library.
+
+
+235
+00:15:09,943 --> 00:15:13,747 line:-2
+What I also recommend doing right away
+is to scan your source code
+
+
+236
+00:15:13,814 --> 00:15:17,951 line:-2
+and do a search for anything
+that's not being built from source code
+
+
+237
+00:15:18,018 --> 00:15:20,821 line:-1
+but is pre-compiled by someone else.
+
+
+238
+00:15:20,888 --> 00:15:22,956 line:-1
+Typically, that's files and bundles
+
+
+239
+00:15:23,023 --> 00:15:28,562 line:-2
+with extensions of .a, .dylib,
+.framework, and .xcframework.
+
+
+240
+00:15:30,430 --> 00:15:33,133 line:-1
+You can use the "lipo -info" command
+
+
+241
+00:15:33,200 --> 00:15:37,171 line:-2
+to inspect any binary and see
+whether it's already universal or not.
+
+
+242
+00:15:38,205 --> 00:15:40,207 line:-1
+So let's do that on our demo project.
+
+
+243
+00:15:40,841 --> 00:15:44,678 line:-2
+I will open the project's directory
+in Finder...
+
+
+244
+00:15:46,113 --> 00:15:48,081 line:-1
+and I will also open Terminal.
+
+
+245
+00:15:49,116 --> 00:15:54,054 line:-2
+Then I will drag Sparkle.framework
+into Terminal to get its full file path
+
+
+246
+00:15:54,121 --> 00:15:59,493 line:-2
+and use the lipo -info command
+on the binary inside the framework.
+
+
+247
+00:16:01,094 --> 00:16:06,600 line:-2
+And once I run this command, lipo will say
+that it is really an Intel-only binary.
+
+
+248
+00:16:08,335 --> 00:16:12,005 line:-2
+So what I need to do
+is update the version of this framework
+
+
+249
+00:16:12,072 --> 00:16:14,308 line:-1
+with a new one that's universal.
+
+
+250
+00:16:14,741 --> 00:16:18,679 line:-2
+Here, you would typically reach out
+to the vendor and ask for a new version
+
+
+251
+00:16:18,745 --> 00:16:21,982 line:-2
+or go to the vendor's Web site
+and download a universal binary
+
+
+252
+00:16:22,049 --> 00:16:23,550 line:-1
+if it's published already.
+
+
+253
+00:16:24,251 --> 00:16:27,588 line:-2
+But I have a new universal version
+of this framework already.
+
+
+254
+00:16:27,988 --> 00:16:30,991 line:-2
+My teammate was actually able
+to provide it for me.
+
+
+255
+00:16:31,992 --> 00:16:33,594 line:-1
+Because the framework is open-source,
+
+
+256
+00:16:33,660 --> 00:16:38,432 line:-2
+and building it universal was literally
+just a matter of rebuilding with Xcode 12,
+
+
+257
+00:16:38,899 --> 00:16:42,002 line:-2
+we did not hit
+any portability issues at all.
+
+
+258
+00:16:42,503 --> 00:16:45,372 line:-2
+Let me replace the old version
+with the new one...
+
+
+259
+00:16:47,808 --> 00:16:50,677 line:-2
+and let's inspect this new version
+of the framework.
+
+
+260
+00:16:52,546 --> 00:16:54,615 line:-1
+Indeed, it is universal now.
+
+
+261
+00:16:54,681 --> 00:16:56,984 line:-1
+Lipo says it's now a fat file
+
+
+262
+00:16:57,050 --> 00:17:01,989 line:-2
+that contains both the x86_64 code
+as well as arm64 code.
+
+
+263
+00:17:02,990 --> 00:17:05,992 line:-2
+And if I build my app in Xcode
+one more time...
+
+
+264
+00:17:07,426 --> 00:17:10,063 line:0
+this time, it will build successfully.
+
+
+265
+00:17:12,232 --> 00:17:15,335 line:-1
+Step four: There is no step four.
+
+
+266
+00:17:15,402 --> 00:17:17,738 line:-1
+I now have a native build of my app.
+
+
+267
+00:17:19,439 --> 00:17:21,175 line:-1
+In this example project,
+
+
+268
+00:17:21,241 --> 00:17:25,412 line:-2
+we've seen a few typical problems
+when building universal apps.
+
+
+269
+00:17:25,479 --> 00:17:28,582 line:-2
+Please see the documentation
+on the Apple Silicon page
+
+
+270
+00:17:28,649 --> 00:17:30,684 line:-1
+on developer.apple.com,
+
+
+271
+00:17:30,751 --> 00:17:33,820 line:-2
+which covers many of the porting problems
+that we've run into.
+
+
+272
+00:17:34,821 --> 00:17:38,926 line:-2
+If you prefer building on command line
+with xcodebuild,
+
+
+273
+00:17:38,992 --> 00:17:42,930 line:-2
+it's important to select
+the right Destination for building.
+
+
+274
+00:17:42,996 --> 00:17:46,266 line:-1
+Use the -showdestinations option
+
+
+275
+00:17:46,333 --> 00:17:48,836 line:-2
+to get a list
+of available Run Destinations.
+
+
+276
+00:17:49,837 --> 00:17:54,174 line:-2
+And then you can use
+the -destination flag to select one.
+
+
+277
+00:17:54,241 --> 00:17:59,213 line:-2
+Here's two examples
+how to target either arm64 or x86_64.
+
+
+278
+00:18:00,848 --> 00:18:06,353 line:-2
+Let me summarize the steps we went through
+to build our app as a native app.
+
+
+279
+00:18:07,154 --> 00:18:12,459 line:-2
+First, we verified that the app
+still builds correctly for Intel CPUs.
+
+
+280
+00:18:13,227 --> 00:18:18,031 line:-2
+Then, we switched to build natively,
+and we fixed code issues.
+
+
+281
+00:18:18,098 --> 00:18:21,702 line:-2
+This is the case where the code itself
+was not correctly portable.
+
+
+282
+00:18:22,402 --> 00:18:25,105 line:-1
+And third, we fixed link-time issues,
+
+
+283
+00:18:25,172 --> 00:18:28,342 line:-2
+which are typically caused
+by having binary dependencies.
+
+
+284
+00:18:29,610 --> 00:18:30,811 line:-1
+And that's it.
+
+
+285
+00:18:30,878 --> 00:18:34,815 line:-2
+As a reminder,
+building universal apps works on any Mac.
+
+
+286
+00:18:34,882 --> 00:18:37,584 line:-2
+You can use your Intel Mac computer
+for that too.
+
+
+287
+00:18:38,552 --> 00:18:42,422 line:-2
+Now that we have our app building,
+let's move on
+
+
+288
+00:18:42,489 --> 00:18:46,527 line:-2
+and talk about running and debugging
+your native build of your app.
+
+
+289
+00:18:47,194 --> 00:18:51,832 line:-2
+I know what you're thinking:
+The app builds, so let's ship it.
+
+
+290
+00:18:51,899 --> 00:18:54,301 line:-1
+Right? Well, no.
+
+
+291
+00:18:54,768 --> 00:18:58,438 line:-2
+Your native app
+still definitely needs runtime testing.
+
+
+292
+00:18:58,505 --> 00:19:02,543 line:-2
+Don't assume that if the app builds,
+that it's going to work flawlessly.
+
+
+293
+00:19:03,477 --> 00:19:07,181 line:-2
+For this part,
+you will need an Apple Silicon Mac.
+
+
+294
+00:19:07,247 --> 00:19:12,052 line:-2
+Things like debugging, running unit tests,
+profiling, using sanitizers
+
+
+295
+00:19:12,119 --> 00:19:16,823 line:-2
+all need to run native code,
+and that can only happen on Apple Silicon.
+
+
+296
+00:19:17,824 --> 00:19:21,695 line:-2
+Please plan to do full runtime testing,
+validation, and profiling
+
+
+297
+00:19:21,762 --> 00:19:25,132 line:-2
+of both CPU architectures
+before you ship your app.
+
+
+298
+00:19:25,666 --> 00:19:28,268 line:-2
+Let's do some runtime testing
+on our demo project.
+
+
+299
+00:19:28,969 --> 00:19:32,806 line:-2
+Now that the app builds,
+I can finally run it natively.
+
+
+300
+00:19:34,341 --> 00:19:37,110 line:-1
+It seems to launch fine. The UI shows up,
+
+
+301
+00:19:37,177 --> 00:19:40,314 line:-2
+and the system information table
+seems to be accurate.
+
+
+302
+00:19:40,380 --> 00:19:43,383 line:-2
+Let's try to start
+the client-server data transfer.
+
+
+303
+00:19:45,385 --> 00:19:47,254 line:-1
+Notice that there's some problem
+
+
+304
+00:19:47,321 --> 00:19:50,224 line:-2
+with the transfer statistics
+and the progress bar.
+
+
+305
+00:19:50,290 --> 00:19:53,193 line:-2
+It seems to refresh
+with some wrong frequency.
+
+
+306
+00:19:53,260 --> 00:19:56,129 line:-2
+It's supposed to update
+every 100 milliseconds,
+
+
+307
+00:19:56,196 --> 00:19:59,600 line:-2
+but instead, the progress bar
+just makes these weird large jumps.
+
+
+308
+00:20:00,767 --> 00:20:03,036 line:-1
+So, let's look into this problem.
+
+
+309
+00:20:03,103 --> 00:20:07,708 line:-2
+Based on the benchmark values, I think
+the benchmark is actually running fine.
+
+
+310
+00:20:07,774 --> 00:20:10,544 line:-2
+It's just the UI
+that's not refreshing fast enough.
+
+
+311
+00:20:11,478 --> 00:20:14,548 line:-2
+So let me set a break point
+into my ViewController
+
+
+312
+00:20:14,615 --> 00:20:18,952 line:-2
+into a method called
+updateClientProgressUI,
+
+
+313
+00:20:19,887 --> 00:20:21,655 line:0
+and let's run the benchmark again.
+
+
+314
+00:20:26,193 --> 00:20:28,128 line:-1
+We will eventually hit this break point,
+
+
+315
+00:20:28,195 --> 00:20:31,765 line:-2
+but notice that it takes a while,
+more than a couple seconds.
+
+
+316
+00:20:31,832 --> 00:20:35,702 line:-2
+So I think there's something wrong
+with the timer that's calling this method.
+
+
+317
+00:20:37,137 --> 00:20:39,706 line:-1
+Let's look a few Stack frames below,
+
+
+318
+00:20:39,773 --> 00:20:42,776 line:-2
+where I have an implementation
+of this custom timer.
+
+
+319
+00:20:43,677 --> 00:20:46,980 line:-2
+It seems to be measuring
+a MonotonicTimestamp
+
+
+320
+00:20:47,047 --> 00:20:50,484 line:-1
+using an API called mach_absolute_time.
+
+
+321
+00:20:51,318 --> 00:20:53,654 line:-2
+So I think
+that's the source of the problem.
+
+
+322
+00:20:53,720 --> 00:20:57,257 line:-2
+Whoever wrote this code
+assumed that mach_absolute_time
+
+
+323
+00:20:57,324 --> 00:21:00,561 line:-1
+is always returning values in nanoseconds.
+
+
+324
+00:21:00,627 --> 00:21:02,629 line:-1
+That's why the code right below it
+
+
+325
+00:21:02,696 --> 00:21:07,067 line:-2
+is dividing by 1,000 three times
+to convert it into seconds.
+
+
+326
+00:21:07,701 --> 00:21:11,972 line:-2
+However, that's not correct.
+I can Option-click the API...
+
+
+327
+00:21:13,006 --> 00:21:15,342 line:-1
+to peek into the documentation for it,
+
+
+328
+00:21:15,409 --> 00:21:19,246 line:-2
+and it says that it returns values
+in tick units.
+
+
+329
+00:21:20,714 --> 00:21:24,618 line:-2
+So assuming these tick units
+are one nanosecond is incorrect.
+
+
+330
+00:21:24,685 --> 00:21:29,156 line:-2
+The timebase for this API is different
+on different CPU architectures.
+
+
+331
+00:21:29,723 --> 00:21:33,594 line:-2
+Probably the best solution here
+would be to avoid writing custom timers
+
+
+332
+00:21:33,660 --> 00:21:35,095 line:-1
+using low-level APIs.
+
+
+333
+00:21:35,596 --> 00:21:40,300 line:-2
+Foundation and GCD have implementations
+of timers that often work better.
+
+
+334
+00:21:40,367 --> 00:21:43,937 line:-2
+But if we really need to use time stamps
+to measure time,
+
+
+335
+00:21:44,004 --> 00:21:47,140 line:-2
+we can either query the timebase
+dynamically
+
+
+336
+00:21:47,207 --> 00:21:49,610 line:-1
+or switch to another API.
+
+
+337
+00:21:49,676 --> 00:21:52,946 line:-1
+There's a variant of the clock_gettime API
+
+
+338
+00:21:53,013 --> 00:21:55,749 line:-2
+that always returns the time stamp
+in nanoseconds.
+
+
+339
+00:21:56,149 --> 00:21:58,252 line:-1
+So let's use that in our demo.
+
+
+340
+00:21:58,318 --> 00:22:02,689 line:-2
+The documentation pop-up
+conveniently mentions this other API,
+
+
+341
+00:22:02,756 --> 00:22:04,758 line:-1
+so I can copy it right from here.
+
+
+342
+00:22:09,463 --> 00:22:12,332 line:0
+Let's run the app one more time,
+
+
+343
+00:22:12,399 --> 00:22:15,335 line:0
+and let me disable the break point
+I've put in earlier.
+
+
+344
+00:22:16,670 --> 00:22:21,542 line:-2
+This time, if I run the benchmark,
+the progress bar will update fluently.
+
+
+345
+00:22:23,310 --> 00:22:27,314 line:-2
+This problem is actually quite common,
+and the typical effect of this bug
+
+
+346
+00:22:27,381 --> 00:22:30,317 line:-2
+is that something is running
+roughly 40 times slower,
+
+
+347
+00:22:30,384 --> 00:22:34,121 line:-2
+or an event is occurring
+40 times less often than it should.
+
+
+348
+00:22:34,521 --> 00:22:36,757 line:-1
+If you observe something like this,
+
+
+349
+00:22:36,823 --> 00:22:39,626 line:-2
+search your codebase
+for mach_absolute_time.
+
+
+350
+00:22:40,093 --> 00:22:43,931 line:-2
+The best way to test software is,
+of course, with automation.
+
+
+351
+00:22:43,997 --> 00:22:48,101 line:-2
+In this project, I have most of the code
+covered with unit tests.
+
+
+352
+00:22:48,168 --> 00:22:49,670 line:-1
+So let's run them.
+
+
+353
+00:22:52,606 --> 00:22:55,542 line:0
+Luckily, all my unit tests are passing,
+
+
+354
+00:22:55,609 --> 00:22:59,346 line:0
+but notice that the entire test suite
+only ran once.
+
+
+355
+00:22:59,413 --> 00:23:04,618 line:-2
+In this case, in the Run Destination menu,
+I have the native mode selected,
+
+
+356
+00:23:04,685 --> 00:23:08,956 line:-2
+so all my tests and the code under test
+were run in native mode.
+
+
+357
+00:23:09,590 --> 00:23:13,660 line:-2
+If I want to run the tests
+as Intel code under Rosetta,
+
+
+358
+00:23:13,727 --> 00:23:17,497 line:-2
+I have to switch the Run Destination
+and re-run my tests.
+
+
+359
+00:23:19,600 --> 00:23:24,104 line:0
+In my project, they all appear to pass
+for both architectures,
+
+
+360
+00:23:24,171 --> 00:23:28,008 line:0
+but if you see a test failing
+only under one of the two destinations,
+
+
+361
+00:23:28,075 --> 00:23:30,978 line:-2
+that again indicates
+some non-portable code.
+
+
+362
+00:23:32,479 --> 00:23:36,850 line:-2
+Similarly to building on the command line,
+when testing with xcodebuild,
+
+
+363
+00:23:36,917 --> 00:23:40,254 line:-2
+think about the destination
+that your tests are using.
+
+
+364
+00:23:40,320 --> 00:23:43,223 line:-1
+If you want to run your tests as "native,"
+
+
+365
+00:23:43,290 --> 00:23:48,529 line:-2
+specify "arch=arm64"
+inside the destination flag.
+
+
+366
+00:23:49,162 --> 00:23:53,200 line:-2
+This also is the default,
+so if you don't use any destination,
+
+
+367
+00:23:53,267 --> 00:23:55,402 line:-1
+your tests will run as native code.
+
+
+368
+00:23:56,937 --> 00:24:03,110 line:-2
+To run your tests as Intel code
+under Rosetta, use "arch=x86_64."
+
+
+369
+00:24:03,177 --> 00:24:06,013 line:-2
+You might also want to set up
+your CI systems
+
+
+370
+00:24:06,079 --> 00:24:08,482 line:-1
+to run tests in both these modes
+
+
+371
+00:24:08,549 --> 00:24:11,985 line:-2
+to catch any non-portable code
+causing test failures.
+
+
+372
+00:24:13,053 --> 00:24:17,724 line:-2
+Let's look at one particular test I have,
+because it's a performance benchmark.
+
+
+373
+00:24:18,425 --> 00:24:23,430 line:-2
+I'll select the "native" destination again
+and run the test...
+
+
+374
+00:24:25,666 --> 00:24:27,835 line:0
+which is just measuring how long it takes
+
+
+375
+00:24:27,901 --> 00:24:30,838 line:0
+to transfer ten megabytes of data
+from a local server.
+
+
+376
+00:24:31,638 --> 00:24:34,474 line:0
+The result is that it takes
+21 milliseconds.
+
+
+377
+00:24:36,577 --> 00:24:40,747 line:0
+If I switch to Rosetta
+and run the test again,
+
+
+378
+00:24:41,248 --> 00:24:42,783 line:0
+we'll get a different result.
+
+
+379
+00:24:43,951 --> 00:24:49,089 line:0
+This time it takes 29 milliseconds,
+which is slower than native,
+
+
+380
+00:24:49,156 --> 00:24:51,959 line:0
+but the translated code
+still performs very well,
+
+
+381
+00:24:52,025 --> 00:24:54,828 line:0
+and the result is very close
+to native execution.
+
+
+382
+00:24:56,663 --> 00:25:00,267 line:-2
+When profiling and benchmarking
+on Apple Silicon Mac computers,
+
+
+383
+00:25:00,334 --> 00:25:02,903 line:-2
+native code
+generally has the best performance,
+
+
+384
+00:25:02,970 --> 00:25:05,973 line:-2
+and you should aim at optimizing
+native execution.
+
+
+385
+00:25:06,673 --> 00:25:10,043 line:-2
+If you see a performance degradation
+in native mode,
+
+
+386
+00:25:10,110 --> 00:25:14,081 line:-2
+watch out for any Intel-specific
+code optimizations that you might have:
+
+
+387
+00:25:16,083 --> 00:25:20,587 line:-2
+for example,
+optimized assembly using SSE or AVX.
+
+
+388
+00:25:20,654 --> 00:25:22,456 line:-1
+To achieve best performance,
+
+
+389
+00:25:22,523 --> 00:25:25,158 line:-2
+you might need to provide
+a matching implementation
+
+
+390
+00:25:25,225 --> 00:25:28,395 line:-2
+for Apple Silicon
+using the ARM instruction set.
+
+
+391
+00:25:29,863 --> 00:25:34,935 line:-2
+But in general, you should try using
+Apple-provided APIs whenever possible,
+
+
+392
+00:25:35,002 --> 00:25:37,304 line:-1
+like Accelerate.framework,
+
+
+393
+00:25:37,371 --> 00:25:40,174 line:-2
+because those will provide
+high-performance implementations
+
+
+394
+00:25:40,240 --> 00:25:42,042 line:-1
+for all supported CPUs.
+
+
+395
+00:25:42,910 --> 00:25:46,880 line:-2
+Apple Silicon Macs use
+asymmetric CPU cores,
+
+
+396
+00:25:46,947 --> 00:25:50,017 line:-2
+and that might have an effect
+on your high-performance code.
+
+
+397
+00:25:51,285 --> 00:25:53,453 line:-1
+There's two types of CPU cores:
+
+
+398
+00:25:53,520 --> 00:25:59,293 line:-2
+high-performance, also called P Cores,
+and energy-efficient, called E Cores.
+
+
+399
+00:25:59,793 --> 00:26:02,196 line:-1
+All of them can be active at the same time
+
+
+400
+00:26:02,262 --> 00:26:05,098 line:-2
+for maximum performance
+on parallel workloads.
+
+
+401
+00:26:06,233 --> 00:26:07,601 line:-1
+In Instruments,
+
+
+402
+00:26:07,668 --> 00:26:12,039 line:-2
+this distinction is visible
+in the CPUs view of the timeline.
+
+
+403
+00:26:12,105 --> 00:26:15,709 line:-2
+The individual CPU cores in the list
+have labels telling you
+
+
+404
+00:26:15,776 --> 00:26:19,046 line:-2
+which ones are Efficient
+and which ones are Performance cores.
+
+
+405
+00:26:21,548 --> 00:26:24,418 line:-2
+Don't be surprised
+if you see a graph like this,
+
+
+406
+00:26:24,484 --> 00:26:28,355 line:-2
+where almost all the work is scheduled
+only on the P Cores
+
+
+407
+00:26:28,422 --> 00:26:30,023 line:-1
+or only on the E Cores.
+
+
+408
+00:26:30,958 --> 00:26:34,394 line:-2
+The system is dynamically choosing
+the best way to perform work
+
+
+409
+00:26:34,461 --> 00:26:37,264 line:-2
+to make the right performance
+and battery life trade-off.
+
+
+410
+00:26:38,899 --> 00:26:42,669 line:-2
+One important pattern to avoid
+on asymmetric CPU systems
+
+
+411
+00:26:42,736 --> 00:26:46,173 line:-1
+is using spinlocks and busy-waiting code.
+
+
+412
+00:26:46,240 --> 00:26:49,443 line:-2
+In this example,
+the first function is using a spinlock
+
+
+413
+00:26:49,510 --> 00:26:52,079 line:-1
+and the second example is busy-waiting.
+
+
+414
+00:26:52,145 --> 00:26:56,149 line:-2
+That means actively spending CPU time
+to check in a loop
+
+
+415
+00:26:56,216 --> 00:26:58,719 line:-1
+whether a new job is available in a queue.
+
+
+416
+00:26:59,219 --> 00:27:02,956 line:-2
+This is something that's generally wrong
+to do on any computer system.
+
+
+417
+00:27:03,490 --> 00:27:06,360 line:-2
+A much better alternative
+for the first function
+
+
+418
+00:27:06,426 --> 00:27:11,298 line:-2
+is to use some blocking type of lock,
+for example, os_unfair_lock.
+
+
+419
+00:27:11,932 --> 00:27:14,835 line:-2
+And instead of checking a condition
+in a spinning loop,
+
+
+420
+00:27:14,902 --> 00:27:19,606 line:-2
+use condition variables, which will block
+until the condition is met.
+
+
+421
+00:27:21,408 --> 00:27:23,277 line:-1
+On Apple Silicon Macs,
+
+
+422
+00:27:23,343 --> 00:27:27,915 line:-2
+busy-waiting can have the effect
+of pointlessly occupying the P Cores,
+
+
+423
+00:27:27,981 --> 00:27:31,051 line:-2
+causing an overall delay
+in completion of the entire work.
+
+
+424
+00:27:32,452 --> 00:27:35,455 line:-2
+You should prefer
+synchronization primitives that block
+
+
+425
+00:27:35,522 --> 00:27:37,624 line:-1
+when they can't make progress.
+
+
+426
+00:27:37,691 --> 00:27:43,797 line:-2
+NSLock, os_unfair_lock, pthread mutexes,
+are all examples of blocking locks.
+
+
+427
+00:27:43,864 --> 00:27:46,400 line:-2
+NSCondition
+and pthread condition variables
+
+
+428
+00:27:46,466 --> 00:27:50,304 line:-2
+provide a way to wait
+until a specific condition occurs.
+
+
+429
+00:27:52,039 --> 00:27:54,675 line:-1
+In general, use GCD when possible
+
+
+430
+00:27:54,741 --> 00:27:59,446 line:-2
+and avoid splitting your work
+based on number of available CPUs,
+
+
+431
+00:27:59,513 --> 00:28:03,116 line:-2
+and instead prefer splitting tasks
+into smaller-size units.
+
+
+432
+00:28:04,585 --> 00:28:09,489 line:0
+For details about GCD,
+please watch a video from WWDC 2017.
+
+
+433
+00:28:10,557 --> 00:28:13,694 line:0
+And if you're using threading
+for audio processing,
+
+
+434
+00:28:13,760 --> 00:28:17,164 line:0
+the "Meet Audio Workgroups" session
+from this year
+
+
+435
+00:28:17,231 --> 00:28:20,267 line:0
+will help you fine-tune
+your audio apps and plug-ins.
+
+
+436
+00:28:21,168 --> 00:28:24,505 line:-2
+So when you're debugging,
+testing and profiling your app,
+
+
+437
+00:28:24,571 --> 00:28:26,874 line:-1
+remember that you can build on any Mac,
+
+
+438
+00:28:26,940 --> 00:28:31,278 line:-2
+but running native arm64 code
+needs an Apple Silicon Mac.
+
+
+439
+00:28:33,313 --> 00:28:38,385 line:-2
+When running your tests, try to run them
+under both native and translated modes
+
+
+440
+00:28:38,452 --> 00:28:41,255 line:-2
+to discover non-portable code
+in your tests.
+
+
+441
+00:28:41,889 --> 00:28:45,626 line:-2
+And watch out for any
+Intel-specific code optimizations
+
+
+442
+00:28:45,692 --> 00:28:49,162 line:-2
+and any code that is using busy-waiting
+instead of blocking.
+
+
+443
+00:28:49,763 --> 00:28:54,034 line:-2
+The next topic I'd like to talk about
+is plug-ins,
+
+
+444
+00:28:54,101 --> 00:28:59,306 line:-2
+because these need some special
+considerations on Apple Silicon computers.
+
+
+445
+00:28:59,973 --> 00:29:03,443 line:-2
+Plug-ins are a way to dynamically load
+and execute code.
+
+
+446
+00:29:03,510 --> 00:29:05,579 line:-1
+Using plug-ins that just implement
+
+
+447
+00:29:05,646 --> 00:29:08,982 line:-2
+standard system extension points
+via NSExtension
+
+
+448
+00:29:09,049 --> 00:29:10,617 line:-1
+is going to just work.
+
+
+449
+00:29:10,684 --> 00:29:13,654 line:-2
+Both native and translated plug-ins
+are supported.
+
+
+450
+00:29:14,655 --> 00:29:17,724 line:-1
+However, if your app is a plug-in host,
+
+
+451
+00:29:17,791 --> 00:29:21,428 line:-2
+and if it's using
+a custom plug-in loading mechanism,
+
+
+452
+00:29:21,495 --> 00:29:24,898 line:-2
+you'll need to consider how plug-ins work
+on Apple Silicon Macs.
+
+
+453
+00:29:26,500 --> 00:29:30,637 line:-2
+Your app's process at runtime
+will contain the code that you wrote
+
+
+454
+00:29:30,704 --> 00:29:33,173 line:-1
+and also code from system frameworks.
+
+
+455
+00:29:33,974 --> 00:29:36,243 line:-1
+If your app supports plug-ins,
+
+
+456
+00:29:36,310 --> 00:29:41,448 line:-2
+it will typically discover them at runtime
+and then load them when needed.
+
+
+457
+00:29:41,515 --> 00:29:44,318 line:-1
+That's called an in-process plug-in model,
+
+
+458
+00:29:44,384 --> 00:29:49,556 line:-2
+and typically the app uses a call
+to dlopen or Bundle.load for this.
+
+
+459
+00:29:51,291 --> 00:29:55,295 line:-2
+Alternatively, the plug-ins can be spawned
+as new processes,
+
+
+460
+00:29:55,362 --> 00:29:58,265 line:-1
+and we call those out-of-process plug-ins.
+
+
+461
+00:29:58,332 --> 00:30:00,200 line:-1
+The app and the plug-in process
+
+
+462
+00:30:00,267 --> 00:30:04,638 line:-2
+then use some inter-process
+communication mechanism like XPC.
+
+
+463
+00:30:05,372 --> 00:30:08,876 line:-2
+Loading another plug-in
+typically spawns another process.
+
+
+464
+00:30:09,576 --> 00:30:14,414 line:-2
+While out-of-process plug-ins generally
+provide better security and stability,
+
+
+465
+00:30:14,481 --> 00:30:17,084 line:-1
+in-process plug-ins are still very common.
+
+
+466
+00:30:17,150 --> 00:30:20,287 line:-1
+If your app is using in-process plug-ins,
+
+
+467
+00:30:20,354 --> 00:30:24,024 line:0
+you need to consider that
+on macOS on Apple Silicon,
+
+
+468
+00:30:24,091 --> 00:30:28,495 line:0
+all code in one process must always have
+the same CPU architecture.
+
+
+469
+00:30:31,265 --> 00:30:34,334 line:-2
+Let's look at typical use cases
+for plug-ins.
+
+
+470
+00:30:34,401 --> 00:30:38,572 line:-2
+As I've mentioned, there's out-of-process
+and in-process plug-ins.
+
+
+471
+00:30:38,639 --> 00:30:42,543 line:-2
+What's also important
+is whether the plug-in is first-party,
+
+
+472
+00:30:42,609 --> 00:30:45,145 line:-2
+which means you are building it
+from source code
+
+
+473
+00:30:45,212 --> 00:30:47,114 line:-1
+and ship it inside your app...
+
+
+474
+00:30:48,182 --> 00:30:50,317 line:-1
+or whether it's a third-party plug-in
+
+
+475
+00:30:50,384 --> 00:30:54,454 line:-2
+that some other software vendor
+distributes in pre-compiled binary form.
+
+
+476
+00:30:55,055 --> 00:30:58,992 line:-2
+If your plug-ins are first-party,
+and you can rebuild them,
+
+
+477
+00:30:59,059 --> 00:31:02,563 line:-2
+make sure to build them as universal
+plug-ins, and everything will work.
+
+
+478
+00:31:04,331 --> 00:31:08,502 line:-2
+For third-party plug-ins
+using the out-of-process plug-in model,
+
+
+479
+00:31:08,569 --> 00:31:11,338 line:-2
+you can make some small changes
+in your loading code
+
+
+480
+00:31:11,405 --> 00:31:14,141 line:-1
+to support both CPU architectures.
+
+
+481
+00:31:14,208 --> 00:31:16,877 line:-2
+If you make sure to load
+the plug-in executable
+
+
+482
+00:31:16,944 --> 00:31:18,912 line:-1
+as the right CPU architecture,
+
+
+483
+00:31:18,979 --> 00:31:23,283 line:-2
+your app will be able to load
+both native and translated plug-ins.
+
+
+484
+00:31:25,085 --> 00:31:28,222 line:-2
+In-process third-party plug-ins
+have some restrictions.
+
+
+485
+00:31:29,957 --> 00:31:32,492 line:0
+Native apps can only load native plug-ins,
+
+
+486
+00:31:32,559 --> 00:31:36,730 line:0
+and Rosetta-translated apps
+can only load Intel-based plug-ins.
+
+
+487
+00:31:38,198 --> 00:31:42,002 line:-2
+If your plug-in vendor hasn't updated
+the plug-in to be universal,
+
+
+488
+00:31:42,069 --> 00:31:43,971 line:-1
+it might affect your users.
+
+
+489
+00:31:44,605 --> 00:31:47,875 line:-2
+Let's look at what happens
+if we have a plug-in CPU mismatch.
+
+
+490
+00:31:48,275 --> 00:31:50,544 line:-1
+In my NetworkBenchmarking app,
+
+
+491
+00:31:50,611 --> 00:31:54,114 line:-2
+I am using a plug-in
+to implement TLS support,
+
+
+492
+00:31:54,615 --> 00:31:58,118 line:0
+and it gets loaded
+the first time I switch to the TLS mode,
+
+
+493
+00:31:58,185 --> 00:31:59,620 line:-1
+so let me do that.
+
+
+494
+00:32:00,554 --> 00:32:04,258 line:-2
+The plug-in loading fails,
+so let's inspect the console.
+
+
+495
+00:32:07,094 --> 00:32:09,796 line:0
+The dynamic linker explains what happened.
+
+
+496
+00:32:09,863 --> 00:32:14,701 line:0
+We tried to use dlopen
+to load a plug-in with this name,
+
+
+497
+00:32:14,768 --> 00:32:19,940 line:0
+and the file was found on disk,
+but it had the wrong CPU architecture.
+
+
+498
+00:32:21,375 --> 00:32:25,145 line:0
+Let's verify this.
+I'll copy the full path of this file...
+
+
+499
+00:32:26,713 --> 00:32:28,415 line:0
+and open Terminal,
+
+
+500
+00:32:28,482 --> 00:32:32,686 line:-2
+and I will paste the path into Terminal
+and the lipo -info again.
+
+
+501
+00:32:34,955 --> 00:32:37,424 line:-1
+And indeed, this binary is Intel-only.
+
+
+502
+00:32:39,026 --> 00:32:41,962 line:-2
+If this was
+a third-party pre-compiled plug-in,
+
+
+503
+00:32:42,029 --> 00:32:45,199 line:-2
+the right solution would be
+to contact that third party
+
+
+504
+00:32:45,265 --> 00:32:49,303 line:-2
+and urge them to publish a universal build
+of the plug-in as soon as possible.
+
+
+505
+00:32:50,804 --> 00:32:53,207 line:-2
+But let's go back into Xcode,
+because in this case,
+
+
+506
+00:32:53,273 --> 00:32:55,375 line:-1
+I do have the source code of this plug-in,
+
+
+507
+00:32:55,442 --> 00:32:58,045 line:-2
+and I should be able to rebuild it
+as universal.
+
+
+508
+00:32:58,745 --> 00:33:00,113 line:-1
+Let's go into my project
+
+
+509
+00:33:00,180 --> 00:33:04,618 line:-2
+and open the TLS plug-in target
+and inspect its build settings.
+
+
+510
+00:33:05,652 --> 00:33:08,856 line:-2
+It looks like I have
+some unusual configuration here.
+
+
+511
+00:33:08,922 --> 00:33:13,093 line:-2
+I'm forcing architectures
+to always be x86_64.
+
+
+512
+00:33:13,594 --> 00:33:18,832 line:-2
+This is probably some leftover
+from when I wanted to drop 32-bit support.
+
+
+513
+00:33:18,899 --> 00:33:22,369 line:-1
+But hard-coding x86_64 is incorrect now.
+
+
+514
+00:33:22,436 --> 00:33:26,573 line:-2
+We should instead be using
+standard architectures everywhere.
+
+
+515
+00:33:27,341 --> 00:33:31,645 line:-2
+But an even better option is to avoid
+setting architectures altogether.
+
+
+516
+00:33:32,346 --> 00:33:35,849 line:-2
+So I will just select the build setting
+and hit the "delete" key.
+
+
+517
+00:33:35,916 --> 00:33:39,353 line:-2
+This way, Xcode will use
+the correct default settings.
+
+
+518
+00:33:40,153 --> 00:33:42,456 line:-1
+Let's build and run the app again...
+
+
+519
+00:33:43,957 --> 00:33:46,894 line:0
+and this time,
+if I switch to the TLS mode,
+
+
+520
+00:33:46,960 --> 00:33:48,962 line:-1
+the plug-in will get loaded correctly now.
+
+
+521
+00:33:51,498 --> 00:33:57,504 line:-2
+A typical pattern to load a plug-in
+is to use dlopen with a file path.
+
+
+522
+00:33:57,571 --> 00:34:01,808 line:-2
+It's very important to always check
+the return value from dlopen,
+
+
+523
+00:34:01,875 --> 00:34:06,079 line:-2
+and if it's null, the full error message
+explaining what's wrong
+
+
+524
+00:34:06,146 --> 00:34:08,649 line:-1
+is provided by calling dlerror.
+
+
+525
+00:34:09,716 --> 00:34:13,820 line:-2
+When running this code with
+a mismatching plug-in CPU architecture,
+
+
+526
+00:34:13,887 --> 00:34:19,059 line:-2
+you'll get an error explaining that
+the file on disk has a wrong architecture.
+
+
+527
+00:34:19,793 --> 00:34:22,763 line:-2
+That indicates that the plug-in
+is not universal.
+
+
+528
+00:34:23,230 --> 00:34:26,967 line:-2
+I'd like to point out
+that the out-of-process plug-in model
+
+
+529
+00:34:27,034 --> 00:34:29,069 line:-1
+doesn't have this restriction.
+
+
+530
+00:34:29,136 --> 00:34:31,338 line:-1
+If you're using in-process plug-ins,
+
+
+531
+00:34:31,405 --> 00:34:34,908 line:-2
+I encourage you
+to explore XPC as a solution.
+
+
+532
+00:34:34,975 --> 00:34:40,380 line:-2
+You can have one process per plug-in,
+but also one process per CPU architecture.
+
+
+533
+00:34:40,447 --> 00:34:44,418 line:-2
+In this case, you'll only ever use
+up to two extra processes.
+
+
+534
+00:34:46,219 --> 00:34:50,757 line:0
+Out-of-process plug-ins provide better
+stability and security for your app,
+
+
+535
+00:34:50,824 --> 00:34:53,659 line:0
+and for details about XPC,
+I recommend watching
+
+
+536
+00:34:53,726 --> 00:34:58,432 line:0
+a WWDC session from 2013
+called "Efficient Design with XPC."
+
+
+537
+00:35:00,267 --> 00:35:03,670 line:-2
+If your users are stuck
+with an Intel-only plug-in,
+
+
+538
+00:35:03,737 --> 00:35:06,974 line:-2
+they can still force the app
+to run in Rosetta,
+
+
+539
+00:35:07,040 --> 00:35:09,943 line:-1
+which will allow loading those plug-ins.
+
+
+540
+00:35:10,010 --> 00:35:13,514 line:-2
+For universal apps,
+the Info dialog in Finder
+
+
+541
+00:35:13,580 --> 00:35:17,784 line:-2
+has a checkbox
+called "Open using Rosetta" to do that.
+
+
+542
+00:35:18,452 --> 00:35:22,322 line:-2
+This checkbox can disallowed
+with an Info.plist key.
+
+
+543
+00:35:22,389 --> 00:35:25,526 line:-2
+Details are explained
+in the Apple Silicon documentation,
+
+
+544
+00:35:25,592 --> 00:35:28,395 line:-2
+so please refer to it
+if you'd like to know more.
+
+
+545
+00:35:29,963 --> 00:35:33,667 line:-2
+Let me finally share a few tips
+when working on apps
+
+
+546
+00:35:33,734 --> 00:35:37,571 line:-2
+that run on both Intel-based Macs
+and Apple Silicon Macs.
+
+
+547
+00:35:38,138 --> 00:35:40,274 line:-1
+Once your app is building, running,
+
+
+548
+00:35:40,340 --> 00:35:43,844 line:-2
+and it's tested and verified
+to work correctly on each architecture,
+
+
+549
+00:35:44,411 --> 00:35:46,980 line:-2
+you're going to start
+distributing your app,
+
+
+550
+00:35:47,047 --> 00:35:48,215 line:-1
+either on the App Store,
+
+
+551
+00:35:48,282 --> 00:35:51,218 line:-2
+or perhaps by a download link
+on your Web site,
+
+
+552
+00:35:51,285 --> 00:35:54,655 line:-2
+in which case you'll need your entire
+software package to be notarized.
+
+
+553
+00:35:55,622 --> 00:35:58,625 line:0
+Please watch a WWDC session from 2019
+
+
+554
+00:35:58,692 --> 00:36:01,328 line:0
+called "All About Notarization"
+for details.
+
+
+555
+00:36:02,996 --> 00:36:07,367 line:-2
+In Xcode, your distribution process
+starts with an Archive build,
+
+
+556
+00:36:07,868 --> 00:36:10,671 line:-2
+which now by default
+produces universal apps.
+
+
+557
+00:36:12,306 --> 00:36:16,043 line:-2
+In Xcode, the Archive action
+is available in the Product menu.
+
+
+558
+00:36:17,611 --> 00:36:22,683 line:-2
+If your primary development work flow
+is to use only one type of Mac computer,
+
+
+559
+00:36:22,749 --> 00:36:25,886 line:-2
+doing an Archive build
+might actually be the first time
+
+
+560
+00:36:25,953 --> 00:36:27,688 line:-1
+that your code builds universally.
+
+
+561
+00:36:29,790 --> 00:36:34,661 line:-2
+So if your debug iterations build fine
+but your Archive build fails,
+
+
+562
+00:36:34,728 --> 00:36:37,231 line:-2
+that indicates
+you have some portability issues
+
+
+563
+00:36:37,297 --> 00:36:39,867 line:-2
+that we've covered
+earlier in this session.
+
+
+564
+00:36:39,933 --> 00:36:42,102 line:-1
+Once your Archive build succeeds,
+
+
+565
+00:36:42,169 --> 00:36:47,174 line:-2
+you can find your package for distribution
+in the Organizer window of Xcode.
+
+
+566
+00:36:47,241 --> 00:36:48,609 line:-1
+In Xcode 12,
+
+
+567
+00:36:48,675 --> 00:36:52,880 line:-2
+it now shows which CPU architectures
+are included in your Archive builds.
+
+
+568
+00:36:54,381 --> 00:36:57,751 line:-2
+The Organizer also provides access
+to crash statistics
+
+
+569
+00:36:57,818 --> 00:37:01,421 line:-2
+and individual crash logs
+from the users of your app.
+
+
+570
+00:37:01,488 --> 00:37:06,260 line:0
+For details about crash logs and how to
+investigate root causes of crashes,
+
+
+571
+00:37:06,326 --> 00:37:09,129 line:0
+please watch a video from WWDC 2018
+
+
+572
+00:37:09,196 --> 00:37:11,865 line:0
+called "Understanding Crashes
+and Crash Logs."
+
+
+573
+00:37:13,767 --> 00:37:16,403 line:0
+With universal apps,
+you should now watch out
+
+
+574
+00:37:16,470 --> 00:37:19,840 line:0
+that you'll be receiving
+three different kinds of crash logs:
+
+
+575
+00:37:20,474 --> 00:37:23,143 line:0
+x86 crash logs from Intel Macs,
+
+
+576
+00:37:23,210 --> 00:37:26,880 line:0
+native arm64 crash logs
+for Apple Silicon Macs,
+
+
+577
+00:37:26,947 --> 00:37:29,816 line:0
+but also translated x86 crash logs
+
+
+578
+00:37:29,883 --> 00:37:32,753 line:0
+when running under Rosetta
+on Apple Silicon Macs.
+
+
+579
+00:37:33,954 --> 00:37:37,391 line:0
+If you select a particular crash log
+in the Organizer,
+
+
+580
+00:37:37,457 --> 00:37:39,726 line:-1
+the Details section now shows
+
+
+581
+00:37:39,793 --> 00:37:42,896 line:-2
+what CPU architecture
+the crash originated on
+
+
+582
+00:37:42,963 --> 00:37:45,832 line:-2
+and whether the process
+was running translated or not.
+
+
+583
+00:37:46,500 --> 00:37:49,136 line:-1
+If your app relies on a kernel extension,
+
+
+584
+00:37:49,203 --> 00:37:52,773 line:-2
+or if you provide drivers for hardware
+using DriverKit,
+
+
+585
+00:37:52,840 --> 00:37:55,876 line:-2
+there's some special considerations
+that you should understand
+
+
+586
+00:37:55,943 --> 00:37:58,212 line:-1
+when porting these types of software.
+
+
+587
+00:37:58,979 --> 00:38:01,648 line:-2
+In particular,
+more types of kernel extensions
+
+
+588
+00:38:01,715 --> 00:38:05,118 line:-2
+are now deprecated or disallowed
+on Apple Silicon Macs,
+
+
+589
+00:38:05,185 --> 00:38:08,488 line:-2
+and you'll have to use DriverKit
+for those instead.
+
+
+590
+00:38:08,555 --> 00:38:11,692 line:-2
+Please refer to the macOS
+porting documentation for details.
+
+
+591
+00:38:13,193 --> 00:38:16,330 line:-2
+One more thing to watch out for
+is multithreading bugs.
+
+
+592
+00:38:16,997 --> 00:38:22,469 line:-2
+Intel CPUs and Apple Silicon implement
+a different memory ordering model.
+
+
+593
+00:38:22,536 --> 00:38:25,539 line:-2
+For correct multithreaded code,
+this doesn't matter.
+
+
+594
+00:38:25,606 --> 00:38:27,341 line:-1
+It will always run correctly.
+
+
+595
+00:38:27,407 --> 00:38:30,944 line:-2
+But bugs like race conditions
+and data races
+
+
+596
+00:38:31,011 --> 00:38:34,381 line:-2
+might have slightly differently behavior
+on each of these architectures.
+
+
+597
+00:38:36,316 --> 00:38:39,086 line:-1
+Specifically, a data race on Intel CPUs
+
+
+598
+00:38:39,152 --> 00:38:42,756 line:-2
+might have worked fine
+and appeared to be benign,
+
+
+599
+00:38:42,823 --> 00:38:46,727 line:-2
+but the same bug could be causing crashes
+on Apple Silicon instead.
+
+
+600
+00:38:47,294 --> 00:38:51,798 line:-2
+Note that running under Rosetta
+fully supports the Intel memory ordering,
+
+
+601
+00:38:51,865 --> 00:38:54,501 line:-2
+so you will not see
+a difference in behavior there.
+
+
+602
+00:38:57,571 --> 00:39:00,807 line:-2
+Whether you do see crashes
+in multithreaded code or not,
+
+
+603
+00:39:00,874 --> 00:39:03,911 line:-2
+I highly recommend using Thread Sanitizer
+as a tool
+
+
+604
+00:39:03,977 --> 00:39:06,580 line:-1
+to detect and prevent data races.
+
+
+605
+00:39:06,647 --> 00:39:10,717 line:0
+We have presented this tool
+in a WWDC session in 2016
+
+
+606
+00:39:10,784 --> 00:39:13,287 line:0
+called "Thread Sanitizer
+and Static Analysis."
+
+
+607
+00:39:14,388 --> 00:39:18,225 line:-2
+You can enable Thread Sanitizer
+in the scheme editor of your project.
+
+
+608
+00:39:18,292 --> 00:39:23,463 line:-2
+In the Diagnostics tab, you can find
+a checkbox called Thread Sanitizer.
+
+
+609
+00:39:23,530 --> 00:39:25,766 line:-1
+But remember, this is a runtime tool.
+
+
+610
+00:39:25,832 --> 00:39:29,603 line:-2
+You have to run your app
+and exercise code at runtime to find bugs.
+
+
+611
+00:39:30,270 --> 00:39:33,941 line:-2
+So this concludes the tips that I have
+for working with universal apps.
+
+
+612
+00:39:34,474 --> 00:39:35,876 line:-1
+Let me now wrap up the session
+
+
+613
+00:39:35,943 --> 00:39:38,979 line:-2
+and summarize
+what we have talked about today.
+
+
+614
+00:39:39,613 --> 00:39:43,750 line:-2
+Mac apps should from now on
+be built as universal apps,
+
+
+615
+00:39:43,817 --> 00:39:47,321 line:-2
+and you can start bringing them
+to Apple Silicon today.
+
+
+616
+00:39:48,388 --> 00:39:51,558 line:-2
+Scan your source code
+for non-universal binaries.
+
+
+617
+00:39:51,625 --> 00:39:55,729 line:-2
+You will need to get them updated
+as universal to run your app natively.
+
+
+618
+00:39:57,564 --> 00:40:00,501 line:-1
+Use Xcode 12 to build your app universal.
+
+
+619
+00:40:00,567 --> 00:40:04,505 line:-2
+Identify and fix any portability issues
+you discover on the way.
+
+
+620
+00:40:05,305 --> 00:40:08,942 line:-2
+And don't forget to run and test
+the native build of your apps.
+
+
+621
+00:40:09,009 --> 00:40:12,880 line:-2
+Watch out for any of the platform
+differences we have discussed today.
+
+
+622
+00:40:15,082 --> 00:40:20,087 line:-2
+Finally, I would like to remind you that
+developer.apple.com/documentation
+
+
+623
+00:40:20,153 --> 00:40:22,055 line:-1
+contains many more details.
+
+
+624
+00:40:22,122 --> 00:40:25,859 line:-2
+The article called "Apple Silicon"
+provides guidance and answers
+
+
+625
+00:40:25,926 --> 00:40:28,729 line:-2
+to questions you might have
+about porting your app.
+
+
+626
+00:40:29,263 --> 00:40:30,898 line:-1
+Thank you for watching.
+

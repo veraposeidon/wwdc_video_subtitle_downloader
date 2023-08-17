@@ -1,0 +1,2611 @@
+2
+00:00:00,501 --> 00:00:08,509 line:-1
+♪ ♪
+
+
+3
+00:00:09,510 --> 00:00:12,913 line:-1
+Dhruva: Welcome to WWDC 2022.
+
+
+4
+00:00:12.946 --> 00:00:16.517 line:-2 align:center
+My name is Dhruva,
+and I am a GPUSW Engineer.
+
+
+5
+00:00:16.550 --> 00:00:21.522 line:-2 align:center
+Today, Matteo and I will explore
+all the new features and enhancements
+
+
+6
+00:00:21.555 --> 00:00:25.726 line:-2 align:center
+introduced for machine learning
+this year in Metal.
+
+
+7
+00:00:25,759 --> 00:00:29,730 line:-2
+Machine learning training is the most
+computationally intensive process
+
+
+8
+00:00:29,763 --> 00:00:31,665 line:-1
+of the ML pipeline.
+
+
+9
+00:00:31.698 --> 00:00:37.371 line:-2 align:center
+Due to their parallel nature,
+GPUs excel at ML workloads.
+
+
+10
+00:00:37.404 --> 00:00:41.074 line:-2 align:center
+The Metal machine learning APIs
+are exposed through a framework
+
+
+11
+00:00:41.108 --> 00:00:44.811 line:-2 align:center
+called Metal Performance Shaders,
+or MPS.
+
+
+12
+00:00:44,845 --> 00:00:49,082 line:-2
+MPS is a collection
+of high performance GPU primitives
+
+
+13
+00:00:49.116 --> 00:00:53.387 line:-2 align:center
+for various fields like Image Processing,
+Linear Algebra,
+
+
+14
+00:00:53.420 --> 00:00:56.290 line:-1 align:center
+Ray Tracing, and machine learning.
+
+
+15
+00:00:56.323 --> 00:01:00.460 line:-2 align:center
+These Metal kernels are optimized
+to provide the best performance
+
+
+16
+00:01:00,494 --> 00:01:02,362 line:-1
+on all of our platforms.
+
+
+17
+00:01:02,396 --> 00:01:05,699 line:-1
+For example the MPSImageCanny filter
+
+
+18
+00:01:05,732 --> 00:01:08,702 line:-1
+returns an edge-map for an input-image.
+
+
+19
+00:01:08.735 --> 00:01:12.773 line:-2 align:center
+This is a common operation
+in image segmentation applications.
+
+
+20
+00:01:12,806 --> 00:01:16,143 line:-2
+This year,
+the Canny filter is able to process
+
+
+21
+00:01:16.176 --> 00:01:21.181 line:-2 align:center
+4K, high-resolution images
+up to eight times faster.
+
+
+22
+00:01:21,215 --> 00:01:24,618 line:-2
+MPS Graph,
+is a general purpose compute graph
+
+
+23
+00:01:24,651 --> 00:01:28,188 line:-2
+for the GPU which sits on top
+of the MPS framework
+
+
+24
+00:01:28.222 --> 00:01:32.025 line:-2 align:center
+and extends support
+to multidimensional tensors.
+
+
+25
+00:01:32,059 --> 00:01:35,429 line:0
+I recommend watching the previous session
+to get more details
+
+
+26
+00:01:35,462 --> 00:01:38,532 align:center
+on how to use MPS Graph.
+
+
+27
+00:01:38,565 --> 00:01:42,769 line:-2
+High level ML frameworks
+like CoreML and Tensorflow
+
+
+28
+00:01:42,803 --> 00:01:44,972 line:-1
+sit on top of MPS Graph.
+
+
+29
+00:01:45,005 --> 00:01:48,809 line:-2
+You can accelerate your TensorFlow
+networks on the GPU
+
+
+30
+00:01:48,842 --> 00:01:51,411 line:-1
+with the TensorFlow Metal plug-in.
+
+
+31
+00:01:51,445 --> 00:01:54,581 line:0
+For more on how to make the most
+of TensorFlow,
+
+
+32
+00:01:54,615 --> 00:01:57,417 line:0
+check out last year's session.
+
+
+33
+00:01:57.451 --> 00:02:01.188 line:-2 align:center
+Matteo and I have three topics to cover
+in this session.
+
+
+34
+00:02:01,221 --> 00:02:06,727 line:-2
+First, I'll introduce the newest ML
+framework coming to Apple GPUs,
+
+
+35
+00:02:06.760 --> 00:02:07.828 line:-1 align:center
+PyTorch.
+
+
+36
+00:02:07.861 --> 00:02:14.034 line:-2 align:center
+Next, I'll dive into the enhancements
+made to TensorFlow over this year.
+
+
+37
+00:02:14,067 --> 00:02:19,339 line:-2
+Finally, Matteo will talk about what's new
+in the MPS Graph framework.
+
+
+38
+00:02:20.674 --> 00:02:25.913 line:-2 align:center
+We are really excited that you will now be
+able to accelerate your PyTorch networks
+
+
+39
+00:02:25.946 --> 00:02:27.948 line:-1 align:center
+on your Mac GPUs.
+
+
+40
+00:02:27,981 --> 00:02:32,653 line:-2
+PyTorch, is a popular open source
+machine learning framework.
+
+
+41
+00:02:32.686 --> 00:02:37.057 line:-2 align:center
+The number one most requested feature,
+in the PyTorch community
+
+
+42
+00:02:37,090 --> 00:02:41,361 line:-2
+was support for GPU acceleration
+on Apple silicon.
+
+
+43
+00:02:41.395 --> 00:02:44.364 line:-2 align:center
+We are bringing the power of Metal
+to PyTorch
+
+
+44
+00:02:44.398 --> 00:02:50.037 line:-2 align:center
+by introducing a new MPS backend
+to the PyTorch ecosystem.
+
+
+45
+00:02:50.070 --> 00:02:56.210 line:-2 align:center
+This backend will be part
+of the official PyTorch 1.12 release.
+
+
+46
+00:02:56,243 --> 00:03:00,380 line:-2
+The MPS backend implements
+the PyTorch operation kernels,
+
+
+47
+00:03:00.414 --> 00:03:02.749 line:-1 align:center
+as well as a Runtime framework.
+
+
+48
+00:03:02.783 --> 00:03:06.987 line:-1 align:center
+The operations call into MPS Graph and MPS
+
+
+49
+00:03:07,020 --> 00:03:10,424 line:-1
+and the Runtime component uses Metal.
+
+
+50
+00:03:10,457 --> 00:03:14,995 line:-2
+This enables PyTorch to use
+the highly efficient kernels from MPS
+
+
+51
+00:03:15,028 --> 00:03:17,364 line:-1
+along with Metal's Command queues,
+
+
+52
+00:03:17,397 --> 00:03:20,901 line:-2
+Command buffers,
+and synchronization primitives.
+
+
+53
+00:03:22.336 --> 00:03:26.974 line:-2 align:center
+The operation kernels
+and PyTorch MPS Runtime components
+
+
+54
+00:03:27,007 --> 00:03:29,109 line:-1
+are part of the open source code
+
+
+55
+00:03:29.142 --> 00:03:32.579 line:-2 align:center
+and merged into the official
+PyTorch GitHub repo.
+
+
+56
+00:03:32.613 --> 00:03:37.484 line:-2 align:center
+Using the MPS PyTorch backend
+is a simple three-step process.
+
+
+57
+00:03:37,518 --> 00:03:40,854 line:-1
+First, starting with PyTorch 1.12,
+
+
+58
+00:03:40,888 --> 00:03:44,958 line:-2
+you can install the base package
+using ‘pip install torch'.
+
+
+59
+00:03:44.992 --> 00:03:49.329 line:-2 align:center
+This package is available in
+the official python package repository.
+
+
+60
+00:03:49.363 --> 00:03:53.033 line:-2 align:center
+For more details
+on environment setup and installation,
+
+
+61
+00:03:53.066 --> 00:03:57.237 line:-2 align:center
+please refer to
+the Metal Developer Resources web page.
+
+
+62
+00:03:57,271 --> 00:04:01,608 line:-2
+Second, import PyTorch
+and create the MPS device.
+
+
+63
+00:04:01.642 --> 00:04:04.945 line:-2 align:center
+This code snippet
+uses the MPS device backend
+
+
+64
+00:04:04,978 --> 00:04:09,016 line:-2
+if it is available,
+otherwise it'll fall back to the CPU.
+
+
+65
+00:04:09,049 --> 00:04:14,621 line:-2
+The last step is to convert your models
+and inputs to use the MPS device.
+
+
+66
+00:04:14,655 --> 00:04:16,590 line:-1
+To demonstrate how to do this,
+
+
+67
+00:04:16.623 --> 00:04:19.493 line:-1 align:center
+I will use an example which runs inference
+
+
+68
+00:04:19.526 --> 00:04:23.664 line:-2 align:center
+on a pre-trained ResNet50 model
+from torchvision.
+
+
+69
+00:04:23.697 --> 00:04:27.301 line:-1 align:center
+By default, the model will run on the CPU.
+
+
+70
+00:04:27.334 --> 00:04:32.306 line:-2 align:center
+You can use the "to" method to convert
+the model to use the MPS device.
+
+
+71
+00:04:32,339 --> 00:04:36,443 line:-2
+This ensures that intermediate tensors
+inside the model
+
+
+72
+00:04:36,476 --> 00:04:39,813 line:-1
+will also use the accelerated MPS backend.
+
+
+73
+00:04:39,847 --> 00:04:42,249 line:-1
+Finally, you can run the model.
+
+
+74
+00:04:42.282 --> 00:04:47.521 line:-2 align:center
+This example passes a random
+input tensor to the MPS model.
+
+
+75
+00:04:47.554 --> 00:04:51.592 line:-2 align:center
+By default,
+all tensors are allocated on the CPU.
+
+
+76
+00:04:51,625 --> 00:04:53,694 line:-1
+In order to use the MPS backend,
+
+
+77
+00:04:53,727 --> 00:04:58,031 line:-2
+you will also need to provide
+the mpsDevice here as well.
+
+
+78
+00:04:58.065 --> 00:05:03.770 line:-2 align:center
+All subsequent operations on this tensor
+will be accelerated on the GPU.
+
+
+79
+00:05:03.804 --> 00:05:09.009 line:-2 align:center
+Finally, pass the sample input
+to the MPS model to get a prediction.
+
+
+80
+00:05:09,042 --> 00:05:12,112 line:-2
+Now that you know
+how to use the MPS device,
+
+
+81
+00:05:12.145 --> 00:05:15.516 line:-2 align:center
+I'll show you an example
+of PyTorch in action.
+
+
+82
+00:05:15.549 --> 00:05:17.951 line:-1 align:center
+I've always wanted to be a famous artist.
+
+
+83
+00:05:17,985 --> 00:05:21,889 line:-2
+So I decided to use machine learning
+and my GPU
+
+
+84
+00:05:21,922 --> 00:05:25,826 line:-2
+to help create my artwork
+using the StyleTransfer network.
+
+
+85
+00:05:25,859 --> 00:05:30,564 line:-2
+This network allows you to apply
+a different artistic style to an image.
+
+
+86
+00:05:30.597 --> 00:05:34.735 line:-2 align:center
+In this case, the goal is to learn
+how to apply Van Gogh's style
+
+
+87
+00:05:34,768 --> 00:05:37,437 line:-1
+in Starry Night to this picture of a cat.
+
+
+88
+00:05:37.471 --> 00:05:41.575 line:-2 align:center
+With the new MPS device,
+you will be able to use the GPU
+
+
+89
+00:05:41,608 --> 00:05:45,312 line:-2
+to train your PyTorch networks
+significantly faster.
+
+
+90
+00:05:45.345 --> 00:05:48.615 line:-2 align:center
+To demonstrate this,
+I'll start training this network
+
+
+91
+00:05:48.649 --> 00:05:53.320 line:-2 align:center
+on both the CPU and GPU simultaneously
+on an M1 Max.
+
+
+92
+00:05:53,353 --> 00:05:56,857 line:-2
+It takes thousands of iterations
+to learn this style,
+
+
+93
+00:05:56.890 --> 00:06:01.929 line:-2 align:center
+but the GPU is able to converge
+to a reasonable model in much less time.
+
+
+94
+00:06:03.897 --> 00:06:07.568 line:-2 align:center
+In addition to StyleTransfer,
+we have seen amazing speedups
+
+
+95
+00:06:07.601 --> 00:06:10.137 line:-1 align:center
+on all these PyTorch benchmarks.
+
+
+96
+00:06:10,170 --> 00:06:15,075 line:-2
+On the M1 Ultra,
+we saw speedups of up to 20 times faster
+
+
+97
+00:06:15.108 --> 00:06:18.612 line:-1 align:center
+with an average of 8.3 times faster.
+
+
+98
+00:06:18,645 --> 00:06:22,583 line:-2
+PyTorch makes it easy
+to develop machine learning models,
+
+
+99
+00:06:22.616 --> 00:06:27.688 line:-2 align:center
+and you'll be able to save a lot of time
+by using Apple GPUs to train them.
+
+
+100
+00:06:27.721 --> 00:06:33.727 line:-2 align:center
+Next, I'll dive into all the enhancements
+we've made this year to TensorFlow.
+
+
+101
+00:06:33.760 --> 00:06:37.331 line:-2 align:center
+TensorFlow Metal acceleration
+has been available
+
+
+102
+00:06:37.364 --> 00:06:40.200 line:-1 align:center
+since TensorFlow version 2.5
+
+
+103
+00:06:40.234 --> 00:06:42.970 line:-1 align:center
+through the TensorFlow Metal plug-in.
+
+
+104
+00:06:43.003 --> 00:06:47.741 line:-2 align:center
+Since then, several additional features
+and improvements have been added.
+
+
+105
+00:06:47.774 --> 00:06:51.879 line:-2 align:center
+These include improved training
+with bigger batches,
+
+
+106
+00:06:51.912 --> 00:06:54.948 line:-1 align:center
+new operations and custom op support,
+
+
+107
+00:06:54,982 --> 00:06:58,452 line:-2
+RNN improvements,
+and distributed training.
+
+
+108
+00:06:58.485 --> 00:07:00.854 line:-1 align:center
+The TensorFlow Metal plug-in releases
+
+
+109
+00:07:00.888 --> 00:07:04.091 line:-2 align:center
+are aligned with major TensorFlow
+releases,
+
+
+110
+00:07:04,124 --> 00:07:06,827 line:-2
+so make sure you update
+your TensorFlow packages
+
+
+111
+00:07:06.860 --> 00:07:10.397 line:-2 align:center
+to get the latest features
+and improvements.
+
+
+112
+00:07:10,430 --> 00:07:13,367 line:-1
+Let's start with bigger batch sizes.
+
+
+113
+00:07:13,400 --> 00:07:17,938 line:-2
+This year software improvements
+in TensorFlow Metal allow you
+
+
+114
+00:07:17.971 --> 00:07:21.875 line:-2 align:center
+to leverage the unique benefits
+of the Apple silicon architecture.
+
+
+115
+00:07:21,909 --> 00:07:26,513 line:-2
+This graph shows speedups
+training a ResNet50 model
+
+
+116
+00:07:26,547 --> 00:07:28,782 line:-1
+with various batch sizes.
+
+
+117
+00:07:28,815 --> 00:07:33,587 line:-2
+The data shows that performance improves
+with bigger batch sizes
+
+
+118
+00:07:33,620 --> 00:07:38,659 line:-2
+because each gradient update corresponds
+more closely to the true gradient.
+
+
+119
+00:07:38.692 --> 00:07:41.461 line:-2 align:center
+Apple silicon's
+unified memory architecture
+
+
+120
+00:07:41,495 --> 00:07:45,999 line:-2
+allows you to run larger networks
+or larger batch sizes.
+
+
+121
+00:07:46.033 --> 00:07:49.670 line:-2 align:center
+Now you can run your workload
+on a single Mac Studio
+
+
+122
+00:07:49,703 --> 00:07:53,407 line:-2
+instead of splitting it
+across a cloud cluster, which is awesome!
+
+
+123
+00:07:53,440 --> 00:07:57,311 line:-2
+The Apple Silicon architecture
+also has high performance per watt,
+
+
+124
+00:07:57.344 --> 00:08:01.381 line:-2 align:center
+meaning your networks run
+more efficiently than ever.
+
+
+125
+00:08:01.415 --> 00:08:06.353 line:-2 align:center
+Next l'll talk about the new operations
+and custom operations.
+
+
+126
+00:08:06,386 --> 00:08:10,357 line:-2
+The Tensorflow Metal plug-in now has
+GPU acceleration
+
+
+127
+00:08:10.390 --> 00:08:12.960 line:-1 align:center
+for a variety of new operations,
+
+
+128
+00:08:12,993 --> 00:08:18,899 line:-2
+including argMin, all, pack,
+adaDelta, and many more.
+
+
+129
+00:08:18,932 --> 00:08:22,569 line:-2
+But what if you want GPU acceleration
+for an operation
+
+
+130
+00:08:22.603 --> 00:08:26.073 line:-2 align:center
+that's currently not supported
+in the TensorFlow API?
+
+
+131
+00:08:26.106 --> 00:08:30.844 line:-2 align:center
+To do this, you will need to create
+a custom operation.
+
+
+132
+00:08:30.878 --> 00:08:33.914 line:-2 align:center
+Here's an example
+of a simple convolutional network
+
+
+133
+00:08:33.947 --> 00:08:36.149 line:-1 align:center
+running for two iterations.
+
+
+134
+00:08:36.183 --> 00:08:40.387 line:-2 align:center
+The timeline represents the work done
+on the GPU and CPU,
+
+
+135
+00:08:40.420 --> 00:08:42.756 line:-1 align:center
+above and below respectively.
+
+
+136
+00:08:42,789 --> 00:08:46,460 line:-2
+The network does a convolution
+followed by maxpool-ing
+
+
+137
+00:08:46,493 --> 00:08:50,230 line:-1
+and then a softmax cross entropy loss.
+
+
+138
+00:08:50.264 --> 00:08:53.033 line:-2 align:center
+All of these operations
+are GPU accelerated
+
+
+139
+00:08:53.066 --> 00:08:56.937 line:-2 align:center
+in the TensorFlow Metal plug-in
+through MPS Graph
+
+
+140
+00:08:56.970 --> 00:09:00.507 line:-2 align:center
+But you might want to use
+a custom loss function.
+
+
+141
+00:09:00,541 --> 00:09:04,511 line:-2
+Without MPS GPU acceleration
+for this custom loss,
+
+
+142
+00:09:04.545 --> 00:09:08.782 line:-2 align:center
+that work will need to be performed
+on the CPU timeline
+
+
+143
+00:09:08,815 --> 00:09:13,687 line:-2
+which introduces synchronization overhead
+and starves the GPU.
+
+
+144
+00:09:13.720 --> 00:09:18.926 line:-2 align:center
+You can achieve far better performance
+by doing this custom loss on the GPU.
+
+
+145
+00:09:18.959 --> 00:09:21.628 line:-1 align:center
+In order to implement a custom operation,
+
+
+146
+00:09:21.662 --> 00:09:26.500 line:-2 align:center
+you will need to understand
+the TensorFlow Metal Stream protocol.
+
+
+147
+00:09:26,533 --> 00:09:31,405 line:-2
+This is a protocol which you use
+to encode GPU operations.
+
+
+148
+00:09:31,438 --> 00:09:35,576 line:-2
+The Metal stream holds a reference
+to the MTLCommandBuffer you use
+
+
+149
+00:09:35,609 --> 00:09:37,411 line:-1
+to encode your GPU kernel.
+
+
+150
+00:09:37.444 --> 00:09:41.615 line:-2 align:center
+It also exposes the dispatch_queue
+to use for CPU side synchronization
+
+
+151
+00:09:41,648 --> 00:09:45,786 line:-2
+while encoding as there may be
+multiple threads submitting work.
+
+
+152
+00:09:45,819 --> 00:09:51,158 line:-2
+Use the commit or commitAndWait methods
+to submit the work to the GPU.
+
+
+153
+00:09:51.191 --> 00:09:55.963 line:-2 align:center
+CommitAndWait is a debugging tool that
+will wait until the current command buffer
+
+
+154
+00:09:55.996 --> 00:09:59.666 line:-2 align:center
+is done so you can observe
+serialized submissions.
+
+
+155
+00:09:59.700 --> 00:10:04.471 line:-2 align:center
+Now let's see how these concepts
+can be used to implement a custom op.
+
+
+156
+00:10:04.505 --> 00:10:07.274 line:-2 align:center
+There are three steps
+to write a custom operation.
+
+
+157
+00:10:07,307 --> 00:10:09,877 line:-1
+First, register the operation.
+
+
+158
+00:10:09,910 --> 00:10:13,514 line:-2
+Next, implement the operation
+using a MetalStream.
+
+
+159
+00:10:13.547 --> 00:10:19.219 line:-2 align:center
+And finally, import the operation into
+your training scripts and begin using it.
+
+
+160
+00:10:19.253 --> 00:10:22.189 line:-1 align:center
+I'll start with registering the operation.
+
+
+161
+00:10:22.222 --> 00:10:25.826 line:-2 align:center
+Use the REGISTER_OP macro
+exposed by TensorFlow core
+
+
+162
+00:10:25,859 --> 00:10:28,095 line:-1
+to specify the semantics of the op
+
+
+163
+00:10:28.128 --> 00:10:32.165 line:-2 align:center
+and how it should be defined
+in the TensorFlow Metal plug-in.
+
+
+164
+00:10:32.199 --> 00:10:36.603 line:-2 align:center
+Next, implement the op using
+the TensorFlow_MetalStream.
+
+
+165
+00:10:36.637 --> 00:10:40.507 line:-1 align:center
+Start by defining the "compute" function.
+
+
+166
+00:10:40.541 --> 00:10:44.978 line:-2 align:center
+Now, inside this function,
+get the TensorFlow_Tensor objects
+
+
+167
+00:10:45.012 --> 00:10:50.417 line:-2 align:center
+for the input and define the output,
+which might require an allocation.
+
+
+168
+00:10:50.450 --> 00:10:55.022 line:-2 align:center
+Then create an encoder
+using the Metal stream's command buffer.
+
+
+169
+00:10:55.055 --> 00:10:57.991 line:-1 align:center
+Next, define the custom GPU kernel.
+
+
+170
+00:10:58.025 --> 00:11:00.928 line:-2 align:center
+Your op should be encoded inside
+the dispatch_queue
+
+
+171
+00:11:00,961 --> 00:11:02,763 line:-1
+provided by the Metal stream.
+
+
+172
+00:11:02.796 --> 00:11:07.000 line:-2 align:center
+This ensures submissions
+from multiple threads are serialized.
+
+
+173
+00:11:08.802 --> 00:11:12.005 line:-2 align:center
+Then commit the kernel
+by using the method provided
+
+
+174
+00:11:12.039 --> 00:11:14.374 line:-1 align:center
+in the TensorFlow_MetalStream protocol.
+
+
+175
+00:11:16,143 --> 00:11:19,947 line:-2
+Finally, delete the references
+to the allocated tensors.
+
+
+176
+00:11:21.315 --> 00:11:27.955 line:-2 align:center
+Last, import the operation into
+your training script to begin using it.
+
+
+177
+00:11:27.988 --> 00:11:35.062 line:-2 align:center
+In this step, build the custom op's shared
+dynamic library file called zero_out.so.
+
+
+178
+00:11:35.095 --> 00:11:37.130 line:-1 align:center
+Refer to Metal Developer Resources
+
+
+179
+00:11:37.164 --> 00:11:41.235 line:-2 align:center
+for info on how to build and import
+.so files.
+
+
+180
+00:11:41,268 --> 00:11:45,172 line:-2
+This example imports the operation
+into the training script
+
+
+181
+00:11:45.205 --> 00:11:48.141 line:-1 align:center
+by using the TensorFlow load_op_library,
+
+
+182
+00:11:48,175 --> 00:11:50,043 line:-1
+which is an optional step.
+
+
+183
+00:11:50,077 --> 00:11:52,746 line:-1
+Now, this works like a python wrapper
+
+
+184
+00:11:52.779 --> 00:11:56.884 line:-2 align:center
+and our custom op can be invoked
+in the training script.
+
+
+185
+00:11:56,917 --> 00:12:00,687 line:-2
+Next, I'd like to show you an example
+of an interesting application
+
+
+186
+00:12:00,721 --> 00:12:04,024 line:-1
+called Neural Radiance Fields, or NeRF.
+
+
+187
+00:12:04.057 --> 00:12:08.328 line:-2 align:center
+We wrote a custom operation
+that elevated the network's performance
+
+
+188
+00:12:08.362 --> 00:12:12.766 line:-2 align:center
+by enabling GPU acceleration
+for a better algorithm.
+
+
+189
+00:12:13.901 --> 00:12:18.472 line:-2 align:center
+NeRF is a network used
+to synthesize 3D views of a model.
+
+
+190
+00:12:18.505 --> 00:12:23.710 line:-2 align:center
+For training, NeRF takes as input,
+images of an object from different angles.
+
+
+191
+00:12:23,744 --> 00:12:28,382 line:-2
+The NeRF network consists of
+two stacked Multi-layer perceptrons,
+
+
+192
+00:12:28,415 --> 00:12:32,819 line:-2
+and the output is a volumetric
+representation of the model.
+
+
+193
+00:12:32.853 --> 00:12:35.956 line:-2 align:center
+A key performance optimization
+for real time training
+
+
+194
+00:12:35,989 --> 00:12:38,592 line:-1
+uses a hash table implementation.
+
+
+195
+00:12:38,625 --> 00:12:43,564 line:-2
+This updated network allows
+a much smaller multi-layer perceptron.
+
+
+196
+00:12:43.597 --> 00:12:46.967 line:-2 align:center
+TensorFlow does not support
+hash tables natively
+
+
+197
+00:12:47,000 --> 00:12:49,236 line:-1
+so we use the custom op feature
+
+
+198
+00:12:49,269 --> 00:12:52,005 line:-1
+to implement them in the Metal plug-in.
+
+
+199
+00:12:52.039 --> 00:12:58.011 line:-2 align:center
+The GPU acceleration for hash tables makes
+it possible to train NeRF much faster.
+
+
+200
+00:12:58,045 --> 00:12:59,947 line:-1
+I'll start on this MacBook
+
+
+201
+00:12:59,980 --> 00:13:03,817 line:-2
+and run original multi-layer perceptron
+implementation.
+
+
+202
+00:13:06.186 --> 00:13:10.724 line:-2 align:center
+In order to render anything reasonable,
+we need at least 20 epochs
+
+
+203
+00:13:10.757 --> 00:13:13.727 line:-1 align:center
+but each epoch takes about 100 seconds.
+
+
+204
+00:13:13,760 --> 00:13:17,798 line:-2
+That means it will take about 30 minutes
+before anything is seen.
+
+
+205
+00:13:17,831 --> 00:13:22,636 line:-2
+So now I will restart training
+from a pre-trained checkpoint file,
+
+
+206
+00:13:22.669 --> 00:13:26.073 line:-2 align:center
+which was left to train
+for 30 minutes beforehand.
+
+
+207
+00:13:26,106 --> 00:13:28,675 line:-1
+This starts at epoch 20.
+
+
+208
+00:13:28.709 --> 00:13:33.780 line:-2 align:center
+The 3D model is blurred and unclear
+even after 30 minutes of training.
+
+
+209
+00:13:33,814 --> 00:13:37,017 line:-2
+It would require a much longer
+training time for the network
+
+
+210
+00:13:37.050 --> 00:13:38.719 line:-1 align:center
+to learn a clearer model.
+
+
+211
+00:13:38.752 --> 00:13:42.256 line:-2 align:center
+The original two stacked multi-layer
+perceptron approach
+
+
+212
+00:13:42,289 --> 00:13:45,559 line:-1
+without custom hash tables is too slow.
+
+
+213
+00:13:45.592 --> 00:13:49.363 line:-2 align:center
+Now on this MacBook
+I'll kick off the optimized version
+
+
+214
+00:13:49,396 --> 00:13:52,299 line:-1
+that uses custom hash tables.
+
+
+215
+00:13:52,332 --> 00:13:57,037 line:-2
+This implementation is already able
+to render a much clearer model
+
+
+216
+00:13:57.070 --> 00:14:00.641 line:-2 align:center
+and each epoch takes only 10 seconds
+to learn.
+
+
+217
+00:14:00,674 --> 00:14:02,910 line:-1
+For more information on this project,
+
+
+218
+00:14:02,943 --> 00:14:07,981 line:-2
+check out the sample code which we have
+uploaded to Metal Developer Resources.
+
+
+219
+00:14:09.683 --> 00:14:13.253 line:-2 align:center
+NeRF is just one of the many networks
+which demonstrates
+
+
+220
+00:14:13.287 --> 00:14:17.958 line:-2 align:center
+how you can implement GPU acceleration
+for your own custom operations
+
+
+221
+00:14:17.991 --> 00:14:20.727 line:-1 align:center
+to make your networks run blazing fast.
+
+
+222
+00:14:20.761 --> 00:14:24.331 line:-2 align:center
+I look forward to learning
+about all the creative customizations
+
+
+223
+00:14:24.364 --> 00:14:26.400 line:-1 align:center
+you make, going forward.
+
+
+224
+00:14:26,433 --> 00:14:30,270 line:-2
+Now I want to show you how to use
+Apple GPUs
+
+
+225
+00:14:30.304 --> 00:14:33.207 line:-1 align:center
+to distribute training of ML workloads.
+
+
+226
+00:14:33.240 --> 00:14:35.976 line:-2 align:center
+In order to distribute
+training of workloads,
+
+
+227
+00:14:36.009 --> 00:14:40.848 line:-2 align:center
+you can run multiple instances of the
+training script in separate processes
+
+
+228
+00:14:40.881 --> 00:14:45.018 line:-2 align:center
+where each process evaluates
+a single iteration of the model.
+
+
+229
+00:14:46.286 --> 00:14:50.090 line:-2 align:center
+Each process will read data
+from a central data store.
+
+
+230
+00:14:50.123 --> 00:14:55.662 line:-2 align:center
+After which, it will run through the model
+and calculate the model gradients.
+
+
+231
+00:14:55,696 --> 00:15:00,167 line:-2
+Next, the processes will average
+the gradients and communicate this
+
+
+232
+00:15:00,200 --> 00:15:06,073 line:-2
+to each other so each process has the same
+gradients before the next iteration.
+
+
+233
+00:15:06.106 --> 00:15:10.043 line:-2 align:center
+Finally, the model is updated
+and you can repeat this process
+
+
+234
+00:15:10,077 --> 00:15:13,180 line:-1
+until all the iterations are exhausted.
+
+
+235
+00:15:13.213 --> 00:15:15.415 line:-1 align:center
+To demonstrate this on TensorFlow,
+
+
+236
+00:15:15,449 --> 00:15:18,118 line:-2
+I will use an example
+of distributed training
+
+
+237
+00:15:18.151 --> 00:15:22.155 line:-2 align:center
+using a popular open source
+framework called Horovod.
+
+
+238
+00:15:23.724 --> 00:15:27.194 line:-1 align:center
+Horovod uses a ring all-reduce approach.
+
+
+239
+00:15:27,227 --> 00:15:31,064 line:-2
+In this algorithm,
+each of N nodes communicates
+
+
+240
+00:15:31.098 --> 00:15:34.101 line:-1 align:center
+with two of its peers multiple times.
+
+
+241
+00:15:34,134 --> 00:15:37,938 line:-2
+Using this communication,
+the worker processes synchronize
+
+
+242
+00:15:37.971 --> 00:15:40.741 line:-1 align:center
+gradients before each iteration.
+
+
+243
+00:15:40.774 --> 00:15:44.211 line:-2 align:center
+I'll show this in action
+using four Mac Studios
+
+
+244
+00:15:44.244 --> 00:15:47.414 line:-2 align:center
+connected to each other
+with Thunderbolt cables.
+
+
+245
+00:15:47,447 --> 00:15:53,120 line:-2
+For this example, I will train ResNet,
+a classifier for images.
+
+
+246
+00:15:53.153 --> 00:15:58.025 line:-2 align:center
+The bar to the side of each Mac Studio
+shows the GPU utilization
+
+
+247
+00:15:58.058 --> 00:15:59.793 line:-1 align:center
+while training this network.
+
+
+248
+00:15:59.826 --> 00:16:04.665 line:-2 align:center
+For a single Mac Studio, the performance
+is about 200 images per second.
+
+
+249
+00:16:04,698 --> 00:16:08,468 line:-2
+When I add another Mac Studio
+connected via Thunderbolt,
+
+
+250
+00:16:08.502 --> 00:16:12.706 line:-2 align:center
+the performance almost doubles
+to 400 images per second
+
+
+251
+00:16:12.739 --> 00:16:16.710 line:-2 align:center
+since both GPUs are utilized
+to the fullest.
+
+
+252
+00:16:16,743 --> 00:16:19,713 line:-2
+Finally,
+when I connect two more Mac Studios,
+
+
+253
+00:16:19.746 --> 00:16:24.051 line:-2 align:center
+the performance is elevated
+to 800 images per second.
+
+
+254
+00:16:24,084 --> 00:16:28,322 line:-2
+This is almost linear scaling on
+your compute bound training workloads.
+
+
+255
+00:16:30.090 --> 00:16:34.995 line:-2 align:center
+Now here's a look at the Distributed
+training performance of TensorFlow.
+
+
+256
+00:16:35.028 --> 00:16:41.034 line:-2 align:center
+This chart shows the relative speedup
+for one, two, and four Mac Studios.
+
+
+257
+00:16:41,068 --> 00:16:45,939 line:-2
+They are connected in a ring topology and
+run compute bound TensorFlow networks
+
+
+258
+00:16:45,973 --> 00:16:48,442 line:-1
+such as resNet and DistilBERT
+
+
+259
+00:16:48.475 --> 00:16:52.813 line:-2 align:center
+with the latest TensorFlow Metal plug-in
+and Horovod.
+
+
+260
+00:16:52,846 --> 00:16:57,050 line:-2
+The base is the performance
+on a single Mac Studio.
+
+
+261
+00:16:57.084 --> 00:17:02.422 line:-2 align:center
+The graph show that network performance
+scales with the addition of each GPU
+
+
+262
+00:17:02.456 --> 00:17:05.859 line:-2 align:center
+so you can now leverage GPUs
+on multiple devices,
+
+
+263
+00:17:05.893 --> 00:17:07.394 line:-1 align:center
+to speed up your training time
+
+
+264
+00:17:07.427 --> 00:17:10.697 line:-2 align:center
+and make the most
+out of all your Apple devices.
+
+
+265
+00:17:12.032 --> 00:17:15.636 line:-2 align:center
+All the improvements and features
+unlocked for TensorFlow this year
+
+
+266
+00:17:15.669 --> 00:17:19.373 line:-2 align:center
+culminate into this chart
+showing the relative performance
+
+
+267
+00:17:19.406 --> 00:17:21.542 line:-1 align:center
+against the CPU implementation
+
+
+268
+00:17:21.575 --> 00:17:24.344 line:-2 align:center
+with more improvements to come
+in the future.
+
+
+269
+00:17:24.378 --> 00:17:29.449 line:-2 align:center
+Now Matteo will share what's new
+in the MPSGraph framework.
+
+
+270
+00:17:30.184 --> 00:17:31.318 line:-1 align:center
+Matteo: Thanks, Dhruva.
+
+
+271
+00:17:31,351 --> 00:17:35,756 line:-2
+Hi, my name is Matteo,
+and I'm a GPU software engineer.
+
+
+272
+00:17:35.789 --> 00:17:41.028 line:-2 align:center
+PyTorch and TensorFlow sit on top
+of the MPSGraph framework.
+
+
+273
+00:17:41,061 --> 00:17:45,199 line:-2
+In turn, MPSGraph uses
+the parallel primitives
+
+
+274
+00:17:45.232 --> 00:17:50.103 line:-2 align:center
+exposed by the MPS framework
+to accelerate work on the GPU.
+
+
+275
+00:17:50,137 --> 00:17:54,241 line:-2
+Today I am going to talk about
+two features that you can use
+
+
+276
+00:17:54.274 --> 00:17:58.979 line:-2 align:center
+to accelerate your compute workloads
+even further with MPSGraph.
+
+
+277
+00:17:59.012 --> 00:18:02.216 line:-2 align:center
+First, I will show
+the new shared events API
+
+
+278
+00:18:02.249 --> 00:18:05.953 line:-2 align:center
+which allows you to synchronize work
+between two graphs.
+
+
+279
+00:18:05.986 --> 00:18:08.922 line:-1 align:center
+Second, I will go over new operations,
+
+
+280
+00:18:08,956 --> 00:18:13,060 line:-2
+which you can use to do even more
+with MPSGraph.
+
+
+281
+00:18:13.093 --> 00:18:15.996 line:-1 align:center
+I'll begin with the Shared Events API.
+
+
+282
+00:18:16.029 --> 00:18:19.132 line:-2 align:center
+Running applications on
+the same command queue
+
+
+283
+00:18:19,166 --> 00:18:22,736 line:-1
+ensures synchronization between workloads.
+
+
+284
+00:18:22.769 --> 00:18:26.440 line:-2 align:center
+In this example,
+the compute workload is guaranteed
+
+
+285
+00:18:26,473 --> 00:18:29,209 line:-2
+to always terminate
+before other workloads,
+
+
+286
+00:18:29,243 --> 00:18:33,380 line:-2
+such as post processing and display,
+are dispatched.
+
+
+287
+00:18:33.413 --> 00:18:37.150 line:-2 align:center
+In cases like this,
+you will leverage the GPU parallelism
+
+
+288
+00:18:37.184 --> 00:18:39.753 line:-1 align:center
+within each single dispatch.
+
+
+289
+00:18:39,786 --> 00:18:44,358 line:-2
+However, some applications could benefit
+from more parallelism,
+
+
+290
+00:18:44.391 --> 00:18:47.995 line:-2 align:center
+where a first portion of the GPU
+is used for the compute,
+
+
+291
+00:18:48,028 --> 00:18:52,666 line:-2
+and a second portion is used
+for the post processing and display.
+
+
+292
+00:18:52.699 --> 00:18:58.605 line:-2 align:center
+This could be achieved by submitting work
+to the GPU on multiple command queues.
+
+
+293
+00:18:58,639 --> 00:19:01,975 line:-2
+Unfortunately, in this case,
+the post processing pipeline
+
+
+294
+00:19:02,009 --> 00:19:06,146 line:-2
+may be dispatched before
+the compute has produced the results,
+
+
+295
+00:19:06.180 --> 00:19:09.449 line:-1 align:center
+introducing a data race.
+
+
+296
+00:19:09.483 --> 00:19:13.554 line:-2 align:center
+The Shared Events API can be used
+to solve this problem
+
+
+297
+00:19:13.587 --> 00:19:16.723 line:-2 align:center
+and introduce synchronization
+across command queues
+
+
+298
+00:19:16,757 --> 00:19:21,428 line:-2
+to make sure that workflow dependencies
+can be satisfied.
+
+
+299
+00:19:21.461 --> 00:19:25.566 line:-2 align:center
+Using shared events within
+your code is very simple.
+
+
+300
+00:19:25,599 --> 00:19:29,169 line:-2
+Let's assume
+you are working with two graphs.
+
+
+301
+00:19:29,203 --> 00:19:32,873 line:-2
+The first is responsible
+for the compute workload.
+
+
+302
+00:19:32.906 --> 00:19:37.277 line:-2 align:center
+The second, is responsible
+for the post processing workload.
+
+
+303
+00:19:37,311 --> 00:19:41,815 line:-2
+Let's also assume that the result
+of the compute graph is used as input
+
+
+304
+00:19:41.849 --> 00:19:43.550 line:-1 align:center
+for the post processing graph,
+
+
+305
+00:19:43.584 --> 00:19:47.187 line:-2 align:center
+and that they run
+on different command queues.
+
+
+306
+00:19:47.221 --> 00:19:51.258 line:-2 align:center
+The new MPSGraph track
+in the Metal System Trace
+
+
+307
+00:19:51,291 --> 00:19:55,329 line:-2
+indicates that the command queues
+are overlapping with each other.
+
+
+308
+00:19:55,362 --> 00:19:58,398 line:-1
+This produces a data race.
+
+
+309
+00:19:58,432 --> 00:20:01,902 line:-2
+You can solve this problem
+using a shared event.
+
+
+310
+00:20:01.935 --> 00:20:05.906 line:-2 align:center
+First, create the event
+using the Metal device.
+
+
+311
+00:20:05.939 --> 00:20:10.477 line:-2 align:center
+Next, invoke the signal method
+in the execution descriptor,
+
+
+312
+00:20:10.511 --> 00:20:14.248 line:-2 align:center
+providing the event, the action,
+and the value.
+
+
+313
+00:20:14.281 --> 00:20:18.552 line:-2 align:center
+Then all you have to do is to call
+the wait method
+
+
+314
+00:20:18.585 --> 00:20:20.087 line:-1 align:center
+on the second descriptor,
+
+
+315
+00:20:20.120 --> 00:20:23.156 line:-1 align:center
+providing event variable and the value.
+
+
+316
+00:20:24,658 --> 00:20:29,596 line:-2
+Now, the Metal system trace
+indicates that the two command queues
+
+
+317
+00:20:29,630 --> 00:20:32,866 line:-2
+are run sequentially,
+and the dependency between
+
+
+318
+00:20:32,900 --> 00:20:37,137 line:-2
+compute and post processing graph
+has been resolved.
+
+
+319
+00:20:37.171 --> 00:20:41.141 line:-2 align:center
+That's how you can use shared events
+to solve synchronization problems
+
+
+320
+00:20:41.175 --> 00:20:43.043 line:-1 align:center
+in your applications.
+
+
+321
+00:20:43.076 --> 00:20:48.348 line:-2 align:center
+Second, I'll talk about the new operations
+supported by MPSGraph.
+
+
+322
+00:20:48,382 --> 00:20:52,619 line:-2
+These operations allow you
+to do even more with the framework.
+
+
+323
+00:20:52.653 --> 00:20:58.458 line:-2 align:center
+I'll go through some of the details of
+each of these new ops, starting with RNNs.
+
+
+324
+00:20:59.760 --> 00:21:03.797 line:-2 align:center
+MPSGraph now exposes three operations
+commonly used
+
+
+325
+00:21:03.830 --> 00:21:07.334 line:-2 align:center
+within Recurrent Neural Network
+applications.
+
+
+326
+00:21:07,367 --> 00:21:12,172 line:-2
+These are the RNN, LSTM,
+and GRU layers.
+
+
+327
+00:21:12,206 --> 00:21:14,808 line:-1
+These operations all work similarly,
+
+
+328
+00:21:14,842 --> 00:21:18,979 line:-1
+so I'll just focus on LSTMs today.
+
+
+329
+00:21:19,012 --> 00:21:23,217 line:-2
+The LSTM operation is commonly used
+for natural language processing
+
+
+330
+00:21:23,250 --> 00:21:25,552 line:-1
+and other applications.
+
+
+331
+00:21:25.586 --> 00:21:29.790 line:-2 align:center
+This diagram shows
+how the LSTM operation works.
+
+
+332
+00:21:29,823 --> 00:21:35,529 line:0
+To learn more about it,
+check out our previous WWDC session.
+
+
+333
+00:21:35,562 --> 00:21:39,600 align:center
+You could implement the LSTM unit
+yourself, but to do so,
+
+
+334
+00:21:39,633 --> 00:21:43,637 line:0
+you would have to build this
+rather complicated custom subgraph.
+
+
+335
+00:21:43,670 --> 00:21:47,508 line:0
+Instead, you can use
+the new LSTM operation,
+
+
+336
+00:21:47,541 --> 00:21:53,647 line:-2
+which efficiently encodes all the GPU work
+required by the recurrent unit.
+
+
+337
+00:21:53.680 --> 00:21:59.586 line:-2 align:center
+This new operation makes LSTM-based CoreML
+inference models significantly faster.
+
+
+338
+00:22:01,388 --> 00:22:03,557 line:-1
+To use the new LSTM operation,
+
+
+339
+00:22:03.590 --> 00:22:08.529 line:-1 align:center
+first create an MPSGraphLSTMDescriptor.
+
+
+340
+00:22:08,562 --> 00:22:11,798 line:-2
+You can modify the descriptor properties
+as needed,
+
+
+341
+00:22:11,832 --> 00:22:15,636 line:-2
+for example
+selecting the activation functions.
+
+
+342
+00:22:15.669 --> 00:22:18.705 line:-1 align:center
+Next, add the LSTM unit to the graph,
+
+
+343
+00:22:18.739 --> 00:22:21.275 line:-1 align:center
+providing the input tensors.
+
+
+344
+00:22:21,308 --> 00:22:23,911 line:-1
+You can also provide a bias vector,
+
+
+345
+00:22:23,944 --> 00:22:27,714 line:-2
+as well as the initial state and cell
+for the operation.
+
+
+346
+00:22:27.748 --> 00:22:30.450 line:-1 align:center
+Finally, provide the descriptor.
+
+
+347
+00:22:30,484 --> 00:22:34,154 line:-2
+That's all you need to do
+to set up an LSTM.
+
+
+348
+00:22:34,188 --> 00:22:38,058 line:-1
+The other RNN operations work similarly.
+
+
+349
+00:22:38.091 --> 00:22:40.694 line:-2 align:center
+I encourage you
+to try these operations out
+
+
+350
+00:22:40.727 --> 00:22:44.431 line:-2 align:center
+and see what kind of speedups
+you can get in your application.
+
+
+351
+00:22:44,464 --> 00:22:48,869 line:-2
+Next, I'll show you
+the improved support for Max Pooling.
+
+
+352
+00:22:48,902 --> 00:22:53,540 line:-2
+The Max Pooling operation takes
+an input tensor and a window size
+
+
+353
+00:22:53,574 --> 00:22:56,543 line:-2
+and computes,
+for each application of the window,
+
+
+354
+00:22:56.577 --> 00:23:00.314 line:-2 align:center
+the maximum value of the input
+within the window.
+
+
+355
+00:23:00,347 --> 00:23:05,686 line:-2
+It is commonly used in computer vision
+to reduce the dimensionality of an image.
+
+
+356
+00:23:05.719 --> 00:23:10.891 line:-2 align:center
+The API has been extended to return
+the indices of the maximum value location
+
+
+357
+00:23:10.924 --> 00:23:13.093 line:-1 align:center
+extracted by the pooling operator.
+
+
+358
+00:23:13,126 --> 00:23:15,729 line:-1
+You can use indices in the gradient pass,
+
+
+359
+00:23:15,762 --> 00:23:19,433 line:-2
+where the gradients must be propagated
+through the locations
+
+
+360
+00:23:19.466 --> 00:23:23.170 line:-1 align:center
+where the maximum values were extracted.
+
+
+361
+00:23:23.203 --> 00:23:26.573 line:-1 align:center
+The new API works for training too.
+
+
+362
+00:23:26.607 --> 00:23:30.844 line:-2 align:center
+Reusing the indices during training
+can be up to six times faster
+
+
+363
+00:23:30.878 --> 00:23:33.380 line:-1 align:center
+for PyTorch and TensorFlow.
+
+
+364
+00:23:34.515 --> 00:23:40.254 line:-2 align:center
+To set this up in code, first,
+create the GraphPooling descriptor.
+
+
+365
+00:23:40,287 --> 00:23:42,723 line:-1
+You can specify the returnIndicesMode,
+
+
+366
+00:23:42.756 --> 00:23:46.593 line:-1 align:center
+for example, globalFlatten4D.
+
+
+367
+00:23:46.627 --> 00:23:53.233 line:-2 align:center
+Then you can call the pooling operation
+on the graph with the Return Indices API.
+
+
+368
+00:23:53.267 --> 00:23:56.203 line:-1 align:center
+The result of the operation is twofold.
+
+
+369
+00:23:56.236 --> 00:24:01.475 line:-2 align:center
+First, the poolingTensor,
+and second, the indicesTensor.
+
+
+370
+00:24:01.508 --> 00:24:04.711 line:-2 align:center
+You can cache the indicesTensor
+for later use,
+
+
+371
+00:24:04.745 --> 00:24:07.748 line:-1 align:center
+for example, on a training pipeline.
+
+
+372
+00:24:09.316 --> 00:24:13.654 line:-2 align:center
+MPS Graph now exposes
+a new parallel random number generator,
+
+
+373
+00:24:13.687 --> 00:24:15.722 line:-1 align:center
+which can be used, for example,
+
+
+374
+00:24:15,756 --> 00:24:19,226 line:-2
+to initialize the weights
+of a training graph.
+
+
+375
+00:24:19.259 --> 00:24:22.863 line:-2 align:center
+The new random operation
+uses the Philox algorithm
+
+
+376
+00:24:22.896 --> 00:24:28.135 line:-2 align:center
+and returns the same results
+as TensorFlow for a given seed.
+
+
+377
+00:24:28.168 --> 00:24:31.772 line:-2 align:center
+The new operation takes,
+as input, a state tensor;
+
+
+378
+00:24:31,805 --> 00:24:34,608 line:-1
+it returns as output a random tensor
+
+
+379
+00:24:34,641 --> 00:24:38,078 line:-2
+and a new state tensor that can be used,
+for example,
+
+
+380
+00:24:38.111 --> 00:24:41.148 line:-1 align:center
+as input for a second random operation.
+
+
+381
+00:24:41,181 --> 00:24:43,517 line:-1
+To use the new random operation,
+
+
+382
+00:24:43.550 --> 00:24:46.787 line:-1 align:center
+call the randomPhiloxStateTensor method.
+
+
+383
+00:24:46.820 --> 00:24:52.192 line:-2 align:center
+This method initializes
+an input stateTensor with the given seed.
+
+
+384
+00:24:52,226 --> 00:24:55,329 line:-1
+Then declare the RandomOp descriptor,
+
+
+385
+00:24:55,362 --> 00:24:59,466 line:-2
+which takes as input
+the distribution and the data type.
+
+
+386
+00:24:59.499 --> 00:25:02.102 line:-2 align:center
+In the example,
+the descriptor specifies
+
+
+387
+00:25:02,135 --> 00:25:07,574 line:-2
+a truncatedNormal distribution
+of 32bit floating point values.
+
+
+388
+00:25:07.608 --> 00:25:11.745 line:-2 align:center
+You can also use
+Normal and Uniform distributions.
+
+
+389
+00:25:12.846 --> 00:25:15.782 line:-2 align:center
+You can further define
+the distribution characteristics
+
+
+390
+00:25:15,816 --> 00:25:18,719 line:-2
+by specifying the mean,
+standard deviation,
+
+
+391
+00:25:18,752 --> 00:25:21,889 line:-1
+minimum, and maximum values.
+
+
+392
+00:25:21.922 --> 00:25:26.326 line:-2 align:center
+Finally, you can create the random
+operation, providing a shapeTensor,
+
+
+393
+00:25:26.360 --> 00:25:29.663 line:-2 align:center
+the descriptor,
+and the stateTensor just created.
+
+
+394
+00:25:32,199 --> 00:25:34,067 line:-1
+In addition to Random,
+
+
+395
+00:25:34,101 --> 00:25:37,905 line:-2
+MPSGraph now supports
+a new GPU accelerated operation
+
+
+396
+00:25:37,938 --> 00:25:42,109 line:-2
+to compute the Hamming distance
+between two bit vectors.
+
+
+397
+00:25:42.142 --> 00:25:45.279 line:-2 align:center
+The hamming distance,
+defined as the number of bits
+
+
+398
+00:25:45.312 --> 00:25:48.215 line:-2 align:center
+that differ between two inputs
+with same length,
+
+
+399
+00:25:48,248 --> 00:25:51,718 line:-2
+is a measure of the edit distance
+between two sequences,
+
+
+400
+00:25:51.752 --> 00:25:58.192 line:-2 align:center
+and it is used on several applications,
+from bioinformatics to cryptography.
+
+
+401
+00:25:58,225 --> 00:26:01,728 line:-2
+To use HammingDistance,
+call the API on the graph,
+
+
+402
+00:26:01.762 --> 00:26:06.867 line:-2 align:center
+providing primaryTensor,
+secondaryTensor, and the resultDataType.
+
+
+403
+00:26:06.900 --> 00:26:11.138 line:-2 align:center
+Note that the new kernel supports
+broadcasting over batch dimensions
+
+
+404
+00:26:11.171 --> 00:26:13.941 line:-1 align:center
+on the GPU.
+
+
+405
+00:26:13,974 --> 00:26:18,612 line:-2
+Now, I'll show you all about
+the new tensor manipulation operations,
+
+
+406
+00:26:18,645 --> 00:26:20,347 line:-1
+which are very easy to use.
+
+
+407
+00:26:20.380 --> 00:26:24.084 line:-2 align:center
+You can now expand the dimensionality
+of the tensor, for example,
+
+
+408
+00:26:24.117 --> 00:26:26.720 line:-1 align:center
+from two to three dimensions.
+
+
+409
+00:26:26.753 --> 00:26:28.889 line:-1 align:center
+And you can squeeze the dimensions back.
+
+
+410
+00:26:30,524 --> 00:26:36,129 line:-2
+You can also split a tensor evenly
+providing a number of slices and an axis.
+
+
+411
+00:26:36,163 --> 00:26:39,233 line:-1
+or stack tensors along a given axis.
+
+
+412
+00:26:40.834 --> 00:26:44.638 line:-2 align:center
+You can also generate coordinate values
+along tensor dimensions
+
+
+413
+00:26:44,671 --> 00:26:46,740 line:-1
+for a given input shape.
+
+
+414
+00:26:46,773 --> 00:26:51,111 line:-2
+For example, you can populate
+a tensor of shape two by four
+
+
+415
+00:26:51.144 --> 00:26:54.348 line:-1 align:center
+with coordinates along the 0 axis.
+
+
+416
+00:26:54,381 --> 00:26:59,720 line:-2
+This can be also used
+to implement a range1D operation.
+
+
+417
+00:26:59.753 --> 00:27:03.490 line:-2 align:center
+For example, assume you want to generate
+the range of numbers
+
+
+418
+00:27:03,524 --> 00:27:07,928 line:-1
+between 3 and 27 with increments of 4.
+
+
+419
+00:27:07.961 --> 00:27:10.731 line:-2 align:center
+You can do so
+by first creating the coordinates
+
+
+420
+00:27:10,764 --> 00:27:15,002 line:-2
+along the dimension 0
+of a tensor of shape 6.
+
+
+421
+00:27:15.035 --> 00:27:21.008 line:-2 align:center
+Then, all you have to do is to multiply
+by the increment, and add the offset.
+
+
+422
+00:27:21,041 --> 00:27:25,179 line:-2
+Those are all of the new operations
+added this year.
+
+
+423
+00:27:25,212 --> 00:27:29,016 line:-2
+With all these new operations,
+you will be able to do even more
+
+
+424
+00:27:29.049 --> 00:27:34.288 line:-2 align:center
+and get higher performance across
+the Apple ecosystem using MPSGraph.
+
+
+425
+00:27:34.321 --> 00:27:37.691 line:-2 align:center
+Now, I am going to show you
+the performance improvements you can get
+
+
+426
+00:27:37.724 --> 00:27:40.861 line:-1 align:center
+on Apple silicon out of MPSGraph.
+
+
+427
+00:27:41.728 --> 00:27:45.766 line:-2 align:center
+Blackmagic has just released
+DaVinci Resolve version 18,
+
+
+428
+00:27:45,799 --> 00:27:50,470 line:-2
+which uses MPS Graph to accelerate
+machine learning workloads.
+
+
+429
+00:27:50.504 --> 00:27:54.808 line:-2 align:center
+Magic Mask is a feature of Resolve
+that uses machine learning
+
+
+430
+00:27:54,842 --> 00:28:00,814 line:-2
+to identify a moving object on screen and
+selectively apply filters on top of it.
+
+
+431
+00:28:00.848 --> 00:28:05.185 line:-2 align:center
+First I'll demonstrate how this works
+in the previous version of Resolve,
+
+
+432
+00:28:05.219 --> 00:28:08.889 line:-2 align:center
+and then I'll compare it
+to the current version.
+
+
+433
+00:28:08.922 --> 00:28:13.060 line:-2 align:center
+To create the mask,
+you just need to select the target object.
+
+
+434
+00:28:13.093 --> 00:28:16.730 line:-2 align:center
+You can view the mask
+by toggling the overlay.
+
+
+435
+00:28:16.763 --> 00:28:19.399 line:-1 align:center
+The mask is identified by the red area,
+
+
+436
+00:28:19.433 --> 00:28:22.402 line:-2 align:center
+which correctly marks
+the shape of the subject.
+
+
+437
+00:28:22.436 --> 00:28:28.709 line:-2 align:center
+Now, if I play the video, the mask will
+track the object as it moves on screen.
+
+
+438
+00:28:28,742 --> 00:28:32,212 line:-2
+This looks great, but it's running
+at a pretty low frame rate,
+
+
+439
+00:28:32,246 --> 00:28:35,916 line:-2
+as the machine learning pipeline
+runs under the hood.
+
+
+440
+00:28:35,949 --> 00:28:39,419 line:-2
+Now I'll switch to the newest version
+of Resolve,
+
+
+441
+00:28:39.453 --> 00:28:44.424 line:-2 align:center
+which uses MPSGraph to accelerate
+the Magic Mask network.
+
+
+442
+00:28:44,458 --> 00:28:49,763 line:-2
+Running the same timeline again,
+the frame rate is way faster than before.
+
+
+443
+00:28:49,796 --> 00:28:54,334 line:-2
+This results in a much better
+editing experience on Apple silicon.
+
+
+444
+00:28:55.402 --> 00:29:00.073 line:-2 align:center
+These are the kind of speedups you can get
+just by adopting MPS Graph.
+
+
+445
+00:29:00,107 --> 00:29:04,645 line:-2
+I encourage you to explore what kind
+of performance it can bring to your app.
+
+
+446
+00:29:04.678 --> 00:29:07.981 line:-2 align:center
+To wrap up,
+you will now be able to leverage
+
+
+447
+00:29:08.015 --> 00:29:10.184 line:-1 align:center
+GPU acceleration for PyTorch,
+
+
+448
+00:29:10.217 --> 00:29:13.420 line:-1 align:center
+and the project is now open source.
+
+
+449
+00:29:13,453 --> 00:29:16,523 line:-2
+You will find new ways to accelerate
+training workloads
+
+
+450
+00:29:16.557 --> 00:29:19.126 line:-1 align:center
+using the TensorFlow Metal plug-in,
+
+
+451
+00:29:19,159 --> 00:29:23,463 line:-2
+for example, using custom operations
+and distributed training.
+
+
+452
+00:29:23.497 --> 00:29:28.202 line:-2 align:center
+Finally, you will be able to optimize the
+most demanding machine learning tasks
+
+
+453
+00:29:28,235 --> 00:29:29,903 line:-1
+with the MPSGraph framework
+
+
+454
+00:29:29,937 --> 00:29:32,206 line:-1
+to make the best out of Apple silicon,
+
+
+455
+00:29:32.239 --> 00:29:34.842 line:-1 align:center
+using shared events and new operations.
+
+
+456
+00:29:34,875 --> 00:29:38,345 line:-2
+Dhruva and I can't wait to see
+how you will use these new features
+
+
+457
+00:29:38.378 --> 00:29:39.880 line:-1 align:center
+in your applications.
+
+
+458
+00:29:39,913 --> 00:29:43,851 line:-2
+Thank you for watching the session,
+and have a great WWDC.
+

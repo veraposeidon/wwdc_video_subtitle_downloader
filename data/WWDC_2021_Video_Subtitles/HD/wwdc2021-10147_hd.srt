@@ -1,0 +1,2239 @@
+2
+00:00:02.035 --> 00:00:05.038 line:-1
+[music]
+
+
+3
+00:00:09.042 --> 00:00:11.245 line:-1
+[Kyle] Hi, my name is Kyle Sanner,
+
+
+4
+00:00:11.278 --> 00:00:13.747 line:-1
+from the GPU Software Engineering team.
+
+
+5
+00:00:13.780 --> 00:00:16.850 line:-2
+Together with my colleague Alex Li,
+we'll be talking about
+
+
+6
+00:00:16.884 --> 00:00:19.253 line:-2
+how to get optimal frame pacing
+in your apps
+
+
+7
+00:00:19.286 --> 00:00:21.889 line:-1
+on variable refresh-rate displays.
+
+
+8
+00:00:21.922 --> 00:00:25.359 line:-2
+We'll be focusing on some new display
+technology coming to macOS,
+
+
+9
+00:00:25.392 --> 00:00:28.195 line:-2
+Adaptive-Sync,
+and how to drive custom drawing
+
+
+10
+00:00:28.228 --> 00:00:31.498 line:-2
+smoothly on iPad Pro
+under all conditions.
+
+
+11
+00:00:31.532 --> 00:00:34.234 line:-2
+We'll start with a quick overview
+of the types of displays
+
+
+12
+00:00:34.268 --> 00:00:36.103 line:-1
+now supported on Apple Platforms.
+
+
+13
+00:00:37.437 --> 00:00:40.941 line:-2
+We're going to introduce
+you to Adaptive-Sync displays on the Mac,
+
+
+14
+00:00:40.974 --> 00:00:44.478 line:-2
+and the new tools in macOS Monterey
+that you can use to deliver
+
+
+15
+00:00:44.511 --> 00:00:48.182 line:-2
+smooth frame rates in full-screen apps
+and games on these displays.
+
+
+16
+00:00:49.950 --> 00:00:53.287 line:-2
+Then, we'll dig
+deep into ProMotion on iPad Pro,
+
+
+17
+00:00:53.320 --> 00:00:55.889 line:-2
+and look at some CADisplayLink
+best practices
+
+
+18
+00:00:55.923 --> 00:00:58.492 line:-2
+that help your apps maintain
+correct frame pacing
+
+
+19
+00:00:58.525 --> 00:01:00.127 line:-1
+at different frame rates.
+
+
+20
+00:01:01.828 --> 00:01:05.832 line:-2
+Let's first review the types
+of displays Apple's devices can support.
+
+
+21
+00:01:06.934 --> 00:01:10.938 line:-2
+Most displays on Apple systems
+work at fixed refresh rates.
+
+
+22
+00:01:10.971 --> 00:01:13.941 line:-2
+That is, they refresh
+themselves at a consistent rate
+
+
+23
+00:01:13.974 --> 00:01:16.009 line:-1
+whenever they are powered on.
+
+
+24
+00:01:16,043 --> 00:01:18,946
+The exception is
+our ProMotion displays on iPad,
+
+
+25
+00:01:18,979 --> 00:01:22,416
+and now with Adaptive-Sync
+displays on macOS.
+
+
+26
+00:01:22.449 --> 00:01:26.220 line:-2
+Let's start digging in to what's new
+with Adaptive-Sync displays on the Mac.
+
+
+27
+00:01:27.688 --> 00:01:32.092 line:-2
+We'll start with what an Adaptive-Sync
+display is, and how they work on the Mac.
+
+
+28
+00:01:32.125 --> 00:01:36.129 line:-2
+But first, let's first take a quick
+look at how a fixed-rate display works.
+
+
+29
+00:01:36.830 --> 00:01:41.401 line:-2
+Here's a diagram showing frames
+being delivered to a 60Hz display.
+
+
+30
+00:01:41.435 --> 00:01:43.770 line:-1
+Each frame is presented to the display,
+
+
+31
+00:01:43.804 --> 00:01:47.875 line:-2
+where it stays for 16ms
+before the display is refreshed.
+
+
+32
+00:01:47.908 --> 00:01:51.478 line:-2
+If there's a new frame drawn
+by your Mac ready in the Framebuffer,
+
+
+33
+00:01:51.512 --> 00:01:53.647 line:-1
+then that new frame is presented.
+
+
+34
+00:01:53.680 --> 00:01:56.416 line:-2
+Otherwise,
+the previous frame is shown again.
+
+
+35
+00:01:57,451 --> 00:02:00,888
+Looking at a 120Hz display,
+you see that that though we've
+
+
+36
+00:02:00,921 --> 00:02:03,524
+doubled the refresh rate,
+and thereby halved the interval
+
+
+37
+00:02:03,557 --> 00:02:07,728
+each frame can be onscreen,
+it behaves the same way, just faster.
+
+
+38
+00:02:09.296 --> 00:02:12.466 line:-2
+Take a look at this Adaptive-Sync display,
+on the other hand.
+
+
+39
+00:02:12.499 --> 00:02:16.103 line:-2
+Instead of a static duration,
+each frame has a window of time
+
+
+40
+00:02:16.136 --> 00:02:17.971 line:-1
+that it can be onscreen.
+
+
+41
+00:02:18.005 --> 00:02:21.041 line:-2
+This window varies depending
+on the attached display.
+
+
+42
+00:02:21.074 --> 00:02:25.179 line:-2
+This display can
+operate between 40 and 120Hz,
+
+
+43
+00:02:25.212 --> 00:02:30.184 line:-2
+which means that a frame can be
+onscreen anywhere between 8 and 25ms.
+
+
+44
+00:02:31.418 --> 00:02:34.188 line:-2
+Note that once
+the maximum time has elapsed,
+
+
+45
+00:02:34.221 --> 00:02:37.691 line:-2
+the system must refresh the panel,
+and the display will briefly
+
+
+46
+00:02:37.724 --> 00:02:41.295 line:-2
+be unavailable for new updates
+for a short time.
+
+
+47
+00:02:41.328 --> 00:02:44.865 line:-2
+Okay, so what kind of benefits
+can your games and apps get
+
+
+48
+00:02:44.898 --> 00:02:46.900 line:-1
+on an Adaptive-Sync Display?
+
+
+49
+00:02:46.934 --> 00:02:51.205 line:-2
+For applications that mostly run at
+the maximum refresh rate of the display,
+
+
+50
+00:02:51.238 --> 00:02:55.108 line:-2
+Adaptive-Sync displays provide
+a great benefit for free.
+
+
+51
+00:02:55.142 --> 00:02:59.713 line:-2
+Let's first take a look at this scenario,
+where your app is mostly able to produce
+
+
+52
+00:02:59.746 --> 00:03:01.915 line:-1
+new frames in under 8ms,
+
+
+53
+00:03:01.949 --> 00:03:05.285 line:-2
+so you're running fairly reliably
+at 120Hz.
+
+
+54
+00:03:05.319 --> 00:03:08.155 line:-2
+But due to a momentary increase in scene
+complexity,
+
+
+55
+00:03:08.188 --> 00:03:10.257 line:-2
+the finished frame lands
+in the Framebuffer
+
+
+56
+00:03:10.290 --> 00:03:14.261 line:-2
+9ms after the previous
+frame was first displayed.
+
+
+57
+00:03:14.294 --> 00:03:16.897 line:-2
+On a fixed frame rate display,
+the previous frame
+
+
+58
+00:03:16.930 --> 00:03:21.468 line:-2
+is displayed for 16ms,
+instead of the 8ms you intended.
+
+
+59
+00:03:21.502 --> 00:03:24.238 line:-2
+This results in a perceptible
+hitch in your app.
+
+
+60
+00:03:25,339 --> 00:03:28,709
+On an Adaptive-Sync display,
+your frame is presented to the display
+
+
+61
+00:03:28,742 --> 00:03:34,081
+immediately after it is done,
+so your app incurs only a 1ms penalty.
+
+
+62
+00:03:34,114 --> 00:03:38,552
+Hitches this small are generally
+not perceptible to users.
+
+
+63
+00:03:38.585 --> 00:03:42.089 line:-2
+For workloads that can't reach
+the maximum frame rate of the display,
+
+
+64
+00:03:42.122 --> 00:03:45.158 line:-2
+you can provide smooth,
+even frames by making
+
+
+65
+00:03:45.192 --> 00:03:48.629 line:-2
+some small changes to how your app
+presents its drawables.
+
+
+66
+00:03:48.662 --> 00:03:52.866 line:-2
+Consider this scenario:
+a game running a complex scene
+
+
+67
+00:03:52.900 --> 00:03:55.769 line:-1
+can produce updates at around 90Hz.
+
+
+68
+00:03:55.802 --> 00:03:59.706 line:-2
+However, an intermittent effect
+causes a large jump in complexity,
+
+
+69
+00:03:59.740 --> 00:04:04.745 line:-2
+but does so inconsistently,
+causing sudden spikes down to 66Hz.
+
+
+70
+00:04:04.778 --> 00:04:08.148 line:-2
+By monitoring your app's GPU work,
+you can respond to this spike
+
+
+71
+00:04:08.182 --> 00:04:11.418 line:-2
+in complexity by intentionally
+presenting your frames later
+
+
+72
+00:04:11.451 --> 00:04:14.655 line:-2
+until your scene's complexity
+is consistently lower.
+
+
+73
+00:04:14.688 --> 00:04:18.692 line:-2
+Now, let's talk about some
+Adaptive-Sync best practices.
+
+
+74
+00:04:18.725 --> 00:04:22.796 line:-2
+On a fixed rate display, when your app's
+GPU work consistently exceeds
+
+
+75
+00:04:22.829 --> 00:04:24.798 line:-1
+the display's on-glass interval,
+
+
+76
+00:04:24.831 --> 00:04:27.935 line:-2
+we've previously recommended
+that you slow down your rendering
+
+
+77
+00:04:27.968 --> 00:04:31.271 line:-2
+to hit the next factor
+of the display's fastest refresh rate.
+
+
+78
+00:04:32,506 --> 00:04:36,710
+Typically, that means lowering your target
+frames per second to 30 from 60,
+
+
+79
+00:04:36,743 --> 00:04:38,879
+like in this example here.
+
+
+80
+00:04:40.314 --> 00:04:42.883 line:-2
+When presenting
+to an Adaptive-Sync display, however,
+
+
+81
+00:04:42.916 --> 00:04:44.651 line:-1
+we're changing that guidance.
+
+
+82
+00:04:44.685 --> 00:04:47.721 line:-2
+You should instead attempt
+to present frames at the highest rate
+
+
+83
+00:04:47.754 --> 00:04:50.057 line:-1
+your app can do so evenly.
+
+
+84
+00:04:50.090 --> 00:04:52.492 line:-1
+In addition to presenting frames evenly,
+
+
+85
+00:04:52.526 --> 00:04:55.662 line:-2
+remember that if your frames are presented
+at less than the minimum rate
+
+
+86
+00:04:55.696 --> 00:04:58.599 line:-2
+that the display supports,
+that the display might become
+
+
+87
+00:04:58.632 --> 00:05:03.036 line:-2
+unavailable for new frames,
+which could induce judder in your app.
+
+
+88
+00:05:03.070 --> 00:05:05.172 line:-2
+But so long as
+you're in the supported range,
+
+
+89
+00:05:05.205 --> 00:05:08.242 line:-2
+you're free to pick whatever
+rate works best for your app.
+
+
+90
+00:05:08.275 --> 00:05:10.210 line:-2
+Now that you've
+got a high-level understanding
+
+
+91
+00:05:10.244 --> 00:05:13.146 line:-2
+of the new display support
+coming to the Mac this year,
+
+
+92
+00:05:13.180 --> 00:05:16.383 line:-2
+let's talk about how to enable
+Adaptive Sync in your games.
+
+
+93
+00:05:17.284 --> 00:05:19.553 line:-1
+First, you'll need a supported Mac.
+
+
+94
+00:05:19.586 --> 00:05:22.923 line:-2
+Any Mac with an Apple Silicon GPU
+will work great,
+
+
+95
+00:05:22.956 --> 00:05:27.494 line:-2
+and we also support many of our most
+recent Intel-based Macs as well.
+
+
+96
+00:05:27.528 --> 00:05:30.964 line:-2
+Second, you'll need a supported
+Adaptive-Sync display,
+
+
+97
+00:05:30.998 --> 00:05:33.567 line:-1
+and to enable Adaptive-Sync mode.
+
+
+98
+00:05:33.600 --> 00:05:37.004 line:-2
+This can be done by selecting
+the new variable refresh rate
+
+
+99
+00:05:37.037 --> 00:05:40.474 line:-1
+available in Display System Preferences.
+
+
+100
+00:05:40.507 --> 00:05:45.012 line:-2
+And lastly, your app needs to be
+running in full-screen mode.
+
+
+101
+00:05:45.045 --> 00:05:48.248 line:-2
+Let's see what APIs you can
+call in your app to detect
+
+
+102
+00:05:48.282 --> 00:05:52.085 line:-2
+whether it should be attempting
+to do Adaptive-Sync scheduling.
+
+
+103
+00:05:52.119 --> 00:05:55.289 line:-2
+First, you'll need to determine whether
+or not the display you're running on
+
+
+104
+00:05:55.322 --> 00:05:57.824 line:-1
+is capable of Adaptive-Sync scheduling.
+
+
+105
+00:05:57.858 --> 00:06:01.361 line:-2
+For that, there are some new
+properties this year on NSScreen,
+
+
+106
+00:06:01.395 --> 00:06:04.898 line:-2
+minimumRefreshInterval
+and maximumRefreshInterval.
+
+
+107
+00:06:04.932 --> 00:06:08.101 line:-2
+These values tell you the range
+of valid onscreen times
+
+
+108
+00:06:08.135 --> 00:06:10.904 line:-1
+for a frame presented to this display.
+
+
+109
+00:06:10.938 --> 00:06:13.941 line:-2
+On a fixed-frame display,
+these values will be the same,
+
+
+110
+00:06:13.974 --> 00:06:15.843 line:-2
+so a simple
+not-equal comparison
+
+
+111
+00:06:15.876 --> 00:06:19.713 line:-2
+will tell you whether this screen
+is in Adaptive-Sync mode.
+
+
+112
+00:06:19,746 --> 00:06:23,150
+Next, you'll need to know if
+your window is currently full screen.
+
+
+113
+00:06:23,183 --> 00:06:26,420
+You can determine that by
+checking your window's styleMask.
+
+
+114
+00:06:27,754 --> 00:06:31,225
+And remember, you'll need to combine
+both of these checks to ensure your app
+
+
+115
+00:06:31,258 --> 00:06:35,028
+is able to take advantage
+of Adaptive-Sync scheduling.
+
+
+116
+00:06:35.762 --> 00:06:38.565 line:-2
+Okay, great.
+So, now that you've got a handle
+
+
+117
+00:06:38.599 --> 00:06:43.637 line:-2
+on Adaptive-Sync displays and the new APIs
+that macOS provides to detect them,
+
+
+118
+00:06:43.670 --> 00:06:47.274 line:-2
+let's see how we can adapt some existing
+metal presentation techniques
+
+
+119
+00:06:47.307 --> 00:06:50.277 line:-2
+to present evenly
+on an Adaptive-Sync display.
+
+
+120
+00:06:51.445 --> 00:06:55.182 line:-2
+You can use our MetalDrawable APIs
+that have built-in frame-pacing,
+
+
+121
+00:06:55.215 --> 00:06:58.919 line:-2
+such as presentAfterMinimumDuration
+or presentAtTime,
+
+
+122
+00:06:58.952 --> 00:07:01.955 line:-2
+to great effect
+with Adaptive-Sync displays.
+
+
+123
+00:07:01.989 --> 00:07:05.225 line:-2
+Or, you can roll your own
+solution with a present now call
+
+
+124
+00:07:05.259 --> 00:07:07.494 line:-1
+and your own custom timers.
+
+
+125
+00:07:07.528 --> 00:07:10.764 line:-2
+Let's take a look at how a few
+different implementations will work.
+
+
+126
+00:07:12.866 --> 00:07:15.102 line:-1
+We'll start with a simple example.
+
+
+127
+00:07:15.135 --> 00:07:17.604 line:-1
+Here, we're going to acquire a Drawable,
+
+
+128
+00:07:17.638 --> 00:07:21.575 line:-2
+set up our GPU work,
+and present it on the screen.
+
+
+129
+00:07:21.608 --> 00:07:24.678 line:-2
+We're relying on the back
+pressure of a Drawable being available
+
+
+130
+00:07:24.711 --> 00:07:27.014 line:-1
+to set our frame rate for us.
+
+
+131
+00:07:27.047 --> 00:07:30.918 line:-2
+On a fixed-rate display, we know that this
+isn't the best idea,
+
+
+132
+00:07:30.951 --> 00:07:33.420 line:-2
+since there's no
+guarantee that your GPU work
+
+
+133
+00:07:33.453 --> 00:07:36.123 line:-2
+will align to the refresh rate
+of the display.
+
+
+134
+00:07:37.925 --> 00:07:42.396 line:-2
+But as you can see from this instruments
+capture taken on an Adaptive-Sync display,
+
+
+135
+00:07:42.429 --> 00:07:46.233 line:-2
+when our scene is consistent,
+this seems to work out okay.
+
+
+136
+00:07:46.266 --> 00:07:50.737 line:-2
+The problem here is that this
+scene is running into periodic hitches.
+
+
+137
+00:07:50.771 --> 00:07:55.342 line:-2
+These hitches will translate
+into stutters that are visible to users.
+
+
+138
+00:07:55.375 --> 00:07:59.780 line:-2
+Let's try to fix that by
+presenting at a fixed, even rate.
+
+
+139
+00:07:59.813 --> 00:08:03.016 line:-2
+This technique can also be
+used if you want to implement
+
+
+140
+00:08:03.050 --> 00:08:07.487 line:-2
+a user-adjustable FPS slider
+for the players of your game.
+
+
+141
+00:08:07.521 --> 00:08:11.391 line:-2
+Here, we've set
+the frequency we want to 78Hz.
+
+
+142
+00:08:11.425 --> 00:08:15.529 line:-2
+And instead of a plain present call,
+we'll use present afterMinimumDuration
+
+
+143
+00:08:15.562 --> 00:08:20.200 line:-2
+for this Drawable, and specify
+the interval that we defined above.
+
+
+144
+00:08:20.234 --> 00:08:24.805 line:-2
+And here, you can see smoothly presented
+frames at the rate that we requested.
+
+
+145
+00:08:24.838 --> 00:08:27.908 line:-2
+We aren't presenting as quickly
+as the previous example,
+
+
+146
+00:08:27.941 --> 00:08:30.944 line:-2
+but your users are far less
+likely to encounter stutters,
+
+
+147
+00:08:30.978 --> 00:08:34.781 line:-2
+and your app
+will use less CPU and GPU time.
+
+
+148
+00:08:34.815 --> 00:08:38.118 line:-2
+Okay, so here's where things
+get a little more interesting.
+
+
+149
+00:08:38.151 --> 00:08:41.588 line:-2
+Let's try an approach that will
+produce evenly-paced frames
+
+
+150
+00:08:41.622 --> 00:08:44.758 line:-1
+without having to set a single fixed rate.
+
+
+151
+00:08:44.791 --> 00:08:48.695 line:-2
+One way to do this is to compute
+a rolling average of the GPU work
+
+
+152
+00:08:48.729 --> 00:08:50.531 line:-1
+needed to produce each frame,
+
+
+153
+00:08:50.564 --> 00:08:54.468 line:-2
+and feed that time
+into our present Drawable call.
+
+
+154
+00:08:54.501 --> 00:08:59.439 line:-2
+For the first frame, we need to load our
+average GPU time with a starting value.
+
+
+155
+00:08:59.473 --> 00:09:02.276 line:-2
+I'm going to choose to be optimistic
+and target the fastest rate
+
+
+156
+00:09:02.309 --> 00:09:04.378 line:-1
+the display can support here.
+
+
+157
+00:09:04.411 --> 00:09:06.847 line:-2
+This will just be a starting
+point for our average,
+
+
+158
+00:09:06.880 --> 00:09:09.983 line:-1
+so any reasonable guess we make is fine.
+
+
+159
+00:09:10.017 --> 00:09:13.086 line:-2
+Now, let's attach a CommandBuffer
+completion handler
+
+
+160
+00:09:13.120 --> 00:09:16.423 line:-2
+to measure the amount of time the GPU
+spent rendering this frame,
+
+
+161
+00:09:16.456 --> 00:09:20.360 line:-2
+and incorporate that time
+into our rolling average.
+
+
+162
+00:09:20,394 --> 00:09:24,665
+First, we can acquire the time
+the GPU took to complete our work.
+
+
+163
+00:09:24,698 --> 00:09:27,935
+Then, we'll incorporate that new time
+into our rolling average
+
+
+164
+00:09:27,968 --> 00:09:31,672
+that will be used
+when we present the next frame.
+
+
+165
+00:09:31.705 --> 00:09:33.273 line:-1
+And here are the results.
+
+
+166
+00:09:33.307 --> 00:09:37.344 line:-2
+As you can see, we're presenting
+at a rate similar to the previous example,
+
+
+167
+00:09:37.377 --> 00:09:40.714 line:-2
+but this limit is determined by
+the previous frames we've generated,
+
+
+168
+00:09:40.747 --> 00:09:45.986 line:-2
+and will produce even frame
+rates across a range of Mac GPUs.
+
+
+169
+00:09:46.019 --> 00:09:49.323 line:-2
+Here, we can see the same
+program running smoothly at 48Hz
+
+
+170
+00:09:49.356 --> 00:09:52.759 line:-2
+on a less powerful Mac,
+without any additional code changes.
+
+
+171
+00:09:54.461 --> 00:09:57.497 line:-2
+All right, Now you've got some new tools
+and techniques
+
+
+172
+00:09:57.531 --> 00:10:01.268 line:-2
+that you can use to optimize your app
+for Adaptive-Sync displays.
+
+
+173
+00:10:01,301 --> 00:10:04,805
+If you want to learn more about
+Adaptive-Sync displays on macOS,
+
+
+174
+00:10:04,838 --> 00:10:08,675
+check out the new Metal sample
+project on the Apple Developer site.
+
+
+175
+00:10:08,709 --> 00:10:11,912
+To learn more about delivering
+performant experiences in Metal,
+
+
+176
+00:10:11,945 --> 00:10:15,482
+check out these
+WWDC talks from previous years.
+
+
+177
+00:10:15.516 --> 00:10:18.752 line:-2
+And now, I'll hand you over to Alex,
+where you'll learn more
+
+
+178
+00:10:18.785 --> 00:10:21.054 line:-1
+about frame pacing on iPad Pro.
+
+
+179
+00:10:21.088 --> 00:10:22.689 line:-1
+[Alex] Thank you, Kyle.
+
+
+180
+00:10:22.723 --> 00:10:25.025 line:-1
+Next, let's talk about ProMotion.
+
+
+181
+00:10:25.058 --> 00:10:29.596 line:-2
+Since 2017, every iPad Pro has
+been equipped with a ProMotion display
+
+
+182
+00:10:29.630 --> 00:10:33.100 line:-2
+that delivers refresh rates
+of up to 120Hz.
+
+
+183
+00:10:33.133 --> 00:10:37.171 line:-2
+However, 120Hz may not be
+available in some situations,
+
+
+184
+00:10:37.204 --> 00:10:39.973 line:-2
+including when the user has
+switched on Low Power Mode,
+
+
+185
+00:10:40.007 --> 00:10:43.977 line:-2
+which has been brought to the iPad
+this year with iPadOS 15.
+
+
+186
+00:10:44.011 --> 00:10:47.447 line:-2
+Proper frame pacing will allow
+your app to present motion contents
+
+
+187
+00:10:47.481 --> 00:10:51.351 line:-2
+correctly and smoothly,
+regardless of display characteristics,
+
+
+188
+00:10:51.385 --> 00:10:53.887 line:-1
+user preferences, and system states.
+
+
+189
+00:10:53.921 --> 00:10:58.292 line:-2
+We are going to look at the differences
+between ProMotion and fixed rate displays,
+
+
+190
+00:10:58.325 --> 00:11:02.663 line:-2
+as well as the situations in which some
+frame rates may not be available.
+
+
+191
+00:11:02.696 --> 00:11:05.265 line:-2
+Next, we'll
+discuss what is a display link,
+
+
+192
+00:11:05.299 --> 00:11:08.802 line:-2
+and how your app can use
+it to drive custom drawing.
+
+
+193
+00:11:08.836 --> 00:11:13.273 line:-2
+And finally, we'll offer some
+display link best practices.
+
+
+194
+00:11:13.307 --> 00:11:15.075 line:-1
+Let's dive right in.
+
+
+195
+00:11:15.108 --> 00:11:19.413 line:-2
+As Kyle has briefly presented earlier,
+a fixed 60Hz display
+
+
+196
+00:11:19.446 --> 00:11:23.784 line:-1
+refreshes every 16ms, a fixed cadence.
+
+
+197
+00:11:23.817 --> 00:11:26.353 line:-2
+It supports smooth presentation
+of contents
+
+
+198
+00:11:26.386 --> 00:11:29.189 line:-1
+whose frame rates are factors of 60.
+
+
+199
+00:11:29.223 --> 00:11:34.661 line:-1
+For example, 60Hz, 30Hz, 20Hz, and so on.
+
+
+200
+00:11:34.695 --> 00:11:39.633 line:-2
+However, when the content is slower
+than the display refresh rate, say 30Hz,
+
+
+201
+00:11:39.666 --> 00:11:43.804 line:-2
+the display itself still has to be
+refreshed at the same cadence,
+
+
+202
+00:11:43.837 --> 00:11:46.974 line:-2
+hence, every other frame is a repeat
+of the previous,
+
+
+203
+00:11:47.007 --> 00:11:49.243 line:-1
+and this consumes some power.
+
+
+204
+00:11:49.276 --> 00:11:52.913 line:-2
+On the other hand,
+ProMotion offers great responsiveness
+
+
+205
+00:11:52.946 --> 00:11:56.116 line:-1
+with refresh rates of up to 120Hz.
+
+
+206
+00:11:56.149 --> 00:12:01.188 line:-2
+It also adapts to onscreen content
+and so reduces its power consumption.
+
+
+207
+00:12:01.221 --> 00:12:03.123 line:-1
+Let's see how it works.
+
+
+208
+00:12:03.156 --> 00:12:09.663 line:-2
+Of course, at its maximum refresh rate
+of 120Hz, the display refreshes every 8ms.
+
+
+209
+00:12:10.964 --> 00:12:16.837 line:-2
+Since 120 is a multiple of 60, ProMotion
+supports all existing frame rates.
+
+
+210
+00:12:16.870 --> 00:12:20.841 line:-2
+It offers not just 120Hz,
+but some intermediate frame rates
+
+
+211
+00:12:20.874 --> 00:12:22.676 line:-1
+for your apps as well.
+
+
+212
+00:12:22.709 --> 00:12:27.014 line:-2
+Moreover, ProMotion can dynamically
+adjust its refresh rate,
+
+
+213
+00:12:27.047 --> 00:12:31.985 line:-2
+so with a smooth 60Hz content,
+it can refresh only every 16ms
+
+
+214
+00:12:32.019 --> 00:12:37.758 line:-2
+without repeats, which otherwise would
+be required on a fixed 120Hz display.
+
+
+215
+00:12:37.791 --> 00:12:40.494 line:-1
+This is true all the way down to 24Hz.
+
+
+216
+00:12:41.662 --> 00:12:44.698 line:-2
+Now, these frame rates may
+not always be available.
+
+
+217
+00:12:44.731 --> 00:12:47.234 line:-2
+The user can
+turn on Limit Frame Rate toggle
+
+
+218
+00:12:47.267 --> 00:12:51.805 line:-2
+in Accessibility settings
+that caps the maximum frame rate to 60Hz.
+
+
+219
+00:12:51.839 --> 00:12:54.374 line:-2
+Also, when the device gets hot,
+the system may
+
+
+220
+00:12:54.408 --> 00:12:58.512 line:-2
+apply restrictions
+on the availability of 120Hz.
+
+
+221
+00:12:58.545 --> 00:13:04.151 line:-2
+With iPadOS 15, we'll also
+enforce the 60Hz cap in Low Power Mode.
+
+
+222
+00:13:04.184 --> 00:13:07.421 line:-2
+So, how do these
+scenarios affect your apps?
+
+
+223
+00:13:07.454 --> 00:13:11.325 line:-2
+The good news is that most apps
+will work without any changes.
+
+
+224
+00:13:11.358 --> 00:13:14.528 line:-2
+But if your app performs frame-by-frame
+custom drawing,
+
+
+225
+00:13:14.561 --> 00:13:17.631 line:-2
+then you would need to pay attention
+to these frame rate changes,
+
+
+226
+00:13:17.664 --> 00:13:20.133 line:-1
+and we will show you how to do that.
+
+
+227
+00:13:20.167 --> 00:13:24.037 line:-2
+The recommended tool to drive
+custom drawing is display link,
+
+
+228
+00:13:24.071 --> 00:13:28.609 line:-2
+which is essentially a timer that is
+synchronized with display refresh rate.
+
+
+229
+00:13:28.642 --> 00:13:33.113 line:-2
+It helps your app drive any
+custom animations or custom render loop.
+
+
+230
+00:13:33.146 --> 00:13:34.615 line:-1
+There are two display links.
+
+
+231
+00:13:34.648 --> 00:13:40.187 line:-2
+One is CVDisplayLink, offered by CoreVideo
+on macOS, and the other is CADisplayLink,
+
+
+232
+00:13:40.220 --> 00:13:45.592 line:-2
+offered by CoreAnimation on our other
+platforms, as well as Catalyst on macOS,
+
+
+233
+00:13:45.626 --> 00:13:48.829 line:-2
+each with slightly different
+characteristics and behavior.
+
+
+234
+00:13:48.862 --> 00:13:51.632 line:-1
+Today, we'll only discuss CADisplayLink,
+
+
+235
+00:13:51.665 --> 00:13:55.035 line:-2
+but on a high level,
+these concepts will apply to both.
+
+
+236
+00:13:55.969 --> 00:14:00.274 line:-2
+CADisplayLink wakes up at every
+vsync and invokes the callback.
+
+
+237
+00:14:00.307 --> 00:14:04.878 line:-2
+This provides the application
+the entire 8ms to complete its work.
+
+
+238
+00:14:06.446 --> 00:14:10.651 line:-2
+A regular timer, such as an NSTimer,
+is very unlikely
+
+
+239
+00:14:10.684 --> 00:14:13.921 line:-1
+to be in perfect sync with the display.
+
+
+240
+00:14:13.954 --> 00:14:19.126 line:-2
+It can be out of phase or drifting,
+so sometimes the app may not have
+
+
+241
+00:14:19.159 --> 00:14:23.230 line:-2
+enough time to complete its work
+and it leads to frame drops.
+
+
+242
+00:14:23.263 --> 00:14:27.467 line:-2
+Now you've seen how CADisplayLink
+provides consistent timings,
+
+
+243
+00:14:27.501 --> 00:14:30.470 line:-1
+here are some of its additional benefits.
+
+
+244
+00:14:30.504 --> 00:14:33.874 line:-2
+It can run at a slower rate
+than the display refresh rate,
+
+
+245
+00:14:33.907 --> 00:14:38.178 line:-2
+and to do so, your app provides
+a hint via preferredFramesPerSecond
+
+
+246
+00:14:38.212 --> 00:14:42.516 line:-2
+and we will choose the nearest
+available frame rate for you.
+
+
+247
+00:14:42.549 --> 00:14:46.253 line:-2
+When the frame rate availability changes,
+as we have discussed earlier,
+
+
+248
+00:14:46.286 --> 00:14:50.157 line:-2
+CADisplayLink will automatically
+adjust its rate under the hood.
+
+
+249
+00:14:50.190 --> 00:14:54.328 line:-2
+Of course, it also provides your app
+with the necessary timing information
+
+
+250
+00:14:54.361 --> 00:14:57.731 line:-2
+so that your custom drawing
+can be aware of these changes.
+
+
+251
+00:14:57.764 --> 00:15:01.869 line:-2
+We won't go into how to write
+a custom animation or custom render loop,
+
+
+252
+00:15:01.902 --> 00:15:06.073 line:-2
+but we will provide you with four
+best practices to help your custom drawing
+
+
+253
+00:15:06.106 --> 00:15:10.143 line:-2
+stay in sync with display timings
+and avoid some of the common pitfalls.
+
+
+254
+00:15:11.245 --> 00:15:15.082 line:-2
+First, it is important to query
+the display refresh rate at runtime
+
+
+255
+00:15:15.115 --> 00:15:17.050 line:-1
+instead of hard-coding it.
+
+
+256
+00:15:17.084 --> 00:15:19.820 line:-2
+Second, it is usually
+the case that you should use
+
+
+257
+00:15:19.853 --> 00:15:23.156 line:-2
+the frame rate
+of the CADisplayLink itself.
+
+
+258
+00:15:23.190 --> 00:15:28.395 line:-2
+Next, using targetTimestamp to prepare
+the drawing will help reduce hitches.
+
+
+259
+00:15:28.428 --> 00:15:32.266 line:-2
+Finally, it is always a good idea
+to prepare for the unexpected
+
+
+260
+00:15:32.299 --> 00:15:35.035 line:-2
+by dynamically
+computing the time delta.
+
+
+261
+00:15:35.068 --> 00:15:37.538 line:-1
+Let's go through them one by one.
+
+
+262
+00:15:37,571 --> 00:15:41,475
+The maximum display refresh rate
+can be queried via UIScreen,
+
+
+263
+00:15:41,508 --> 00:15:45,746
+which will always return
+120Hz on ProMotion displays,
+
+
+264
+00:15:45,779 --> 00:15:50,083
+even during situations such
+as when Low Power Mode is turned on.
+
+
+265
+00:15:50,117 --> 00:15:52,586
+On the other hand,
+CADisplayLink will actually
+
+
+266
+00:15:52,619 --> 00:15:56,924
+provide the shortest interval
+between frames via the duration property,
+
+
+267
+00:15:56,957 --> 00:16:01,695
+and it will dynamically update
+based on the current device state.
+
+
+268
+00:16:01.728 --> 00:16:04.965 line:-2
+But almost always, you should use
+the actual frame information
+
+
+269
+00:16:04.998 --> 00:16:07.134 line:-1
+directly from the CADisplayLink
+
+
+270
+00:16:07.167 --> 00:16:11.672 line:-2
+because the display link can run slower
+than the maximum display refresh rate.
+
+
+271
+00:16:11.705 --> 00:16:15.843 line:-2
+Also, frame rate availability
+is dependent on the hardware,
+
+
+272
+00:16:15.876 --> 00:16:20.280 line:-2
+and the actual frame rate may be changed
+dynamically by the display link itself
+
+
+273
+00:16:20.314 --> 00:16:23.150 line:-1
+in response to system state changes.
+
+
+274
+00:16:23.183 --> 00:16:25.052 line:-1
+Let's look at an example.
+
+
+275
+00:16:25.085 --> 00:16:27.855 line:-1
+Suppose we request a 40Hz display link.
+
+
+276
+00:16:27.888 --> 00:16:32.693 line:-2
+As you see,
+on a ProMotion display, 40Hz is supported.
+
+
+277
+00:16:32.726 --> 00:16:38.131 line:-2
+However, on a 60Hz display,
+or when ProMotion is capped at 60Hz,
+
+
+278
+00:16:38.165 --> 00:16:41.935 line:-2
+the display link will
+automatically adjust itself to 30Hz.
+
+
+279
+00:16:41.969 --> 00:16:46.306 line:-2
+This ensures a good cadence
+where each wake-up is on a possible vsync
+
+
+280
+00:16:46.340 --> 00:16:49.877 line:-2
+that tries to give the equal
+amount of time for each frame.
+
+
+281
+00:16:49.910 --> 00:16:55.048 line:-2
+If we were to use a plain 40Hz NSTimer,
+which is not frame rate aware,
+
+
+282
+00:16:55.082 --> 00:16:58.619 line:-2
+its wake-up could be right in the middle
+of the vsync interval,
+
+
+283
+00:16:58.652 --> 00:17:01.288 line:-2
+and of course,
+we cannot present a frame there,
+
+
+284
+00:17:01.321 --> 00:17:05.359 line:-2
+so you'll likely observe hitches
+in your custom drawing.
+
+
+285
+00:17:05.392 --> 00:17:07.794 line:-1
+So, how does it look in the code?
+
+
+286
+00:17:07.828 --> 00:17:11.298 line:-2
+Well, here is how you would
+usually set up a display link.
+
+
+287
+00:17:11.331 --> 00:17:13.934 line:-2
+First, you must
+provide a target and a selector,
+
+
+288
+00:17:13.967 --> 00:17:16.503 line:-1
+which is the callback to be invoked.
+
+
+289
+00:17:16.537 --> 00:17:22.409 line:-2
+Next, hint the preferred frame
+rate of 40Hz via preferredFramesPerSecond.
+
+
+290
+00:17:22.442 --> 00:17:25.145 line:-2
+You then add the display
+link to the current runloop,
+
+
+291
+00:17:25.179 --> 00:17:28.015 line:-1
+from which the callback will be invoked.
+
+
+292
+00:17:28.048 --> 00:17:30.484 line:-2
+So, in the callback,
+you can get the expected interval
+
+
+293
+00:17:30.517 --> 00:17:32.286 line:-1
+between display link wake-ups
+
+
+294
+00:17:32.319 --> 00:17:35.956 line:-2
+by subtracting the timestamp
+from targetTimestamp.
+
+
+295
+00:17:35.989 --> 00:17:40.827 line:-2
+This interval is not necessarily always
+1 over 40 because the display link itself
+
+
+296
+00:17:40.861 --> 00:17:43.597 line:-1
+may be running at a different frequency.
+
+
+297
+00:17:43.630 --> 00:17:46.200 line:-1
+Next, let's talk about these timestamps.
+
+
+298
+00:17:46.233 --> 00:17:49.570 line:-2
+There are primarily two
+timestamps on the CADisplayLink,
+
+
+299
+00:17:49.603 --> 00:17:53.373 line:-2
+Timestamp, which denotes when the callback
+is scheduled to be invoked,
+
+
+300
+00:17:53.407 --> 00:17:54.708 line:-1
+and targetTimestamp,
+
+
+301
+00:17:54.741 --> 00:17:58.879 line:-2
+which is when the next frame
+will be composited by CoreAnimation.
+
+
+302
+00:17:58.912 --> 00:18:01.915 line:-2
+We'll walk through an example
+that illustrates why you should use
+
+
+303
+00:18:01.949 --> 00:18:05.385 line:-1
+targetTimestamp to prepare your drawings.
+
+
+304
+00:18:05.419 --> 00:18:10.290 line:-2
+Here's an animation in its normalized
+time domain from 0 to 1.
+
+
+305
+00:18:10.324 --> 00:18:16.129 line:-2
+Suppose we are targeting the highest frame
+rate possible and currently it is 120Hz.
+
+
+306
+00:18:16.163 --> 00:18:19.233 line:-2
+CADisplayLink wakes up,
+and if we were to prepare
+
+
+307
+00:18:19.266 --> 00:18:22.002 line:-1
+our frame presentation using timestamp,
+
+
+308
+00:18:22.035 --> 00:18:24.071 line:-1
+we'll sample directly here,
+
+
+309
+00:18:24.104 --> 00:18:27.741 line:-2
+which gets presented in the next vsync,
+and here it is.
+
+
+310
+00:18:29.443 --> 00:18:32.880 line:-2
+The same process continues,
+and we see that it has a good cadence
+
+
+311
+00:18:32.913 --> 00:18:39.586 line:-2
+where for each 120Hz frame,
+our animation progress increases by 0.05.
+
+
+312
+00:18:39.620 --> 00:18:45.292 line:-2
+Now, suppose the thermal state changes,
+and 120Hz is no longer available.
+
+
+313
+00:18:45.325 --> 00:18:49.463 line:-2
+Now the display link wakes up again,
+and the app prepares the animation
+
+
+314
+00:18:49.496 --> 00:18:55.836 line:-2
+at progress 0.4, which gets
+presented in the next vsync right here.
+
+
+315
+00:18:57.204 --> 00:18:59.873 line:-1
+And the same pattern continues.
+
+
+316
+00:18:59.907 --> 00:19:02.876 line:-2
+Something's not quite right
+at the transition here.
+
+
+317
+00:19:02.910 --> 00:19:07.714 line:-2
+We see that the progress increases
+by 0.05, but one is over 8ms,
+
+
+318
+00:19:07.748 --> 00:19:11.585 line:-1
+and the other is over 16ms.
+
+
+319
+00:19:11.618 --> 00:19:14.421 line:-2
+It's very clear
+if we plot progress versus time,
+
+
+320
+00:19:14.454 --> 00:19:16.823 line:-2
+we'll see a hiccup right at
+the transition,
+
+
+321
+00:19:16.857 --> 00:19:19.626 line:-2
+and this will reflect
+as a user perceptible hitch,
+
+
+322
+00:19:19.660 --> 00:19:21.528 line:-1
+and that's not desirable.
+
+
+323
+00:19:23.497 --> 00:19:26.266 line:-1
+Now, let's try targetTimestamp.
+
+
+324
+00:19:26.300 --> 00:19:28.435 line:-1
+CADisplayLink wakes up here.
+
+
+325
+00:19:28.468 --> 00:19:33.841 line:-2
+The progress is sampled at
+targetTimestamp, which gives 0.15.
+
+
+326
+00:19:33.874 --> 00:19:38.412 line:-2
+The same pattern continues,
+and again, we see a good cadence.
+
+
+327
+00:19:38.445 --> 00:19:42.082 line:-2
+At this frame rate transition point,
+the display link wakes up,
+
+
+328
+00:19:42.115 --> 00:19:46.587 line:-2
+samples at targetTimestamp,
+and we get 0.50.
+
+
+329
+00:19:46.620 --> 00:19:49.022 line:-1
+And it continues in the same way.
+
+
+330
+00:19:49.056 --> 00:19:51.892 line:-2
+If we plot the same progress
+versus time graph,
+
+
+331
+00:19:51.925 --> 00:19:54.161 line:-1
+you will see that it is a straight line,
+
+
+332
+00:19:54.194 --> 00:19:58.599 line:-2
+and hence it provides smooth contents
+even when the frame rate changes.
+
+
+333
+00:19:58.632 --> 00:20:04.171 line:-2
+So, targetTimestamp should be used rather
+than timestamp to prepare your drawings.
+
+
+334
+00:20:04.204 --> 00:20:06.773 line:-2
+In your code,
+it should generally be as simple
+
+
+335
+00:20:06.807 --> 00:20:11.979 line:-2
+as replacing any timestamp
+usage with targetTimestamp.
+
+
+336
+00:20:12.012 --> 00:20:16.283 line:-2
+Finally, let's talk about
+dynamically computing the time delta.
+
+
+337
+00:20:16.316 --> 00:20:19.486 line:-2
+The difference between
+targetTimestamp and timestamp
+
+
+338
+00:20:19.520 --> 00:20:23.090 line:-2
+gives you the expected amount
+of time between display link callbacks,
+
+
+339
+00:20:23.123 --> 00:20:26.527 line:-2
+but the actual amount
+of time is not guaranteed.
+
+
+340
+00:20:26.560 --> 00:20:29.563 line:-2
+A higher priority thread
+may be scheduled on the CPU,
+
+
+341
+00:20:29.596 --> 00:20:32.266 line:-2
+or the runloop
+is busy with something else.
+
+
+342
+00:20:32.299 --> 00:20:36.136 line:-2
+In the extreme case,
+callbacks may be skipped entirely,
+
+
+343
+00:20:36.170 --> 00:20:39.840 line:-2
+so in these situations,
+it's especially critical to still maintain
+
+
+344
+00:20:39.873 --> 00:20:43.710 line:-2
+the correct timing in your custom
+drawing for the best user experience.
+
+
+345
+00:20:44.478 --> 00:20:47.948 line:-2
+When the CADisplayLink callback
+is invoked, the app performs its work
+
+
+346
+00:20:47.981 --> 00:20:52.519 line:-2
+to prepare the updates
+or renders necessary for the next frame.
+
+
+347
+00:20:52.553 --> 00:20:56.123 line:-2
+Usually, the callback will be invoked
+right at the scheduled wake-up time,
+
+
+348
+00:20:56.156 --> 00:20:58.091 line:-1
+but it's not alays the case.
+
+
+349
+00:20:58.125 --> 00:21:00.928 line:-2
+We expect the next
+callback to be invoked here.
+
+
+350
+00:21:00.961 --> 00:21:03.564 line:-2
+However, the display link
+doesn't get a chance to run
+
+
+351
+00:21:03.597 --> 00:21:06.967 line:-2
+until a few milliseconds
+into the vsync interval.
+
+
+352
+00:21:07.000 --> 00:21:10.137 line:-1
+And hence, you may not get the full 8ms.
+
+
+353
+00:21:10.170 --> 00:21:12.973 line:-2
+In this case,
+you can query CACurrentMediaTime
+
+
+354
+00:21:13.006 --> 00:21:17.277 line:-2
+and compare with targetTimestamp to get
+a sense of how much time is available.
+
+
+355
+00:21:18.645 --> 00:21:21.982 line:-2
+Now, suppose the work is
+taking too long in this frame.
+
+
+356
+00:21:22.015 --> 00:21:26.186 line:-2
+The next callback won't be invoked
+until the runloop is free again.
+
+
+357
+00:21:26.220 --> 00:21:30.023 line:-2
+Because this one is delayed,
+the following callback will be skipped,
+
+
+358
+00:21:30,057 --> 00:21:34,094
+so when you are preparing to advance
+the progress of your custom drawing
+
+
+359
+00:21:34,127 --> 00:21:39,933
+in this callback, be mindful that the time
+delta that you should use is not 8ms,
+
+
+360
+00:21:39,967 --> 00:21:44,571
+but rather 16ms, if you were to keep track
+of the previous timestamp
+
+
+361
+00:21:44,605 --> 00:21:48,108
+at which your custom
+drawing state was updated at.
+
+
+362
+00:21:48.141 --> 00:21:50.477 line:-1
+Therefore, if your app uses time delta
+
+
+363
+00:21:50.511 --> 00:21:52.846 line:-2
+to advance the state
+of your custom drawing,
+
+
+364
+00:21:52.880 --> 00:21:55.582 line:-2
+this will slow down your custom drawing
+by one frame
+
+
+365
+00:21:55.616 --> 00:21:58.185 line:-1
+every time a calback is skipped.
+
+
+366
+00:21:58.218 --> 00:22:01.321 line:-2
+You can instead keep track
+of a previous targetTimestamp
+
+
+367
+00:22:01.355 --> 00:22:04.258 line:-2
+so that you can
+advance the state correctly.
+
+
+368
+00:22:04.291 --> 00:22:08.295 line:-2
+And if your custom drawing has high
+workload, you can look at targetTimestamp
+
+
+369
+00:22:08.328 --> 00:22:12.165 line:-2
+to potentially reduce the workload
+to meet the deadline as needed.
+
+
+370
+00:22:13.333 --> 00:22:17.337 line:-2
+To recap the best practices,
+don't guess the display refresh rate.
+
+
+371
+00:22:17.371 --> 00:22:19.773 line:-1
+Always query it at runtime.
+
+
+372
+00:22:19.806 --> 00:22:23.110 line:-2
+Your custom drawing should be
+flexible in its supported frame rates
+
+
+373
+00:22:23.143 --> 00:22:26.513 line:-2
+and should be ready
+to adapt to a different rate.
+
+
+374
+00:22:26.547 --> 00:22:30.584 line:-2
+Use targetTimestamp to ensure a hitch-free
+frame rate transition,
+
+
+375
+00:22:30.617 --> 00:22:33.487 line:-2
+and be on the look out
+for any unexpected situations,
+
+
+376
+00:22:33.520 --> 00:22:36.790 line:-1
+such as missed display link callback.
+
+
+377
+00:22:36.823 --> 00:22:38.125 line:-1
+So, let's wrap up.
+
+
+378
+00:22:38.158 --> 00:22:42.029 line:-2
+In the first half of this session,
+we've discussed how to optimize your app's
+
+
+379
+00:22:42.062 --> 00:22:46.633 line:-2
+frame-pacing when running
+on an Adaptive-Sync display on macOS.
+
+
+380
+00:22:46.667 --> 00:22:49.269 line:-2
+In the second half,
+we've described the best practices
+
+
+381
+00:22:49.303 --> 00:22:53.307 line:-2
+for your app to drive its custom drawing
+and maintain smooth frame-pacing
+
+
+382
+00:22:53.340 --> 00:22:58.111 line:-2
+under all conditions
+on a ProMotion display on iPad Pro.
+
+
+383
+00:22:58.145 --> 00:23:00.581 line:-2
+As display technologies continue
+to evolve,
+
+
+384
+00:23:00.614 --> 00:23:04.184 line:-2
+we hope this session
+has provided you with not only insights,
+
+
+385
+00:23:04.218 --> 00:23:06.386 line:-1
+but also tools and best practices
+
+
+386
+00:23:06.420 --> 00:23:10.490 line:-2
+to support the increasingly dynamic
+timings of the displays.
+
+
+387
+00:23:10.524 --> 00:23:15.062 line:-2
+Thank you so much for joining us,
+and enjoy the rest of WWDC 2021.
+
+
+388
+00:23:15.095 --> 00:23:17.898 line:-1
+[music]
+

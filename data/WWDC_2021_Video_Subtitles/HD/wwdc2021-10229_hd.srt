@@ -1,0 +1,2228 @@
+2
+00:00:02,069 --> 00:00:05,072 line:-1
+[music]
+
+
+3
+00:00:09,443 --> 00:00:12,012 line:-2
+[Rini]
+Hello. My name is Rini Patel,
+
+
+4
+00:00:12,045 --> 00:00:15,382 line:-2
+and I'm from the GPU software
+engineering team.
+
+
+5
+00:00:15.415 --> 00:00:17.818 line:-2 align:center
+In this session,
+I'll be introducing the new
+
+
+6
+00:00:17,851 --> 00:00:20,554 line:-1
+shader compilation workflows in Metal.
+
+
+7
+00:00:20,587 --> 00:00:24,057 line:-2
+The Metal shading language
+is a C++-based language,
+
+
+8
+00:00:24,091 --> 00:00:28,595 line:-2
+and its compilation model closely
+resembles the CPU compilation model.
+
+
+9
+00:00:28.629 --> 00:00:33.534 line:-2 align:center
+As GPU workloads are increasing
+in complexity, Metal has similarly evolved
+
+
+10
+00:00:33,567 --> 00:00:38,472 line:-2
+to address the flexibility and performance
+needed to support the modern use cases.
+
+
+11
+00:00:38.505 --> 00:00:41.408 line:-2 align:center
+Some common challenges
+that you may have already faced
+
+
+12
+00:00:41,441 --> 00:00:44,044 line:-1
+while authoring your shaders can be
+
+
+13
+00:00:44.077 --> 00:00:47.147 line:-1 align:center
+sharing utility code across pipelines,
+
+
+14
+00:00:47.181 --> 00:00:51.084 line:-2 align:center
+modifying shader behavior at
+runtime without recompilation,
+
+
+15
+00:00:51.118 --> 00:00:57.291 line:-2 align:center
+or an ability to reuse compiled
+GPU binaries between application launches.
+
+
+16
+00:00:57.324 --> 00:01:01.195 line:-2 align:center
+So, let's walk through a simple
+shader code and discuss the scenarios.
+
+
+17
+00:01:02,696 --> 00:01:06,200 line:-2
+Here, we have a simple fragment
+shader that returns the result
+
+
+18
+00:01:06,233 --> 00:01:10,103 line:-2
+of foo() or bar(),
+depending on the result of condition.
+
+
+19
+00:01:10.137 --> 00:01:13.607 line:-2 align:center
+Now, if those functions are
+called by multiple pipelines,
+
+
+20
+00:01:13.640 --> 00:01:18.011 line:-2 align:center
+we might want to compile them just once
+and link them to each pipeline instead.
+
+
+21
+00:01:19,313 --> 00:01:21,782 line:-2
+We might need to link
+a different implementation
+
+
+22
+00:01:21,815 --> 00:01:24,418 line:-1
+of these functions at the runtime,
+
+
+23
+00:01:24.451 --> 00:01:27.855 line:-2 align:center
+or we might need a fragment shader
+to be extensible
+
+
+24
+00:01:27,888 --> 00:01:31,625 line:-2
+in order to handle
+a new case statement for baz().
+
+
+25
+00:01:31,658 --> 00:01:35,762 line:0
+We may also want to be able
+to call a user-provided function bat()
+
+
+26
+00:01:35,796 --> 00:01:38,832 align:center
+instead of baz()
+from our fragment function.
+
+
+27
+00:01:38,866 --> 00:01:41,568 line:0
+As you can see,
+there are many different requirements
+
+
+28
+00:01:41,602 --> 00:01:45,739 align:center
+that a shader authoring pipeline may have,
+and Metal offers
+
+
+29
+00:01:45,772 --> 00:01:49,376 line:0
+various APIs to support
+different implementations.
+
+
+30
+00:01:49,409 --> 00:01:52,813 align:center
+Each approach will have a different
+trade-off between compilation time
+
+
+31
+00:01:52,846 --> 00:01:54,414 line:-1
+and shader performance.
+
+
+32
+00:01:54.448 --> 00:01:58.952 line:-2 align:center
+And today, I'd like to talk about
+the new compilation workflows that will
+
+
+33
+00:01:58,986 --> 00:02:03,257 line:-2
+help you find the perfect balance
+between performance and flexibility.
+
+
+34
+00:02:03.290 --> 00:02:06.093 line:-2 align:center
+We are going to start with the new support
+for dynamic libraries
+
+
+35
+00:02:06,126 --> 00:02:08,095 line:-1
+for render pipelines,
+
+
+36
+00:02:08.128 --> 00:02:11.765 line:-2 align:center
+as well as function pointers
+for render pipelines.
+
+
+37
+00:02:11,798 --> 00:02:16,270 line:-2
+We'll talk a bit about
+the additions to binaryArchive API.
+
+
+38
+00:02:16.303 --> 00:02:19.306 line:-2 align:center
+Then, we will
+see private linked functions.
+
+
+39
+00:02:19.339 --> 00:02:22.843 line:-2 align:center
+And finally,
+we'll introduce a brand-new feature
+
+
+40
+00:02:22,876 --> 00:02:26,446 line:-1
+for stitching visible functions in Metal.
+
+
+41
+00:02:26,480 --> 00:02:30,384 line:-2
+So, let's start with the dynamic
+library support in Metal.
+
+
+42
+00:02:30,417 --> 00:02:34,721 line:-2
+Dynamic libraries are a common
+tool in software engineering.
+
+
+43
+00:02:34,755 --> 00:02:39,326 line:-2
+They are shared object files
+that allow you to compartmentalize
+
+
+44
+00:02:39,359 --> 00:02:43,964 line:-2
+utility code into
+a stand-alone compilation unit.
+
+
+45
+00:02:43,997 --> 00:02:47,201 line:-2
+They help reduce
+the amount of compiled shader code
+
+
+46
+00:02:47.234 --> 00:02:51.071 line:-1 align:center
+and reuse it between multiple pipelines.
+
+
+47
+00:02:51,104 --> 00:02:54,975 line:-2
+Additionally,
+they allow you to dynamically link, load,
+
+
+48
+00:02:55.008 --> 00:02:57.477 line:-1 align:center
+and share the GPU binary code.
+
+
+49
+00:02:59,580 --> 00:03:03,917 line:0
+Last year, we introduced dynamic languages
+for compute pipelines,
+
+
+50
+00:03:03,951 --> 00:03:08,021 align:center
+and to get more of an introduction to
+dynamic libraries in Metal,
+
+
+51
+00:03:08,055 --> 00:03:11,491 line:0
+I encourage you to check out
+our previous year's presentation,
+
+
+52
+00:03:11,525 --> 00:03:14,494 align:center
+"Build GPU Binaries with Metal."
+
+
+53
+00:03:14,528 --> 00:03:18,999 align:center
+This year, we are bringing dynamic
+libraries to render and tile pipelines.
+
+
+54
+00:03:19,032 --> 00:03:22,870 align:center
+With this added support,
+you can now share utility libraries
+
+
+55
+00:03:22,903 --> 00:03:26,240 align:center
+across all
+your compute and render workloads.
+
+
+56
+00:03:26,273 --> 00:03:28,942 align:center
+And now that we know
+what dynamic libraries are,
+
+
+57
+00:03:28,976 --> 00:03:32,112 line:0
+it's time to talk
+about some of the use cases.
+
+
+58
+00:03:32,145 --> 00:03:35,349 line:0
+Helper functions are often
+used across general compute,
+
+
+59
+00:03:35,382 --> 00:03:38,385 line:0
+vertex, fragment, and tile shaders.
+
+
+60
+00:03:38,418 --> 00:03:42,289 align:center
+With the addition of dynamic
+libraries to render pipelines, you can now
+
+
+61
+00:03:42,322 --> 00:03:47,528 line:0
+manage large amount of utility code
+and share it across all of your workloads.
+
+
+62
+00:03:47,561 --> 00:03:51,698 line:0
+You can precompile the libraries
+that may be used at runtime
+
+
+63
+00:03:51,732 --> 00:03:55,068 line:0
+without experiencing
+the compilation slow down,
+
+
+64
+00:03:55,102 --> 00:03:57,437 align:center
+and even swap out functions of the runtime,
+
+
+65
+00:03:57,471 --> 00:04:01,808 line:0
+simply by changing the libraries that are
+loaded while creating the pipeline.
+
+
+66
+00:04:01,842 --> 00:04:06,380 line:0
+They also help your users to author
+shader code that you can load
+
+
+67
+00:04:06,413 --> 00:04:10,417 line:0
+as part of your pipeline without
+needing to provide the source.
+
+
+68
+00:04:10.450 --> 00:04:13.420 line:-2 align:center
+So, we have talked about when
+to use dynamic libraries.
+
+
+69
+00:04:13,453 --> 00:04:16,723 line:-2
+Let's now look at
+how to build and work with them.
+
+
+70
+00:04:16,757 --> 00:04:21,528 line:-2
+In our example fragment shader,
+we call functions foo() and bar(),
+
+
+71
+00:04:21.562 --> 00:04:25.399 line:-2 align:center
+but we do not provide the implementation
+for either at compile time.
+
+
+72
+00:04:25,432 --> 00:04:29,570 line:-2
+Instead, the implementation for these
+functions exist in a Metal library
+
+
+73
+00:04:29,603 --> 00:04:32,906 line:-2
+that we later link when
+creating our render pipeline.
+
+
+74
+00:04:32,940 --> 00:04:35,642 line:-2
+And it's also possible
+to provide separate libraries
+
+
+75
+00:04:35,676 --> 00:04:38,278 line:-2
+for each of the functions
+that you may use.
+
+
+76
+00:04:38.312 --> 00:04:40.914 line:-2 align:center
+Let's now discuss the tools
+and flexibilities you have
+
+
+77
+00:04:40,948 --> 00:04:44,151 line:-1
+by building dynamic libraries in Metal.
+
+
+78
+00:04:44,184 --> 00:04:48,956 line:-2
+You first need to compile your Metal
+shader source to AIR, and you can do that
+
+
+79
+00:04:48,989 --> 00:04:53,360 line:-2
+either by using Xcode's Metal
+toolchain as part of your build process,
+
+
+80
+00:04:53.393 --> 00:04:59.833 line:-2 align:center
+or by compiling from source by
+using newLibraryWithSource API at runtime.
+
+
+81
+00:04:59.867 --> 00:05:05.272 line:-2 align:center
+With your compiled Metal shader in AIR,
+you can now create a dynamic library
+
+
+82
+00:05:05,305 --> 00:05:08,876 line:-2
+simply by using
+the newDynamicLibrary API.
+
+
+83
+00:05:08,909 --> 00:05:13,213 line:-2
+This library is ready to be
+used in its GPU binary format.
+
+
+84
+00:05:13.247 --> 00:05:16.683 line:-2 align:center
+But what if you want
+to reuse it in later runs?
+
+
+85
+00:05:16,717 --> 00:05:21,855 line:-2
+To do that, you can serialize
+your dynamic library to disk,
+
+
+86
+00:05:21.889 --> 00:05:25.759 line:-2 align:center
+and this can be
+done using serializeToURL API.
+
+
+87
+00:05:25,792 --> 00:05:32,032 line:-2
+And later, you can reuse it by
+calling the newDynamicLibraryWithURL API.
+
+
+88
+00:05:32,065 --> 00:05:34,635 line:-2
+Let's now go through an example
+which calls functions from
+
+
+89
+00:05:34,668 --> 00:05:37,404 line:-1
+dynamic library and fragment shader.
+
+
+90
+00:05:37,437 --> 00:05:43,143 line:-2
+In this example, we declare functions
+foo() and bar() using the extern keyword,
+
+
+91
+00:05:43,177 --> 00:05:46,213 line:-2
+but we do not
+provide definitions for them.
+
+
+92
+00:05:46,246 --> 00:05:50,684 align:center
+To use them, we simply call
+these functions from our fragment shader.
+
+
+93
+00:05:50,717 --> 00:05:53,921 align:center
+And you can provide
+an implementation for the extern functions
+
+
+94
+00:05:53,954 --> 00:05:56,723 align:center
+when building your Metal library.
+
+
+95
+00:05:56,757 --> 00:06:00,027 align:center
+Now, keep in mind that it's
+also possible to replace those
+
+
+96
+00:06:00,060 --> 00:06:04,064 line:0
+implementations with something
+different at the runtime.
+
+
+97
+00:06:04,097 --> 00:06:07,935 align:center
+And to do this, you just need
+to add your dynamic libraries
+
+
+98
+00:06:07,968 --> 00:06:11,672 line:0
+to the appropriate
+preloaded libraries array.
+
+
+99
+00:06:11,705 --> 00:06:15,175 align:center
+In our case, it's fragment,
+but a similar property is available
+
+
+100
+00:06:15,209 --> 00:06:17,678 align:center
+for each stage and pipeline.
+
+
+101
+00:06:17,711 --> 00:06:20,514 align:center
+And the symbols
+will be resolved in the same order
+
+
+102
+00:06:20,547 --> 00:06:23,116 align:center
+in which the libraries
+are added to this array.
+
+
+103
+00:06:23.150 --> 00:06:25.919 line:-2 align:center
+This workflow
+is well suited for experimenting
+
+
+104
+00:06:25,953 --> 00:06:27,387 line:-1
+with new implementations.
+
+
+105
+00:06:27.421 --> 00:06:30.557 line:-1 align:center
+And that's it for the dynamic libraries.
+
+
+106
+00:06:31.024 --> 00:06:34.895 line:-2 align:center
+If you are looking to use Metal dynamic
+libraries, the support is available
+
+
+107
+00:06:34,928 --> 00:06:41,201 line:-2
+for compute pipelines on Apple GPU
+family 7 and above in macOS Monterey.
+
+
+108
+00:06:41.235 --> 00:06:46.273 line:-2 align:center
+It's also available for other GPUs,
+as well as most Mac family 2 devices,
+
+
+109
+00:06:46,306 --> 00:06:50,377 line:-2
+although you’ll need to call Metal
+device supports dynamic libraries.
+
+
+110
+00:06:50.410 --> 00:06:56.350 line:-2 align:center
+On iOS 15, this feature is available
+on all Apple 6 devices and above.
+
+
+111
+00:06:56.383 --> 00:07:00.454 line:-2 align:center
+Render and tile pipeline
+support is available on all devices
+
+
+112
+00:07:00,487 --> 00:07:02,656 line:-1
+that support Apple 6 feature set.
+
+
+113
+00:07:03.857 --> 00:07:08.362 line:-2 align:center
+Next, let's talk about the improvements
+to function pointers coming this year.
+
+
+114
+00:07:09,530 --> 00:07:14,835 align:center
+Function pointer is a simple construct
+for referring to a code that we can call
+
+
+115
+00:07:14,868 --> 00:07:19,106 line:0
+to make your code extensible by
+allowing you to call functions
+
+
+116
+00:07:19,139 --> 00:07:21,308 line:0
+that we have not seen before.
+
+
+117
+00:07:21,341 --> 00:07:26,213 align:center
+Last year, we introduced compute
+pipeline function pointers, and for that,
+
+
+118
+00:07:26,246 --> 00:07:29,483 line:0
+I recommend you to check out our previous
+year's presentation,
+
+
+119
+00:07:29,516 --> 00:07:32,686 line:0
+"Get to know Metal function pointers."
+
+
+120
+00:07:32,719 --> 00:07:35,155 line:-2
+This year, we are extending function
+pointer support
+
+
+121
+00:07:35.189 --> 00:07:38.892 line:-2 align:center
+to the render and tile
+pipelines on Apple Silicon.
+
+
+122
+00:07:38.926 --> 00:07:42.462 line:-2 align:center
+Similar to dynamic libraries,
+function pointers allow
+
+
+123
+00:07:42,496 --> 00:07:45,766 line:-1
+creating customizable pipelines.
+
+
+124
+00:07:45,799 --> 00:07:49,803 line:-2
+With function pointers,
+a GPU pipeline can call code
+
+
+125
+00:07:49.837 --> 00:07:53.707 line:-2 align:center
+that has not been seen during
+the pipeline compilation.
+
+
+126
+00:07:53.740 --> 00:07:57.578 line:-2 align:center
+With function pointer tables,
+code execution behavior
+
+
+127
+00:07:57.611 --> 00:08:00.514 line:-2 align:center
+can change dynamically,
+either when you bind the different
+
+
+128
+00:08:00.547 --> 00:08:06.286 line:-2 align:center
+function table or when the GPU pipeline
+indexes into the function pointer table.
+
+
+129
+00:08:06,320 --> 00:08:09,823 line:-2
+You can also decide
+how to balance compilation performance
+
+
+130
+00:08:09,857 --> 00:08:13,193 line:-2
+against the runtime performance
+using function pointers.
+
+
+131
+00:08:13.227 --> 00:08:17.064 line:-2 align:center
+For fastest compilation,
+for example, you can precompile
+
+
+132
+00:08:17,097 --> 00:08:21,802 line:-2
+function pointers to a GPU
+binary and quickly deal-in the pipeline.
+
+
+133
+00:08:21.835 --> 00:08:24.671 line:-2 align:center
+For the best runtime performance,
+on the other hand,
+
+
+134
+00:08:24.705 --> 00:08:29.209 line:-2 align:center
+you can have your pipeline reference
+AIR representations of functions,
+
+
+135
+00:08:29,243 --> 00:08:32,980 line:-2
+allowing the compiler
+to do maximum optimizations.
+
+
+136
+00:08:33,013 --> 00:08:37,451 line:-2
+Let's now see how you can set
+the function pointers in your code.
+
+
+137
+00:08:37.484 --> 00:08:40.554 line:-1 align:center
+There are three basic building blocks.
+
+
+138
+00:08:40,587 --> 00:08:44,091 line:-1
+We start by instantiating the function,
+
+
+139
+00:08:44.124 --> 00:08:47.361 line:-2 align:center
+then configuring a pipeline
+with these functions,
+
+
+140
+00:08:47,394 --> 00:08:51,064 line:-1
+and finally, creating function tables.
+
+
+141
+00:08:51.098 --> 00:08:57.371 line:-2 align:center
+Once this is done, using a new
+render loop doesn't involve much code.
+
+
+142
+00:08:57,404 --> 00:09:01,708 line:-2
+So let's dive in to the details
+of each of the steps.
+
+
+143
+00:09:01.742 --> 00:09:06.246 line:-2 align:center
+To start using function pointers,
+we first declare the function descriptor
+
+
+144
+00:09:06,280 --> 00:09:10,717 line:-2
+and instantiate to compile a GPU
+binary version of the function.
+
+
+145
+00:09:10,751 --> 00:09:14,988 line:-2
+This will accelerate pipeline
+creation time, and it's as simple as
+
+
+146
+00:09:15,022 --> 00:09:19,193 line:-2
+declaring a descriptor and setting
+the option to compile to binary.
+
+
+147
+00:09:19.226 --> 00:09:23.764 line:-2 align:center
+When the Metal function foo is created
+from library using this descriptor,
+
+
+148
+00:09:23,797 --> 00:09:28,168 line:-2
+the function will be compiled
+by the GPU backend compiler.
+
+
+149
+00:09:28.202 --> 00:09:33.140 line:-2 align:center
+Next, we need to configure
+the render pipeline descriptor.
+
+
+150
+00:09:33,173 --> 00:09:36,109 line:-2
+First, we add the functions
+via the pipeline descriptor
+
+
+151
+00:09:36.143 --> 00:09:38.579 line:-1 align:center
+to the stage where they'll be used,
+
+
+152
+00:09:38.612 --> 00:09:42.015 line:-2 align:center
+which can be vertex,
+fragment, or tile stage.
+
+
+153
+00:09:42.049 --> 00:09:46.086 line:-2 align:center
+We can choose to add
+functions in AIR or binary form.
+
+
+154
+00:09:46,119 --> 00:09:47,788 line:-1
+When adding AIR functions,
+
+
+155
+00:09:47.821 --> 00:09:50.657 line:-2 align:center
+the compiler will statically link
+the visible functions,
+
+
+156
+00:09:50,691 --> 00:09:55,796 line:-2
+allowing for the backend
+compilers to optimize the code.
+
+
+157
+00:09:55,829 --> 00:09:59,933 line:-2
+Adding binary functions,
+on the other hand, will inform the driver
+
+
+158
+00:09:59,967 --> 00:10:04,371 line:-2
+which externally-compiled functions
+are callable from a given pipeline.
+
+
+159
+00:10:04.404 --> 00:10:08.041 line:-2 align:center
+One additional thing to note here
+is when you create a pipeline
+
+
+160
+00:10:08,075 --> 00:10:10,644 line:-1
+that uses binary functions
+
+
+161
+00:10:10,677 --> 00:10:13,780 line:-2
+and if the code that you are
+calling has a complex call chain,
+
+
+162
+00:10:13.814 --> 00:10:18.485 line:-2 align:center
+as illustrated here, it's important to
+specify the maximum call stack depth
+
+
+163
+00:10:18,519 --> 00:10:23,991 line:-2
+necessary, as the compiler cannot
+do static analysis to determine the depth.
+
+
+164
+00:10:24,024 --> 00:10:27,995 line:-2
+The compiler will default
+to maximum depth to be run,
+
+
+165
+00:10:28,028 --> 00:10:32,833 line:-2
+and you may get a stack overflow
+if the depth isn't specified correctly.
+
+
+166
+00:10:32.866 --> 00:10:35.836 line:-2 align:center
+In contrast,
+specifying the depth correctly
+
+
+167
+00:10:35.869 --> 00:10:39.640 line:-2 align:center
+leads to a better resource
+conception and optimal performance.
+
+
+168
+00:10:39,673 --> 00:10:43,677 line:-2
+So once the descriptor is fully set up,
+you can create your pipeline
+
+
+169
+00:10:43,710 --> 00:10:46,613 line:-1
+that's ready to use function pointer.
+
+
+170
+00:10:46.647 --> 00:10:50.083 line:-2 align:center
+After creating your pipeline,
+the next steps are to create
+
+
+171
+00:10:50.117 --> 00:10:55.255 line:-2 align:center
+visible function tables and populate
+them with function handles in the API.
+
+
+172
+00:10:55.289 --> 00:10:58.926 line:-2 align:center
+First, we create a visible
+function table using a descriptor
+
+
+173
+00:10:58,959 --> 00:11:01,328 line:-1
+and specify a render stage.
+
+
+174
+00:11:01.361 --> 00:11:04.898 line:-2 align:center
+Then, we create function handles
+to reference those functions.
+
+
+175
+00:11:04,932 --> 00:11:08,836 line:-2
+Both the function handles
+and table are specific to a given pipeline
+
+
+176
+00:11:08.869 --> 00:11:11.238 line:-1 align:center
+and selected stage.
+
+
+177
+00:11:11.271 --> 00:11:16.543 line:-2 align:center
+You can then insert the handles into
+the function table using setFunction API.
+
+
+178
+00:11:16,577 --> 00:11:22,249 line:-2
+Let's now see how do you use this function
+tables after we have done all the set up.
+
+
+179
+00:11:22,282 --> 00:11:25,519 line:-2
+First, as a part
+of the command and coding,
+
+
+180
+00:11:25.552 --> 00:11:29.523 line:-2 align:center
+we bind the visible function
+table to a buffer index.
+
+
+181
+00:11:29,556 --> 00:11:33,660 line:0
+In the shader itself,
+the visible_function_table is passed
+
+
+182
+00:11:33,694 --> 00:11:39,099 align:center
+as a buffer binding, and we can then
+call our functions through this table.
+
+
+183
+00:11:39,132 --> 00:11:42,769 align:center
+And that was a simple case
+of using function pointers.
+
+
+184
+00:11:42.803 --> 00:11:47.307 line:-2 align:center
+When using function pointers,
+it's not uncommon to create a pipeline
+
+
+185
+00:11:47.341 --> 00:11:52.713 line:-2 align:center
+just to find out later that you need to
+access one or more additional functions.
+
+
+186
+00:11:52,746 --> 00:11:55,782 line:-2
+Now, if you could achieve that by
+creating the second pipeline
+
+
+187
+00:11:55,816 --> 00:11:59,720 line:-2
+from an identical descriptor,
+which adds the additional functions,
+
+
+188
+00:11:59,753 --> 00:12:02,990 line:-2
+but that would
+trigger a pipeline compilation.
+
+
+189
+00:12:03,023 --> 00:12:06,660 line:-2
+To accelerate this process,
+Metal lets you specify if
+
+
+190
+00:12:06,693 --> 00:12:09,463 line:-2
+you plan on extending
+the original pipeline.
+
+
+191
+00:12:09,496 --> 00:12:14,334 line:-2
+This way, a new pipeline can be
+created faster from an existing pipeline,
+
+
+192
+00:12:14.368 --> 00:12:16.837 line:-2 align:center
+and it can use all the function
+pointer tables that were
+
+
+193
+00:12:16,870 --> 00:12:19,873 line:-2
+initially created
+for the original pipeline.
+
+
+194
+00:12:19,907 --> 00:12:24,111 line:-2
+To do that from code,
+when creating the original pipeline,
+
+
+195
+00:12:24,144 --> 00:12:28,482 line:-2
+set supportAddingBinaryFunctions
+option to YES,
+
+
+196
+00:12:28,515 --> 00:12:31,919 line:-2
+for all the stages that you wish
+to extend.
+
+
+197
+00:12:31,952 --> 00:12:34,955 line:-2
+Then when you need
+to create an extended pipeline,
+
+
+198
+00:12:34.988 --> 00:12:37.758 line:-1 align:center
+create RenderPipelineFunctionDescriptor
+
+
+199
+00:12:37,791 --> 00:12:43,030 line:-2
+and include new binary function
+bat() on the fragment length function list.
+
+
+200
+00:12:43,063 --> 00:12:47,801 line:0
+Finally, call new RenderPipelineState
+with additional binary functions
+
+
+201
+00:12:47,835 --> 00:12:52,105 line:0
+on renderPipeline1
+to create renderPipeline2,
+
+
+202
+00:12:52,139 --> 00:12:56,543 align:center
+which will be identical, but includes
+the additional function pointer bat.
+
+
+203
+00:12:56,577 --> 00:12:58,312 line:0
+And that's pretty much it.
+
+
+204
+00:12:58,345 --> 00:13:03,684 line:0
+Now that we have seen how to use function
+pointers, here is where you can use them.
+
+
+205
+00:13:03,717 --> 00:13:09,056 line:-2
+Function pointers in compute pipelines are
+supported on Apple GPU family 6 and above,
+
+
+206
+00:13:09.089 --> 00:13:11.825 line:-1 align:center
+in macOS Big Sur, and iOS 14.
+
+
+207
+00:13:11.859 --> 00:13:15.229 line:-2 align:center
+They are also supported
+on Mac family 2 devices.
+
+
+208
+00:13:15.262 --> 00:13:18.732 line:-2 align:center
+And this year, we are extending
+function pointer support for render
+
+
+209
+00:13:18.765 --> 00:13:22.903 line:-2 align:center
+and tile pipelines on Apple GPU family 6
+and above,
+
+
+210
+00:13:22.936 --> 00:13:25.539 line:-1 align:center
+in Mac OS Monterey, and iOS 15.
+
+
+211
+00:13:27,508 --> 00:13:31,345 line:-2
+The next topic I'd like to talk
+about is managing binary function
+
+
+212
+00:13:31,378 --> 00:13:33,447 line:-1
+compilation overhead.
+
+
+213
+00:13:33,480 --> 00:13:37,184 line:-2
+Compiling shaders
+can be extremely time intensive,
+
+
+214
+00:13:37.217 --> 00:13:41.488 line:-2 align:center
+and you may want to control
+the overhead it brings to an application.
+
+
+215
+00:13:41,522 --> 00:13:46,560 line:0
+To help with that, we added
+binaryArchives to Metal last year.
+
+
+216
+00:13:46,593 --> 00:13:50,531 align:center
+BinaryArchives can collect
+and store the compiled binary versions
+
+
+217
+00:13:50,564 --> 00:13:56,203 line:0
+of the pipeline to disk, saving
+compilation time and subsequent runs
+
+
+218
+00:13:56,236 --> 00:14:00,741 align:center
+and reducing the memory
+cost associated with the compilation.
+
+
+219
+00:14:00,774 --> 00:14:05,612 line:0
+This year, we are adding the ability
+to store visible and intersection function
+
+
+220
+00:14:05,646 --> 00:14:10,717 align:center
+to binaryArchives, allowing
+you to significantly reduce the overhead.
+
+
+221
+00:14:10,751 --> 00:14:15,789 line:0
+So, let's take a look at how you store
+into and load from binaryArchives.
+
+
+222
+00:14:15,822 --> 00:14:21,628 line:0
+To add a function to BinaryArchive,
+simply call addFunctionWithDescriptor
+
+
+223
+00:14:21,662 --> 00:14:26,200 align:center
+and pass the function descriptor
+and source library as arguments.
+
+
+224
+00:14:26,233 --> 00:14:29,870 line:0
+To load the binary function
+pointer from BinaryArchive,
+
+
+225
+00:14:29,903 --> 00:14:34,741 line:0
+place the BinaryArchive on the function
+descriptor's binaryArchives array,
+
+
+226
+00:14:34,775 --> 00:14:39,346 line:0
+and then call Metal library
+method newFunctionWithDescriptor.
+
+
+227
+00:14:39,379 --> 00:14:43,584 align:center
+If any of the archives in the array
+has the compiled function pointer,
+
+
+228
+00:14:43,617 --> 00:14:48,322 line:0
+it will be returned immediately,
+without having to recompile.
+
+
+229
+00:14:48.355 --> 00:14:50.791 line:-2 align:center
+Here are some
+of the rules that illustrate how
+
+
+230
+00:14:50,824 --> 00:14:54,995 line:-2
+newFunctionWithDescriptor will
+behave with the binaryArchives.
+
+
+231
+00:14:55.028 --> 00:15:00.400 line:-2 align:center
+We first search for the binary version
+of the function in the BinaryArchive list.
+
+
+232
+00:15:00,434 --> 00:15:03,670 line:0
+If the function is found,
+it will be returned,
+
+
+233
+00:15:03,704 --> 00:15:08,675 line:0
+and if it's not found,
+we'll check the CompileToBinary option
+
+
+234
+00:15:08,709 --> 00:15:13,947 align:center
+and return AIR version of the function,
+if binary compilation wasn't requested.
+
+
+235
+00:15:13,981 --> 00:15:17,651 align:center
+On the other hand,
+if the binary compilation was requested,
+
+
+236
+00:15:17,684 --> 00:15:22,656 align:center
+then depending on the pipeline option,
+FailOnBinaryArchiveMiss
+
+
+237
+00:15:22,689 --> 00:15:28,996 align:center
+will either compile the function
+binary at runtime or return nil.
+
+
+238
+00:15:29,029 --> 00:15:33,000 line:-2
+When you integrate
+MTLBinaryArchive into your application,
+
+
+239
+00:15:33,033 --> 00:15:37,671 line:-2
+you can use the same archive
+to store all your GPU-compiled code.
+
+
+240
+00:15:37.704 --> 00:15:43.944 line:-2 align:center
+Your render, tile, and compute pipelines,
+as well as your binary function pointers.
+
+
+241
+00:15:44,311 --> 00:15:47,748 line:-2
+And after your archive has been
+prepopulated with the pipeline state
+
+
+242
+00:15:47.781 --> 00:15:52.052 line:-2 align:center
+objects and binary functions,
+you can serialize it to a disk.
+
+
+243
+00:15:52,085 --> 00:15:55,656 line:-2
+Collecting and storing your GPU
+binaries this way will help
+
+
+244
+00:15:55.689 --> 00:16:01.628 line:-2 align:center
+accelerate shader compilation
+on to subsequent application runs.
+
+
+245
+00:16:01,662 --> 00:16:04,631 line:-2
+When using
+a pipeline with function pointers,
+
+
+246
+00:16:04,665 --> 00:16:09,069 line:-2
+you might want to cache
+the pipeline state object itself.
+
+
+247
+00:16:09,102 --> 00:16:11,872 line:-2
+But why should you cache when
+you have a pipeline that comes
+
+
+248
+00:16:11.905 --> 00:16:15.309 line:-2 align:center
+with different
+function pointer combinations?
+
+
+249
+00:16:15,342 --> 00:16:18,712 line:0
+For example, here,
+there are three pipeline descriptors
+
+
+250
+00:16:18,745 --> 00:16:23,717 line:0
+which are identical,
+except for their user function pointers.
+
+
+251
+00:16:23,750 --> 00:16:26,119 align:center
+So, if you are
+using AIR function pointers,
+
+
+252
+00:16:26,153 --> 00:16:30,490 line:0
+you need to cache all
+permutations of the pipeline.
+
+
+253
+00:16:30,524 --> 00:16:34,261 line:0
+However, when using
+the binary function pointers,
+
+
+254
+00:16:34,294 --> 00:16:38,332 line:0
+it's enough to cache a single
+variant because the pipeline binary code
+
+
+255
+00:16:38,365 --> 00:16:42,236 align:center
+doesn't change when a new
+function pointer is added to it.
+
+
+256
+00:16:42,269 --> 00:16:45,572 line:0
+And you can use
+that archive to find all other variants
+
+
+257
+00:16:45,606 --> 00:16:48,509 line:0
+of the pipelines,
+independent of which binary
+
+
+258
+00:16:48,542 --> 00:16:51,845 align:center
+function pointers are used
+in the pipeline descriptor.
+
+
+259
+00:16:51,879 --> 00:16:55,849 line:-2
+To wrap it up, you always want
+to use binaryArchives in Metal,
+
+
+260
+00:16:55,883 --> 00:16:59,887 line:-2
+as it's a great tool to control
+your pipeline compilation cost.
+
+
+261
+00:16:59.920 --> 00:17:04.124 line:-2 align:center
+The support for binaryArchives
+is available on all devices,
+
+
+262
+00:17:04,157 --> 00:17:06,660 line:-2
+but adding
+function pointers to a BinaryArchive
+
+
+263
+00:17:06,693 --> 00:17:10,497 line:-1
+depends on the function pointer ability.
+
+
+264
+00:17:10,531 --> 00:17:14,668 line:-2
+Now, I'd like to briefly
+talk about our next addition this year,
+
+
+265
+00:17:14.701 --> 00:17:17.371 line:-1 align:center
+which is private linked functions.
+
+
+266
+00:17:17.404 --> 00:17:21.975 line:-2 align:center
+So far, we have discussed how
+dynamic libraries and function pointers
+
+
+267
+00:17:22,009 --> 00:17:25,746 line:-2
+provide a lot of flexibility
+to your shader development pipeline,
+
+
+268
+00:17:25.779 --> 00:17:28.015 line:-2 align:center
+but sometimes,
+for performance reasons,
+
+
+269
+00:17:28,048 --> 00:17:32,452 line:-2
+you may want to statically link
+an external function into your pipeline.
+
+
+270
+00:17:32,486 --> 00:17:36,790 line:-2
+Last year, we added
+linkedFunctions API with a support
+
+
+271
+00:17:36,823 --> 00:17:39,393 line:-1
+for statically linking AIR functions.
+
+
+272
+00:17:39.426 --> 00:17:42.262 line:-2 align:center
+However, this requires function
+pointer support,
+
+
+273
+00:17:42,296 --> 00:17:45,299 line:-1
+as these are usable in a function table.
+
+
+274
+00:17:45,332 --> 00:17:48,702 line:-2
+This year,
+we are introducing privateFunctions.
+
+
+275
+00:17:48,735 --> 00:17:53,273 line:-2
+Both functions and privateFunctions
+are linked statically at the AIR level,
+
+
+276
+00:17:53,307 --> 00:17:55,142 line:-1
+but since those are private,
+
+
+277
+00:17:55,175 --> 00:17:58,078 line:-2
+no function handling can be made
+for a function pointer,
+
+
+278
+00:17:58.111 --> 00:18:02.316 line:-2 align:center
+and this allows compiler
+to fully optimize your shader code.
+
+
+279
+00:18:02,349 --> 00:18:04,484 line:-1
+So, where are they available?
+
+
+280
+00:18:04.518 --> 00:18:08.789 line:-2 align:center
+Because this feature works
+with code at the AIR level,
+
+
+281
+00:18:08.822 --> 00:18:15.028 line:-2 align:center
+it is available on all devices
+in macOS Monterey and iOS 15.
+
+
+282
+00:18:15.062 --> 00:18:19.199 line:-2 align:center
+Moving on to the last addition I'd
+like to discuss today,
+
+
+283
+00:18:19,233 --> 00:18:21,935 line:-1
+function stitching.
+
+
+284
+00:18:21,969 --> 00:18:26,073 line:-2
+Some applications need to generate
+dynamic content at the runtime.
+
+
+285
+00:18:26,106 --> 00:18:30,477 line:-2
+For example, to implement
+customizations for the graphic effects
+
+
+286
+00:18:30,511 --> 00:18:32,779 line:-1
+based on user input.
+
+
+287
+00:18:32,813 --> 00:18:36,717 line:-2
+Or, say, complex compute
+kernel based on incoming data.
+
+
+288
+00:18:37.351 --> 00:18:40.387 line:-2 align:center
+Function stitching is
+a great tool to solve this.
+
+
+289
+00:18:41,355 --> 00:18:44,925 line:-2
+Prior to function stitching,
+the only way to do this
+
+
+290
+00:18:44,958 --> 00:18:48,228 line:-1
+was by generating Metal source strings.
+
+
+291
+00:18:48,262 --> 00:18:52,266 line:-2
+The string-manipulation technique
+can be somewhat inefficient,
+
+
+292
+00:18:52,299 --> 00:18:55,669 line:-2
+and it also implies
+that the translation from Metal to AIR
+
+
+293
+00:18:55.702 --> 00:18:59.673 line:-2 align:center
+will happen at runtime,
+which can be an expensive opration.
+
+
+294
+00:18:59.706 --> 00:19:03.177 line:-2 align:center
+So let's take a look at how
+function stitching works.
+
+
+295
+00:19:03.210 --> 00:19:06.947 line:-2 align:center
+Function stitching provides
+a mechanism to generate functions
+
+
+296
+00:19:06.980 --> 00:19:11.185 line:-2 align:center
+from computation graphs
+and precompiled functions at runtime.
+
+
+297
+00:19:11.218 --> 00:19:15.022 line:-2 align:center
+The computation graph is
+a Directed Acyclic Graph.
+
+
+298
+00:19:15.055 --> 00:19:18.225 line:-2 align:center
+And in a graph,
+there are two kind of nodes:
+
+
+299
+00:19:18.258 --> 00:19:22.996 line:-2 align:center
+input nodes that represent
+the arguments of the generated function,
+
+
+300
+00:19:23,030 --> 00:19:26,867 align:center
+and function nodes
+that represent function calls.
+
+
+301
+00:19:26,900 --> 00:19:33,240 line:0
+There are also two kind of edges:
+data edges that represent how data flows
+
+
+302
+00:19:33,273 --> 00:19:38,011 line:0
+from one node to another,
+and control edges that represent
+
+
+303
+00:19:38,045 --> 00:19:41,748 line:0
+the order in which function
+calls should be executed.
+
+
+304
+00:19:41,782 --> 00:19:44,885 align:center
+We'll see how function
+stitching uses a computation graph
+
+
+305
+00:19:44,918 --> 00:19:47,955 line:0
+to generate a function.
+
+
+306
+00:19:47.988 --> 00:19:51.024 line:-2 align:center
+We'll start with the notion
+of stitchable functions.
+
+
+307
+00:19:51,058 --> 00:19:54,862 line:-2
+The function in a graph must
+have the stitchable attribute.
+
+
+308
+00:19:54,895 --> 00:19:57,431 line:-1
+Such function is a visible function,
+
+
+309
+00:19:57.464 --> 00:20:00.901 line:-2 align:center
+which can be used
+with the functionStitching API.
+
+
+310
+00:20:00,934 --> 00:20:04,638 line:-2
+The stitchable functions can
+be part of the Metal library
+
+
+311
+00:20:04.671 --> 00:20:08.909 line:-2 align:center
+shipped with your application bundle
+to avoid Metal to AIR translation cost.
+
+
+312
+00:20:10,644 --> 00:20:13,347 line:-2
+The stitching
+process generates the functions
+
+
+313
+00:20:13.380 --> 00:20:18.051 line:-2 align:center
+directly in AIR and completely
+skipping the Metal frontend.
+
+
+314
+00:20:18,085 --> 00:20:21,088 line:-2
+The generated function is
+a regular stitchable function,
+
+
+315
+00:20:21.121 --> 00:20:26.426 line:-2 align:center
+so it can be linked into a pipeline,
+or used directly as function pointer,
+
+
+316
+00:20:26,460 --> 00:20:29,997 line:0
+or it can be used
+for generating other functions.
+
+
+317
+00:20:30,030 --> 00:20:33,634 line:0
+So, consider the previous graph,
+and let's assume that we have
+
+
+318
+00:20:33,667 --> 00:20:39,173 line:0
+dual functions A and C from
+library as described previously.
+
+
+319
+00:20:39,206 --> 00:20:43,410 line:0
+Let's now see what happens
+when we bind these functions to the graph.
+
+
+320
+00:20:43,443 --> 00:20:47,714 line:0
+The stitcher here associates
+a corresponding function type
+
+
+321
+00:20:47,748 --> 00:20:50,083 line:0
+to each function node.
+
+
+322
+00:20:50,117 --> 00:20:54,755 line:0
+N0 and N1 get the type from FunctionA,
+
+
+323
+00:20:54,788 --> 00:20:58,058 align:center
+and N2 gets the type from FunctionC.
+
+
+324
+00:20:58,091 --> 00:21:02,663 line:0
+After that, the stitcher infers
+the types for the input nodes
+
+
+325
+00:21:02,696 --> 00:21:06,800 align:center
+by looking at the parameter types
+of the functions using them.
+
+
+326
+00:21:06,834 --> 00:21:11,505 align:center
+For example,
+Input0 is inferred to be the type devised
+
+
+327
+00:21:11,538 --> 00:21:16,043 line:0
+in pointer because it's
+the first argument for N0 and N1.
+
+
+328
+00:21:17,144 --> 00:21:19,980 line:0
+The stitcher then
+generates a function equivalent
+
+
+329
+00:21:20,013 --> 00:21:22,916 align:center
+to the following one described in Metal.
+
+
+330
+00:21:22,950 --> 00:21:26,353 line:0
+With the functionStitching API,
+we can generate a library
+
+
+331
+00:21:26,386 --> 00:21:29,323 align:center
+containing such
+functions directly from AIR.
+
+
+332
+00:21:29,356 --> 00:21:33,026 line:0
+And now that we have fair
+idea on how stitching works,
+
+
+333
+00:21:33,060 --> 00:21:36,163 line:-1
+here is how you can use it in the API.
+
+
+334
+00:21:36.196 --> 00:21:39.633 line:-2 align:center
+First, we need to define
+the stitched function inputs.
+
+
+335
+00:21:39,666 --> 00:21:45,072 line:-2
+In this case, we simply make enough input
+nodes to account for all the arguments.
+
+
+336
+00:21:45.105 --> 00:21:51.245 line:-2 align:center
+Next, we create function nodes for each
+function we wish to call in our graph.
+
+
+337
+00:21:51.278 --> 00:21:55.382 line:-2 align:center
+For each function call,
+we define the name, arguments,
+
+
+338
+00:21:55,415 --> 00:22:00,721 line:-2
+and control dependencies if we have
+any explicit ordering requirements.
+
+
+339
+00:22:00,754 --> 00:22:04,725 align:center
+And finally, we create the graph
+with the function name,
+
+
+340
+00:22:04,758 --> 00:22:07,160 line:0
+the function nodes used in a graph,
+
+
+341
+00:22:07,194 --> 00:22:10,797 align:center
+and any function attribute
+we want to apply.
+
+
+342
+00:22:10,831 --> 00:22:14,434 line:0
+You also assign an outputNode,
+which will return the output value
+
+
+343
+00:22:14,468 --> 00:22:17,771 line:0
+of the resulting stitched function.
+
+
+344
+00:22:17.804 --> 00:22:19.373 line:-1 align:center
+So, we have our graph.
+
+
+345
+00:22:19.406 --> 00:22:22.543 line:-1 align:center
+Now, we can create a function using it.
+
+
+346
+00:22:22.576 --> 00:22:26.780 line:-2 align:center
+The first step is to create
+a StitchedLibraryDescriptor.
+
+
+347
+00:22:26.813 --> 00:22:32.119 line:-2 align:center
+We add our stitchableFunctions
+and functionGraph to this descriptor.
+
+
+348
+00:22:32,152 --> 00:22:35,522 line:-2
+We then create a library
+using the descriptor, and now,
+
+
+349
+00:22:35,556 --> 00:22:39,593 line:-2
+we can create our stitched
+function out of this library.
+
+
+350
+00:22:39.626 --> 00:22:43.630 line:-2 align:center
+This stitched function is now ready to be
+used anywhere a stitchable function
+
+
+351
+00:22:43,664 --> 00:22:48,669 line:-2
+is expected, including as
+a function in another stitching graph.
+
+
+352
+00:22:48,702 --> 00:22:50,971 line:-1
+And that's it for the function stitching.
+
+
+353
+00:22:51,004 --> 00:22:58,345 line:-2
+This API is also available across all
+devices in macOS Monterey and iOS 15.
+
+
+354
+00:22:58,378 --> 00:23:02,316 line:-2
+So, as a quick recap, today,
+we looked at dynamic libraries
+
+
+355
+00:23:02,349 --> 00:23:05,652 line:-2
+and function pointers
+for render pipelines.
+
+
+356
+00:23:05,686 --> 00:23:11,191 line:-2
+Private linked functions, which can be
+used to statically link visible functions.
+
+
+357
+00:23:11,225 --> 00:23:14,194 line:-2
+And how function stitching
+can save compilation time
+
+
+358
+00:23:14.228 --> 00:23:16.430 line:-1 align:center
+when dynamically creating shaders.
+
+
+359
+00:23:17,965 --> 00:23:21,969 line:-2
+So, when would
+you choose one over the other?
+
+
+360
+00:23:22.002 --> 00:23:27.441 line:-2 align:center
+Dynamic libraries are an excellent choice
+to link helper and utility functions.
+
+
+361
+00:23:27,474 --> 00:23:31,778 line:-2
+And they are best used when
+you have a fixed set of utility functions,
+
+
+362
+00:23:31,812 --> 00:23:35,382 line:-2
+and those functions do not
+change very frequently.
+
+
+363
+00:23:35.415 --> 00:23:40.120 line:-2 align:center
+Function pointers add the ability
+for a shader to invoke functions
+
+
+364
+00:23:40,153 --> 00:23:43,156 line:-2
+that it knows nothing about,
+other than their signature.
+
+
+365
+00:23:43,190 --> 00:23:46,827 line:-2
+It doesn't need to know how many
+functions exist, the names,
+
+
+366
+00:23:46,860 --> 00:23:49,229 line:-1
+or even what speed-flexibility trade-off
+
+
+367
+00:23:49.263 --> 00:23:52.466 line:-2 align:center
+the developer has made
+using AIR or binaries.
+
+
+368
+00:23:52,499 --> 00:23:56,203 line:-2
+And this year,
+you can also cache function pointers.
+
+
+369
+00:23:56,236 --> 00:23:59,773 line:-2
+Private functions offer
+you a way to statically link functions
+
+
+370
+00:23:59.806 --> 00:24:03.010 line:-1 align:center
+to a pipeline state object by name.
+
+
+371
+00:24:03.043 --> 00:24:06.747 line:-2 align:center
+They are internal to the pipeline,
+so they cannot be encoded
+
+
+372
+00:24:06.780 --> 00:24:10.017 line:-2 align:center
+in a visible function table,
+but they allow the compiler
+
+
+373
+00:24:10,050 --> 00:24:11,785 line:-1
+to do maximum optimization,
+
+
+374
+00:24:11,818 --> 00:24:15,055 line:-2
+and they are supported
+across all GPU families.
+
+
+375
+00:24:15.088 --> 00:24:19.726 line:-2 align:center
+And finally, function stitching
+gives you a way to precompile snippets
+
+
+376
+00:24:19,760 --> 00:24:25,199 line:-2
+of your code directly to AIR and perform
+function compilation at runtime.
+
+
+377
+00:24:25.232 --> 00:24:27.968 line:-2 align:center
+If you are compositing
+Metal shader strings today
+
+
+378
+00:24:28,001 --> 00:24:31,905 line:-2
+and have to pay the cost of compiling
+from source at runtime,
+
+
+379
+00:24:31,939 --> 00:24:35,509 line:-2
+then function stitching would
+greatly accelerate this workflow.
+
+
+380
+00:24:35.542 --> 00:24:38.178 line:-2 align:center
+I hope that you can leverage
+these compiler features
+
+
+381
+00:24:38,212 --> 00:24:41,381 line:-2
+to develop
+new experiences using Metal.
+
+
+382
+00:24:41.415 --> 00:24:46.153 line:-2 align:center
+Thanks for watching,
+and enjoy the rest of WWDC 2021.
+
+
+383
+00:24:46,186 --> 00:24:49,089 line:-1
+[music]
+

@@ -1,0 +1,3614 @@
+1
+00:00:03,871 --> 00:00:06,740 line:-1
+Hello and welcome to WWDC.
+
+
+2
+00:00:07,941 --> 00:00:12,446 line:0
+Hello, hello. My name is Gavi Rawson,
+and I'm a software engineer
+
+
+3
+00:00:12,513 --> 00:00:15,349 line:0
+on the Apple Health team
+working on the CareKit framework.
+
+
+4
+00:00:15,883 --> 00:00:18,519 line:-2
+Later we'll be joined by
+my colleague Erik Hornberger,
+
+
+5
+00:00:18,585 --> 00:00:20,521 line:-1
+who works on the framework as well.
+
+
+6
+00:00:20,587 --> 00:00:22,923 line:-2
+We're here to talk to you today
+about the updates
+
+
+7
+00:00:22,990 --> 00:00:24,892 line:-1
+that we've added to CareKit this year.
+
+
+8
+00:00:24,958 --> 00:00:26,927 line:-1
+So, what is CareKit?
+
+
+9
+00:00:26,994 --> 00:00:31,231 line:-2
+CareKit is an open-source framework
+that helps you build beautiful care apps.
+
+
+10
+00:00:31,298 --> 00:00:33,700 line:-2
+The framework is split up
+into three parts.
+
+
+11
+00:00:33,767 --> 00:00:37,237 line:-2
+We have CareKit, CareKitUI
+and CareKitStore.
+
+
+12
+00:00:37,871 --> 00:00:40,207 line:-1
+Each part is a framework in and of itself
+
+
+13
+00:00:40,274 --> 00:00:42,676 line:-2
+and can be imported
+using Swift Package Manager.
+
+
+14
+00:00:43,143 --> 00:00:45,913 line:-2
+CareKitStore provides
+health flavored data models
+
+
+15
+00:00:45,979 --> 00:00:48,115 line:-1
+and a core data layer for persistence.
+
+
+16
+00:00:48,615 --> 00:00:52,953 line:-2
+CareKitUI provides static views
+that are perfect for displaying that data.
+
+
+17
+00:00:53,020 --> 00:00:56,356 line:-2
+And CareKit ties the UI
+and store layers together
+
+
+18
+00:00:56,423 --> 00:00:59,159 line:-2
+by providing synchronization
+between the two.
+
+
+19
+00:00:59,226 --> 00:01:03,397 line:-2
+When data in the store changes,
+the views are automatically updated.
+
+
+20
+00:01:03,964 --> 00:01:07,434 line:-2
+Last year, we rearchitected the framework
+using Swift.
+
+
+21
+00:01:07,501 --> 00:01:10,103 line:-2
+We made sure to design the framework
+in such a way
+
+
+22
+00:01:10,170 --> 00:01:12,005 line:-1
+that it's easy to use for beginners
+
+
+23
+00:01:12,072 --> 00:01:16,543 line:-2
+but also provides enough customization
+hooks for more advanced developers.
+
+
+24
+00:01:16,944 --> 00:01:19,346 line:-2
+This year, we focused
+on strengthening the framework
+
+
+25
+00:01:19,413 --> 00:01:21,448 line:-1
+and building out even more new tools
+
+
+26
+00:01:21,515 --> 00:01:24,451 line:-2
+that make it easier for you
+to create your care apps.
+
+
+27
+00:01:25,052 --> 00:01:27,588 line:-1
+Instead of giving you a boring old agenda,
+
+
+28
+00:01:27,654 --> 00:01:31,191 line:-2
+we've created this sticker pack
+for all the new CareKit features,
+
+
+29
+00:01:31,258 --> 00:01:33,060 line:-1
+because who doesn't love stickers?
+
+
+30
+00:01:33,894 --> 00:01:35,295 line:-1
+By the end of the talk today,
+
+
+31
+00:01:35,362 --> 00:01:38,365 line:-2
+we'll collect all the stickers
+and tack them onto our MacBook.
+
+
+32
+00:01:39,499 --> 00:01:42,035 line:-2
+So, let's kick things off today
+in CareKitUI,
+
+
+33
+00:01:42,102 --> 00:01:43,904 line:-1
+which provides different types of views
+
+
+34
+00:01:43,971 --> 00:01:46,874 line:-2
+for visualizing tasks,
+charts and contacts.
+
+
+35
+00:01:47,341 --> 00:01:50,177 line:-2
+This year, we're adding even more
+new views to the framework.
+
+
+36
+00:01:50,944 --> 00:01:52,513 line:-1
+Let's look at these new views
+
+
+37
+00:01:52,579 --> 00:01:56,016 line:-2
+in the context of a wellness application
+built using CareKit.
+
+
+38
+00:01:56,550 --> 00:02:00,354 line:-2
+Here we have my personal feed,
+showing a list of cards relevant to me.
+
+
+39
+00:02:00,420 --> 00:02:03,724 line:-2
+Each card here is a new view
+that we've added to the framework.
+
+
+40
+00:02:04,691 --> 00:02:08,562 line:-2
+The first is the SimpleTaskView,
+reminding me to do my daily stretches.
+
+
+41
+00:02:09,128 --> 00:02:12,966 line:-2
+If you've worked with CareKit before,
+this view might look familiar to you.
+
+
+42
+00:02:13,033 --> 00:02:16,436 line:-2
+We already have a UIKit API
+for the SimpleTaskView,
+
+
+43
+00:02:16,503 --> 00:02:19,473 line:-1
+and now we've added a SwiftUI API as well.
+
+
+44
+00:02:19,540 --> 00:02:22,376 line:-1
+Let's look at that SwiftUI API in detail.
+
+
+45
+00:02:22,442 --> 00:02:25,746 line:-2
+We start by importing
+CareKitUI and SwiftUI
+
+
+46
+00:02:25,812 --> 00:02:28,215 line:-2
+and we write some boilerplate
+SwiftUI code.
+
+
+47
+00:02:28,982 --> 00:02:31,685 line:-2
+Then we add the SimpleTaskView
+to the body.
+
+
+48
+00:02:31,752 --> 00:02:35,122 line:-2
+We initialized the view
+with a title, a detail
+
+
+49
+00:02:35,189 --> 00:02:38,325 line:-2
+and a flag that determines
+if the task is complete or not.
+
+
+50
+00:02:39,226 --> 00:02:41,061 line:-1
+But this view is just a starting point.
+
+
+51
+00:02:41,128 --> 00:02:43,797 line:-2
+So, let's say you want to customize it
+just a bit.
+
+
+52
+00:02:43,864 --> 00:02:47,034 line:-2
+We'll take a closer look
+at the title and detail parameters
+
+
+53
+00:02:47,100 --> 00:02:49,937 line:-2
+that accepts SwiftUI texts
+rather than a string.
+
+
+54
+00:02:51,071 --> 00:02:54,007 line:-2
+This allows you to decorate
+the title and detail
+
+
+55
+00:02:54,074 --> 00:02:56,310 line:-1
+using custom view modifiers.
+
+
+56
+00:02:56,376 --> 00:02:59,179 line:-2
+Notice how we changed the title
+to a thin fontWeight
+
+
+57
+00:02:59,246 --> 00:03:01,348 line:-1
+to provide less emphasis in the header.
+
+
+58
+00:03:02,749 --> 00:03:04,585 line:-1
+We'll jump back to our default fontWeight
+
+
+59
+00:03:04,651 --> 00:03:07,621 line:-2
+and check out another customization point
+available to us.
+
+
+60
+00:03:09,256 --> 00:03:12,392 line:-2
+SwiftUI encourages you
+to build small view components
+
+
+61
+00:03:12,459 --> 00:03:16,363 line:-2
+then compose them together
+to create more rich and functional views.
+
+
+62
+00:03:16,430 --> 00:03:19,800 line:-2
+This SimpleTaskView is built
+from small view components as well.
+
+
+63
+00:03:19,867 --> 00:03:22,870 line:-1
+We have a detail disclosure and a header.
+
+
+64
+00:03:23,770 --> 00:03:27,341 line:-2
+If you'd like, you have the option
+of injecting your own custom header
+
+
+65
+00:03:27,407 --> 00:03:29,309 line:-1
+or detail disclosure into the view
+
+
+66
+00:03:29,376 --> 00:03:32,079 line:-2
+in place of the default ones
+we provide for you.
+
+
+67
+00:03:32,613 --> 00:03:35,215 line:-2
+Let's try creating a custom header
+for this view.
+
+
+68
+00:03:36,350 --> 00:03:40,187 line:-2
+We'll go back to our code and use
+another initializer available to us.
+
+
+69
+00:03:40,754 --> 00:03:44,558 line:-2
+This one provides us a closure
+where we can build our custom header,
+
+
+70
+00:03:44,625 --> 00:03:47,461 line:-2
+and CareKitUI provides
+a few small view components
+
+
+71
+00:03:47,528 --> 00:03:49,062 line:-1
+to help us along the way.
+
+
+72
+00:03:49,997 --> 00:03:52,332 line:-1
+In particular, we can use a HeaderView
+
+
+73
+00:03:52,399 --> 00:03:55,435 line:-2
+to help us match the style
+of other CareKitUI cards.
+
+
+74
+00:03:55,869 --> 00:03:58,305 line:-1
+We pass a title and a detail to the header
+
+
+75
+00:03:58,372 --> 00:04:01,608 line:-2
+and place it beside a custom accent bar
+in an HStack.
+
+
+76
+00:04:02,676 --> 00:04:05,579 line:-2
+With that, the view is already starting
+to look custom,
+
+
+77
+00:04:05,646 --> 00:04:08,882 line:-2
+but let's go even deeper
+using another customization point.
+
+
+78
+00:04:10,284 --> 00:04:13,887 line:-2
+We can attach custom views
+to any side of the content here,
+
+
+79
+00:04:13,954 --> 00:04:17,291 line:-2
+which allows us to extend the card
+in any direction.
+
+
+80
+00:04:17,357 --> 00:04:21,028 line:-2
+Let's look at some code to attach content
+to the bottom of the view.
+
+
+81
+00:04:22,496 --> 00:04:26,333 line:-2
+We'll start by creating a new view
+just so that we have more space to work.
+
+
+82
+00:04:26,967 --> 00:04:30,604 line:-2
+Then we wrap our SimpleTaskView
+inside of a CardView
+
+
+83
+00:04:30,671 --> 00:04:33,440 line:-2
+and place it beside
+a divider and instructions text.
+
+
+84
+00:04:34,007 --> 00:04:36,944 line:-2
+The CardView is another component
+from CareKitUI,
+
+
+85
+00:04:37,244 --> 00:04:39,580 line:-2
+and when wrapping one card
+inside of another,
+
+
+86
+00:04:39,646 --> 00:04:41,782 line:-1
+only the outermost card will be displayed.
+
+
+87
+00:04:42,583 --> 00:04:45,886 line:-2
+This allows us to put all of our content
+into a single card.
+
+
+88
+00:04:46,653 --> 00:04:49,289 line:-2
+And with that, we're all done
+building our custom view,
+
+
+89
+00:04:49,356 --> 00:04:52,426 line:-2
+and you can see it looks very different
+from when we started.
+
+
+90
+00:04:52,492 --> 00:04:54,428 line:-1
+We started with the SimpleTaskView
+
+
+91
+00:04:54,494 --> 00:04:56,930 line:-2
+that had just a header
+and a completion button.
+
+
+92
+00:04:56,997 --> 00:05:00,934 line:-2
+And now we have a custom accent bar
+and detailed instructions for the task.
+
+
+93
+00:05:01,902 --> 00:05:03,837 line:-1
+Let's go back to our wellness application
+
+
+94
+00:05:03,904 --> 00:05:06,707 line:-2
+and look at some
+of the other new views in CareKitUI.
+
+
+95
+00:05:08,308 --> 00:05:11,144 line:-2
+The next new view
+is the labeled value view.
+
+
+96
+00:05:11,578 --> 00:05:15,415 line:-2
+This one is great for displaying a value
+and its associated units.
+
+
+97
+00:05:15,482 --> 00:05:18,685 line:-2
+Here we're showing my heart rate
+measurement is 62 beats per minute,
+
+
+98
+00:05:18,752 --> 00:05:20,754 line:-1
+which seems a bit generous.
+
+
+99
+00:05:22,122 --> 00:05:25,726 line:-2
+We can create this view
+by providing title and detail text
+
+
+100
+00:05:25,792 --> 00:05:27,327 line:-1
+just like in the previous view.
+
+
+101
+00:05:27,794 --> 00:05:30,097 line:-1
+We also provide the completion state.
+
+
+102
+00:05:30,163 --> 00:05:32,666 line:-2
+If you'd like to customize
+the view even further,
+
+
+103
+00:05:32,733 --> 00:05:35,102 line:-1
+we provide identical hooks into the view
+
+
+104
+00:05:35,169 --> 00:05:37,604 line:-2
+as the ones we saw
+for the SimpleTaskView.
+
+
+105
+00:05:39,907 --> 00:05:44,211 line:-2
+The next new addition to CareKitUI
+is the NumericProgressTaskView,
+
+
+106
+00:05:44,278 --> 00:05:47,714 line:-2
+which is helpful for displaying
+my cumulative progress towards a goal.
+
+
+107
+00:05:48,348 --> 00:05:50,884 line:-2
+Here you can see
+that I've exercised for 22 minutes
+
+
+108
+00:05:50,951 --> 00:05:52,886 line:-1
+in pursuit of my 30-minute goal.
+
+
+109
+00:05:52,953 --> 00:05:55,389 line:-2
+Just a gentle reminder
+to get back out there.
+
+
+110
+00:05:57,057 --> 00:06:01,562 line:-2
+To create the view, we again pass a title
+and a detail to display in the header.
+
+
+111
+00:06:02,162 --> 00:06:06,700 line:-2
+We also provide instructions for the task
+and the text for the progress and goal.
+
+
+112
+00:06:07,334 --> 00:06:10,871 line:-2
+Lastly, we pass in a flag
+that determines if the task is complete.
+
+
+113
+00:06:13,006 --> 00:06:15,809 line:-2
+The next new view
+is the FeaturedContentView,
+
+
+114
+00:06:15,876 --> 00:06:18,712 line:-2
+and this one is great
+for highlighting important information,
+
+
+115
+00:06:18,779 --> 00:06:20,614 line:-1
+such as an article for me to read.
+
+
+116
+00:06:21,215 --> 00:06:24,151 line:-2
+Here we have a great article
+on easy and healthy recipes
+
+
+117
+00:06:24,218 --> 00:06:25,652 line:-1
+that I can cook at home.
+
+
+118
+00:06:26,787 --> 00:06:30,657 line:-2
+Creating the FeaturedContentView
+is a bit different from before.
+
+
+119
+00:06:30,724 --> 00:06:34,161 line:-1
+We start by importing CareKitUI and UIKit.
+
+
+120
+00:06:34,228 --> 00:06:35,829 line:-1
+We then define the view,
+
+
+121
+00:06:36,697 --> 00:06:41,034 line:-2
+then set the large image in the background
+and the text on the bottom of the view.
+
+
+122
+00:06:42,369 --> 00:06:46,707 line:-2
+When the FeaturedContentView is tapped,
+we can display a new DetailView.
+
+
+123
+00:06:47,307 --> 00:06:51,778 line:-2
+The DetailView supports HTML and CSS
+in the content under the image,
+
+
+124
+00:06:51,845 --> 00:06:54,381 line:-2
+allowing you to put
+virtually anything in here.
+
+
+125
+00:06:56,216 --> 00:06:58,685 line:-2
+Creating the view
+is similar to the last one.
+
+
+126
+00:06:59,086 --> 00:07:02,022 line:-1
+We start by importing CareKitUI and UIKit.
+
+
+127
+00:07:02,456 --> 00:07:04,958 line:-1
+Then we define styledHTML,
+
+
+128
+00:07:05,025 --> 00:07:09,663 line:-2
+which is a combination of HTML
+and the associated CSS for styling.
+
+
+129
+00:07:10,864 --> 00:07:14,468 line:-2
+We then instantiate the view
+by passing in the styledHTML
+
+
+130
+00:07:14,535 --> 00:07:17,538 line:-2
+and a flag that determines whether or not
+to show the close button
+
+
+131
+00:07:17,604 --> 00:07:19,006 line:-1
+in the top right corner.
+
+
+132
+00:07:19,973 --> 00:07:22,643 line:-2
+Finally, we set the image,
+just like we did before.
+
+
+133
+00:07:24,978 --> 00:07:29,349 line:-2
+The last new view is the LinkView,
+which is great for displaying buttons
+
+
+134
+00:07:29,416 --> 00:07:33,387 line:-2
+that present new views directly inside
+or outside of the application.
+
+
+135
+00:07:33,921 --> 00:07:37,624 line:-2
+Here I have links to help me schedule
+a physical therapist appointment.
+
+
+136
+00:07:39,393 --> 00:07:44,264 line:-2
+We create the view by supplying a title,
+instructions and the links to display.
+
+
+137
+00:07:45,065 --> 00:07:48,669 line:-2
+Here we create a link button that opens up
+a website inside of the app.
+
+
+138
+00:07:49,703 --> 00:07:53,173 line:-2
+These link options are just a few
+of the many that we provide.
+
+
+139
+00:07:53,240 --> 00:07:56,410 line:-2
+We also provide options
+like navigating to the App Store.
+
+
+140
+00:07:56,844 --> 00:07:58,679 line:-1
+But if we don't address your use case,
+
+
+141
+00:07:58,745 --> 00:08:01,682 line:-2
+there's an option to provide
+a custom URL as well.
+
+
+142
+00:08:02,349 --> 00:08:05,219 line:-2
+So, we've reached the end
+of today's feed in the app.
+
+
+143
+00:08:05,285 --> 00:08:07,754 line:-2
+And that finishes up
+with all of the new views
+
+
+144
+00:08:07,821 --> 00:08:09,690 line:-1
+that we're adding to the framework.
+
+
+145
+00:08:09,756 --> 00:08:11,391 line:-1
+These are just a few new views,
+
+
+146
+00:08:11,458 --> 00:08:15,662 line:-2
+but we're essentially laying a road map
+for a UIKit and SwiftUI APIs.
+
+
+147
+00:08:16,196 --> 00:08:20,133 line:-2
+We now look to all of you in the community
+to build on top of what we have
+
+
+148
+00:08:20,200 --> 00:08:23,504 line:-2
+and improve the framework
+with new views for new use cases.
+
+
+149
+00:08:23,570 --> 00:08:27,774 line:-2
+With that, we can get our first sticker
+for CareKitUI views,
+
+
+150
+00:08:27,841 --> 00:08:31,044 line:-2
+and we can tack that on
+right next to our WW sticker.
+
+
+151
+00:08:31,879 --> 00:08:35,782 line:-2
+So, we just saw how we can create
+static views in CareKitUI,
+
+
+152
+00:08:35,849 --> 00:08:37,583 line:-1
+but CareKit goes one step further
+
+
+153
+00:08:37,650 --> 00:08:40,687 line:-2
+and wraps the static views
+in a synchronization layer,
+
+
+154
+00:08:40,754 --> 00:08:45,025 line:-2
+so that when data in the store is updated,
+the UI will reflect the changes.
+
+
+155
+00:08:45,659 --> 00:08:49,129 line:-2
+So now that we have
+new SwiftUI views in CareKitUI,
+
+
+156
+00:08:49,196 --> 00:08:52,266 line:-2
+we're adding synchronized
+SwiftUI views in CareKit.
+
+
+157
+00:08:53,133 --> 00:08:55,903 line:-2
+Let's look at how we can create
+one of these views.
+
+
+158
+00:08:55,969 --> 00:08:59,540 line:-2
+We start by importing CareKit,
+CareKitUI and SwiftUI.
+
+
+159
+00:09:00,574 --> 00:09:04,411 line:-2
+Then in the body we can create
+the SimpleTaskView from CareKit
+
+
+160
+00:09:04,478 --> 00:09:08,849 line:-2
+by providing a taskID, an eventQuery
+and a SynchronizedStoreManager
+
+
+161
+00:09:08,916 --> 00:09:11,084 line:-2
+that holds a reference
+to the CareKitStore.
+
+
+162
+00:09:11,485 --> 00:09:14,121 line:-2
+The view will use the taskID
+and the eventQuery
+
+
+163
+00:09:14,188 --> 00:09:16,423 line:-1
+to locate the task data in that store.
+
+
+164
+00:09:17,357 --> 00:09:20,394 line:-2
+Once it's located,
+it'll be automatically mapped to the view.
+
+
+165
+00:09:20,460 --> 00:09:22,930 line:-2
+And after that,
+the SynchronizedStoreManager
+
+
+166
+00:09:22,996 --> 00:09:26,233 line:-2
+will ensure that the view is updated
+when task data changes.
+
+
+167
+00:09:27,134 --> 00:09:31,138 line:-2
+But you may want to customize the way
+that the task data is mapped to the view.
+
+
+168
+00:09:31,772 --> 00:09:34,241 line:-2
+To do that,
+we can use another initializer.
+
+
+169
+00:09:34,708 --> 00:09:37,878 line:-2
+In this one, we provide
+the same parameters as before,
+
+
+170
+00:09:37,945 --> 00:09:41,682 line:-2
+but we also provide a closure
+where we can create the underlying view
+
+
+171
+00:09:41,748 --> 00:09:43,750 line:-1
+from CareKitUI to display.
+
+
+172
+00:09:44,451 --> 00:09:48,689 line:-2
+The closure will be called each time
+SwiftUI recomputes the body of this view.
+
+
+173
+00:09:50,257 --> 00:09:52,860 line:-2
+Inside of the closure
+we have access to a controller
+
+
+174
+00:09:52,926 --> 00:09:56,096 line:-2
+that holds a reference
+to the task data and a view model.
+
+
+175
+00:09:56,763 --> 00:10:00,701 line:-2
+The view model is a convenient struct to
+help us instantiate the underlying view.
+
+
+176
+00:10:01,368 --> 00:10:02,669 line:-1
+So, let's use that view model
+
+
+177
+00:10:02,736 --> 00:10:05,572 line:-2
+to instantiate
+the SimpleTaskView from CareKitUI.
+
+
+178
+00:10:06,039 --> 00:10:08,242 line:-2
+Since we're creating the view
+from CareKitUI,
+
+
+179
+00:10:08,308 --> 00:10:10,811 line:-2
+we have access to all
+of the customization points
+
+
+180
+00:10:10,878 --> 00:10:13,347 line:-1
+that we saw earlier for CareKitUI views.
+
+
+181
+00:10:14,281 --> 00:10:15,949 line:-1
+So with the help of the view model,
+
+
+182
+00:10:16,016 --> 00:10:18,986 line:-2
+we've essentially created
+the default SimpleTaskView.
+
+
+183
+00:10:19,586 --> 00:10:21,755 line:-2
+To make things a little bit
+more interesting,
+
+
+184
+00:10:21,822 --> 00:10:25,659 line:-2
+let's try modifying this view to display
+a ResearchKit survey when it's tapped.
+
+
+185
+00:10:27,060 --> 00:10:29,429 line:-1
+To do that, we first add a state property
+
+
+186
+00:10:29,496 --> 00:10:31,932 line:-2
+that determines whether or not
+the survey is showing.
+
+
+187
+00:10:33,000 --> 00:10:36,870 line:-2
+Then we change the displayed task
+to the researchKitSurveyTask.
+
+
+188
+00:10:38,005 --> 00:10:40,474 line:-1
+After that, we can modify the action
+
+
+189
+00:10:40,541 --> 00:10:44,144 line:-2
+to set the isShowingSurvey flag to true
+when the view is tapped.
+
+
+190
+00:10:45,345 --> 00:10:47,247 line:-1
+And finally when that flag is true,
+
+
+191
+00:10:47,314 --> 00:10:49,983 line:-2
+we can present a popover
+with the ResearchKitSurvey.
+
+
+192
+00:10:50,651 --> 00:10:53,120 line:-2
+We've seen a lot of you out there
+using CareKit cards
+
+
+193
+00:10:53,187 --> 00:10:55,055 line:-1
+to present ResearchKitSurveys,
+
+
+194
+00:10:55,122 --> 00:10:57,758 line:-2
+so this should be
+a really good starting point for you all.
+
+
+195
+00:10:58,025 --> 00:11:00,260 line:-1
+All right. That finishes up our section.
+
+
+196
+00:11:00,327 --> 00:11:02,629 line:-2
+Let's get our new sticker
+for synchronized views
+
+
+197
+00:11:02,696 --> 00:11:04,865 line:-1
+and build up our collection even more.
+
+
+198
+00:11:05,799 --> 00:11:08,569 line:-1
+We've clearly embraced SwiftUI in our API,
+
+
+199
+00:11:08,635 --> 00:11:10,904 line:-2
+and it's brought many advantages
+to the framework,
+
+
+200
+00:11:10,971 --> 00:11:14,441 line:-2
+including a simplified API
+and many customization points.
+
+
+201
+00:11:14,808 --> 00:11:16,677 line:-1
+But one of the biggest advantages
+
+
+202
+00:11:16,743 --> 00:11:21,048 line:-2
+is that SwiftUI has allowed us
+to bring CareKit to the Apple Watch.
+
+
+203
+00:11:21,481 --> 00:11:26,753 line:-2
+You can now build CareKit, CareKitUI
+and CareKitStore all for watchOS.
+
+
+204
+00:11:28,522 --> 00:11:32,893 line:-2
+On the UI side, we currently support
+the simple and instructions task views,
+
+
+205
+00:11:32,960 --> 00:11:35,696 line:-2
+and each have been fine-tuned
+for the Apple Watch screen.
+
+
+206
+00:11:36,430 --> 00:11:39,166 line:-2
+Like we said before,
+these are just a few new views,
+
+
+207
+00:11:39,233 --> 00:11:42,469 line:-2
+and we're super excited to see you all
+take them one step further
+
+
+208
+00:11:42,536 --> 00:11:44,638 line:-1
+and build new views for the Apple Watch.
+
+
+209
+00:11:46,874 --> 00:11:51,044 line:-2
+That finishes up our really short section,
+so let's get a shiny new watch sticker.
+
+
+210
+00:11:52,613 --> 00:11:55,249 line:-2
+Now, let's move on to some updates
+to the CareKitStore,
+
+
+211
+00:11:55,315 --> 00:11:57,951 line:-2
+which is perfect for storing health data
+in your app.
+
+
+212
+00:11:58,519 --> 00:12:00,420 line:-1
+But while the CareKitStore is useful,
+
+
+213
+00:12:00,487 --> 00:12:02,789 line:-2
+we already have a store
+on our devices today
+
+
+214
+00:12:02,856 --> 00:12:05,759 line:-2
+that's storing an immense amount
+of health data.
+
+
+215
+00:12:05,826 --> 00:12:07,594 line:-1
+That store is HealthKit.
+
+
+216
+00:12:07,661 --> 00:12:11,431 line:-2
+And now you can use data in HealthKit
+alongside CareKit data
+
+
+217
+00:12:11,498 --> 00:12:13,867 line:-1
+to create HealthKit-driven tasks.
+
+
+218
+00:12:14,635 --> 00:12:16,637 line:-1
+The tasks can be stored in a CareKitStore
+
+
+219
+00:12:16,703 --> 00:12:20,140 line:-2
+and can be auto-completed
+based on data that comes out of HealthKit.
+
+
+220
+00:12:21,175 --> 00:12:23,877 line:-2
+Before diving into the new
+HealthKit architecture,
+
+
+221
+00:12:23,944 --> 00:12:27,548 line:-2
+let's look at the current architecture
+around the CareKitStore.
+
+
+222
+00:12:28,248 --> 00:12:31,552 line:-2
+We have an OCKStore,
+which is a core data implementation.
+
+
+223
+00:12:32,286 --> 00:12:34,488 line:-1
+The store can be wrapped by a StoreManager
+
+
+224
+00:12:34,555 --> 00:12:36,857 line:-1
+that powers synchronization in the views
+
+
+225
+00:12:36,924 --> 00:12:40,160 line:-2
+by emitting notifications
+when data in the store changes.
+
+
+226
+00:12:41,395 --> 00:12:45,132 line:-2
+The StoreManager can be used
+to create synchronized views in CareKit,
+
+
+227
+00:12:45,199 --> 00:12:46,834 line:-1
+like the ones we saw earlier.
+
+
+228
+00:12:47,868 --> 00:12:51,171 line:-2
+Now let's look at how HealthKit
+integration fits into the picture.
+
+
+229
+00:12:52,472 --> 00:12:55,409 line:-2
+We've created a new
+HealthKitPassthroughStore
+
+
+230
+00:12:55,475 --> 00:12:57,344 line:-1
+that sits beside the CareKitStore.
+
+
+231
+00:12:58,011 --> 00:13:01,181 line:-2
+While the CareKitStore uses core data
+as its source of truth,
+
+
+232
+00:13:01,248 --> 00:13:04,818 line:-2
+the HealthKitPassthroughStore
+uses HealthKit as its source of truth.
+
+
+233
+00:13:05,786 --> 00:13:09,456 line:-2
+The two stores can be wrapped
+with a new StoreCoordinator.
+
+
+234
+00:13:09,523 --> 00:13:11,491 line:-1
+We can interact with the StoreCoordinator
+
+
+235
+00:13:11,558 --> 00:13:14,661 line:-2
+in the same way that we interact
+with the individual stores,
+
+
+236
+00:13:14,728 --> 00:13:18,632 line:-2
+by calling create, update
+and delete methods for CareKit entities.
+
+
+237
+00:13:20,534 --> 00:13:22,669 line:-2
+So, let's dive deeper
+into the StoreCoordinator
+
+
+238
+00:13:22,736 --> 00:13:25,339 line:-2
+to see how it communicates
+with its internal stores.
+
+
+239
+00:13:27,040 --> 00:13:29,643 line:-2
+When we ask the StoreCoordinator
+to fetch data,
+
+
+240
+00:13:29,710 --> 00:13:32,179 line:-2
+it aggregates results
+from its internal stores.
+
+
+241
+00:13:32,713 --> 00:13:35,349 line:-2
+But if we ask the StoreCoordinator
+to write data,
+
+
+242
+00:13:35,415 --> 00:13:37,918 line:-2
+it only writes to a single store
+at a time,
+
+
+243
+00:13:37,985 --> 00:13:41,922 line:-2
+which helps ensure that writing data
+is a transactional operation.
+
+
+244
+00:13:43,390 --> 00:13:44,791 line:-1
+Let's take a look at some code
+
+
+245
+00:13:44,858 --> 00:13:47,794 line:-2
+that actually sets up
+this new HealthKit integration.
+
+
+246
+00:13:48,295 --> 00:13:50,998 line:-2
+We'll start by importing
+CareKit and CareKitStore.
+
+
+247
+00:13:52,232 --> 00:13:56,203 line:-2
+Next, create both the CareKitStore
+and the HealthKitPassthroughStore,
+
+
+248
+00:13:56,270 --> 00:13:59,773 line:-2
+making sure to give each a name
+that's unique for your application.
+
+
+249
+00:14:01,341 --> 00:14:03,143 line:-1
+Then create a StoreCoordinator
+
+
+250
+00:14:03,210 --> 00:14:05,746 line:-2
+and attach the two stores
+that we've just created.
+
+
+251
+00:14:07,381 --> 00:14:10,651 line:-2
+Finally, create a StoreManager
+using the StoreCoordinator,
+
+
+252
+00:14:10,717 --> 00:14:14,688 line:-2
+and this StoreManager can now be used
+to create synchronized CareKit views.
+
+
+253
+00:14:16,490 --> 00:14:18,091 line:-1
+Now that we have a store set up,
+
+
+254
+00:14:18,158 --> 00:14:21,228 line:-2
+let's actually create an exercise task
+to add to it.
+
+
+255
+00:14:22,296 --> 00:14:23,997 line:-1
+We create a schedule for the task,
+
+
+256
+00:14:24,064 --> 00:14:27,467 line:-2
+which specifies that the task occurs
+at 8:00 a.m. every day.
+
+
+257
+00:14:28,035 --> 00:14:31,505 line:-2
+It also sets a target value
+of 30 exercise minutes,
+
+
+258
+00:14:31,572 --> 00:14:34,908 line:-2
+which will be used by the views
+to display the exercise goal.
+
+
+259
+00:14:36,276 --> 00:14:38,212 line:-1
+Next we create a HealthKit linkage
+
+
+260
+00:14:38,278 --> 00:14:40,914 line:-2
+to help us link the task
+to a HealthKit quantity.
+
+
+261
+00:14:41,548 --> 00:14:44,184 line:-1
+We can use the quantity identifier, type
+
+
+262
+00:14:44,251 --> 00:14:46,887 line:-2
+and unit that corresponds
+to the HealthKit data type.
+
+
+263
+00:14:48,455 --> 00:14:50,924 line:-2
+Now that we have a schedule
+and a HealthKit linkage,
+
+
+264
+00:14:50,991 --> 00:14:53,627 line:-2
+we can create the new task
+and add it to the store.
+
+
+265
+00:14:55,229 --> 00:14:56,530 line:-1
+To display the task,
+
+
+266
+00:14:56,597 --> 00:15:00,200 line:-2
+we can use some of the new views
+that we've introduced in CareKitUI.
+
+
+267
+00:15:00,767 --> 00:15:03,904 line:-2
+In this case, the NumericProgressTaskView
+is a perfect fit
+
+
+268
+00:15:03,971 --> 00:15:06,406 line:-2
+because it shows
+a progress and a goal value.
+
+
+269
+00:15:07,007 --> 00:15:08,942 line:-1
+The LabeledValueTaskView above it
+
+
+270
+00:15:09,009 --> 00:15:12,312 line:-2
+is better for displaying tasks
+that don't have a particular goal.
+
+
+271
+00:15:14,214 --> 00:15:17,084 line:-2
+All right.
+That finishes up another section.
+
+
+272
+00:15:17,150 --> 00:15:18,852 line:-1
+We already have a lot of stickers,
+
+
+273
+00:15:18,919 --> 00:15:21,922 line:-2
+but let's make room for one more
+for HealthKit-driven tasks.
+
+
+274
+00:15:23,924 --> 00:15:26,593 line:-2
+In addition to HealthKit,
+there are many other storage systems
+
+
+275
+00:15:26,660 --> 00:15:28,829 line:-2
+out there today
+in the health care industry.
+
+
+276
+00:15:29,196 --> 00:15:33,000 line:-2
+The vast majority of them
+store their data in a format called FHIR.
+
+
+277
+00:15:33,066 --> 00:15:37,237 line:-2
+And FHIR is used so that data
+can be easily exchanged and parsed.
+
+
+278
+00:15:37,671 --> 00:15:42,009 line:-2
+And to make it easier for you to interact
+with these databases in your apps,
+
+
+279
+00:15:42,075 --> 00:15:44,711 line:-1
+we're introducing FHIR compatibility.
+
+
+280
+00:15:45,979 --> 00:15:48,148 line:-1
+To understand FHIR a little bit better,
+
+
+281
+00:15:48,215 --> 00:15:51,785 line:-2
+let's look at a snippet of JSON
+that's structured in the FHIR format.
+
+
+282
+00:15:53,220 --> 00:15:56,957 line:-2
+This JSON represents data
+for a medication order of Tylenol.
+
+
+283
+00:15:57,291 --> 00:16:00,160 line:-2
+The JSON is formed
+in a certain release of FHIR.
+
+
+284
+00:16:00,227 --> 00:16:03,597 line:-2
+In CareKit, we support compatibility
+with a few releases,
+
+
+285
+00:16:03,664 --> 00:16:05,999 line:-1
+including DSTU2 and R4.
+
+
+286
+00:16:07,501 --> 00:16:10,637 line:-2
+To enable FHIR compatibility,
+we're introducing coders
+
+
+287
+00:16:10,704 --> 00:16:13,540 line:-2
+that can map between
+CareKit entities and FHIR data.
+
+
+288
+00:16:14,208 --> 00:16:15,776 line:-1
+To accomplish this mapping,
+
+
+289
+00:16:15,843 --> 00:16:18,579 line:-2
+we make use of
+a new open-source Apple framework,
+
+
+290
+00:16:18,645 --> 00:16:19,680 line:-1
+called FHIRModels.
+
+
+291
+00:16:20,547 --> 00:16:22,349 line:0
+For more information on the framework,
+
+
+292
+00:16:22,416 --> 00:16:25,385 line:0
+check out the session,
+"Handling FHIR Without Getting Burned,"
+
+
+293
+00:16:25,452 --> 00:16:28,121 line:0
+which is one of the best-named
+WW sessions out there.
+
+
+294
+00:16:28,755 --> 00:16:31,758 line:-2
+When we're doing this mapping
+of FHIR data to CareKit entities,
+
+
+295
+00:16:31,825 --> 00:16:36,096 line:-2
+oftentimes a single FHIR resource
+maps to a single CareKit entity.
+
+
+296
+00:16:36,163 --> 00:16:38,131 line:-1
+A good example is a FHIR patient.
+
+
+297
+00:16:38,866 --> 00:16:42,836 line:-2
+But sometimes FHIR resources
+are more granular than CareKit entities,
+
+
+298
+00:16:42,903 --> 00:16:47,841 line:-2
+and in those cases, a few FHIR resources
+might map to a single CareKit entity.
+
+
+299
+00:16:47,908 --> 00:16:51,745 line:-2
+It's important to take this into account
+when doing the mapping yourselves.
+
+
+300
+00:16:53,013 --> 00:16:55,449 line:-2
+Now that we understand the coders
+at a high level,
+
+
+301
+00:16:55,516 --> 00:16:57,050 line:-1
+let's actually create them.
+
+
+302
+00:16:57,518 --> 00:17:00,787 line:-2
+We'll start by importing CareKitStore
+and CareKitFHIR,
+
+
+303
+00:17:00,854 --> 00:17:03,724 line:-2
+which is a new SPM package
+that contains the coders.
+
+
+304
+00:17:05,224 --> 00:17:09,029 line:-2
+We can then initialize the coder
+that's responsible for mapping the data,
+
+
+305
+00:17:09,096 --> 00:17:12,665 line:-2
+and here we have a coder that will map
+JSON in the R4 release
+
+
+306
+00:17:12,733 --> 00:17:14,101 line:-1
+to CareKit entities.
+
+
+307
+00:17:15,569 --> 00:17:18,204 line:-2
+Using that coder,
+we can take a CareKit patient
+
+
+308
+00:17:18,271 --> 00:17:20,107 line:-1
+and convert it to FHIR data.
+
+
+309
+00:17:21,175 --> 00:17:22,542 line:-1
+In the reverse direction,
+
+
+310
+00:17:22,608 --> 00:17:25,878 line:-2
+we can take FHIR data
+and map it to a CareKit patient.
+
+
+311
+00:17:25,945 --> 00:17:29,850 line:-2
+Notice that in the process,
+we first create a FHIR resource data.
+
+
+312
+00:17:30,317 --> 00:17:34,721 line:-2
+This helps ensure that the binary data
+is JSON in the R4 format,
+
+
+313
+00:17:34,788 --> 00:17:37,357 line:-2
+so that it can be safely passed
+to our R4 coder.
+
+
+314
+00:17:37,925 --> 00:17:40,761 line:-2
+But the mapping between FHIR data
+and CareKit entities
+
+
+315
+00:17:40,827 --> 00:17:42,529 line:-1
+isn't always so perfect.
+
+
+316
+00:17:42,596 --> 00:17:45,699 line:-2
+For example, it's possible
+that a property on a CareKit entity
+
+
+317
+00:17:45,766 --> 00:17:48,635 line:-2
+cannot be perfectly represented
+by a FHIR resource.
+
+
+318
+00:17:49,269 --> 00:17:52,639 line:-2
+In those cases, it's important
+to define the mapping yourself,
+
+
+319
+00:17:52,706 --> 00:17:54,942 line:-1
+so that data isn't lost in translation.
+
+
+320
+00:17:55,642 --> 00:17:57,077 line:-1
+Here you can define the way
+
+
+321
+00:17:57,144 --> 00:17:59,646 line:-2
+that a patient name
+is mapped to the FHIR data.
+
+
+322
+00:18:00,681 --> 00:18:02,916 line:-1
+In this closure, we're given a name
+
+
+323
+00:18:02,983 --> 00:18:05,152 line:-2
+and a patient
+from the FHIRModel's framework.
+
+
+324
+00:18:05,786 --> 00:18:08,856 line:-2
+Our job is to actually map the name
+to the patient.
+
+
+325
+00:18:10,390 --> 00:18:11,658 line:-1
+In the reverse direction,
+
+
+326
+00:18:11,725 --> 00:18:14,294 line:-2
+you can define the way
+that a patient name is mapped
+
+
+327
+00:18:14,361 --> 00:18:15,596 line:-1
+from the FHIR data.
+
+
+328
+00:18:15,996 --> 00:18:19,099 line:-2
+Here we're given a patient
+from the FHIRModel's framework,
+
+
+329
+00:18:19,166 --> 00:18:22,069 line:-2
+but this time, our job
+is to extract the name components
+
+
+330
+00:18:22,135 --> 00:18:23,337 line:-1
+for the CareKit entity.
+
+
+331
+00:18:24,471 --> 00:18:27,441 line:-2
+Notice that these closures
+expose types from FHIRModels.
+
+
+332
+00:18:27,875 --> 00:18:31,678 line:-2
+Like we mentioned before,
+the framework is completely open-source,
+
+
+333
+00:18:31,745 --> 00:18:35,048 line:-2
+and you can find all of the source code
+on the CareKit GitHub page.
+
+
+334
+00:18:36,984 --> 00:18:39,419 line:-1
+That finishes up the FHIR updates.
+
+
+335
+00:18:39,486 --> 00:18:41,655 line:-1
+Let's see what our new sticker looks like.
+
+
+336
+00:18:42,356 --> 00:18:43,390 line:-1
+Awesome.
+
+
+337
+00:18:44,057 --> 00:18:46,793 line:-2
+And now, I'll pass it off
+to my colleague, Erik,
+
+
+338
+00:18:46,860 --> 00:18:50,330 line:-2
+who's going to go through some
+more exciting updates to the CareKitStore.
+
+
+339
+00:18:50,397 --> 00:18:51,732 line:-1
+On to you, Erik.
+
+
+340
+00:18:52,366 --> 00:18:53,367 line:-1
+Thanks, Gavi.
+
+
+341
+00:18:53,433 --> 00:18:54,968 line:-1
+And hello, everybody.
+
+
+342
+00:18:55,035 --> 00:18:56,370 line:-1
+My name's Erik.
+
+
+343
+00:18:56,436 --> 00:18:58,405 line:-1
+I'm also an engineer on the CareKit team,
+
+
+344
+00:18:58,472 --> 00:19:01,575 line:-2
+and today I have the privilege
+of introducing and demoing
+
+
+345
+00:19:01,642 --> 00:19:03,577 line:-1
+an exciting new feature in CareKit.
+
+
+346
+00:19:04,244 --> 00:19:07,514 line:-2
+Gavi's just talked to you a bit
+about how CareKit helps keep your views
+
+
+347
+00:19:07,581 --> 00:19:09,716 line:-1
+in sync with the data in your store.
+
+
+348
+00:19:09,783 --> 00:19:13,353 line:-2
+What I'm going to talk with you about
+is a different kind of synchronization:
+
+
+349
+00:19:13,420 --> 00:19:15,255 line:-1
+synchronization with a server.
+
+
+350
+00:19:16,023 --> 00:19:18,292 line:-2
+One of the most common questions
+we've received
+
+
+351
+00:19:18,358 --> 00:19:21,328 line:-1
+since CareKit was open-sourced has been,
+
+
+352
+00:19:21,395 --> 00:19:24,765 line:-2
+"How do I synchronize the data
+in my CareKit app with a server?"
+
+
+353
+00:19:26,066 --> 00:19:29,369 line:-2
+We've put a lot of time and thought
+into considering how to do that
+
+
+354
+00:19:29,436 --> 00:19:30,804 line:-1
+and how to do it well.
+
+
+355
+00:19:30,871 --> 00:19:32,806 line:-1
+And today, I'm happy to introduce
+
+
+356
+00:19:32,873 --> 00:19:36,376 line:-2
+a new set
+of CareKit remote synchronization APIs.
+
+
+357
+00:19:36,977 --> 00:19:41,682 line:-2
+The new remote sync API defines a protocol
+for communicating with CareKit.
+
+
+358
+00:19:42,349 --> 00:19:44,918 line:-1
+Any server that observes these rules
+
+
+359
+00:19:44,985 --> 00:19:48,589 line:-2
+can be used as a synchronization back end
+for CareKit apps.
+
+
+360
+00:19:49,890 --> 00:19:52,726 line:-2
+When a CareKit app
+enables remote synchronization,
+
+
+361
+00:19:52,793 --> 00:19:55,762 line:-2
+changes made locally,
+such as completing a task,
+
+
+362
+00:19:55,829 --> 00:19:57,898 line:-1
+will be synchronized to a remote server.
+
+
+363
+00:19:59,867 --> 00:20:03,570 line:-2
+Other devices can interact
+with the data on the server as well.
+
+
+364
+00:20:03,637 --> 00:20:06,573 line:-2
+Here the other device adds a new task
+for this user.
+
+
+365
+00:20:07,374 --> 00:20:10,143 line:-2
+The next time our patient
+synchronizes with the server,
+
+
+366
+00:20:10,210 --> 00:20:14,114 line:-2
+the store receives the updates,
+and it can be displayed to them.
+
+
+367
+00:20:14,181 --> 00:20:18,051 line:-2
+There are two sides to the new APIs
+that enable these interactions.
+
+
+368
+00:20:18,118 --> 00:20:23,023 line:-2
+The first lives on an extension
+to OCKStore and is for iOS developers.
+
+
+369
+00:20:23,090 --> 00:20:27,594 line:-2
+The second is a new protocol
+for adding support for CareKit to servers.
+
+
+370
+00:20:28,228 --> 00:20:31,598 line:-2
+Let's start with the app developer
+facing bits of the API.
+
+
+371
+00:20:32,699 --> 00:20:36,637 line:-2
+We've added a new remote parameter
+to OCKStore's initializer.
+
+
+372
+00:20:37,204 --> 00:20:39,606 line:-2
+If you pass an argument
+into this parameter,
+
+
+373
+00:20:39,673 --> 00:20:43,343 line:-2
+CareKit will enable remote synchronization
+with the object you provided.
+
+
+374
+00:20:44,077 --> 00:20:45,846 line:-1
+If you leave the remote nil,
+
+
+375
+00:20:45,913 --> 00:20:49,249 line:-2
+then CareKit will continue
+to function entirely off-line,
+
+
+376
+00:20:49,316 --> 00:20:50,817 line:-1
+as it did previously.
+
+
+377
+00:20:51,585 --> 00:20:53,887 line:-1
+We've also added a new synchronize method,
+
+
+378
+00:20:53,954 --> 00:20:57,658 line:-2
+and as its name suggests,
+calling this method will prompt CareKit
+
+
+379
+00:20:57,724 --> 00:21:01,128 line:-2
+to synchronize its local store
+with its remote store.
+
+
+380
+00:21:01,929 --> 00:21:05,866 line:-2
+The policy parameter's default value
+is generally the one that you'll want,
+
+
+381
+00:21:05,933 --> 00:21:09,736 line:-2
+but there are other options that allow you
+to completely overwrite the data
+
+
+382
+00:21:09,803 --> 00:21:13,774 line:-2
+on either the local or the remote
+with the data from its partner.
+
+
+383
+00:21:15,275 --> 00:21:18,011 line:-2
+Let's take a look
+at how you'll use these in practice.
+
+
+384
+00:21:18,478 --> 00:21:22,616 line:-2
+First you'll need to import CareKitStore
+plus a VendorSDK.
+
+
+385
+00:21:23,116 --> 00:21:25,485 line:-2
+We'll talk more about these packages
+in a moment,
+
+
+386
+00:21:25,552 --> 00:21:27,754 line:-1
+but let's assume that we have one for now.
+
+
+387
+00:21:28,388 --> 00:21:30,691 line:-1
+The next step is to instantiate a class
+
+
+388
+00:21:30,757 --> 00:21:33,493 line:-2
+that conforms
+to OCKRemoteSynchronizable.
+
+
+389
+00:21:34,328 --> 00:21:38,031 line:-2
+You'll need to pass that instance
+into OCKStore's initializer.
+
+
+390
+00:21:38,465 --> 00:21:41,902 line:-2
+And once you've done that,
+just use the store as you normally would.
+
+
+391
+00:21:42,369 --> 00:21:45,305 line:-2
+Many remotes support
+automatic synchronization,
+
+
+392
+00:21:45,372 --> 00:21:49,810 line:-2
+which means that CareKit will call
+the synchronized method for you as needed.
+
+
+393
+00:21:50,711 --> 00:21:53,847 line:0
+Of course, you're always welcome
+to call synchronize manually
+
+
+394
+00:21:53,914 --> 00:21:55,616 line:0
+to kick it off on your own.
+
+
+395
+00:21:55,682 --> 00:21:59,753 line:-2
+So, we've just had a look at
+the app developer facing side of the API.
+
+
+396
+00:22:00,320 --> 00:22:04,858 line:-2
+The other side of the coin is the new
+OCKRemoteSynchronizable protocol
+
+
+397
+00:22:04,925 --> 00:22:07,895 line:-2
+that back end engineers
+and cloud providers can use
+
+
+398
+00:22:07,961 --> 00:22:11,164 line:-2
+to add support for CareKit
+to their servers.
+
+
+399
+00:22:11,698 --> 00:22:14,034 line:-1
+This protocol has five requirements.
+
+
+400
+00:22:15,969 --> 00:22:18,672 line:-2
+You'll need to equip your class
+with a delegate,
+
+
+401
+00:22:18,739 --> 00:22:21,375 line:-2
+and it'll be your responsibility
+to alert the delegate
+
+
+402
+00:22:21,441 --> 00:22:24,878 line:-2
+when changes happen on the server
+that CareKit needs to be aware of.
+
+
+403
+00:22:26,380 --> 00:22:30,384 line:-2
+You'll also need to tell CareKit if you
+want automatic synchronization or not.
+
+
+404
+00:22:31,018 --> 00:22:34,721 line:-2
+It can be helpful to turn this off
+for deterministic unit tests,
+
+
+405
+00:22:34,788 --> 00:22:36,957 line:-2
+but typically,
+you'll want this to be true.
+
+
+406
+00:22:38,859 --> 00:22:42,829 line:-2
+You'll also need to provide a method
+for fetching changes from the server.
+
+
+407
+00:22:42,896 --> 00:22:45,265 line:-1
+CareKit will give you a knowledgeVector,
+
+
+408
+00:22:45,332 --> 00:22:48,068 line:-2
+also known as a vector clock
+in other contexts.
+
+
+409
+00:22:48,135 --> 00:22:51,038 line:-2
+This is a specialized data structure
+that allows the server
+
+
+410
+00:22:51,104 --> 00:22:55,008 line:-2
+to know exactly what data already exists
+on your device and what doesn't.
+
+
+411
+00:22:55,909 --> 00:22:58,478 line:-2
+Your job will be to send this vector
+to the server,
+
+
+412
+00:22:58,545 --> 00:23:00,948 line:-1
+exchange it for a RevisionRecord,
+
+
+413
+00:23:01,014 --> 00:23:04,518 line:-2
+pass the RevisionRecord
+into the merger vision closure
+
+
+414
+00:23:04,585 --> 00:23:07,821 line:-2
+and indicate when you're done
+by calling the completion block.
+
+
+415
+00:23:09,556 --> 00:23:11,825 line:-1
+The next requirement is pushRevisions.
+
+
+416
+00:23:12,392 --> 00:23:14,761 line:-2
+CareKit will provide you
+with a deviceRevision,
+
+
+417
+00:23:14,828 --> 00:23:18,265 line:-2
+which documents all of the changes
+that have happened on the device
+
+
+418
+00:23:18,332 --> 00:23:20,567 line:-2
+since the last time it checked in
+with the server.
+
+
+419
+00:23:21,268 --> 00:23:24,471 line:-2
+It's your job to pass this RevisionRecord
+to your server
+
+
+420
+00:23:24,538 --> 00:23:28,108 line:-2
+and tell CareKit when you're done
+by calling the completion closure.
+
+
+421
+00:23:29,443 --> 00:23:33,146 line:0
+Finally, chooseConflictResolutionPolicy
+will be invoked
+
+
+422
+00:23:33,213 --> 00:23:36,850 line:0
+when conflicting edits are made
+on the device and on the server.
+
+
+423
+00:23:37,584 --> 00:23:42,122 line:0
+The conflict description contains a copy
+of both versions of the conflicted entity.
+
+
+424
+00:23:42,422 --> 00:23:46,693 line:0
+And your job will be to inspect both
+and decide which one to keep.
+
+
+425
+00:23:47,961 --> 00:23:52,065 line:-2
+By implementing this protocol,
+plus the server side logic to support it,
+
+
+426
+00:23:52,132 --> 00:23:55,302 line:-2
+it's possible to create
+new integrations with CareKit.
+
+
+427
+00:23:56,336 --> 00:23:59,673 line:-2
+Now, Apple does not provide
+a bespoke server implementation,
+
+
+428
+00:24:00,174 --> 00:24:03,810 line:-2
+but we have made it as easy as we can
+for others to do so.
+
+
+429
+00:24:03,877 --> 00:24:07,814 line:-2
+And we're thrilled to announce
+that we already have one partner lined up.
+
+
+430
+00:24:08,949 --> 00:24:12,719 line:-2
+IBM has become the very first
+to add support for CareKit
+
+
+431
+00:24:12,786 --> 00:24:16,156 line:-1
+to their IBM Cloud Hyper Protect offering.
+
+
+432
+00:24:16,857 --> 00:24:18,225 line:-1
+In the spirit of CareKit,
+
+
+433
+00:24:18,292 --> 00:24:20,627 line:-1
+IBM has even open-sourced their work
+
+
+434
+00:24:20,694 --> 00:24:23,263 line:-2
+as part of the CareKit organization
+on GitHub.
+
+
+435
+00:24:24,097 --> 00:24:26,300 line:-2
+If you'd like to learn more
+about their SDK,
+
+
+436
+00:24:26,366 --> 00:24:29,870 line:-2
+you can follow their self-guided lab
+to find out how to get started.
+
+
+437
+00:24:30,671 --> 00:24:32,573 line:-2
+All right.
+We've done a lot of talking now,
+
+
+438
+00:24:32,639 --> 00:24:35,042 line:-2
+and I'm really excited
+to get to the showing.
+
+
+439
+00:24:35,609 --> 00:24:37,711 line:-2
+Today we're gonna go through
+a demonstration
+
+
+440
+00:24:37,778 --> 00:24:40,647 line:-2
+that uses the new sync API
+we've just introduced
+
+
+441
+00:24:40,714 --> 00:24:43,217 line:-2
+to do something
+that we think is pretty clever.
+
+
+442
+00:24:43,951 --> 00:24:45,185 line:-1
+Now, the remote sync API
+
+
+443
+00:24:45,252 --> 00:24:49,623 line:-2
+is primarily intended for synchronizing
+an iOS CareKit app with a server,
+
+
+444
+00:24:50,524 --> 00:24:53,427 line:-2
+but I'm gonna show you
+how we can use the very same API
+
+
+445
+00:24:53,493 --> 00:24:58,065 line:-2
+to synchronize data between an iOS app
+and its companion watchOS app.
+
+
+446
+00:24:58,765 --> 00:25:03,170 line:-2
+The app we're gonna be creating today
+will remind our user to stretch daily,
+
+
+447
+00:25:03,737 --> 00:25:06,073 line:-1
+prompt them to report any muscle cramps
+
+
+448
+00:25:06,139 --> 00:25:09,776 line:-2
+and show them a chart to illustrate
+the relationship between the two.
+
+
+449
+00:25:10,310 --> 00:25:14,848 line:-2
+Our goal is to get to a point where the
+same tasks are displayed on both devices,
+
+
+450
+00:25:14,915 --> 00:25:18,485 line:-2
+and completing them on one device should
+automatically update them on the other.
+
+
+451
+00:25:19,887 --> 00:25:23,624 line:-2
+Now the iOS application
+is actually just a pruned-down version
+
+
+452
+00:25:23,690 --> 00:25:25,192 line:-1
+of the very same sample app
+
+
+453
+00:25:25,259 --> 00:25:27,494 line:-2
+that we built out
+in our talk from last year.
+
+
+454
+00:25:28,228 --> 00:25:29,963 line:0
+If you haven't seen that presentation yet,
+
+
+455
+00:25:30,030 --> 00:25:32,466 line:0
+I'd highly recommend
+going back and watching it
+
+
+456
+00:25:32,533 --> 00:25:35,502 line:0
+to learn how we got to where
+we're going to be jumping in today.
+
+
+457
+00:25:36,170 --> 00:25:38,105 line:-1
+All right, let's hop into Xcode.
+
+
+458
+00:25:38,639 --> 00:25:40,040 line:-1
+As I mentioned a moment ago,
+
+
+459
+00:25:40,107 --> 00:25:43,143 line:-2
+the iOS application
+is actually complete already.
+
+
+460
+00:25:43,844 --> 00:25:47,981 line:-2
+That means that we'll be able to focus
+on creating a stellar watchOS experience.
+
+
+461
+00:25:49,116 --> 00:25:51,485 line:-2
+Let's begin by setting up
+the synchronization
+
+
+462
+00:25:51,552 --> 00:25:54,588 line:-2
+between our Apple Watch app
+and our iOS app.
+
+
+463
+00:25:54,655 --> 00:25:59,459 line:-2
+We'll do that by leveraging a new class:
+the OCKWatchConnectivityPeer.
+
+
+464
+00:25:59,993 --> 00:26:03,297 line:-2
+This class conforms
+to the remote synchronizable protocol,
+
+
+465
+00:26:03,363 --> 00:26:06,333 line:-2
+and it makes it possible
+for the Apple Watch and the iPhone
+
+
+466
+00:26:06,400 --> 00:26:08,602 line:-1
+to act as remote stores for one another.
+
+
+467
+00:26:09,736 --> 00:26:13,640 line:-2
+We'll need to pass this remote
+into the store when we instantiate it.
+
+
+468
+00:26:15,709 --> 00:26:19,346 line:-2
+Now, in today's demo, we're going to be
+working with WatchConnectivity.
+
+
+469
+00:26:19,413 --> 00:26:20,981 line:-1
+And when using WatchConnectivity,
+
+
+470
+00:26:21,048 --> 00:26:24,952 line:-2
+all of the messages passed back and forth
+between iOS and watchOS
+
+
+471
+00:26:25,018 --> 00:26:27,921 line:-2
+get funneled through
+the WatchConnectivity session delegate,
+
+
+472
+00:26:27,988 --> 00:26:32,292 line:-2
+which is a class that's typically owned
+and controlled by you, the app developer.
+
+
+473
+00:26:32,960 --> 00:26:33,961 line:-1
+What that means
+
+
+474
+00:26:34,027 --> 00:26:37,464 line:-2
+is that CareKit is going to require
+a little bit of cooperation on your part
+
+
+475
+00:26:37,531 --> 00:26:39,766 line:-2
+in order to get its messages
+back and forth.
+
+
+476
+00:26:40,634 --> 00:26:42,436 line:-1
+I'll walk you through what we need to do.
+
+
+477
+00:26:43,837 --> 00:26:47,274 line:-2
+We'll need to set up and activate
+our WatchConnectivity session.
+
+
+478
+00:26:47,875 --> 00:26:51,578 line:-2
+That'll entail setting the delegate
+and calling the activate method.
+
+
+479
+00:26:53,013 --> 00:26:55,549 line:-2
+For our purposes,
+we're gonna define a little helper class
+
+
+480
+00:26:55,616 --> 00:26:57,084 line:-1
+to function as our delegate.
+
+
+481
+00:26:58,085 --> 00:27:02,556 line:-2
+The WatchConnectivity session delegate
+has two required methods.
+
+
+482
+00:27:03,090 --> 00:27:06,059 line:-1
+The first, activationDidComplete,
+
+
+483
+00:27:06,126 --> 00:27:09,696 line:-2
+seems like the perfect place to kick off
+our very first synchronization.
+
+
+484
+00:27:11,798 --> 00:27:14,668 line:-1
+The second method, didReceiveMessage,
+
+
+485
+00:27:14,735 --> 00:27:18,805 line:-2
+will be triggered each time a message
+from the iPhone lands on the Apple Watch.
+
+
+486
+00:27:19,306 --> 00:27:22,209 line:-2
+And this is where we're gonna give CareKit
+a bit of help.
+
+
+487
+00:27:23,110 --> 00:27:24,845 line:-1
+Each time we receive a message,
+
+
+488
+00:27:24,912 --> 00:27:27,748 line:-2
+we're going to show that message
+to our CareKit remote
+
+
+489
+00:27:28,115 --> 00:27:31,018 line:-2
+and give it an opportunity
+to furnish a response.
+
+
+490
+00:27:32,219 --> 00:27:33,754 line:-1
+We'll then take that response
+
+
+491
+00:27:33,820 --> 00:27:37,191 line:-2
+and forward it back to the iPhone
+on CareKit's behalf.
+
+
+492
+00:27:40,194 --> 00:27:41,662 line:-1
+Now that that's out of the way,
+
+
+493
+00:27:41,728 --> 00:27:44,231 line:-2
+we'll just need to create an instance
+of our new class
+
+
+494
+00:27:44,298 --> 00:27:47,000 line:-2
+and remember to set it
+as the session delegate.
+
+
+495
+00:27:48,769 --> 00:27:52,105 line:-2
+Now, typically, we would need to perform
+this exact same setup
+
+
+496
+00:27:52,172 --> 00:27:54,007 line:-1
+on the iOS side as well.
+
+
+497
+00:27:54,608 --> 00:27:57,477 line:-2
+But because it really is
+the exact same setup,
+
+
+498
+00:27:57,544 --> 00:28:01,615 line:-2
+we've gone ahead and done some demo magic,
+and we've taken care of that already.
+
+
+499
+00:28:02,049 --> 00:28:04,184 line:-1
+We have our remote setup on watchOS.
+
+
+500
+00:28:04,618 --> 00:28:07,120 line:-1
+We have our remote setup on iOS.
+
+
+501
+00:28:07,554 --> 00:28:09,823 line:-1
+And our synchronization story is complete.
+
+
+502
+00:28:10,757 --> 00:28:13,560 line:-2
+We're going to move on
+and tackle the views next.
+
+
+503
+00:28:14,695 --> 00:28:18,765 line:-2
+In order to keep the views up-to-date
+with the latest data in the store,
+
+
+504
+00:28:18,832 --> 00:28:20,501 line:-2
+we'll need to provide them
+with a reference
+
+
+505
+00:28:20,567 --> 00:28:22,336 line:-1
+to a SynchronizedStoreManager.
+
+
+506
+00:28:22,936 --> 00:28:24,605 line:-1
+Let's create one right here.
+
+
+507
+00:28:27,875 --> 00:28:31,011 line:-2
+We'll be building out our views
+in SwiftUI today.
+
+
+508
+00:28:31,078 --> 00:28:32,613 line:-1
+And when using SwiftUI,
+
+
+509
+00:28:32,679 --> 00:28:35,983 line:-2
+EnvironmentValues can be a great way
+to provide a reference
+
+
+510
+00:28:36,049 --> 00:28:38,385 line:-1
+to your StoreManager to your views.
+
+
+511
+00:28:39,653 --> 00:28:42,155 line:-1
+Here we're defining a new EnvironmentKey
+
+
+512
+00:28:42,222 --> 00:28:44,558 line:-2
+that provides
+a SynchronizedStoreManager.
+
+
+513
+00:28:45,225 --> 00:28:46,827 line:-1
+For the default value,
+
+
+514
+00:28:46,894 --> 00:28:49,997 line:-2
+let's use the instance owned
+by our extensionDelegate.
+
+
+515
+00:28:52,633 --> 00:28:57,671 line:-2
+We'll also extend EnvironmentValues
+to define a new property: storeManager.
+
+
+516
+00:28:59,072 --> 00:29:02,042 line:-2
+And we'll use this property
+as an environment variable
+
+
+517
+00:29:02,109 --> 00:29:04,178 line:-1
+inside of our TodaysTasksView.
+
+
+518
+00:29:05,812 --> 00:29:07,948 line:-2
+Now that we have a reference
+to the storeManager,
+
+
+519
+00:29:08,015 --> 00:29:09,850 line:-1
+we can begin fleshing out our view.
+
+
+520
+00:29:10,384 --> 00:29:12,619 line:-1
+We want to display two task cards
+
+
+521
+00:29:12,686 --> 00:29:15,422 line:-2
+and we'll wrap both of them
+inside of a ScrollView.
+
+
+522
+00:29:16,223 --> 00:29:19,393 line:-2
+We'll also go ahead
+and tint that ScrollView red
+
+
+523
+00:29:19,459 --> 00:29:22,162 line:-1
+to match the theme of our iOS application.
+
+
+524
+00:29:23,597 --> 00:29:27,201 line:0
+Now on iOS we chose to use
+the InstructionsTaskView
+
+
+525
+00:29:27,267 --> 00:29:28,402 line:0
+for the stretch task.
+
+
+526
+00:29:28,468 --> 00:29:30,604 line:0
+So we'll do the exact same thing here.
+
+
+527
+00:29:34,741 --> 00:29:38,745 line:0
+Similarly, we'll use the SimpleTaskView
+for the cramps card.
+
+
+528
+00:29:41,048 --> 00:29:44,685 line:0
+And because reporting cramps
+is sufficiently self-explanatory,
+
+
+529
+00:29:44,751 --> 00:29:47,821 line:0
+we'll demonstrate the use
+of a secondary initializer
+
+
+530
+00:29:47,888 --> 00:29:52,059 line:0
+to hide away the detail label
+and create a nice crisp view.
+
+
+531
+00:29:54,127 --> 00:29:56,997 line:-2
+With our view complete,
+our app is now finished.
+
+
+532
+00:29:57,931 --> 00:30:01,268 line:-1
+Let's build, run and see how it looks.
+
+
+533
+00:30:03,070 --> 00:30:05,405 line:-2
+Note that the very first time
+we run our app,
+
+
+534
+00:30:05,906 --> 00:30:09,576 line:-2
+we won't see any tasks appear
+immediately on the Apple Watch.
+
+
+535
+00:30:10,444 --> 00:30:13,146 line:-2
+This is because it will take a moment
+for synchronization
+
+
+536
+00:30:13,213 --> 00:30:16,316 line:-1
+between watchOS and iOS to complete.
+
+
+537
+00:30:18,619 --> 00:30:22,389 line:-2
+But once it does, we should see our tasks
+appear on the Apple Watch.
+
+
+538
+00:30:22,990 --> 00:30:24,057 line:-1
+And we do.
+
+
+539
+00:30:24,725 --> 00:30:28,228 line:-2
+Let's go ahead and try reporting
+muscle cramps on the iPhone
+
+
+540
+00:30:28,295 --> 00:30:30,564 line:-2
+to see if it makes it across
+to our Apple Watch.
+
+
+541
+00:30:31,498 --> 00:30:33,400 line:-1
+It does. This is looking really good.
+
+
+542
+00:30:34,268 --> 00:30:38,572 line:-2
+Remember, all of the views in CareKit
+are synchronized with the store.
+
+
+543
+00:30:39,640 --> 00:30:44,211 line:-2
+What that means is that, in a moment,
+when I check off our stretch task
+
+
+544
+00:30:44,278 --> 00:30:45,479 line:-1
+on the Apple Watch,
+
+
+545
+00:30:45,546 --> 00:30:49,716 line:-2
+we should see all the subscribed views
+on the iPhone update simultaneously.
+
+
+546
+00:30:50,717 --> 00:30:53,120 line:-1
+Keep an eye on the adherence ring,
+
+
+547
+00:30:53,187 --> 00:30:55,055 line:-1
+the stretch task card
+
+
+548
+00:30:55,122 --> 00:30:57,357 line:-1
+and the chart as I complete our task.
+
+
+549
+00:30:59,326 --> 00:31:02,996 line:-2
+There is just something about that
+that is really satisfying.
+
+
+550
+00:31:04,164 --> 00:31:06,800 line:-2
+There's a bit more here
+that we can tinker around with,
+
+
+551
+00:31:06,867 --> 00:31:08,869 line:-1
+but I think that you all get the gist.
+
+
+552
+00:31:08,936 --> 00:31:11,738 line:-2
+So I'm gonna go ahead
+and wind down our demo right here.
+
+
+553
+00:31:12,639 --> 00:31:13,807 line:-1
+Let's recap.
+
+
+554
+00:31:15,042 --> 00:31:18,846 line:-2
+We've taken a look
+at the new APIs in CareKit.
+
+
+555
+00:31:18,912 --> 00:31:22,549 line:-2
+We've also looked
+at how you can add support for CareKit
+
+
+556
+00:31:22,616 --> 00:31:24,985 line:-1
+to existing servers or clouds.
+
+
+557
+00:31:25,452 --> 00:31:28,088 line:-2
+Then we demonstrated
+how these new APIs can be used
+
+
+558
+00:31:28,155 --> 00:31:31,191 line:-2
+to synchronize an Apple Watch
+with an iPhone.
+
+
+559
+00:31:32,226 --> 00:31:34,561 line:-1
+We've worked really hard for this one,
+
+
+560
+00:31:34,628 --> 00:31:37,497 line:-2
+so let's claim
+our remote synchronization sticker.
+
+
+561
+00:31:39,833 --> 00:31:41,735 line:-1
+I'm gonna hand things back to Gavi now.
+
+
+562
+00:31:41,802 --> 00:31:44,471 line:-2
+And he's gonna cover
+our very last topic for today:
+
+
+563
+00:31:44,538 --> 00:31:45,973 line:-1
+community updates.
+
+
+564
+00:31:46,039 --> 00:31:47,241 line:-1
+Take it away, Gavi.
+
+
+565
+00:31:47,841 --> 00:31:48,842 line:-1
+Thanks, Erik.
+
+
+566
+00:31:49,476 --> 00:31:53,080 line:-2
+We're really excited
+about the new remote synchronization API,
+
+
+567
+00:31:53,146 --> 00:31:56,517 line:-2
+and we can't wait to see how all of you
+will use it in your apps.
+
+
+568
+00:31:57,050 --> 00:32:00,420 line:-2
+Like Erik mentioned, next we'll go through
+some community updates.
+
+
+569
+00:32:00,854 --> 00:32:01,855 line:-1
+And each year,
+
+
+570
+00:32:01,922 --> 00:32:04,992 line:-2
+there's amazing work that's done
+by all of you in the community.
+
+
+571
+00:32:05,058 --> 00:32:08,095 line:-2
+And I'm super excited
+to share those updates with you today.
+
+
+572
+00:32:09,329 --> 00:32:13,000 line:-2
+Erik just talked all about
+our new remote synchronization API.
+
+
+573
+00:32:13,400 --> 00:32:14,868 line:-1
+As a member of our community,
+
+
+574
+00:32:14,935 --> 00:32:17,771 line:-2
+IBM has been one of the first adopters
+of the API.
+
+
+575
+00:32:18,272 --> 00:32:21,875 line:-2
+You can find all of their source code
+on the CareKit GitHub page.
+
+
+576
+00:32:23,544 --> 00:32:25,646 line:-1
+Setting remote synchronization aside,
+
+
+577
+00:32:25,712 --> 00:32:28,448 line:-2
+each year we love to highlight
+amazing apps
+
+
+578
+00:32:28,515 --> 00:32:29,917 line:-1
+that are on the App Store today,
+
+
+579
+00:32:29,983 --> 00:32:32,386 line:-2
+making great use of CareKit
+and ResearchKit.
+
+
+580
+00:32:33,320 --> 00:32:38,025 line:-2
+To call out a few, the OYM Athlete app
+helps support athletes' nutrition goals
+
+
+581
+00:32:38,091 --> 00:32:42,196 line:-2
+by providing daily meal tracking
+and trends using our chart views.
+
+
+582
+00:32:42,896 --> 00:32:44,264 line:-1
+The Health Connected app
+
+
+583
+00:32:44,331 --> 00:32:48,368 line:-2
+makes it easy for you to share health data
+with your doctors and family members
+
+
+584
+00:32:48,435 --> 00:32:51,205 line:-2
+and makes use of contact views
+and charts as well.
+
+
+585
+00:32:52,706 --> 00:32:55,642 line:-2
+We've also seen apps leverage CareKit
+and ResearchKit
+
+
+586
+00:32:55,709 --> 00:32:57,711 line:-1
+to quickly respond to COVID-19.
+
+
+587
+00:32:58,312 --> 00:32:59,813 line:-1
+The Stanford First Responder app
+
+
+588
+00:32:59,880 --> 00:33:03,217 line:-2
+is helping responders
+assess their risk for COVID-19
+
+
+589
+00:33:03,283 --> 00:33:04,918 line:-1
+and quickly get them tested.
+
+
+590
+00:33:05,786 --> 00:33:07,988 line:-2
+The University of Nebraska's
+1-Check COVID app
+
+
+591
+00:33:08,055 --> 00:33:11,525 line:-2
+is providing investigators
+with greater awareness of the disease.
+
+
+592
+00:33:13,093 --> 00:33:15,495 line:-2
+These are just a few of the apps
+released this year,
+
+
+593
+00:33:15,562 --> 00:33:18,532 line:-2
+but we'd love to hear
+how you've been leveraging the frameworks,
+
+
+594
+00:33:18,599 --> 00:33:20,567 line:-2
+and we'll show you how to do that
+in just a bit.
+
+
+595
+00:33:22,736 --> 00:33:26,673 line:-2
+Last year, we announced that
+we'd be releasing a brand-new website.
+
+
+596
+00:33:26,740 --> 00:33:29,476 line:-1
+It's out there now at researchandcare.org
+
+
+597
+00:33:29,543 --> 00:33:32,379 line:-2
+and acts as a beautiful landing page
+for the frameworks.
+
+
+598
+00:33:32,846 --> 00:33:34,348 line:-1
+On our overview page,
+
+
+599
+00:33:34,414 --> 00:33:38,418 line:-2
+you can get a snapshot of the features
+in both CareKit and ResearchKit
+
+
+600
+00:33:38,485 --> 00:33:41,688 line:-2
+and get insight into how the frameworks
+can help you and your app.
+
+
+601
+00:33:42,990 --> 00:33:45,425 line:-2
+To get more specific information
+on CareKit,
+
+
+602
+00:33:45,492 --> 00:33:47,394 line:-1
+you can navigate to the CareKit tab
+
+
+603
+00:33:47,461 --> 00:33:50,030 line:-2
+where you can browse through
+CareKit features,
+
+
+604
+00:33:50,097 --> 00:33:53,700 line:-2
+and as you scroll more,
+you can read case studies from programs
+
+
+605
+00:33:53,767 --> 00:33:57,004 line:-2
+that are using the frameworks
+to help people on a daily basis.
+
+
+606
+00:33:59,039 --> 00:34:01,975 line:-2
+You can also check out
+our Investigator Support Program,
+
+
+607
+00:34:02,042 --> 00:34:05,812 line:-2
+which aims to support researchers
+with Apple Watches for their studies.
+
+
+608
+00:34:06,914 --> 00:34:09,315 line:-2
+And if you're interested
+in applying for this program,
+
+
+609
+00:34:09,382 --> 00:34:12,553 line:-2
+please reach out to us using
+the e-mail address on this page.
+
+
+610
+00:34:14,521 --> 00:34:15,522 line:-1
+And finally,
+
+
+611
+00:34:15,589 --> 00:34:19,860 line:-2
+there are a lot of you out there using
+ResearchKit and CareKit in your apps.
+
+
+612
+00:34:19,927 --> 00:34:23,797 line:-2
+Like I mentioned before,
+we'd love to hear all about your use case
+
+
+613
+00:34:23,864 --> 00:34:26,065 line:-2
+and how you've been leveraging
+the frameworks.
+
+
+614
+00:34:26,132 --> 00:34:28,869 line:-2
+So, please reach out to us
+using this submission form.
+
+
+615
+00:34:31,004 --> 00:34:33,206 line:-1
+Now comes a bittersweet moment
+
+
+616
+00:34:33,273 --> 00:34:36,210 line:-2
+where we get our last new sticker
+for community updates.
+
+
+617
+00:34:36,643 --> 00:34:39,346 line:-2
+It's been a long journey
+and we've talked about everything
+
+
+618
+00:34:39,413 --> 00:34:42,716 line:-2
+from a beautiful new UI
+to enhancements to the CareKitStore.
+
+
+619
+00:34:43,317 --> 00:34:46,954 line:-2
+I hope you're all as excited as I am
+about all of the new updates.
+
+
+620
+00:34:48,021 --> 00:34:50,123 line:-2
+I think it's about time
+we earned our badge
+
+
+621
+00:34:50,190 --> 00:34:52,326 line:-1
+for this year's new CareKit features.
+
+
+622
+00:34:54,061 --> 00:34:55,629 line:-1
+To get started with the framework,
+
+
+623
+00:34:55,696 --> 00:34:59,032 line:-2
+make sure to check out our GitHub page
+and newly designed website.
+
+
+624
+00:35:00,267 --> 00:35:03,036 line:-2
+And as you all know,
+we're an open-source framework,
+
+
+625
+00:35:03,103 --> 00:35:06,473 line:-2
+and we're made better by all of you
+out there in the community
+
+
+626
+00:35:06,540 --> 00:35:08,809 line:-2
+that put in the hard work
+to build new features
+
+
+627
+00:35:08,876 --> 00:35:10,444 line:-1
+and contribute them back.
+
+
+628
+00:35:10,511 --> 00:35:13,514 line:-2
+So don't be afraid to open up
+your first PR on GitHub
+
+
+629
+00:35:13,580 --> 00:35:15,415 line:-1
+whether it's big or small.
+
+
+630
+00:35:15,482 --> 00:35:19,186 line:-2
+And to finish things off today,
+the team just wants to take a moment
+
+
+631
+00:35:19,253 --> 00:35:22,523 line:-2
+to thank all of you for being
+amazing supporters of the framework
+
+
+632
+00:35:22,589 --> 00:35:24,625 line:-1
+and for improving health in the world.
+
+
+633
+00:35:25,125 --> 00:35:27,528 line:-2
+We can't wait to see
+what you all build next.
+
+
+634
+00:35:27,594 --> 00:35:28,629 line:-1
+Thank you.
+

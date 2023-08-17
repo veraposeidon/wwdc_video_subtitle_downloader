@@ -1,0 +1,540 @@
+1
+00:00:03,836 --> 00:00:06,073 line:0
+Hello and welcome to WWDC.
+
+
+2
+00:00:08,675 --> 00:00:09,676 line:0
+Welcome, everyone.
+
+
+3
+00:00:09,743 --> 00:00:12,946 line:0
+My name is David Hayward, and I'm
+an engineer on the Core Image team.
+
+
+4
+00:00:13,013 --> 00:00:15,115 line:0
+I'll be giving a short presentation today
+
+
+5
+00:00:15,182 --> 00:00:17,150 line:0
+that will show you everything
+you need to do
+
+
+6
+00:00:17,217 --> 00:00:20,420 line:0
+to build Metal-Based Core Image kernels
+in Xcode.
+
+
+7
+00:00:20,988 --> 00:00:24,358 line:-2
+First off, why do you want to write
+custom CIKernels in Metal?
+
+
+8
+00:00:25,292 --> 00:00:27,761 line:-2
+In addition to the usual features
+of CIKernels,
+
+
+9
+00:00:27,828 --> 00:00:30,931 line:-2
+such as automatic tiling
+and concatenation,
+
+
+10
+00:00:30,998 --> 00:00:35,335 line:-2
+by writing them in Metal,
+you will reduce runtime compile times
+
+
+11
+00:00:35,402 --> 00:00:38,205 line:-2
+by shifting that work
+to when your app is built,
+
+
+12
+00:00:39,206 --> 00:00:42,176 line:-2
+give your kernels access
+to high-performance features
+
+
+13
+00:00:42,242 --> 00:00:45,646 line:-2
+such as gather-reads, group-writes,
+and half-float math,
+
+
+14
+00:00:45,712 --> 00:00:50,784 line:-2
+and make your life easier as a developer
+by syntax highlighting as you type
+
+
+15
+00:00:50,851 --> 00:00:52,920 line:-1
+and syntax checking when you build.
+
+
+16
+00:00:54,288 --> 00:00:57,558 line:-2
+So now that you know these benefits,
+let me show you step-by-step
+
+
+17
+00:00:57,624 --> 00:01:00,594 line:-2
+how to add Metal Core Image kernels
+to your application.
+
+
+18
+00:01:01,161 --> 00:01:02,863 line:-1
+There are five simple steps.
+
+
+19
+00:01:03,664 --> 00:01:06,400 line:-2
+First, add custom build rules
+to your project,
+
+
+20
+00:01:07,501 --> 00:01:10,103 line:-2
+then add .ci.metal sources
+to your project,
+
+
+21
+00:01:11,038 --> 00:01:12,306 line:-1
+write your kernel,
+
+
+22
+00:01:13,373 --> 00:01:15,576 line:-1
+initialize your CIKernel objects,
+
+
+23
+00:01:16,543 --> 00:01:19,613 line:-2
+and apply your kernel
+to create a new CIImage.
+
+
+24
+00:01:20,047 --> 00:01:23,383 line:-2
+Unlike conventional Metal compute
+and graphics shaders,
+
+
+25
+00:01:23,450 --> 00:01:27,754 line:-2
+Core Image Metal code needs to be
+compiled and linked with special flags.
+
+
+26
+00:01:28,522 --> 00:01:32,259 line:-2
+I recommend adding two custom build rules
+to your project targets
+
+
+27
+00:01:32,326 --> 00:01:34,461 line:-2
+that will make
+using these flags automatic.
+
+
+28
+00:01:35,829 --> 00:01:38,432 line:-2
+First we'll go
+to the project's target settings
+
+
+29
+00:01:38,498 --> 00:01:42,636 line:-2
+and add a build rule
+for files that end in .ci.metal.
+
+
+30
+00:01:42,703 --> 00:01:46,273 line:-2
+For files with this extension,
+we will run a one-line script
+
+
+31
+00:01:46,340 --> 00:01:51,211 line:-2
+that calls the Metal compiler
+with the required -fcikernel flag.
+
+
+32
+00:01:51,845 --> 00:01:56,950 line:-2
+This build rule will produce
+an output binary that will end in .ci.air.
+
+
+33
+00:01:58,018 --> 00:02:02,856 line:-2
+Next, we will add a second rule
+for files that end in .ci.air.
+
+
+34
+00:02:03,991 --> 00:02:07,928 line:-2
+For files with this extension,
+we will run another one-line script
+
+
+35
+00:02:07,995 --> 00:02:12,232 line:-2
+that calls the Metal linker
+with the required -cikernel flag.
+
+
+36
+00:02:13,800 --> 00:02:18,138 line:-2
+This build rule will produce an output
+in your apps resources directory
+
+
+37
+00:02:18,205 --> 00:02:20,941 line:-1
+that will end in .ci.metallib.
+
+
+38
+00:02:22,476 --> 00:02:25,012 line:-2
+Now that we have added
+the custom build rules,
+
+
+39
+00:02:25,078 --> 00:02:29,149 line:-2
+all we need to do is add
+a .ci.metal source to your project.
+
+
+40
+00:02:30,050 --> 00:02:34,388 line:-2
+To do that, all you need to do is go to
+the file menu and select New, File,
+
+
+41
+00:02:35,422 --> 00:02:37,691 line:-2
+and select
+that you want to add a Metal file,
+
+
+42
+00:02:38,892 --> 00:02:42,396 line:-2
+and then create a file name
+that ends in .ci
+
+
+43
+00:02:42,462 --> 00:02:46,567 line:-2
+so that the new file in your project
+will end in .ci.metal.
+
+
+44
+00:02:47,501 --> 00:02:49,770 line:-2
+For today's session,
+I will demonstrate this
+
+
+45
+00:02:49,837 --> 00:02:52,840 line:-2
+with a kernel that is shown
+in another great presentation
+
+
+46
+00:02:52,906 --> 00:02:56,543 line:-2
+on Edit and Playback HDR Video
+With AVFoundation.
+
+
+47
+00:02:58,045 --> 00:03:02,249 line:-2
+The kernel from that presentation
+applies an animated zebra-stripe effect
+
+
+48
+00:03:02,316 --> 00:03:06,753 line:-2
+that highlights the bright,
+extended range portions of an HDR video.
+
+
+49
+00:03:08,188 --> 00:03:11,558 line:-2
+To write a custom CIKernel for this effect
+is really easy.
+
+
+50
+00:03:12,492 --> 00:03:16,330 line:-2
+First, at the top of the source,
+you will include CoreImage.h header
+
+
+51
+00:03:16,396 --> 00:03:19,299 line:-2
+so that you get access
+to all the normal Metal classes
+
+
+52
+00:03:19,366 --> 00:03:22,769 line:-2
+as well as the additional classes
+that Core Image provides.
+
+
+53
+00:03:25,138 --> 00:03:29,343 line:-2
+Next you will declare the function
+for the kernel, which must be extern "C".
+
+
+54
+00:03:30,377 --> 00:03:32,346 line:-1
+The example is a CIColorKernel,
+
+
+55
+00:03:32,412 --> 00:03:36,149 line:-2
+so the function must return a float4 pixel
+and take some arguments.
+
+
+56
+00:03:39,019 --> 00:03:41,889 line:-2
+Here, the first argument
+is a Core Image sample_t
+
+
+57
+00:03:41,955 --> 00:03:44,558 line:-2
+that represents a pixel
+from an input image.
+
+
+58
+00:03:45,292 --> 00:03:50,063 line:-2
+This pixel is a linear
+premultiplied RGBA float4,
+
+
+59
+00:03:50,130 --> 00:03:54,234 line:-2
+which is suitable
+for either SDR or HDR images.
+
+
+60
+00:03:55,936 --> 00:03:58,839 line:-2
+The last argument
+is a Core Image destination
+
+
+61
+00:03:58,906 --> 00:04:01,575 line:-2
+that provides the coordinate
+of the pixel to return.
+
+
+62
+00:04:02,776 --> 00:04:07,848 line:-2
+In the implementation of this kernel,
+we use the dest.coord x and y values
+
+
+63
+00:04:07,915 --> 00:04:10,450 line:-2
+to determine
+which diagonal line we are on.
+
+
+64
+00:04:11,318 --> 00:04:12,853 line:-1
+Then we use some simple math
+
+
+65
+00:04:12,920 --> 00:04:16,089 line:-2
+to calculate
+if we should be on a zebra stripe or not.
+
+
+66
+00:04:17,391 --> 00:04:19,026 line:-1
+If we are on a zebra stripe,
+
+
+67
+00:04:19,091 --> 00:04:23,430 line:-2
+and the current pixel sample is brighter
+than the normal Standard Dynamic Range
+
+
+68
+00:04:23,497 --> 00:04:24,698 line:-1
+white of 1,
+
+
+69
+00:04:25,399 --> 00:04:28,368 line:-1
+then we will return a bright red pixel.
+
+
+70
+00:04:28,435 --> 00:04:31,638 line:-2
+Otherwise we return
+the input sample unchanged.
+
+
+71
+00:04:32,906 --> 00:04:36,944 line:-2
+For detailed documentation on Metal Shader
+Language for Core Image kernels,
+
+
+72
+00:04:37,010 --> 00:04:41,481 line:-2
+I recommend you go to developer.apple.com
+and download this reference PDF.
+
+
+73
+00:04:42,716 --> 00:04:45,285 line:0
+It documents
+the Metal Core Image kernel classes
+
+
+74
+00:04:45,352 --> 00:04:49,690 line:0
+and also describes more advanced features
+like gather-reads and group-writes.
+
+
+75
+00:04:51,091 --> 00:04:53,260 line:-1
+The final steps I will describe today
+
+
+76
+00:04:53,327 --> 00:04:55,662 line:-2
+are in the Swift code
+that loads your kernel
+
+
+77
+00:04:55,729 --> 00:04:57,698 line:-1
+and applies it to create a new image.
+
+
+78
+00:04:58,799 --> 00:05:02,035 line:-2
+Kernels are typically used
+by CIFilter subclasses
+
+
+79
+00:05:02,102 --> 00:05:06,039 line:-2
+which will have input properties
+such inputImage and other parameters.
+
+
+80
+00:05:07,741 --> 00:05:11,478 line:-2
+We recommend that your filter
+instantiate its CIKernel object
+
+
+81
+00:05:11,545 --> 00:05:13,080 line:-1
+using a static property.
+
+
+82
+00:05:13,547 --> 00:05:18,085 line:-2
+This way, the work of loading the compiled
+metallib resource is done only once
+
+
+83
+00:05:18,151 --> 00:05:19,553 line:-1
+when it is first needed.
+
+
+84
+00:05:21,522 --> 00:05:25,792 line:-2
+Lastly, CIFilter subclass must override
+the output image property.
+
+
+85
+00:05:26,660 --> 00:05:29,796 line:-2
+In this getter, you will take the kernel
+from the static property
+
+
+86
+00:05:29,863 --> 00:05:32,766 line:-2
+and use its apply method
+to create a new image.
+
+
+87
+00:05:34,368 --> 00:05:36,803 line:-2
+So that concludes
+my step-by-step description
+
+
+88
+00:05:36,870 --> 00:05:40,174 line:-2
+on how to build
+Metal Core Image kernels in Xcode.
+
+
+89
+00:05:41,108 --> 00:05:44,945 line:-2
+I have shown you how to add
+custom build rules to your project,
+
+
+90
+00:05:45,012 --> 00:05:47,514 line:-2
+how to write a kernel
+and add it to your project,
+
+
+91
+00:05:48,215 --> 00:05:52,352 line:-2
+and how to initialize and apply
+your kernel object to create a new image.
+
+
+92
+00:05:53,353 --> 00:05:57,991 line:-2
+I hope this allows you to add great visual
+effects to your app's images and videos.
+
+
+93
+00:05:58,592 --> 00:06:02,896 line:-2
+Thank you very much,
+and enjoy the rest of WWDC 2020.
+

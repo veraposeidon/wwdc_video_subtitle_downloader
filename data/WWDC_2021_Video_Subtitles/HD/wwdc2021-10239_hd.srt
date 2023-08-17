@@ -1,0 +1,2474 @@
+2
+00:00:00,000 --> 00:00:01,902 line:-1 size:34% align:center
+[MAC STARTUP CHIME]
+
+
+3
+00:00:01,902 --> 00:00:05,472 position:50% size:31% line:-1
+♪ Bass music playing ♪
+
+
+4
+00:00:05,472 --> 00:00:07,708 size:23% line:-1 align:center
+[KEYSTROKES]
+
+
+5
+00:00:07,708 --> 00:00:09,343 align:right size:2% line:0
+♪
+
+
+6
+00:00:09,343 --> 00:00:10,544 align:center line:-1 position:50%
+Stuart Cheshire: Welcome to
+
+
+7
+00:00:10,544 --> 00:00:12,946 line:-1 position:50% size:33%
+"Reduce network delays
+for your app".
+
+
+8
+00:00:12,946 --> 00:00:15,482 align:center line:-1 position:50%
+My name is Stuart Cheshire.
+
+
+9
+00:00:15.482 --> 00:00:17.718 line:-1 size:38% align:center position:50%
+I'm going to talk
+about factors that contribute
+
+
+10
+00:00:17,718 --> 00:00:20,487 line:-1 size:32% align:center
+to making network apps
+feel slow today
+
+
+11
+00:00:20,487 --> 00:00:23,323 line:-1 size:36% position:50%
+and then I'll hand over
+to my colleague Vidhi Goel
+
+
+12
+00:00:23,323 --> 00:00:26,226 line:-1 size:42% align:center
+to tell you about the techniques
+and APIs you can use
+
+
+13
+00:00:26,226 --> 00:00:28,929 size:35% align:center line:-1
+to make your network app
+more responsive.
+
+
+14
+00:00:28.929 --> 00:00:30.264 line:-1 align:center size:35% position:50%
+Let's start by talking about
+
+
+15
+00:00:30,264 --> 00:00:36,570 line:-1 size:45% align:center
+something you may have already
+seen in the WWDC beta of iOS.
+
+
+16
+00:00:36.570 --> 00:00:38.405 line:-1 align:center position:50% size:29%
+If you look
+in Developer settings,
+
+
+17
+00:00:38,405 --> 00:00:40,540 position:50% line:-1 align:center
+you will see a new item
+in the Networking section
+
+
+18
+00:00:40,540 --> 00:00:42,643 align:center line:-1 size:34%
+called Responsiveness.
+
+
+19
+00:00:42,643 --> 00:00:45,379 size:34% line:-1 position:50%
+While upload throughput,
+download throughput,
+
+
+20
+00:00:45.379 --> 00:00:47.848 line:-1 position:50% size:24% align:center
+and idle ping time
+are all interesting,
+
+
+21
+00:00:47,848 --> 00:00:50,017 size:36% line:-1 position:50%
+the main factor that affects
+the responsiveness
+
+
+22
+00:00:50,017 --> 00:00:52,853 align:center line:-1 position:50%
+of your network app
+is the network's responsiveness
+
+
+23
+00:00:52.853 --> 00:00:56.623 line:-1 position:50% size:35% align:center
+under working conditions,
+not idle conditions.
+
+
+24
+00:00:56,623 --> 00:01:00,093 size:41% align:center line:-1
+The typical internet speed test
+idle ping time measurement
+
+
+25
+00:01:00,093 --> 00:01:02,162 line:-1 size:41% position:50%
+tells you how well
+your internet connection works
+
+
+26
+00:01:02.162 --> 00:01:03.630 line:-1 position:50% size:33% align:center
+when you're not using it.
+
+
+27
+00:01:03,630 --> 00:01:06,433 size:41% line:-1 position:50%
+What matters is how well
+your internet connection works
+
+
+28
+00:01:06,433 --> 00:01:08,535 line:-1 align:center size:30%
+when you are using it.
+
+
+29
+00:01:08,535 --> 00:01:10,470 line:-1 size:17% align:center
+Tap on Test.
+
+
+30
+00:01:10,470 --> 00:01:13,573 size:33% align:center line:-1
+It will warn you that it will
+generate network traffic,
+
+
+31
+00:01:13.573 --> 00:01:16.310 line:-1 position:50% align:center size:38%
+it will measure your network
+for a few seconds,
+
+
+32
+00:01:16,310 --> 00:01:19,713 size:42% line:-1 position:50%
+and then it will tell you how
+well your network is performing
+
+
+33
+00:01:19,713 --> 00:01:22,249 line:-1 size:35% align:center
+under working conditions.
+
+
+34
+00:01:22,249 --> 00:01:24,284 size:33% position:50% line:-1
+The tool reports
+network responsiveness
+
+
+35
+00:01:24,284 --> 00:01:29,656 position:50% size:43% line:-1
+in round trips per minute,
+or RPM, instead of milliseconds.
+
+
+36
+00:01:29.656 --> 00:01:32.125 line:-1 position:50% align:center size:44%
+We created this new RPM metric
+
+
+37
+00:01:32,125 --> 00:01:34,795 align:center size:37% line:-1
+because milliseconds
+are a fairly abstract concept
+
+
+38
+00:01:34,795 --> 00:01:36,496 position:50% size:24% line:-1
+to a lot of people.
+
+
+39
+00:01:36,496 --> 00:01:38,231 line:-1 size:40% align:center
+People are also more familiar
+with metrics
+
+
+40
+00:01:38,231 --> 00:01:40,100 line:-1 size:30% align:center
+where higher is better.
+
+
+41
+00:01:40,100 --> 00:01:42,636 size:35% align:center line:-1
+The RPM metric produces
+numbers in the range
+
+
+42
+00:01:42,636 --> 00:01:46,006 line:-1 position:50% size:34%
+from a few hundred RPM
+to a few thousand RPM,
+
+
+43
+00:01:46,006 --> 00:01:49,009 align:center line:-1 size:25%
+just like the RPM
+of your car engine.
+
+
+44
+00:01:49,009 --> 00:01:51,511 align:center size:39% line:-1
+There's also a command-line
+version of this test tool
+
+
+45
+00:01:51,511 --> 00:01:55,015 line:-1 size:25% position:50%
+on macOS called
+NetworkQuality.
+
+
+46
+00:01:55,015 --> 00:01:57,284 line:0 align:center size:42%
+You might think that your home
+or work network
+
+
+47
+00:01:57,284 --> 00:02:00,988 align:center size:31% position:50%
+has a great ping time,
+but that's when it's idle.
+
+
+48
+00:02:00,988 --> 00:02:03,323 position:50% align:center size:39%
+Run this network quality test
+for yourself --
+
+
+49
+00:02:03,323 --> 00:02:04,858 align:center position:50% size:34%
+on your iPhone or Mac --
+
+
+50
+00:02:04,858 --> 00:02:07,461 line:0 align:center position:50%
+and you might find that when
+your network is being used,
+
+
+51
+00:02:07,461 --> 00:02:10,263 line:0 position:50% size:29%
+its responsiveness
+becomes a lot worse.
+
+
+52
+00:02:10,263 --> 00:02:13,100 line:-1 position:50% align:center
+And I do mean a lot worse.
+
+
+53
+00:02:13.100 --> 00:02:15.535 line:-1 size:33% position:50% align:center
+Your network might have
+an idle round-trip time
+
+
+54
+00:02:15,535 --> 00:02:18,205 line:-1 position:50% size:35%
+of 20 milliseconds,
+which sounds pretty good,
+
+
+55
+00:02:18,205 --> 00:02:20,540 line:-1 position:50% size:40%
+but you might find
+that under working conditions
+
+
+56
+00:02:20,540 --> 00:02:24,244 size:38% position:50% line:-1
+the round-trip time goes up
+to 600 milliseconds or more.
+
+
+57
+00:02:24,244 --> 00:02:26,580 line:-1 position:50% align:center
+That's 30 times worse.
+
+
+58
+00:02:26,580 --> 00:02:29,016 size:34% line:0 position:50%
+Network responsiveness
+under working conditions
+
+
+59
+00:02:29,016 --> 00:02:33,120 size:42% line:0 position:50%
+is what matters
+for your app's user experience.
+
+
+60
+00:02:33,120 --> 00:02:35,555 line:-1 align:center size:32%
+We all see this problem
+all the time,
+
+
+61
+00:02:35,555 --> 00:02:39,059 position:50% line:-1 align:center
+but especially with audio
+and video
+
+
+62
+00:02:39,059 --> 00:02:41,995 line:-1 align:center size:36%
+freezes, and dropouts
+during video conferencing.
+
+
+63
+00:02:41,995 --> 00:02:44,765 align:center size:28% line:-1
+High network delays
+hurt all apps,
+
+
+64
+00:02:44.765 --> 00:02:47.634 line:-1 position:50% size:35% align:center
+but we've got used to that,
+so we notice it more
+
+
+65
+00:02:47.634 --> 00:02:49.903 line:-1 position:50% size:27% align:center
+when it affects
+video conferencing.
+
+
+66
+00:02:49,903 --> 00:02:52,439 position:50% line:-1 align:center
+When we have problems
+with our video conferences,
+
+
+67
+00:02:52,439 --> 00:02:53,440 line:-1 align:center position:50%
+we think we'll fix it
+
+
+68
+00:02:53,440 --> 00:02:56,143 position:50% align:center line:-1
+by upgrading
+our internet connection.
+
+
+69
+00:02:56,143 --> 00:02:58,645 line:-1 position:50% align:center
+People have gone from
+a few megabits per second
+
+
+70
+00:02:58,645 --> 00:03:02,416 size:40% line:-1 position:50%
+to gigabit and above,
+yet the problems still happen.
+
+
+71
+00:03:02.416 --> 00:03:03.717 line:-1 position:50% align:center size:37%
+A few megabits per second
+
+
+72
+00:03:03,717 --> 00:03:06,019 line:-1 position:50% align:center
+should be plenty
+for video conferencing,
+
+
+73
+00:03:06,019 --> 00:03:09,990 line:-1 position:50% align:center
+so why do we still have
+these problems?
+
+
+74
+00:03:09,990 --> 00:03:13,160 position:50% align:center line:-1
+When buffers in the network
+are excessively large,
+
+
+75
+00:03:13,160 --> 00:03:16,196 size:41% line:-1 position:50%
+when they fill up,
+they don't improve throughput,
+
+
+76
+00:03:16,196 --> 00:03:18,331 size:30% align:center line:-1
+but they do add delay.
+
+
+77
+00:03:18,331 --> 00:03:21,601 line:-1 align:center position:50%
+We normally think of the
+internet operating like this,
+
+
+78
+00:03:21,601 --> 00:03:25,372 align:center line:-1 position:50%
+with packets flowing speedily
+through the network.
+
+
+79
+00:03:25,372 --> 00:03:27,674 size:41% line:-1 position:50%
+But if we look inside the cloud,
+
+
+80
+00:03:27.674 --> 00:03:31.344 line:-1 size:37% position:50% align:center
+we'll see that it really works
+more like this.
+
+
+81
+00:03:31,344 --> 00:03:33,613 line:0 align:center size:35%
+The packet you see
+coming out of the network
+
+
+82
+00:03:33,613 --> 00:03:36,016 align:center size:26% line:0
+is not the one
+that you saw go in.
+
+
+83
+00:03:36,016 --> 00:03:37,484 line:0 align:center size:37%
+Packets spend a lot of time
+
+
+84
+00:03:37,484 --> 00:03:40,587 position:50% line:0 size:35%
+sitting in excessively large
+buffers in the network.
+
+
+85
+00:03:40,587 --> 00:03:43,323 position:50% align:center size:37%
+This phenomenon
+of excessively large buffers
+
+
+86
+00:03:43,323 --> 00:03:44,991 line:0 size:29% position:50%
+is called bufferbloat,
+
+
+87
+00:03:44,991 --> 00:03:47,994 position:50% size:37% align:center
+and until now it hasn't been
+widely measured,
+
+
+88
+00:03:47,994 --> 00:03:51,531 position:50% align:center line:0
+despite the effect it has
+on everyday network use.
+
+
+89
+00:03:51.531 --> 00:03:53.467 line:-1 position:50% size:43% align:center
+The good news is that there are
+
+
+90
+00:03:53.467 --> 00:03:56.803 line:-1 position:50% size:38% align:center
+modern queue management
+algorithms, like CoDel --
+
+
+91
+00:03:56,803 --> 00:03:59,039 line:-1 position:50% align:center
+the Controlled Delay
+queueing algorithm --
+
+
+92
+00:03:59.039 --> 00:04:01.274 line:-1 position:50% size:34% align:center
+that eliminate bufferbloat.
+
+
+93
+00:04:01,274 --> 00:04:03,477 size:28% position:50% line:-1
+When the network
+keeps queues short,
+
+
+94
+00:04:03.477 --> 00:04:05.679 line:-1 size:34% position:50% align:center
+the time a packet spends
+waiting in the network
+
+
+95
+00:04:05,679 --> 00:04:07,481 line:-1 size:32% position:50%
+is dramatically reduced.
+
+
+96
+00:04:07,481 --> 00:04:10,617 position:50% size:41% line:-1
+It's possible to get
+high throughput and low delay
+
+
+97
+00:04:10,617 --> 00:04:12,352 position:50% line:-1 size:24%
+at the same time.
+
+
+98
+00:04:12,352 --> 00:04:16,523 line:-1 align:center position:50%
+It's not an either/or choice.
+It's not a zero-sum game.
+
+
+99
+00:04:16,523 --> 00:04:17,924 align:center line:0 position:50%
+We're working with the industry
+
+
+100
+00:04:17,924 --> 00:04:20,293 size:42% line:0 position:50%
+to deploy smarter
+queue management algorithms
+
+
+101
+00:04:20,293 --> 00:04:22,129 line:0 align:center position:50%
+and improve
+network responsiveness
+
+
+102
+00:04:22,129 --> 00:04:23,830 position:50% align:center size:35%
+under working conditions.
+
+
+103
+00:04:23,830 --> 00:04:27,968 align:center size:43% line:0
+But for now, if you want
+to give a great user experience,
+
+
+104
+00:04:27,968 --> 00:04:30,370 align:center position:50% line:0
+you will want to make your apps
+cope with the internet
+
+
+105
+00:04:30,370 --> 00:04:31,671 align:center size:18% position:50%
+as it is today.
+
+
+106
+00:04:31.671 --> 00:04:34.774 line:-1 size:44% align:center position:50%
+Bufferbloat is a large component
+of the network delays
+
+
+107
+00:04:34,774 --> 00:04:37,410 position:50% align:center line:-1
+your application
+will experience,
+
+
+108
+00:04:37,410 --> 00:04:39,946 size:35% align:center line:-1
+but it's not the only source
+of delay.
+
+
+109
+00:04:39,946 --> 00:04:42,816 position:50% size:42% line:-1
+There's software and hardware
+processing time.
+
+
+110
+00:04:42.816 --> 00:04:44.751 line:-1 position:50% size:33% align:center
+As CPUs get ever faster,
+
+
+111
+00:04:44,751 --> 00:04:47,554 position:50% size:27% line:-1
+this processing time
+continues to shrink.
+
+
+112
+00:04:47,554 --> 00:04:49,990 align:center size:31% line:-1
+There's the actual
+data transmission time.
+
+
+113
+00:04:49,990 --> 00:04:53,193 line:-1 size:33% align:center
+As data rates increase
+from kilobits to megabits
+
+
+114
+00:04:53,193 --> 00:04:54,895 position:50% align:center line:-1
+to gigabits per second,
+
+
+115
+00:04:54,895 --> 00:04:57,664 position:50% align:center line:-1
+transmission time
+continues to shrink.
+
+
+116
+00:04:57,664 --> 00:05:00,734 size:42% position:50% line:-1
+Then there's the time delay
+due to buffering in the network.
+
+
+117
+00:05:00,734 --> 00:05:02,769 position:50% align:center line:-1
+As I said, we're working
+with the industry
+
+
+118
+00:05:02.769 --> 00:05:04.604 line:-1 align:center size:35% position:50%
+on reducing these delays.
+
+
+119
+00:05:04,604 --> 00:05:06,239 align:center position:50% line:-1
+But there's always going to be
+
+
+120
+00:05:06,239 --> 00:05:08,975 position:50% align:center line:-1
+the speed-of-light
+signal propagation delay.
+
+
+121
+00:05:08,975 --> 00:05:12,913 line:-1 size:40% position:50%
+Back in the 1990s,
+the Stanford-to-MIT ping time,
+
+
+122
+00:05:12,913 --> 00:05:16,249 align:center size:35% line:-1
+round-trip, coast-to-coast,
+across the United States,
+
+
+123
+00:05:16,249 --> 00:05:18,952 position:50% line:-1 size:25%
+was already under
+100 milliseconds.
+
+
+124
+00:05:18,952 --> 00:05:21,821 line:-1 align:center size:36%
+That's pretty close to the
+speed-of-light limit already,
+
+
+125
+00:05:21.821 --> 00:05:24.090 line:-1 position:50% size:30% align:center
+so it's not going to get
+much better.
+
+
+126
+00:05:24.090 --> 00:05:26.826 line:-1 position:50% align:center size:36%
+We're working on reducing
+the other three delays,
+
+
+127
+00:05:26.826 --> 00:05:29.396 line:-1 position:50% align:center size:37%
+but the speed-of-light delay
+will never go away,
+
+
+128
+00:05:29.396 --> 00:05:32.199 line:-1 size:37% align:center position:50%
+so this is why it’s important
+to design your apps
+
+
+129
+00:05:32,199 --> 00:05:36,703 size:42% line:-1 position:50%
+taking network round-trip times
+into account.
+
+
+130
+00:05:36,703 --> 00:05:37,837 line:-1 size:34% position:50%
+When we're talking about
+
+
+131
+00:05:37,837 --> 00:05:40,207 line:-1 size:42% align:center
+taking network round-trip times
+into account,
+
+
+132
+00:05:40,207 --> 00:05:42,776 align:center line:-1 size:29%
+what kind of apps
+are we talking about?
+
+
+133
+00:05:42,776 --> 00:05:45,245 position:50% line:-1 size:32%
+Everyone knows
+that video conferencing
+
+
+134
+00:05:45,245 --> 00:05:48,415 size:32% line:-1 align:center
+is severely affected
+by high network delays.
+
+
+135
+00:05:48,415 --> 00:05:51,184 position:50% line:-1 size:47%
+Everyone knows that online games
+are severely affected
+
+
+136
+00:05:51,184 --> 00:05:53,053 position:50% line:-1 size:32%
+by high network delays.
+
+
+137
+00:05:53,053 --> 00:05:56,189 line:-1 position:50% size:31%
+But this affects all apps
+that use the network.
+
+
+138
+00:05:56.189 --> 00:05:58.225 line:-1 align:center position:50% size:35%
+I'm talking about
+getting weather forecasts,
+
+
+139
+00:05:58,225 --> 00:06:00,460 align:center position:50% line:-1
+stock quotes,
+driving directions.
+
+
+140
+00:06:00.460 --> 00:06:02.262 line:-1 size:36% align:center position:50%
+This affects web browsing.
+
+
+141
+00:06:02.262 --> 00:06:05.699 line:-1 align:center size:40% position:50%
+It affects skipping ahead while
+watching a streaming video.
+
+
+142
+00:06:05,699 --> 00:06:07,601 size:32% align:center line:-1
+Think about
+how many apps include
+
+
+143
+00:06:07,601 --> 00:06:09,669 line:-1 position:50% align:center
+some animated
+spinning delay indicator
+
+
+144
+00:06:09,669 --> 00:06:11,671 position:50% align:center line:-1
+while the app is waiting
+for the network.
+
+
+145
+00:06:11,671 --> 00:06:13,473 size:23% position:50% line:-1
+Maybe your app.
+
+
+146
+00:06:13.473 --> 00:06:15.575 line:-1 size:36% align:center position:50%
+We show
+that "please wait" indicator
+
+
+147
+00:06:15,575 --> 00:06:18,378 align:center line:-1 position:50%
+so that the user doesn't think
+the app has hung.
+
+
+148
+00:06:18,378 --> 00:06:20,347 align:center position:50% line:-1
+It's great that we put
+so much effort
+
+
+149
+00:06:20,347 --> 00:06:22,315 position:50% line:-1 size:40%
+into giving the user something
+to look at
+
+
+150
+00:06:22,315 --> 00:06:24,284 align:center position:50% line:-1
+while they wait
+for the slow network,
+
+
+151
+00:06:24,284 --> 00:06:26,052 line:-1 size:30% align:center
+but we should also put
+equal effort
+
+
+152
+00:06:26,052 --> 00:06:28,688 size:29% line:-1 position:50%
+into reducing the time
+they spend waiting.
+
+
+153
+00:06:28,688 --> 00:06:30,624 align:center line:-1 position:50%
+If you have an app
+where you ever show
+
+
+154
+00:06:30,624 --> 00:06:33,627 position:50% line:-1 size:40%
+a delay indicator while waiting
+for data from the network,
+
+
+155
+00:06:33,627 --> 00:06:37,230 size:45% line:-1 position:50%
+there are techniques you can use
+to reduce those wait times.
+
+
+156
+00:06:37,230 --> 00:06:39,666 line:-1 size:30% position:50%
+The time an app waits
+for network data
+
+
+157
+00:06:39,666 --> 00:06:41,401 size:20% align:center line:-1
+is a function of
+
+
+158
+00:06:41,401 --> 00:06:44,304 align:center position:50% line:-1
+how long it takes
+for one network round trip,
+
+
+159
+00:06:44,304 --> 00:06:48,708 align:center size:40% line:-1
+and how many network
+round trips your app requires.
+
+
+160
+00:06:48,708 --> 00:06:51,544 align:center position:50% line:-1
+As an app developer,
+there's not a lot you can do
+
+
+161
+00:06:51.544 --> 00:06:54.314 line:-1 align:center position:50% size:34%
+to improve the underlying
+network round-trip time,
+
+
+162
+00:06:54,314 --> 00:06:58,418 align:center line:-1 position:50%
+but you can control how many
+round trips your app requires.
+
+
+163
+00:06:58,418 --> 00:07:01,588 align:center line:-1 size:42%
+Let me introduce my colleague,
+Vidhi Goel,
+
+
+164
+00:07:01,588 --> 00:07:04,391 size:42% align:center line:-1
+to tell you how you can do that.
+
+
+165
+00:07:04,391 --> 00:07:06,159 align:center position:50% line:-1
+Vidhi Goel: Thanks, Stuart.
+
+
+166
+00:07:06,159 --> 00:07:10,163 line:-1 position:50% align:center
+Hi, I am Vidhi, and today
+I'd like to talk to you about
+
+
+167
+00:07:10,163 --> 00:07:12,565 position:50% align:center line:-1
+what you can do as a developer
+
+
+168
+00:07:12.565 --> 00:07:16.202 line:-1 align:center size:34% position:50%
+to reduce network delays
+in your app.
+
+
+169
+00:07:16.202 --> 00:07:19.639 line:-1 size:32% align:center position:50%
+App responsiveness
+is inversely proportional
+
+
+170
+00:07:19.639 --> 00:07:22.442 line:-1 size:30% align:center position:50%
+to the number
+of network round trips.
+
+
+171
+00:07:22,442 --> 00:07:27,113 line:-1 position:50% size:44%
+Let me show you how you can
+reduce these network round trips
+
+
+172
+00:07:27.113 --> 00:07:30.016 line:-1 size:32% position:50% align:center
+by adopting the modern
+networking protocols
+
+
+173
+00:07:30,016 --> 00:07:32,852 align:center position:50% line:-1
+and make your apps super snappy.
+
+
+174
+00:07:32,852 --> 00:07:34,554 position:50% line:-1 align:center
+To speed up your apps,
+
+
+175
+00:07:34.554 --> 00:07:36.823 line:-1 align:center size:28% position:50%
+adopt the modern
+networking protocols
+
+
+176
+00:07:36,823 --> 00:07:42,095 align:center position:50% line:-1
+such as HTTP/3 & QUIC,
+TCP Fast Open,
+
+
+177
+00:07:42,095 --> 00:07:47,500 align:center size:38% line:-1
+TLS 1.3, and Multipath TCP.
+
+
+178
+00:07:47,500 --> 00:07:49,135 line:-1 align:center size:31%
+With these techniques,
+
+
+179
+00:07:49,135 --> 00:07:53,673 line:-1 position:50% align:center
+your app can potentially achieve
+multiple round-trip reductions
+
+
+180
+00:07:53,673 --> 00:07:56,609 size:23% position:50% line:-1
+in delivering data
+to your user.
+
+
+181
+00:07:56,609 --> 00:07:58,845 position:50% line:-1 align:center
+Server side support is required
+
+
+182
+00:07:58,845 --> 00:08:01,514 position:50% size:25% line:-1
+for all of these
+modern protocols,
+
+
+183
+00:08:01,514 --> 00:08:05,618 line:-1 position:50% size:37%
+so check with your provider
+about their readiness.
+
+
+184
+00:08:05,618 --> 00:08:09,089 size:39% align:center position:50%
+We are happy to tell you
+that all of these technologies
+
+
+185
+00:08:09,089 --> 00:08:12,625 line:0 position:50% align:center
+are available on iOS and macOS.
+
+
+186
+00:08:12,625 --> 00:08:15,962 size:30% line:0 align:center
+Let's look into each
+of these technologies.
+
+
+187
+00:08:15.962 --> 00:08:18.898 line:-1 position:50% size:35% align:center
+First up, we have HTTP/3
+and QUIC
+
+
+188
+00:08:18,898 --> 00:08:25,171 line:-1 position:50% size:43%
+which are enabled by default
+in iOS 15 and macOS Monterey.
+
+
+189
+00:08:25,171 --> 00:08:27,841 position:50% align:center line:-1
+QUIC is a transport protocol
+which can set up
+
+
+190
+00:08:27,841 --> 00:08:32,445 line:-1 align:center position:50%
+a connection much faster
+than TCP and TLS.
+
+
+191
+00:08:32,445 --> 00:08:35,382 position:50% size:34% line:-1
+By reducing
+the head-of-line blocking,
+
+
+192
+00:08:35,382 --> 00:08:38,184 position:50% size:30% line:-1
+QUIC can significantly
+reduce delays
+
+
+193
+00:08:38,184 --> 00:08:41,221 align:center position:50% line:-1
+in delivering data to your user.
+
+
+194
+00:08:41,221 --> 00:08:43,189 line:-1 size:33% align:center
+And here is the best part:
+
+
+195
+00:08:43,189 --> 00:08:47,794 position:50% line:-1 align:center
+if you are already using
+URLSession, you’re all set.
+
+
+196
+00:08:47,794 --> 00:08:50,330 line:0 size:32% position:50%
+If you provide your own
+application layer
+
+
+197
+00:08:50,330 --> 00:08:53,066 size:46% line:0 position:50%
+using the Network framework APIs
+
+
+198
+00:08:53,066 --> 00:08:55,535 line:0 size:37% position:50%
+and want to take advantage
+of QUIC,
+
+
+199
+00:08:55,535 --> 00:08:59,706 line:0 align:center position:50%
+simply create an NWConnection
+with QUIC parameters
+
+
+200
+00:08:59,706 --> 00:09:04,577 size:43% line:0 align:center
+and set a TLS Application-Layer
+protocol or ALPN.
+
+
+201
+00:09:04,577 --> 00:09:05,745 position:50% align:center line:0
+Please check out the
+
+
+202
+00:09:05,745 --> 00:09:09,716 size:37% align:center position:50%
+"Accelerate networking with
+HTTP/3 and QUIC" session
+
+
+203
+00:09:09,716 --> 00:09:14,287 line:0 size:42% align:center
+to learn more about how to use
+these technologies in your app.
+
+
+204
+00:09:14.287 --> 00:09:17.690 line:-1 align:center size:26% position:50%
+QUIC is useful
+in many scenarios.
+
+
+205
+00:09:17.690 --> 00:09:21.294 line:-1 position:50% size:36% align:center
+However, TCP may still be
+the right choice
+
+
+206
+00:09:21,294 --> 00:09:24,397 line:-1 position:50% align:center
+for some applications.
+
+
+207
+00:09:24,397 --> 00:09:29,302 line:-1 size:39% align:center
+When using TCP, you can
+eliminate an entire round trip
+
+
+208
+00:09:29,302 --> 00:09:35,108 size:42% line:-1 align:center
+by sending the app data
+along with the TCP handshake.
+
+
+209
+00:09:35,108 --> 00:09:37,544 size:38% line:-1 align:center
+TCP Fast Open is supported
+
+
+210
+00:09:37,544 --> 00:09:41,114 size:30% align:center line:-1
+in Network framework
+and Sockets.
+
+
+211
+00:09:41,114 --> 00:09:47,253 size:41% position:50% line:-1
+To use it with NWConnections,
+there are two options:
+
+
+212
+00:09:47,253 --> 00:09:51,658 line:-1 position:50% align:center
+the first option is to allow
+Fast Open on your connection
+
+
+213
+00:09:51,658 --> 00:09:55,528 position:50% align:center line:-1
+and in this case, the app will
+provide the initial data
+
+
+214
+00:09:55,528 --> 00:09:58,898 position:50% align:center line:-1
+to be sent out
+with the handshake.
+
+
+215
+00:09:58,898 --> 00:10:02,869 size:45% align:center position:50%
+To enable this,
+set the allowFastOpen parameter
+
+
+216
+00:10:02,869 --> 00:10:06,840 size:24% align:center position:50%
+to true and create
+your connection.
+
+
+217
+00:10:06,840 --> 00:10:09,542 line:0 size:40% align:center
+And then, before calling start,
+
+
+218
+00:10:09,542 --> 00:10:14,781 align:center line:0 size:28%
+you would call send
+with your initial data.
+
+
+219
+00:10:14.781 --> 00:10:19.219 line:-1 size:39% align:center position:50%
+When using TCP Fast Open,
+you have to be careful
+
+
+220
+00:10:19.219 --> 00:10:22.255 line:-1 align:center size:28% position:50%
+that you only send
+idempotent requests
+
+
+221
+00:10:22,255 --> 00:10:24,524 position:50% line:-1 size:27%
+with the handshake.
+
+
+222
+00:10:24,524 --> 00:10:28,728 line:0 position:50% size:44%
+Idempotent basically means that
+the data is safe to be replayed
+
+
+223
+00:10:28,728 --> 00:10:30,797 size:24% align:center position:50%
+over the network.
+
+
+224
+00:10:30,797 --> 00:10:34,167 line:-1 position:50% size:30%
+There is another way
+to use TCP Fast Open
+
+
+225
+00:10:34,167 --> 00:10:40,106 line:-1 size:41% position:50%
+that does not require your app
+to send its own initial data.
+
+
+226
+00:10:40,106 --> 00:10:43,443 align:center line:-1 position:50%
+If your app is using TLS
+over TCP,
+
+
+227
+00:10:43,443 --> 00:10:46,946 align:center size:39% line:-1
+you can choose to send
+the TLS handshake message
+
+
+228
+00:10:46.946 --> 00:10:49.282 line:-1 position:50% size:24% align:center
+as the initial data.
+
+
+229
+00:10:49,282 --> 00:10:53,620 line:0 size:42% position:50%
+To enable this,
+go to your TCP-specific options
+
+
+230
+00:10:53,620 --> 00:10:58,458 align:center size:44% position:50%
+and set enableFastOpen to true.
+
+
+231
+00:10:58,458 --> 00:11:01,628 line:0 size:41% align:center
+The recommended way to use
+TCP Fast Open
+
+
+232
+00:11:01,628 --> 00:11:04,664 size:39% align:center position:50%
+is via the Network framework
+API,
+
+
+233
+00:11:04,664 --> 00:11:07,467 position:50% size:29% line:0
+but if your app is built
+over Sockets,
+
+
+234
+00:11:07,467 --> 00:11:12,138 line:0 align:center position:50%
+then you would call the connectx
+API with the respective flags
+
+
+235
+00:11:12,138 --> 00:11:15,542 position:50% line:0 size:43%
+to specify that you want to send
+idempotent data
+
+
+236
+00:11:15,542 --> 00:11:17,577 size:27% align:center position:50%
+with the handshake.
+
+
+237
+00:11:17.577 --> 00:11:21.147 line:-1 size:32% align:center position:50%
+I mentioned idempotent
+a couple of times.
+
+
+238
+00:11:21.147 --> 00:11:25.385 line:-1 position:50% align:center size:41%
+Let me explain what it means
+and why it is important to send
+
+
+239
+00:11:25,385 --> 00:11:29,789 line:-1 size:34% position:50%
+only idempotent requests
+with the handshake.
+
+
+240
+00:11:29,789 --> 00:11:32,825 line:-1 position:50% size:35%
+An idempotent
+and replay-safe operation
+
+
+241
+00:11:32,825 --> 00:11:35,662 position:50% line:-1 size:26%
+is one that has
+no additional effect
+
+
+242
+00:11:35,662 --> 00:11:39,332 align:center line:-1 size:22%
+if it is performed
+more than once.
+
+
+243
+00:11:39,332 --> 00:11:42,001 size:27% position:50% line:-1
+For example,
+when the user goes
+
+
+244
+00:11:42,001 --> 00:11:45,338 line:-1 size:37% align:center
+to the developer.apple.com
+web page,
+
+
+245
+00:11:45,338 --> 00:11:49,309 align:center position:50% line:-1
+the HTTP GET request
+for this web page is sent out
+
+
+246
+00:11:49,309 --> 00:11:52,478 size:34% line:-1 align:center
+with the TCP handshake.
+
+
+247
+00:11:52.478 --> 00:11:54.847 line:-1 size:31% align:center position:50%
+If the acknowledgment
+for this request
+
+
+248
+00:11:54,847 --> 00:11:58,518 position:50% align:center line:-1
+was either delayed
+or dropped in the network,
+
+
+249
+00:11:58,518 --> 00:12:02,055 size:31% line:-1 align:center
+the device will resend
+the HTTP GET request
+
+
+250
+00:12:02,055 --> 00:12:06,025 line:-1 position:50% size:29%
+which may get routed
+to a different server.
+
+
+251
+00:12:06,025 --> 00:12:08,861 align:center size:40% line:-1
+And this time
+the acknowledgement arrives
+
+
+252
+00:12:08,861 --> 00:12:12,031 position:50% line:-1 size:42%
+along with the HTTP response.
+
+
+253
+00:12:12,031 --> 00:12:14,968 line:-1 position:50% size:35%
+As the HTTP GET request
+does not have
+
+
+254
+00:12:14,968 --> 00:12:16,536 position:50% line:-1 size:27%
+any additional effect
+
+
+255
+00:12:16.536 --> 00:12:19.038 line:-1 align:center size:24% position:50%
+when it is resent
+over the network,
+
+
+256
+00:12:19,038 --> 00:12:23,276 line:-1 align:center size:35%
+it is considered
+as an idempotent request.
+
+
+257
+00:12:23,276 --> 00:12:25,278 line:-1 size:30% align:center
+Now, let's say the user
+
+
+258
+00:12:25,278 --> 00:12:29,048 line:-1 size:24% align:center
+is trying to buy
+a new iPhone 12.
+
+
+259
+00:12:29.048 --> 00:12:32.518 line:-1 align:center size:32% position:50%
+The HTTP request sent
+for this operation
+
+
+260
+00:12:32,518 --> 00:12:36,122 line:-1 align:center position:50%
+is not an idempotent request.
+
+
+261
+00:12:36,122 --> 00:12:39,025 line:-1 position:50% align:center
+It could result
+in multiple transactions
+
+
+262
+00:12:39,025 --> 00:12:42,595 size:40% line:-1 position:50%
+if the request goes
+to a different server each time
+
+
+263
+00:12:42,595 --> 00:12:46,666 position:50% line:-1 size:35%
+when the data is replayed
+over the network.
+
+
+264
+00:12:46,666 --> 00:12:51,704 size:32% line:-1 position:50%
+Keeping that in mind,
+let's talk about TLS 1.3.
+
+
+265
+00:12:51,704 --> 00:12:55,475 size:26% position:50% line:-1
+TLS 1.3 removes
+an entire round trip
+
+
+266
+00:12:55.475 --> 00:12:59.612 line:-1 size:33% align:center position:50%
+from the handshake
+as compared to TLS 1.2.
+
+
+267
+00:12:59,612 --> 00:13:03,650 align:center line:-1 size:23%
+It also provides
+stronger security.
+
+
+268
+00:13:03,650 --> 00:13:05,351 position:50% align:center line:-1
+It is enabled by default
+
+
+269
+00:13:05.351 --> 00:13:11.024 line:-1 size:42% position:50% align:center
+since iOS 13.4 for URLSession
+and NWConnection.
+
+
+270
+00:13:11,024 --> 00:13:15,228 align:center size:36% position:50%
+The TLS 1.3 protocol
+defines early data support,
+
+
+271
+00:13:15,228 --> 00:13:17,764 align:center position:50% line:0
+which can save yet another
+round trip
+
+
+272
+00:13:17,764 --> 00:13:19,899 size:43% align:center position:50%
+by sending idempotent requests
+
+
+273
+00:13:19,899 --> 00:13:23,403 position:50% line:0 align:center
+along with the TLS handshake
+message.
+
+
+274
+00:13:23.403 --> 00:13:27.373 line:-1 align:center position:50% size:35%
+Let's switch gears
+and look at Multipath TCP
+
+
+275
+00:13:27,373 --> 00:13:31,577 position:50% size:37% line:-1
+which works a bit differently
+in reducing network delays.
+
+
+276
+00:13:31,577 --> 00:13:35,548 size:33% align:center line:-1
+Multipath TCP allows
+a single TCP connection
+
+
+277
+00:13:35,548 --> 00:13:37,717 line:-1 align:center size:31%
+to continue
+as the device switches
+
+
+278
+00:13:37.717 --> 00:13:40.720 line:-1 align:center size:39% position:50%
+from one network to another.
+
+
+279
+00:13:40.720 --> 00:13:44.624 line:-1 size:40% position:50% align:center
+To get the low latency feature
+of Multipath TCP,
+
+
+280
+00:13:44,624 --> 00:13:48,027 size:40% line:-1 position:50%
+use the interactive mode API.
+
+
+281
+00:13:48,027 --> 00:13:50,596 line:-1 size:31% align:center
+It will save all
+the round trips needed
+
+
+282
+00:13:50,596 --> 00:13:52,932 position:50% size:41% line:-1
+to establish a new connection,
+
+
+283
+00:13:52,932 --> 00:13:55,401 line:-1 size:34% position:50%
+and the system
+will automatically choose
+
+
+284
+00:13:55,401 --> 00:13:59,505 position:50% line:-1 align:center
+the faster network path
+for your data packets.
+
+
+285
+00:13:59,505 --> 00:14:01,340 align:center position:50% line:0
+To opt in from the client,
+
+
+286
+00:14:01,340 --> 00:14:05,311 position:50% line:0 align:center
+set the multipathServiceType
+property to interactive
+
+
+287
+00:14:05,311 --> 00:14:08,281 align:center position:50% size:28%
+on your URLSession
+configuration
+
+
+288
+00:14:08,281 --> 00:14:11,417 align:center line:0 position:50%
+or on your NWParameters.
+
+
+289
+00:14:11,417 --> 00:14:15,188 position:50% line:-1 align:center
+To give you an idea of how
+many round trips you can save
+
+
+290
+00:14:15,188 --> 00:14:17,490 size:44% align:center line:-1
+with these modern technologies,
+
+
+291
+00:14:17,490 --> 00:14:20,359 size:30% line:-1 position:50%
+let's start
+with a reference point.
+
+
+292
+00:14:20.359 --> 00:14:25.998 line:-1 align:center size:40% position:50%
+Let's say your app is currently
+running TLS 1.2 over TCP.
+
+
+293
+00:14:25,998 --> 00:14:28,801 align:center size:30% line:0
+In this case it will take
+four round trips
+
+
+294
+00:14:28,801 --> 00:14:32,138 align:center size:25% line:0
+to get the first byte
+to your user.
+
+
+295
+00:14:32,138 --> 00:14:37,110 line:0 align:center position:50%
+If your server switches
+from TLS 1.2 to TLS 1.3,
+
+
+296
+00:14:37,110 --> 00:14:41,481 align:center size:41% position:50%
+your connections will eliminate
+an entire round trip.
+
+
+297
+00:14:41,481 --> 00:14:45,852 align:center line:0 position:50%
+If you enable TCP Fast Open
+on your connection,
+
+
+298
+00:14:45,852 --> 00:14:49,856 line:0 size:30% position:50%
+you will save
+yet another round trip.
+
+
+299
+00:14:49,856 --> 00:14:53,760 align:center size:40% line:0
+In iOS 15, HTTP/3 over QUIC
+
+
+300
+00:14:53,760 --> 00:14:57,730 size:28% align:center position:50%
+provides a reduction
+to two round trips.
+
+
+301
+00:14:57,730 --> 00:15:01,834 position:50% size:42% line:0
+The QUIC protocol
+also defines early data support,
+
+
+302
+00:15:01,834 --> 00:15:07,006 align:center position:50% line:0
+which could enable a further
+reduction to one round trip.
+
+
+303
+00:15:07,006 --> 00:15:09,575 size:39% position:50% line:-1
+Based on our measurements
+at Apple,
+
+
+304
+00:15:09,575 --> 00:15:12,812 line:-1 size:35% position:50%
+it is common for the users
+to see round-trip times
+
+
+305
+00:15:12,812 --> 00:15:18,518 size:38% position:50% line:-1
+that sometimes spike up
+as high as 600 milliseconds.
+
+
+306
+00:15:18,518 --> 00:15:21,454 line:-1 position:50% size:35%
+Let's see what that means
+for your app.
+
+
+307
+00:15:21.454 --> 00:15:24.490 line:-1 size:26% position:50% align:center
+Four round trips
+at 600 milliseconds
+
+
+308
+00:15:24,490 --> 00:15:28,661 line:-1 position:50% size:41%
+means your user is waiting
+almost two and a half seconds
+
+
+309
+00:15:28,661 --> 00:15:30,997 size:28% position:50% line:-1
+for the data to arrive.
+
+
+310
+00:15:30,997 --> 00:15:32,865 align:center size:39% line:-1
+That's a huge amount of time
+
+
+311
+00:15:32,865 --> 00:15:36,502 align:center line:-1 size:31%
+to wait and stare
+at the network spinner.
+
+
+312
+00:15:36,502 --> 00:15:39,539 position:50% line:-1 size:32%
+By adopting the modern
+networking protocols,
+
+
+313
+00:15:39,539 --> 00:15:44,277 align:center line:-1 position:50%
+you can reduce that time
+to first byte from 2.4 seconds
+
+
+314
+00:15:44,277 --> 00:15:47,880 line:-1 align:center position:50%
+to about half a second.
+
+
+315
+00:15:47,880 --> 00:15:50,616 line:-1 align:center size:32%
+The user will definitively
+notice the difference
+
+
+316
+00:15:50.616 --> 00:15:55.288 line:-1 align:center position:50% size:40%
+when the data arrives a whole
+second and a half earlier.
+
+
+317
+00:15:55,288 --> 00:15:58,457 position:50% line:-1 size:37%
+Every developer who wants
+great network performance
+
+
+318
+00:15:58,457 --> 00:16:02,528 align:center line:-1 size:38%
+should pay attention
+to the number of round trips.
+
+
+319
+00:16:02,528 --> 00:16:06,165 position:50% align:center line:-1
+This is where the big wins are.
+
+
+320
+00:16:06.165 --> 00:16:08.901 line:-1 size:28% position:50% align:center
+All the technologies
+that I've talked about
+
+
+321
+00:16:08.901 --> 00:16:11.437 line:-1 align:center position:50% size:40%
+help to reduce network delays
+in your app
+
+
+322
+00:16:11,437 --> 00:16:14,774 line:-1 align:center position:50%
+in real-world
+network conditions.
+
+
+323
+00:16:14.774 --> 00:16:20.213 line:-1 align:center position:50% size:37%
+If you test your app on 5G,
+LTE, or fast Wi-Fi networks,
+
+
+324
+00:16:20,213 --> 00:16:23,816 position:50% line:-1 align:center
+your app responsiveness
+might seem fine to you.
+
+
+325
+00:16:23,816 --> 00:16:26,586 position:50% line:0 align:center
+But your users
+aren't always using your app
+
+
+326
+00:16:26,586 --> 00:16:29,555 align:center size:41% position:50%
+in the best network conditions.
+
+
+327
+00:16:29,555 --> 00:16:32,058 position:50% size:40% align:center
+To simulate realistic networks,
+
+
+328
+00:16:32,058 --> 00:16:35,528 size:40% align:center position:50%
+Network Link Conditioner tool
+is available for iOS
+
+
+329
+00:16:35,528 --> 00:16:38,030 size:37% align:center position:50%
+from the Developer settings
+menu.
+
+
+330
+00:16:38,030 --> 00:16:40,433 size:44% align:center position:50%
+For macOS, you can download it
+
+
+331
+00:16:40,433 --> 00:16:43,236 align:center line:0 position:50%
+from the Apple Developer
+website.
+
+
+332
+00:16:43,236 --> 00:16:46,339 position:50% align:center line:-1
+This tool is a reliable
+and repeatable way
+
+
+333
+00:16:46,339 --> 00:16:49,475 position:50% line:-1 align:center
+to test your app
+in different network conditions
+
+
+334
+00:16:49.475 --> 00:16:53.713 line:-1 position:50% size:42% align:center
+that your users may experience
+in their day-to-day life.
+
+
+335
+00:16:53.713 --> 00:16:58.284 line:-1 size:40% align:center position:50%
+If you recall, Stuart mentioned
+earlier that you can't do much
+
+
+336
+00:16:58,284 --> 00:17:02,321 line:-1 align:center size:39%
+about reducing
+your network round-trip time.
+
+
+337
+00:17:02,321 --> 00:17:05,791 size:37% position:50% line:-1
+Well, that's not entirely true.
+
+
+338
+00:17:05,791 --> 00:17:09,028 size:38% line:-1 position:50%
+Let me explain how you can
+reduce the network
+
+
+339
+00:17:09,028 --> 00:17:12,632 align:center line:-1 size:36%
+round-trip time when you
+correctly inform the system
+
+
+340
+00:17:12,632 --> 00:17:15,835 line:-1 size:30% align:center
+about your app traffic.
+
+
+341
+00:17:15,835 --> 00:17:20,806 align:center position:50% line:-1
+Most apps have a mix of traffic
+that they send or receive.
+
+
+342
+00:17:20.806 --> 00:17:23.309 line:-1 align:center size:28% position:50%
+There is a lot of data
+that is exchanged
+
+
+343
+00:17:23.309 --> 00:17:27.480 line:-1 position:50% size:42% align:center
+from the user's device
+when running a bunch of apps.
+
+
+344
+00:17:27.480 --> 00:17:31.517 line:-1 align:center size:36% position:50%
+In real-world networks,
+like a home or office Wi-Fi,
+
+
+345
+00:17:31,517 --> 00:17:35,721 align:center line:-1 size:33%
+a number of devices
+share the same network.
+
+
+346
+00:17:35,721 --> 00:17:39,025 position:50% line:-1 size:41%
+These devices simultaneously
+send and receive
+
+
+347
+00:17:39.025 --> 00:17:43.596 line:-1 align:center position:50% size:35%
+significant amount of data
+while using a set of apps.
+
+
+348
+00:17:43,596 --> 00:17:48,200 position:50% align:center line:-1
+To avoid building up long queues
+in this shared network,
+
+
+349
+00:17:48,200 --> 00:17:52,672 line:-1 align:center size:37%
+it is crucial that you classify
+your app data appropriately
+
+
+350
+00:17:52,672 --> 00:17:56,042 size:42% line:-1 position:50%
+so that the system can manage
+your traffic efficiently
+
+
+351
+00:17:56,042 --> 00:17:59,445 line:-1 size:27% align:center
+in order to maintain
+low network delays.
+
+
+352
+00:17:59,445 --> 00:18:03,416 position:50% line:-1 size:43%
+And when you allow the system
+to maintain low network delays,
+
+
+353
+00:18:03,416 --> 00:18:06,986 line:-1 size:32% position:50%
+it makes your app's
+foreground traffic faster
+
+
+354
+00:18:06,986 --> 00:18:10,423 line:-1 align:center size:40%
+and hence the data
+that matters most to the users
+
+
+355
+00:18:10,423 --> 00:18:12,391 size:26% line:-1 align:center
+is delivered quickly.
+
+
+356
+00:18:12,391 --> 00:18:16,162 size:27% line:-1 align:center
+Let me illustrate this
+with an example.
+
+
+357
+00:18:16,162 --> 00:18:19,398 size:38% line:-1 align:center
+Many apps prefetch content
+like graphics,
+
+
+358
+00:18:19,398 --> 00:18:24,770 size:40% position:50% line:-1
+audio files, et cetera, to make
+it available for later use.
+
+
+359
+00:18:24.770 --> 00:18:29.208 line:-1 size:39% align:center position:50%
+When the app is prefetching
+a substantial amount of data,
+
+
+360
+00:18:29,208 --> 00:18:32,411 align:center line:-1 position:50%
+this is what the network
+might look like.
+
+
+361
+00:18:32,411 --> 00:18:36,382 line:-1 size:29% align:center
+The bottleneck queue
+can become full.
+
+
+362
+00:18:36,382 --> 00:18:40,853 align:center line:-1 size:37%
+If at this point, the user
+initiates a network activity --
+
+
+363
+00:18:40,853 --> 00:18:43,289 align:center line:-1 position:50%
+like viewing
+their profile page --
+
+
+364
+00:18:43,289 --> 00:18:45,358 line:-1 size:39% align:center
+the response for this request
+
+
+365
+00:18:45,358 --> 00:18:48,527 position:50% line:-1 size:44%
+will be queued
+at the end of the network queue,
+
+
+366
+00:18:48.527 --> 00:18:52.698 line:-1 align:center size:36% position:50%
+and it may take seconds
+before the profile is shown.
+
+
+367
+00:18:52,698 --> 00:18:56,836 position:50% line:-1 size:33%
+This would not be
+a good user experience.
+
+
+368
+00:18:56,836 --> 00:19:00,439 position:50% line:-1 size:42%
+Now, let's look at what happens
+to the network
+
+
+369
+00:19:00,439 --> 00:19:04,377 line:-1 size:40% align:center
+when we mark these nonuser
+initiated prefetching tasks
+
+
+370
+00:19:04,377 --> 00:19:06,746 position:50% line:-1 align:center
+as background.
+
+
+371
+00:19:06,746 --> 00:19:11,017 position:50% size:42% line:-1
+Marking these non user initiated
+transfers as background
+
+
+372
+00:19:11.017 --> 00:19:14.854 line:-1 position:50% align:center size:40%
+will dramatically reduce
+the size of the network queue
+
+
+373
+00:19:14,854 --> 00:19:19,291 align:center position:50% line:-1
+which will then become available
+for other foreground data.
+
+
+374
+00:19:19,291 --> 00:19:23,929 size:39% line:-1 align:center
+Thus, any foreground data --
+that is, the green packets --
+
+
+375
+00:19:23,929 --> 00:19:25,631 line:-1 align:center position:50%
+will be delivered instantly
+
+
+376
+00:19:25,631 --> 00:19:29,735 line:-1 size:29% position:50%
+for a quick,
+delightful experience.
+
+
+377
+00:19:29,735 --> 00:19:33,205 size:44% align:center line:-1
+In iOS 15 and macOS Monterey,
+
+
+378
+00:19:33,205 --> 00:19:37,643 align:center position:50% line:-1
+the background service type
+has improved dramatically.
+
+
+379
+00:19:37,643 --> 00:19:40,946 position:50% align:center line:-1
+We have added new
+congestion control algorithms
+
+
+380
+00:19:40,946 --> 00:19:44,784 size:32% position:50% line:-1
+for background uploads
+and downloads.
+
+
+381
+00:19:44,784 --> 00:19:48,821 position:50% line:-1 align:center
+These new algorithms not only
+reduce network delays
+
+
+382
+00:19:48,821 --> 00:19:51,991 position:50% line:-1 size:29%
+significantly, for better
+user experience,
+
+
+383
+00:19:51,991 --> 00:19:55,361 position:50% size:34% line:-1
+but also ensure that
+the background transfers
+
+
+384
+00:19:55,361 --> 00:19:59,732 align:center position:50% line:-1
+finish in nearly the same time
+as other traffic.
+
+
+385
+00:19:59,732 --> 00:20:01,934 size:31% align:center line:-1
+Let's look
+at the networking APIs
+
+
+386
+00:20:01,934 --> 00:20:04,470 size:25% align:center line:-1
+that you can adopt
+to take advantage
+
+
+387
+00:20:04.470 --> 00:20:07.673 line:-1 align:center size:42% position:50%
+of the background service type.
+
+
+388
+00:20:07,673 --> 00:20:09,909 line:-1 size:26% align:center
+When your app
+is in the foreground
+
+
+389
+00:20:09,909 --> 00:20:13,512 position:50% line:-1 align:center
+and performing
+non-user-initiated transfers,
+
+
+390
+00:20:13.512 --> 00:20:16.582 line:-1 size:35% position:50% align:center
+you would use the default
+URLSession
+
+
+391
+00:20:16,582 --> 00:20:19,552 line:-1 size:44% position:50%
+and set the network service type
+to background
+
+
+392
+00:20:19,552 --> 00:20:22,354 line:-1 align:center position:50%
+on your URL requests.
+
+
+393
+00:20:22,354 --> 00:20:28,227 position:50% line:-1 size:42%
+Again, this allows the system
+to maintain low network delays.
+
+
+394
+00:20:28,227 --> 00:20:32,298 line:-1 align:center position:50%
+And for NWConnection,
+you would set the service class
+
+
+395
+00:20:32,298 --> 00:20:37,036 line:-1 align:center position:50%
+to background
+on your NWParameters.
+
+
+396
+00:20:37,036 --> 00:20:40,506 size:31% align:center line:-1
+If your app starts
+a long-running transfer,
+
+
+397
+00:20:40,506 --> 00:20:43,109 line:-1 size:34% align:center
+whether it is user initiated
+or not,
+
+
+398
+00:20:43,109 --> 00:20:46,078 size:36% line:-1 align:center
+you would create
+a background URLSession
+
+
+399
+00:20:46,078 --> 00:20:51,517 size:47% position:50% line:-1
+to continue running
+even when your app is suspended.
+
+
+400
+00:20:51.517 --> 00:20:54.653 line:-1 align:center position:50% size:35%
+For time-insensitive tasks,
+you can set
+
+
+401
+00:20:54.653 --> 00:20:57.923 line:-1 position:50% size:37% align:center
+the isDiscretionary property
+to true.
+
+
+402
+00:20:57.923 --> 00:21:01.727 line:-1 size:38% position:50% align:center
+This will allow the system
+to wait for optimal conditions
+
+
+403
+00:21:01,727 --> 00:21:05,397 line:-1 size:31% position:50%
+to perform the transfer.
+
+
+404
+00:21:05,397 --> 00:21:07,600 align:center line:-1 size:45%
+We've talked about how your app
+
+
+405
+00:21:07,600 --> 00:21:11,637 align:center line:-1 size:35%
+can help in keeping
+the network queues short.
+
+
+406
+00:21:11,637 --> 00:21:17,610 align:center size:42% line:-1
+Another source of delay can be
+on the sending device itself.
+
+
+407
+00:21:17,610 --> 00:21:19,879 size:40% line:-1 align:center
+Historically, networking stacks
+
+
+408
+00:21:19,879 --> 00:21:23,282 line:-1 position:50% align:center
+have used very large
+send buffers.
+
+
+409
+00:21:23,282 --> 00:21:26,552 size:29% position:50% line:-1
+This adds a lot
+of unnecessary delay,
+
+
+410
+00:21:26,552 --> 00:21:28,821 position:50% size:31% line:-1
+sometimes in the order
+of seconds,
+
+
+411
+00:21:28.821 --> 00:21:32.625 line:-1 size:33% position:50% align:center
+before the packet
+even enters the network.
+
+
+412
+00:21:32,625 --> 00:21:36,996 position:50% align:center line:0
+We fixed this for URLSession
+and NWConnection
+
+
+413
+00:21:36,996 --> 00:21:40,299 position:50% size:25% line:0
+way back in 2015.
+
+
+414
+00:21:40,299 --> 00:21:42,601 size:43% align:center position:50%
+But most servers on the internet
+
+
+415
+00:21:42,601 --> 00:21:47,373 size:31% align:center position:50%
+run on Linux
+and use BSD Sockets.
+
+
+416
+00:21:47,373 --> 00:21:51,043 position:50% line:-1 size:40%
+Contact your server operators
+to ensure that they are using
+
+
+417
+00:21:51,043 --> 00:21:55,047 size:45% line:-1 align:center
+the TCP not sent low watermark
+socket option
+
+
+418
+00:21:55,047 --> 00:22:01,287 align:center line:-1 size:28%
+to reduce the delays
+at the source.
+
+
+419
+00:22:01,287 --> 00:22:03,689 position:50% line:-1 align:center
+For your next steps,
+
+
+420
+00:22:03,689 --> 00:22:06,392 position:50% size:28% line:-1
+Adopt the modern
+networking protocols
+
+
+421
+00:22:06,392 --> 00:22:10,729 line:-1 size:27% align:center
+to eliminate
+multiple round trips.
+
+
+422
+00:22:10,729 --> 00:22:14,099 line:-1 align:center position:50%
+Use the background mode
+for prefetching assets,
+
+
+423
+00:22:14.099 --> 00:22:18.871 line:-1 position:50% size:29% align:center
+bulk transfers,
+and non urgent tasks.
+
+
+424
+00:22:18,871 --> 00:22:24,076 align:center size:41% line:-1
+Test your app's performance
+in different network conditions.
+
+
+425
+00:22:24,076 --> 00:22:29,548 line:-1 size:40% align:center
+Network Link Conditioner is an
+excellent tool for doing that.
+
+
+426
+00:22:29,548 --> 00:22:31,383 line:-1 position:50% align:center
+Keeping network delays low
+
+
+427
+00:22:31.383 --> 00:22:34.186 line:-1 size:39% align:center position:50%
+improves the responsiveness
+of your app
+
+
+428
+00:22:34.186 --> 00:22:38.591 line:-1 align:center size:37% position:50%
+and enhances
+the overall user experience.
+
+
+429
+00:22:38.591 --> 00:22:42.728 line:-1 size:35% align:center position:50%
+Thanks for watching
+and have a great WWDC!
+
+
+430
+00:22:42,728 --> 00:22:46,265 line:0 size:2% position:90%
+♪
+

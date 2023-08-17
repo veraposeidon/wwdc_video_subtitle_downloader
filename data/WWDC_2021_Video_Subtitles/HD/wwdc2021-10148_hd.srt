@@ -1,0 +1,4062 @@
+2
+00:00:02.069 --> 00:00:07.074 line:-1 align:center
+[music]
+
+
+3
+00:00:09.042 --> 00:00:11.211 line:-2 align:center
+[Jonathan]
+Welcome to WWDC.
+
+
+4
+00:00:11.245 --> 00:00:13.313 line:-1 align:center
+Hi, I'm Jonathan Metzgar.
+
+
+5
+00:00:13.347 --> 00:00:15.282 line:-2 align:center
+I'm a member
+of the Metal Ecosystem team
+
+
+6
+00:00:15.315 --> 00:00:16.216 line:-1 align:center
+at Apple.
+
+
+7
+00:00:16.250 --> 00:00:18.452 line:-2 align:center
+We get to work with game
+developers to help them
+
+
+8
+00:00:18,485 --> 00:00:21,488 line:-2
+get the best graphics
+performance on our Apple GPUs.
+
+
+9
+00:00:21,522 --> 00:00:23,490 line:-2
+Dustin and I are going to
+show you how
+
+
+10
+00:00:23.524 --> 00:00:26.093 line:-2 align:center
+we optimize high-end
+games for Apple GPUs.
+
+
+11
+00:00:26.126 --> 00:00:28.028 line:-2 align:center
+In this video,
+I'm going to cover
+
+
+12
+00:00:28,061 --> 00:00:30,831 line:-2
+the process that we use
+to optimize games.
+
+
+13
+00:00:30,864 --> 00:00:32,799 line:-2
+Then, I'm going
+to show you the kinds
+
+
+14
+00:00:32.833 --> 00:00:34.334 line:-1 align:center
+of optimizations that are used
+
+
+15
+00:00:34.368 --> 00:00:37.938 line:-2 align:center
+in the games Baldur's Gate
+3 and Metro Exodus.
+
+
+16
+00:00:37,971 --> 00:00:40,374 line:-2
+And lastly,
+Dustin is going to do a tools
+
+
+17
+00:00:40,407 --> 00:00:44,144 line:-2
+demonstration featuring the game
+Divinity: Original Sin 2,
+
+
+18
+00:00:44,178 --> 00:00:49,049 line:-2
+while he introduces the new
+GPU Timeline in Xcode 13.
+
+
+19
+00:00:49,082 --> 00:00:52,119 line:-2
+Let's dive in and talk
+about optimization.
+
+
+20
+00:00:52,152 --> 00:00:54,354 line:-2
+So, over the past year,
+we collaborated
+
+
+21
+00:00:54.388 --> 00:00:57.691 line:-2 align:center
+with Larian Studios and 4A Games
+to find ways to tune
+
+
+22
+00:00:57.724 --> 00:01:00.494 line:-2 align:center
+the graphics performance
+in their games for Apple GPUs.
+
+
+23
+00:01:00.527 --> 00:01:03.230 line:-2 align:center
+I am sure you'll be excited
+to see the details,
+
+
+24
+00:01:03,263 --> 00:01:06,800 line:-2
+and I want to take a moment
+and thank both Larian Studios
+
+
+25
+00:01:06.834 --> 00:01:09.203 line:-2 align:center
+and 4A Games for giving
+us permission to show
+
+
+26
+00:01:09,236 --> 00:01:11,805 line:-2
+development materials
+in this presentation.
+
+
+27
+00:01:11.839 --> 00:01:13.941 line:-2 align:center
+Looking back over the course
+of the year,
+
+
+28
+00:01:13.974 --> 00:01:17.511 line:-2 align:center
+we have analyzed many games and
+identified some common scenarios
+
+
+29
+00:01:17.544 --> 00:01:19.613 line:-2 align:center
+that affect
+graphics performance.
+
+
+30
+00:01:19.646 --> 00:01:21.815 line:-2 align:center
+You're probably interested
+in finding opportunities
+
+
+31
+00:01:21,849 --> 00:01:24,418 line:-2
+to optimize your own game,
+so we have geared this session
+
+
+32
+00:01:24.451 --> 00:01:27.821 line:-2 align:center
+to emphasize how our GPU
+tools are especially helpful
+
+
+33
+00:01:27,855 --> 00:01:29,756 line:-2
+in pinpointing
+these problem areas
+
+
+34
+00:01:29,790 --> 00:01:31,792 line:-2
+and to suggest ways
+to solve them.
+
+
+35
+00:01:31.825 --> 00:01:34.294 line:-2 align:center
+And, in particular, I'd like
+to share some of the principles
+
+
+36
+00:01:34.328 --> 00:01:37.764 line:-2 align:center
+our team uses to help developers
+optimize their games.
+
+
+37
+00:01:37,798 --> 00:01:40,634 line:-2
+When we optimize a graphics
+application, it's important
+
+
+38
+00:01:40.667 --> 00:01:43.170 line:-2 align:center
+to have a methodology,
+a set of principles
+
+
+39
+00:01:43.203 --> 00:01:45.706 line:-2 align:center
+that define how we solve
+a particular problem.
+
+
+40
+00:01:45,739 --> 00:01:49,409 line:-2
+So, let me show you
+a four-step process.
+
+
+41
+00:01:49.443 --> 00:01:52.179 line:-2 align:center
+First, you need to choose
+what data to collect,
+
+
+42
+00:01:52.212 --> 00:01:54.581 line:-2 align:center
+or measure,
+so it will help you understand
+
+
+43
+00:01:54.615 --> 00:01:56.216 line:-1 align:center
+what's happening with your game.
+
+
+44
+00:01:56,250 --> 00:01:58,385 line:-2
+Soon after you begin
+measuring data,
+
+
+45
+00:01:58,418 --> 00:02:00,454 line:-2
+you will want to choose
+some performance targets,
+
+
+46
+00:02:00.487 --> 00:02:02.589 line:-2 align:center
+or where you want to be
+when you finish.
+
+
+47
+00:02:02.623 --> 00:02:04.591 line:-2 align:center
+You may decide
+the in-game location
+
+
+48
+00:02:04,625 --> 00:02:07,895 line:-2
+to take your GPU frame captures
+and Metal system traces,
+
+
+49
+00:02:07,928 --> 00:02:10,497 line:-2
+the scene complexity,
+graphics settings,
+
+
+50
+00:02:10.531 --> 00:02:13.233 line:-2 align:center
+and other metrics important
+to you, like frame time.
+
+
+51
+00:02:13,267 --> 00:02:15,435 line:-2
+Then, you analyze
+the data to learn about
+
+
+52
+00:02:15.469 --> 00:02:17.304 line:-1 align:center
+the behavior of your engine.
+
+
+53
+00:02:17,337 --> 00:02:19,439 line:-2
+In-depth analysis
+helps you find where
+
+
+54
+00:02:19,473 --> 00:02:21,942 line:-2
+and why the bottlenecks
+are occurring.
+
+
+55
+00:02:21.975 --> 00:02:24.144 line:-2 align:center
+Once you know
+what is causing a bottleneck,
+
+
+56
+00:02:24.178 --> 00:02:26.180 line:-2 align:center
+then you can make improvements
+to the game,
+
+
+57
+00:02:26.213 --> 00:02:28.515 line:-2 align:center
+but normally you pick one or two
+at a time,
+
+
+58
+00:02:28,549 --> 00:02:31,318 line:-2
+so you can understand
+the impact of each change.
+
+
+59
+00:02:31.351 --> 00:02:34.621 line:-2 align:center
+Lastly, you verify
+your improvements by comparing
+
+
+60
+00:02:34,655 --> 00:02:37,324 line:-2
+some new measurements
+with your original ones.
+
+
+61
+00:02:37.357 --> 00:02:40.827 line:-2 align:center
+Since optimization is a process,
+you will go back and repeat
+
+
+62
+00:02:40,861 --> 00:02:43,330 line:-2
+until your performance
+targets have been met.
+
+
+63
+00:02:43,363 --> 00:02:46,333 line:-2
+For these games,
+we use Xcode's Metal Debugger
+
+
+64
+00:02:46.366 --> 00:02:48.635 line:-2 align:center
+to give us insights
+about their performance
+
+
+65
+00:02:48,669 --> 00:02:50,838 line:-2
+and how their frame
+graphs are structured,
+
+
+66
+00:02:50,871 --> 00:02:53,907 line:-2
+and we use Metal System Trace
+in Instruments to learn
+
+
+67
+00:02:53,941 --> 00:02:56,043 line:-2
+about a game's performance
+over time.
+
+
+68
+00:02:56,076 --> 00:02:58,745 line:-2
+It's a great idea
+to save a GPU trace file
+
+
+69
+00:02:58,779 --> 00:03:00,914 line:-2
+and an Instruments trace
+file so you can have
+
+
+70
+00:03:00,948 --> 00:03:04,818 line:-2
+your before and after data, both
+before and after optimization.
+
+
+71
+00:03:04,852 --> 00:03:07,754 line:-2
+So, I have a little list
+of things you could consider,
+
+
+72
+00:03:07.788 --> 00:03:10.123 line:-1 align:center
+or look for, in your game.
+
+
+73
+00:03:10,157 --> 00:03:13,627 line:-2
+As I mentioned, Xcode
+and Instruments are great tools
+
+
+74
+00:03:13,660 --> 00:03:16,129 line:-2
+to help you understand
+your Metal application.
+
+
+75
+00:03:16.163 --> 00:03:19.166 line:-2 align:center
+Optimization is about getting
+the best out of several areas,
+
+
+76
+00:03:19,199 --> 00:03:22,936 line:-2
+ranging from shader performance
+to memory bandwidth.
+
+
+77
+00:03:22,970 --> 00:03:26,373 line:-2
+Another area is getting
+good overlap across your vertex,
+
+
+78
+00:03:26,406 --> 00:03:28,942 line:-1
+fragment, and compute workloads.
+
+
+79
+00:03:28.976 --> 00:03:31.245 line:-2 align:center
+And while rendering
+several frames in flight,
+
+
+80
+00:03:31,278 --> 00:03:34,748 line:-2
+some Apple GPUs can overlap
+workloads between them.
+
+
+81
+00:03:34.781 --> 00:03:36.984 line:-2 align:center
+I'll show you some pointers
+to help you with resource
+
+
+82
+00:03:37,017 --> 00:03:39,987 line:-2
+dependencies, which
+might prevent that overlap.
+
+
+83
+00:03:40,020 --> 00:03:42,689 line:-2
+And since some developers
+use a custom workflow
+
+
+84
+00:03:42.723 --> 00:03:44.658 line:-2 align:center
+for their shaders,
+I'll show you how
+
+
+85
+00:03:44,691 --> 00:03:47,394 line:-2
+compiler settings can
+affect performance.
+
+
+86
+00:03:47,427 --> 00:03:50,230 line:-2
+Lastly, I'll talk about how
+to reduce the impact
+
+
+87
+00:03:50,264 --> 00:03:53,333 line:-1
+of redundant bindings.
+
+
+88
+00:03:53,367 --> 00:03:57,971 line:-2
+Let's start with Baldur's Gate 3
+from Larian Studios.
+
+
+89
+00:03:58.005 --> 00:04:00.641 line:-2 align:center
+Baldur's Gate 3 is
+an RPG building
+
+
+90
+00:04:00,674 --> 00:04:03,010 line:-2
+on a 20-year gaming
+legacy and stands out
+
+
+91
+00:04:03.043 --> 00:04:05.045 line:-2 align:center
+with its cinematic visual
+effects.
+
+
+92
+00:04:05.078 --> 00:04:07.080 line:-2 align:center
+Our engagement
+with Larian Studios
+
+
+93
+00:04:07.114 --> 00:04:09.149 line:-2 align:center
+helped us identify how
+they could optimize
+
+
+94
+00:04:09.183 --> 00:04:12.286 line:-2 align:center
+their amazing rendering
+engine for Apple GPUs.
+
+
+95
+00:04:12,319 --> 00:04:15,656 line:-2
+First, we started
+with a GPU frame capture,
+
+
+96
+00:04:15.689 --> 00:04:17.758 line:-2 align:center
+like the Ravaged Beach scene
+we see here.
+
+
+97
+00:04:17,791 --> 00:04:21,795 line:-2
+Then, we break down the scene
+into a frame graph.
+
+
+98
+00:04:21,828 --> 00:04:23,664 line:-1
+The frame graph is a breakdown
+
+
+99
+00:04:23,697 --> 00:04:26,433 line:-2
+of the order and purpose
+of each rendering pass.
+
+
+100
+00:04:26,466 --> 00:04:29,770 line:-2
+High-end games have many render
+passes specializing in achieving
+
+
+101
+00:04:29.803 --> 00:04:32.973 line:-2 align:center
+a certain visual effect,
+such as ambient occlusion,
+
+
+102
+00:04:33.006 --> 00:04:36.143 line:-2 align:center
+shadow mapping, post processing,
+and so on.
+
+
+103
+00:04:36.176 --> 00:04:38.812 line:-2 align:center
+Baldur's Gate 3 has
+a complex frame graph,
+
+
+104
+00:04:38,846 --> 00:04:42,115 line:-1
+so this is a simplified version.
+
+
+105
+00:04:42.149 --> 00:04:46.286 line:-2 align:center
+By using Xcode's Metal Debugger,
+we capture a GPU trace
+
+
+106
+00:04:46.320 --> 00:04:49.623 line:-2 align:center
+and use it to see all
+the render passes in the game.
+
+
+107
+00:04:49,656 --> 00:04:51,758 line:-2
+Clicking
+on Show Dependencies brings
+
+
+108
+00:04:51.792 --> 00:04:55.863 line:-2 align:center
+up a visualization
+that you can pan and zoom.
+
+
+109
+00:04:55.896 --> 00:04:58.932 line:-2 align:center
+It shows how your render
+passes depend on the results
+
+
+110
+00:04:58,966 --> 00:05:01,735 line:-2
+of previous ones to help
+you understand what's going on.
+
+
+111
+00:05:01,768 --> 00:05:04,238 line:-2
+For example,
+I am zooming into this deferred
+
+
+112
+00:05:04.271 --> 00:05:06.673 line:-2 align:center
+decal render stage
+to get more details.
+
+
+113
+00:05:06,707 --> 00:05:11,211 line:-2
+Next, I will show
+you the Instruments tools.
+
+
+114
+00:05:11,245 --> 00:05:15,215 line:-2
+We spend time analyzing games
+using the Instruments trace,
+
+
+115
+00:05:15.249 --> 00:05:18.552 line:-2 align:center
+using the Metal System Trace,
+or Game performance templates.
+
+
+116
+00:05:18.585 --> 00:05:22.656 line:-2 align:center
+Metal System Trace is ideal if
+you wanna focus on GPU execution
+
+
+117
+00:05:22.689 --> 00:05:25.359 line:-2 align:center
+and scheduling analysis,
+and Game Performance
+
+
+118
+00:05:25.392 --> 00:05:27.160 line:-2 align:center
+expands on that to help
+you with other issues,
+
+
+119
+00:05:27,194 --> 00:05:30,163 line:-2
+like thread stalls
+or thermal notifications.
+
+
+120
+00:05:30,197 --> 00:05:32,199 line:-2
+Let's choose
+Metal System Trace to see
+
+
+121
+00:05:32,232 --> 00:05:36,637 line:-2
+the behavior of our engine
+from frame to frame.
+
+
+122
+00:05:36.670 --> 00:05:39.072 line:-2 align:center
+Instruments allows
+you to view several channels
+
+
+123
+00:05:39,106 --> 00:05:40,674 line:-1
+of data along a timeline.
+
+
+124
+00:05:40.707 --> 00:05:42.609 line:-1 align:center
+Here, we find our first problem:
+
+
+125
+00:05:42,643 --> 00:05:45,279 line:-2
+An expensive workload
+in our render passes.
+
+
+126
+00:05:45,312 --> 00:05:47,514 line:-2
+An expensive workload
+might mean that we need
+
+
+127
+00:05:47.548 --> 00:05:48.815 line:-1 align:center
+to optimize a shader.
+
+
+128
+00:05:48,849 --> 00:05:51,084 line:-2
+For instance,
+we see a long compute shader
+
+
+129
+00:05:51.118 --> 00:05:52.953 line:-2 align:center
+holding up
+the rest of our frame.
+
+
+130
+00:05:52,986 --> 00:05:54,988 line:-1
+We call these gaps "bubbles."
+
+
+131
+00:05:55,022 --> 00:05:57,257 line:-2
+Let's switch back
+over to the GPU trace
+
+
+132
+00:05:57,291 --> 00:06:00,327 line:-1
+and investigate this further.
+
+
+133
+00:06:00,360 --> 00:06:02,663 line:-1
+This is the "before" GPU trace.
+
+
+134
+00:06:02.696 --> 00:06:06.633 line:-2 align:center
+Let's change the grouping
+from API CALL to PIPELINE STATE.
+
+
+135
+00:06:06,667 --> 00:06:08,869 line:-2
+You may
+notice the pipeline states
+
+
+136
+00:06:08,902 --> 00:06:11,004 line:-1
+are sorted by execution time.
+
+
+137
+00:06:11.038 --> 00:06:13.307 line:-2 align:center
+Let's check the first
+compute pipeline.
+
+
+138
+00:06:13,340 --> 00:06:15,542 line:-2
+We can expand
+the compute function details
+
+
+139
+00:06:15.576 --> 00:06:18.412 line:-2 align:center
+to take a closer look
+at its statistics.
+
+
+140
+00:06:18.445 --> 00:06:19.746 line:-1 align:center
+Notice here that there are
+
+
+141
+00:06:19,780 --> 00:06:22,349 line:-2
+over four-and-a-half-thousand
+instructions.
+
+
+142
+00:06:22,382 --> 00:06:25,018 line:-2
+That's quite a lot.
+So, what else?
+
+
+143
+00:06:25,052 --> 00:06:27,154 line:-2
+Let's see what resources
+are being used
+
+
+144
+00:06:27,187 --> 00:06:30,490 line:-1
+by this compute function.
+
+
+145
+00:06:30,524 --> 00:06:33,393 line:-2
+Depending on the input data,
+this function uses up
+
+
+146
+00:06:33.427 --> 00:06:36.096 line:-2 align:center
+to 120 textures to produce
+the output.
+
+
+147
+00:06:36.129 --> 00:06:38.332 line:-2 align:center
+However,
+we discovered that only six
+
+
+148
+00:06:38.365 --> 00:06:42.035 line:-2 align:center
+to 12 are actually
+used 90% of the time.
+
+
+149
+00:06:42,069 --> 00:06:46,306 line:-2
+So, let's talk about how
+this shader could be improved.
+
+
+150
+00:06:46.340 --> 00:06:49.977 line:-2 align:center
+Shaders that need to handle many
+different conditions can reserve
+
+
+151
+00:06:50,010 --> 00:06:52,312 line:-2
+more registers than necessary,
+and this can reduce
+
+
+152
+00:06:52,346 --> 00:06:54,615 line:-2
+the number of threads
+that run in parallel.
+
+
+153
+00:06:54,648 --> 00:06:56,583 line:-2
+Splitting your workload
+into smaller,
+
+
+154
+00:06:56.617 --> 00:06:59.353 line:-2 align:center
+more focused shaders,
+which need fewer registers,
+
+
+155
+00:06:59.386 --> 00:07:02.256 line:-2 align:center
+can improve the utilization
+of the shader cores.
+
+
+156
+00:07:02,289 --> 00:07:05,325 line:-2
+So, instead of selecting
+the appropriate algorithm
+
+
+157
+00:07:05.359 --> 00:07:07.928 line:-2 align:center
+in the shader, you would
+choose the appropriate shader
+
+
+158
+00:07:07.961 --> 00:07:10.864 line:-2 align:center
+permutation when you issue
+your GPU workload.
+
+
+159
+00:07:10.898 --> 00:07:14.434 line:-2 align:center
+Additionally, a shader function
+which uses too many registers
+
+
+160
+00:07:14,468 --> 00:07:18,005 line:-2
+can result in register pressure,
+when an execution unit runs out
+
+
+161
+00:07:18.038 --> 00:07:21.942 line:-2 align:center
+of fast register memory and has
+to use device memory instead.
+
+
+162
+00:07:21.975 --> 00:07:25.245 line:-2 align:center
+That's one reason to use
+16-bit types, like half,
+
+
+163
+00:07:25,279 --> 00:07:28,248 line:-2
+when appropriate,
+since they use half the register
+
+
+164
+00:07:28,282 --> 00:07:32,119 line:-2
+space than 32-bit types,
+like floats.
+
+
+165
+00:07:32,152 --> 00:07:35,789 line:-2
+In this case, Larian Studios
+already optimized their shader
+
+
+166
+00:07:35.822 --> 00:07:38.825 line:-2 align:center
+to use half-precision floating
+point and decided to create
+
+
+167
+00:07:38,859 --> 00:07:41,128 line:-2
+dedicated shader variants,
+instead.
+
+
+168
+00:07:41,161 --> 00:07:44,264 line:-1
+So, let's see what happened.
+
+
+169
+00:07:44,298 --> 00:07:47,734 line:-2
+When comparing the numbers
+before, in the box on the left,
+
+
+170
+00:07:47,768 --> 00:07:50,270 line:-2
+with the numbers in the box
+on the right, the number
+
+
+171
+00:07:50,304 --> 00:07:54,908 line:-2
+of instructions reduced by 84%,
+branches reduced 90%,
+
+
+172
+00:07:54,942 --> 00:08:00,314 line:-2
+registers reduced 25%,
+and texture reads reduced 92%.
+
+
+173
+00:08:00.347 --> 00:08:03.550 line:-2 align:center
+This shader variant is
+used 90% of the time.
+
+
+174
+00:08:03.584 --> 00:08:06.587 line:-2 align:center
+We can also see
+this in the Metal System Trace.
+
+
+175
+00:08:06.620 --> 00:08:08.755 line:-2 align:center
+Notice here,
+in the before trace,
+
+
+176
+00:08:08.789 --> 00:08:12.226 line:-1 align:center
+the bubbles we saw earlier.
+
+
+177
+00:08:12,259 --> 00:08:15,762 line:-2
+And here, in the after trace,
+they have been minimized.
+
+
+178
+00:08:15,796 --> 00:08:18,532 line:-2
+Larian Studios was able
+to reduce this shader
+
+
+179
+00:08:18,565 --> 00:08:20,267 line:-2
+by eight milliseconds,
+on average.
+
+
+180
+00:08:20.300 --> 00:08:22.102 line:-1 align:center
+That is a huge win!
+
+
+181
+00:08:22,135 --> 00:08:25,506 line:-2
+If you look at your most
+expensive pipeline state objects
+
+
+182
+00:08:25,539 --> 00:08:28,275 line:-2
+and shaders, you may
+find a complicated shader
+
+
+183
+00:08:28,308 --> 00:08:29,810 line:-1
+that could be simplified.
+
+
+184
+00:08:29.843 --> 00:08:32.012 line:-2 align:center
+This is especially true
+if the results
+
+
+185
+00:08:32,045 --> 00:08:34,047 line:-2
+of that shader
+are used by a later pass.
+
+
+186
+00:08:34,081 --> 00:08:36,483 line:-2
+This was a huge improvement
+for the game,
+
+
+187
+00:08:36,517 --> 00:08:39,386 line:-2
+but short of the developer's
+performance target.
+
+
+188
+00:08:39,419 --> 00:08:41,855 line:-2
+We just mentioned memory
+as an issue, and one
+
+
+189
+00:08:41.889 --> 00:08:45.025 line:-2 align:center
+of the features of our GPUs
+is lossless compression,
+
+
+190
+00:08:45.058 --> 00:08:47.294 line:-2 align:center
+which is enabled
+in certain conditions.
+
+
+191
+00:08:47.327 --> 00:08:50.130 line:-2 align:center
+So, maybe there was a flag
+we either accidentally set
+
+
+192
+00:08:50,163 --> 00:08:51,665 line:-1
+or forgot to set.
+
+
+193
+00:08:51,698 --> 00:08:55,302 line:-2
+Lossless compression helps
+reduce bandwidth by compressing
+
+
+194
+00:08:55.335 --> 00:09:00.641 line:-2 align:center
+textures when they are stored
+from tile to device memory.
+
+
+195
+00:09:00.674 --> 00:09:02.776 line:-2 align:center
+If you look
+at the Bandwidth Insights
+
+
+196
+00:09:02.809 --> 00:09:05.012 line:-2 align:center
+on the Summary page,
+you may notice
+
+
+197
+00:09:05,045 --> 00:09:07,681 line:-2
+Lossless Compression
+warnings for some textures.
+
+
+198
+00:09:07,714 --> 00:09:09,383 line:-2
+They tell you
+that these textures
+
+
+199
+00:09:09,416 --> 00:09:10,918 line:-1
+can't be lossless compressed,
+
+
+200
+00:09:10.951 --> 00:09:13.020 line:-2 align:center
+and you may pay
+a bandwidth penalty.
+
+
+201
+00:09:13,053 --> 00:09:15,889 line:-2
+Metal Debugger will also let you
+know why these textures
+
+
+202
+00:09:15,923 --> 00:09:17,925 line:-1
+can't be lossless compressed.
+
+
+203
+00:09:17,958 --> 00:09:20,994 line:-2
+Here we see it's because
+of the ShaderWrite usage flag.
+
+
+204
+00:09:21.028 --> 00:09:25.098 line:-2 align:center
+We can see all the usage flags
+by going to the memory section.
+
+
+205
+00:09:25.132 --> 00:09:29.770 line:-2 align:center
+Once in the memory section,
+we can filter by render targets.
+
+
+206
+00:09:29,803 --> 00:09:32,272 line:-2
+Then, right click
+on the table header,
+
+
+207
+00:09:32.306 --> 00:09:35.576 line:-1 align:center
+choose texture, and then usage.
+
+
+208
+00:09:35,609 --> 00:09:37,344 line:-1
+Now, we can sort by usage
+
+
+209
+00:09:37,377 --> 00:09:41,114 line:-2
+and find the textures
+using ShaderWrite.
+
+
+210
+00:09:41.148 --> 00:09:44.151 line:-2 align:center
+If you set the ShaderWrite
+or PixelFormatView flag
+
+
+211
+00:09:44.184 --> 00:09:45.519 line:-1 align:center
+when you create your textures,
+
+
+212
+00:09:45.552 --> 00:09:47.955 line:-2 align:center
+you will disable
+lossless compression.
+
+
+213
+00:09:47.988 --> 00:09:51.592 line:-2 align:center
+Let's take a look
+at these flags in more detail.
+
+
+214
+00:09:51,625 --> 00:09:54,995 line:-2
+The Unknown, ShaderWrite,
+and PixelFormatView flags
+
+
+215
+00:09:55,028 --> 00:09:57,631 line:-2
+prevent your textures
+from being lossless compressed.
+
+
+216
+00:09:57,664 --> 00:10:00,133 line:-2
+The general rule of thumb
+is to use these flags
+
+
+217
+00:10:00,167 --> 00:10:01,668 line:-1
+only when required.
+
+
+218
+00:10:01,702 --> 00:10:04,271 line:-2
+For example, you would use
+the ShaderWrite flag
+
+
+219
+00:10:04,304 --> 00:10:06,240 line:-2
+if you use the write()
+method to store values
+
+
+220
+00:10:06,273 --> 00:10:09,176 line:-2
+in a texture from a fragment
+or compute function.
+
+
+221
+00:10:09,209 --> 00:10:11,778 line:-2
+Rendering to a texture
+bound as a color attachment
+
+
+222
+00:10:11,812 --> 00:10:14,181 line:-2
+doesn't require
+the ShaderWrite flag.
+
+
+223
+00:10:14,214 --> 00:10:16,483 line:-2
+And don't
+set the PixelFormatView option
+
+
+224
+00:10:16,517 --> 00:10:18,452 line:-2
+if you only need
+to read the component values
+
+
+225
+00:10:18.485 --> 00:10:19.720 line:-1 align:center
+in a different order.
+
+
+226
+00:10:19,753 --> 00:10:22,022 line:-2
+Instead,
+create a texture view using
+
+
+227
+00:10:22,055 --> 00:10:24,825 line:-2
+a swizzle pattern
+to specify the new order.
+
+
+228
+00:10:24,858 --> 00:10:28,896 line:-2
+Similarly, don't set
+the PixelFormatView option if
+
+
+229
+00:10:28,929 --> 00:10:32,966 line:-2
+your texture view only converts
+between linear space and sRGB.
+
+
+230
+00:10:33.000 --> 00:10:35.469 line:-2 align:center
+Check the documentation
+for more information.
+
+
+231
+00:10:35.502 --> 00:10:38.238 line:-2 align:center
+Shader optimization
+and lossless compression
+
+
+232
+00:10:38.272 --> 00:10:40.707 line:-2 align:center
+are two techniques
+that have helped us out,
+
+
+233
+00:10:40,741 --> 00:10:43,343 line:-2
+but another problem area is
+getting good overlap
+
+
+234
+00:10:43,377 --> 00:10:46,246 line:-2
+across the vertex, fragment,
+and compute channels.
+
+
+235
+00:10:46,280 --> 00:10:49,016 line:-2
+Let's take a look at two ways
+to optimize workloads
+
+
+236
+00:10:49.049 --> 00:10:50.117 line:-1 align:center
+across channels.
+
+
+237
+00:10:50,150 --> 00:10:53,787 line:-2
+First, we'll start by looking
+at our Metal System Trace again.
+
+
+238
+00:10:53.820 --> 00:10:55.856 line:-2 align:center
+Here, we can see
+that we have low overlap
+
+
+239
+00:10:55,889 --> 00:10:58,792 line:-2
+on our vertex, fragment,
+and compute channels.
+
+
+240
+00:10:58.825 --> 00:11:01.995 line:-2 align:center
+It would be nice to improve this
+to keep the GPU busy.
+
+
+241
+00:11:02,029 --> 00:11:04,731 line:-2
+One way to solve this problem
+is to see if we can
+
+
+242
+00:11:04,765 --> 00:11:07,534 line:-2
+restructure the encoding
+order in our frame graph.
+
+
+243
+00:11:07,568 --> 00:11:09,636 line:-2
+In other words,
+we want to move this work
+
+
+244
+00:11:09.670 --> 00:11:12.940 line:-2 align:center
+over to where the vertex
+stage has very low occupancy.
+
+
+245
+00:11:12,973 --> 00:11:15,609 line:-2
+We would like to process
+those vertices earlier,
+
+
+246
+00:11:15.642 --> 00:11:20.614 line:-2 align:center
+along with the fragment
+stage of an earlier render pass.
+
+
+247
+00:11:20,647 --> 00:11:23,383 line:-2
+We can think of our frame graph
+as a list
+
+
+248
+00:11:23,417 --> 00:11:26,119 line:-2
+of rendering tasks,
+like this pseudocode example.
+
+
+249
+00:11:26.153 --> 00:11:29.022 line:-2 align:center
+Getting good overlap can
+be as simple as changing
+
+
+250
+00:11:29.056 --> 00:11:31.758 line:-2 align:center
+the order of your render tasks
+in your frame graph.
+
+
+251
+00:11:31,792 --> 00:11:34,862 line:-2
+Some tasks may rely
+on results from earlier ones,
+
+
+252
+00:11:34.895 --> 00:11:36.096 line:-1 align:center
+but not always.
+
+
+253
+00:11:36.129 --> 00:11:39.066 line:-2 align:center
+It turns out that
+the CascadedShadowBuffer stage,
+
+
+254
+00:11:39.099 --> 00:11:41.468 line:-2 align:center
+which is vertex-shader heavy,
+could be moved
+
+
+255
+00:11:41,502 --> 00:11:45,239 line:-2
+a few tasks earlier,
+since it has few dependencies.
+
+
+256
+00:11:45,272 --> 00:11:47,374 line:-1
+And now, we see that our region
+
+
+257
+00:11:47.407 --> 00:11:50.444 line:-2 align:center
+with low overlap has better
+utilization of the vertex
+
+
+258
+00:11:50,477 --> 00:11:53,947 line:-2
+and fragment channels,
+giving us another 1 ms win.
+
+
+259
+00:11:53.981 --> 00:11:55.582 line:-2 align:center
+But there is
+another optimization
+
+
+260
+00:11:55,616 --> 00:11:57,818 line:-1
+that we can try out.
+
+
+261
+00:11:57,851 --> 00:12:00,654 line:-2
+Games often have two
+to three frames in flight.
+
+
+262
+00:12:00.687 --> 00:12:02.523 line:-2 align:center
+So, a cool feature
+in our tile-based
+
+
+263
+00:12:02.556 --> 00:12:05.692 line:-2 align:center
+deferred rendering,
+or TBDR architecture GPUs,
+
+
+264
+00:12:05.726 --> 00:12:08.128 line:-2 align:center
+is to overlap workloads
+from two frames
+
+
+265
+00:12:08,161 --> 00:12:11,131 line:-2
+when there are no resource
+dependencies between them.
+
+
+266
+00:12:11,164 --> 00:12:12,799 line:-2
+So, I'm going to show you
+how to optimize
+
+
+267
+00:12:12.833 --> 00:12:15.502 line:-1 align:center
+for this possibility.
+
+
+268
+00:12:15.536 --> 00:12:19.873 line:-2 align:center
+Let's have a look at the GPU
+track in Instruments once again.
+
+
+269
+00:12:19,907 --> 00:12:21,575 line:-2
+Here, you can see
+that these frames
+
+
+270
+00:12:21.608 --> 00:12:24.545 line:-1 align:center
+are processed, almost serially.
+
+
+271
+00:12:24,578 --> 00:12:27,481 line:-2
+This is caused by using
+a blit encoder to update
+
+
+272
+00:12:27.514 --> 00:12:32.619 line:-2 align:center
+constant buffers, like per-frame
+animation data, and so on.
+
+
+273
+00:12:32.653 --> 00:12:36.690 line:-2 align:center
+To efficiently update constant
+buffer data with a discrete GPU,
+
+
+274
+00:12:36.723 --> 00:12:40.427 line:-2 align:center
+we blit from shared buffers
+on the CPU to a private buffer
+
+
+275
+00:12:40,460 --> 00:12:43,897 line:-2
+on the GPU, which will be
+used for rendering the frame.
+
+
+276
+00:12:43.931 --> 00:12:47.367 line:-2 align:center
+This strategy is efficient
+for GPUs with discrete memory,
+
+
+277
+00:12:47,401 --> 00:12:51,772 line:-2
+so you want to keep this behavior
+for that purpose.
+
+
+278
+00:12:51.805 --> 00:12:54.808 line:-2 align:center
+If your device has a unified
+memory architecture,
+
+
+279
+00:12:54,842 --> 00:12:57,377 line:-2
+then there is no need
+to use a blit encoder
+
+
+280
+00:12:57.411 --> 00:12:59.780 line:-2 align:center
+to copy your data
+to a private buffer.
+
+
+281
+00:12:59.813 --> 00:13:03.584 line:-2 align:center
+However, when you use a shared
+buffer in a ring-buffer pattern,
+
+
+282
+00:13:03.617 --> 00:13:06.253 line:-2 align:center
+you need to watch out
+for synchronization issues
+
+
+283
+00:13:06.286 --> 00:13:09.223 line:-2 align:center
+because visual corruption
+can happen if your CPU
+
+
+284
+00:13:09,256 --> 00:13:12,492 line:-2
+writes to data currently
+being read by the GPU.
+
+
+285
+00:13:12.526 --> 00:13:16.263 line:-1 align:center
+Let's see this in action.
+
+
+286
+00:13:16.296 --> 00:13:18.365 line:-2 align:center
+Here, you can
+see in this diagram
+
+
+287
+00:13:18.398 --> 00:13:21.101 line:-2 align:center
+the encoding
+and rendering of our frames.
+
+
+288
+00:13:21,134 --> 00:13:23,170 line:-1
+We are using colors to represent
+
+
+289
+00:13:23,203 --> 00:13:24,872 line:-2
+the shared buffers,
+which are updated
+
+
+290
+00:13:24.905 --> 00:13:28.342 line:-2 align:center
+at the beginning of the frame:
+blue for buffer one,
+
+
+291
+00:13:28.375 --> 00:13:31.879 line:-2 align:center
+green for buffer two,
+and yellow for buffer three.
+
+
+292
+00:13:31,912 --> 00:13:35,015 line:-2
+Ring buffers are typically
+used to implement queues,
+
+
+293
+00:13:35,048 --> 00:13:38,018 line:-2
+which need to use a compact
+amount of memory.
+
+
+294
+00:13:38,051 --> 00:13:41,088 line:-2
+Here, there is no concern
+of a data race condition
+
+
+295
+00:13:41,121 --> 00:13:43,724 line:-2
+with this arrangement,
+as our writing and reading
+
+
+296
+00:13:43,757 --> 00:13:46,727 line:-2
+of our shared buffers
+is mutually exclusive.
+
+
+297
+00:13:46.760 --> 00:13:49.429 line:-2 align:center
+It's very common to have
+latency between encoding
+
+
+298
+00:13:49,463 --> 00:13:51,798 line:-2
+the frame
+and the rendering of a frame.
+
+
+299
+00:13:51,832 --> 00:13:53,100 line:-1
+This causes a shift
+
+
+300
+00:13:53.133 --> 00:13:55.235 line:-2 align:center
+of when the rendering
+actually begins.
+
+
+301
+00:13:55,269 --> 00:13:57,371 line:-2
+As long as the latency isn't
+too long,
+
+
+302
+00:13:57,404 --> 00:13:59,606 line:-2
+you will not have
+a data race condition.
+
+
+303
+00:13:59,640 --> 00:14:04,111 line:-2
+However, what happens if latency
+continues to increase?
+
+
+304
+00:14:04.144 --> 00:14:07.381 line:-2 align:center
+Well, this introduces
+a data race condition,
+
+
+305
+00:14:07,414 --> 00:14:09,950 line:-2
+where the main thread is
+updating its shared buffers
+
+
+306
+00:14:09,983 --> 00:14:12,853 line:-2
+during the time the GPU is
+rendering the frame.
+
+
+307
+00:14:12.886 --> 00:14:15.856 line:-2 align:center
+And if that happens,
+you could get visual corruption
+
+
+308
+00:14:15,889 --> 00:14:18,926 line:-2
+if elements of your frame
+are dependent on this data.
+
+
+309
+00:14:18.959 --> 00:14:22.229 line:-2 align:center
+In the case of Baldur's Gate 3,
+removing the private buffer
+
+
+310
+00:14:22.262 --> 00:14:24.198 line:-1 align:center
+and blit encoder eliminated
+
+
+311
+00:14:24,231 --> 00:14:27,467 line:-2
+the synchronization point,
+but introduced a race condition,
+
+
+312
+00:14:27,501 --> 00:14:30,938 line:-2
+which affected their temporal
+anti-aliasing render pass.
+
+
+313
+00:14:30,971 --> 00:14:34,408 line:-2
+So, let's see how
+to avoid this situation.
+
+
+314
+00:14:34.441 --> 00:14:36.243 line:-1 align:center
+To avoid this race condition,
+
+
+315
+00:14:36.276 --> 00:14:38.111 line:-2 align:center
+you need to make sure
+you are not writing
+
+
+316
+00:14:38,145 --> 00:14:40,814 line:-2
+into the same resource
+the GPU is reading from.
+
+
+317
+00:14:40.848 --> 00:14:42.850 line:-1 align:center
+For example, you could utilize
+
+
+318
+00:14:42.883 --> 00:14:45.919 line:-2 align:center
+a completion handler,
+and then wait until it is safe
+
+
+319
+00:14:45,953 --> 00:14:48,655 line:-2
+to update the shared buffer
+in your encoding thread.
+
+
+320
+00:14:48,689 --> 00:14:53,560 line:-2
+But let me show you how
+we avoided a wait time.
+
+
+321
+00:14:53,594 --> 00:14:56,964 line:-2
+We maintained our completion
+handler, but added an extra
+
+
+322
+00:14:56,997 --> 00:14:59,499 line:-2
+buffer to our ring buffer
+to avoid the wait.
+
+
+323
+00:14:59.533 --> 00:15:02.769 line:-2 align:center
+The extra buffer is colored
+purple on the bottom diagram.
+
+
+324
+00:15:02,803 --> 00:15:06,573 line:-2
+The memory consumption remains
+the same as with a discrete GPU.
+
+
+325
+00:15:06,607 --> 00:15:08,275 line:-2
+But if you need to save
+on memory,
+
+
+326
+00:15:08.308 --> 00:15:11.411 line:-2 align:center
+and the CPU wait time doesn't
+affect frame rate of your game,
+
+
+327
+00:15:11,445 --> 00:15:13,881 line:-2
+then you can just use
+three buffers.
+
+
+328
+00:15:13,914 --> 00:15:17,117 line:-2
+So, let's look at an easy way
+to decide how many shared
+
+
+329
+00:15:17.150 --> 00:15:22.289 line:-2 align:center
+and private buffers to create
+with a pseudocode example.
+
+
+330
+00:15:22,322 --> 00:15:25,192 line:-2
+In this code snippet,
+you can see how to choose
+
+
+331
+00:15:25.225 --> 00:15:29.296 line:-2 align:center
+the number of shared and private
+buffers at initialization time.
+
+
+332
+00:15:29.329 --> 00:15:31.198 line:-1 align:center
+Once we have created our device,
+
+
+333
+00:15:31,231 --> 00:15:33,133 line:-2
+we can check
+to see if the device has
+
+
+334
+00:15:33,166 --> 00:15:36,236 line:-2
+unified memory or not,
+and then ensure that we create
+
+
+335
+00:15:36.270 --> 00:15:39.773 line:-2 align:center
+an extra shared buffer,
+or to use a private buffer.
+
+
+336
+00:15:39,806 --> 00:15:41,875 line:-2
+This extra
+buffer will help reduce
+
+
+337
+00:15:41.909 --> 00:15:44.378 line:-2 align:center
+the impact of waiting
+for a completion handler,
+
+
+338
+00:15:44.411 --> 00:15:47.447 line:-2 align:center
+which we are using to avoid
+a data race condition.
+
+
+339
+00:15:47.481 --> 00:15:50.617 line:-2 align:center
+And now, we can see how Fragment
+workloads from the previous
+
+
+340
+00:15:50,651 --> 00:15:54,321 line:-2
+frame overlaps with Vertex
+workloads from the next frame.
+
+
+341
+00:15:54,354 --> 00:15:56,089 line:-1
+Overall, this can give us one
+
+
+342
+00:15:56.123 --> 00:15:58.559 line:-2 align:center
+to two milliseconds,
+depending on the scene.
+
+
+343
+00:15:58,592 --> 00:16:01,161 line:-2
+And, of course,
+this approach can be applied not
+
+
+344
+00:16:01.195 --> 00:16:02.963 line:-2 align:center
+only for the constant
+buffer data we've
+
+
+345
+00:16:02.996 --> 00:16:05.933 line:-2 align:center
+shown in this example,
+but for all of the buffer data
+
+
+346
+00:16:05,966 --> 00:16:09,136 line:-2
+you transfer
+from the CPU to the GPU.
+
+
+347
+00:16:09,169 --> 00:16:11,839 line:-1
+So, let's review.
+
+
+348
+00:16:11,872 --> 00:16:14,875 line:-2
+Larian Studios was able
+to achieve their performance
+
+
+349
+00:16:14,908 --> 00:16:17,778 line:-2
+targets by applying
+the following optimizations:
+
+
+350
+00:16:17,811 --> 00:16:21,582 line:-2
+Optimizing their most expensive
+shaders to reduce bubbles,
+
+
+351
+00:16:21.615 --> 00:16:24.785 line:-2 align:center
+opting in to lossless
+compression to improve
+
+
+352
+00:16:24,818 --> 00:16:27,221 line:-2
+bandwidth, overlapping vertex
+and fragment workloads
+
+
+353
+00:16:27.254 --> 00:16:30.023 line:-2 align:center
+to get better GPU utilization,
+and checking
+
+
+354
+00:16:30.057 --> 00:16:33.260 line:-2 align:center
+for resource dependencies
+that prevent frame overlap.
+
+
+355
+00:16:33,293 --> 00:16:36,330 line:-2
+When they were finished,
+Larian Studios not only met
+
+
+356
+00:16:36,363 --> 00:16:39,433 line:-2
+their performance targets,
+but got a 33% improvement
+
+
+357
+00:16:39.466 --> 00:16:41.635 line:-1 align:center
+in frame time for their game.
+
+
+358
+00:16:41.668 --> 00:16:44.004 line:-2 align:center
+And now,
+we will look at a different set
+
+
+359
+00:16:44.037 --> 00:16:47.274 line:-2 align:center
+of optimizations
+with the game Metro Exodus.
+
+
+360
+00:16:47.307 --> 00:16:50.244 line:-2 align:center
+Metro Exodus is known
+for its epic storyline
+
+
+361
+00:16:50.277 --> 00:16:52.546 line:-2 align:center
+and demanding visual effects,
+as you can see
+
+
+362
+00:16:52,579 --> 00:16:54,581 line:-2
+in this series
+of game-play clips.
+
+
+363
+00:16:54.615 --> 00:16:57.518 line:-2 align:center
+After the integration
+of our suggested optimizations,
+
+
+364
+00:16:57.551 --> 00:17:00.487 line:-2 align:center
+4A Games was able to meet
+their performance targets.
+
+
+365
+00:17:00.521 --> 00:17:03.156 line:-2 align:center
+So now, let's have a look
+at an in-game scene
+
+
+366
+00:17:03,190 --> 00:17:05,125 line:-1
+from Metro Exodus.
+
+
+367
+00:17:05,158 --> 00:17:08,295 line:-2
+Metro Exodus uses
+a custom workflow to translate
+
+
+368
+00:17:08.328 --> 00:17:10.731 line:-2 align:center
+render commands
+into Metal API commands,
+
+
+369
+00:17:10,764 --> 00:17:13,800 line:-2
+which is quite common
+for cross-platform games.
+
+
+370
+00:17:13.834 --> 00:17:16.470 line:-2 align:center
+The translation layer
+they are using is optimized
+
+
+371
+00:17:16.503 --> 00:17:18.705 line:-2 align:center
+for Metal,
+but some issues can arise
+
+
+372
+00:17:18.739 --> 00:17:22.009 line:-2 align:center
+when two complex systems
+come together in practice.
+
+
+373
+00:17:22,042 --> 00:17:23,744 line:-2
+So, additional
+performance tuning
+
+
+374
+00:17:23.777 --> 00:17:28.749 line:-2 align:center
+was required
+to meet their project goals.
+
+
+375
+00:17:28.782 --> 00:17:30.951 line:-2 align:center
+As in the previous game,
+we start
+
+
+376
+00:17:30.984 --> 00:17:33.487 line:-2 align:center
+by investigating how
+a frame is being rendered.
+
+
+377
+00:17:33,520 --> 00:17:36,490 line:-2
+Modern renderers have a lot
+of different techniques involved
+
+
+378
+00:17:36.523 --> 00:17:40.928 line:-2 align:center
+so first we try to understand
+the high-level frame graph.
+
+
+379
+00:17:40,961 --> 00:17:44,498 line:-2
+Again, we start analysis
+by looking at the GPU trace.
+
+
+380
+00:17:44,531 --> 00:17:48,202 line:-2
+It always gives us useful
+insights about game performance.
+
+
+381
+00:17:48.235 --> 00:17:51.071 line:-2 align:center
+So first,
+let's start with the GPU time,
+
+
+382
+00:17:51.104 --> 00:17:53.740 line:-2 align:center
+which doesn't meet the developer
+performance targets.
+
+
+383
+00:17:53.774 --> 00:17:55.742 line:-2 align:center
+So, let's find the shader
+or pipeline
+
+
+384
+00:17:55,776 --> 00:17:57,744 line:-2
+which is
+the most time-consuming.
+
+
+385
+00:17:57,778 --> 00:18:00,347 line:-2
+To do this, we are going
+to group by pipeline state
+
+
+386
+00:18:00,380 --> 00:18:03,817 line:-2
+once again and look
+at the most expensive one.
+
+
+387
+00:18:03,851 --> 00:18:06,253 line:-2
+Let's quickly look
+at its statistics.
+
+
+388
+00:18:06.286 --> 00:18:09.156 line:-2 align:center
+You can see that there is a high
+number of ALU instructions
+
+
+389
+00:18:09.189 --> 00:18:12.759 line:-2 align:center
+compared to the total, meaning
+this is a math-heavy shader.
+
+
+390
+00:18:12,793 --> 00:18:15,529 line:-2
+We also see that the number
+of registers being used
+
+
+391
+00:18:15.562 --> 00:18:17.331 line:-1 align:center
+by the shader is quite high.
+
+
+392
+00:18:17,364 --> 00:18:20,601 line:-2
+The number of registers used
+by a particular shader directly
+
+
+393
+00:18:20,634 --> 00:18:23,704 line:-2
+affects how its workload
+will scale during execution.
+
+
+394
+00:18:23.737 --> 00:18:26.340 line:-2 align:center
+The higher this number is,
+the less work can be done
+
+
+395
+00:18:26,373 --> 00:18:28,475 line:-1
+in parallel by the GPU.
+
+
+396
+00:18:28,509 --> 00:18:31,945 line:-2
+Sometimes it's just a complex
+shader, such as SSAO
+
+
+397
+00:18:31,979 --> 00:18:34,047 line:-2
+in this example,
+that requires lots
+
+
+398
+00:18:34.081 --> 00:18:36.717 line:-2 align:center
+of computations and registers,
+but sometimes
+
+
+399
+00:18:36,750 --> 00:18:39,586 line:-2
+the compiler settings can affect
+the generated instructions
+
+
+400
+00:18:39,620 --> 00:18:41,822 line:-2
+and register allocation,
+as well.
+
+
+401
+00:18:41.855 --> 00:18:44.658 line:-2 align:center
+Let's also take a look
+at the shader compiler options.
+
+
+402
+00:18:44,691 --> 00:18:46,793 line:-2
+And it turns out,
+this shader was compiled
+
+
+403
+00:18:46,827 --> 00:18:48,862 line:-2
+with the fast math flag
+disabled.
+
+
+404
+00:18:48.896 --> 00:18:51.665 line:-2 align:center
+Fast math allows the shader
+compiler to optimize
+
+
+405
+00:18:51,698 --> 00:18:53,867 line:-2
+various instructions,
+and it is enabled
+
+
+406
+00:18:53,901 --> 00:18:56,603 line:-2
+for the Metal shader compiler,
+by default.
+
+
+407
+00:18:56.637 --> 00:18:58.705 line:-2 align:center
+However, there might be
+some cases,
+
+
+408
+00:18:58,739 --> 00:19:01,108 line:-2
+for example,
+using custom shader workflows,
+
+
+409
+00:19:01,141 --> 00:19:03,844 line:-2
+that can
+disable this compilation flag.
+
+
+410
+00:19:03,877 --> 00:19:06,813 line:-2
+In this case, we discovered
+that the translation layer,
+
+
+411
+00:19:06,847 --> 00:19:09,616 line:-2
+which 4A Games was using
+to invoke the compiler,
+
+
+412
+00:19:09.650 --> 00:19:12.986 line:-2 align:center
+had its default behavior
+set to not use fast math.
+
+
+413
+00:19:13,020 --> 00:19:15,689 line:-1
+So, what is fast math?
+
+
+414
+00:19:15,722 --> 00:19:18,192 line:-2
+Fast math is
+a set of optimizations
+
+
+415
+00:19:18,225 --> 00:19:19,893 line:-1
+for floating-point arithmetic,
+
+
+416
+00:19:19,927 --> 00:19:22,262 line:-2
+that trades
+between speed and correctness.
+
+
+417
+00:19:22,296 --> 00:19:26,166 line:-2
+For example, assumptions can be
+made that there will be no NANs,
+
+
+418
+00:19:26.200 --> 00:19:30.704 line:-2 align:center
+infinity, or signed zeros
+as either a result or argument.
+
+
+419
+00:19:30.737 --> 00:19:33.106 line:-2 align:center
+Fast math optimizations
+can also apply
+
+
+420
+00:19:33.140 --> 00:19:35.742 line:-2 align:center
+algebraically-equivalent
+transformations,
+
+
+421
+00:19:35.776 --> 00:19:39.446 line:-2 align:center
+which may affect the precision
+in floating-point results.
+
+
+422
+00:19:39,479 --> 00:19:41,114 line:-1
+However in most scenarios,
+
+
+423
+00:19:41,148 --> 00:19:43,250 line:-2
+fast math is a great choice
+for games.
+
+
+424
+00:19:43,283 --> 00:19:45,652 line:-2
+This can significantly
+improve performance,
+
+
+425
+00:19:45,686 --> 00:19:48,522 line:-1
+especially in ALU-bound cases.
+
+
+426
+00:19:48,555 --> 00:19:51,625 line:-2
+Our recommendation to you is
+to check your compiler options
+
+
+427
+00:19:51.658 --> 00:19:55.262 line:-2 align:center
+to verify that you have enabled
+fast math, if your shaders do
+
+
+428
+00:19:55.295 --> 00:19:58.232 line:-2 align:center
+not depend on the things
+that we just mentioned.
+
+
+429
+00:20:00,767 --> 00:20:02,970 line:-2
+The fast math flag
+works at the front-
+
+
+430
+00:20:03,003 --> 00:20:04,738 line:-1
+and back-end compiler levels.
+
+
+431
+00:20:04,771 --> 00:20:06,673 line:-2
+When you are building
+your shader source,
+
+
+432
+00:20:06,707 --> 00:20:09,610 line:-2
+the front-end shader compiler
+will select fast math functions,
+
+
+433
+00:20:09.643 --> 00:20:12.112 line:-2 align:center
+which will be used
+in intermediate code.
+
+
+434
+00:20:12,145 --> 00:20:15,249 line:-2
+This will hint to the back-end
+shader compiler that it can
+
+
+435
+00:20:15,282 --> 00:20:18,519 line:-2
+generate more optimal
+GPU machine code.
+
+
+436
+00:20:18.552 --> 00:20:20.654 line:-2 align:center
+Here, you can see
+how the Instructions
+
+
+437
+00:20:20.687 --> 00:20:23.190 line:-2 align:center
+and Register counters
+on the left have been improved
+
+
+438
+00:20:23.223 --> 00:20:26.960 line:-2 align:center
+in the box on the right
+after we recompiled this shader.
+
+
+439
+00:20:26,994 --> 00:20:29,897 line:-2
+So, after changing the behavior
+of the translation layer
+
+
+440
+00:20:29.930 --> 00:20:32.165 line:-2 align:center
+to enable fast math
+for all the shaders,
+
+
+441
+00:20:32.199 --> 00:20:35.636 line:-2 align:center
+we got a 21% frame time decrease
+in our test workload
+
+
+442
+00:20:35.669 --> 00:20:38.172 line:-2 align:center
+using the built-in game
+benchmark.
+
+
+443
+00:20:38.205 --> 00:20:43.043 line:-2 align:center
+So, the next area I wanna talk
+about is redundant bindings.
+
+
+444
+00:20:43,076 --> 00:20:45,412 line:-2
+If we go
+back to the summary page,
+
+
+445
+00:20:45,445 --> 00:20:48,282 line:-2
+and look at the API insights,
+we can see there are
+
+
+446
+00:20:48.315 --> 00:20:51.418 line:-2 align:center
+many redundant bindings
+when rendering the frame.
+
+
+447
+00:20:51.451 --> 00:20:54.621 line:-2 align:center
+Redundant bindings can be either
+resources like textures,
+
+
+448
+00:20:54,655 --> 00:20:57,191 line:-2
+buffers, and samplers;
+or render states
+
+
+449
+00:20:57.224 --> 00:21:01.094 line:-2 align:center
+like depth stencil state,
+viewport configuration, etc.
+
+
+450
+00:21:01,128 --> 00:21:04,231 line:-2
+Repeatedly binding resources
+might negatively affect
+
+
+451
+00:21:04,264 --> 00:21:06,600 line:-2
+your encoding time,
+but redundant render
+
+
+452
+00:21:06,633 --> 00:21:10,971 line:-2
+state changes may also
+affect the GPU time.
+
+
+453
+00:21:11.004 --> 00:21:12.739 line:-2 align:center
+Let's have a look
+at the encoding
+
+
+454
+00:21:12,773 --> 00:21:16,076 line:-2
+and GPU times
+in the Metal System Trace.
+
+
+455
+00:21:16,109 --> 00:21:19,112 line:-2
+For a given frame, it takes
+eight-and-a-half milliseconds
+
+
+456
+00:21:19,146 --> 00:21:20,881 line:-2
+for all the commands
+to be encoded
+
+
+457
+00:21:20,914 --> 00:21:22,583 line:-1
+and around 22 milliseconds
+
+
+458
+00:21:22,616 --> 00:21:24,651 line:-2
+for the GPU
+to render this frame.
+
+
+459
+00:21:24.685 --> 00:21:27.921 line:-2 align:center
+When we investigated the cause
+of the redundant bindings,
+
+
+460
+00:21:27,955 --> 00:21:29,756 line:-2
+we found
+that the translation layer
+
+
+461
+00:21:29,790 --> 00:21:32,025 line:-2
+could be
+modified to reduce them.
+
+
+462
+00:21:32.059 --> 00:21:35.028 line:-2 align:center
+So, let me show you a pseudocode
+example which shows how
+
+
+463
+00:21:35,062 --> 00:21:38,966 line:-2
+to check for and reduce
+redundant bindings.
+
+
+464
+00:21:38,999 --> 00:21:42,336 line:-2
+Instead of binding textures
+directly to the encoder,
+
+
+465
+00:21:42,369 --> 00:21:45,606 line:-2
+you can pre-cache them and only
+bind them if they change.
+
+
+466
+00:21:45,639 --> 00:21:49,243 line:-2
+And to minimize interactions
+with the API, you can set all
+
+
+467
+00:21:49,276 --> 00:21:52,880 line:-2
+the textures with one call to
+the setFragmentTextures method
+
+
+468
+00:21:52,913 --> 00:21:55,983 line:-2
+instead of setting them
+in a loop, one by one.
+
+
+469
+00:21:56.016 --> 00:21:58.685 line:-2 align:center
+Additionally,
+you can apply a similar approach
+
+
+470
+00:21:58,719 --> 00:22:01,121 line:-2
+to other shader stages
+and other binding types,
+
+
+471
+00:22:01.154 --> 00:22:04.625 line:-2 align:center
+like buffers and samplers,
+as well as render states.
+
+
+472
+00:22:04,658 --> 00:22:09,596 line:-2
+So, let's see what happened
+in the Metal System Trace.
+
+
+473
+00:22:09,630 --> 00:22:12,533 line:-2
+4A Games was able
+to reduce encoding time
+
+
+474
+00:22:12.566 --> 00:22:15.636 line:-2 align:center
+between 30% and 50%,
+depending on the scene,
+
+
+475
+00:22:15,669 --> 00:22:18,038 line:-2
+because the translation
+layer wasn't repeatedly
+
+
+476
+00:22:18,071 --> 00:22:21,074 line:-2
+binding the same resources
+and render states.
+
+
+477
+00:22:21.108 --> 00:22:23.844 line:-2 align:center
+However,
+GPU time also decreased by up
+
+
+478
+00:22:23,877 --> 00:22:25,979 line:-2
+to three milliseconds and,
+overall,
+
+
+479
+00:22:26.013 --> 00:22:29.883 line:-2 align:center
+resulted in a 15% speedup
+in their in-game benchmark.
+
+
+480
+00:22:29,917 --> 00:22:32,219 line:-2
+If you have a few redundant
+binding warnings,
+
+
+481
+00:22:32,252 --> 00:22:34,855 line:-2
+it's not an issue,
+but we definitely see an impact
+
+
+482
+00:22:34.888 --> 00:22:39.726 line:-2 align:center
+with hundreds or thousands
+of redundant bindings.
+
+
+483
+00:22:39,760 --> 00:22:44,097 line:-2
+So, avoiding redundant bindings
+gave us a further 15% reduction
+
+
+484
+00:22:44,131 --> 00:22:45,632 line:-1
+in average frame time.
+
+
+485
+00:22:45.666 --> 00:22:48.669 line:-2 align:center
+After these two improvements,
+4A Games was able to meet
+
+
+486
+00:22:48,702 --> 00:22:50,437 line:-1
+their performance targets.
+
+
+487
+00:22:50,470 --> 00:22:52,573 line:-2
+So now, let's summarize
+what we learned
+
+
+488
+00:22:52,606 --> 00:22:57,110 line:-2
+from optimizing Metro Exodus
+for Apple GPUs.
+
+
+489
+00:22:57,144 --> 00:23:00,347 line:-2
+First, if you're using
+a custom workflow for shaders,
+
+
+490
+00:23:00,380 --> 00:23:02,850 line:-2
+you should check
+your compiler settings to ensure
+
+
+491
+00:23:02.883 --> 00:23:06.086 line:-2 align:center
+you are using the best options
+for your Metal applications.
+
+
+492
+00:23:06.119 --> 00:23:08.422 line:-2 align:center
+And if you see a lot
+of redundant binding warnings
+
+
+493
+00:23:08.455 --> 00:23:10.924 line:-2 align:center
+in the Metal Debugger,
+I showed you a technique
+
+
+494
+00:23:10.958 --> 00:23:13.393 line:-2 align:center
+to reduce encoding
+and GPU time overhead,
+
+
+495
+00:23:13,427 --> 00:23:15,796 line:-2
+which you can apply
+either to your engine
+
+
+496
+00:23:15,829 --> 00:23:17,831 line:-2
+or the translation layer
+that you are using.
+
+
+497
+00:23:17.865 --> 00:23:20.334 line:-2 align:center
+And now, I'd like to hand it
+over to Dustin,
+
+
+498
+00:23:20.367 --> 00:23:23.604 line:-2 align:center
+who's going to talk to you
+about Divinity: Original Sin 2
+
+
+499
+00:23:23.637 --> 00:23:27.474 line:-2 align:center
+and demo the new
+Xcode GPU timeline features.
+
+
+500
+00:23:27,508 --> 00:23:29,243 line:-2
+[Dustin]
+Thanks, Jonathan.
+
+
+501
+00:23:29.276 --> 00:23:31.245 line:-2 align:center
+Hi, my name is Dustin,
+and I work
+
+
+502
+00:23:31,278 --> 00:23:33,447 line:-2
+on the GPU Software team
+here at Apple.
+
+
+503
+00:23:33,480 --> 00:23:36,683 line:-2
+And today, I'm excited
+to show you a hands-on demo
+
+
+504
+00:23:36.717 --> 00:23:39.887 line:-2 align:center
+optimizing an early build
+of Larian Studios hit title,
+
+
+505
+00:23:39.920 --> 00:23:41.855 line:-1 align:center
+Divinity: Original Sin 2.
+
+
+506
+00:23:41,889 --> 00:23:43,590 line:-2
+Last year,
+Larian announced they were
+
+
+507
+00:23:43,624 --> 00:23:45,025 line:-2
+bringing
+their critically-acclaimed
+
+
+508
+00:23:45,058 --> 00:23:48,328 line:-2
+role-playing game Divinity:
+Original Sin 2 to the iPad.
+
+
+509
+00:23:48.362 --> 00:23:50.564 line:-2 align:center
+And over the last year,
+Larian has worked hard
+
+
+510
+00:23:50,597 --> 00:23:53,300 line:-2
+optimizing their game
+to run great on Apple GPU's,
+
+
+511
+00:23:53,333 --> 00:23:55,869 line:-2
+and the game is a lot of fun
+to play.
+
+
+512
+00:23:55.903 --> 00:23:59.806 line:-2 align:center
+Larian was able to achieve these
+results with the help of a great
+
+
+513
+00:23:59.840 --> 00:24:03.110 line:-2 align:center
+set of tools in Metal Debugger
+and Metal System Trace
+
+
+514
+00:24:03.143 --> 00:24:06.547 line:-2 align:center
+that are getting even
+better this year in Xcode 13
+
+
+515
+00:24:06,580 --> 00:24:09,449 line:-2
+with the addition
+of the new GPU Timeline.
+
+
+516
+00:24:09.483 --> 00:24:12.052 line:-2 align:center
+Let's get started by taking
+a look at a frame
+
+
+517
+00:24:12,085 --> 00:24:15,389 line:-2
+of Divinity: Original Sin 2
+I captured earlier.
+
+
+518
+00:24:15,422 --> 00:24:17,991 line:-2
+We are here on the Summary Page,
+which contains an overview
+
+
+519
+00:24:18.025 --> 00:24:20.527 line:-2 align:center
+of your frame that helps
+to guide you along the way
+
+
+520
+00:24:20.561 --> 00:24:22.930 line:-2 align:center
+as you debug
+and optimize your game.
+
+
+521
+00:24:22.963 --> 00:24:25.132 line:-2 align:center
+From the Summary Page,
+we can quickly navigate
+
+
+522
+00:24:25.165 --> 00:24:28.101 line:-2 align:center
+to all the great tools offered
+by the Metal Debugger,
+
+
+523
+00:24:28,135 --> 00:24:30,571 line:-1
+including the new GPU Timeline.
+
+
+524
+00:24:30,604 --> 00:24:32,706 line:-2
+And accessing it is
+as easy as clicking
+
+
+525
+00:24:32,739 --> 00:24:34,474 line:-2
+on the new Performance page
+here.
+
+
+526
+00:24:34,508 --> 00:24:37,344 line:-1
+So, let me go ahead and do that.
+
+
+527
+00:24:37,377 --> 00:24:40,080 line:-2
+Introducing
+the new GPU Timeline.
+
+
+528
+00:24:40.113 --> 00:24:41.548 line:-1 align:center
+The Timeline has been designed
+
+
+529
+00:24:41,582 --> 00:24:43,684 line:-2
+around Apple GPU's
+unique architecture
+
+
+530
+00:24:43.717 --> 00:24:47.654 line:-2 align:center
+that allows each GPU pipeline
+stage to run in parallel.
+
+
+531
+00:24:47.688 --> 00:24:50.424 line:-2 align:center
+In order to maximize
+performance, we need to keep
+
+
+532
+00:24:50,457 --> 00:24:54,361 line:-2
+all pipeline stages as busy as
+possible by maximizing overlap,
+
+
+533
+00:24:54.394 --> 00:24:57.898 line:-2 align:center
+which the Timeline allows you
+to easily see.
+
+
+534
+00:24:57.931 --> 00:25:00.300 line:-2 align:center
+The Timeline is composed
+of two sections.
+
+
+535
+00:25:00,334 --> 00:25:02,703 line:-2
+On the top,
+we have the GPU section,
+
+
+536
+00:25:02.736 --> 00:25:04.705 line:-2 align:center
+which is composed
+of separate tracks
+
+
+537
+00:25:04.738 --> 00:25:07.975 line:-2 align:center
+for each pipeline stage,
+making it really easy to see
+
+
+538
+00:25:08.008 --> 00:25:11.245 line:-2 align:center
+which stages are active
+and running in parallel.
+
+
+539
+00:25:11,278 --> 00:25:13,947 line:-2
+Underneath,
+we have the Counters section,
+
+
+540
+00:25:13,981 --> 00:25:16,850 line:-2
+which contains a curated set
+of important counters,
+
+
+541
+00:25:16,884 --> 00:25:19,653 line:-2
+such as shader occupancy,
+bandwidth,
+
+
+542
+00:25:19,686 --> 00:25:22,422 line:-2
+and performance limiters
+that provides us
+
+
+543
+00:25:22.456 --> 00:25:25.459 line:-2 align:center
+with deeper insight into how
+the GPU's system performance
+
+
+544
+00:25:25.492 --> 00:25:29.162 line:-2 align:center
+changes over the course
+of your workload.
+
+
+545
+00:25:29.196 --> 00:25:31.865 line:-2 align:center
+The encoders in the GPU tracks
+provide us with a lot
+
+
+546
+00:25:31.899 --> 00:25:35.202 line:-2 align:center
+of useful information, with even
+more just a click away.
+
+
+547
+00:25:35,235 --> 00:25:36,904 line:-2
+Selecting a Render Encoder
+brings up
+
+
+548
+00:25:36.937 --> 00:25:38.539 line:-2 align:center
+the Timeline's sidebar,
+which contains
+
+
+549
+00:25:38,572 --> 00:25:41,475 line:-2
+additional information
+for the currently-selected item.
+
+
+550
+00:25:41.508 --> 00:25:43.377 line:-2 align:center
+In this case,
+the sidebar contains
+
+
+551
+00:25:43,410 --> 00:25:46,013 line:-2
+render pass information,
+such as texture details,
+
+
+552
+00:25:46.046 --> 00:25:49.950 line:-2 align:center
+load/store actions,
+and the number of draw calls.
+
+
+553
+00:25:49.983 --> 00:25:52.286 line:-2 align:center
+Notice that since
+Render Encoders are composed
+
+
+554
+00:25:52,319 --> 00:25:54,788 line:-2
+of two shader stages,
+both the vertex
+
+
+555
+00:25:54,821 --> 00:25:57,824 line:-2
+and fragment stages are
+highlighted, as well.
+
+
+556
+00:25:57,858 --> 00:25:59,826 line:-2
+If we select the Fragment track
+instead,
+
+
+557
+00:25:59.860 --> 00:26:02.663 line:-2 align:center
+the sidebar contains all
+of the encoders in the Timeline,
+
+
+558
+00:26:02,696 --> 00:26:06,033 line:-2
+which can then be
+sorted based on time.
+
+
+559
+00:26:06.066 --> 00:26:09.469 line:-2 align:center
+But that's not all because
+we can expand the Fragment track
+
+
+560
+00:26:09.503 --> 00:26:12.606 line:-2 align:center
+to reveal the Shader Timeline,
+which shows all of the shaders
+
+
+561
+00:26:12.639 --> 00:26:15.776 line:-2 align:center
+used by the encoders
+during their execution.
+
+
+562
+00:26:15.809 --> 00:26:18.478 line:-2 align:center
+We can easily identify
+long-running shaders, as well
+
+
+563
+00:26:18.512 --> 00:26:22.216 line:-2 align:center
+as which shaders are running
+in parallel with others.
+
+
+564
+00:26:22,249 --> 00:26:24,284 line:-2
+For the Fragment track,
+we also have
+
+
+565
+00:26:24.318 --> 00:26:26.820 line:-2 align:center
+two additional tracks
+for load/store actions.
+
+
+566
+00:26:26.854 --> 00:26:29.456 line:-2 align:center
+This is useful to be able
+to see when the GPU
+
+
+567
+00:26:29.489 --> 00:26:31.792 line:-2 align:center
+is loading and storing
+attachment textures between
+
+
+568
+00:26:31,825 --> 00:26:34,027 line:-2
+local and main memory,
+and is an important
+
+
+569
+00:26:34.061 --> 00:26:38.131 line:-2 align:center
+consideration in order
+to reduce bandwidth usage.
+
+
+570
+00:26:38.165 --> 00:26:40.567 line:-2 align:center
+Selecting a shader
+will highlight all the regions
+
+
+571
+00:26:40,601 --> 00:26:42,503 line:-2
+on the timeline
+where it is active,
+
+
+572
+00:26:42,536 --> 00:26:45,639 line:-2
+and we can learn more about
+it from its compiler statistics
+
+
+573
+00:26:45.672 --> 00:26:49.309 line:-2 align:center
+and runtime performance metrics
+presented in the sidebar.
+
+
+574
+00:26:49,343 --> 00:26:52,246 line:-2
+Expanding the shader timeline
+shows each shader
+
+
+575
+00:26:52,279 --> 00:26:54,348 line:-2
+in its own track,
+which is useful
+
+
+576
+00:26:54,381 --> 00:26:56,416 line:-2
+for understanding the flow
+of your GPU workload
+
+
+577
+00:26:56.450 --> 00:27:01.221 line:-2 align:center
+and the order
+of shader execution.
+
+
+578
+00:27:01.255 --> 00:27:02.689 line:-2 align:center
+Now that you're
+a bit more familiar
+
+
+579
+00:27:02,723 --> 00:27:04,658 line:-2
+with the new GPU Timeline
+and thinking
+
+
+580
+00:27:04.691 --> 00:27:07.227 line:-2 align:center
+of all the ways that you will
+be able to use it yourself,
+
+
+581
+00:27:07,261 --> 00:27:09,563 line:-2
+let me show you
+just how how easy it is
+
+
+582
+00:27:09.596 --> 00:27:13.867 line:-2 align:center
+to find performance bottlenecks
+using the GPU Timeline.
+
+
+583
+00:27:13.901 --> 00:27:17.504 line:-2 align:center
+Shader performance can suffer
+as a result of many factors,
+
+
+584
+00:27:17,538 --> 00:27:19,673 line:-2
+one of which is
+register pressure,
+
+
+585
+00:27:19,706 --> 00:27:22,042 line:-2
+and when this happens,
+the GPU runs out
+
+
+586
+00:27:22,075 --> 00:27:26,213 line:-2
+of fast register memory and has
+to use main memory instead.
+
+
+587
+00:27:26.246 --> 00:27:29.249 line:-2 align:center
+A high ALU limiter
+alone does not indicate
+
+
+588
+00:27:29,283 --> 00:27:30,584 line:-1
+a performance bottleneck.
+
+
+589
+00:27:30,617 --> 00:27:33,120 line:-2
+It may just be
+that your shader is math heavy.
+
+
+590
+00:27:33.153 --> 00:27:37.124 line:-2 align:center
+However, when combined with low
+shader occupancy, this may be
+
+
+591
+00:27:37.157 --> 00:27:40.427 line:-2 align:center
+an indicator of a shader
+experiencing register pressure,
+
+
+592
+00:27:40.460 --> 00:27:43.430 line:-2 align:center
+which will cause
+your shader to run slower.
+
+
+593
+00:27:43.463 --> 00:27:46.099 line:-2 align:center
+In order to highlight
+this better for today's demo,
+
+
+594
+00:27:46.133 --> 00:27:50.504 line:-2 align:center
+let me pin both the ALU track
+and the shader occupancy track
+
+
+595
+00:27:50.537 --> 00:27:51.939 line:-1 align:center
+to the top of the Timeline
+
+
+596
+00:27:51,972 --> 00:27:54,942 line:-2
+by clicking the "Plus"
+button here on the left.
+
+
+597
+00:27:57,678 --> 00:28:00,981 line:-2
+As I scan over these two tracks,
+the first thing I notice
+
+
+598
+00:28:01,014 --> 00:28:03,917 line:-2
+is this region here,
+where the ALU spikes and,
+
+
+599
+00:28:03.951 --> 00:28:08.255 line:-2 align:center
+at the same time,
+shader occupancy drops.
+
+
+600
+00:28:08.288 --> 00:28:10.357 line:-2 align:center
+I can highlight a region
+on the Timeline to see
+
+
+601
+00:28:10,390 --> 00:28:12,292 line:-1
+how long it takes to execute.
+
+
+602
+00:28:12.326 --> 00:28:14.661 line:-2 align:center
+Notice as I do this,
+the counters in the sidebar
+
+
+603
+00:28:14,695 --> 00:28:17,431 line:-2
+update dynamically based
+on the selected region.
+
+
+604
+00:28:17,464 --> 00:28:21,535 line:-2
+This region here is taking about
+3.7 milliseconds to execute.
+
+
+605
+00:28:21,568 --> 00:28:25,138 line:-2
+Let's zoom in
+and take a closer look.
+
+
+606
+00:28:25.172 --> 00:28:27.074 line:-2 align:center
+It looks like our issue
+is related
+
+
+607
+00:28:27,107 --> 00:28:30,677 line:-2
+to these first four encoders
+of the Ambient Occlusion pass.
+
+
+608
+00:28:30,711 --> 00:28:32,379 line:-2
+Let's see
+what shaders are being used
+
+
+609
+00:28:32,412 --> 00:28:36,350 line:-2
+by taking a look
+at the shader timeline.
+
+
+610
+00:28:36.383 --> 00:28:38.785 line:-2 align:center
+Looks like our issue
+is related to this shader here,
+
+
+611
+00:28:38.819 --> 00:28:41.388 line:-1 align:center
+as it's the only one being used.
+
+
+612
+00:28:41.421 --> 00:28:44.658 line:-2 align:center
+From the sidebar's runtime
+performance metrics, not only is
+
+
+613
+00:28:44,691 --> 00:28:47,594 line:-2
+this shader ALU intensive,
+it is float heavy, as well,
+
+
+614
+00:28:47,628 --> 00:28:48,629 line:-1
+so let's take a look
+
+
+615
+00:28:48,662 --> 00:28:52,065 line:-2
+at the Floating
+Point Utilization track.
+
+
+616
+00:28:52.099 --> 00:28:54.134 line:-2 align:center
+Notice as I hover
+over this track,
+
+
+617
+00:28:54.168 --> 00:28:56.637 line:-1 align:center
+this shader is only using F32.
+
+
+618
+00:28:56.670 --> 00:28:59.573 line:-1 align:center
+F16 is at 0%.
+
+
+619
+00:28:59,606 --> 00:29:01,742 line:-2
+From the Timeline,
+we can navigate directly
+
+
+620
+00:29:01,775 --> 00:29:06,146 line:-2
+to shader source by right
+clicking and opening the shader.
+
+
+621
+00:29:06.180 --> 00:29:09.183 line:-2 align:center
+Here in the source editor,
+we can see a simplified version
+
+
+622
+00:29:09,216 --> 00:29:12,186 line:-2
+of the shader source
+for demo purposes.
+
+
+623
+00:29:12.219 --> 00:29:15.155 line:-2 align:center
+Along with source, we can also
+see per-line cost information
+
+
+624
+00:29:15.189 --> 00:29:18.425 line:-2 align:center
+with the help
+of the shader profiler.
+
+
+625
+00:29:18,458 --> 00:29:21,929 line:-2
+Hovering over the shader
+profiler pie chart provides us
+
+
+626
+00:29:21,962 --> 00:29:23,797 line:-2
+with confirmation
+that this function is
+
+
+627
+00:29:23.830 --> 00:29:25.432 line:-2 align:center
+likely causing
+register pressure,
+
+
+628
+00:29:25,465 --> 00:29:28,936 line:-2
+as it is both ALU
+and float heavy.
+
+
+629
+00:29:28,969 --> 00:29:32,039 line:-2
+Situations like this are
+candidates for using F16,
+
+
+630
+00:29:32.072 --> 00:29:34.808 line:-2 align:center
+which gives us double the amount
+of registers in places
+
+
+631
+00:29:34,842 --> 00:29:37,945 line:-2
+where the full precision
+of F32 is not required,
+
+
+632
+00:29:37.978 --> 00:29:41.048 line:-2 align:center
+which will help
+to reduce register pressure.
+
+
+633
+00:29:41,081 --> 00:29:42,916 line:-2
+Metal Debugger makes it
+really convenient
+
+
+634
+00:29:42,950 --> 00:29:46,253 line:-2
+to update source code directly
+inside the source editor.
+
+
+635
+00:29:46,286 --> 00:29:49,289 line:-2
+Let me make this change here
+that uses an updated version
+
+
+636
+00:29:49.323 --> 00:29:54.361 line:-2 align:center
+of the shader that uses
+a mixture of F32 and F16.
+
+
+637
+00:29:54,394 --> 00:29:57,064 line:-2
+After making this change,
+I can click the "Reload Shaders"
+
+
+638
+00:29:57,097 --> 00:30:00,100 line:-2
+button down here at the bottom,
+which will trigger
+
+
+639
+00:30:00,133 --> 00:30:03,337 line:-2
+a shader update that both
+recompiles and reprofiles
+
+
+640
+00:30:03,370 --> 00:30:07,975 line:-2
+our shader, as well as updating
+the per-line shader costs.
+
+
+641
+00:30:08,008 --> 00:30:09,643 line:-2
+Let's see what effect
+this change has made
+
+
+642
+00:30:09,676 --> 00:30:12,813 line:-1
+by going back to the Timeline.
+
+
+643
+00:30:12.846 --> 00:30:14.281 line:-2 align:center
+The first thing I'd like
+to do is see
+
+
+644
+00:30:14.314 --> 00:30:15.782 line:-2 align:center
+how long
+those first four encoders
+
+
+645
+00:30:15.816 --> 00:30:18.719 line:-2 align:center
+of the Ambient Occlusion pass
+are taking.
+
+
+646
+00:30:20.854 --> 00:30:24.191 line:-2 align:center
+Looks like this region here
+is taking about 2.6 milliseconds
+
+
+647
+00:30:24,224 --> 00:30:25,559 line:-1
+to execute.
+
+
+648
+00:30:25.592 --> 00:30:27.394 line:-2 align:center
+The change we just made
+has improved
+
+
+649
+00:30:27,427 --> 00:30:28,729 line:-1
+our shader execution time
+
+
+650
+00:30:28,762 --> 00:30:34,134 line:-2
+by over one millisecond, or 30%,
+which is a huge improvement.
+
+
+651
+00:30:34,168 --> 00:30:36,803 line:-2
+Taking a look at some
+of the counters from earlier,
+
+
+652
+00:30:36.837 --> 00:30:38.572 line:-1 align:center
+while ALU is still high,
+
+
+653
+00:30:38.605 --> 00:30:41.375 line:-2 align:center
+that is to be expected
+for a math-heavy shader.
+
+
+654
+00:30:41.408 --> 00:30:43.544 line:-2 align:center
+But notice now,
+our shader is experiencing
+
+
+655
+00:30:43.577 --> 00:30:46.146 line:-2 align:center
+less register pressure,
+as our shader occupancy
+
+
+656
+00:30:46.180 --> 00:30:48.448 line:-1 align:center
+has improved by almost double.
+
+
+657
+00:30:48.482 --> 00:30:52.553 line:-2 align:center
+This was accomplished by using
+a mixture of F32 and F16,
+
+
+658
+00:30:52,586 --> 00:30:53,887 line:-1
+which we can see using
+
+
+659
+00:30:53.921 --> 00:30:56.823 line:-2 align:center
+the Floating Point Utilization
+track.
+
+
+660
+00:30:56.857 --> 00:30:59.793 line:-2 align:center
+The GPU Timeline made
+it really easy for me
+
+
+661
+00:30:59.826 --> 00:31:02.129 line:-2 align:center
+to identify the issue,
+navigate to where
+
+
+662
+00:31:02,162 --> 00:31:04,865 line:-2
+the problem existed,
+and get it fixed.
+
+
+663
+00:31:04,898 --> 00:31:07,301 line:-1
+The GPU Timeline is a great tool
+
+
+664
+00:31:07.334 --> 00:31:10.003 line:-2 align:center
+for identifying not only
+shader performance issues,
+
+
+665
+00:31:10,037 --> 00:31:13,807 line:-2
+but also memory bandwidth
+and many other kinds of issues.
+
+
+666
+00:31:13.841 --> 00:31:17.511 line:-2 align:center
+I hope you enjoyed this demo
+of the brand-new GPU Timeline
+
+
+667
+00:31:17.544 --> 00:31:19.780 line:-2 align:center
+and are already thinking
+of all the ways
+
+
+668
+00:31:19,813 --> 00:31:21,815 line:-2
+that you're going to use it
+to optimize your games
+
+
+669
+00:31:21,849 --> 00:31:24,618 line:-2
+to run even better
+on Apple GPUs.
+
+
+670
+00:31:24.651 --> 00:31:27.454 line:-2 align:center
+Thank you,
+and enjoy the rest of WWDC.
+
+
+671
+00:31:27.487 --> 00:31:28.922 line:-1 align:center
+Back to Jonathan.
+
+
+672
+00:31:28.956 --> 00:31:31.558 line:-2 align:center
+[Jonathan] Thank you, Dustin,
+for that amazing demo.
+
+
+673
+00:31:31.592 --> 00:31:33.160 line:-1 align:center
+And thank you for watching.
+
+
+674
+00:31:33.193 --> 00:31:35.295 line:-2 align:center
+It was great to share
+with you how we worked
+
+
+675
+00:31:35,329 --> 00:31:37,931 line:-2
+with Larian Studios and 4A Games
+to take advantage
+
+
+676
+00:31:37.965 --> 00:31:40.133 line:-2 align:center
+of the features
+on our Apple GPUs.
+
+
+677
+00:31:40.167 --> 00:31:42.970 line:-2 align:center
+They provide many ways
+to improve performance, ranging
+
+
+678
+00:31:43.003 --> 00:31:46.073 line:-2 align:center
+from lossless compression
+to overlapping shader workloads.
+
+
+679
+00:31:46,106 --> 00:31:48,208 line:-2
+And our tools,
+like Metal System Trace
+
+
+680
+00:31:48,242 --> 00:31:50,344 line:-2
+and the new GPU timeline
+in Xcode,
+
+
+681
+00:31:50,377 --> 00:31:53,413 line:-2
+will really be helpful to you
+as you improve your games.
+
+
+682
+00:31:53.447 --> 00:31:56.783 line:-2 align:center
+If there's one thing I can leave
+you with, a thorough examination
+
+
+683
+00:31:56.817 --> 00:32:00.120 line:-2 align:center
+of your rendering is essential
+to delivering a highly-optimized
+
+
+684
+00:32:00.153 --> 00:32:03.023 line:-2 align:center
+game, and our tools are there
+to help you with this.
+
+
+685
+00:32:03.056 --> 00:32:04.591 line:-1 align:center
+If you'd like to learn more,
+
+
+686
+00:32:04.625 --> 00:32:06.693 line:-2 align:center
+please refer
+to the related sessions,
+
+
+687
+00:32:06.727 --> 00:32:09.062 line:-2 align:center
+"Discover Metal debugging,
+profiling,
+
+
+688
+00:32:09.096 --> 00:32:12.533 line:-2 align:center
+and asset creation tools"
+in this year's WWDC,
+
+
+689
+00:32:12,566 --> 00:32:16,170 line:-2
+or "Optimize Metal apps
+and games with GPU counters"
+
+
+690
+00:32:16.203 --> 00:32:17.938 line:-1 align:center
+from WWDC20.
+
+
+691
+00:32:17.971 --> 00:32:20.140 line:-1 align:center
+Thank you, and farewell!
+
+
+692
+00:32:20.174 --> 00:32:22.242 line:-1 align:center
+[music]
+

@@ -1,0 +1,985 @@
+2
+00:00:00.000 --> 00:00:02.069 line:-1 position:50%
+[MAC STARTUP CHIME]
+
+
+3
+00:00:02.069 --> 00:00:05.672 line:-1 position:50%
+♪ Bass music playing ♪
+
+
+4
+00:00:05,672 --> 00:00:07,875 line:-1
+[KEYSTROKES]
+
+
+5
+00:00:07,875 --> 00:00:09,877 position:89% line:0 size:2%
+♪
+
+
+6
+00:00:09,877 --> 00:00:13,280 line:-1
+Graham Seyffert: Hello
+and welcome to WWDC 2021.
+
+
+7
+00:00:13,280 --> 00:00:16,884 line:-1
+My name is Graham Seyffert,
+and I’m a MusicKit engineer.
+
+
+8
+00:00:16,884 --> 00:00:18,352 line:-1
+Over the past few years,
+
+
+9
+00:00:18.352 --> 00:00:20.087 line:-1 position:50%
+we’ve enhanced the ability
+of developers
+
+
+10
+00:00:20.087 --> 00:00:24.625 line:-1 position:50%
+to fetch new, enriched data
+from the Apple Music catalog.
+
+
+11
+00:00:24.625 --> 00:00:26.426 line:-1 position:50%
+Today we’re excited
+to introduce
+
+
+12
+00:00:26.426 --> 00:00:28.195 line:-1 position:50%
+some of those
+improvements to you.
+
+
+13
+00:00:28.195 --> 00:00:31.064 line:-1 position:50%
+In this presentation,
+we’ll be going over enhancements
+
+
+14
+00:00:31.064 --> 00:00:33.467 line:-1 position:50%
+to the search functionality
+in the API,
+
+
+15
+00:00:33.467 --> 00:00:36.270 line:-1 position:50%
+as well as new ways
+to request data
+
+
+16
+00:00:36.270 --> 00:00:40.307 line:-1 position:50%
+by relating resources,
+extending attributes,
+
+
+17
+00:00:40.307 --> 00:00:42.442 line:-1 position:50%
+and requesting
+relationship views
+
+
+18
+00:00:42,442 --> 00:00:45,112 line:-1
+for resources in your responses.
+
+
+19
+00:00:45,112 --> 00:00:49,383 line:-1
+Finally, we’ll go over some new
+enhancements to the Charts API.
+
+
+20
+00:00:49.383 --> 00:00:51.785 line:-1 position:50%
+Before going over some
+of the search enhancements,
+
+
+21
+00:00:51,785 --> 00:00:56,356 line:-1
+I’d like to quickly recap the
+current /search/hints endpoint.
+
+
+22
+00:00:56,356 --> 00:00:58,258 line:-1
+You might already use
+this endpoint today
+
+
+23
+00:00:58.258 --> 00:01:01.361 line:-1 position:50%
+to fetch a list
+of suggested search terms.
+
+
+24
+00:01:01,361 --> 00:01:04,464 line:-1
+As an example, here’s some
+results you might get back
+
+
+25
+00:01:04.464 --> 00:01:07.567 line:-1 position:50%
+for the search term “taylor”.
+
+
+26
+00:01:07,567 --> 00:01:11,872 line:-1
+Today, we’re introducing the
+/search/suggestions endpoint
+
+
+27
+00:01:11,872 --> 00:01:14,508 line:-1
+which replaces
+the /search/hints endpoint.
+
+
+28
+00:01:14,508 --> 00:01:17,044 line:-1
+This endpoint provides access
+to the same terms
+
+
+29
+00:01:17.044 --> 00:01:18.979 line:-1 position:50%
+as the /search/hints endpoint,
+
+
+30
+00:01:18,979 --> 00:01:23,183 line:-1
+and you can continue to fetch
+these by specifying kinds=terms
+
+
+31
+00:01:23.183 --> 00:01:24.518 line:-1 position:50%
+on your request.
+
+
+32
+00:01:24,518 --> 00:01:27,421 line:-1
+However, you can see that
+the response from this endpoint
+
+
+33
+00:01:27,421 --> 00:01:29,022 line:-1
+is a bit different.
+
+
+34
+00:01:29.022 --> 00:01:32.125 line:-1 position:50%
+suggested results
+now indicate their kind,
+
+
+35
+00:01:32.125 --> 00:01:35.495 line:-1 position:50%
+which will match one of the
+kinds specified on the request.
+
+
+36
+00:01:35,495 --> 00:01:37,965 line:-1
+It also differentiates the term
+that should be used
+
+
+37
+00:01:37.965 --> 00:01:39.166 line:-1 position:50%
+for the search query
+
+
+38
+00:01:39.166 --> 00:01:42.336 line:-1 position:50%
+from the term that should be
+displayed to the user.
+
+
+39
+00:01:42,336 --> 00:01:45,973 line:-1
+More importantly, this endpoint
+now also allows access
+
+
+40
+00:01:45.973 --> 00:01:48.976 line:-1 position:50%
+to the top suggested
+search results --
+
+
+41
+00:01:48,976 --> 00:01:51,211 line:-1
+ideal for powering
+typeahead results.
+
+
+42
+00:01:51,211 --> 00:01:55,115 line:-1
+These may be requested
+by specifying kinds=topResults
+
+
+43
+00:01:55,115 --> 00:01:56,483 line:-1
+on the request,
+
+
+44
+00:01:56.483 --> 00:01:57.818 line:-1 position:50%
+as well as some resource types
+
+
+45
+00:01:57,818 --> 00:02:00,520 line:-1
+that you’re interested in
+fetching results for.
+
+
+46
+00:02:00,520 --> 00:02:02,389 line:-1
+Resources for topResults kinds
+
+
+47
+00:02:02.389 --> 00:02:05.058 line:-1 position:50%
+can be found
+under the content key.
+
+
+48
+00:02:05.058 --> 00:02:06.693 line:-1 position:50%
+It’s worth noting
+that the results
+
+
+49
+00:02:06,693 --> 00:02:09,863 line:-1
+you’ll get from this endpoint
+might be noticeably different
+
+
+50
+00:02:09,863 --> 00:02:12,666 line:-1
+from the results you’d get
+from a regular search,
+
+
+51
+00:02:12.666 --> 00:02:16.603 line:-1 position:50%
+as this response prioritizes
+speed over breadth.
+
+
+52
+00:02:16,603 --> 00:02:19,406 line:-1
+As such, this is not intended
+to be a replacement
+
+
+53
+00:02:19,406 --> 00:02:21,475 line:-1
+for the regular
+/search endpoint,
+
+
+54
+00:02:21.475 --> 00:02:23.844 line:-1 position:50%
+but rather a complement to it.
+
+
+55
+00:02:23,844 --> 00:02:26,446 line:-1
+Before going into
+how to modify resources,
+
+
+56
+00:02:26,446 --> 00:02:29,216 line:-1
+I’d like to reintroduce
+what a resource is
+
+
+57
+00:02:29,216 --> 00:02:31,585 line:-1
+for those
+that may not be familiar.
+
+
+58
+00:02:31,585 --> 00:02:35,322 line:-1
+All resources have what we call
+a “resource identifier,”
+
+
+59
+00:02:35.322 --> 00:02:38.225 line:-1 position:50%
+which is the minimal amount
+of information you’d need
+
+
+60
+00:02:38,225 --> 00:02:41,161 line:-1
+in order to look a resource up
+in the API.
+
+
+61
+00:02:41,161 --> 00:02:44,498 line:-1
+Resource identifiers will
+include a resource’s ID,
+
+
+62
+00:02:44,498 --> 00:02:47,234 line:-1
+its type, and its href.
+
+
+63
+00:02:47,234 --> 00:02:49,336 line:-1
+The complete representation
+of a resource
+
+
+64
+00:02:49.336 --> 00:02:52.072 line:-1 position:50%
+will also include
+that resource’s attributes,
+
+
+65
+00:02:52.072 --> 00:02:55.409 line:-1 position:50%
+such as its name,
+and potentially relationships
+
+
+66
+00:02:55,409 --> 00:02:58,645 line:-1
+if they’ve been requested
+using the include parameter.
+
+
+67
+00:02:58,645 --> 00:03:01,915 line:-1
+Relationships are collections
+of related resources,
+
+
+68
+00:03:01.915 --> 00:03:05.819 line:-1 position:50%
+such as a song’s genres
+or a playlist’s tracks.
+
+
+69
+00:03:05,819 --> 00:03:06,920 line:-1
+With that,
+
+
+70
+00:03:06.920 --> 00:03:11.091 line:-1 position:50%
+I’d like to now introduce the
+concept of relating resources.
+
+
+71
+00:03:11.091 --> 00:03:13.460 line:-1 position:50%
+Relationships requested
+with relate
+
+
+72
+00:03:13.460 --> 00:03:16.596 line:-1 position:50%
+are different from relationships
+requested with include
+
+
+73
+00:03:16.596 --> 00:03:18.098 line:-1 position:50%
+in that they only return
+
+
+74
+00:03:18.098 --> 00:03:20.534 line:-1 position:50%
+the aforementioned
+Resource Identifiers
+
+
+75
+00:03:20.534 --> 00:03:23.503 line:-1 position:50%
+for the resources
+in that relationship.
+
+
+76
+00:03:23,503 --> 00:03:25,472 line:-1
+This means that relating
+a relationship
+
+
+77
+00:03:25.472 --> 00:03:27.841 line:-1 position:50%
+results in a faster response
+
+
+78
+00:03:27,841 --> 00:03:31,545 line:-1
+if all you need access to
+is a resource's reference.
+
+
+79
+00:03:31,545 --> 00:03:35,882 line:-1
+You can relate a relationship by
+using the relate query parameter
+
+
+80
+00:03:35.882 --> 00:03:38.685 line:-1 position:50%
+and classifying it with the
+resource type you’re targeting,
+
+
+81
+00:03:38,685 --> 00:03:40,854 line:-1
+followed by a list
+of relationship names
+
+
+82
+00:03:40.854 --> 00:03:43.056 line:-1 position:50%
+you’re interested
+in getting back.
+
+
+83
+00:03:43,056 --> 00:03:46,293 line:0
+For example, on the
+/search /suggestions endpoint,
+
+
+84
+00:03:46,293 --> 00:03:49,563 line:0
+you may decide that when a user
+selects a song result
+
+
+85
+00:03:49,563 --> 00:03:53,033 line:0
+that you want to pop out
+to the album page for that song.
+
+
+86
+00:03:53,033 --> 00:03:56,703 position:50%
+In this case, all you need is
+the href for that song’s album
+
+
+87
+00:03:56,703 --> 00:03:58,505 position:50%
+in order to navigate there,
+
+
+88
+00:03:58,505 --> 00:04:02,409 line:0
+so we can specify
+relate[songs]=albums
+
+
+89
+00:04:02,409 --> 00:04:04,144 position:50%
+in order to get that data.
+
+
+90
+00:04:04,144 --> 00:04:06,847 line:-1
+After doing that, we can see
+that song results
+
+
+91
+00:04:06.847 --> 00:04:10.250 line:-1 position:50%
+in our response now
+include the resource identifiers
+
+
+92
+00:04:10,250 --> 00:04:12,352 line:-1
+for their respective albums.
+
+
+93
+00:04:12.352 --> 00:04:15.856 line:-1 position:50%
+So relate is great to use when
+we want to quickly reference
+
+
+94
+00:04:15.856 --> 00:04:17.724 line:-1 position:50%
+additional related content,
+
+
+95
+00:04:17.724 --> 00:04:20.393 line:-1 position:50%
+but what if we want to learn
+more about the resources
+
+
+96
+00:04:20,393 --> 00:04:22,829 line:-1
+we’re already getting back
+in our responses?
+
+
+97
+00:04:22.829 --> 00:04:24.531 line:-1 position:50%
+As mentioned previously,
+
+
+98
+00:04:24,531 --> 00:04:28,034 line:-1
+every resource today has
+a default set of attributes --
+
+
+99
+00:04:28.034 --> 00:04:31.037 line:-1 position:50%
+things like its name,
+its artwork, et cetera.
+
+
+100
+00:04:31.037 --> 00:04:34.975 line:-1 position:50%
+But resources may also
+have extended attributes.
+
+
+101
+00:04:34.975 --> 00:04:38.011 line:-1 position:50%
+Extended attributes are either
+more expensive to calculate
+
+
+102
+00:04:38.011 --> 00:04:40.013 line:-1 position:50%
+or are less frequently needed,
+
+
+103
+00:04:40.013 --> 00:04:41.915 line:-1 position:50%
+such that including them
+by default
+
+
+104
+00:04:41.915 --> 00:04:44.751 line:-1 position:50%
+might either slow down
+responses noticeably
+
+
+105
+00:04:44,751 --> 00:04:47,053 line:-1
+or bloat the object model.
+
+
+106
+00:04:47,053 --> 00:04:50,557 line:-1
+Similar to what we just saw
+with the relate query param,
+
+
+107
+00:04:50.557 --> 00:04:53.226 line:-1 position:50%
+you can request extended
+attributes on resources
+
+
+108
+00:04:53.226 --> 00:04:55.495 line:-1 position:50%
+by using the extend query param,
+
+
+109
+00:04:55.495 --> 00:04:57.631 line:-1 position:50%
+classifying it
+with a resource type,
+
+
+110
+00:04:57,631 --> 00:04:59,533 line:-1
+and following it
+with a list of attribute names
+
+
+111
+00:04:59,533 --> 00:05:01,301 line:-1
+that you’re interested in.
+
+
+112
+00:05:01,301 --> 00:05:03,537 line:0
+Building on our /suggestions
+request,
+
+
+113
+00:05:03,537 --> 00:05:05,572 position:50%
+we might decide that,
+for song results,
+
+
+114
+00:05:05,572 --> 00:05:07,707 position:50%
+we also want to allow users
+the ability
+
+
+115
+00:05:07,707 --> 00:05:11,244 position:50%
+to link out to that artist’s
+page on Apple Music.
+
+
+116
+00:05:11,244 --> 00:05:12,512 line:0
+In order to do this,
+
+
+117
+00:05:12,512 --> 00:05:16,516 line:0
+you could simply append
+extend[songs]=artistUrl
+
+
+118
+00:05:16,516 --> 00:05:17,851 position:50%
+to your request.
+
+
+119
+00:05:17,851 --> 00:05:19,586 line:-1
+Indeed, after doing this,
+
+
+120
+00:05:19.586 --> 00:05:22.556 line:-1 position:50%
+we can see the songs resources
+in our responses
+
+
+121
+00:05:22.556 --> 00:05:25.792 line:-1 position:50%
+now include
+the artistUrl attribute.
+
+
+122
+00:05:25.792 --> 00:05:30.163 line:-1 position:50%
+Now I’d like to introduce the
+concept of relationship views.
+
+
+123
+00:05:30,163 --> 00:05:31,665 line:-1
+Compared to relationships,
+
+
+124
+00:05:31.665 --> 00:05:34.501 line:-1 position:50%
+views are more loosely coupled
+to their resource.
+
+
+125
+00:05:34.501 --> 00:05:37.137 line:-1 position:50%
+They don’t necessarily represent
+some ground truth
+
+
+126
+00:05:37.137 --> 00:05:40.240 line:-1 position:50%
+about a resource
+like relationships do.
+
+
+127
+00:05:40,240 --> 00:05:42,275 line:-1
+This makes views ideally suited
+
+
+128
+00:05:42,275 --> 00:05:44,711 line:-1
+for driving product page
+experiences,
+
+
+129
+00:05:44,711 --> 00:05:46,913 line:-1
+such as an album page.
+
+
+130
+00:05:46,913 --> 00:05:50,217 line:-1
+Compare this to relationships
+which may be useful to use on,
+
+
+131
+00:05:50.217 --> 00:05:53.220 line:-1 position:50%
+for instance,
+search result pages.
+
+
+132
+00:05:53.220 --> 00:05:57.057 line:-1 position:50%
+Additionally, views may have
+attributes -- like a title --
+
+
+133
+00:05:57.057 --> 00:05:58.291 line:-1 position:50%
+as well as data.
+
+
+134
+00:05:58,291 --> 00:06:01,728 line:-1
+Views are also only requestable
+on direct resource fetches.
+
+
+135
+00:06:01.728 --> 00:06:03.430 line:-1 position:50%
+This means that there
+are two different ways
+
+
+136
+00:06:03,430 --> 00:06:04,898 line:-1
+you can fetch them.
+
+
+137
+00:06:04.898 --> 00:06:06.933 line:-1 position:50%
+You can either use
+the views query parameter
+
+
+138
+00:06:06.933 --> 00:06:08.568 line:-1 position:50%
+and specify a list,
+
+
+139
+00:06:08,568 --> 00:06:12,606 line:-1
+or a single one
+via /view/{viewName}
+
+
+140
+00:06:12.606 --> 00:06:16.042 line:-1 position:50%
+right after the resource’s ID
+in the request path.
+
+
+141
+00:06:16,042 --> 00:06:18,144 line:-1
+In this response,
+we have an example
+
+
+142
+00:06:18.144 --> 00:06:21.248 line:-1 position:50%
+of what it might look like
+to include the Top Songs view
+
+
+143
+00:06:21.248 --> 00:06:23.250 line:-1 position:50%
+on an artist resource.
+
+
+144
+00:06:23,250 --> 00:06:26,186 line:-1
+Other examples include
+Top Music Videos
+
+
+145
+00:06:26.186 --> 00:06:28.154 line:-1 position:50%
+or an artist’s singles.
+
+
+146
+00:06:28.154 --> 00:06:31.091 line:-1 position:50%
+The full list of supported views
+for a given resource type
+
+
+147
+00:06:31,091 --> 00:06:32,292 line:-1
+can of course be found
+
+
+148
+00:06:32,292 --> 00:06:35,829 line:-1
+in the official Apple Music API
+documentation.
+
+
+149
+00:06:35.829 --> 00:06:39.899 line:-1 position:50%
+Finally, let’s take a look at
+the updates to the Charts API.
+
+
+150
+00:06:39.899 --> 00:06:44.004 line:-1 position:50%
+Today, Apple Music supports
+chart playlists for the world,
+
+
+151
+00:06:44.004 --> 00:06:47.741 line:-1 position:50%
+storefronts, and more recently,
+specific cities.
+
+
+152
+00:06:47,741 --> 00:06:50,877 line:-1
+Users can add these chart
+playlists to their libraries,
+
+
+153
+00:06:50,877 --> 00:06:52,846 line:-1
+which will update automatically.
+
+
+154
+00:06:52.846 --> 00:06:55.682 line:-1 position:50%
+You can now fetch these directly
+from the /charts endpoint
+
+
+155
+00:06:55.682 --> 00:06:58.685 line:-1 position:50%
+by specifying types=playlists
+
+
+156
+00:06:58.685 --> 00:07:00.887 line:-1 position:50%
+and using the "with"
+query parameter
+
+
+157
+00:07:00.887 --> 00:07:03.123 line:-1 position:50%
+to indicate
+which sets you’d like --
+
+
+158
+00:07:03.123 --> 00:07:07.494 line:-1 position:50%
+either dailyGlobalTopCharts
+or cityCharts, or both.
+
+
+159
+00:07:07,494 --> 00:07:09,763 line:-1
+And here we have an example
+of how a chart’s response
+
+
+160
+00:07:09,763 --> 00:07:12,832 line:-1
+with those query parameters
+might look.
+
+
+161
+00:07:12.832 --> 00:07:15.835 line:-1 position:50%
+So in summary,
+today we went over enhancements
+
+
+162
+00:07:15.835 --> 00:07:18.505 line:-1 position:50%
+to the search
+and charts endpoints,
+
+
+163
+00:07:18,505 --> 00:07:21,141 line:-1
+and looked at new ways
+to fetch data for resources
+
+
+164
+00:07:21,141 --> 00:07:23,143 line:-1
+in our responses.
+
+
+165
+00:07:23,143 --> 00:07:26,079 position:50%
+If you’d like to learn more
+about the Apple Music API,
+
+
+166
+00:07:26,079 --> 00:07:28,181 position:50%
+I’d highly suggest
+this year’s session
+
+
+167
+00:07:28,181 --> 00:07:32,452 line:0
+on how to Cross reference
+content on the Apple Music API,
+
+
+168
+00:07:32,452 --> 00:07:35,989 position:50%
+or 2017’s Introducing MusicKit
+presentation,
+
+
+169
+00:07:35,989 --> 00:07:38,692 position:50%
+which goes over some
+of the API’s core concepts
+
+
+170
+00:07:38,692 --> 00:07:40,527 line:0
+in even greater detail.
+
+
+171
+00:07:40.527 --> 00:07:41.961 line:-1 position:50%
+Thanks so much for watching,
+
+
+172
+00:07:41,961 --> 00:07:44,698 line:-1
+and we hope you enjoy
+this year’s WWDC.
+
+
+173
+00:07:44,698 --> 00:07:46,700 line:0 position:89% size:2%
+♪
+

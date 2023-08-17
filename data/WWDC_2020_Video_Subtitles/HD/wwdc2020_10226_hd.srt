@@ -1,0 +1,1061 @@
+1
+00:00:03,904 --> 00:00:07,341 line:-1
+Hello and welcome to WWDC.
+
+
+2
+00:00:08,442 --> 00:00:12,179 line:0
+Hi. I'm Peter Raffensperger, and I'm
+gonna tell you how you can record stereo
+
+
+3
+00:00:12,246 --> 00:00:14,081 line:0
+from the built-in microphones.
+
+
+4
+00:00:14,147 --> 00:00:17,651 line:0
+AVAudioSession is how your app
+communicates to the system
+
+
+5
+00:00:17,718 --> 00:00:20,087 line:0
+how you intend to use audio in your app,
+
+
+6
+00:00:20,153 --> 00:00:22,856 line:0
+including configuration
+for audio recording.
+
+
+7
+00:00:22,923 --> 00:00:26,126 line:0
+New in iOS 14 and iPadOS 14
+
+
+8
+00:00:26,193 --> 00:00:28,362 line:0
+is the option to record stereo audio
+
+
+9
+00:00:28,428 --> 00:00:30,664 line:0
+from the built-in microphones
+on supported hardware.
+
+
+10
+00:00:30,731 --> 00:00:31,832 line:-1
+That's right,
+
+
+11
+00:00:31,899 --> 00:00:34,401 line:-2
+you asked for stereo recording,
+and now you can have it.
+
+
+12
+00:00:35,002 --> 00:00:39,139 line:-2
+The benefit of stereo is that you can tell
+what direction a sound comes from.
+
+
+13
+00:00:39,206 --> 00:00:41,441 line:-1
+Let's say I'm recording with your app.
+
+
+14
+00:00:41,508 --> 00:00:43,810 line:-1
+My listeners could be my friends,
+
+
+15
+00:00:43,877 --> 00:00:46,146 line:-1
+family or fans,
+
+
+16
+00:00:46,213 --> 00:00:48,949 line:-1
+and stereo lets me bring them closer
+
+
+17
+00:00:49,016 --> 00:00:52,186 line:-1
+to my expression, my art and my life.
+
+
+18
+00:00:52,252 --> 00:00:54,955 line:-2
+So we recommend that you write your app
+to take advantage
+
+
+19
+00:00:55,022 --> 00:00:57,791 line:-2
+of the option to record stereo
+whenever possible
+
+
+20
+00:00:57,858 --> 00:01:01,528 line:-2
+so that you get the most immersive
+audio recording experience.
+
+
+21
+00:01:02,396 --> 00:01:06,366 line:-2
+In this talk, I'll explain how you
+can adopt this new API feature
+
+
+22
+00:01:06,433 --> 00:01:08,936 line:-2
+and also how to address
+the new special consideration
+
+
+23
+00:01:09,002 --> 00:01:12,673 line:-2
+for stereo recording
+that we call "inputOrientation."
+
+
+24
+00:01:12,739 --> 00:01:15,108 line:-2
+But first,
+we need to go back to the basics
+
+
+25
+00:01:15,175 --> 00:01:18,645 line:-2
+of AVAudioSession's microphone
+and beam selection.
+
+
+26
+00:01:19,313 --> 00:01:21,915 line:0
+Many Apple devices
+have multiple microphones,
+
+
+27
+00:01:21,982 --> 00:01:24,685 line:0
+and our fantastic acoustics design team
+works hard
+
+
+28
+00:01:24,751 --> 00:01:27,855 line:-2
+to optimize the microphone arrays
+on each product.
+
+
+29
+00:01:27,921 --> 00:01:31,859 line:-2
+AVAudioSession lets you choose
+which of those device microphones
+
+
+30
+00:01:31,925 --> 00:01:33,727 line:-1
+you want to record from.
+
+
+31
+00:01:33,794 --> 00:01:35,362 line:-1
+Actually, in the API,
+
+
+32
+00:01:35,429 --> 00:01:39,199 line:-2
+we say that you can choose different
+data sources, not different mics,
+
+
+33
+00:01:39,266 --> 00:01:41,101 line:-1
+because you can choose a polar pattern
+
+
+34
+00:01:41,168 --> 00:01:43,470 line:-2
+that gets you
+a kind of virtualized microphone.
+
+
+35
+00:01:43,537 --> 00:01:46,907 line:-2
+So, say you select
+that upper front data source.
+
+
+36
+00:01:46,974 --> 00:01:49,409 line:-2
+You can either get
+that individual microphone
+
+
+37
+00:01:49,476 --> 00:01:51,545 line:-1
+by selecting the omni polar pattern,
+
+
+38
+00:01:51,612 --> 00:01:54,214 line:-2
+or you can choose
+to get a cardioid beamformer.
+
+
+39
+00:01:54,281 --> 00:01:56,383 line:-2
+Let's have a closer look
+at how this works.
+
+
+40
+00:01:56,450 --> 00:02:00,587 line:-2
+When you record from the upper front data
+source with the cardioid beam pattern,
+
+
+41
+00:02:00,654 --> 00:02:04,391 line:-2
+actually you're using both of those
+upper microphones and in tandem
+
+
+42
+00:02:04,458 --> 00:02:06,660 line:-1
+to get a better directional response.
+
+
+43
+00:02:06,727 --> 00:02:09,295 line:-2
+So that when a sound wave arrives
+from the front
+
+
+44
+00:02:09,363 --> 00:02:12,633 line:-2
+and arrives at that front microphone
+before it arrives at the back microphone,
+
+
+45
+00:02:12,699 --> 00:02:16,537 line:-2
+we can make that sound wave louder
+than if it comes from the other direction.
+
+
+46
+00:02:16,603 --> 00:02:18,672 line:-1
+So we get a kind of pattern like this--
+
+
+47
+00:02:18,739 --> 00:02:22,643 line:-2
+it's louder in the forward direction,
+quieter in the back.
+
+
+48
+00:02:22,709 --> 00:02:26,246 line:-2
+Okay, so if we swap the roles
+of those two microphones around,
+
+
+49
+00:02:26,313 --> 00:02:29,283 line:-1
+we can get upper back subcardioid,
+
+
+50
+00:02:29,349 --> 00:02:32,452 line:-2
+and that lets us listen more
+in the other direction.
+
+
+51
+00:02:32,519 --> 00:02:34,154 line:-1
+It's not quite the same shape,
+
+
+52
+00:02:34,221 --> 00:02:36,890 line:-2
+because we don't want to null out
+the user if they talk.
+
+
+53
+00:02:36,957 --> 00:02:37,958 line:-1
+This is great.
+
+
+54
+00:02:38,025 --> 00:02:40,494 line:-2
+We can focus audio
+in particular directions.
+
+
+55
+00:02:41,261 --> 00:02:43,197 line:0
+But it's mono.
+
+
+56
+00:02:43,263 --> 00:02:44,598 line:0
+To get stereo,
+
+
+57
+00:02:44,665 --> 00:02:48,335 line:-2
+we actually record from
+all the device microphones simultaneously.
+
+
+58
+00:02:48,402 --> 00:02:50,737 line:-1
+And we apply a special modeling process
+
+
+59
+00:02:50,804 --> 00:02:53,907 line:-2
+that results
+in a binaural stereo experience.
+
+
+60
+00:02:53,974 --> 00:02:57,144 line:-2
+And we apply some special processing
+to that front direction
+
+
+61
+00:02:57,211 --> 00:02:59,613 line:-2
+to make it a little bit louder
+than the back direction,
+
+
+62
+00:02:59,680 --> 00:03:01,949 line:-1
+similar to how a cardioid beam works.
+
+
+63
+00:03:02,549 --> 00:03:04,218 line:-1
+The result is this.
+
+
+64
+00:03:04,284 --> 00:03:07,254 line:-1
+Left and right are in distinct directions,
+
+
+65
+00:03:07,321 --> 00:03:11,692 line:-2
+and the forward direction is in
+the look direction of that back camera.
+
+
+66
+00:03:11,758 --> 00:03:15,195 line:-2
+So you're gonna choose this data source
+if you want to get stereo audio
+
+
+67
+00:03:15,262 --> 00:03:18,432 line:-2
+with your recording made
+on the back camera.
+
+
+68
+00:03:18,498 --> 00:03:22,402 line:-2
+Similar to cardioid and subcardioid,
+if we want to look in the other direction,
+
+
+69
+00:03:22,469 --> 00:03:24,505 line:-1
+we can choose upper front stereo.
+
+
+70
+00:03:24,571 --> 00:03:28,075 line:-2
+Notice that left and right
+are now in the opposite direction.
+
+
+71
+00:03:28,141 --> 00:03:32,212 line:-2
+Left is now the edge of the device
+with the lock button.
+
+
+72
+00:03:32,279 --> 00:03:35,749 line:-2
+And right is the edge of the device
+with the volume buttons.
+
+
+73
+00:03:35,816 --> 00:03:38,151 line:-1
+So you're gonna choose this data source
+
+
+74
+00:03:38,218 --> 00:03:41,154 line:-2
+to go with videos you've made
+on the front camera.
+
+
+75
+00:03:41,221 --> 00:03:47,694 line:-2
+However, users can hold the device
+in many different possible orientations.
+
+
+76
+00:03:47,761 --> 00:03:50,364 line:-2
+And we can't do the same thing
+in landscape
+
+
+77
+00:03:50,430 --> 00:03:51,932 line:-1
+as we did in portrait
+
+
+78
+00:03:51,999 --> 00:03:55,769 line:-2
+because if we did,
+then left and right would be up and down.
+
+
+79
+00:03:55,836 --> 00:03:59,840 line:-2
+So we're gonna actually repeat
+this modeling process once
+
+
+80
+00:03:59,907 --> 00:04:03,076 line:-2
+for each different way
+the user can hold the phone.
+
+
+81
+00:04:03,143 --> 00:04:05,979 line:-2
+And you have to tell the system
+which of those you want.
+
+
+82
+00:04:06,046 --> 00:04:11,251 line:-2
+And that brings us to the new property,
+inputOrientation for AVAudioSession.
+
+
+83
+00:04:11,318 --> 00:04:13,987 line:-1
+Now, there are four possible values here--
+
+
+84
+00:04:14,054 --> 00:04:15,989 line:-1
+portrait, portrait upside-down,
+
+
+85
+00:04:16,055 --> 00:04:18,158 line:-1
+landscape left and landscape right.
+
+
+86
+00:04:18,225 --> 00:04:20,494 line:-1
+And there are two different data sources.
+
+
+87
+00:04:20,560 --> 00:04:23,430 line:-2
+So there are a total
+of eight distinct cases,
+
+
+88
+00:04:23,497 --> 00:04:27,000 line:-2
+each with a unique combination
+of that forward beam direction
+
+
+89
+00:04:27,067 --> 00:04:29,336 line:-1
+and left and right directions
+
+
+90
+00:04:29,403 --> 00:04:31,505 line:-1
+relative to the edges of the device.
+
+
+91
+00:04:32,039 --> 00:04:34,508 line:-2
+Here's the first four
+of those eight possibilities.
+
+
+92
+00:04:34,575 --> 00:04:37,110 line:-2
+First, you're gonna choose
+which direction is forward
+
+
+93
+00:04:37,177 --> 00:04:39,947 line:-2
+based on your selection
+of the data source.
+
+
+94
+00:04:40,013 --> 00:04:42,382 line:-1
+And then, left and right are determined
+
+
+95
+00:04:42,449 --> 00:04:45,319 line:-1
+by the new inputOrientation property.
+
+
+96
+00:04:45,385 --> 00:04:46,887 line:-1
+Okay, here's the second four.
+
+
+97
+00:04:46,954 --> 00:04:49,089 line:-1
+You need to design your app logic
+
+
+98
+00:04:49,156 --> 00:04:52,326 line:-2
+to select that stereo input orientation
+and data source
+
+
+99
+00:04:52,392 --> 00:04:56,096 line:-2
+so that these directions match
+what your users are expecting.
+
+
+100
+00:04:56,163 --> 00:04:59,132 line:-2
+Now, you'll only need to do this
+for stereo polar patterns
+
+
+101
+00:04:59,199 --> 00:05:03,136 line:-2
+because for mono,
+the input orientation makes no difference.
+
+
+102
+00:05:03,203 --> 00:05:06,173 line:-2
+There are a lot of options here,
+so let me help you out.
+
+
+103
+00:05:06,240 --> 00:05:10,110 line:-2
+If your app records video,
+then select the input orientation
+
+
+104
+00:05:10,177 --> 00:05:14,414 line:-2
+that makes left and right in the audio
+match left and right in the video.
+
+
+105
+00:05:14,481 --> 00:05:18,585 line:-2
+Refer to the documentation for details
+on how to match the input orientation,
+
+
+106
+00:05:18,652 --> 00:05:21,154 line:-1
+camera direction and video rotation.
+
+
+107
+00:05:21,221 --> 00:05:24,825 line:-2
+If your app doesn't record video,
+then we think it makes the most sense
+
+
+108
+00:05:24,892 --> 00:05:28,896 line:-2
+to match your stereo input orientation
+to your UI orientation
+
+
+109
+00:05:28,962 --> 00:05:32,266 line:-2
+because that's how users
+are expecting the device to be.
+
+
+110
+00:05:32,332 --> 00:05:34,935 line:-2
+The other thing is,
+when you're recording to a file,
+
+
+111
+00:05:35,002 --> 00:05:37,070 line:-1
+especially if it's a video file,
+
+
+112
+00:05:37,137 --> 00:05:39,273 line:-2
+then you should keep
+that orientation fixed
+
+
+113
+00:05:39,339 --> 00:05:41,508 line:-1
+for the entire duration of the recording.
+
+
+114
+00:05:41,575 --> 00:05:46,113 line:-2
+That ensures there are no strange changes
+in the directions during your recording.
+
+
+115
+00:05:46,914 --> 00:05:49,216 line:-2
+Ultimately, though,
+the number one principle is
+
+
+116
+00:05:49,283 --> 00:05:51,518 line:-2
+that you should anticipate
+the expectations
+
+
+117
+00:05:51,585 --> 00:05:54,721 line:-2
+of the end listener
+of your users' recordings.
+
+
+118
+00:05:54,788 --> 00:05:57,624 line:-1
+And one size doesn't fit all here.
+
+
+119
+00:05:57,691 --> 00:06:00,794 line:-2
+You've gotta figure out the logic
+that's right for your app.
+
+
+120
+00:06:01,528 --> 00:06:03,864 line:-1
+Here's a bunch of principles,
+
+
+121
+00:06:03,931 --> 00:06:07,901 line:-2
+and they all lead to getting audio
+in the correct directions.
+
+
+122
+00:06:07,968 --> 00:06:09,937 line:-1
+The main idea is
+
+
+123
+00:06:10,003 --> 00:06:12,773 line:-1
+that the app audio directions
+
+
+124
+00:06:12,840 --> 00:06:16,944 line:-2
+are related to the edges of the device
+and the microphone placements.
+
+
+125
+00:06:17,010 --> 00:06:19,847 line:-2
+And we need to know
+how that relationship works.
+
+
+126
+00:06:19,913 --> 00:06:22,482 line:-2
+First, you're gonna choose
+that forward direction
+
+
+127
+00:06:22,549 --> 00:06:25,052 line:-1
+with the data source selection,
+
+
+128
+00:06:25,118 --> 00:06:28,989 line:-2
+and then you're gonna figure out
+which way left and right are
+
+
+129
+00:06:29,056 --> 00:06:33,393 line:-2
+based on the data source
+and that input orientation in combination.
+
+
+130
+00:06:33,460 --> 00:06:37,931 line:-2
+The other thing is that we recommend
+you test your app comprehensively here.
+
+
+131
+00:06:37,998 --> 00:06:41,335 line:-2
+So, record a sound coming from the left
+and then a sound coming from the right,
+
+
+132
+00:06:41,401 --> 00:06:42,469 line:-1
+and listen back.
+
+
+133
+00:06:42,536 --> 00:06:45,339 line:-1
+Make sure that is how you expect it to be.
+
+
+134
+00:06:45,405 --> 00:06:49,376 line:-2
+Then repeat that test for each orientation
+and data source selection
+
+
+135
+00:06:49,443 --> 00:06:50,711 line:-1
+that you intend to use.
+
+
+136
+00:06:50,777 --> 00:06:53,847 line:-1
+Okay, so that's the basic principles.
+
+
+137
+00:06:53,914 --> 00:06:56,517 line:-2
+Let's have a look
+at how this appears in code.
+
+
+138
+00:06:56,950 --> 00:06:58,886 line:-1
+Here's some code from a sample project.
+
+
+139
+00:06:58,952 --> 00:07:01,154 line:-2
+You can look
+at the sample project on line.
+
+
+140
+00:07:01,221 --> 00:07:04,424 line:-2
+The first thing we need to do is record
+from the built-in microphone.
+
+
+141
+00:07:04,491 --> 00:07:06,994 line:-1
+So this is all existing use of the API.
+
+
+142
+00:07:07,060 --> 00:07:09,730 line:-2
+First we're gonna find
+that built-in mic port.
+
+
+143
+00:07:09,796 --> 00:07:13,200 line:-2
+And then we're gonna set that
+as our preferred input port.
+
+
+144
+00:07:14,101 --> 00:07:15,602 line:-1
+Okay, here's the new stuff.
+
+
+145
+00:07:15,669 --> 00:07:18,739 line:-2
+First, we're gonna choose
+that stereo polar pattern.
+
+
+146
+00:07:18,805 --> 00:07:23,443 line:-2
+You'll see this new pattern on devices
+that support stereo recording.
+
+
+147
+00:07:23,510 --> 00:07:27,581 line:-2
+But you need to be ready for the case
+when the device doesn't support stereo.
+
+
+148
+00:07:27,648 --> 00:07:29,716 line:-1
+So, size your buffers dynamically.
+
+
+149
+00:07:29,783 --> 00:07:32,853 line:-2
+The right way to do that is,
+activate your audio session
+
+
+150
+00:07:32,920 --> 00:07:35,455 line:-2
+and check
+that input channel count property.
+
+
+151
+00:07:36,290 --> 00:07:38,559 line:-2
+Then we're gonna choose
+what data source we want.
+
+
+152
+00:07:38,625 --> 00:07:41,028 line:-2
+Remember,
+there's two options for stereo here--
+
+
+153
+00:07:41,094 --> 00:07:42,796 line:-1
+one for the front, one for the back.
+
+
+154
+00:07:42,863 --> 00:07:47,367 line:-2
+You're gonna choose the direction that
+focuses audio where you want it to go.
+
+
+155
+00:07:48,135 --> 00:07:51,672 line:-2
+And here's the call
+to the new inputOrientation property.
+
+
+156
+00:07:51,738 --> 00:07:54,741 line:-2
+You'll notice that
+it's the PreferredInputOrientation.
+
+
+157
+00:07:54,808 --> 00:07:58,946 line:-2
+And that's because if there's some other app
+that happens to be in control of routing,
+
+
+158
+00:07:59,012 --> 00:08:00,981 line:-1
+you might not get what you prefer here.
+
+
+159
+00:08:01,048 --> 00:08:03,083 line:-1
+To get the best chance at your preference,
+
+
+160
+00:08:03,150 --> 00:08:06,053 line:-2
+choose a non-mixable option
+when you set up your session.
+
+
+161
+00:08:06,119 --> 00:08:09,456 line:-2
+Okay, so I talked about what values
+that you should set.
+
+
+162
+00:08:09,523 --> 00:08:11,458 line:-1
+Now I'm gonna expand a little bit about
+
+
+163
+00:08:11,525 --> 00:08:14,294 line:-2
+when you should set the data source
+and inputOrientation.
+
+
+164
+00:08:14,361 --> 00:08:17,197 line:-2
+If your app records video,
+then you should set the inputOrientation
+
+
+165
+00:08:17,264 --> 00:08:18,832 line:-1
+before you start recording video.
+
+
+166
+00:08:19,499 --> 00:08:22,669 line:-2
+But the sample app doesn't record video,
+and your app might not,
+
+
+167
+00:08:22,736 --> 00:08:25,305 line:-2
+so we're gonna listen
+to when the UI is rotated.
+
+
+168
+00:08:26,640 --> 00:08:29,943 line:-2
+You might also have your focus direction
+based on user input,
+
+
+169
+00:08:30,010 --> 00:08:33,447 line:-2
+for example, derived from
+the camera that your user selected.
+
+
+170
+00:08:33,514 --> 00:08:35,716 line:-1
+In the sample app, it's a little picker,
+
+
+171
+00:08:35,782 --> 00:08:37,951 line:-1
+so that's what gets called here.
+
+
+172
+00:08:38,018 --> 00:08:41,020 line:-2
+The other thing I mentioned before
+is if you're recording,
+
+
+173
+00:08:41,087 --> 00:08:42,890 line:-1
+then now is probably not the time
+
+
+174
+00:08:42,956 --> 00:08:46,426 line:-2
+to be changing that inputOrientation
+or the dataSource selection.
+
+
+175
+00:08:47,127 --> 00:08:50,898 line:-2
+So, here we're just gonna call
+the function from the previous slide
+
+
+176
+00:08:50,964 --> 00:08:52,966 line:-1
+with the chosen data source
+
+
+177
+00:08:53,033 --> 00:08:55,736 line:-1
+and the orientation of the window.
+
+
+178
+00:08:55,802 --> 00:08:58,705 line:-2
+All right. At this point,
+you're ready to record stereo
+
+
+179
+00:08:58,772 --> 00:09:00,874 line:-1
+using any of our audio APIs,
+
+
+180
+00:09:00,941 --> 00:09:03,844 line:-1
+like AVAudioRecorder or AVAudioEngine.
+
+
+181
+00:09:03,911 --> 00:09:06,380 line:-1
+Take your time to study that sample app.
+
+
+182
+00:09:06,446 --> 00:09:08,582 line:-1
+See how it applies in your use case.
+
+
+183
+00:09:08,649 --> 00:09:10,551 line:-1
+So what can we take away from all this?
+
+
+184
+00:09:10,617 --> 00:09:12,886 line:-1
+The main thing is, record in stereo.
+
+
+185
+00:09:12,953 --> 00:09:15,422 line:-2
+That'll get you
+the most immersive experience.
+
+
+186
+00:09:16,223 --> 00:09:19,326 line:-2
+Choose that data source to match
+where you want to focus audio.
+
+
+187
+00:09:19,393 --> 00:09:21,828 line:-1
+And then set your inputOrientation
+
+
+188
+00:09:21,895 --> 00:09:26,400 line:-2
+so that the sounds come from directions
+that match the user's expectations.
+
+
+189
+00:09:26,466 --> 00:09:29,603 line:-2
+And that's recording stereo
+from the built-in mic.
+

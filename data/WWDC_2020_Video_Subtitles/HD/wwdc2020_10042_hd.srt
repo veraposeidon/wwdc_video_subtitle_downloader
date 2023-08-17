@@ -1,0 +1,1141 @@
+1
+00:00:03,670 --> 00:00:06,607 line:-1
+Hello, and welcome to WWDC.
+
+
+2
+00:00:07,474 --> 00:00:12,679 line:0
+Hello, everyone. My name is Tanu Singhal,
+and I'm an engineer on the tvOS team.
+
+
+3
+00:00:13,514 --> 00:00:18,118 line:-2
+Today, we'll talk about
+building SwiftUI apps for Apple TV.
+
+
+4
+00:00:19,019 --> 00:00:23,557 line:-2
+We'll introduce new APIs,
+we'll discuss best practices,
+
+
+5
+00:00:23,991 --> 00:00:28,729 line:-2
+and we'll go over some examples
+that'll help you create experiences
+
+
+6
+00:00:28,795 --> 00:00:31,798 line:-1
+that look and feel familiar to TV users.
+
+
+7
+00:00:32,665 --> 00:00:39,306 line:-2
+First, we'll discuss button styles
+and context menus that are new on tvOS 14.
+
+
+8
+00:00:41,341 --> 00:00:45,212 line:-2
+Next, we'll talk about
+managing focus in our apps.
+
+
+9
+00:00:46,813 --> 00:00:49,883 line:-1
+And finally, we'll learn to create layouts
+
+
+10
+00:00:49,950 --> 00:00:53,253 line:-2
+that look good
+on the largest screen in the home.
+
+
+11
+00:00:53,320 --> 00:00:56,256 line:-2
+There are some button styles
+that are unique to TV.
+
+
+12
+00:00:57,024 --> 00:00:58,892 line:-1
+Let's look at an example.
+
+
+13
+00:00:59,193 --> 00:01:03,063 line:-2
+Say we're building an app
+for streaming music on Apple TV.
+
+
+14
+00:01:04,230 --> 00:01:07,234 line:-2
+Here's a mock-up that we received
+from our design team.
+
+
+15
+00:01:08,368 --> 00:01:10,871 line:-1
+They'd like us to create these buttons
+
+
+16
+00:01:10,938 --> 00:01:14,908 line:-2
+that have a movement effect
+when we drag on the Siri Remote,
+
+
+17
+00:01:15,442 --> 00:01:17,945 line:-2
+just like the one you see
+under "Albums" here.
+
+
+18
+00:01:19,279 --> 00:01:24,718 line:-2
+To create such buttons in SwiftUI,
+we can use the new Card-Button-Style.
+
+
+19
+00:01:26,253 --> 00:01:28,822 line:-1
+A Card-Button creates a platter
+
+
+20
+00:01:28,889 --> 00:01:32,326 line:-2
+that raises and looks highlighted
+when it's focused.
+
+
+21
+00:01:33,160 --> 00:01:36,263 line:-2
+It also adds
+directional movement to the button
+
+
+22
+00:01:36,330 --> 00:01:38,532 line:-1
+when you drag on the Siri Remote.
+
+
+23
+00:01:40,067 --> 00:01:42,002 line:-1
+To create a Card-Button,
+
+
+24
+00:01:42,069 --> 00:01:46,273 line:-2
+you simply add the button style modifier
+to any button,
+
+
+25
+00:01:46,340 --> 00:01:48,542 line:-1
+and set it to Card-Button-Style.
+
+
+26
+00:01:50,410 --> 00:01:54,615 line:-2
+Card-Button-Styles can really
+enhance the appearance of your buttons.
+
+
+27
+00:01:55,549 --> 00:01:58,085 line:-1
+However, there might be times
+
+
+28
+00:01:58,151 --> 00:02:01,955 line:-2
+when you don't want
+the default highlighting and focus effects
+
+
+29
+00:02:02,022 --> 00:02:05,125 line:-2
+that we offer
+with the preexisting button styles.
+
+
+30
+00:02:06,093 --> 00:02:09,128 line:-2
+In such a case,
+you can create your own button style.
+
+
+31
+00:02:09,930 --> 00:02:13,967 line:-2
+This adds no existing effects
+for pressing and focused states.
+
+
+32
+00:02:14,801 --> 00:02:19,506 line:-2
+And a custom button style
+is really easy to configure and customize.
+
+
+33
+00:02:20,741 --> 00:02:22,843 line:-1
+To create your own button style,
+
+
+34
+00:02:23,510 --> 00:02:26,313 line:0
+you first conform
+to the Button-Style protocol...
+
+
+35
+00:02:27,748 --> 00:02:30,083 line:0
+then in the makeBody method,
+
+
+36
+00:02:30,150 --> 00:02:34,054 line:0
+you can leverage the configuration
+to return any view.
+
+
+37
+00:02:36,023 --> 00:02:38,225 line:0
+Once the button style is set up,
+
+
+38
+00:02:38,292 --> 00:02:43,130 line:0
+it can be added to any button
+using the button style modifier.
+
+
+39
+00:02:43,530 --> 00:02:46,233 line:-1
+Now we've set up the buttons in our app,
+
+
+40
+00:02:46,300 --> 00:02:48,735 line:-2
+but we've received
+another feature request.
+
+
+41
+00:02:49,570 --> 00:02:55,142 line:-2
+When we long-press on an album button,
+we want to present some quick actions,
+
+
+42
+00:02:55,209 --> 00:02:56,844 line:-1
+like the ones you see here.
+
+
+43
+00:02:58,212 --> 00:03:03,083 line:-2
+These can be created easily in SwiftUI
+using context menus.
+
+
+44
+00:03:04,017 --> 00:03:07,354 line:-2
+Context menus can be added
+to any button or view
+
+
+45
+00:03:07,888 --> 00:03:10,791 line:-2
+and they're invoked
+after the long-press gesture.
+
+
+46
+00:03:11,925 --> 00:03:16,563 line:-2
+We can add actions to the context menu
+using regular buttons.
+
+
+47
+00:03:18,432 --> 00:03:21,969 line:-2
+Here's some code showing
+how you can create a context menu.
+
+
+48
+00:03:22,803 --> 00:03:26,006 line:-1
+We simply add the context menu modifier,
+
+
+49
+00:03:26,073 --> 00:03:29,243 line:-2
+and then we can add
+some buttons within it.
+
+
+50
+00:03:30,110 --> 00:03:35,382 line:-2
+As you've seen, it's really easy to use
+the new button styles and context menus.
+
+
+51
+00:03:36,049 --> 00:03:38,285 line:-2
+We think these will look great
+in your apps.
+
+
+52
+00:03:39,386 --> 00:03:41,822 line:-1
+Next, we'll discuss focus.
+
+
+53
+00:03:42,523 --> 00:03:46,560 line:-2
+Focus is the primary way
+to interact with a TV app.
+
+
+54
+00:03:47,294 --> 00:03:51,198 line:-2
+And it's incredibly important
+to be able to focus on views,
+
+
+55
+00:03:51,265 --> 00:03:54,067 line:-1
+as well as determine if a view is focused.
+
+
+56
+00:03:55,202 --> 00:04:00,541 line:-2
+To learn more about focus, let's look at
+another example from our music app.
+
+
+57
+00:04:02,075 --> 00:04:04,211 line:0
+Here we have the "Now Playing" screen.
+
+
+58
+00:04:05,379 --> 00:04:08,916 line:0
+We want to focus
+on the currently playing song.
+
+
+59
+00:04:09,750 --> 00:04:11,652 line:0
+And for this focused song,
+
+
+60
+00:04:11,718 --> 00:04:14,721 line:0
+we would like to display
+the name of the artist,
+
+
+61
+00:04:14,788 --> 00:04:19,091 line:0
+as well as the name of the album,
+along with some music emoji.
+
+
+62
+00:04:20,360 --> 00:04:22,796 line:0
+For the songs that are not focused,
+
+
+63
+00:04:22,863 --> 00:04:27,034 line:0
+we simply display the name of the artist
+without the name of the album.
+
+
+64
+00:04:28,669 --> 00:04:33,607 line:0
+To implement this, first, we need to
+be able to focus on the Song-View.
+
+
+65
+00:04:34,308 --> 00:04:38,478 line:-2
+One way to do this
+is by using the focusable modifier.
+
+
+66
+00:04:38,912 --> 00:04:44,852 line:-2
+The focusable modifier creates a focusable
+wrapper on top of your existing view.
+
+
+67
+00:04:46,053 --> 00:04:51,158 line:-2
+Note that this modifier is not meant
+for intrinsically focusable views.
+
+
+68
+00:04:51,525 --> 00:04:53,694 line:-1
+So, if you have a button or list,
+
+
+69
+00:04:54,161 --> 00:04:58,098 line:-2
+or a UIKit view
+that manages focus in UIKit,
+
+
+70
+00:04:58,498 --> 00:05:01,668 line:-2
+then it's best to not have
+a focusable modifier on that,
+
+
+71
+00:05:02,069 --> 00:05:05,439 line:-2
+because this modifier will add
+another focusable wrapper
+
+
+72
+00:05:05,506 --> 00:05:07,374 line:-1
+on top of your existing view.
+
+
+73
+00:05:07,975 --> 00:05:13,180 line:-2
+To manage the focused
+and non-focused state, in tvOS 13,
+
+
+74
+00:05:13,247 --> 00:05:17,618 line:-2
+you would have to use the onFocusChange
+callback for the focusable modifier.
+
+
+75
+00:05:19,786 --> 00:05:26,126 line:-2
+However, new in tvOS 14, we're introducing
+the isFocused environment variable.
+
+
+76
+00:05:27,694 --> 00:05:31,265 line:-2
+This lets you check
+whether or not a view is in focus,
+
+
+77
+00:05:31,965 --> 00:05:34,768 line:-1
+even if the view itself is not focusable.
+
+
+78
+00:05:35,936 --> 00:05:39,506 line:-2
+The isFocused environment variable
+will return true
+
+
+79
+00:05:39,573 --> 00:05:43,944 line:-2
+if the nearest focusable ancestor
+of your view is focused.
+
+
+80
+00:05:45,479 --> 00:05:49,349 line:-2
+So now, we'll look at the code
+for the Song-View that we saw before.
+
+
+81
+00:05:50,551 --> 00:05:54,521 line:-2
+This just has an image
+followed by some text labels.
+
+
+82
+00:05:55,856 --> 00:05:59,593 line:-2
+We've refactored the text labels
+into a Details-View.
+
+
+83
+00:06:01,261 --> 00:06:07,134 line:-2
+Within the Details-View, we can simply use
+the environment variable for isFocused
+
+
+84
+00:06:07,668 --> 00:06:10,871 line:-2
+to check whether or not
+this view is focused.
+
+
+85
+00:06:12,039 --> 00:06:16,944 line:-2
+So if the Song-View that's the parent
+of the Details-View is focused,
+
+
+86
+00:06:17,010 --> 00:06:19,279 line:-2
+then our isFocused variable
+would be true.
+
+
+87
+00:06:21,381 --> 00:06:23,784 line:-1
+We'll use this isFocused variable
+
+
+88
+00:06:23,851 --> 00:06:28,655 line:-2
+to display either the artist
+and the album name, along with the emojis,
+
+
+89
+00:06:28,722 --> 00:06:32,459 line:-2
+or simply the artist name
+when the view is not focused.
+
+
+90
+00:06:33,694 --> 00:06:37,931 line:-2
+Notice, in our Song-View,
+we are using a button
+
+
+91
+00:06:37,998 --> 00:06:41,468 line:-2
+so we don't need to use
+the focusable modifier at all,
+
+
+92
+00:06:41,535 --> 00:06:43,937 line:-1
+because the button is focusable already.
+
+
+93
+00:06:45,072 --> 00:06:47,941 line:-1
+Using a button also has the advantage
+
+
+94
+00:06:48,008 --> 00:06:51,345 line:-2
+of giving us
+selection and accessibility for free.
+
+
+95
+00:06:52,813 --> 00:06:56,717 line:-2
+We've added the button style
+that's our own button style,
+
+
+96
+00:06:56,783 --> 00:07:00,854 line:-2
+because we didn't want
+the default highlighting and focus effect
+
+
+97
+00:07:00,921 --> 00:07:03,090 line:-1
+offered by the existing button styles.
+
+
+98
+00:07:04,791 --> 00:07:07,661 line:-2
+Now, at this point,
+our app is mostly set up,
+
+
+99
+00:07:07,728 --> 00:07:09,997 line:-1
+and it's ready to start streaming music.
+
+
+100
+00:07:11,365 --> 00:07:15,369 line:-2
+But, we also want to add
+a paid version of this app,
+
+
+101
+00:07:15,435 --> 00:07:18,205 line:-1
+so users can listen to premium content.
+
+
+102
+00:07:19,339 --> 00:07:24,011 line:-2
+To create this paid version,
+we are first setting up a sign in screen.
+
+
+103
+00:07:25,179 --> 00:07:28,949 line:-2
+This screen simply has
+a username and password field
+
+
+104
+00:07:29,016 --> 00:07:31,018 line:-1
+followed by a log in button.
+
+
+105
+00:07:31,718 --> 00:07:35,556 line:-2
+Notice that the username field
+is what's focused by default.
+
+
+106
+00:07:35,889 --> 00:07:41,395 line:-2
+tvOS will geometrically compute
+the view that should be focused on load.
+
+
+107
+00:07:41,862 --> 00:07:46,366 line:-2
+This is typically the topmost
+or leading focusable view on the screen.
+
+
+108
+00:07:47,401 --> 00:07:50,804 line:-2
+In this case, it makes sense
+for the username to be focused.
+
+
+109
+00:07:51,805 --> 00:07:57,110 line:-2
+However, there are times when
+we already know the username and password,
+
+
+110
+00:07:57,177 --> 00:08:00,614 line:-2
+and we want to focus
+on the log in button instead.
+
+
+111
+00:08:01,849 --> 00:08:07,754 line:-2
+To implement this in SwiftUI,
+we can use the new default focus APIs.
+
+
+112
+00:08:09,056 --> 00:08:13,060 line:-2
+We're introducing
+the prefersDefaultFocus modifier
+
+
+113
+00:08:13,126 --> 00:08:18,432 line:-2
+that allows you to specify the view
+that prefers to be focused by default.
+
+
+114
+00:08:18,999 --> 00:08:22,803 line:-2
+Now, we want to make sure
+that you don't accidentally change focus
+
+
+115
+00:08:22,870 --> 00:08:25,305 line:-1
+for an entire global view hierarchy
+
+
+116
+00:08:25,372 --> 00:08:28,008 line:-2
+when you're only working
+on a small custom view.
+
+
+117
+00:08:28,542 --> 00:08:33,113 line:-2
+To support this, we have created
+the focus-Scope modifier,
+
+
+118
+00:08:33,179 --> 00:08:38,719 line:-2
+which allows you to limit default focus
+preferences just to a specific view.
+
+
+119
+00:08:39,385 --> 00:08:42,389 line:-2
+We'll look at the code
+for the log in screen that we saw.
+
+
+120
+00:08:43,123 --> 00:08:44,892 line:-1
+This is simply a VStack
+
+
+121
+00:08:44,958 --> 00:08:47,861 line:-2
+with a TextField, a Secure-Field
+and a button.
+
+
+122
+00:08:48,462 --> 00:08:51,265 line:-2
+Now I'll add some focus management code
+to this.
+
+
+123
+00:08:52,399 --> 00:08:54,535 line:-2
+Don't worry about reading
+all of it at once.
+
+
+124
+00:08:54,601 --> 00:08:56,403 line:-1
+We'll go over it line by line.
+
+
+125
+00:08:57,404 --> 00:09:01,875 line:-2
+We have a state variable to figure out
+if the credentials are filled.
+
+
+126
+00:09:02,676 --> 00:09:08,682 line:-2
+Now, we add the prefersDefaultFocus
+modifier to the username TextField,
+
+
+127
+00:09:08,749 --> 00:09:11,218 line:-1
+and the first parameter of this modifier
+
+
+128
+00:09:11,285 --> 00:09:16,056 line:-2
+is a Boolean that should be true
+if this view prefers default focus.
+
+
+129
+00:09:16,123 --> 00:09:21,461 line:-2
+In this case, the username prefers default
+focus when the credentials are not filled.
+
+
+130
+00:09:22,429 --> 00:09:26,133 line:-2
+We'll also add the same modifier
+to the log in button,
+
+
+131
+00:09:26,200 --> 00:09:30,504 line:-2
+but this prefers default focus
+when the credentials are filled.
+
+
+132
+00:09:31,505 --> 00:09:35,242 line:-2
+Next, we want to limit
+our focus preferences
+
+
+133
+00:09:35,309 --> 00:09:37,678 line:-1
+just to the VStack that we're working on.
+
+
+134
+00:09:38,545 --> 00:09:41,081 line:-1
+To do this, we create a namespace.
+
+
+135
+00:09:42,015 --> 00:09:44,751 line:-1
+The namespace is a dynamic property
+
+
+136
+00:09:44,818 --> 00:09:50,390 line:-2
+that provides us with a unique ID
+which can be used to identify any view.
+
+
+137
+00:09:51,525 --> 00:09:55,462 line:-2
+We'll add this namespace
+to the focus-Scope modifier
+
+
+138
+00:09:55,529 --> 00:09:57,497 line:-1
+that we've added to our VStack.
+
+
+139
+00:09:58,799 --> 00:10:02,069 line:-1
+Next, we'll pass the same namespace
+
+
+140
+00:10:02,135 --> 00:10:05,906 line:-2
+to the prefersDefaultFocus modifiers
+as the second parameter.
+
+
+141
+00:10:06,607 --> 00:10:10,110 line:-2
+By doing this, we have set up
+our default focus preferences
+
+
+142
+00:10:10,177 --> 00:10:13,680 line:-2
+in a way
+that they apply only to this VStack.
+
+
+143
+00:10:13,747 --> 00:10:17,050 line:-2
+So if focus was meant to be
+within the VStack,
+
+
+144
+00:10:17,117 --> 00:10:20,921 line:-2
+then our username or log in button
+would be focused
+
+
+145
+00:10:20,988 --> 00:10:24,191 line:-2
+depending on whether or not
+the credentials are filled.
+
+
+146
+00:10:25,058 --> 00:10:29,796 line:-2
+However, if focus was supposed to be
+somewhere else in the view hierarchy,
+
+
+147
+00:10:29,863 --> 00:10:33,367 line:-2
+then our modifiers
+will not impact global focus,
+
+
+148
+00:10:33,433 --> 00:10:35,035 line:-1
+which is what we want.
+
+
+149
+00:10:35,936 --> 00:10:41,575 line:-2
+In addition to setting default focus,
+we also need to reset focus sometimes.
+
+
+150
+00:10:42,342 --> 00:10:46,547 line:-2
+This can be done using
+the new reset-Focus environment action.
+
+
+151
+00:10:47,314 --> 00:10:51,385 line:-2
+This environment action
+resets focus back to default
+
+
+152
+00:10:51,451 --> 00:10:56,490 line:-2
+and, again, the focus updates stay scoped
+to the namespace that you provide.
+
+
+153
+00:10:57,257 --> 00:11:00,294 line:-2
+So, in the sign in screen example
+that we saw earlier,
+
+
+154
+00:11:00,861 --> 00:11:03,997 line:-2
+let's say we also want to add
+a clear button,
+
+
+155
+00:11:04,064 --> 00:11:09,236 line:-2
+which clears the username and password
+and resets focus back to the username.
+
+
+156
+00:11:09,837 --> 00:11:14,541 line:-2
+To implement that, we'll use
+the reset-Focus environment action.
+
+
+157
+00:11:15,542 --> 00:11:18,111 line:0
+Then, when the clear button is triggered,
+
+
+158
+00:11:18,178 --> 00:11:23,617 line:0
+we call reset-Focus for the same namespace
+that we had in our focus-Scope.
+
+
+159
+00:11:24,885 --> 00:11:27,821 line:0
+Since the credentials
+have been cleared at this point,
+
+
+160
+00:11:27,888 --> 00:11:31,225 line:0
+our focus will get reset
+back to the username.
+
+
+161
+00:11:31,625 --> 00:11:35,963 line:-2
+In this section, we learned about
+the isFocus environment variable,
+
+
+162
+00:11:36,029 --> 00:11:39,466 line:-2
+as well as the new modifiers
+and environment actions
+
+
+163
+00:11:39,533 --> 00:11:42,202 line:-1
+that can be used to control default focus.
+
+
+164
+00:11:42,870 --> 00:11:47,107 line:-2
+We think you'll find these really useful
+as you create your SwiftUI apps.
+
+
+165
+00:11:48,242 --> 00:11:53,413 line:-2
+Finally, we'll learn to build layouts
+that are commonly seen on Apple TV.
+
+
+166
+00:11:53,847 --> 00:11:57,951 line:0
+Here's a view that we saw earlier
+from the music streaming app.
+
+
+167
+00:11:58,919 --> 00:12:03,323 line:0
+You may have seen similar layouts
+across various Apple TV apps.
+
+
+168
+00:12:04,625 --> 00:12:07,861 line:0
+This is made up of shelves
+that scroll horizontally.
+
+
+169
+00:12:08,996 --> 00:12:13,567 line:-2
+To implement this screen,
+we can use the new Lazy Grids.
+
+
+170
+00:12:14,902 --> 00:12:18,605 line:-2
+Lazy Grids arrange child views
+in a grid container
+
+
+171
+00:12:18,672 --> 00:12:21,241 line:-1
+that scrolls vertically or horizontally.
+
+
+172
+00:12:22,543 --> 00:12:28,315 line:-2
+The grid items can specify properties
+such as size, alignment, and spacing,
+
+
+173
+00:12:28,382 --> 00:12:30,250 line:-1
+that help with building the layout.
+
+
+174
+00:12:30,951 --> 00:12:36,223 line:0
+To learn more about grids, you can
+check out the following two sessions:
+
+
+175
+00:12:36,290 --> 00:12:37,858 line:0
+In this session, though,
+
+
+176
+00:12:37,925 --> 00:12:42,429 line:0
+we'll learn to leverage a Lazy Grid
+to build the layout that we just saw.
+
+
+177
+00:12:43,463 --> 00:12:48,635 line:-2
+In our Shelf-View, we have created
+a Scroll-View that scrolls horizontally.
+
+
+178
+00:12:49,770 --> 00:12:54,308 line:-2
+Within the horizontal Scroll-View,
+we have added a Lazy-H-Grid.
+
+
+179
+00:12:55,442 --> 00:12:59,279 line:-2
+Now, we can add a lot of items
+to this Lazy-H-Grid,
+
+
+180
+00:12:59,346 --> 00:13:01,782 line:-2
+and they won't all get initialized
+at once.
+
+
+181
+00:13:02,516 --> 00:13:06,053 line:-2
+They'll get loaded as and when
+they're needed, while we scroll.
+
+
+182
+00:13:08,021 --> 00:13:11,692 line:-2
+For the Lazy Grid,
+we also set up Grid-Items.
+
+
+183
+00:13:12,492 --> 00:13:15,729 line:-1
+Grid-Items can be a flexible or fixed size
+
+
+184
+00:13:15,796 --> 00:13:19,199 line:-2
+and we can customize
+the spacing between Grid-Items.
+
+
+185
+00:13:20,501 --> 00:13:22,135 line:-1
+Within our Lazy Grid,
+
+
+186
+00:13:22,202 --> 00:13:26,507 line:-2
+we simply add the content
+that we want to present in our cells.
+
+
+187
+00:13:27,541 --> 00:13:29,476 line:-1
+Now, our shelf is ready,
+
+
+188
+00:13:29,543 --> 00:13:33,247 line:-2
+and we can stack together
+multiple shelves in a VStack
+
+
+189
+00:13:33,313 --> 00:13:37,584 line:-2
+along with a few text labels
+to create the layout that we saw before.
+
+
+190
+00:13:38,719 --> 00:13:43,457 line:-2
+It's as easy as that to create
+beautiful Grid layouts on Apple TV.
+
+
+191
+00:13:43,857 --> 00:13:46,960 line:-1
+So, to recap, we encourage you to try out
+
+
+192
+00:13:47,027 --> 00:13:51,732 line:-2
+the new Card-Button Styles
+and context menus on tvOS 14.
+
+
+193
+00:13:52,733 --> 00:13:56,770 line:-2
+They're really easy to use,
+and they will look great in your apps.
+
+
+194
+00:13:58,805 --> 00:14:03,577 line:-2
+The new focus APIs can help you
+manage focus better in your apps,
+
+
+195
+00:14:03,644 --> 00:14:05,879 line:-2
+and we think you'll find them
+really useful.
+
+
+196
+00:14:08,182 --> 00:14:11,285 line:-2
+Finally, we hope
+you'll leverage Lazy Grids
+
+
+197
+00:14:11,351 --> 00:14:14,221 line:-1
+to quickly build layouts for tvOS.
+
+
+198
+00:14:14,855 --> 00:14:17,958 line:-2
+We cannot wait to see
+what you build next with SwiftUI.
+
+
+199
+00:14:18,559 --> 00:14:21,128 line:-1
+Thank you, and have an amazing WWDC.
+

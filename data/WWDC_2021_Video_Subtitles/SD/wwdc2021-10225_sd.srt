@@ -1,0 +1,4583 @@
+2
+00:00:02.069 --> 00:00:07.074 line:-1 align:center
+[music]
+
+
+3
+00:00:09,042 --> 00:00:10,277 line:-2
+[Hayden]
+G'day.
+
+
+4
+00:00:10,310 --> 00:00:12,613 line:-2
+Welcome to the session,
+"Coordinate media experiences
+
+
+5
+00:00:12,646 --> 00:00:14,081 line:-1
+with Group Activities."
+
+
+6
+00:00:14,114 --> 00:00:15,549 line:-2
+My name is Hayden,
+and I'm an engineer
+
+
+7
+00:00:15,582 --> 00:00:18,218 line:-2
+on the Group Activities
+team here at Apple.
+
+
+8
+00:00:18.252 --> 00:00:21.188 line:-2 align:center
+Today, we will talk about how to
+create synchronized media apps
+
+
+9
+00:00:21,221 --> 00:00:23,190 line:-2
+that give users the ability
+to watch
+
+
+10
+00:00:23,223 --> 00:00:25,592 line:-2
+and listen to content
+together across devices.
+
+
+11
+00:00:25,626 --> 00:00:27,361 line:-2
+The goal is
+for your users to feel
+
+
+12
+00:00:27.394 --> 00:00:30.230 line:-2 align:center
+as if they were physically
+together, wherever they may be.
+
+
+13
+00:00:30,264 --> 00:00:32,933 line:-2
+The GroupActivities API
+is a Swift framework
+
+
+14
+00:00:32,966 --> 00:00:34,968 line:-1
+for creating shared experiences.
+
+
+15
+00:00:35.002 --> 00:00:37.938 line:-2 align:center
+It takes care of coordinating
+media for you, via APIs
+
+
+16
+00:00:37,971 --> 00:00:41,141 line:-2
+for playback coordination
+and group session management.
+
+
+17
+00:00:41,175 --> 00:00:44,378 line:-2
+And it is supported across
+a wide range of Apple platforms,
+
+
+18
+00:00:44,411 --> 00:00:48,248 line:-2
+such as iOS, iPadOS,
+macOS, and tvOS.
+
+
+19
+00:00:48,282 --> 00:00:51,018 line:-2
+Let's start off with a demo
+of the GroupActivities API,
+
+
+20
+00:00:51,051 --> 00:00:53,387 line:-2
+by calling my colleague,
+Moritz, and sharing a video
+
+
+21
+00:00:53.420 --> 00:00:56.190 line:-2 align:center
+from the sample app
+attached to this talk.
+
+
+22
+00:00:56.223 --> 00:00:58.158 line:-2 align:center
+Let's see
+if Moritz is available.
+
+
+23
+00:00:58.192 --> 00:01:02.229 line:-1 align:center
+[ringing]
+
+
+24
+00:01:05.299 --> 00:01:06.867 line:-1 align:center
+Hi, Moritz!
+
+
+25
+00:01:06,900 --> 00:01:08,535 line:-2
+[Moritz]
+Hey, Hayden!
+
+
+26
+00:01:08.569 --> 00:01:11.104 line:-2 align:center
+[Hayden] I'm gonna home out
+and open the sample app.
+
+
+27
+00:01:11.138 --> 00:01:14.908 line:-2 align:center
+You can see it's a list of drone
+footage from Apple Park.
+
+
+28
+00:01:14.942 --> 00:01:17.878 line:-2 align:center
+I'm gonna show
+the theater footage to Moritz.
+
+
+29
+00:01:17.911 --> 00:01:20.414 line:-2 align:center
+How does that look, Moritz?
+Do you wanna watch it?
+
+
+30
+00:01:20.447 --> 00:01:22.983 line:-2 align:center
+[Moritz] That looks great.
+I really love that one.
+
+
+31
+00:01:23.016 --> 00:01:24.618 line:-2 align:center
+But did you see
+the new one I uploaded
+
+
+32
+00:01:24,651 --> 00:01:26,520 line:-1
+last week from the rings?
+
+
+33
+00:01:26.553 --> 00:01:28.589 line:-2 align:center
+[Hayden]
+Oh, it looks great!
+
+
+34
+00:01:28,622 --> 00:01:30,290 line:-1
+I'm gonna start playback,
+
+
+35
+00:01:30,324 --> 00:01:34,261 line:-2
+and our videos will be in sync
+across our devices.
+
+
+36
+00:01:34,294 --> 00:01:38,799 line:-2
+You can see if I pause,
+it'll also pause for Moritz.
+
+
+37
+00:01:38.832 --> 00:01:42.336 line:-2 align:center
+And if he moves ahead,
+it'll also move ahead for me.
+
+
+38
+00:01:44,671 --> 00:01:49,776 line:-2
+Looks awesome.
+OK, thanks, Moritz!
+
+
+39
+00:01:49.810 --> 00:01:52.312 line:-2 align:center
+[Moritz] Yeah, that was great.
+Bye, Hayden.
+
+
+40
+00:01:52.346 --> 00:01:53.881 line:-2 align:center
+[Hayden] There are
+three main pieces that you need
+
+
+41
+00:01:53,914 --> 00:01:57,284 line:-2
+to think about when creating a
+coordinated media playback app.
+
+
+42
+00:01:57,317 --> 00:02:01,121 line:-2
+First is implementing
+the new GroupActivities API.
+
+
+43
+00:02:01,154 --> 00:02:03,857 line:-2
+Second is how you can take
+advantage of picture-in-picture
+
+
+44
+00:02:03.891 --> 00:02:07.828 line:-2 align:center
+to make sharing your experiences
+as seamless as possible.
+
+
+45
+00:02:07,861 --> 00:02:10,497 line:-2
+And third, my colleague,
+Moritz, will do a deep dive
+
+
+46
+00:02:10.531 --> 00:02:12.399 line:-2 align:center
+into how playback
+coordination works
+
+
+47
+00:02:12.432 --> 00:02:15.435 line:-2 align:center
+and the features of the new
+playback coordination object.
+
+
+48
+00:02:15,469 --> 00:02:18,238 line:-2
+Let's familiarize ourselves
+with the GroupActivities API
+
+
+49
+00:02:18,272 --> 00:02:21,441 line:-2
+by looking at the life cycle
+of a GroupActivities app.
+
+
+50
+00:02:21.475 --> 00:02:24.178 line:-2 align:center
+Here, we have two iPhones
+in a FaceTime call,
+
+
+51
+00:02:24,211 --> 00:02:25,879 line:-1
+just like in the first demo.
+
+
+52
+00:02:25,913 --> 00:02:27,548 line:-1
+My device is on the left,
+
+
+53
+00:02:27.581 --> 00:02:30.217 line:-2 align:center
+and my colleague,
+Moritz's is on the right.
+
+
+54
+00:02:30,250 --> 00:02:33,053 line:-2
+On my device,
+I open the shared app.
+
+
+55
+00:02:33,086 --> 00:02:36,790 line:-2
+In the app, I then
+share an activity to the group.
+
+
+56
+00:02:36,823 --> 00:02:39,326 line:-2
+The GroupActivities framework
+creates a session object
+
+
+57
+00:02:39,359 --> 00:02:42,729 line:-2
+for the activity,
+and then delivers it to my app.
+
+
+58
+00:02:42.763 --> 00:02:45.699 line:-2 align:center
+Meanwhile, the session object
+is shared to Moritz, where
+
+
+59
+00:02:45,732 --> 00:02:49,536 line:-2
+the framework handles opening
+the same app on his device.
+
+
+60
+00:02:49.570 --> 00:02:53.340 line:-2 align:center
+Finally, the framework passes
+Moritz's app the GroupSession.
+
+
+61
+00:02:53.373 --> 00:02:55.542 line:-2 align:center
+Now, we have two apps
+able to communicate
+
+
+62
+00:02:55.576 --> 00:02:57.477 line:-1 align:center
+over the same GroupSession.
+
+
+63
+00:02:57,511 --> 00:02:59,046 line:-2
+Now, let's look
+at the steps you need
+
+
+64
+00:02:59.079 --> 00:03:01.481 line:-2 align:center
+to take in order to adopt
+the GroupActivities framework.
+
+
+65
+00:03:01.515 --> 00:03:03.550 line:-2 align:center
+The first step is creating
+a GroupActivity
+
+
+66
+00:03:03,584 --> 00:03:05,752 line:-1
+along with its metadata.
+
+
+67
+00:03:05,786 --> 00:03:07,754 line:-2
+So, let's talk
+about what a GroupActivity is
+
+
+68
+00:03:07.788 --> 00:03:09.389 line:-1 align:center
+and how you define it.
+
+
+69
+00:03:09.423 --> 00:03:11.692 line:-2 align:center
+GroupActivity is a Swift
+protocol that represents
+
+
+70
+00:03:11.725 --> 00:03:14.461 line:-2 align:center
+the item that your users
+are experiencing together.
+
+
+71
+00:03:14.494 --> 00:03:16.296 line:-2 align:center
+This will be
+a single piece of content,
+
+
+72
+00:03:16,330 --> 00:03:18,799 line:-1
+like a movie or a song.
+
+
+73
+00:03:18.832 --> 00:03:20.767 line:-2 align:center
+You should include
+any properties on this type
+
+
+74
+00:03:20.801 --> 00:03:22.469 line:-2 align:center
+that you need
+to set up your experience.
+
+
+75
+00:03:22.503 --> 00:03:25.606 line:-2 align:center
+For example, you may want to
+include the URL to a video here,
+
+
+76
+00:03:25.639 --> 00:03:28.475 line:-2 align:center
+so you can load a video
+in preparation for the session.
+
+
+77
+00:03:28.509 --> 00:03:30.244 line:-2 align:center
+In order for the framework
+to send the data
+
+
+78
+00:03:30.277 --> 00:03:32.579 line:-2 align:center
+over the network,
+it conforms to Codable.
+
+
+79
+00:03:32,613 --> 00:03:36,216 line:-2
+This means your properties
+must also conform to Codable.
+
+
+80
+00:03:36,250 --> 00:03:38,585 line:-2
+You'll notice there
+are two required properties.
+
+
+81
+00:03:38.619 --> 00:03:41.455 line:-2 align:center
+ActivityIdentifier
+is a unique type identifier
+
+
+82
+00:03:41,488 --> 00:03:44,224 line:-2
+so the system knows how
+to reference this activity.
+
+
+83
+00:03:44.258 --> 00:03:46.927 line:-2 align:center
+GroupActivityMetadata
+contains information to show
+
+
+84
+00:03:46,960 --> 00:03:50,330 line:-2
+this activity in system UI
+on the remote device.
+
+
+85
+00:03:50.364 --> 00:03:53.300 line:-2 align:center
+You'll notice this is an example
+of the new async effectful
+
+
+86
+00:03:53.333 --> 00:03:55.936 line:-2 align:center
+read-only properties
+feature that is being introduced
+
+
+87
+00:03:55,969 --> 00:03:57,604 line:-2
+with Swift Concurrency
+this year.
+
+
+88
+00:03:57,638 --> 00:03:59,606 line:-2
+For more information
+see the session,
+
+
+89
+00:03:59,640 --> 00:04:04,745 line:-2
+"Meet async/await in Swift"
+at WWDC this year.
+
+
+90
+00:04:04,778 --> 00:04:07,247 line:-2
+So, you've defined
+a GroupActivity.
+
+
+91
+00:04:07.281 --> 00:04:08.782 line:-2 align:center
+Now, you wanna
+share it to the call
+
+
+92
+00:04:08.815 --> 00:04:11.952 line:-2 align:center
+by calling the activate method
+on your GroupActivity.
+
+
+93
+00:04:11,985 --> 00:04:13,754 line:-2
+When you activate
+a GroupActivity,
+
+
+94
+00:04:13.787 --> 00:04:16.190 line:-2 align:center
+the framework creates
+a GroupSession object,
+
+
+95
+00:04:16.223 --> 00:04:19.126 line:-2 align:center
+which is delivered to both
+the local and remote devices.
+
+
+96
+00:04:19.159 --> 00:04:21.662 line:-2 align:center
+The system is in charge
+of launching the app,
+
+
+97
+00:04:21.695 --> 00:04:24.765 line:-2 align:center
+and system UI will
+show the activity metadata.
+
+
+98
+00:04:24,798 --> 00:04:27,067 line:-2
+But first, there's something
+we glossed over.
+
+
+99
+00:04:27.100 --> 00:04:29.670 line:-2 align:center
+How does your app know
+that you're in a FaceTime call?
+
+
+100
+00:04:29,703 --> 00:04:31,271 line:-2
+And what if,
+when a user selects a piece
+
+
+101
+00:04:31.305 --> 00:04:33.240 line:-2 align:center
+of content, they don't mean
+to share it to the group,
+
+
+102
+00:04:33,273 --> 00:04:35,275 line:-2
+and instead
+just wanna view it locally?
+
+
+103
+00:04:35.309 --> 00:04:37.811 line:-2 align:center
+The PrepareForActivation
+function solves these problems
+
+
+104
+00:04:37,845 --> 00:04:41,148 line:-2
+for you, by letting the system
+work out the user intent.
+
+
+105
+00:04:41,181 --> 00:04:44,084 line:-2
+Here's an example
+of the prepareForActivation API.
+
+
+106
+00:04:44.117 --> 00:04:46.153 line:-2 align:center
+In the switch statement,
+there are three cases
+
+
+107
+00:04:46.186 --> 00:04:47.254 line:-1 align:center
+we need to handle.
+
+
+108
+00:04:47,287 --> 00:04:50,424 line:-2
+The first, activationDisabled,
+will be taken when the user
+
+
+109
+00:04:50,457 --> 00:04:53,360 line:-2
+is not in a FaceTime call,
+or the system has decided
+
+
+110
+00:04:53.393 --> 00:04:55.362 line:-2 align:center
+that they wish
+to consume it locally.
+
+
+111
+00:04:55.395 --> 00:04:58.031 line:-2 align:center
+The second, activationPreferred,
+will be taken
+
+
+112
+00:04:58,065 --> 00:04:59,900 line:-2
+when the user is
+in a FaceTime call,
+
+
+113
+00:04:59.933 --> 00:05:01.668 line:-2 align:center
+and they wish
+to share it to the group.
+
+
+114
+00:05:01.702 --> 00:05:04.404 line:-2 align:center
+Canceled is taken when the user
+cancels the share action.
+
+
+115
+00:05:04,438 --> 00:05:07,341 line:-2
+This is already enough knowledge
+to create a GroupActivities app
+
+
+116
+00:05:07.374 --> 00:05:08.876 line:-1 align:center
+that shares an activity.
+
+
+117
+00:05:08.909 --> 00:05:10.477 line:-1 align:center
+So, let's jump over to Xcode,
+
+
+118
+00:05:10,511 --> 00:05:12,446 line:-2
+and I'll show you it
+in practice.
+
+
+119
+00:05:12,479 --> 00:05:14,281 line:-2
+Before we add
+GroupActivities support,
+
+
+120
+00:05:14,314 --> 00:05:16,250 line:-2
+I'll give a quick run through
+of the project.
+
+
+121
+00:05:16.283 --> 00:05:18.018 line:-1 align:center
+It's a simple movie-watching app
+
+
+122
+00:05:18.051 --> 00:05:21.021 line:-2 align:center
+that lets you select a movie
+and watch it.
+
+
+123
+00:05:21,054 --> 00:05:23,257 line:-2
+It consists of a list
+of movies to watch,
+
+
+124
+00:05:23.290 --> 00:05:26.593 line:-2 align:center
+along with a movie detail page
+to show you the video player.
+
+
+125
+00:05:26.627 --> 00:05:29.196 line:-2 align:center
+Right now,
+the app only lets you watch
+
+
+126
+00:05:29,229 --> 00:05:31,665 line:-2
+movies alone,
+so let's change that.
+
+
+127
+00:05:34.568 --> 00:05:38.972 line:-2 align:center
+You'll notice we have the Group
+Activity entitlement set.
+
+
+128
+00:05:39,006 --> 00:05:44,411 line:-2
+And then, we'll add
+a GroupActivity to Movie.swift.
+
+
+129
+00:05:44,444 --> 00:05:48,315 line:-2
+First thing to do is
+import GroupActivities.
+
+
+130
+00:05:52.586 --> 00:05:55.789 line:-2 align:center
+And then,
+we'll add the GroupActivity,
+
+
+131
+00:05:55.822 --> 00:05:59.126 line:-1 align:center
+MovieWatchingActivity.
+
+
+132
+00:05:59,159 --> 00:06:01,695 line:-2
+You'll notice
+it has a movie property,
+
+
+133
+00:06:01.728 --> 00:06:06.834 line:-2 align:center
+and it uses that property
+to fill in the metadata.
+
+
+134
+00:06:06,867 --> 00:06:09,036 line:-1
+Let's share this activity now.
+
+
+135
+00:06:09.069 --> 00:06:12.639 line:-2 align:center
+We'll go
+to the CoordinationManager
+
+
+136
+00:06:12,673 --> 00:06:17,044 line:-2
+and find
+the prepareToPlay function.
+
+
+137
+00:06:17.077 --> 00:06:19.279 line:-2 align:center
+Currently,
+this function starts playback
+
+
+138
+00:06:19,313 --> 00:06:22,216 line:-2
+immediately
+by enqueueing the movie.
+
+
+139
+00:06:22.249 --> 00:06:24.284 line:-1 align:center
+Instead, we'll replace this
+
+
+140
+00:06:24,318 --> 00:06:26,420 line:-2
+with our prepareForActivation
+function
+
+
+141
+00:06:26.453 --> 00:06:28.522 line:-1 align:center
+that we showed in the slides.
+
+
+142
+00:06:32,526 --> 00:06:34,995 line:-2
+You can see we immediately
+enqueue the movie
+
+
+143
+00:06:35.028 --> 00:06:37.464 line:-1 align:center
+in the activationDisabled case.
+
+
+144
+00:06:40.901 --> 00:06:43.904 line:-2 align:center
+And activate() is called
+when the user wants to share it
+
+
+145
+00:06:43,937 --> 00:06:47,274 line:-1
+to their FaceTime call.
+
+
+146
+00:06:47.307 --> 00:06:50.544 line:-2 align:center
+Later in the talk, we'll enqueue
+the movie to start playback,
+
+
+147
+00:06:50,577 --> 00:06:54,681 line:-2
+but for now, let's see what
+happens if we run the app as-is.
+
+
+148
+00:06:54,715 --> 00:06:58,118 line:-2
+I've grabbed Moritz's device,
+and I've started a FaceTime call
+
+
+149
+00:06:58.151 --> 00:07:00.787 line:-1 align:center
+between the two iPhones.
+
+
+150
+00:07:00,821 --> 00:07:05,459 line:-2
+I'll home out and then launch
+the sample app on my phone.
+
+
+151
+00:07:05.492 --> 00:07:08.195 line:-2 align:center
+I'll share the rings video
+we watched earlier
+
+
+152
+00:07:08.228 --> 00:07:12.032 line:-2 align:center
+and launch the app
+on Moritz's device.
+
+
+153
+00:07:12,065 --> 00:07:14,635 line:-2
+You can see that it
+received the GroupActivity.
+
+
+154
+00:07:14,668 --> 00:07:17,638 line:-2
+However, it didn't
+load the correct video,
+
+
+155
+00:07:17.671 --> 00:07:20.407 line:-2 align:center
+and there's no
+playback synchronization.
+
+
+156
+00:07:20.440 --> 00:07:24.344 line:-2 align:center
+So, let's learn how
+to add that into the app now.
+
+
+157
+00:07:24,378 --> 00:07:27,247 line:-2
+The main thing to learn
+about receiving a Group Activity
+
+
+158
+00:07:27.281 --> 00:07:28.815 line:-1 align:center
+is the GroupSession object
+
+
+159
+00:07:28.849 --> 00:07:30.551 line:-2 align:center
+and the way
+you receive a GroupSession,
+
+
+160
+00:07:30.584 --> 00:07:33.420 line:-2 align:center
+the GroupSessions
+async sequence.
+
+
+161
+00:07:33.453 --> 00:07:34.855 line:-1 align:center
+Here's a high-level diagram
+
+
+162
+00:07:34.888 --> 00:07:37.257 line:-2 align:center
+showing the typical
+GroupSession life cycle.
+
+
+163
+00:07:37.291 --> 00:07:41.028 line:-2 align:center
+Both the local and remote
+devices receive a group session.
+
+
+164
+00:07:41.061 --> 00:07:44.097 line:-2 align:center
+The app should then set up
+in preparation for playback.
+
+
+165
+00:07:44.131 --> 00:07:47.734 line:-2 align:center
+And finally, when ready,
+join the group session.
+
+
+166
+00:07:47,768 --> 00:07:49,837 line:-2
+The GroupSession
+is the object that represents
+
+
+167
+00:07:49.870 --> 00:07:53.240 line:-2 align:center
+the realtime session between
+devices of a group activity.
+
+
+168
+00:07:53,273 --> 00:07:55,375 line:-2
+It provides state
+about the session, such
+
+
+169
+00:07:55.409 --> 00:07:58.212 line:-2 align:center
+as the latest group activity,
+the connection state, and
+
+
+170
+00:07:58.245 --> 00:08:01.181 line:-2 align:center
+the set of active participants
+connected to the session.
+
+
+171
+00:08:01.215 --> 00:08:02.349 line:-1 align:center
+As we'll see in a moment,
+
+
+172
+00:08:02.382 --> 00:08:04.785 line:-2 align:center
+it's also used
+for synchronizing playback.
+
+
+173
+00:08:04,818 --> 00:08:06,854 line:-1
+The GroupSession AsyncSequence
+
+
+174
+00:08:06,887 --> 00:08:09,890 line:-2
+delivers GroupSessions
+to your app.
+
+
+175
+00:08:09,923 --> 00:08:12,993 line:-2
+Your app never instantiates
+a GroupSession object directly,
+
+
+176
+00:08:13,026 --> 00:08:16,864 line:-2
+so this is the only way
+to receive GroupSessions.
+
+
+177
+00:08:16,897 --> 00:08:18,398 line:-2
+It's important to note
+that you should
+
+
+178
+00:08:18,432 --> 00:08:20,501 line:-2
+get the latest GroupSession
+from this sequence,
+
+
+179
+00:08:20.534 --> 00:08:24.671 line:-2 align:center
+on both the local
+and remote devices.
+
+
+180
+00:08:24,705 --> 00:08:27,374 line:-2
+AsyncSequence is covered
+in the Swift Concurrency talk
+
+
+181
+00:08:27,407 --> 00:08:29,042 line:-1
+mentioned earlier.
+
+
+182
+00:08:29,076 --> 00:08:30,944 line:-2
+Here's what awaiting
+on the GroupSessions
+
+
+183
+00:08:30.978 --> 00:08:33.514 line:-2 align:center
+AsyncSequence
+looks like in code.
+
+
+184
+00:08:33,547 --> 00:08:35,182 line:-2
+When a GroupActivity
+is activated,
+
+
+185
+00:08:35,215 --> 00:08:37,150 line:-2
+the system
+will return a GroupSession
+
+
+186
+00:08:37.184 --> 00:08:40.988 line:-2 align:center
+from the AsyncSequence
+into your await loop.
+
+
+187
+00:08:41.021 --> 00:08:43.690 line:-2 align:center
+Now that we've received
+a GroupSession, let's learn
+
+
+188
+00:08:43.724 --> 00:08:46.360 line:-2 align:center
+how to use it to set up
+playback synchronization.
+
+
+189
+00:08:46,393 --> 00:08:48,529 line:-2
+This latest release
+of AVFoundation
+
+
+190
+00:08:48.562 --> 00:08:52.132 line:-2 align:center
+introduces a new type
+called AVPlaybackCoordinator.
+
+
+191
+00:08:52.165 --> 00:08:54.234 line:-2 align:center
+Moritz will give more
+information on this object
+
+
+192
+00:08:54,268 --> 00:08:56,470 line:-2
+later in the talk,
+but for now, I'll show you how
+
+
+193
+00:08:56,503 --> 00:08:58,872 line:-2
+to attach a GroupSession
+to the playback coordinator,
+
+
+194
+00:08:58,906 --> 00:09:01,175 line:-2
+which will enable
+synchronized playback.
+
+
+195
+00:09:01,208 --> 00:09:03,544 line:-2
+The way to access
+the playback coordinator is
+
+
+196
+00:09:03.577 --> 00:09:06.813 line:-2 align:center
+by the playbackCoordinator
+property on AVPlayer.
+
+
+197
+00:09:06,847 --> 00:09:09,683 line:-2
+Then, to attach the groupSession
+to the coordinator,
+
+
+198
+00:09:09.716 --> 00:09:13.453 line:-2 align:center
+we call coordinateWithSession
+and pass in the GroupSession.
+
+
+199
+00:09:13,487 --> 00:09:14,788 line:-1
+And that's it.
+
+
+200
+00:09:14,821 --> 00:09:17,090 line:-2
+Under the hood, the framework
+handles all the intricacies
+
+
+201
+00:09:17.124 --> 00:09:20.494 line:-2 align:center
+of playback coordination
+and realtime networking for you.
+
+
+202
+00:09:20.527 --> 00:09:22.529 line:-2 align:center
+There's one final step
+to session management,
+
+
+203
+00:09:22,563 --> 00:09:24,865 line:-2
+and that's finally
+joining the session.
+
+
+204
+00:09:24.898 --> 00:09:27.301 line:-2 align:center
+Initially,
+a GroupSession is not connected
+
+
+205
+00:09:27,334 --> 00:09:30,037 line:-2
+and is instead
+in a "waiting" state.
+
+
+206
+00:09:30.070 --> 00:09:32.906 line:-2 align:center
+Calling "join()" connects
+the GroupSession to the group
+
+
+207
+00:09:32.940 --> 00:09:35.475 line:-2 align:center
+and begins the realtime
+connection, allowing messages
+
+
+208
+00:09:35,509 --> 00:09:38,512 line:-2
+to be sent and received
+from other devices in the group.
+
+
+209
+00:09:38,545 --> 00:09:40,747 line:-2
+Once the GroupSession
+has successfully joined,
+
+
+210
+00:09:40.781 --> 00:09:43.350 line:-2 align:center
+playback synchronization
+will begin.
+
+
+211
+00:09:43.383 --> 00:09:45.052 line:-2 align:center
+Let's add this session
+management code
+
+
+212
+00:09:45.085 --> 00:09:46.787 line:-1 align:center
+to our sample app.
+
+
+213
+00:09:46.820 --> 00:09:48.355 line:-1 align:center
+In CoordinationManager,
+
+
+214
+00:09:48.388 --> 00:09:52.025 line:-2 align:center
+let's add the session's async
+sequence in an await loop.
+
+
+215
+00:09:57,865 --> 00:10:00,300 line:-2
+Remember, this gives your app
+GroupSessions when they've been
+
+
+216
+00:10:00,334 --> 00:10:05,205 line:-2
+activated from either the local
+or remote devices.
+
+
+217
+00:10:05.239 --> 00:10:08.909 line:-2 align:center
+Let's store this groupSession
+on the CoordinatorManager,
+
+
+218
+00:10:08,942 --> 00:10:10,944 line:-1
+which will propagate the change
+
+
+219
+00:10:10,978 --> 00:10:13,280 line:-2
+over to our
+MoviePlayerViewController.
+
+
+220
+00:10:19.486 --> 00:10:23.156 line:-2 align:center
+Once set, we'll attach the
+session object to our AVPlayer
+
+
+221
+00:10:23,190 --> 00:10:26,727 line:-2
+via playbackCoordinator
+.coordinateWithSession.
+
+
+222
+00:10:31.732 --> 00:10:34.601 line:-1 align:center
+Then, back in our await loop,
+
+
+223
+00:10:34,635 --> 00:10:37,538 line:-2
+we'll get the movie
+from the session object.
+
+
+224
+00:10:47.214 --> 00:10:49.917 line:-2 align:center
+Since the activity can change
+throughout the session,
+
+
+225
+00:10:49.950 --> 00:10:54.888 line:-2 align:center
+we use a Combine publisher
+to get the activity.
+
+
+226
+00:10:54.922 --> 00:10:58.225 line:-2 align:center
+Then, we enqueue
+a movie to start playback.
+
+
+227
+00:10:58,258 --> 00:11:01,195 line:-2
+And finally,
+we join the session.
+
+
+228
+00:11:01,228 --> 00:11:03,096 line:-2
+Now that we've set up
+the code to receive
+
+
+229
+00:11:03.130 --> 00:11:04.965 line:-2 align:center
+a GroupSession
+and sync playback,
+
+
+230
+00:11:04,998 --> 00:11:10,070 line:-2
+let's run the app on our devices
+and see what happens.
+
+
+231
+00:11:10.103 --> 00:11:12.940 line:-2 align:center
+Again, the two devices
+are in a FaceTime call,
+
+
+232
+00:11:12,973 --> 00:11:16,109 line:-2
+and on the first device,
+I'll open the sample app
+
+
+233
+00:11:16.143 --> 00:11:18.545 line:-1 align:center
+and share the rings video.
+
+
+234
+00:11:22.549 --> 00:11:24.551 line:-2 align:center
+You can see
+Moritz's device received
+
+
+235
+00:11:24,585 --> 00:11:27,588 line:-2
+the Group Activity,
+so we'll launch the app.
+
+
+236
+00:11:27.621 --> 00:11:31.859 line:-2 align:center
+And this time, both devices
+show the right video.
+
+
+237
+00:11:33.861 --> 00:11:35.863 line:-1 align:center
+Then, if I press "play,"
+
+
+238
+00:11:35,896 --> 00:11:39,900 line:-2
+we can see that playback
+synchronization works.
+
+
+239
+00:11:39.933 --> 00:11:43.604 line:-2 align:center
+And if I pause on one,
+it'll pause on the other.
+
+
+240
+00:11:45.806 --> 00:11:49.810 line:-2 align:center
+Or I can move ahead,
+and it'll move ahead on both.
+
+
+241
+00:11:51.678 --> 00:11:54.848 line:-1 align:center
+And playback is in perfect sync.
+
+
+242
+00:12:01.355 --> 00:12:03.557 line:-2 align:center
+One final thing to note
+about GroupSession is
+
+
+243
+00:12:03,590 --> 00:12:05,726 line:-1
+how the session is finished.
+
+
+244
+00:12:05,759 --> 00:12:08,395 line:-2
+There are two ways
+to finish a GroupSession.
+
+
+245
+00:12:08.428 --> 00:12:10.364 line:-1 align:center
+The first is leave().
+
+
+246
+00:12:10.397 --> 00:12:12.866 line:-2 align:center
+This disconnects
+the local user from the session,
+
+
+247
+00:12:12,900 --> 00:12:14,334 line:-1
+but leaves the session active
+
+
+248
+00:12:14,368 --> 00:12:16,403 line:-2
+for the remaining participants
+in the call.
+
+
+249
+00:12:16.436 --> 00:12:18.305 line:-1 align:center
+The second is end().
+
+
+250
+00:12:18.338 --> 00:12:19.740 line:-2 align:center
+This ends the session,
+not just
+
+
+251
+00:12:19,773 --> 00:12:23,277 line:-2
+for the local participant,
+but for the entire call.
+
+
+252
+00:12:23.310 --> 00:12:26.280 line:-2 align:center
+For extra details on creating
+advanced GroupActivities apps,
+
+
+253
+00:12:26.313 --> 00:12:28.682 line:-1 align:center
+see the following WWDC session,
+
+
+254
+00:12:28,715 --> 00:12:31,785 line:-2
+"Build custom experiences
+with Group Activities."
+
+
+255
+00:12:31,818 --> 00:12:34,588 line:-2
+It covers how to change
+the activity of a GroupSession,
+
+
+256
+00:12:34,621 --> 00:12:37,691 line:-2
+observe state of a GroupSession,
+and how to use advanced
+
+
+257
+00:12:37,724 --> 00:12:40,127 line:-2
+features, such as
+the GroupSessionMessenger,
+
+
+258
+00:12:40.160 --> 00:12:42.896 line:-2 align:center
+which lets you send arbitrary
+messages between the group.
+
+
+259
+00:12:42,930 --> 00:12:44,631 line:-1
+I highly recommend it.
+
+
+260
+00:12:44,665 --> 00:12:47,201 line:-2
+Let's switch gears and look
+at how you can take advantage
+
+
+261
+00:12:47,234 --> 00:12:50,204 line:-2
+of picture-in-picture to make
+sharing a video GroupActivity
+
+
+262
+00:12:50,237 --> 00:12:52,606 line:-1
+as seamless as possible.
+
+
+263
+00:12:52.639 --> 00:12:54.474 line:-2 align:center
+Why is picture-in-picture worth
+thinking about
+
+
+264
+00:12:54,508 --> 00:12:56,543 line:-1
+for GroupActivities apps?
+
+
+265
+00:12:56,577 --> 00:12:58,579 line:-2
+Well, supporting
+picture-in-picture allows
+
+
+266
+00:12:58,612 --> 00:13:02,015 line:-2
+content to start playing
+instantly after being shared.
+
+
+267
+00:13:02.049 --> 00:13:05.252 line:-2 align:center
+Since it doesn't take a user out
+of their current context, there
+
+
+268
+00:13:05.285 --> 00:13:09.356 line:-2 align:center
+is no need for an explicit user
+interaction to start playback.
+
+
+269
+00:13:09.389 --> 00:13:12.359 line:-2 align:center
+This saves your users
+an extra step and results
+
+
+270
+00:13:12,392 --> 00:13:15,562 line:-2
+in a frictionless experience
+to share content.
+
+
+271
+00:13:15.596 --> 00:13:17.798 line:-2 align:center
+For more information on setting
+up picture-in-picture,
+
+
+272
+00:13:17.831 --> 00:13:20.400 line:-1 align:center
+see the 2019 WWDC session
+
+
+273
+00:13:20,434 --> 00:13:23,937 line:-2
+on "Delivering Intuitive
+Media Playback with AVKit."
+
+
+274
+00:13:23,971 --> 00:13:26,707 line:-2
+However, there are some nuances
+in how picture-in-picture works
+
+
+275
+00:13:26,740 --> 00:13:29,610 line:-2
+with GroupActivitities,
+so let's go over them now.
+
+
+276
+00:13:29.643 --> 00:13:32.045 line:-2 align:center
+The GroupActivities framework
+will deliver sessions
+
+
+277
+00:13:32.079 --> 00:13:34.414 line:-2 align:center
+to your media app
+while in background,
+
+
+278
+00:13:34,448 --> 00:13:37,551 line:-2
+to give your app a chance
+to set up picture-in-picture.
+
+
+279
+00:13:37.584 --> 00:13:39.953 line:-2 align:center
+If the GroupSession
+indicates playback can start
+
+
+280
+00:13:39,987 --> 00:13:41,388 line:-2
+in the background,
+you should set up
+
+
+281
+00:13:41.421 --> 00:13:42.956 line:-2 align:center
+picture-in-picture,
+and then go through
+
+
+282
+00:13:42.990 --> 00:13:45.626 line:-2 align:center
+the regular
+GroupActivities flow.
+
+
+283
+00:13:45.659 --> 00:13:47.461 line:-2 align:center
+The system
+will start playing the content
+
+
+284
+00:13:47.494 --> 00:13:50.364 line:-2 align:center
+in picture-in-picture without
+launching the app in fullscreen,
+
+
+285
+00:13:50.397 --> 00:13:52.232 line:-2 align:center
+so users get
+that seamless experience
+
+
+286
+00:13:52,266 --> 00:13:55,235 line:-2
+and aren't taken
+out of their current context.
+
+
+287
+00:13:55,269 --> 00:13:56,737 line:-2
+But in some cases,
+you won't be able
+
+
+288
+00:13:56.770 --> 00:13:59.139 line:-2 align:center
+to set up picture-in-picture
+because you may need the user
+
+
+289
+00:13:59.173 --> 00:14:01.775 line:-2 align:center
+to sign in to your app,
+or the content might not
+
+
+290
+00:14:01,808 --> 00:14:04,778 line:-2
+be available without some
+additional steps from the user.
+
+
+291
+00:14:04.811 --> 00:14:07.147 line:-2 align:center
+For these cases, GroupSession
+provides APIs
+
+
+292
+00:14:07.181 --> 00:14:09.883 line:-2 align:center
+for your app to request
+to be foregrounded.
+
+
+293
+00:14:09.917 --> 00:14:12.286 line:-2 align:center
+Another handy thing we've built
+into picture-in-picture
+
+
+294
+00:14:12.319 --> 00:14:15.155 line:-2 align:center
+is that it handles leaving and
+ending a GroupSession for you,
+
+
+295
+00:14:15,189 --> 00:14:18,292 line:-2
+via a system dialog, so there's
+no need to worry about leaving
+
+
+296
+00:14:18,325 --> 00:14:22,196 line:-2
+or ending a session when
+picture-in-picture is active.
+
+
+297
+00:14:22.229 --> 00:14:23.931 line:-2 align:center
+And now, I'll pass it
+over to my colleague,
+
+
+298
+00:14:23.964 --> 00:14:25.265 line:-1 align:center
+Moritz, to do a deep dive
+
+
+299
+00:14:25,299 --> 00:14:27,467 line:-2
+on the playback
+coordinator object.
+
+
+300
+00:14:29,903 --> 00:14:32,506 line:-2
+[Moritz] Hello,
+my name is Moritz Wittenhagen,
+
+
+301
+00:14:32.539 --> 00:14:34.842 line:-2 align:center
+and I am an engineer
+on the AVFoundation team.
+
+
+302
+00:14:34.875 --> 00:14:37.778 line:-2 align:center
+Hayden has introduced
+you to AVPlaybackCoordinator
+
+
+303
+00:14:37.811 --> 00:14:40.647 line:-2 align:center
+as an object that automatically
+keeps playback on multiple
+
+
+304
+00:14:40,681 --> 00:14:43,617 line:-2
+devices in sync, and we've seen
+it working in the demo.
+
+
+305
+00:14:43,650 --> 00:14:46,420 line:-2
+In this part of the talk,
+I am going to demystify
+
+
+306
+00:14:46.453 --> 00:14:48.722 line:-2 align:center
+what the coordinator
+actually does under the hood
+
+
+307
+00:14:48.755 --> 00:14:50.824 line:-2 align:center
+and how it interacts
+with your code.
+
+
+308
+00:14:50,858 --> 00:14:54,661 line:-2
+For the most part, I will focus
+on how the coordinator interacts
+
+
+309
+00:14:54,695 --> 00:14:57,164 line:-2
+with AVPlayer,
+how you should select
+
+
+310
+00:14:57.197 --> 00:15:00.367 line:-2 align:center
+your assets for coordinated
+playback, how individual
+
+
+311
+00:15:00.400 --> 00:15:03.570 line:-2 align:center
+participants can suspend
+coordination temporarily,
+
+
+312
+00:15:03,604 --> 00:15:07,174 line:-2
+and I will also give
+you a brief insight into how
+
+
+313
+00:15:07.207 --> 00:15:10.110 line:-2 align:center
+to implement coordination
+when not using AVPlayer.
+
+
+314
+00:15:10.143 --> 00:15:12.513 line:-2 align:center
+AVPlaybackCoordinator is
+an object
+
+
+315
+00:15:12.546 --> 00:15:15.048 line:-2 align:center
+that shares playback state
+across devices,
+
+
+316
+00:15:15,082 --> 00:15:18,285 line:-2
+and it coordinates playback
+start across those devices,
+
+
+317
+00:15:18.318 --> 00:15:21.421 line:-2 align:center
+with the goal of no one
+missing any content.
+
+
+318
+00:15:21.455 --> 00:15:24.124 line:-2 align:center
+There are two subclasses
+of the coordinator.
+
+
+319
+00:15:24.157 --> 00:15:26.827 line:-2 align:center
+An instance
+of AVPlayerPlaybackCoordinator
+
+
+320
+00:15:26,860 --> 00:15:29,463 line:-2
+is always tied
+to a particular AVPlayer,
+
+
+321
+00:15:29.496 --> 00:15:33.100 line:-2 align:center
+and it handles all
+remote state management for you.
+
+
+322
+00:15:33.133 --> 00:15:35.702 line:-2 align:center
+This makes it the easiest way
+to jump into coordinated
+
+
+323
+00:15:35.736 --> 00:15:38.772 line:-2 align:center
+playback, and I highly
+recommend you start here.
+
+
+324
+00:15:38.805 --> 00:15:40.374 line:-2 align:center
+We are not going
+to talk much
+
+
+325
+00:15:40.407 --> 00:15:42.409 line:-2 align:center
+about
+AVDelegatingPlaybackCoordinator,
+
+
+326
+00:15:42.442 --> 00:15:45.512 line:-2 align:center
+but this subclass gives
+you the flexibility to control
+
+
+327
+00:15:45,546 --> 00:15:49,216 line:-2
+any other playback objects
+that aren't an AVPlayer.
+
+
+328
+00:15:49.249 --> 00:15:51.685 line:-2 align:center
+Let's look
+at our device setup again.
+
+
+329
+00:15:51,718 --> 00:15:54,021 line:-2
+For the rest of the talk,
+we are going to represent
+
+
+330
+00:15:54.054 --> 00:15:57.491 line:-2 align:center
+the GroupActivities objects
+through the GroupSession.
+
+
+331
+00:15:57,524 --> 00:16:01,795 line:-2
+We also assume that your UI
+presents an AVPlayer playing
+
+
+332
+00:16:01.828 --> 00:16:04.831 line:-2 align:center
+some AVPlayerItem,
+and this is where the new
+
+
+333
+00:16:04.865 --> 00:16:07.100 line:-2 align:center
+AVPlayerPlaybackCoordinator
+comes in.
+
+
+334
+00:16:07,134 --> 00:16:10,003 line:-2
+When you call coordinator
+coordinateWithSession,
+
+
+335
+00:16:10,037 --> 00:16:13,240 line:-2
+as Hayden showed earlier,
+we have effectively connected
+
+
+336
+00:16:13.273 --> 00:16:17.211 line:-2 align:center
+the two AVPlayers, and
+they start to affect each other.
+
+
+337
+00:16:17.244 --> 00:16:19.746 line:-2 align:center
+The basic rule
+is the coordinator
+
+
+338
+00:16:19,780 --> 00:16:22,482 line:-2
+will intercept any
+transport control API,
+
+
+339
+00:16:22.516 --> 00:16:25.819 line:-2 align:center
+so any API that changes rate
+or current time.
+
+
+340
+00:16:25.853 --> 00:16:29.189 line:-2 align:center
+It takes those commands, figures
+out if it needs to coordinate
+
+
+341
+00:16:29,223 --> 00:16:33,060 line:-2
+them with someone else, and
+then, at the appropriate time,
+
+
+342
+00:16:33.093 --> 00:16:36.363 line:-2 align:center
+lets them take effect
+on the AVPlayer.
+
+
+343
+00:16:36.396 --> 00:16:38.098 line:-1 align:center
+Let's look at an example.
+
+
+344
+00:16:38,131 --> 00:16:41,134 line:-2
+Here, Hayden and I are
+in a GroupSession together,
+
+
+345
+00:16:41.168 --> 00:16:45.138 line:-2 align:center
+and because the GroupActivity
+told us which URL to load,
+
+
+346
+00:16:45.172 --> 00:16:47.674 line:-2 align:center
+have enqueued
+the same AVPlayerItem.
+
+
+347
+00:16:47,708 --> 00:16:51,778 line:-2
+Now, if my device changes
+the AVPlayer's rate property,
+
+
+348
+00:16:51.812 --> 00:16:54.681 line:-2 align:center
+the playback coordinator
+will intercept that command
+
+
+349
+00:16:54,715 --> 00:16:57,951 line:-2
+and not immediately allow
+the player to start playback.
+
+
+350
+00:16:57.985 --> 00:17:00.387 line:-1 align:center
+Instead, it will ask the player
+
+
+351
+00:17:00,420 --> 00:17:04,992 line:-2
+to enter a timeControlStatus
+of WaitingToPlayAtSpecifiedRate.
+
+
+352
+00:17:05,025 --> 00:17:07,828 line:-2
+UIs will typically
+represent this timeControlStatus
+
+
+353
+00:17:07,861 --> 00:17:09,229 line:-1
+with a waiting spinner.
+
+
+354
+00:17:09.263 --> 00:17:11.498 line:-2 align:center
+The coordinator will
+then send the command
+
+
+355
+00:17:11,532 --> 00:17:13,367 line:-1
+over to Hayden's iPad.
+
+
+356
+00:17:13.400 --> 00:17:16.470 line:-2 align:center
+The AVPlayerPlaybackCoordinator
+there receives the command
+
+
+357
+00:17:16,503 --> 00:17:18,672 line:-2
+and similarly
+asks Hayden's AVPlayer
+
+
+358
+00:17:18,705 --> 00:17:21,942 line:-2
+to change rate
+and enter a waiting state.
+
+
+359
+00:17:21,975 --> 00:17:24,278 line:-2
+The coordinators give
+everyone some time to prepare
+
+
+360
+00:17:24,311 --> 00:17:26,914 line:-2
+for playback with the goal
+of everyone starting playback
+
+
+361
+00:17:26,947 --> 00:17:29,750 line:-2
+at the same time
+without missing any content.
+
+
+362
+00:17:29.783 --> 00:17:34.154 line:-2 align:center
+When everyone is good to go, all
+devices begin playback together.
+
+
+363
+00:17:34,188 --> 00:17:36,356 line:-2
+All coordinators
+in the session are equal,
+
+
+364
+00:17:36.390 --> 00:17:39.193 line:-2 align:center
+meaning that Hayden
+can also initiate a command.
+
+
+365
+00:17:39.226 --> 00:17:41.128 line:-1 align:center
+Let's have him seek this time.
+
+
+366
+00:17:41.161 --> 00:17:43.697 line:-2 align:center
+Again, the seek API is
+intercepted,
+
+
+367
+00:17:43,730 --> 00:17:46,266 line:-2
+and the coordinator forces
+the AVPlayer to wait
+
+
+368
+00:17:46.300 --> 00:17:50.103 line:-2 align:center
+while it shares the command
+with connected coordinators.
+
+
+369
+00:17:50.137 --> 00:17:52.773 line:-2 align:center
+Everyone is given some time
+to complete the seek,
+
+
+370
+00:17:52,806 --> 00:17:55,442 line:-2
+and when all devices
+are ready to go again,
+
+
+371
+00:17:55.475 --> 00:17:58.946 line:-2 align:center
+playback resumes
+for everyone together.
+
+
+372
+00:17:58,979 --> 00:18:01,715 line:-2
+You may ask yourself,
+what happens when the AVPlayers
+
+
+373
+00:18:01,748 --> 00:18:03,684 line:-1
+are playing different items?
+
+
+374
+00:18:03.717 --> 00:18:05.686 line:-2 align:center
+And the answer
+is that the coordinator
+
+
+375
+00:18:05,719 --> 00:18:07,754 line:-2
+only applies state
+to the other player
+
+
+376
+00:18:07,788 --> 00:18:10,891 line:-2
+when both players are
+playing identical content.
+
+
+377
+00:18:10.924 --> 00:18:13.760 line:-2 align:center
+I will elaborate on the concept
+of identity later.
+
+
+378
+00:18:13,794 --> 00:18:16,330 line:-2
+For now,
+think that content is identical
+
+
+379
+00:18:16.363 --> 00:18:18.966 line:-2 align:center
+when you create the items
+from the same URL.
+
+
+380
+00:18:18.999 --> 00:18:22.970 line:-2 align:center
+What this means is that any
+command you send for item A will
+
+
+381
+00:18:23,003 --> 00:18:26,640 line:-2
+only be applied if the receiver
+is also playing item A.
+
+
+382
+00:18:26,673 --> 00:18:31,378 line:-2
+And changing the item to B will
+ignore all state from item A.
+
+
+383
+00:18:31,411 --> 00:18:33,780 line:-2
+We do this because
+distinguishing commands
+
+
+384
+00:18:33,814 --> 00:18:36,717 line:-2
+per-item allows for safe joining
+of participants
+
+
+385
+00:18:36,750 --> 00:18:38,785 line:-1
+and transitions between items.
+
+
+386
+00:18:38,819 --> 00:18:40,420 line:-1
+Let me show you what I mean.
+
+
+387
+00:18:40,454 --> 00:18:42,623 line:-2
+Here's our example again,
+but this time,
+
+
+388
+00:18:42.656 --> 00:18:45.225 line:-2 align:center
+we start
+with Hayden already playing.
+
+
+389
+00:18:45,259 --> 00:18:47,928 line:-2
+As I join and connect
+my playback coordinator
+
+
+390
+00:18:47,961 --> 00:18:51,298 line:-2
+to the same session,
+nothing happens to my AVPlayer,
+
+
+391
+00:18:51.331 --> 00:18:54.735 line:-2 align:center
+because I am not playing
+the same current item as Hayden.
+
+
+392
+00:18:54.768 --> 00:18:57.938 line:-2 align:center
+Even creating that same item
+has no impact
+
+
+393
+00:18:57,971 --> 00:19:01,508 line:-2
+because the item is not current
+in my player.
+
+
+394
+00:19:01,542 --> 00:19:04,178 line:-2
+This means that I can
+even seek the item
+
+
+395
+00:19:04.211 --> 00:19:06.480 line:-2 align:center
+without consequences
+for anyone else.
+
+
+396
+00:19:06,513 --> 00:19:08,515 line:-2
+Only when
+the item becomes current
+
+
+397
+00:19:08,549 --> 00:19:11,285 line:-2
+in the AVPlayer will
+the coordinator start
+
+
+398
+00:19:11,318 --> 00:19:14,154 line:-2
+doing its work and try
+to apply the right state.
+
+
+399
+00:19:14,188 --> 00:19:16,890 line:-2
+The rule is that
+the coordinator always starts
+
+
+400
+00:19:16.924 --> 00:19:19.326 line:-2 align:center
+with the group state,
+if there is one.
+
+
+401
+00:19:19.359 --> 00:19:22.462 line:-2 align:center
+And since Hayden was already
+playing in the GroupSession,
+
+
+402
+00:19:22.496 --> 00:19:24.631 line:-2 align:center
+the coordinator
+prefers his state
+
+
+403
+00:19:24.665 --> 00:19:28.202 line:-2 align:center
+over my own configuration
+from before enqeueuing the item.
+
+
+404
+00:19:28,235 --> 00:19:32,439 line:-2
+This means that my coordinator
+will override any configuration
+
+
+405
+00:19:32,472 --> 00:19:36,510 line:-2
+in the AVPlayer and AVPlayerItem
+to match Hayden's device.
+
+
+406
+00:19:36,543 --> 00:19:39,012 line:-2
+And with that,
+we are both in the same state
+
+
+407
+00:19:39.046 --> 00:19:40.848 line:-1 align:center
+and can play together.
+
+
+408
+00:19:40,881 --> 00:19:43,417 line:-2
+Let's repeat this
+with an item transition.
+
+
+409
+00:19:43.450 --> 00:19:45.853 line:-2 align:center
+As we both
+approach the end of item A,
+
+
+410
+00:19:45,886 --> 00:19:49,623 line:-2
+my AVQueuePlayer is getting
+ready to play the next item.
+
+
+411
+00:19:49.656 --> 00:19:52.359 line:-2 align:center
+Usually, we would expect
+Hayden to get ready, as well,
+
+
+412
+00:19:52,392 --> 00:19:54,828 line:-2
+but for this example,
+let's assume Hayden's iPad
+
+
+413
+00:19:54.862 --> 00:19:57.898 line:-2 align:center
+is in a bad network and
+cannot load the next item yet.
+
+
+414
+00:19:57,931 --> 00:20:00,067 line:-2
+So, now that I'm at the end
+of item A,
+
+
+415
+00:20:00,100 --> 00:20:03,604 line:-2
+I already have item B enqueued,
+and it is ready to play.
+
+
+416
+00:20:03,637 --> 00:20:05,706 line:-2
+But because
+the item is not current,
+
+
+417
+00:20:05,739 --> 00:20:08,275 line:-2
+the coordinator
+is not doing anything yet.
+
+
+418
+00:20:08,308 --> 00:20:10,844 line:-2
+Only when my player transitions
+to the new item,
+
+
+419
+00:20:10.878 --> 00:20:13.046 line:-2 align:center
+will the coordinator
+do its job again.
+
+
+420
+00:20:13,080 --> 00:20:15,816 line:-2
+And this time, it does
+not find an existing state
+
+
+421
+00:20:15.849 --> 00:20:17.885 line:-2 align:center
+for item B,
+so it just continues
+
+
+422
+00:20:17,918 --> 00:20:20,053 line:-2
+with the state
+my player is proposing.
+
+
+423
+00:20:20,087 --> 00:20:21,722 line:-2
+Even though
+the coordinator shares
+
+
+424
+00:20:21.755 --> 00:20:24.391 line:-2 align:center
+this new state with Hayden,
+he is not affected
+
+
+425
+00:20:24.424 --> 00:20:27.160 line:-2 align:center
+because he is still
+displaying item A.
+
+
+426
+00:20:27,194 --> 00:20:30,163 line:-2
+But when he eventually
+transitions to match my item,
+
+
+427
+00:20:30,197 --> 00:20:33,333 line:-2
+his coordinator will
+again apply the existing state
+
+
+428
+00:20:33.367 --> 00:20:34.735 line:-1 align:center
+to his player.
+
+
+429
+00:20:34,768 --> 00:20:38,205 line:-2
+And with that, everyone
+is playing in sync again.
+
+
+430
+00:20:38.238 --> 00:20:41.441 line:-2 align:center
+After all this,
+here is my first call-to-action.
+
+
+431
+00:20:41.475 --> 00:20:44.411 line:-2 align:center
+Be careful about the order
+of your item changes
+
+
+432
+00:20:44.444 --> 00:20:46.580 line:-1 align:center
+and transport control commands.
+
+
+433
+00:20:46.613 --> 00:20:48.982 line:-2 align:center
+Let's say we have
+a function beginPlayback
+
+
+434
+00:20:49,016 --> 00:20:52,519 line:-2
+that enqueues an item and
+automatically starts playing.
+
+
+435
+00:20:52,553 --> 00:20:54,755 line:-2
+This code would be
+called whenever the user
+
+
+436
+00:20:54,788 --> 00:20:56,690 line:-1
+has selected something to play
+
+
+437
+00:20:56,723 --> 00:20:59,893 line:-2
+or when our GroupSession
+informs us of a new activity.
+
+
+438
+00:20:59.927 --> 00:21:03.931 line:-2 align:center
+It is important that we seek
+to our start time first,
+
+
+439
+00:21:03.964 --> 00:21:06.433 line:-2 align:center
+and similarly,
+we should change player rate
+
+
+440
+00:21:06.466 --> 00:21:10.137 line:-2 align:center
+before the item is enqueued
+so that our initial
+
+
+441
+00:21:10,170 --> 00:21:13,106 line:-2
+configuration
+cannot affect anyone else.
+
+
+442
+00:21:13.140 --> 00:21:16.210 line:-2 align:center
+If we do it in this order,
+the playback coordinator can
+
+
+443
+00:21:16.243 --> 00:21:19.213 line:-2 align:center
+decide if we are first
+and our state should be shared
+
+
+444
+00:21:19,246 --> 00:21:22,049 line:-2
+with everyone else,
+or if another state already
+
+
+445
+00:21:22.082 --> 00:21:25.819 line:-2 align:center
+exists, and that should
+override our state instead.
+
+
+446
+00:21:25,853 --> 00:21:29,756 line:-2
+Also, audit your transport
+control commands and consider
+
+
+447
+00:21:29,790 --> 00:21:32,392 line:-2
+if they should affect everyone
+in the group.
+
+
+448
+00:21:32.426 --> 00:21:35.295 line:-2 align:center
+Usually,
+an API call should affect
+
+
+449
+00:21:35,329 --> 00:21:37,965 line:-2
+the group if it
+originates from playback UI.
+
+
+450
+00:21:37.998 --> 00:21:41.602 line:-2 align:center
+So if the user pauses,
+everyone else should pause, too.
+
+
+451
+00:21:41.635 --> 00:21:45.572 line:-2 align:center
+In that case, just call
+the AVPlayer API as usual.
+
+
+452
+00:21:45,606 --> 00:21:47,074 line:-1
+So, what should we do
+
+
+453
+00:21:47,107 --> 00:21:50,677 line:-2
+with the other API calls
+not coming from playback UI?
+
+
+454
+00:21:50.711 --> 00:21:52.779 line:-2 align:center
+Usually,
+these are automated pauses
+
+
+455
+00:21:52,813 --> 00:21:55,516 line:-2
+because your app has
+encountered some system event.
+
+
+456
+00:21:55.549 --> 00:21:57.484 line:-2 align:center
+Automatic pauses
+like this should
+
+
+457
+00:21:57,518 --> 00:22:00,087 line:-2
+not usually affect
+the other participants.
+
+
+458
+00:22:00,120 --> 00:22:02,956 line:-2
+In such a situation, where
+your users are playing together
+
+
+459
+00:22:02.990 --> 00:22:06.827 line:-2 align:center
+with others, you should first
+consider not pausing at all.
+
+
+460
+00:22:06,860 --> 00:22:10,531 line:-2
+Since everyone else continues
+to play, users will often prefer
+
+
+461
+00:22:10,564 --> 00:22:13,901 line:-2
+to stick with the group, even
+if it has some kind of drawback,
+
+
+462
+00:22:13.934 --> 00:22:16.970 line:-2 align:center
+like not being able
+to see the content temporarily.
+
+
+463
+00:22:17.004 --> 00:22:20.507 line:-2 align:center
+If you have no other choice but
+to pause, you have two options:
+
+
+464
+00:22:20.541 --> 00:22:24.077 line:-2 align:center
+remove the item first,
+or begin a coordinated playback
+
+
+465
+00:22:24.111 --> 00:22:27.147 line:-2 align:center
+suspension, which I will
+cover later in this talk.
+
+
+466
+00:22:27.181 --> 00:22:30.617 line:-2 align:center
+Now that you have an idea of how
+the playback coordinator works,
+
+
+467
+00:22:30,651 --> 00:22:33,320 line:-2
+let's talk about content
+for coordinated playback.
+
+
+468
+00:22:33.353 --> 00:22:36.823 line:-2 align:center
+As I stated previously,
+we consider two player items
+
+
+469
+00:22:36.857 --> 00:22:39.159 line:-2 align:center
+on different devices
+to be the same
+
+
+470
+00:22:39.193 --> 00:22:42.062 line:-2 align:center
+when their assets were created
+from the same URL.
+
+
+471
+00:22:42.095 --> 00:22:45.432 line:-2 align:center
+While this default can
+work well, there are situations
+
+
+472
+00:22:45,465 --> 00:22:47,668 line:-2
+where you want
+to change this behavior.
+
+
+473
+00:22:47.701 --> 00:22:50.370 line:-2 align:center
+For example,
+your app may offer the user
+
+
+474
+00:22:50.404 --> 00:22:53.740 line:-2 align:center
+a choice to download
+and cache the content on device.
+
+
+475
+00:22:53.774 --> 00:22:56.610 line:-2 align:center
+So, if I have downloaded
+the asset to my local cache,
+
+
+476
+00:22:56.643 --> 00:22:59.246 line:-2 align:center
+and Hayden is still streaming
+the content from the cloud,
+
+
+477
+00:22:59,279 --> 00:23:02,749 line:-2
+we are no longer using the same
+URL, meaning the playback
+
+
+478
+00:23:02.783 --> 00:23:06.086 line:-2 align:center
+coordinator will not keep
+our playback states in sync.
+
+
+479
+00:23:06,119 --> 00:23:09,389 line:-2
+Similarly, some of you
+may have exciting use cases
+
+
+480
+00:23:09,423 --> 00:23:12,726 line:-2
+for coordinating the state
+of AVMutableMovies or
+
+
+481
+00:23:12.759 --> 00:23:16.663 line:-2 align:center
+AVCompositions, which don't have
+a URL representation at all.
+
+
+482
+00:23:16,697 --> 00:23:20,434 line:-2
+Again, the playback coordinator
+does not know what to do here.
+
+
+483
+00:23:20,467 --> 00:23:23,337 line:-2
+To solve this problem,
+you can provide a custom string
+
+
+484
+00:23:23.370 --> 00:23:26.106 line:-2 align:center
+as an identifier
+for an AVPlayerItem.
+
+
+485
+00:23:26,139 --> 00:23:28,742 line:-2
+If this string is present,
+the coordinator will use it
+
+
+486
+00:23:28,775 --> 00:23:31,378 line:-2
+to decide if two items
+represent the same content,
+
+
+487
+00:23:31.411 --> 00:23:33.213 line:-1 align:center
+and it will ignore the URL.
+
+
+488
+00:23:33.247 --> 00:23:36.650 line:-2 align:center
+You do this by implementing the
+AVPlayerPlaybackCoordinator
+
+
+489
+00:23:36,683 --> 00:23:39,353 line:-2
+Delegate protocol
+and its playbackCoordinator
+
+
+490
+00:23:39.386 --> 00:23:41.855 line:-2 align:center
+identifierFor playerItem
+function.
+
+
+491
+00:23:41.889 --> 00:23:45.192 line:-2 align:center
+The coordinator will ask
+its delegate for an identifier
+
+
+492
+00:23:45.225 --> 00:23:47.861 line:-2 align:center
+whenever you enqueue
+an item in the player.
+
+
+493
+00:23:47.895 --> 00:23:50.030 line:-2 align:center
+Whenever the playback
+coordinator considers
+
+
+494
+00:23:50.063 --> 00:23:53.100 line:-2 align:center
+two items equal,
+it is important that a time
+
+
+495
+00:23:53,133 --> 00:23:56,870 line:-2
+on one device matches
+the same time on the others.
+
+
+496
+00:23:56,904 --> 00:23:59,173 line:-2
+This means
+that you need to be careful
+
+
+497
+00:23:59.206 --> 00:24:01.308 line:-2 align:center
+with content
+that is automatically injected
+
+
+498
+00:24:01,341 --> 00:24:03,877 line:-2
+into the playback stream
+by a server.
+
+
+499
+00:24:03,911 --> 00:24:07,214 line:-2
+So, if Hayden
+and I request the same URL,
+
+
+500
+00:24:07,247 --> 00:24:11,185 line:-2
+but the server decides to inject
+an ad into only my stream,
+
+
+501
+00:24:11,218 --> 00:24:14,855 line:-2
+the devices are now out of sync,
+as I play into the ad,
+
+
+502
+00:24:14.888 --> 00:24:17.558 line:-2 align:center
+and Hayden continues
+with the main content.
+
+
+503
+00:24:17.591 --> 00:24:20.827 line:-2 align:center
+The right way to approach
+this problem is to move ads
+
+
+504
+00:24:20,861 --> 00:24:23,964 line:-2
+and other interstitials
+into a separate player.
+
+
+505
+00:24:23,997 --> 00:24:26,500 line:-2
+That leaves
+the main asset unaffected.
+
+
+506
+00:24:26,533 --> 00:24:30,137 line:-2
+Now, as I play into the ad,
+my phone switches
+
+
+507
+00:24:30.170 --> 00:24:33.073 line:-2 align:center
+to a different player
+for the duration of the ad.
+
+
+508
+00:24:33,106 --> 00:24:35,909 line:-2
+And when the ad is over,
+the coordinator can easily
+
+
+509
+00:24:35.943 --> 00:24:40.113 line:-2 align:center
+rejoin everyone else's timing,
+and we are back in sync.
+
+
+510
+00:24:40,147 --> 00:24:43,984 line:-2
+If you are playing HLS content,
+AVPlayer will be able to help
+
+
+511
+00:24:44,017 --> 00:24:47,688 line:-2
+you with this through the new
+AVPlayerInterstitialEvent API.
+
+
+512
+00:24:47,721 --> 00:24:50,057 line:-2
+Check out the dynamic pre-roll
+and mid-rolls
+
+
+513
+00:24:50.090 --> 00:24:52.459 line:-1 align:center
+in HLS talk to learn more.
+
+
+514
+00:24:52.492 --> 00:24:55.696 line:-2 align:center
+In summary,
+use custom identifiers to match
+
+
+515
+00:24:55,729 --> 00:24:59,266 line:-2
+content if the URL does
+not cover the right information.
+
+
+516
+00:24:59.299 --> 00:25:02.436 line:-2 align:center
+Make sure times are
+the same for everyone.
+
+
+517
+00:25:02.469 --> 00:25:04.938 line:-2 align:center
+And if you want to play
+personalized interstitials,
+
+
+518
+00:25:04,972 --> 00:25:06,840 line:-2
+play them
+through a different player,
+
+
+519
+00:25:06,874 --> 00:25:09,309 line:-2
+so that your main content
+is not affected.
+
+
+520
+00:25:09,343 --> 00:25:12,045 line:-2
+And finally,
+use date tags when coordinating
+
+
+521
+00:25:12.079 --> 00:25:14.014 line:-2 align:center
+live content
+so that the coordinator
+
+
+522
+00:25:14.047 --> 00:25:17.518 line:-2 align:center
+can share the correct timing
+with everyone else.
+
+
+523
+00:25:17,551 --> 00:25:20,988 line:-2
+So far, we have only dealt
+with the perfect playback cases,
+
+
+524
+00:25:21,021 --> 00:25:24,024 line:-2
+where everyone can stay
+in sync the whole time.
+
+
+525
+00:25:24,057 --> 00:25:27,561 line:-2
+Unfortunately,
+that is not always possible.
+
+
+526
+00:25:27,594 --> 00:25:30,230 line:-2
+Let's say Hayden
+and I are playing together,
+
+
+527
+00:25:30,264 --> 00:25:33,734 line:-2
+but an alarm goes off telling me
+to feed my cat, Zorro.
+
+
+528
+00:25:33,767 --> 00:25:37,804 line:-2
+By the rules of AVAudioSession,
+my app must now pause,
+
+
+529
+00:25:37.838 --> 00:25:42.242 line:-2 align:center
+and those rules still apply,
+even when playing in a group.
+
+
+530
+00:25:42.276 --> 00:25:45.646 line:-2 align:center
+Yet, we do not want my pause
+to affect everyone else.
+
+
+531
+00:25:45.679 --> 00:25:48.315 line:-2 align:center
+Forwarding everyone's
+little pauses to the whole group
+
+
+532
+00:25:48.348 --> 00:25:50.951 line:-2 align:center
+would just cause
+too many annoyances.
+
+
+533
+00:25:50,984 --> 00:25:55,722 line:-2
+So, instead, we want Hayden's
+iPad to continue playing.
+
+
+534
+00:25:55,756 --> 00:25:59,126 line:-2
+And when I dismiss my alarm,
+playback should catch up,
+
+
+535
+00:25:59.159 --> 00:26:02.162 line:-2 align:center
+and everyone should play
+in sync again.
+
+
+536
+00:26:02.196 --> 00:26:05.432 line:-2 align:center
+So, how can we
+implement behavior like this?
+
+
+537
+00:26:05.465 --> 00:26:07.000 line:-1 align:center
+You use a new object
+
+
+538
+00:26:07.034 --> 00:26:10.437 line:-2 align:center
+called an
+AVCoordinatedPlaybackSuspension.
+
+
+539
+00:26:10,470 --> 00:26:13,307 line:-2
+Such a suspension
+represents a separation
+
+
+540
+00:26:13.340 --> 00:26:15.475 line:-2 align:center
+between one
+participant's coordinator
+
+
+541
+00:26:15,509 --> 00:26:17,845 line:-2
+and the other
+participants' coordinators.
+
+
+542
+00:26:17.878 --> 00:26:19.913 line:-2 align:center
+The participant
+is separate from the group,
+
+
+543
+00:26:19,947 --> 00:26:24,351 line:-2
+and player rate changes or seeks
+no longer affect anyone else.
+
+
+544
+00:26:24,384 --> 00:26:26,687 line:-2
+Similarly,
+any rate change coming
+
+
+545
+00:26:26.720 --> 00:26:30.824 line:-2 align:center
+from the group will not change
+the AVPlayer's rate or time.
+
+
+546
+00:26:30,858 --> 00:26:33,026 line:-2
+In the example,
+this means that it
+
+
+547
+00:26:33,060 --> 00:26:34,795 line:-2
+is not possible
+for Hayden to start
+
+
+548
+00:26:34.828 --> 00:26:38.332 line:-2 align:center
+my player while
+the alarm is still playing.
+
+
+549
+00:26:38,365 --> 00:26:40,701 line:-2
+There are two different kinds
+of suspensions:
+
+
+550
+00:26:40.734 --> 00:26:44.238 line:-2 align:center
+automatic suspensions and
+suspensions you add yourself.
+
+
+551
+00:26:44,271 --> 00:26:48,008 line:-2
+Automatic suspensions are added
+by AVPlayerPlaybackCoordinator
+
+
+552
+00:26:48,041 --> 00:26:50,444 line:-2
+when the player
+pauses automatically.
+
+
+553
+00:26:50.477 --> 00:26:52.679 line:-2 align:center
+We already saw
+the example of the audio
+
+
+554
+00:26:52.713 --> 00:26:54.882 line:-2 align:center
+session interruption,
+but this also applies
+
+
+555
+00:26:54.915 --> 00:26:57.050 line:-2 align:center
+to network stalls
+or playing an interstitial
+
+
+556
+00:26:57.084 --> 00:26:59.686 line:-2 align:center
+through the new
+AVPlayer interstitial API.
+
+
+557
+00:26:59.720 --> 00:27:02.356 line:-2 align:center
+Suspensions added
+by the playback coordinator
+
+
+558
+00:27:02.389 --> 00:27:05.559 line:-2 align:center
+end when the player
+resumes playback, and it causes
+
+
+559
+00:27:05,592 --> 00:27:09,029 line:-2
+the player to match timing
+to the current group state.
+
+
+560
+00:27:09,062 --> 00:27:11,532 line:-2
+For our example,
+this means that I will
+
+
+561
+00:27:11,565 --> 00:27:14,701 line:-2
+automatically rejoin the group
+when my player rate changes back
+
+
+562
+00:27:14.735 --> 00:27:17.571 line:-2 align:center
+to one after my app
+handled the end-interruption
+
+
+563
+00:27:17,604 --> 00:27:20,307 line:-2
+notification
+from dismissing the alarm.
+
+
+564
+00:27:20.340 --> 00:27:23.177 line:-2 align:center
+Let me show you two examples
+of how the system uses
+
+
+565
+00:27:23.210 --> 00:27:25.379 line:-2 align:center
+coordinated
+playback suspensions.
+
+
+566
+00:27:33,420 --> 00:27:36,190 line:-2
+Here is our sample app playing
+drone footage of the rings.
+
+
+567
+00:27:36.223 --> 00:27:39.459 line:-2 align:center
+Let's look at the interruption
+example we discussed before.
+
+
+568
+00:27:39.493 --> 00:27:41.995 line:-2 align:center
+I have set a timer
+to go off in a few seconds,
+
+
+569
+00:27:42,029 --> 00:27:43,931 line:-1
+so let's wait for that.
+
+
+570
+00:27:46.934 --> 00:27:48.936 line:-2 align:center
+[timer ringing]
+Ah, here we go.
+
+
+571
+00:27:48,969 --> 00:27:52,172 line:-2
+This has paused the iPad
+on my left, but as you can see,
+
+
+572
+00:27:52,206 --> 00:27:54,341 line:-2
+the other device
+is still happily playing.
+
+
+573
+00:27:54,374 --> 00:27:57,244 line:-2
+And as I dismiss the timer,
+playback on the device
+
+
+574
+00:27:57,277 --> 00:27:59,746 line:-2
+on the left jumps forward
+to rejoin
+
+
+575
+00:27:59,780 --> 00:28:03,283 line:-2
+the other device
+and is perfectly in sync.
+
+
+576
+00:28:03,317 --> 00:28:05,485 line:-2
+This is not the only way
+the system makes use
+
+
+577
+00:28:05,519 --> 00:28:06,720 line:-1
+of suspensions.
+
+
+578
+00:28:06,753 --> 00:28:08,922 line:-2
+AVKit uses them
+to keep random video frames
+
+
+579
+00:28:08.956 --> 00:28:11.625 line:-2 align:center
+from flashing in front
+of everybody during scrubbing.
+
+
+580
+00:28:11,658 --> 00:28:13,827 line:-2
+You may have noticed
+already that scrubbing will
+
+
+581
+00:28:13.861 --> 00:28:15.662 line:-2 align:center
+show intermediate frames only
+on the device
+
+
+582
+00:28:15.696 --> 00:28:17.030 line:-1 align:center
+that I'm interacting with.
+
+
+583
+00:28:17,064 --> 00:28:18,832 line:-1
+So, as I touch the scrubber,
+
+
+584
+00:28:18,866 --> 00:28:20,934 line:-2
+the device
+on the right continues playing,
+
+
+585
+00:28:20,968 --> 00:28:23,737 line:-2
+while the left device
+shows the scrubbing frames.
+
+
+586
+00:28:23.770 --> 00:28:25.639 line:-2 align:center
+Only when
+I let go of the scrubber
+
+
+587
+00:28:25.672 --> 00:28:28.141 line:-2 align:center
+will the new time be shared
+with the other device,
+
+
+588
+00:28:28,175 --> 00:28:31,044 line:-2
+and playback resumes
+for everyone.
+
+
+589
+00:28:31.078 --> 00:28:34.147 line:-2 align:center
+These are examples of how
+the system uses suspensions.
+
+
+590
+00:28:34,181 --> 00:28:38,252 line:-2
+Now, let's look at how
+you would adopt one yourself.
+
+
+591
+00:28:38.285 --> 00:28:41.688 line:-2 align:center
+So, let's jump into Xcode
+and actually do that.
+
+
+592
+00:28:41,722 --> 00:28:43,023 line:-1
+Let's say you wanted
+
+
+593
+00:28:43.056 --> 00:28:45.592 line:-2 align:center
+to implement a feature
+that allows one participant
+
+
+594
+00:28:45.626 --> 00:28:47.928 line:-2 align:center
+to rewatch something
+they just missed.
+
+
+595
+00:28:47.961 --> 00:28:50.397 line:-2 align:center
+Maybe there was
+a particularly exciting moment
+
+
+596
+00:28:50,430 --> 00:28:52,466 line:-2
+in the drone footage
+we are watching.
+
+
+597
+00:28:52.499 --> 00:28:55.536 line:-2 align:center
+With all the coordinator
+behaviors we discussed so far,
+
+
+598
+00:28:55,569 --> 00:28:58,472 line:-2
+seeking back and playing
+again will affect everyone.
+
+
+599
+00:28:58,505 --> 00:28:59,873 line:-1
+And I want to emphasize
+
+
+600
+00:28:59.907 --> 00:29:02.409 line:-2 align:center
+that this may very well be
+the right thing to do.
+
+
+601
+00:29:02,442 --> 00:29:05,279 line:-2
+Try to keep your users together
+as much as possible.
+
+
+602
+00:29:05.312 --> 00:29:08.882 line:-2 align:center
+But let's say seeking back
+for everyone is not an option.
+
+
+603
+00:29:08.916 --> 00:29:11.818 line:-2 align:center
+So, what we will build instead
+is a way to seek back
+
+
+604
+00:29:11.852 --> 00:29:15.189 line:-2 align:center
+by a few seconds and play
+the content at twice the speed
+
+
+605
+00:29:15.222 --> 00:29:17.524 line:-2 align:center
+until we join back up
+with everyone.
+
+
+606
+00:29:17,558 --> 00:29:20,594 line:-2
+I have already added a button
+in my UI that a user
+
+
+607
+00:29:20,627 --> 00:29:22,930 line:-2
+can use to indicate
+that they missed something.
+
+
+608
+00:29:22.963 --> 00:29:24.831 line:-2 align:center
+It is hooked up
+with this function
+
+
+609
+00:29:24.865 --> 00:29:26.733 line:-2 align:center
+in our
+MoviePlayerViewController.
+
+
+610
+00:29:26,767 --> 00:29:28,969 line:-1
+Let's fill that in.
+
+
+611
+00:29:31.972 --> 00:29:34.608 line:-1 align:center
+Here is just the player logic.
+
+
+612
+00:29:34,641 --> 00:29:36,977 line:-2
+We figure out
+what time to seek to,
+
+
+613
+00:29:37,010 --> 00:29:40,547 line:-2
+seek back,
+and set the player rate to 2.
+
+
+614
+00:29:40,581 --> 00:29:45,219 line:-2
+When we have caught up, we just
+resume playback at rate 1.
+
+
+615
+00:29:45.252 --> 00:29:48.755 line:-2 align:center
+So far, this would all happen
+to everyone because
+
+
+616
+00:29:48,789 --> 00:29:52,626 line:-2
+the playback coordinator
+will intercept those API calls.
+
+
+617
+00:29:52.659 --> 00:29:55.229 line:-2 align:center
+This is where
+the suspensions come in.
+
+
+618
+00:29:55,262 --> 00:29:56,897 line:-1
+Right before we seek back,
+
+
+619
+00:29:56.930 --> 00:30:01.735 line:-2 align:center
+I want to separate our player
+from everyone else.
+
+
+620
+00:30:01.768 --> 00:30:04.037 line:-2 align:center
+And we do
+that with the coordinator's
+
+
+621
+00:30:04,071 --> 00:30:07,508 line:-1
+beginSuspension function.
+
+
+622
+00:30:07.541 --> 00:30:10.978 line:-2 align:center
+It requires a reason,
+and to provide that reason,
+
+
+623
+00:30:11,011 --> 00:30:15,048 line:-2
+we just extend the Reason struct
+with a new string constant.
+
+
+624
+00:30:16,984 --> 00:30:19,219 line:-1
+In this case, what-happened.
+
+
+625
+00:30:19.253 --> 00:30:23.624 line:-2 align:center
+Now, we can use that
+in our beginSuspension call.
+
+
+626
+00:30:27.294 --> 00:30:30.764 line:-2 align:center
+Since the coordinator is now
+suspended, we can safely seek
+
+
+627
+00:30:30,797 --> 00:30:34,134 line:-2
+and set the rate,
+just for our player.
+
+
+628
+00:30:34,168 --> 00:30:36,837 line:-2
+Once we are ready
+to meet up with everyone else,
+
+
+629
+00:30:36.870 --> 00:30:39.072 line:-2 align:center
+we need to signal
+to the coordinator to listen
+
+
+630
+00:30:39,106 --> 00:30:43,010 line:-1
+to the group again, so we call
+
+
+631
+00:30:43,043 --> 00:30:46,613 line:-1
+suspension.end().
+
+
+632
+00:30:46,647 --> 00:30:50,717 line:-2
+Note that we don't actually need
+the player rate change anymore.
+
+
+633
+00:30:50,751 --> 00:30:52,920 line:-2
+Since ending
+the suspension will always
+
+
+634
+00:30:52.953 --> 00:30:55.822 line:-2 align:center
+rejoin everyone else,
+our player rate change would
+
+
+635
+00:30:55,856 --> 00:30:59,459 line:-2
+also change back to whatever
+the current group rate is.
+
+
+636
+00:31:01.995 --> 00:31:04.731 line:-1 align:center
+Now, let's try this out.
+
+
+637
+00:31:08,302 --> 00:31:09,903 line:-1
+Everyone plays together.
+
+
+638
+00:31:09,937 --> 00:31:12,573 line:-2
+I miss an exciting event,
+like the approach to the ring,
+
+
+639
+00:31:12.606 --> 00:31:14.708 line:-2 align:center
+and I tap our new
+what-happened button.
+
+
+640
+00:31:14,741 --> 00:31:16,810 line:-2
+So, you can see,
+the device I'm interacting with
+
+
+641
+00:31:16.844 --> 00:31:18.745 line:-2 align:center
+jumps back
+to repeat the content.
+
+
+642
+00:31:18.779 --> 00:31:20.047 line:-1 align:center
+It plays faster to catch up,
+
+
+643
+00:31:20.080 --> 00:31:22.015 line:-2 align:center
+while the other
+device is not affected.
+
+
+644
+00:31:22,049 --> 00:31:25,986 line:-2
+And now, we are
+already perfectly in sync again.
+
+
+645
+00:31:26.019 --> 00:31:30.290 line:-2 align:center
+So, when you begin a suspension
+on an AVPlaybackCoordinator,
+
+
+646
+00:31:30.324 --> 00:31:32.526 line:-2 align:center
+you separate its player
+from the group,
+
+
+647
+00:31:32.559 --> 00:31:35.095 line:-2 align:center
+and it is now safe
+to issue any rate change
+
+
+648
+00:31:35.128 --> 00:31:37.998 line:-2 align:center
+or seek
+without affecting anyone else.
+
+
+649
+00:31:38,031 --> 00:31:39,666 line:-1
+Ending the suspension will
+
+
+650
+00:31:39,700 --> 00:31:41,902 line:-2
+rejoin the group's
+current time and rate.
+
+
+651
+00:31:41.935 --> 00:31:45.239 line:-2 align:center
+And, new on this slide,
+you can optionally propose
+
+
+652
+00:31:45,272 --> 00:31:47,941 line:-2
+a new time to the group
+when ending the suspension.
+
+
+653
+00:31:47,975 --> 00:31:50,577 line:-2
+This is how you can implement
+a scrubbing suspension
+
+
+654
+00:31:50.611 --> 00:31:52.880 line:-2 align:center
+that changes time
+for everyone only
+
+
+655
+00:31:52.913 --> 00:31:55.415 line:-2 align:center
+when letting go
+of the playback control.
+
+
+656
+00:31:55.449 --> 00:31:58.385 line:-2 align:center
+Here is a summary of when
+AVPlayer transport control
+
+
+657
+00:31:58.418 --> 00:32:01.021 line:-2 align:center
+commands are actually
+shared with other participants.
+
+
+658
+00:32:01.054 --> 00:32:04.491 line:-2 align:center
+First, you have to connect
+the AVPlayerPlaybackCoordinator
+
+
+659
+00:32:04.525 --> 00:32:07.194 line:-2 align:center
+to other participants
+through a group session,
+
+
+660
+00:32:07.227 --> 00:32:09.696 line:-2 align:center
+as Hayden showed you
+at the beginning of the talk.
+
+
+661
+00:32:09,730 --> 00:32:13,800 line:-2
+Second, the AVPlayer's current
+AVPlayerItem must have
+
+
+662
+00:32:13,834 --> 00:32:17,571 line:-2
+the same URL as the other
+participants' player items.
+
+
+663
+00:32:17.604 --> 00:32:20.174 line:-2 align:center
+Or if you're providing
+your own identifiers,
+
+
+664
+00:32:20,207 --> 00:32:23,477 line:-2
+they must have
+the same custom identifier.
+
+
+665
+00:32:23.510 --> 00:32:26.680 line:-2 align:center
+Once an item is enqueued,
+all seeks and rate changes
+
+
+666
+00:32:26.713 --> 00:32:29.049 line:-1 align:center
+affect everyone in the group,
+
+
+667
+00:32:29.082 --> 00:32:33.187 line:-2 align:center
+except when you begin a
+coordinated playback suspension.
+
+
+668
+00:32:33.220 --> 00:32:36.857 line:-2 align:center
+And to close out the discussion
+of AVPlayerPlaybackCoordinator,
+
+
+669
+00:32:36,890 --> 00:32:40,928 line:-2
+here's a quick tour of other API
+related to coordinated playback.
+
+
+670
+00:32:40.961 --> 00:32:43.797 line:-2 align:center
+If you want other participants
+to wait
+
+
+671
+00:32:43.830 --> 00:32:45.732 line:-1 align:center
+during one user's suspension,
+
+
+672
+00:32:45,766 --> 00:32:48,402 line:-2
+you can configure this
+using the coordinator's
+
+
+673
+00:32:48.435 --> 00:32:51.672 line:-2 align:center
+suspensionReasons
+ThatTriggerWaiting property.
+
+
+674
+00:32:51,705 --> 00:32:55,609 line:-2
+This is how you could request
+that no one misses any content
+
+
+675
+00:32:55,642 --> 00:32:58,745 line:-2
+if participants have
+different length ads.
+
+
+676
+00:32:58,779 --> 00:33:01,715 line:-2
+To learn more about the state
+of other participants,
+
+
+677
+00:33:01.748 --> 00:33:04.885 line:-2 align:center
+take a look at the coordinator's
+otherParticipants property
+
+
+678
+00:33:04.918 --> 00:33:07.054 line:-2 align:center
+and its corresponding
+notification.
+
+
+679
+00:33:07,087 --> 00:33:09,489 line:-2
+The
+AVCoordinatedPlaybackParticipant
+
+
+680
+00:33:09,523 --> 00:33:12,492 line:-2
+most notably gives you the list
+of suspensionReasons,
+
+
+681
+00:33:12.526 --> 00:33:14.895 line:-2 align:center
+which may be useful
+to inform UI,
+
+
+682
+00:33:14,928 --> 00:33:19,633 line:-2
+especially if you use suspension
+ReasonsThatTriggerWaiting above.
+
+
+683
+00:33:19,666 --> 00:33:23,704 line:-2
+Whenever the coordinator
+requests its AVPlayer to wait,
+
+
+684
+00:33:23.737 --> 00:33:27.207 line:-2 align:center
+that is reflected in the players
+reasonForWaitingToPlay,
+
+
+685
+00:33:27.241 --> 00:33:31.011 line:-2 align:center
+with the new waiting
+ForCoordinatedPlayback reason.
+
+
+686
+00:33:31,044 --> 00:33:34,114 line:-2
+To override waiting
+and immediately start playback,
+
+
+687
+00:33:34.147 --> 00:33:36.450 line:-2 align:center
+regardless of the other
+participants' states,
+
+
+688
+00:33:36,483 --> 00:33:39,820 line:-2
+use the player's
+playImmediately atRate function.
+
+
+689
+00:33:39.853 --> 00:33:43.457 line:-2 align:center
+Note that this can cause other
+participants to miss content,
+
+
+690
+00:33:43.490 --> 00:33:46.493 line:-2 align:center
+so be aware
+of that when using this API.
+
+
+691
+00:33:46,527 --> 00:33:50,130 line:-2
+AVPlayer also has
+a new rateDidChangeNotification,
+
+
+692
+00:33:50.163 --> 00:33:52.833 line:-2 align:center
+which provides more information
+about the rate change,
+
+
+693
+00:33:52.866 --> 00:33:56.170 line:-2 align:center
+including when another
+participant caused it.
+
+
+694
+00:33:56,203 --> 00:33:57,671 line:-1
+And similarly,
+
+
+695
+00:33:57.704 --> 00:34:00.340 line:-2 align:center
+AVPlayerItem's
+TimeJumpedNotification
+
+
+696
+00:34:00.374 --> 00:34:02.876 line:-2 align:center
+will also tell you
+if a time jump originates
+
+
+697
+00:34:02,910 --> 00:34:05,345 line:-1
+from another participant.
+
+
+698
+00:34:05,379 --> 00:34:07,881 line:-2
+There is some
+AVPlayer API you cannot use
+
+
+699
+00:34:07,915 --> 00:34:10,083 line:-2
+with
+AVPlayerPlaybackCoordinator.
+
+
+700
+00:34:10,117 --> 00:34:13,487 line:-2
+The default time pitch algorithm
+on iOS used to be
+
+
+701
+00:34:13.520 --> 00:34:15.422 line:-1 align:center
+low quality zero latency.
+
+
+702
+00:34:15.455 --> 00:34:18.859 line:-2 align:center
+This value is now
+deprecated in iOS 15.
+
+
+703
+00:34:18,892 --> 00:34:21,161 line:-2
+LowQualityZeroLatency
+is not supported
+
+
+704
+00:34:21,195 --> 00:34:23,530 line:-2
+for coordinated playback,
+and you should watch out
+
+
+705
+00:34:23.564 --> 00:34:27.067 line:-2 align:center
+for code resetting
+to this now-deprecated value.
+
+
+706
+00:34:27.100 --> 00:34:29.336 line:-2 align:center
+Use one of the other
+algorithms instead.
+
+
+707
+00:34:29.369 --> 00:34:31.405 line:-1 align:center
+Also, do not use
+
+
+708
+00:34:31.438 --> 00:34:34.107 line:-2 align:center
+AVPlayer's
+setRate(time:atHostTime:)
+
+
+709
+00:34:34.141 --> 00:34:36.543 line:-2 align:center
+function with an
+AVPlayerPlaybackCoordinator
+
+
+710
+00:34:36.577 --> 00:34:39.079 line:-2 align:center
+because it is vital
+that the playback coordinater
+
+
+711
+00:34:39,112 --> 00:34:40,981 line:-1
+is in charge of player timing,
+
+
+712
+00:34:41,014 --> 00:34:44,718 line:-2
+which is incompatible
+with external startup sync.
+
+
+713
+00:34:44,751 --> 00:34:46,887 line:-2
+After all this talk
+about AVPlayer,
+
+
+714
+00:34:46,920 --> 00:34:49,223 line:-2
+let's quickly dip
+into the second subclass
+
+
+715
+00:34:49,256 --> 00:34:54,228 line:-2
+of AVPlaybackCoordinator,
+AVDelegatingPlaybackCoordinator.
+
+
+716
+00:34:54,261 --> 00:34:57,431 line:-2
+A lot of the concepts
+that we discussed still apply
+
+
+717
+00:34:57.464 --> 00:35:00.100 line:-2 align:center
+for delegating playback
+coordinator, but instead
+
+
+718
+00:35:00.133 --> 00:35:03.203 line:-2 align:center
+of observing the player for you,
+the delegating coordinator
+
+
+719
+00:35:03,237 --> 00:35:06,240 line:-2
+requires you to provide
+information about playback state
+
+
+720
+00:35:06,273 --> 00:35:09,910 line:-2
+and apply state to your
+playback objects yourself.
+
+
+721
+00:35:09,943 --> 00:35:13,347 line:-2
+A custom playback object setup
+will look something like this.
+
+
+722
+00:35:13.380 --> 00:35:16.750 line:-2 align:center
+Your UI controls the player,
+which uses one of the other
+
+
+723
+00:35:16,783 --> 00:35:18,919 line:-2
+system-rendering APIs
+underneath.
+
+
+724
+00:35:18.952 --> 00:35:21.188 line:-2 align:center
+The delegating
+playback coordinator fits
+
+
+725
+00:35:21,221 --> 00:35:24,424 line:-2
+in between your UI
+and your player implementation.
+
+
+726
+00:35:24,458 --> 00:35:27,561 line:-2
+As the name suggests,
+AVDelegatingPlaybackCoordinator
+
+
+727
+00:35:27.594 --> 00:35:30.097 line:-2 align:center
+requires you to implement
+a delegate protocol
+
+
+728
+00:35:30.130 --> 00:35:32.966 line:-2 align:center
+that receives playback commands
+for playing,
+
+
+729
+00:35:33.000 --> 00:35:36.303 line:-1 align:center
+pausing, seeking, and buffering.
+
+
+730
+00:35:36.336 --> 00:35:39.573 line:-2 align:center
+Instead of sending a play
+command to your player directly,
+
+
+731
+00:35:39,606 --> 00:35:42,442 line:-2
+your UI would tell
+the coordinator first.
+
+
+732
+00:35:42,476 --> 00:35:44,912 line:-2
+The coordinator will
+then decide if it needs
+
+
+733
+00:35:44.945 --> 00:35:47.614 line:-2 align:center
+to first negotiate
+with other connected players,
+
+
+734
+00:35:47.648 --> 00:35:51.018 line:-2 align:center
+before changing your playback
+object's time or rate.
+
+
+735
+00:35:51.051 --> 00:35:53.854 line:-2 align:center
+You also have to tell
+the coordinator whenever
+
+
+736
+00:35:53.887 --> 00:35:56.023 line:-2 align:center
+your player transitions
+to a new current item,
+
+
+737
+00:35:56.056 --> 00:35:59.293 line:-2 align:center
+so that the coordinator knows
+which commands to send to you.
+
+
+738
+00:35:59,326 --> 00:36:03,230 line:-2
+As before, items are identified
+by arbitrary strings.
+
+
+739
+00:36:03.263 --> 00:36:05.699 line:-2 align:center
+When the coordinator
+sends a command, it should
+
+
+740
+00:36:05.732 --> 00:36:09.403 line:-2 align:center
+affect the originating UI,
+as well as the receiver UI.
+
+
+741
+00:36:09.436 --> 00:36:11.038 line:-1 align:center
+And when it is time to play,
+
+
+742
+00:36:11,071 --> 00:36:13,874 line:-2
+it should affect all players
+in the same way.
+
+
+743
+00:36:13,907 --> 00:36:16,910 line:-2
+It is your responsibility
+to make your playback object
+
+
+744
+00:36:16.944 --> 00:36:19.046 line:-2 align:center
+follow along
+and to update your UI
+
+
+745
+00:36:19.079 --> 00:36:20.814 line:-1 align:center
+for commands appropriately.
+
+
+746
+00:36:20.848 --> 00:36:24.151 line:-2 align:center
+I want to specially call out
+that the delegating coordinator
+
+
+747
+00:36:24.184 --> 00:36:26.587 line:-2 align:center
+will often tell you
+to begin buffering,
+
+
+748
+00:36:26,620 --> 00:36:29,957 line:-2
+even if your device
+is already ready to go.
+
+
+749
+00:36:29,990 --> 00:36:33,126 line:-2
+This means the coordinator
+is still waiting for other
+
+
+750
+00:36:33.160 --> 00:36:36.396 line:-2 align:center
+connected participants,
+and your UI should reflect that,
+
+
+751
+00:36:36.430 --> 00:36:39.399 line:-2 align:center
+even if there is nothing
+to do on your end.
+
+
+752
+00:36:39,433 --> 00:36:41,134 line:-1
+Final words of warning.
+
+
+753
+00:36:41.168 --> 00:36:43.337 line:-2 align:center
+Be careful with events
+like route changes
+
+
+754
+00:36:43,370 --> 00:36:45,772 line:-2
+that briefly pause
+and resume your player.
+
+
+755
+00:36:45,806 --> 00:36:49,076 line:-2
+It is your responsibility
+to stick to the requested timing
+
+
+756
+00:36:49,109 --> 00:36:51,912 line:-2
+and reapply the group timing
+as needed.
+
+
+757
+00:36:51.945 --> 00:36:54.348 line:-2 align:center
+If you cannot keep up
+for whatever reason,
+
+
+758
+00:36:54,381 --> 00:36:56,550 line:-2
+you should communicate that
+to the coordinator
+
+
+759
+00:36:56.583 --> 00:36:58.652 line:-1 align:center
+using a suspension.
+
+
+760
+00:36:58.685 --> 00:37:00.587 line:-2 align:center
+The delegating
+playback coordinator
+
+
+761
+00:37:00.621 --> 00:37:03.590 line:-2 align:center
+also does not add
+any automatic suspensions.
+
+
+762
+00:37:03.624 --> 00:37:06.460 line:-2 align:center
+This means you should begin
+and end suspensions
+
+
+763
+00:37:06.493 --> 00:37:08.595 line:-2 align:center
+for relevant system events
+yourself.
+
+
+764
+00:37:08,629 --> 00:37:10,864 line:-2
+Use the reasons provided
+by AVFoundation
+
+
+765
+00:37:10,898 --> 00:37:12,533 line:-1
+where appropriate.
+
+
+766
+00:37:12.566 --> 00:37:15.435 line:-2 align:center
+And it is possible
+to connect a delegating playback
+
+
+767
+00:37:15.469 --> 00:37:18.839 line:-2 align:center
+coordinator on one device
+to a player playback coordinator
+
+
+768
+00:37:18,872 --> 00:37:22,809 line:-2
+on another, but you must
+use custom identifiers
+
+
+769
+00:37:22.843 --> 00:37:24.945 line:-2 align:center
+on the player
+playback coordinator end.
+
+
+770
+00:37:24.978 --> 00:37:26.513 line:-1 align:center
+Let's wrap up.
+
+
+771
+00:37:26.547 --> 00:37:28.749 line:-2 align:center
+To build a coordinated
+media playback app,
+
+
+772
+00:37:28.782 --> 00:37:31.251 line:-2 align:center
+use a GroupActivity
+to define the content you are
+
+
+773
+00:37:31.285 --> 00:37:33.987 line:-2 align:center
+playing and to propose it
+to the group.
+
+
+774
+00:37:34.021 --> 00:37:36.757 line:-2 align:center
+Start to keep track
+of GroupSessions as soon
+
+
+775
+00:37:36.790 --> 00:37:39.193 line:-2 align:center
+as your app launches
+to learn when your users
+
+
+776
+00:37:39.226 --> 00:37:41.929 line:-2 align:center
+are in a FaceTime call
+and want to play together.
+
+
+777
+00:37:41.962 --> 00:37:44.464 line:-2 align:center
+And finally,
+connect the playback coordinator
+
+
+778
+00:37:44,498 --> 00:37:46,433 line:-2
+to your GroupSession
+to keep your content
+
+
+779
+00:37:46.466 --> 00:37:48.202 line:-1 align:center
+in sync for everyone.
+
+
+780
+00:37:48.235 --> 00:37:51.572 line:-2 align:center
+Thank you,
+and enjoy the rest of WWDC.
+
+
+781
+00:37:51,605 --> 00:37:54,474 line:-1
+[music]
+

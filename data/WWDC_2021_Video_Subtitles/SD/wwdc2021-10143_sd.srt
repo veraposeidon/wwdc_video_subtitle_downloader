@@ -1,0 +1,1106 @@
+2
+00:00:00,133 --> 00:00:02,035 line:-1
+[MAC STARTUP CHIME]
+
+
+3
+00:00:02,035 --> 00:00:05,639 line:-1
+♪ Bass music playing ♪
+
+
+4
+00:00:05,639 --> 00:00:06,707 line:-1
+[KEYSTROKES]
+
+
+5
+00:00:06,707 --> 00:00:09,243 line:-1
+Nishant Nelogal: Hello,
+and welcome to WWDC.
+
+
+6
+00:00:09.243 --> 00:00:11.945 line:-1 position:50%
+My name is Nishant,
+and I’m an engineer
+
+
+7
+00:00:11.945 --> 00:00:14.281 line:-1 position:50%
+on the AVFoundation team.
+
+
+8
+00:00:14.281 --> 00:00:17.517 line:-1 position:50%
+Today, we will be looking
+at HLS Variants.
+
+
+9
+00:00:17.517 --> 00:00:21.021 line:-1 position:50%
+First, we will look at how
+you can inspect HLS variants,
+
+
+10
+00:00:21.021 --> 00:00:23.423 line:-1 position:50%
+using AVFoundation APIs,
+
+
+11
+00:00:23.423 --> 00:00:26.760 line:-1 position:50%
+and later on, we will see
+how we can use the HLS variants
+
+
+12
+00:00:26,760 --> 00:00:28,562 line:-1
+with downloads.
+
+
+13
+00:00:28.562 --> 00:00:32.266 line:-1 position:50%
+So let's start
+with variant inspection.
+
+
+14
+00:00:32,266 --> 00:00:33,267 line:-1
+You all must be familiar
+
+
+15
+00:00:33.267 --> 00:00:36.937 line:-1 position:50%
+with what a typical
+master playlist looks like.
+
+
+16
+00:00:36.937 --> 00:00:39.072 line:-1 position:50%
+Here is an example.
+
+
+17
+00:00:39,072 --> 00:00:42,409 position:50%
+In this particular playlist,
+we have two variants.
+
+
+18
+00:00:42,409 --> 00:00:47,114 position:50%
+One of the variants is an
+SDR variant with stereo audio,
+
+
+19
+00:00:47,114 --> 00:00:49,816 position:50%
+and the other one is
+a Dolby Vision variant
+
+
+20
+00:00:49,816 --> 00:00:52,386 line:0
+with Dolby Atmos audio.
+
+
+21
+00:00:52,386 --> 00:00:54,688 line:-1
+The asset representing
+this particular playlist
+
+
+22
+00:00:54,688 --> 00:00:58,492 line:-1
+may be presented
+something like this in your app.
+
+
+23
+00:00:58,492 --> 00:01:02,963 line:-1
+Looking closely,
+you see that the asset has 4K,
+
+
+24
+00:01:02.963 --> 00:01:06.900 line:-1 position:50%
+Dolby Vision,
+and Dolby Atmos badges.
+
+
+25
+00:01:06.900 --> 00:01:11.371 line:-1 position:50%
+Earlier, you had to get such
+information out of the band.
+
+
+26
+00:01:11.371 --> 00:01:13.040 line:-1 position:50%
+Now in iOS 15,
+
+
+27
+00:01:13.040 --> 00:01:17.678 line:-1 position:50%
+you can directly inspect
+the HLS playlist to infer them.
+
+
+28
+00:01:17,678 --> 00:01:20,614 line:-1
+For that, you start
+with an AVURLAsset
+
+
+29
+00:01:20.614 --> 00:01:23.350 line:-1 position:50%
+pointing to the location
+of your master playlist.
+
+
+30
+00:01:23.350 --> 00:01:26.386 line:-1 position:50%
+Later on, you can obtain
+the HLS playlist
+
+
+31
+00:01:26.386 --> 00:01:29.856 line:-1 position:50%
+via the variant's property.
+
+
+32
+00:01:29,856 --> 00:01:32,459 line:-1
+This AVAssetVariant,
+as we see here,
+
+
+33
+00:01:32.459 --> 00:01:37.130 line:-1 position:50%
+represents an HLS variant as is
+from the master playlist.
+
+
+34
+00:01:37.130 --> 00:01:39.066 line:-1 position:50%
+So it has multiple properties
+
+
+35
+00:01:39,066 --> 00:01:41,601 line:-1
+representing different
+media attributes.
+
+
+36
+00:01:41.601 --> 00:01:44.237 line:-1 position:50%
+Some of the attributes,
+such as the media bitrate,
+
+
+37
+00:01:44.237 --> 00:01:46.239 line:-1 position:50%
+can be accessed directly.
+
+
+38
+00:01:46,239 --> 00:01:47,441 line:-1
+Other attributes,
+
+
+39
+00:01:47,441 --> 00:01:50,477 line:-1
+such as those related
+to video and audio renditions,
+
+
+40
+00:01:50.477 --> 00:01:53.447 line:-1 position:50%
+are grouped together
+in their own subclasses.
+
+
+41
+00:01:53,447 --> 00:01:56,783 line:-1
+They are called
+as VideoAttributes
+
+
+42
+00:01:56,783 --> 00:02:00,587 line:-1
+and AudioAttributes,
+respectively.
+
+
+43
+00:02:00,587 --> 00:02:03,457 line:0
+As you see, each of them
+has relevant properties,
+
+
+44
+00:02:03,457 --> 00:02:06,393 position:50%
+which you can use
+to understand your asset.
+
+
+45
+00:02:06,393 --> 00:02:11,765 line:0
+Now you know how to inspect
+HLS variants in AVFoundation.
+
+
+46
+00:02:11,765 --> 00:02:14,768 line:-1
+Let's see how we can use them
+with downloads.
+
+
+47
+00:02:14.768 --> 00:02:17.304 line:-1 position:50%
+Downloading HLS content
+for offline playback
+
+
+48
+00:02:17.304 --> 00:02:19.940 line:-1 position:50%
+has been supported since 2016.
+
+
+49
+00:02:19,940 --> 00:02:22,509 line:0
+If you're not familiar
+with HLS download APIs,
+
+
+50
+00:02:22,509 --> 00:02:25,679 position:50%
+I would suggest you check out
+our earlier talk on the topic
+
+
+51
+00:02:25,679 --> 00:02:28,515 line:0
+from WWDC 2020.
+
+
+52
+00:02:28.515 --> 00:02:31.952 line:-1 position:50%
+In iOS 15, we are taking
+our HLS download APIs
+
+
+53
+00:02:31.952 --> 00:02:34.955 line:-1 position:50%
+and making them
+even more powerful.
+
+
+54
+00:02:34,955 --> 00:02:38,025 line:-1
+Typically, you would like
+to influence the HLS variants
+
+
+55
+00:02:38.025 --> 00:02:40.193 line:-1 position:50%
+selected for the download.
+
+
+56
+00:02:40,193 --> 00:02:42,295 line:-1
+This may be due
+to business requirements,
+
+
+57
+00:02:42.295 --> 00:02:45.699 line:-1 position:50%
+or you just want to provide
+more choice to your users.
+
+
+58
+00:02:45,699 --> 00:02:47,501 line:-1
+Before, you could provide
+such input
+
+
+59
+00:02:47,501 --> 00:02:49,903 line:-1
+via downloadTask options.
+
+
+60
+00:02:49,903 --> 00:02:55,275 line:-1
+We had an option for HDR,
+an option for lossless audio,
+
+
+61
+00:02:55.275 --> 00:02:57.577 line:-1 position:50%
+and a few other attributes.
+
+
+62
+00:02:57.577 --> 00:03:01.448 line:-1 position:50%
+In iOS 15, we are expanding
+the variant selection
+
+
+63
+00:03:01,448 --> 00:03:03,650 line:-1
+with the use of NSPredicates.
+
+
+64
+00:03:03,650 --> 00:03:08,121 line:-1
+You may be already familiar with
+using predicates from Core Data.
+
+
+65
+00:03:08,121 --> 00:03:12,059 line:-1
+If not, don’t worry,
+you will learn about them today.
+
+
+66
+00:03:12.059 --> 00:03:13.293 line:-1 position:50%
+So to get started,
+
+
+67
+00:03:13.293 --> 00:03:17.230 line:-1 position:50%
+let me introduce
+the variant qualifier interface.
+
+
+68
+00:03:17,230 --> 00:03:20,734 line:-1
+This interface allows you to
+specify your variant preferences
+
+
+69
+00:03:20,734 --> 00:03:22,035 line:-1
+to AVFoundation.
+
+
+70
+00:03:22.035 --> 00:03:25.138 line:-1 position:50%
+And, as I said,
+they can be constructed
+
+
+71
+00:03:25.138 --> 00:03:27.741 line:-1 position:50%
+using NSPredicates.
+
+
+72
+00:03:27,741 --> 00:03:31,511 line:-1
+Let’s understand
+by looking at few examples.
+
+
+73
+00:03:31,511 --> 00:03:34,848 line:-1
+Here, we have a NSPredicate
+which expresses peak bitrate
+
+
+74
+00:03:34,848 --> 00:03:37,684 line:-1
+to be less than five megabits.
+
+
+75
+00:03:37.684 --> 00:03:40.654 line:-1 position:50%
+You use this to construct
+your variant qualifier,
+
+
+76
+00:03:40,654 --> 00:03:42,422 line:-1
+which instructs AVFoundation
+
+
+77
+00:03:42.422 --> 00:03:44.925 line:-1 position:50%
+to prefer variants
+under five megabits.
+
+
+78
+00:03:44.925 --> 00:03:47.160 line:-1 position:50%
+Simple enough, right?
+
+
+79
+00:03:47.160 --> 00:03:49.830 line:-1 position:50%
+Let’s take a look
+at another example.
+
+
+80
+00:03:49.830 --> 00:03:53.433 line:-1 position:50%
+Here we create an NSPredicate
+for HDR video range.
+
+
+81
+00:03:53,433 --> 00:03:55,402 line:-1
+And similarly as before,
+
+
+82
+00:03:55.402 --> 00:03:59.039 line:-1 position:50%
+you can construct
+a variant qualifier for it.
+
+
+83
+00:03:59,039 --> 00:04:01,074 line:-1
+You can also combine
+multiple predicates
+
+
+84
+00:04:01.074 --> 00:04:03.076 line:-1 position:50%
+to create a compound predicate
+
+
+85
+00:04:03.076 --> 00:04:06.746 line:-1 position:50%
+and use them to create
+your variant qualifier.
+
+
+86
+00:04:06.746 --> 00:04:08.815 line:-1 position:50%
+Any property on variant
+can be used
+
+
+87
+00:04:08.815 --> 00:04:11.551 line:-1 position:50%
+to create a predicate against.
+
+
+88
+00:04:11.551 --> 00:04:13.787 line:-1 position:50%
+For properties
+such as audio channel count,
+
+
+89
+00:04:13.787 --> 00:04:15.288 line:-1 position:50%
+which cannot be easily expressed
+
+
+90
+00:04:15,288 --> 00:04:17,624 line:-1
+using the predicate
+format string,
+
+
+91
+00:04:17.624 --> 00:04:20.327 line:-1 position:50%
+we have custom constructors.
+
+
+92
+00:04:20.327 --> 00:04:21.995 line:-1 position:50%
+You can look them up
+in our header doc
+
+
+93
+00:04:21.995 --> 00:04:24.064 line:-1 position:50%
+for variant qualifier.
+
+
+94
+00:04:24,064 --> 00:04:26,333 line:-1
+Once you have
+your variant qualifier,
+
+
+95
+00:04:26.333 --> 00:04:30.971 line:-1 position:50%
+you use it to create something
+called as content configuration.
+
+
+96
+00:04:30,971 --> 00:04:34,441 line:-1
+Each content configuration
+represents a set of video,
+
+
+97
+00:04:34.441 --> 00:04:37.611 line:-1 position:50%
+audio, and subtitle renditions.
+
+
+98
+00:04:37.611 --> 00:04:42.582 line:-1 position:50%
+OK, let's understand
+with an example.
+
+
+99
+00:04:42.582 --> 00:04:44.117 line:-1 position:50%
+Here is the variant qualifier
+
+
+100
+00:04:44.117 --> 00:04:47.220 line:-1 position:50%
+which combines the two
+predicates we saw earlier.
+
+
+101
+00:04:47.220 --> 00:04:50.056 line:-1 position:50%
+Eh, this is compounding. Ha-ha.
+
+
+102
+00:04:50.056 --> 00:04:53.560 line:-1 position:50%
+It informs AVFoundation
+to prefer HDR variants
+
+
+103
+00:04:53,560 --> 00:04:55,762 line:-1
+under five megabits.
+
+
+104
+00:04:55,762 --> 00:04:58,198 line:-1
+We also have a set
+of media selections
+
+
+105
+00:04:58,198 --> 00:05:01,468 line:-1
+representing English
+and French audio,
+
+
+106
+00:05:01.468 --> 00:05:04.137 line:-1 position:50%
+and English subtitle renditions.
+
+
+107
+00:05:04,137 --> 00:05:05,438 line:-1
+Both of these can be used
+
+
+108
+00:05:05.438 --> 00:05:08.775 line:-1 position:50%
+to create a content
+configuration object.
+
+
+109
+00:05:08.775 --> 00:05:11.645 line:-1 position:50%
+You can create multiple
+of these content configurations
+
+
+110
+00:05:11,645 --> 00:05:13,914 line:-1
+and provide it
+to the downloadTask.
+
+
+111
+00:05:13.914 --> 00:05:17.017 line:-1 position:50%
+These multiple content
+configurations are tied together
+
+
+112
+00:05:17.017 --> 00:05:19.819 line:-1 position:50%
+by the download
+configuration interface.
+
+
+113
+00:05:19.819 --> 00:05:23.590 line:-1 position:50%
+This is the root
+which holds everything together.
+
+
+114
+00:05:23,590 --> 00:05:28,094 line:-1
+It is created with an AVURLAsset
+and needs an asset name,
+
+
+115
+00:05:28.094 --> 00:05:30.931 line:-1 position:50%
+and optionally, an image.
+
+
+116
+00:05:30.931 --> 00:05:35.001 line:-1 position:50%
+The asset name and image are
+displayed in the Settings app.
+
+
+117
+00:05:35,001 --> 00:05:38,104 line:-1
+This allows your users
+to manage all of their downloads
+
+
+118
+00:05:38,104 --> 00:05:40,740 line:-1
+in one place
+in the Settings app.
+
+
+119
+00:05:40.740 --> 00:05:43.376 line:-1 position:50%
+And of course, the downloadTask
+can be configured
+
+
+120
+00:05:43.376 --> 00:05:46.680 line:-1 position:50%
+with multiple content
+configurations.
+
+
+121
+00:05:46,680 --> 00:05:48,915 line:-1
+Looking closely,
+
+
+122
+00:05:48,915 --> 00:05:50,784 line:-1
+one of the content
+configurations
+
+
+123
+00:05:50,784 --> 00:05:57,157 line:-1
+will be designated as primary
+and the rest will be auxiliary.
+
+
+124
+00:05:57.157 --> 00:05:59.059 line:-1 position:50%
+The difference
+between the two is
+
+
+125
+00:05:59,059 --> 00:06:02,729 line:-1
+you typically want to download
+a primary set of video, audio,
+
+
+126
+00:06:02.729 --> 00:06:06.066 line:-1 position:50%
+and subtitle renditions
+and then complement them
+
+
+127
+00:06:06,066 --> 00:06:10,070 line:-1
+with additional audio
+or subtitle renditions.
+
+
+128
+00:06:10.070 --> 00:06:12.572 line:-1 position:50%
+By specifying
+your additional renditions
+
+
+129
+00:06:12.572 --> 00:06:15.141 line:-1 position:50%
+as auxiliary content
+configurations,
+
+
+130
+00:06:15.141 --> 00:06:17.444 line:-1 position:50%
+you instruct AVFoundation
+to optimize
+
+
+131
+00:06:17,444 --> 00:06:21,548 line:-1
+and avoid downloading
+multiple video renditions.
+
+
+132
+00:06:21.548 --> 00:06:25.518 line:-1 position:50%
+It becomes more clear
+as we go over an example.
+
+
+133
+00:06:25.518 --> 00:06:28.121 line:-1 position:50%
+Here is the complete example.
+
+
+134
+00:06:28,121 --> 00:06:30,757 line:-1
+First, we start by creating
+a download configuration
+
+
+135
+00:06:30.757 --> 00:06:35.895 line:-1 position:50%
+with AVURLAsset and a title.
+
+
+136
+00:06:35,895 --> 00:06:37,564 line:-1
+The primary content
+configuration
+
+
+137
+00:06:37.564 --> 00:06:39.532 line:-1 position:50%
+is the same one we saw earlier.
+
+
+138
+00:06:39.532 --> 00:06:43.069 line:-1 position:50%
+It is configured to download HDR
+variants under five megabits,
+
+
+139
+00:06:43.069 --> 00:06:47.107 line:-1 position:50%
+with English and French audio
+and English subtitle renditions.
+
+
+140
+00:06:47.107 --> 00:06:50.176 line:-1 position:50%
+In this particular example,
+we would like to complement it
+
+
+141
+00:06:50,176 --> 00:06:52,979 line:-1
+with an auxiliary
+content configuration
+
+
+142
+00:06:52,979 --> 00:06:55,982 position:50%
+to download English audio
+in lossless format.
+
+
+143
+00:06:55,982 --> 00:06:58,218 line:0
+Now we have both
+our content configurations,
+
+
+144
+00:06:58,218 --> 00:07:00,787 position:50%
+which we want to download.
+
+
+145
+00:07:00,787 --> 00:07:02,088 position:50%
+Make sure to set
+
+
+146
+00:07:02,088 --> 00:07:06,693 line:0
+optimizesAuxiliary
+ContentConfigurations to true.
+
+
+147
+00:07:06,693 --> 00:07:08,928 line:0
+By the way, it is true
+by default,
+
+
+148
+00:07:08,928 --> 00:07:12,932 position:50%
+and it allows AVFoundation
+to choose lossless variant,
+
+
+149
+00:07:12,932 --> 00:07:16,102 line:0
+such that the lossless
+variant’s video rendition
+
+
+150
+00:07:16,102 --> 00:07:19,906 position:50%
+is the same as the primary
+content configuration.
+
+
+151
+00:07:19,906 --> 00:07:22,509 line:0
+Setting it to false
+may cause lossless variant
+
+
+152
+00:07:22,509 --> 00:07:24,778 line:0
+to be evaluated independently,
+
+
+153
+00:07:24,778 --> 00:07:28,648 position:50%
+which may cause duplicate video
+renditions to be downloaded.
+
+
+154
+00:07:28,648 --> 00:07:32,419 line:0
+This may increase your download
+size, which we don’t want.
+
+
+155
+00:07:32,419 --> 00:07:36,189 line:0
+OK, once you have
+the download configuration,
+
+
+156
+00:07:36,189 --> 00:07:38,858 line:0
+you can use it
+to create the downloadTask.
+
+
+157
+00:07:38,858 --> 00:07:42,228 line:-1
+You resume the downloadTask
+to start the download.
+
+
+158
+00:07:42,228 --> 00:07:43,863 line:-1
+Starting in iOS 15,
+
+
+159
+00:07:43,863 --> 00:07:46,533 line:-1
+you can also observe the
+progress of the downloadTask
+
+
+160
+00:07:46,533 --> 00:07:48,735 line:-1
+using NSProgress interface.
+
+
+161
+00:07:48.735 --> 00:07:52.005 line:-1 position:50%
+The NSProgress object
+is KVO-observable,
+
+
+162
+00:07:52,005 --> 00:07:55,375 line:-1
+and you can use it
+to update your user interface.
+
+
+163
+00:07:55,375 --> 00:07:57,010 line:-1
+Moving on.
+
+
+164
+00:07:57,010 --> 00:07:59,679 line:-1
+We understand that some of you
+may have business logic
+
+
+165
+00:07:59.679 --> 00:08:01.214 line:-1 position:50%
+for selecting variants,
+
+
+166
+00:08:01,214 --> 00:08:04,384 line:-1
+which may be harder
+to express via predicates.
+
+
+167
+00:08:04.384 --> 00:08:07.220 line:-1 position:50%
+For such cases,
+you can also choose
+
+
+168
+00:08:07,220 --> 00:08:10,557 line:-1
+to choose the variants
+you want to download explicitly.
+
+
+169
+00:08:10.557 --> 00:08:12.525 line:-1 position:50%
+Here in this example,
+
+
+170
+00:08:12.525 --> 00:08:15.695 line:-1 position:50%
+we have already picked our
+primary and auxiliary variant
+
+
+171
+00:08:15,695 --> 00:08:18,064 line:-1
+and the media selections
+to go with it.
+
+
+172
+00:08:18,064 --> 00:08:21,634 position:50%
+We can instruct AVFoundation
+to download them as is,
+
+
+173
+00:08:21,634 --> 00:08:25,205 line:0
+by creating a qualifier
+with the variant directly.
+
+
+174
+00:08:25,205 --> 00:08:27,841 position:50%
+Be careful to select variants
+so that they are playable
+
+
+175
+00:08:27,841 --> 00:08:30,610 line:0
+on the device
+where they are downloaded.
+
+
+176
+00:08:30,610 --> 00:08:32,412 line:-1
+That's all we have today, folks.
+
+
+177
+00:08:32.412 --> 00:08:33.580 line:-1 position:50%
+To wrap up,
+
+
+178
+00:08:33.580 --> 00:08:36.182 line:-1 position:50%
+we looked at how you can
+inspect HLS variants
+
+
+179
+00:08:36.182 --> 00:08:38.351 line:-1 position:50%
+and use them to configure
+the downloadTask.
+
+
+180
+00:08:38.351 --> 00:08:41.254 line:-1 position:50%
+Along the way, we encountered
+different interfaces
+
+
+181
+00:08:41.254 --> 00:08:43.923 line:-1 position:50%
+for downloadTask configuration.
+
+
+182
+00:08:43.923 --> 00:08:46.426 line:-1 position:50%
+The first one was
+variant qualifier.
+
+
+183
+00:08:46.426 --> 00:08:49.496 line:-1 position:50%
+This is used to express
+your variant preferences.
+
+
+184
+00:08:49.496 --> 00:08:52.465 line:-1 position:50%
+Then we saw content
+configuration interface.
+
+
+185
+00:08:52.465 --> 00:08:54.534 line:-1 position:50%
+The content configuration
+ties together
+
+
+186
+00:08:54,534 --> 00:08:58,738 line:-1
+your variant preferences and
+your media selection choices.
+
+
+187
+00:08:58.738 --> 00:09:01.374 line:-1 position:50%
+Finally, we saw
+the download configuration.
+
+
+188
+00:09:01.374 --> 00:09:03.610 line:-1 position:50%
+The download configuration
+is the root interface
+
+
+189
+00:09:03,610 --> 00:09:06,045 line:-1
+which ties everything together.
+
+
+190
+00:09:06.045 --> 00:09:08.581 line:-1 position:50%
+Last, but not the least,
+we also learned that
+
+
+191
+00:09:08.581 --> 00:09:12.719 line:-1 position:50%
+you can monitor your
+downloadTask using NSProgress.
+
+
+192
+00:09:12,719 --> 00:09:15,588 line:-1
+For more information,
+check our header docs.
+
+
+193
+00:09:15,588 --> 00:09:17,624 line:-1
+They're very well commented.
+
+
+194
+00:09:17.624 --> 00:09:19.692 line:-1 position:50%
+Thank you for watching
+and bye-bye!
+
+
+195
+00:09:19,692 --> 00:09:23,696 align:center size:2% line:0
+♪
+

@@ -1,0 +1,2385 @@
+1
+00:00:03,871 --> 00:00:06,540 line:-1
+Hello and welcome to WWDC.
+
+
+2
+00:00:08,642 --> 00:00:12,079 line:0
+Hello, everyone, and welcome to
+"Synchronize Health Data with HealthKit".
+
+
+3
+00:00:12,145 --> 00:00:13,146 line:0
+My name is Netra,
+
+
+4
+00:00:13,213 --> 00:00:15,415 line:0
+and I'm a software developer
+on the HealthKit team.
+
+
+5
+00:00:15,916 --> 00:00:20,020 line:-2
+Our users store their most private
+and personal information on our devices
+
+
+6
+00:00:20,087 --> 00:00:21,555 line:-1
+in the form of health data.
+
+
+7
+00:00:22,089 --> 00:00:23,457 line:-1
+On Apple platforms,
+
+
+8
+00:00:23,524 --> 00:00:26,860 line:-2
+HealthKit is the foundation
+that provides easy access to this data.
+
+
+9
+00:00:27,694 --> 00:00:30,364 line:-2
+HealthKit also enables
+all of the rich experiences
+
+
+10
+00:00:30,430 --> 00:00:32,031 line:-1
+you have created in your apps.
+
+
+11
+00:00:32,566 --> 00:00:35,802 line:-2
+As a result, we are all part
+of this large health ecosystem.
+
+
+12
+00:00:36,436 --> 00:00:39,540 line:-2
+The goal of this health ecosystem
+is to empower our users.
+
+
+13
+00:00:40,174 --> 00:00:44,011 line:-2
+Our users may access their health data
+from any part of this ecosystem.
+
+
+14
+00:00:44,077 --> 00:00:46,813 line:-2
+From Apple Watch,
+from the apps released by Apple
+
+
+15
+00:00:46,880 --> 00:00:48,715 line:-1
+all from all your amazing apps.
+
+
+16
+00:00:49,683 --> 00:00:52,386 line:-2
+As such, we never want
+to surprise our users
+
+
+17
+00:00:52,452 --> 00:00:54,555 line:-2
+with the changes we make
+to their health data.
+
+
+18
+00:00:55,255 --> 00:00:58,292 line:-2
+While we all want to be good citizens
+of this health ecosystem,
+
+
+19
+00:00:58,358 --> 00:00:59,960 line:-1
+it can get quite challenging.
+
+
+20
+00:01:00,561 --> 00:01:04,331 line:-2
+In this talk, we here at HealthKit
+are going to help you do just that.
+
+
+21
+00:01:04,864 --> 00:01:07,935 line:-2
+So let's remember that our goal
+is to empower our users.
+
+
+22
+00:01:08,502 --> 00:01:11,371 line:-2
+Users must always remain
+in control of their data
+
+
+23
+00:01:11,438 --> 00:01:14,708 line:-2
+and changes to health data
+must always reflect user intent.
+
+
+24
+00:01:15,843 --> 00:01:18,145 line:-1
+Today, we look at two important topics.
+
+
+25
+00:01:18,779 --> 00:01:21,448 line:-2
+First, we look at monitoring changes
+in HealthKit.
+
+
+26
+00:01:22,416 --> 00:01:26,320 line:-2
+We know that data can be read or written
+from any part of the health ecosystem.
+
+
+27
+00:01:26,753 --> 00:01:29,756 line:-2
+This health data can be used
+to power multiple types of apps
+
+
+28
+00:01:29,823 --> 00:01:31,325 line:-1
+or data visualizations.
+
+
+29
+00:01:31,959 --> 00:01:34,862 line:-2
+Our apps must be equipped
+to react appropriately
+
+
+30
+00:01:34,928 --> 00:01:36,296 line:-1
+to the changes in HealthKit.
+
+
+31
+00:01:37,631 --> 00:01:40,701 line:-2
+We will then dive into maintaining
+an external data store
+
+
+32
+00:01:40,767 --> 00:01:42,302 line:-1
+in sync with HealthKit,
+
+
+33
+00:01:42,369 --> 00:01:45,205 line:-2
+and we'll see how HealthKit
+can make this really easy for you.
+
+
+34
+00:01:46,640 --> 00:01:50,110 line:-2
+We'll begin with our first topic,
+monitoring changes in HealthKit.
+
+
+35
+00:01:50,677 --> 00:01:53,380 line:-2
+Let's build an app
+to work through these concepts.
+
+
+36
+00:01:53,714 --> 00:01:56,416 line:-2
+This is an app for patients
+recovering from an injury.
+
+
+37
+00:01:56,683 --> 00:01:59,553 line:-2
+This app let's patients track
+their daily step count.
+
+
+38
+00:02:00,254 --> 00:02:01,555 line:-1
+As time goes on,
+
+
+39
+00:02:01,622 --> 00:02:04,358 line:-2
+they want to monitor
+the progress in their daily step count.
+
+
+40
+00:02:04,424 --> 00:02:07,427 line:-2
+Additionally, our patient also visits
+the physical therapist
+
+
+41
+00:02:07,494 --> 00:02:08,762 line:-1
+a couple of times a week
+
+
+42
+00:02:08,829 --> 00:02:11,164 line:-1
+and completes certain walking tests.
+
+
+43
+00:02:11,231 --> 00:02:14,268 line:-2
+The test is a six-minute
+walking distance test.
+
+
+44
+00:02:14,334 --> 00:02:16,537 line:-2
+It measures the distance
+covered by a patient
+
+
+45
+00:02:16,603 --> 00:02:19,306 line:-2
+while walking on a flat surface
+for six minutes.
+
+
+46
+00:02:19,940 --> 00:02:23,610 line:-2
+The physical therapist enters
+the results of this test on their machine
+
+
+47
+00:02:23,677 --> 00:02:27,381 line:-2
+and data is synced over
+to the user's iPhone as a weekly report.
+
+
+48
+00:02:28,415 --> 00:02:32,286 line:-2
+One of the best ways to monitor
+such important data is via a graph.
+
+
+49
+00:02:32,819 --> 00:02:36,390 line:-2
+A patient can easily see the uptrend
+or downtrend in their steps count
+
+
+50
+00:02:36,456 --> 00:02:39,026 line:-2
+with out being too concerned
+with actual values.
+
+
+51
+00:02:39,092 --> 00:02:41,962 line:-2
+Here we have a graph
+that is of great interest to our patient
+
+
+52
+00:02:42,029 --> 00:02:43,430 line:-1
+and the physical therapist.
+
+
+53
+00:02:43,797 --> 00:02:47,734 line:-2
+It tracks the patient's total step count
+over each day of the past week.
+
+
+54
+00:02:48,135 --> 00:02:50,971 line:-2
+Now steps can be recorded
+from both Apple Watch and iPhone.
+
+
+55
+00:02:51,672 --> 00:02:55,509 line:-2
+We want to ensure that we get
+an accurate count of steps taken in a day.
+
+
+56
+00:02:56,210 --> 00:02:58,812 line:-2
+The first thing you do
+when creating a graph like this
+
+
+57
+00:02:58,879 --> 00:03:01,481 line:-2
+is to reach for
+the HKStatisticsCollectionQuery.
+
+
+58
+00:03:02,182 --> 00:03:05,419 line:-2
+This is the first query you should
+reach for when creating most graphs.
+
+
+59
+00:03:06,086 --> 00:03:08,355 line:0
+You might have already learned
+all about this query
+
+
+60
+00:03:08,422 --> 00:03:11,158 line:0
+in our previous talk,
+"Getting Started with HealthKit".
+
+
+61
+00:03:11,225 --> 00:03:13,126 line:0
+If not, and if it is new to you,
+
+
+62
+00:03:13,193 --> 00:03:15,262 line:0
+you might want to go
+watch that talk first.
+
+
+63
+00:03:15,696 --> 00:03:20,033 line:-2
+In fact, we'll use the SmoothWalker app
+created in that talk to build our app.
+
+
+64
+00:03:20,834 --> 00:03:24,538 line:-2
+The graphs that we just created
+need to be sent to the remote server
+
+
+65
+00:03:24,605 --> 00:03:27,774 line:-2
+so that the physical therapist
+who is interested in the user's progress
+
+
+66
+00:03:27,841 --> 00:03:29,109 line:-1
+can read them as well.
+
+
+67
+00:03:29,776 --> 00:03:30,911 line:-1
+How would this look like?
+
+
+68
+00:03:32,145 --> 00:03:35,349 line:-2
+First, we'd send our initial
+graph of the week to the server.
+
+
+69
+00:03:37,384 --> 00:03:40,454 line:-2
+Next, if there are any changes
+to the data for the week,
+
+
+70
+00:03:40,521 --> 00:03:42,789 line:-1
+for instance, with more steps collected,
+
+
+71
+00:03:42,856 --> 00:03:46,093 line:-2
+the new data for the week
+would have to be sent over to the server.
+
+
+72
+00:03:46,727 --> 00:03:47,961 line:-1
+For our purposes here,
+
+
+73
+00:03:48,028 --> 00:03:51,098 line:-2
+we are considering the external data
+to be a remote server,
+
+
+74
+00:03:51,598 --> 00:03:53,867 line:-2
+but it might as well be
+an external database
+
+
+75
+00:03:53,934 --> 00:03:55,903 line:-1
+maintained locally on the device.
+
+
+76
+00:03:55,969 --> 00:03:59,273 line:-2
+It could be using Core Data
+or even a SQLite database.
+
+
+77
+00:04:00,507 --> 00:04:01,942 line:-1
+Now we know that we can use
+
+
+78
+00:04:02,009 --> 00:04:04,945 line:-2
+the HKStatisticsCollectionQuery
+to load data,
+
+
+79
+00:04:05,012 --> 00:04:08,949 line:-2
+we'd need to run the query
+at a regular cadence to fetch new data.
+
+
+80
+00:04:09,016 --> 00:04:12,085 line:-2
+This could be at app launch
+and maybe every few hours after that.
+
+
+81
+00:04:12,853 --> 00:04:16,356 line:-2
+But there are some downsides
+to using it for reacting to new changes.
+
+
+82
+00:04:17,190 --> 00:04:19,293 line:-1
+If data does not change often enough,
+
+
+83
+00:04:19,358 --> 00:04:21,762 line:-2
+we would be running
+the HKStatisticsCollectionQuery
+
+
+84
+00:04:21,827 --> 00:04:24,765 line:-2
+multiple times,
+leading to redundant calculations.
+
+
+85
+00:04:25,899 --> 00:04:29,169 line:-2
+We would also be sending
+all the data every single time.
+
+
+86
+00:04:29,236 --> 00:04:31,371 line:-2
+This would be a waste
+of network resources.
+
+
+87
+00:04:32,172 --> 00:04:35,475 line:-2
+HealthKit has another tool
+specifically for use cases like this.
+
+
+88
+00:04:35,943 --> 00:04:38,278 line:-1
+It's called the HKAnchoredObjectQuery.
+
+
+89
+00:04:38,679 --> 00:04:40,247 line:-1
+The HKAnchoredObjectQuery
+
+
+90
+00:04:40,314 --> 00:04:42,983 line:-2
+allows us to monitor updates
+to the health database.
+
+
+91
+00:04:43,884 --> 00:04:46,854 line:-2
+It provides a snapshot of changes
+in the health database.
+
+
+92
+00:04:47,554 --> 00:04:50,991 line:-2
+This snapshot includes both
+new samples and deleted samples.
+
+
+93
+00:04:51,391 --> 00:04:52,993 line:-1
+Let's see how this query works.
+
+
+94
+00:04:54,127 --> 00:04:55,329 line:0
+As the name suggests,
+
+
+95
+00:04:55,395 --> 00:04:57,731 line:0
+an anchored object query
+requires an anchor.
+
+
+96
+00:04:58,665 --> 00:05:01,068 line:0
+An anchor represents
+a specific point in time
+
+
+97
+00:05:01,134 --> 00:05:03,437 line:0
+in the evolution of the health database.
+
+
+98
+00:05:03,504 --> 00:05:06,940 line:0
+Health data could have been added
+or deleted after this point in time.
+
+
+99
+00:05:08,041 --> 00:05:10,110 line:0
+This anchor allows you to identify
+
+
+100
+00:05:10,177 --> 00:05:12,913 line:0
+all the samples you last received
+from this query.
+
+
+101
+00:05:13,780 --> 00:05:15,782 line:0
+When you provide HealthKit
+with this anchor,
+
+
+102
+00:05:15,849 --> 00:05:18,652 line:0
+HealthKit will only return
+the changes since that point.
+
+
+103
+00:05:20,254 --> 00:05:23,624 line:0
+Now, initially, for the first query
+our anchor will be nil.
+
+
+104
+00:05:24,591 --> 00:05:29,463 line:0
+HealthKit at this time
+has samples A, B and C.
+
+
+105
+00:05:30,764 --> 00:05:32,533 line:0
+When you execute the query,
+
+
+106
+00:05:32,599 --> 00:05:36,003 line:0
+HealthKit returns all the data
+based on the data type you specified.
+
+
+107
+00:05:36,603 --> 00:05:40,841 line:0
+In this case, you will receive
+samples A, B and C in your updateHandler.
+
+
+108
+00:05:41,909 --> 00:05:43,377 line:0
+The anchor is updated,
+
+
+109
+00:05:43,443 --> 00:05:46,280 line:0
+and HealthKit gives you
+the new anchor in the updateHandler.
+
+
+110
+00:05:47,481 --> 00:05:48,982 line:0
+It is the last point in time
+
+
+111
+00:05:49,049 --> 00:05:51,618 line:0
+that HealthKit returns samples
+in the updateHandler.
+
+
+112
+00:05:52,653 --> 00:05:56,390 line:0
+Let's say there were more samples added
+since your updateHandler was last called.
+
+
+113
+00:05:56,957 --> 00:05:59,560 line:0
+These include samples D and E.
+
+
+114
+00:06:00,260 --> 00:06:02,796 line:0
+Additionally, sample B
+has since been deleted.
+
+
+115
+00:06:03,363 --> 00:06:04,965 line:0
+For every subsequent query run,
+
+
+116
+00:06:05,032 --> 00:06:07,067 line:0
+only the changes since the previous anchor
+
+
+117
+00:06:07,134 --> 00:06:09,169 line:0
+will be returned in the updateHandler.
+
+
+118
+00:06:09,236 --> 00:06:11,538 line:0
+These will include samples D and E,
+
+
+119
+00:06:11,605 --> 00:06:14,641 line:0
+the deletion of sample B,
+but nothing about A and C.
+
+
+120
+00:06:15,976 --> 00:06:18,212 line:-1
+When we use the HKAnchoredObjectQuery
+
+
+121
+00:06:18,278 --> 00:06:19,880 line:-1
+or any query in HealthKit,
+
+
+122
+00:06:19,947 --> 00:06:21,949 line:-2
+we must think a little
+about the type of data
+
+
+123
+00:06:22,015 --> 00:06:23,517 line:-1
+and use case we are dealing with.
+
+
+124
+00:06:23,884 --> 00:06:27,487 line:-2
+In the case of steps, we don't really care
+about the actual samples itself.
+
+
+125
+00:06:27,988 --> 00:06:30,624 line:-2
+In fact, Apple Watch
+was released five years ago now.
+
+
+126
+00:06:31,124 --> 00:06:33,794 line:-2
+That's a lot of data
+being generated by these devices.
+
+
+127
+00:06:33,861 --> 00:06:35,596 line:-1
+That's a lot of data to sync up.
+
+
+128
+00:06:35,662 --> 00:06:38,866 line:-2
+We just want a cumulative statistic,
+not every single sample.
+
+
+129
+00:06:39,867 --> 00:06:43,470 line:-2
+There are other cases where we might care
+about the individual samples.
+
+
+130
+00:06:43,537 --> 00:06:46,607 line:-2
+These could be samples
+that are not generated very often.
+
+
+131
+00:06:47,241 --> 00:06:49,476 line:-1
+Each data type can be treated differently.
+
+
+132
+00:06:50,110 --> 00:06:52,679 line:-2
+We must spend some time
+thinking about how we want to query
+
+
+133
+00:06:52,746 --> 00:06:53,914 line:-1
+and sync our data.
+
+
+134
+00:06:54,381 --> 00:06:57,851 line:-2
+The task we are trying to accomplish
+drives the type of query we want.
+
+
+135
+00:06:59,319 --> 00:07:02,923 line:-2
+Querying for the minimal amount of data
+has its performance benefits as well.
+
+
+136
+00:07:03,557 --> 00:07:04,825 line:-1
+For our current use case,
+
+
+137
+00:07:04,892 --> 00:07:08,662 line:-2
+we just want the statistical graph
+to be available to the physical therapist.
+
+
+138
+00:07:08,729 --> 00:07:10,097 line:-1
+How do we do this?
+
+
+139
+00:07:10,163 --> 00:07:11,832 line:-1
+We can always run over our samples
+
+
+140
+00:07:11,899 --> 00:07:14,902 line:-2
+from the HKAnchoredObjectQuery
+and compute the graph.
+
+
+141
+00:07:14,968 --> 00:07:17,638 line:-2
+But why not make
+the two queries work together?
+
+
+142
+00:07:18,205 --> 00:07:19,673 line:-1
+With the anchored object query,
+
+
+143
+00:07:19,740 --> 00:07:23,477 line:-2
+we can set our predicate and sample type
+to exactly what we are looking for.
+
+
+144
+00:07:23,911 --> 00:07:27,080 line:-2
+When the anchored object query
+updates you with changes in HealthKit,
+
+
+145
+00:07:28,282 --> 00:07:30,250 line:-2
+you can look at the dates
+of the returned samples
+
+
+146
+00:07:30,317 --> 00:07:33,387 line:-2
+and use that to create and run
+the statistics collection query.
+
+
+147
+00:07:34,922 --> 00:07:38,892 line:-2
+The statistics returned for those days
+can then be sent to the remote computer
+
+
+148
+00:07:38,959 --> 00:07:40,527 line:-1
+as updated graph data.
+
+
+149
+00:07:41,528 --> 00:07:44,031 line:-2
+Now we just send
+the new data to the server.
+
+
+150
+00:07:44,831 --> 00:07:47,201 line:-2
+This, again,
+might be a local Core Data model
+
+
+151
+00:07:47,267 --> 00:07:49,903 line:-1
+or an NSURLSession for a remote server.
+
+
+152
+00:07:49,970 --> 00:07:51,405 line:-1
+To understand this better,
+
+
+153
+00:07:51,471 --> 00:07:53,874 line:-2
+we'll take a look at
+how this would look like in code.
+
+
+154
+00:07:54,975 --> 00:07:57,878 line:-2
+First, we'll set the parameters
+for the anchored object query.
+
+
+155
+00:07:58,312 --> 00:08:00,147 line:-1
+The sample type is step count.
+
+
+156
+00:08:01,081 --> 00:08:04,051 line:-2
+We'll set the anchor parameter
+using the PersistedAnchor.
+
+
+157
+00:08:04,651 --> 00:08:06,954 line:-2
+Persisting the anchor
+allows us to only retrieve
+
+
+158
+00:08:07,020 --> 00:08:09,423 line:-2
+the changes in HealthKit
+since the last query.
+
+
+159
+00:08:11,491 --> 00:08:14,027 line:-2
+We need the same behavior
+for the initialResultsHandler
+
+
+160
+00:08:14,094 --> 00:08:15,429 line:-1
+and the updateHandler,
+
+
+161
+00:08:15,495 --> 00:08:18,232 line:-2
+and so we'll set the same block
+for the handler variable.
+
+
+162
+00:08:19,766 --> 00:08:22,903 line:-2
+In the handler, we'll unwrap
+the samples returned from HealthKit.
+
+
+163
+00:08:24,204 --> 00:08:26,106 line:-1
+We'll create a predicate from the samples.
+
+
+164
+00:08:26,173 --> 00:08:28,942 line:-2
+This might be the dates
+for which the samples were retrieved.
+
+
+165
+00:08:29,576 --> 00:08:31,111 line:-1
+This is the predicate we'll be using
+
+
+166
+00:08:31,178 --> 00:08:33,380 line:-2
+to initialize
+our statistics collection query.
+
+
+167
+00:08:34,914 --> 00:08:37,518 line:-2
+Here we also need to update
+the PersistedAnchor.
+
+
+168
+00:08:38,986 --> 00:08:42,054 line:-2
+At the end of this block,
+we can call the fetchStatistics method
+
+
+169
+00:08:42,121 --> 00:08:44,258 line:-2
+that creates
+the HKStatisticsCollectionQuery
+
+
+170
+00:08:44,324 --> 00:08:45,559 line:-1
+using the predicate.
+
+
+171
+00:08:46,994 --> 00:08:49,096 line:-1
+We'll initialize the HKAnchoredObjectQuery
+
+
+172
+00:08:49,162 --> 00:08:50,564 line:-1
+with the parameters we set.
+
+
+173
+00:08:51,098 --> 00:08:54,968 line:-2
+These include sample type,
+a nil predicate, the anchor
+
+
+174
+00:08:55,035 --> 00:08:57,704 line:-2
+and lastly, the resultsHandler
+and the updateHandler.
+
+
+175
+00:09:00,040 --> 00:09:02,709 line:-2
+Finally, we'll execute the query
+on the healthStore.
+
+
+176
+00:09:03,744 --> 00:09:06,046 line:-2
+Let's see how
+the fetchStatistics method creates
+
+
+177
+00:09:06,113 --> 00:09:08,115 line:-1
+the HKStatisticsCollectionQuery.
+
+
+178
+00:09:08,482 --> 00:09:10,317 line:-1
+Once again, we set our parameters.
+
+
+179
+00:09:10,918 --> 00:09:13,820 line:-2
+We want our statistics collection query
+bucketed by days.
+
+
+180
+00:09:14,321 --> 00:09:17,591 line:-2
+To achieve this, we'll set the anchor date
+to Monday at midnight
+
+
+181
+00:09:17,658 --> 00:09:19,760 line:-1
+and an interval parameter of one day.
+
+
+182
+00:09:20,327 --> 00:09:22,663 line:-2
+The sample type
+will once again be step count.
+
+
+183
+00:09:24,865 --> 00:09:27,601 line:-2
+We can then initialize
+the HKStatisticsCollectionQuery
+
+
+184
+00:09:27,668 --> 00:09:28,969 line:-1
+with these parameters.
+
+
+185
+00:09:29,603 --> 00:09:31,238 line:-1
+The options will be cumulativeSum
+
+
+186
+00:09:31,305 --> 00:09:33,774 line:-2
+since we want a total step count
+for each day.
+
+
+187
+00:09:34,575 --> 00:09:36,376 line:-1
+As you can see, we have provided
+
+
+188
+00:09:36,443 --> 00:09:39,379 line:-2
+the predicate created in
+the anchored object query over here.
+
+
+189
+00:09:41,114 --> 00:09:44,318 line:-2
+In our initialResultsHandler,
+we unwrap the statisticsCollection
+
+
+190
+00:09:44,384 --> 00:09:47,387 line:-2
+and then simply send over this data
+to our remote server.
+
+
+191
+00:09:49,623 --> 00:09:51,692 line:-1
+And as always, we only get our updates
+
+
+192
+00:09:51,758 --> 00:09:53,961 line:-2
+after we execute the query
+on the healthStore.
+
+
+193
+00:09:55,062 --> 00:09:58,866 line:-2
+We just saw how you can send data
+from HealthKit to an external server.
+
+
+194
+00:09:58,932 --> 00:10:00,534 line:-1
+Now we need to get to the next step,
+
+
+195
+00:10:00,601 --> 00:10:03,036 line:-2
+which is receiving data
+from the external store
+
+
+196
+00:10:03,103 --> 00:10:04,905 line:-1
+and saving it to HealthKit as well.
+
+
+197
+00:10:05,906 --> 00:10:09,243 line:-2
+Like we saw earlier, our patient visits
+the physical therapist's office
+
+
+198
+00:10:09,309 --> 00:10:12,246 line:-2
+a couple of times a week
+and completes six-minute walk tests.
+
+
+199
+00:10:13,013 --> 00:10:14,281 line:-1
+The six-minute walk test
+
+
+200
+00:10:14,348 --> 00:10:16,550 line:-2
+is the amount of distance
+covered by an individual
+
+
+201
+00:10:16,617 --> 00:10:19,419 line:-2
+while walking for six minutes
+on a flat surface.
+
+
+202
+00:10:19,486 --> 00:10:21,255 line:-1
+It is often used by physical therapists
+
+
+203
+00:10:21,321 --> 00:10:23,857 line:-2
+to gauge their patient's
+exercise capacity.
+
+
+204
+00:10:24,858 --> 00:10:28,462 line:-2
+This year, we introduced a new set
+of mobility types in HealthKit.
+
+
+205
+00:10:28,529 --> 00:10:31,532 line:-2
+One of the data types
+is the six-minute walk test distance.
+
+
+206
+00:10:32,132 --> 00:10:35,035 line:-2
+These work perfectly
+for the purposes of our app.
+
+
+207
+00:10:35,102 --> 00:10:38,238 line:-2
+We can save test data
+received from the physical therapist
+
+
+208
+00:10:38,305 --> 00:10:40,474 line:-1
+as six-minute walk test distance samples.
+
+
+209
+00:10:40,974 --> 00:10:45,179 line:-2
+In our app, the physical therapist
+records these six-minute walk test values
+
+
+210
+00:10:45,245 --> 00:10:47,915 line:-2
+and a weekly report is synced
+to the patient's device.
+
+
+211
+00:10:48,448 --> 00:10:51,985 line:-2
+The weekly report contains a graph
+of the six-minute walk test distance
+
+
+212
+00:10:52,052 --> 00:10:53,453 line:-1
+for each day of the week.
+
+
+213
+00:10:54,688 --> 00:10:58,892 line:-2
+We also have the individual samples
+from the graph displayed underneath it.
+
+
+214
+00:10:58,959 --> 00:11:01,562 line:-2
+This is in case the physical therapist
+or patient
+
+
+215
+00:11:01,628 --> 00:11:04,731 line:-2
+wants to dig deeper
+into each individual test result.
+
+
+216
+00:11:04,798 --> 00:11:06,533 line:-1
+This takes us back to the idea
+
+
+217
+00:11:06,600 --> 00:11:09,636 line:-2
+that each data type
+needs to be treated differently.
+
+
+218
+00:11:09,703 --> 00:11:13,607 line:-2
+We must think about the type of data we
+are dealing with and what our use case is.
+
+
+219
+00:11:13,674 --> 00:11:15,642 line:-1
+The sixMinuteWalkTestDistance
+
+
+220
+00:11:15,709 --> 00:11:17,978 line:-2
+is not written to HealthKit
+very frequently,
+
+
+221
+00:11:18,045 --> 00:11:20,047 line:-1
+and the patient or the physical therapist
+
+
+222
+00:11:20,113 --> 00:11:22,783 line:-2
+might be interested
+in each individual test sample.
+
+
+223
+00:11:23,317 --> 00:11:25,519 line:-1
+So, unlike steps, which we saw earlier,
+
+
+224
+00:11:25,586 --> 00:11:28,055 line:-2
+in this graph
+it is worth plotting each sample.
+
+
+225
+00:11:28,522 --> 00:11:32,693 line:-2
+Earlier, we were syncing step samples
+from the device to a remote server.
+
+
+226
+00:11:32,759 --> 00:11:36,530 line:-2
+Now we have this weekly report
+on the physical therapist's server.
+
+
+227
+00:11:36,597 --> 00:11:39,366 line:-2
+We want to sync it from the server
+to the patient's device
+
+
+228
+00:11:39,433 --> 00:11:42,002 line:-2
+and save the corresponding samples
+in HealthKit.
+
+
+229
+00:11:43,437 --> 00:11:46,974 line:-2
+This will allow the patient to view
+their sixMinuteWalkTestDistance graph
+
+
+230
+00:11:47,040 --> 00:11:49,810 line:-2
+on their app
+along with the individual test samples.
+
+
+231
+00:11:50,677 --> 00:11:54,314 line:-2
+When saving changes to HealthKit,
+there are a couple things to keep in mind.
+
+
+232
+00:11:54,381 --> 00:11:57,951 line:-2
+We only want to save incremental samples
+in HealthKit.
+
+
+233
+00:11:58,018 --> 00:12:00,754 line:-2
+Simply removing
+and then re-saving all the data
+
+
+234
+00:12:00,821 --> 00:12:04,091 line:-2
+can result in an inconsistent state
+of the user's health data.
+
+
+235
+00:12:04,157 --> 00:12:07,194 line:-2
+New samples reflect new health data
+about the user,
+
+
+236
+00:12:07,261 --> 00:12:10,664 line:-2
+for instance, a new six-minute walk test
+or new steps covered.
+
+
+237
+00:12:10,731 --> 00:12:13,400 line:-2
+Maybe even the change in weight
+recorded by the user.
+
+
+238
+00:12:14,401 --> 00:12:17,971 line:-2
+When deleting a sample, you need
+to ensure that it is actually a sample
+
+
+239
+00:12:18,038 --> 00:12:20,207 line:-1
+that was previously written by your app.
+
+
+240
+00:12:20,274 --> 00:12:23,210 line:-2
+You can't delete data
+you didn't explicitly save yourself.
+
+
+241
+00:12:24,077 --> 00:12:28,549 line:-2
+A good best practice here is to first
+query for the sample and then delete it.
+
+
+242
+00:12:29,850 --> 00:12:33,554 line:-2
+Adding or deleting a sample
+should always reflect user intent.
+
+
+243
+00:12:33,620 --> 00:12:35,656 line:-2
+If the user didn't mean
+to delete a sample,
+
+
+244
+00:12:35,722 --> 00:12:37,624 line:-2
+then you should probably
+not be deleting it.
+
+
+245
+00:12:38,825 --> 00:12:41,428 line:-2
+Now there are some challenges
+that arise here.
+
+
+246
+00:12:41,495 --> 00:12:45,465 line:-2
+What if the physical therapist
+wanted to update a specific test?
+
+
+247
+00:12:45,532 --> 00:12:48,268 line:-2
+For example,
+for a test on the 18th of June,
+
+
+248
+00:12:48,335 --> 00:12:51,572 line:-2
+the patient covered 400 meters
+in a six-minute walking test.
+
+
+249
+00:12:52,105 --> 00:12:55,075 line:-2
+This data was later updated
+by the physical therapist
+
+
+250
+00:12:55,142 --> 00:12:56,543 line:-1
+to reflect an error.
+
+
+251
+00:12:57,311 --> 00:13:00,414 line:-2
+The distance covered
+was actually 450 meters.
+
+
+252
+00:13:00,480 --> 00:13:02,216 line:-1
+Now this can be a little tricky.
+
+
+253
+00:13:02,549 --> 00:13:06,420 line:-2
+When you edit a sample, you need
+to actually delete and add a new sample.
+
+
+254
+00:13:06,486 --> 00:13:09,823 line:-2
+If you don't,
+you could be saving duplicated samples.
+
+
+255
+00:13:09,890 --> 00:13:12,259 line:-2
+This means
+you have to query for the sample,
+
+
+256
+00:13:12,326 --> 00:13:15,562 line:-2
+match it to the exact sample
+the physical therapist had edited
+
+
+257
+00:13:15,629 --> 00:13:17,164 line:-1
+and then save a new sample.
+
+
+258
+00:13:18,098 --> 00:13:21,435 line:-2
+If there are no edits needed to be made
+to the other samples,
+
+
+259
+00:13:21,502 --> 00:13:23,737 line:-2
+you need to make sure
+that during your changes
+
+
+260
+00:13:23,804 --> 00:13:27,274 line:-2
+you are not saving a duplicated sample
+for any of those either.
+
+
+261
+00:13:28,141 --> 00:13:30,844 line:-2
+Health data is available
+on all of the patient's devices:
+
+
+262
+00:13:30,911 --> 00:13:33,380 line:-1
+their iPhones and their Apple Watches.
+
+
+263
+00:13:33,447 --> 00:13:37,885 line:-2
+The change in samples need to be
+reflected correctly across all devices.
+
+
+264
+00:13:37,951 --> 00:13:40,220 line:-1
+If you have saved a sample on one device,
+
+
+265
+00:13:40,287 --> 00:13:44,124 line:-2
+you need to make sure that you are not
+saving the sample again on another device.
+
+
+266
+00:13:45,192 --> 00:13:49,463 line:-2
+All this time, you have to ensure that
+you're correctly reflecting user intent.
+
+
+267
+00:13:49,530 --> 00:13:51,465 line:-1
+This may appear to be really complex,
+
+
+268
+00:13:51,532 --> 00:13:54,101 line:-2
+but HealthKit actually makes this
+really easy for you.
+
+
+269
+00:13:54,935 --> 00:13:57,137 line:-1
+HealthKit contains two metadata keys
+
+
+270
+00:13:57,204 --> 00:14:01,708 line:-2
+known as the HKMetadataSyncIdentifier
+and the HKMetadataSyncVersion.
+
+
+271
+00:14:01,775 --> 00:14:04,645 line:-2
+The sync identifier is a string,
+and the version is a number.
+
+
+272
+00:14:05,512 --> 00:14:09,650 line:-2
+The identifier allows us to recognize
+a sample anywhere in the health ecosystem
+
+
+273
+00:14:09,716 --> 00:14:12,085 line:-1
+across any of the user's devices.
+
+
+274
+00:14:12,152 --> 00:14:15,522 line:-2
+The version helps us understand
+when the sample has been updated.
+
+
+275
+00:14:16,657 --> 00:14:19,193 line:-2
+When you set a sync identifier
+on a sample,
+
+
+276
+00:14:19,259 --> 00:14:21,962 line:-2
+HealthKit ensures
+that duplicate copies of the sample
+
+
+277
+00:14:22,029 --> 00:14:24,264 line:-2
+are not saved
+in the user's health database.
+
+
+278
+00:14:25,065 --> 00:14:27,968 line:-2
+A combination of the sync identifier
+and the version
+
+
+279
+00:14:28,035 --> 00:14:32,306 line:-2
+allows HealthKit to update samples only
+when the version number has increased.
+
+
+280
+00:14:33,207 --> 00:14:37,511 line:-2
+Additionally, all operations done using
+sync identifiers are transaction safe.
+
+
+281
+00:14:37,878 --> 00:14:39,713 line:-1
+That means if there was any error,
+
+
+282
+00:14:39,780 --> 00:14:43,083 line:-2
+you can be rest assured that your data
+is in a consistent state.
+
+
+283
+00:14:43,684 --> 00:14:46,553 line:-2
+Health data is available
+on all of the user's devices.
+
+
+284
+00:14:47,154 --> 00:14:49,623 line:-2
+Sync identifiers
+allow you to maintain samples
+
+
+285
+00:14:49,690 --> 00:14:51,825 line:-1
+in a consistent state across devices.
+
+
+286
+00:14:52,659 --> 00:14:56,630 line:-2
+In your remote server, you have a sample
+with an identifier and a version one.
+
+
+287
+00:14:57,564 --> 00:15:01,668 line:-2
+Your app syncs a sample from
+the remote server to the patient's iPhone.
+
+
+288
+00:15:02,703 --> 00:15:06,206 line:-2
+Considering that this is the first sample,
+HealthKit saves it successfully.
+
+
+289
+00:15:07,207 --> 00:15:10,244 line:-2
+Now when HealthKit realizes
+a new sample has been saved,
+
+
+290
+00:15:10,310 --> 00:15:13,213 line:-2
+it syncs this over
+to all of the patient's devices.
+
+
+291
+00:15:13,680 --> 00:15:16,984 line:-2
+If the patient had an Apple Watch,
+it would sync it over to the Watch.
+
+
+292
+00:15:18,785 --> 00:15:22,556 line:-2
+If your remote server were also
+syncing data to your app on Watch
+
+
+293
+00:15:22,623 --> 00:15:24,625 line:-1
+and you try to save the sample again,
+
+
+294
+00:15:24,691 --> 00:15:28,161 line:-2
+HealthKit would see that the sample
+already exists and ignore it.
+
+
+295
+00:15:28,929 --> 00:15:32,466 line:-2
+Now if the physical therapist decides
+to update the distance completed
+
+
+296
+00:15:32,533 --> 00:15:35,602 line:-2
+in the six-minute walk test,
+we would update the sample
+
+
+297
+00:15:35,669 --> 00:15:39,840 line:-2
+by keeping the sync identifier consistent
+but increasing the version number.
+
+
+298
+00:15:41,041 --> 00:15:43,844 line:-2
+When this sample is synced
+to the patient's device,
+
+
+299
+00:15:43,911 --> 00:15:46,647 line:-2
+HealthKit notices
+that the version number has increased.
+
+
+300
+00:15:47,714 --> 00:15:50,484 line:-2
+It overwrites the previous sample
+with the new sample.
+
+
+301
+00:15:53,887 --> 00:15:57,157 line:-2
+The sample will again be synced
+to all of the patient's devices.
+
+
+302
+00:15:58,292 --> 00:16:02,029 line:-2
+If the remote server syncs the version two
+of the sample to Apple Watch,
+
+
+303
+00:16:02,095 --> 00:16:04,598 line:-2
+HealthKit would see
+that the sample already exists
+
+
+304
+00:16:04,665 --> 00:16:06,066 line:-1
+and ignore the sample.
+
+
+305
+00:16:06,867 --> 00:16:10,370 line:-2
+As you can see, HealthKit will manage
+all the conflict resolution
+
+
+306
+00:16:10,437 --> 00:16:11,839 line:-1
+while saving and syncing.
+
+
+307
+00:16:11,905 --> 00:16:15,943 line:-2
+The challenging task of versioning
+and syncing has been reduced
+
+
+308
+00:16:16,009 --> 00:16:18,345 line:-2
+to simply maintaining
+consistent identifiers.
+
+
+309
+00:16:18,412 --> 00:16:21,448 line:-2
+We saw the patient's weekly report
+earlier,
+
+
+310
+00:16:21,515 --> 00:16:23,951 line:-2
+but how do we go about
+actually modeling this data?
+
+
+311
+00:16:24,017 --> 00:16:29,022 line:-2
+One way to do this is by representing
+the weekly report as a report class.
+
+
+312
+00:16:29,089 --> 00:16:32,893 line:-2
+This report class can be identified
+with a high-level sync identifier.
+
+
+313
+00:16:33,827 --> 00:16:35,596 line:-1
+The report class will contain a list
+
+
+314
+00:16:35,662 --> 00:16:39,333 line:-2
+of all the sixMinuteWalkTestDistance
+samples from that week.
+
+
+315
+00:16:42,803 --> 00:16:46,206 line:-2
+Each sample can then contain
+a sync identifier metadata key
+
+
+316
+00:16:46,273 --> 00:16:48,775 line:-2
+which is derived
+from the high-level report identifier.
+
+
+317
+00:16:51,812 --> 00:16:55,816 line:-2
+This way, each sample can be uniquely
+referenced across different weeks.
+
+
+318
+00:16:56,550 --> 00:16:59,920 line:-2
+Data can be synced from the remote server
+to the patient's device
+
+
+319
+00:16:59,987 --> 00:17:02,122 line:-1
+in the form of this report class model,
+
+
+320
+00:17:02,189 --> 00:17:06,093 line:-2
+and individual HK samples from this list
+can be saved to HealthKit.
+
+
+321
+00:17:07,160 --> 00:17:09,195 line:-1
+Let's take a look at this in a demo.
+
+
+322
+00:17:09,262 --> 00:17:11,932 line:-2
+We have already created this app,
+SmoothWalker,
+
+
+323
+00:17:11,999 --> 00:17:14,434 line:-2
+in our previous talk
+"Getting Started with HealthKit."
+
+
+324
+00:17:14,501 --> 00:17:17,738 line:-2
+This project is also available
+for download as sample code
+
+
+325
+00:17:17,804 --> 00:17:19,071 line:-1
+on the Developer website.
+
+
+326
+00:17:19,640 --> 00:17:23,076 line:-2
+We want to create this weekly report
+view controller in our app.
+
+
+327
+00:17:23,609 --> 00:17:25,112 line:-1
+When you press the Fetch button,
+
+
+328
+00:17:25,179 --> 00:17:28,147 line:-2
+we want to pull the six-minute walk
+samples from the server
+
+
+329
+00:17:28,214 --> 00:17:30,083 line:-1
+and populate our view controller with it.
+
+
+330
+00:17:30,150 --> 00:17:33,554 line:-2
+Let's take a look at the
+WeeklyReportTableViewController class.
+
+
+331
+00:17:34,154 --> 00:17:35,622 line:-1
+When we select the Fetch button,
+
+
+332
+00:17:35,689 --> 00:17:38,025 line:-2
+the didTapFetchButton method
+will be called.
+
+
+333
+00:17:39,092 --> 00:17:42,462 line:-2
+Here we want to pull the server response
+from the network.
+
+
+334
+00:17:43,230 --> 00:17:45,999 line:-2
+We then want to call
+the handleServerResponse method
+
+
+335
+00:17:46,066 --> 00:17:47,568 line:-1
+with the serverResponse.
+
+
+336
+00:17:48,101 --> 00:17:50,470 line:-2
+Let's implement
+the handleServerResponse method.
+
+
+337
+00:17:51,271 --> 00:17:54,575 line:-2
+Here we want to pull the weekly report
+from the serverResponse
+
+
+338
+00:17:54,641 --> 00:17:56,977 line:-2
+and save the corresponding samples
+to HealthKit.
+
+
+339
+00:17:57,778 --> 00:18:01,782 line:-2
+The first thing we'll do is to pull
+the weekly report from the serverResponse.
+
+
+340
+00:18:03,317 --> 00:18:06,787 line:-2
+After this, we loop over all the samples
+in the weekly report.
+
+
+341
+00:18:07,487 --> 00:18:11,124 line:-2
+As you can see here, we are
+looping over the weekly report samples
+
+
+342
+00:18:11,191 --> 00:18:14,194 line:-2
+and returning an HKQuantitySample
+for each of them.
+
+
+343
+00:18:14,962 --> 00:18:19,099 line:-2
+In this loop, first we'll set
+the parameters for HKQuantitySample.
+
+
+344
+00:18:20,100 --> 00:18:23,103 line:-1
+We have a quantity which has a unit meter,
+
+
+345
+00:18:23,170 --> 00:18:25,739 line:-2
+and the value is pulled
+from the serverHealthSample.
+
+
+346
+00:18:25,806 --> 00:18:28,609 line:-2
+The sampleType
+is sixMinuteWalkTestDistance.
+
+
+347
+00:18:29,209 --> 00:18:31,645 line:-2
+And finally, we have
+the start and end date.
+
+
+348
+00:18:33,580 --> 00:18:37,251 line:-2
+We'll then initialize our
+HKQuantitySample with these parameters.
+
+
+349
+00:18:42,689 --> 00:18:46,994 line:-2
+We have the sample type, the quantity,
+the start and end date,
+
+
+350
+00:18:47,060 --> 00:18:49,096 line:-1
+and, for now, the metadata is "nil."
+
+
+351
+00:18:49,162 --> 00:18:52,833 line:-2
+The samples returned from the loop
+need to be saved to HealthKit.
+
+
+352
+00:18:53,767 --> 00:18:55,969 line:0
+So now, we'll save the samples
+to HealthKit.
+
+
+353
+00:18:56,837 --> 00:19:00,574 line:0
+As you can see, we have saved
+all these samples using the healthStore,
+
+
+354
+00:19:00,641 --> 00:19:04,244 line:-2
+and the completion handler
+will load the new data from HealthKit
+
+
+355
+00:19:04,311 --> 00:19:05,646 line:-1
+to the view controller.
+
+
+356
+00:19:06,280 --> 00:19:08,415 line:-2
+Let's run this code
+and see what it looks like.
+
+
+357
+00:19:12,953 --> 00:19:14,555 line:0
+When we select the Fetch button,
+
+
+358
+00:19:14,621 --> 00:19:18,258 line:0
+the view controller is populated
+with the samples from the weekly report.
+
+
+359
+00:19:19,259 --> 00:19:21,662 line:0
+However,
+when we select the Fetch button again,
+
+
+360
+00:19:21,728 --> 00:19:24,498 line:0
+we can see that duplicated samples
+are saved to HealthKit.
+
+
+361
+00:19:25,032 --> 00:19:26,266 line:0
+This is incorrect.
+
+
+362
+00:19:26,333 --> 00:19:28,735 line:0
+We don't want duplicated data
+in HealthKit.
+
+
+363
+00:19:28,802 --> 00:19:31,238 line:-2
+Let's see how this changes
+when we include metadata
+
+
+364
+00:19:31,305 --> 00:19:32,773 line:-1
+in the HKQuantitySample.
+
+
+365
+00:19:32,840 --> 00:19:36,643 line:-2
+We create a metadata dictionary
+and add it to our list of parameters.
+
+
+366
+00:19:36,710 --> 00:19:39,613 line:-2
+We'll pull the sync identifier
+from the serverHealthSample
+
+
+367
+00:19:39,680 --> 00:19:43,050 line:-2
+and add it to the key,
+the HKMetadataKeySyncIdentifier.
+
+
+368
+00:19:43,750 --> 00:19:47,287 line:-2
+Similarly, we'll also pull the
+syncVersion from the serverHealthSample
+
+
+369
+00:19:47,354 --> 00:19:50,490 line:-2
+and add it to the key,
+the HKMetadataKeySyncVersion.
+
+
+370
+00:19:51,091 --> 00:19:54,228 line:-2
+We'll then add this metadata dictionary
+to our list of parameters
+
+
+371
+00:19:54,294 --> 00:19:56,463 line:-1
+in the HKQuantitySample.
+
+
+372
+00:19:56,530 --> 00:19:58,999 line:-2
+Let's run this code again
+and see what it looks like.
+
+
+373
+00:20:00,367 --> 00:20:03,403 line:-2
+For the purposes of this demo,
+I've added code to delete
+
+
+374
+00:20:03,470 --> 00:20:06,273 line:-2
+all the six-minute walk samples
+in HealthKit on app launch.
+
+
+375
+00:20:06,640 --> 00:20:08,909 line:-2
+However, let's remember
+that when deleting samples,
+
+
+376
+00:20:08,976 --> 00:20:12,179 line:-2
+always be careful and ensure
+that we're reflecting user intent.
+
+
+377
+00:20:13,447 --> 00:20:14,781 line:-1
+Now, on selecting Fetch,
+
+
+378
+00:20:14,848 --> 00:20:17,784 line:-2
+the six-minute walk samples
+are displayed in the weekly report.
+
+
+379
+00:20:18,485 --> 00:20:20,687 line:-2
+On selecting Fetch
+multiple times, however,
+
+
+380
+00:20:20,754 --> 00:20:22,422 line:-1
+there are no duplicated samples.
+
+
+381
+00:20:22,956 --> 00:20:26,693 line:-2
+As you can see, saving a sample
+with the HKMetadataSyncIdentifier
+
+
+382
+00:20:26,760 --> 00:20:28,562 line:-1
+and the HKMetadataSyncVersion
+
+
+383
+00:20:28,629 --> 00:20:31,298 line:-2
+ensures that there are
+no duplicated samples in HealthKit.
+
+
+384
+00:20:31,365 --> 00:20:34,168 line:-2
+We have now modeled
+the data backing this graph.
+
+
+385
+00:20:34,835 --> 00:20:37,137 line:-2
+Synchronizing your external data
+with HealthKit
+
+
+386
+00:20:37,204 --> 00:20:39,540 line:-2
+is not as challenging
+as it might appear to be.
+
+
+387
+00:20:39,940 --> 00:20:43,277 line:-2
+HealthKit provides the tools that
+allow you to efficiently monitor changes
+
+
+388
+00:20:43,343 --> 00:20:44,745 line:-1
+in the health ecosystem,
+
+
+389
+00:20:44,811 --> 00:20:48,315 line:-2
+as well as maintain your data consistently
+across multiple devices.
+
+
+390
+00:20:48,916 --> 00:20:50,751 line:-1
+Let me leave you with some best practices
+
+
+391
+00:20:50,817 --> 00:20:52,753 line:-2
+when working on synchronizing
+your health data.
+
+
+392
+00:20:53,420 --> 00:20:55,455 line:-1
+When making changes to users' data,
+
+
+393
+00:20:55,522 --> 00:20:58,025 line:-2
+ensure that you're always reflecting
+user intent.
+
+
+394
+00:20:58,692 --> 00:21:00,394 line:-1
+Users should not be taken aback
+
+
+395
+00:21:00,460 --> 00:21:02,930 line:-2
+or surprised by the changes
+to their health data.
+
+
+396
+00:21:03,764 --> 00:21:06,934 line:-2
+Think about ways
+in which you can run efficient queries.
+
+
+397
+00:21:07,000 --> 00:21:11,405 line:-2
+Maybe you can consider combining queries
+to fetch and sync minimal amount of data.
+
+
+398
+00:21:12,472 --> 00:21:16,043 line:-2
+Finally, since health data exists
+across multiple devices,
+
+
+399
+00:21:16,109 --> 00:21:21,114 line:-2
+use sync identifiers and version numbers
+to keep data consistent across devices.
+
+
+400
+00:21:21,949 --> 00:21:25,686 line:-2
+We have only touched a small part of
+the health ecosystem on Apple platforms,
+
+
+401
+00:21:25,752 --> 00:21:27,688 line:-1
+but there is much more you can do here.
+
+
+402
+00:21:27,754 --> 00:21:29,489 line:-1
+When working with health data,
+
+
+403
+00:21:29,556 --> 00:21:33,393 line:-2
+think about the security and privacy
+implications of what you are trying to do.
+
+
+404
+00:21:33,460 --> 00:21:36,463 line:-2
+This is especially important
+if we're maintaining health data
+
+
+405
+00:21:36,530 --> 00:21:38,332 line:-1
+on an external data store.
+
+
+406
+00:21:38,398 --> 00:21:41,168 line:-2
+Apple has a lot of resources
+that can help you with this.
+
+
+407
+00:21:42,135 --> 00:21:45,539 line:-2
+If you want to create the beautiful graph
+visualizations we showed you today,
+
+
+408
+00:21:45,606 --> 00:21:47,574 line:-1
+take a look at the CareKit framework.
+
+
+409
+00:21:47,641 --> 00:21:50,611 line:-2
+CareKit is an open-source framework
+for developing apps
+
+
+410
+00:21:50,677 --> 00:21:53,413 line:-2
+specifically around managing your health
+and providing care.
+
+
+411
+00:21:53,480 --> 00:21:56,283 line:-2
+Finally,
+HealthKit has multiple other features
+
+
+412
+00:21:56,350 --> 00:21:58,919 line:-2
+that you can use
+to create rich health experiences.
+
+
+413
+00:21:59,453 --> 00:22:02,122 line:-2
+These range from workouts,
+clinical health records
+
+
+414
+00:22:02,189 --> 00:22:04,258 line:-1
+and high-frequency data types.
+
+
+415
+00:22:04,324 --> 00:22:07,227 line:-2
+We are so excited to see the amazing apps
+that you create
+
+
+416
+00:22:07,294 --> 00:22:09,396 line:-1
+using all these HealthKit resources.
+
+
+417
+00:22:10,097 --> 00:22:13,433 line:-2
+Thank you so much for watching.
+I hope you have a great WWDC.
+

@@ -1,0 +1,610 @@
+1
+00:00:03,770 --> 00:00:06,907 line:-1
+Hello and welcome to WWDC.
+
+
+2
+00:00:07,841 --> 00:00:11,912 line:0
+Hi. My name is Wil, and I work on testing
+and automation in Xcode.
+
+
+3
+00:00:11,979 --> 00:00:14,748 line:0
+In this session, we're going to learn
+about XCTSkip,
+
+
+4
+00:00:14,815 --> 00:00:19,152 line:0
+a new API for managing test execution
+based on runtime conditions.
+
+
+5
+00:00:19,720 --> 00:00:21,889 line:-2
+Some tests,
+particularly integration tests,
+
+
+6
+00:00:21,955 --> 00:00:25,726 line:-2
+have requirements or dependencies
+that cannot easily be mocked out.
+
+
+7
+00:00:25,792 --> 00:00:29,162 line:-2
+For example, an app might have
+iPad-specific functionality
+
+
+8
+00:00:29,229 --> 00:00:30,964 line:-1
+that can't be tested with an iPhone.
+
+
+9
+00:00:31,465 --> 00:00:34,201 line:-2
+In other cases,
+the test may exercise an API
+
+
+10
+00:00:34,268 --> 00:00:37,404 line:-2
+that's not available in devices
+running older versions of the OS.
+
+
+11
+00:00:37,871 --> 00:00:42,276 line:-2
+Or a test might require a server that's
+periodically off-line for maintenance.
+
+
+12
+00:00:42,776 --> 00:00:46,880 line:-2
+All of these are examples of conditions
+that can only be determined at runtime.
+
+
+13
+00:00:47,381 --> 00:00:51,018 line:-2
+To handle cases where the environment
+doesn't meet the requirements of the test,
+
+
+14
+00:00:51,084 --> 00:00:54,354 line:-2
+what's needed is a way to make
+test execution conditional.
+
+
+15
+00:00:54,655 --> 00:00:57,191 line:-2
+Otherwise, the test author
+is left with a choice.
+
+
+16
+00:00:57,558 --> 00:01:00,627 line:-2
+Return early, passing the test,
+or report a failure.
+
+
+17
+00:01:02,095 --> 00:01:04,131 line:-1
+There are downsides to both approaches.
+
+
+18
+00:01:04,197 --> 00:01:08,235 line:-2
+Passing the test suggests code is working
+when it's not actually been validated.
+
+
+19
+00:01:08,535 --> 00:01:11,405 line:-2
+But failing the test raises a problem
+where none has been found,
+
+
+20
+00:01:11,471 --> 00:01:13,273 line:-1
+and may consume triage resources.
+
+
+21
+00:01:14,474 --> 00:01:17,311 line:-1
+Fortunately, you can now use XCTSkip
+
+
+22
+00:01:17,377 --> 00:01:20,113 line:-2
+when you have tests
+that require conditional execution.
+
+
+23
+00:01:20,514 --> 00:01:25,719 line:-2
+This API, introduced in Xcode 11.4,
+produces a new test result.
+
+
+24
+00:01:25,786 --> 00:01:31,558 line:-2
+Tests can pass or fail, or with XCTSkip,
+be marked with an explicit "skip" result.
+
+
+25
+00:01:33,026 --> 00:01:36,463 line:-2
+Xcode uses this icon to highlight tests
+which were skipped,
+
+
+26
+00:01:36,530 --> 00:01:40,334 line:-2
+giving you a much clearer picture of
+what your test suites actually validated.
+
+
+27
+00:01:40,400 --> 00:01:43,637 line:-2
+Let's get a better understanding
+of how this works in practice.
+
+
+28
+00:01:44,204 --> 00:01:46,807 line:-2
+I have here a little project
+called Play Garden
+
+
+29
+00:01:46,874 --> 00:01:49,376 line:-2
+that I've been working on
+with my 3-year-old daughter.
+
+
+30
+00:01:49,443 --> 00:01:51,745 line:-2
+Play Garden helps us
+keep track of all the plants,
+
+
+31
+00:01:51,812 --> 00:01:54,147 line:-1
+toys and furniture in our backyard.
+
+
+32
+00:01:54,848 --> 00:01:58,519 line:-2
+We recently decided to add support
+for pointer interactions,
+
+
+33
+00:01:58,585 --> 00:02:01,922 line:-2
+since we love that feature
+and mostly use the app on our iPad.
+
+
+34
+00:02:03,056 --> 00:02:07,094 line:-2
+Now, even at age three, my daughter has
+fully embraced test-driven development.
+
+
+35
+00:02:07,160 --> 00:02:10,564 line:-2
+So it was a given that we'd be adding
+some unit tests for this new feature.
+
+
+36
+00:02:11,131 --> 00:02:13,734 line:-2
+You can see one of these tests
+here on the screen now.
+
+
+37
+00:02:14,168 --> 00:02:16,436 line:-2
+As it happens,
+this test has two conditions
+
+
+38
+00:02:16,503 --> 00:02:18,872 line:-2
+under which it wouldn't make sense
+for it to execute.
+
+
+39
+00:02:19,773 --> 00:02:24,278 line:-2
+First, since pointer interaction
+was introduced in iOS 13.4,
+
+
+40
+00:02:24,344 --> 00:02:27,481 line:-2
+we can't run this test on older versions
+of the OS.
+
+
+41
+00:02:27,548 --> 00:02:32,853 line:-2
+So I'll add an availability guard
+that uses XCTSkip for older iOS versions.
+
+
+42
+00:02:34,154 --> 00:02:37,824 line:-2
+Second, the app only enables
+pointer interactions on iPads.
+
+
+43
+00:02:37,891 --> 00:02:40,127 line:-2
+So if we're running on
+some other kind of device,
+
+
+44
+00:02:40,194 --> 00:02:41,995 line:-1
+we don't need to execute this test.
+
+
+45
+00:02:42,429 --> 00:02:45,699 line:-2
+I'll use "XCTSkipIf"
+to handle this condition.
+
+
+46
+00:02:46,533 --> 00:02:48,869 line:-2
+First, let's run this test
+with a destination
+
+
+47
+00:02:48,936 --> 00:02:50,304 line:-1
+where it can execute normally.
+
+
+48
+00:02:50,871 --> 00:02:53,874 line:-1
+I'll use an iPad running iOS 14.
+
+
+49
+00:02:59,479 --> 00:03:02,416 line:0
+As you can see, it runs and passes
+just as we would expect.
+
+
+50
+00:03:02,749 --> 00:03:04,985 line:-1
+Now let's run this on an older device,
+
+
+51
+00:03:05,052 --> 00:03:08,856 line:-1
+an iPhone running iOS 13.0.
+
+
+52
+00:03:10,524 --> 00:03:13,527 line:-2
+I'm going to use my favorite keyboard
+shortcut to run the test this time,
+
+
+53
+00:03:13,861 --> 00:03:16,530 line:-1
+"control-option-command-G,"
+
+
+54
+00:03:16,597 --> 00:03:19,099 line:0
+which just repeats
+the previous test action.
+
+
+55
+00:03:22,603 --> 00:03:24,972 line:0
+This time we can see
+that the green "pass" icon
+
+
+56
+00:03:25,038 --> 00:03:27,541 line:-2
+has been replaced
+with the gray "skip" icon,
+
+
+57
+00:03:27,608 --> 00:03:32,279 line:-2
+and an annotation in the source editor
+shows where and why the test was skipped.
+
+
+58
+00:03:33,413 --> 00:03:37,718 line:-2
+Let's check out the other places in Xcode
+where the UI services the skip result.
+
+
+59
+00:03:37,784 --> 00:03:39,720 line:-1
+First, the Test Navigator.
+
+
+60
+00:03:40,954 --> 00:03:44,258 line:-2
+Here we can see the skip indicated
+next to the test.
+
+
+61
+00:03:44,625 --> 00:03:48,462 line:-2
+In addition, you can filter the displayed
+list to show only skipped tests
+
+
+62
+00:03:48,529 --> 00:03:51,198 line:-2
+using this button
+at the bottom of the navigator.
+
+
+63
+00:03:52,666 --> 00:03:54,801 line:-1
+Now let's take a look at the test report.
+
+
+64
+00:03:56,336 --> 00:03:58,138 line:-1
+Here's the run with the skip.
+
+
+65
+00:03:59,873 --> 00:04:01,542 line:-1
+As I expand the test details,
+
+
+66
+00:04:01,608 --> 00:04:04,178 line:-2
+we see the file and line
+where the skip occurred,
+
+
+67
+00:04:04,244 --> 00:04:06,180 line:-1
+along with a reason explaining why.
+
+
+68
+00:04:06,813 --> 00:04:07,948 line:-1
+As I hover over this,
+
+
+69
+00:04:08,015 --> 00:04:10,784 line:-2
+perhaps you've noticed
+two buttons at the end of the line.
+
+
+70
+00:04:11,151 --> 00:04:12,786 line:-1
+The first is the "jump" button,
+
+
+71
+00:04:12,853 --> 00:04:16,589 line:-2
+which navigates to the location
+and source where the skip occurred.
+
+
+72
+00:04:17,524 --> 00:04:20,260 line:-2
+I'll go back
+so we can explore the second button.
+
+
+73
+00:04:21,595 --> 00:04:25,632 line:-2
+New in Xcode 12, the "assistant" button
+will open a secondary editor
+
+
+74
+00:04:25,699 --> 00:04:28,969 line:-2
+showing the reference source location
+for the skip.
+
+
+75
+00:04:29,837 --> 00:04:33,907 line:-2
+This lets us view the test report
+and the source code side by side.
+
+
+76
+00:04:34,541 --> 00:04:38,612 line:-2
+Finally, let's take a look at how skip
+appears in continuous integration.
+
+
+77
+00:04:41,248 --> 00:04:44,685 line:-1
+I have here the result from my CI system
+
+
+78
+00:04:44,751 --> 00:04:47,087 line:-2
+which ran my test
+on three different devices.
+
+
+79
+00:04:47,654 --> 00:04:51,458 line:-2
+I'm going to use the "skipped" filter
+so we can focus on just this test.
+
+
+80
+00:04:52,059 --> 00:04:56,430 line:-2
+When I expand the test, we see
+a result for each device the test ran on.
+
+
+81
+00:04:56,496 --> 00:05:00,067 line:-2
+A pass for the first iPad,
+and a skip for the other devices.
+
+
+82
+00:05:00,734 --> 00:05:04,905 line:-2
+Expanding the device results shows
+the location and reason for each skip
+
+
+83
+00:05:04,972 --> 00:05:07,908 line:-2
+putting all of this information
+right at my fingertips.
+
+
+84
+00:05:08,809 --> 00:05:11,378 line:-2
+So that's it.
+We've seen just how easy it is
+
+
+85
+00:05:11,445 --> 00:05:15,148 line:-2
+to use XCTSkip in your tests
+for a variety of conditions
+
+
+86
+00:05:15,215 --> 00:05:18,685 line:-2
+and how Xcode highlights the difference
+between tests that were skipped,
+
+
+87
+00:05:18,752 --> 00:05:21,154 line:-2
+versus those that passed or failed
+normally.
+
+
+88
+00:05:21,221 --> 00:05:23,690 line:-1
+Now let's take a closer look at the APIs.
+
+
+89
+00:05:25,659 --> 00:05:29,563 line:-2
+As you saw in the demo, there are
+a few different ways to use XCTSkip.
+
+
+90
+00:05:29,630 --> 00:05:31,198 line:-1
+There are two throwing functions:
+
+
+91
+00:05:31,265 --> 00:05:34,334 line:-1
+XCTSkipIf and XCTSkipUnless.
+
+
+92
+00:05:34,768 --> 00:05:36,770 line:-1
+Both functions take the same parameters.
+
+
+93
+00:05:37,104 --> 00:05:40,240 line:-2
+XCTSkipIf skips
+when the expression is true.
+
+
+94
+00:05:40,307 --> 00:05:43,777 line:-2
+XCTSkipUnless skips
+when the expression is false.
+
+
+95
+00:05:44,945 --> 00:05:47,548 line:-2
+The example here shows
+how a test might skip
+
+
+96
+00:05:47,614 --> 00:05:50,184 line:-2
+when running on any device
+other than iPad.
+
+
+97
+00:05:52,186 --> 00:05:55,822 line:-2
+Tests can also
+throw the XCTSkip struct directly.
+
+
+98
+00:05:55,889 --> 00:05:58,392 line:-2
+This is convenient
+in combination with guard,
+
+
+99
+00:05:58,458 --> 00:06:02,796 line:-2
+as shown here with an availability check
+for iOS 13.4.
+
+
+100
+00:06:03,830 --> 00:06:07,267 line:-2
+So to wrap up, some tests,
+particularly integration tests,
+
+
+101
+00:06:07,334 --> 00:06:10,304 line:-2
+may be unable to execute
+under certain conditions.
+
+
+102
+00:06:10,737 --> 00:06:13,841 line:0
+You can use XCTSkip
+to respond to those conditions
+
+
+103
+00:06:13,907 --> 00:06:17,778 line:0
+in a way that most accurately models
+the outcome of the test run.
+
+
+104
+00:06:17,845 --> 00:06:20,814 line:-2
+This, in turn,
+ensures clearer overall results,
+
+
+105
+00:06:20,881 --> 00:06:24,952 line:-2
+particularly when your test suites execute
+in continuous integration systems.
+
+
+106
+00:06:25,552 --> 00:06:27,020 line:-1
+Thanks for watching.
+

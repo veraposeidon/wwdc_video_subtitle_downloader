@@ -1,0 +1,752 @@
+1
+00:00:03,637 --> 00:00:06,773 line:-1
+Hello and welcome to WWDC.
+
+
+2
+00:00:09,409 --> 00:00:14,147 line:0
+Hello, everyone. My name's Zeheng Chen,
+and I'm a keyboard engineer.
+
+
+3
+00:00:14,715 --> 00:00:17,384 line:0
+Today I'm going to talk about AutoFill.
+
+
+4
+00:00:17,451 --> 00:00:19,319 line:-1
+I'm going to share some tips
+
+
+5
+00:00:19,386 --> 00:00:24,391 line:-2
+about how you can help your users
+complete some everyday tasks in your app.
+
+
+6
+00:00:25,225 --> 00:00:28,729 line:-2
+I'm going to talk about
+AutoFilling recent addresses,
+
+
+7
+00:00:29,696 --> 00:00:31,064 line:-1
+contact information,
+
+
+8
+00:00:32,031 --> 00:00:34,601 line:-1
+as well as passwords and security codes.
+
+
+9
+00:00:35,502 --> 00:00:39,406 line:-2
+If your app requires a log in
+or a new account setup,
+
+
+10
+00:00:39,473 --> 00:00:42,743 line:-2
+I will also talk about some best practices
+for that.
+
+
+11
+00:00:43,310 --> 00:00:49,216 line:-2
+Now let me start with an example
+of how AutoFill can use recent addresses.
+
+
+12
+00:00:49,616 --> 00:00:52,452 line:-1
+If you are building a navigation app,
+
+
+13
+00:00:52,519 --> 00:00:55,923 line:-2
+there maybe a text field
+expecting an address.
+
+
+14
+00:00:57,024 --> 00:01:00,294 line:-1
+As soon as the user taps that text field,
+
+
+15
+00:01:01,028 --> 00:01:06,633 line:-2
+iOS will intelligently suggest
+an appropriate location.
+
+
+16
+00:01:07,000 --> 00:01:09,937 line:-2
+For example,
+you just checked out a restaurant
+
+
+17
+00:01:11,338 --> 00:01:14,942 line:-2
+and now the keyboard will suggest
+a restaurant address
+
+
+18
+00:01:15,008 --> 00:01:16,677 line:-1
+right in the in QuickType bar.
+
+
+19
+00:01:17,311 --> 00:01:22,850 line:-2
+So, your user is only one tap away
+from inputting the address.
+
+
+20
+00:01:23,450 --> 00:01:26,720 line:-2
+If you are interested
+in promoting locations
+
+
+21
+00:01:26,787 --> 00:01:28,689 line:-1
+from your app to the system,
+
+
+22
+00:01:29,122 --> 00:01:33,861 line:0
+you can watch the WWDC 2016 session
+
+
+23
+00:01:33,927 --> 00:01:38,332 line:0
+"Increase Usage
+of Your App with Proactive Suggestions."
+
+
+24
+00:01:39,366 --> 00:01:43,403 line:-2
+Another example:
+You have a Calendar event coming up
+
+
+25
+00:01:44,438 --> 00:01:47,908 line:-2
+and now the keyboard will suggest
+event location.
+
+
+26
+00:01:49,209 --> 00:01:50,711 line:-1
+Or maybe you want to go home,
+
+
+27
+00:01:51,578 --> 00:01:54,248 line:-2
+and the keyboard
+will suggest your home address.
+
+
+28
+00:01:55,482 --> 00:01:59,553 line:-2
+Now you may be wondering:
+How do I do this in my app?
+
+
+29
+00:02:00,687 --> 00:02:03,524 line:-1
+Well, the good news is it's easy.
+
+
+30
+00:02:03,924 --> 00:02:04,925 line:-1
+Let me show you.
+
+
+31
+00:02:05,859 --> 00:02:07,995 line:-1
+You can adopt this in code.
+
+
+32
+00:02:08,061 --> 00:02:09,663 line:-1
+You just need to annotate
+
+
+33
+00:02:09,729 --> 00:02:13,400 line:-2
+your text field
+with the UITextContentType API,
+
+
+34
+00:02:14,101 --> 00:02:19,339 line:-2
+which provides the semantic meaning
+of these text fields to iOS.
+
+
+35
+00:02:20,007 --> 00:02:24,678 line:-2
+Here we are setting the Content Type
+to fullStreetAddress,
+
+
+36
+00:02:25,579 --> 00:02:29,750 line:-2
+which is all you need
+to get recent address AutoFill
+
+
+37
+00:02:29,816 --> 00:02:31,485 line:-1
+from the previous example.
+
+
+38
+00:02:31,985 --> 00:02:33,353 line:-1
+It's that simple.
+
+
+39
+00:02:35,055 --> 00:02:37,291 line:-1
+You can also set the Content Type
+
+
+40
+00:02:37,357 --> 00:02:40,661 line:-1
+for a UITextView or a UITextField
+
+
+41
+00:02:40,727 --> 00:02:44,698 line:-2
+directly
+in the Xcode Attributes inspector.
+
+
+42
+00:02:46,300 --> 00:02:51,171 line:0
+One thing to pay attention to
+is the expected semantic meaning
+
+
+43
+00:02:51,238 --> 00:02:56,710 line:0
+for each text field should be identified
+as precisely as possible.
+
+
+44
+00:02:57,578 --> 00:03:03,217 line:0
+You can't combine multiple values
+for one Text Content Type property.
+
+
+45
+00:03:03,851 --> 00:03:08,789 line:-2
+So think about your specific use case
+and find the appropriate one.
+
+
+46
+00:03:09,489 --> 00:03:10,958 line:-1
+For example:
+
+
+47
+00:03:11,024 --> 00:03:12,893 line:-1
+for a navigation app,
+
+
+48
+00:03:12,960 --> 00:03:16,763 line:-2
+a full street address
+might be the right granularity,
+
+
+49
+00:03:18,065 --> 00:03:21,768 line:-2
+but for a weather app,
+a city address is likely enough.
+
+
+50
+00:03:23,504 --> 00:03:28,609 line:-2
+I want to pause here
+and take a moment to talk about privacy.
+
+
+51
+00:03:29,009 --> 00:03:32,513 line:-1
+At Apple, it's one of our core values.
+
+
+52
+00:03:33,113 --> 00:03:37,484 line:-2
+Our devices are essential
+to so many parts of our lives.
+
+
+53
+00:03:37,918 --> 00:03:43,590 line:-2
+What we share and who we share with
+should be entirely up to us.
+
+
+54
+00:03:44,258 --> 00:03:49,263 line:-2
+We design our products
+to protect our users' privacy
+
+
+55
+00:03:49,329 --> 00:03:52,666 line:-2
+and give them control
+over their information.
+
+
+56
+00:03:52,733 --> 00:03:54,868 line:-1
+It's not always easy.
+
+
+57
+00:03:54,935 --> 00:03:58,305 line:-1
+Sometimes building a great experience
+
+
+58
+00:03:58,372 --> 00:04:02,910 line:-2
+might need some level of access
+to personal information.
+
+
+59
+00:04:03,477 --> 00:04:06,146 line:-1
+Let's take a look at an example.
+
+
+60
+00:04:07,347 --> 00:04:10,551 line:-1
+Here I'm building a payment app
+
+
+61
+00:04:10,617 --> 00:04:14,288 line:-2
+that allows users to send money
+to their friends.
+
+
+62
+00:04:15,989 --> 00:04:21,428 line:-2
+How can I help my users
+find their intended recipient quickly?
+
+
+63
+00:04:23,397 --> 00:04:27,401 line:-2
+Should I bring up a Contact Picker
+and let them choose,
+
+
+64
+00:04:28,101 --> 00:04:31,138 line:-1
+or should I suggest Contacts as they type?
+
+
+65
+00:04:32,706 --> 00:04:34,007 line:-1
+Either way,
+
+
+66
+00:04:34,074 --> 00:04:38,145 line:-2
+I probably need to request access
+to their Contacts, right?
+
+
+67
+00:04:40,848 --> 00:04:44,451 line:-2
+But is asking for Contact access
+a good idea?
+
+
+68
+00:04:45,853 --> 00:04:51,758 line:-2
+If I ask for their Contacts,
+users will be prompted to allow access.
+
+
+69
+00:04:53,060 --> 00:04:56,697 line:-2
+This is not only going to
+interrupt their flow,
+
+
+70
+00:04:56,763 --> 00:05:00,501 line:-2
+they might not even feel comfortable
+sharing their Contacts.
+
+
+71
+00:05:02,236 --> 00:05:07,541 line:-2
+Besides, even if they do choose
+to share their Contacts with my app,
+
+
+72
+00:05:08,342 --> 00:05:13,247 line:-2
+my app now has a greater risk
+for potential privacy exposure
+
+
+73
+00:05:13,313 --> 00:05:16,917 line:-2
+because I have access
+to their personal information.
+
+
+74
+00:05:18,585 --> 00:05:22,389 line:-2
+A better approach is
+to use the Contact Picker API.
+
+
+75
+00:05:23,123 --> 00:05:28,195 line:-2
+By using this API,
+the app does not need access to Contacts
+
+
+76
+00:05:28,562 --> 00:05:32,266 line:-2
+and users will not be prompted
+to grant permission.
+
+
+77
+00:05:33,267 --> 00:05:37,471 line:-2
+There's no prompt
+because the app only has access
+
+
+78
+00:05:37,538 --> 00:05:42,943 line:-2
+to the specific information that the user
+chooses to share with the app.
+
+
+79
+00:05:44,778 --> 00:05:49,616 line:-2
+In iOS 14,
+we are now suggesting Contact information
+
+
+80
+00:05:49,683 --> 00:05:52,686 line:-2
+in the QuickType keyboard
+while the user types.
+
+
+81
+00:05:54,721 --> 00:06:00,160 line:-2
+Just like the previous example,
+the app has no access to Contacts
+
+
+82
+00:06:00,227 --> 00:06:02,896 line:-2
+and so
+there will be no prompt here either.
+
+
+83
+00:06:04,898 --> 00:06:10,337 line:-2
+Nothing is shared with the app
+until the user taps the QuickType bar
+
+
+84
+00:06:10,404 --> 00:06:11,939 line:-1
+and inserts the text.
+
+
+85
+00:06:14,508 --> 00:06:16,376 line:-1
+So, how do we accomplish this?
+
+
+86
+00:06:18,412 --> 00:06:23,650 line:-2
+The adoption of this new Contact AutoFill
+feature may look familiar to you.
+
+
+87
+00:06:24,751 --> 00:06:31,258 line:-2
+Similar to recent address AutoFill,
+you just set the Content Type to email
+
+
+88
+00:06:31,325 --> 00:06:32,659 line:-1
+or telephone number
+
+
+89
+00:06:33,927 --> 00:06:36,330 line:-1
+to get Contact AutoFill in your app.
+
+
+90
+00:06:38,232 --> 00:06:44,605 line:-2
+To reiterate, if your app requires access
+to users' Contacts,
+
+
+91
+00:06:44,671 --> 00:06:47,307 line:-1
+try to use these two solutions first.
+
+
+92
+00:06:48,108 --> 00:06:51,612 line:-2
+This way
+you don't have the potential liability
+
+
+93
+00:06:51,678 --> 00:06:56,183 line:-2
+of holding users' data,
+you don't have to prompt users,
+
+
+94
+00:06:56,250 --> 00:07:01,688 line:-2
+and you don't have to maintain custom UI
+for Contact selection and suggestions.
+
+
+95
+00:07:04,024 --> 00:07:07,227 line:-1
+Now let's talk about Password AutoFill.
+
+
+96
+00:07:08,462 --> 00:07:12,432 line:-2
+Even if your app
+has adopted Sign in with Apple,
+
+
+97
+00:07:12,499 --> 00:07:17,037 line:-2
+which is the best way to get users
+signed in with an account quickly,
+
+
+98
+00:07:17,704 --> 00:07:21,675 line:-2
+Password AutoFill may be important
+to your app
+
+
+99
+00:07:21,742 --> 00:07:26,747 line:-2
+if your app has a way
+to log in with usernames and passwords.
+
+
+100
+00:07:27,948 --> 00:07:34,488 line:-2
+And, fortunately, it's easy to make
+Password AutoFill work great in your apps.
+
+
+101
+00:07:36,423 --> 00:07:40,794 line:-2
+For Password AutoFill,
+you just need to tag the username
+
+
+102
+00:07:40,861 --> 00:07:47,467 line:-2
+and password fields with the corresponding
+content type, username: password.
+
+
+103
+00:07:48,836 --> 00:07:53,507 line:-2
+The keyboard will automatically suggest
+the corresponding username
+
+
+104
+00:07:53,574 --> 00:07:58,912 line:-2
+and password saved in iCloud Keychain
+or another password manager.
+
+
+105
+00:08:00,247 --> 00:08:04,685 line:-2
+For security codes,
+the Content Type you want to use
+
+
+106
+00:08:04,751 --> 00:08:06,320 line:-1
+is One Time Code.
+
+
+107
+00:08:08,088 --> 00:08:14,194 line:-2
+Automatic Strong Passwords can hugely
+simplify the onboarding flow in your app.
+
+
+108
+00:08:14,962 --> 00:08:18,265 line:-1
+By suggesting unique strong passwords
+
+
+109
+00:08:18,332 --> 00:08:21,301 line:-2
+and automatically saving them
+to iCloud Keychain,
+
+
+110
+00:08:22,269 --> 00:08:26,106 line:-2
+this is not only quick and easy
+for the user,
+
+
+111
+00:08:26,173 --> 00:08:29,042 line:-2
+it also helps
+increase your app's security.
+
+
+112
+00:08:30,577 --> 00:08:34,881 line:-2
+An adoption couldn't be easier
+as shown in the example here,
+
+
+113
+00:08:35,582 --> 00:08:39,820 line:-2
+where we are using the newPassword
+Content Type.
+
+
+114
+00:08:41,621 --> 00:08:45,993 line:0
+The last step is
+to associate your app with a domain.
+
+
+115
+00:08:46,827 --> 00:08:50,964 line:0
+To learn how to do this,
+check out "Automatic Strong Passwords and Security Code AutoFill"
+
+
+116
+00:08:51,031 --> 00:08:54,067 line:0
+from WWDC 2018.
+
+
+117
+00:08:54,568 --> 00:08:55,969 line:-1
+Let's talk about the Mac.
+
+
+118
+00:08:56,803 --> 00:08:58,739 line:-1
+New to macOS Big Sur,
+
+
+119
+00:08:59,273 --> 00:09:02,843 line:-2
+Catalyst apps
+now have security code AutoFill.
+
+
+120
+00:09:03,777 --> 00:09:07,781 line:-2
+If security code AutoFill works
+in your iPad apps,
+
+
+121
+00:09:07,848 --> 00:09:10,217 line:-1
+it will work great on macOS.
+
+
+122
+00:09:11,818 --> 00:09:18,058 line:-2
+And also new to macOS Big Sur,
+AppKit based apps have full support
+
+
+123
+00:09:18,125 --> 00:09:21,295 line:-1
+for password and security code AutoFill.
+
+
+124
+00:09:22,262 --> 00:09:28,268 line:-2
+AppKit now has a NSTextContentType,
+which is similar to UITextContentType
+
+
+125
+00:09:28,335 --> 00:09:29,336 line:-1
+in UIKit.
+
+
+126
+00:09:30,170 --> 00:09:36,476 line:-2
+Currently the supported values
+are .username, .password and .oneTimeCode.
+
+
+127
+00:09:37,277 --> 00:09:39,146 line:-1
+And one more thing that's cool
+
+
+128
+00:09:39,213 --> 00:09:45,118 line:-2
+is that macOS Big Sur also supports
+password manager apps as a data source
+
+
+129
+00:09:45,185 --> 00:09:46,353 line:-1
+for AutoFill.
+
+
+130
+00:09:48,222 --> 00:09:53,227 line:-2
+Last, but not least,
+if you get one thing out of this talk,
+
+
+131
+00:09:53,293 --> 00:09:56,496 line:-2
+it should be:
+Tag every text field in your app.
+
+
+132
+00:09:57,197 --> 00:10:01,902 line:-2
+Tag address fields, tag email fields.
+Tag all text fields.
+
+
+133
+00:10:03,203 --> 00:10:06,240 line:-1
+Thanks for your time. Happy AutoFilling.
+

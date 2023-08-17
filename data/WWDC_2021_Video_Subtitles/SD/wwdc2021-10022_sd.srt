@@ -1,0 +1,4588 @@
+2
+00:00:00.000 --> 00:00:01.635 line:-1 position:50%
+[MAC STARTUP CHIME]
+
+
+3
+00:00:01,635 --> 00:00:05,639 line:-1
+♪ Bass music playing ♪
+
+
+4
+00:00:05.639 --> 00:00:07.708 line:-1 position:50%
+[KEYSTROKES]
+
+
+5
+00:00:07,708 --> 00:00:09,243 line:0 align:right size:2%
+♪
+
+
+6
+00:00:09.243 --> 00:00:10.911 line:-1 position:50%
+Matt Ricketson: Hi, I'm Matt,
+
+
+7
+00:00:10.911 --> 00:00:14.081 line:-1 position:50%
+and later on
+I'll be joined by Luca and Raj.
+
+
+8
+00:00:14,081 --> 00:00:17,918 line:-1
+Today, we're going
+to demystify SwiftUI.
+
+
+9
+00:00:17,918 --> 00:00:19,920 line:-1
+Now, we've heard it
+many times before
+
+
+10
+00:00:19,920 --> 00:00:24,358 line:-1
+that SwiftUI is
+a declarative UI framework.
+
+
+11
+00:00:24.358 --> 00:00:26.426 line:-1 position:50%
+That means that you describe
+what you want
+
+
+12
+00:00:26.426 --> 00:00:27.928 line:-1 position:50%
+for your app at a high level,
+
+
+13
+00:00:27.928 --> 00:00:32.032 line:-1 position:50%
+and SwiftUI decides
+exactly how to make it happen.
+
+
+14
+00:00:32,032 --> 00:00:34,635 line:-1
+Now, most of the time,
+this works great!
+
+
+15
+00:00:34,635 --> 00:00:37,504 line:-1
+And that's when SwiftUI
+feels magical.
+
+
+16
+00:00:37.504 --> 00:00:39.039 line:-1 position:50%
+But there will always
+be those moments
+
+
+17
+00:00:39.039 --> 00:00:42.843 line:-1 position:50%
+when SwiftUI does something
+that you might not expect.
+
+
+18
+00:00:42.843 --> 00:00:45.512 line:-1 position:50%
+And in those moments,
+it helps to understand
+
+
+19
+00:00:45,512 --> 00:00:49,383 line:-1
+a bit more about what SwiftUI
+is doing behind the scenes
+
+
+20
+00:00:49,383 --> 00:00:52,052 line:-1
+to build a better intuition
+for how to get the results
+
+
+21
+00:00:52,052 --> 00:00:54,388 line:-1
+you're looking for.
+
+
+22
+00:00:54.388 --> 00:00:55.989 line:-1 position:50%
+So today's question is,
+
+
+23
+00:00:55,989 --> 00:00:59,826 line:-1
+When SwiftUI looks at your code,
+what does it see?
+
+
+24
+00:00:59,826 --> 00:01:02,596 line:-1
+The answer is three things:
+
+
+25
+00:01:02,596 --> 00:01:06,199 line:-1
+identity, lifetime,
+and dependencies.
+
+
+26
+00:01:06,199 --> 00:01:09,536 line:-1
+Identity is how SwiftUI
+recognizes elements
+
+
+27
+00:01:09,536 --> 00:01:15,175 line:-1
+as the same or distinct across
+multiple updates of your app.
+
+
+28
+00:01:15,175 --> 00:01:18,679 line:-1
+Lifetime is how SwiftUI tracks
+the existence of views
+
+
+29
+00:01:18,679 --> 00:01:21,682 line:-1
+and data over time.
+
+
+30
+00:01:21.682 --> 00:01:24.284 line:-1 position:50%
+And dependencies
+are how SwiftUI understands
+
+
+31
+00:01:24,284 --> 00:01:28,322 line:-1
+when your interface
+needs to be updated and why.
+
+
+32
+00:01:28.322 --> 00:01:32.059 line:-1 position:50%
+Together, these three concepts
+inform how SwiftUI decides
+
+
+33
+00:01:32.059 --> 00:01:35.329 line:-1 position:50%
+what needs to change,
+how, and when,
+
+
+34
+00:01:35.329 --> 00:01:40.834 line:-1 position:50%
+resulting in the dynamic
+user interface you see onscreen.
+
+
+35
+00:01:40,834 --> 00:01:46,006 line:-1
+Today, we'll talk about each of
+these three concepts in more depth.
+
+
+36
+00:01:46,006 --> 00:01:48,909 line:-1
+Let's start with identity,
+
+
+37
+00:01:48.909 --> 00:01:51.778 line:-1 position:50%
+and I have a few friends
+here to help me.
+
+
+38
+00:01:51.778 --> 00:01:54.314 line:-1 position:50%
+These Ruby Spaniels
+are adorable,
+
+
+39
+00:01:54.314 --> 00:01:59.219 line:-1 position:50%
+but they're also the subject of
+a deep philosophical question.
+
+
+40
+00:01:59.219 --> 00:02:01.822 line:-1 position:50%
+Are these two different dogs?
+
+
+41
+00:02:01.822 --> 00:02:06.860 line:-1 position:50%
+Or are these, in fact,
+two pictures of the same dog?
+
+
+42
+00:02:06,860 --> 00:02:09,429 line:-1
+The truth is,
+it's impossible to say!
+
+
+43
+00:02:09,429 --> 00:02:11,732 line:-1
+We just don't have
+enough information.
+
+
+44
+00:02:11.732 --> 00:02:14.935 line:-1 position:50%
+But this question of whether
+things are the same or different
+
+
+45
+00:02:14.935 --> 00:02:19.206 line:-1 position:50%
+is at the heart of what we call
+"identity."
+
+
+46
+00:02:19,206 --> 00:02:21,842 line:-1
+Identity isn't just important
+for dogs though.
+
+
+47
+00:02:21.842 --> 00:02:23.944 line:-1 position:50%
+It's also a critical aspect
+
+
+48
+00:02:23.944 --> 00:02:27.314 line:-1 position:50%
+of how SwiftUI
+understands your app.
+
+
+49
+00:02:27.314 --> 00:02:30.083 line:-1 position:50%
+Let's look at an example.
+
+
+50
+00:02:30.083 --> 00:02:33.053 line:-1 position:50%
+This is an app I made called
+"Good Dog, Bad Dog,"
+
+
+51
+00:02:33.053 --> 00:02:34.388 line:-1 position:50%
+which helps me keep track
+
+
+52
+00:02:34.388 --> 00:02:37.591 line:-1 position:50%
+of whether my furry friend
+has been on her best behavior.
+
+
+53
+00:02:37.591 --> 00:02:38.959 line:-1 position:50%
+It's pretty simple.
+
+
+54
+00:02:38,959 --> 00:02:40,627 line:-1
+I can just tap
+anywhere on the screen
+
+
+55
+00:02:40,627 --> 00:02:43,897 line:-1
+to flip between
+the good and bad states.
+
+
+56
+00:02:43,897 --> 00:02:47,267 line:-1
+So what does identity
+have to do with my app?
+
+
+57
+00:02:47.267 --> 00:02:50.604 line:-1 position:50%
+Well, it's actually very similar
+to that philosophical question
+
+
+58
+00:02:50,604 --> 00:02:53,774 line:-1
+we just asked about the dogs.
+
+
+59
+00:02:53,774 --> 00:02:57,511 line:-1
+Looking at those icons, do those
+seem like two different views,
+
+
+60
+00:02:57,511 --> 00:02:59,913 line:-1
+completely distinct
+from each other?
+
+
+61
+00:02:59.913 --> 00:03:01.515 line:-1 position:50%
+Or could they be the same view,
+
+
+62
+00:03:01.515 --> 00:03:04.751 line:-1 position:50%
+just in a different place
+and with a different color?
+
+
+63
+00:03:04.751 --> 00:03:07.788 line:-1 position:50%
+That distinction
+actually matters a great deal
+
+
+64
+00:03:07.788 --> 00:03:09.489 line:-1 position:50%
+because it changes
+how our interface
+
+
+65
+00:03:09.489 --> 00:03:13.593 line:-1 position:50%
+transitions from one state
+to another.
+
+
+66
+00:03:13.593 --> 00:03:17.230 line:-1 position:50%
+Let's say those icons are,
+in fact, different views.
+
+
+67
+00:03:17.230 --> 00:03:20.767 line:-1 position:50%
+That means the icons
+should transition independently,
+
+
+68
+00:03:20.767 --> 00:03:24.137 line:-1 position:50%
+such as fading in and out.
+
+
+69
+00:03:24.137 --> 00:03:27.574 line:-1 position:50%
+But what if they're,
+in fact, the same view?
+
+
+70
+00:03:27,574 --> 00:03:29,409 line:-1
+That would instead imply
+that the view
+
+
+71
+00:03:29,409 --> 00:03:33,080 line:-1
+should slide across the screen
+during the transition
+
+
+72
+00:03:33.080 --> 00:03:34.581 line:-1 position:50%
+because it's the same view
+
+
+73
+00:03:34.581 --> 00:03:37.617 line:-1 position:50%
+moving from one location
+to the other.
+
+
+74
+00:03:37,617 --> 00:03:40,720 line:-1
+So connecting views across
+different states is important,
+
+
+75
+00:03:40,720 --> 00:03:42,856 line:-1
+because that's
+how SwiftUI understands
+
+
+76
+00:03:42,856 --> 00:03:45,459 line:-1
+how to transition
+between them.
+
+
+77
+00:03:45,459 --> 00:03:50,697 line:-1
+This is the key concept
+behind view identity.
+
+
+78
+00:03:50,697 --> 00:03:52,532 line:-1
+Views that share
+the same identity
+
+
+79
+00:03:52,532 --> 00:03:57,104 line:-1
+represent different states of
+the same conceptual UI element.
+
+
+80
+00:03:57.104 --> 00:04:00.407 line:-1 position:50%
+In contrast, views that
+represent distinct UI elements
+
+
+81
+00:04:00,407 --> 00:04:03,376 line:-1
+will always have
+different identities.
+
+
+82
+00:04:03,376 --> 00:04:05,912 line:-1
+Later in the talk,
+Luca and Raj will talk about
+
+
+83
+00:04:05,912 --> 00:04:07,914 line:-1
+the practical impacts
+of view identity
+
+
+84
+00:04:07.914 --> 00:04:11.084 line:-1 position:50%
+on your app's data
+and update cycle.
+
+
+85
+00:04:11.084 --> 00:04:13.687 line:-1 position:50%
+For now, let's look
+at how identity
+
+
+86
+00:04:13.687 --> 00:04:16.923 line:-1 position:50%
+is represented in your code,
+focusing on
+
+
+87
+00:04:16.923 --> 00:04:21.194 line:-1 position:50%
+the two different types
+of identity used by SwiftUI.
+
+
+88
+00:04:21,194 --> 00:04:23,663 line:-1
+First, explicit identity:
+
+
+89
+00:04:23.663 --> 00:04:27.267 line:-1 position:50%
+using custom
+or data-driven identifiers.
+
+
+90
+00:04:27,267 --> 00:04:31,304 line:0
+And second, structural identity:
+distinguishing views
+
+
+91
+00:04:31,304 --> 00:04:35,609 line:0
+by their type and position
+in the view hierarchy.
+
+
+92
+00:04:35,609 --> 00:04:37,377 line:-1
+Now, to help understand
+these concepts,
+
+
+93
+00:04:37,377 --> 00:04:40,847 line:-1
+let me introduce you
+to some more of my friends.
+
+
+94
+00:04:40.847 --> 00:04:44.651 line:-1 position:50%
+OK, remember that it can
+be difficult to tell dogs apart,
+
+
+95
+00:04:44.651 --> 00:04:47.020 line:-1 position:50%
+especially when
+they look the same.
+
+
+96
+00:04:47.020 --> 00:04:49.055 line:-1 position:50%
+So what kind
+of extra information
+
+
+97
+00:04:49.055 --> 00:04:52.626 line:-1 position:50%
+would help us identify our dogs?
+
+
+98
+00:04:52,626 --> 00:04:56,496 line:-1
+One way would be
+to simply ask for their names.
+
+
+99
+00:04:56,496 --> 00:05:00,167 line:0
+If two dogs look the same
+and also share the same name,
+
+
+100
+00:05:00,167 --> 00:05:01,768 line:0
+then I'd say it's pretty likely
+
+
+101
+00:05:01,768 --> 00:05:04,471 position:50%
+that they're,
+in fact, the same dog.
+
+
+102
+00:05:04,471 --> 00:05:06,039 position:50%
+But if they have
+different names,
+
+
+103
+00:05:06,039 --> 00:05:08,208 position:50%
+then we can guarantee
+that they are,
+
+
+104
+00:05:08,208 --> 00:05:10,844 position:50%
+in fact, different dogs.
+
+
+105
+00:05:10.844 --> 00:05:13.113 line:-1 position:50%
+Assigning names
+or identifiers like this
+
+
+106
+00:05:13,113 --> 00:05:16,216 line:-1
+is a form of explicit identity.
+
+
+107
+00:05:16.216 --> 00:05:18.885 line:-1 position:50%
+Explicit identity is powerful
+and flexible,
+
+
+108
+00:05:18,885 --> 00:05:21,488 line:-1
+but does require that
+someone, somewhere
+
+
+109
+00:05:21.488 --> 00:05:24.491 line:-1 position:50%
+keeps track of all those names.
+
+
+110
+00:05:24,491 --> 00:05:25,926 line:-1
+One form of explicit identity
+
+
+111
+00:05:25,926 --> 00:05:29,429 line:-1
+you may already be used to
+is pointer identity,
+
+
+112
+00:05:29,429 --> 00:05:32,199 line:-1
+which is used throughout
+UIKit and AppKit.
+
+
+113
+00:05:32,199 --> 00:05:34,701 line:-1
+Now, SwiftUI doesn't use
+pointer identity,
+
+
+114
+00:05:34.701 --> 00:05:37.103 line:-1 position:50%
+but learning about it
+will help you better understand
+
+
+115
+00:05:37.103 --> 00:05:40.073 line:-1 position:50%
+how and why SwiftUI
+works differently.
+
+
+116
+00:05:40.073 --> 00:05:42.008 line:-1 position:50%
+Let's take a quick look.
+
+
+117
+00:05:42.008 --> 00:05:45.745 line:-1 position:50%
+Consider a UIKit or AppKit
+view hierarchy, like this one.
+
+
+118
+00:05:45,745 --> 00:05:48,915 position:50%
+Since UIViews
+and NSViews are classes,
+
+
+119
+00:05:48,915 --> 00:05:53,053 line:0
+they each have a unique pointer
+to their memory allocation.
+
+
+120
+00:05:53,053 --> 00:05:56,790 line:0
+The pointer is a natural source
+of explicit identity.
+
+
+121
+00:05:56,790 --> 00:06:00,961 position:50%
+We can refer to individual views
+just using their pointer,
+
+
+122
+00:06:00,961 --> 00:06:03,230 line:0
+and if two views
+share the same pointer,
+
+
+123
+00:06:03,230 --> 00:06:07,534 line:0
+we can guarantee that
+they are really the same view.
+
+
+124
+00:06:07,534 --> 00:06:09,369 position:50%
+But SwiftUI
+doesn't use pointers
+
+
+125
+00:06:09,369 --> 00:06:11,805 line:0
+because SwiftUI views
+are value types,
+
+
+126
+00:06:11,805 --> 00:06:16,543 position:50%
+commonly represented
+as structs instead of classes.
+
+
+127
+00:06:16,543 --> 00:06:19,179 position:50%
+In the "SwiftUI essentials" talk
+from 2019,
+
+
+128
+00:06:19,179 --> 00:06:22,015 position:50%
+we discussed why SwiftUI
+uses value types
+
+
+129
+00:06:22,015 --> 00:06:24,317 position:50%
+instead of classes
+for its views,
+
+
+130
+00:06:24,317 --> 00:06:27,687 line:0
+so I recommend watching
+that talk to learn more.
+
+
+131
+00:06:27.687 --> 00:06:30.023 line:-1 position:50%
+For now, the important
+thing to know is that
+
+
+132
+00:06:30,023 --> 00:06:33,426 line:-1
+value types do not have
+a canonical reference that
+
+
+133
+00:06:33.426 --> 00:06:37.797 line:-1 position:50%
+SwiftUI can use as a persistent
+identity for its views.
+
+
+134
+00:06:37,797 --> 00:06:42,469 line:-1
+Instead, SwiftUI relies on other
+forms of explicit identity.
+
+
+135
+00:06:42.469 --> 00:06:46.673 line:-1 position:50%
+For example, consider this list
+of rescue dogs.
+
+
+136
+00:06:46.673 --> 00:06:51.344 line:-1 position:50%
+The id parameter used here
+is a form of explicit identity.
+
+
+137
+00:06:51.344 --> 00:06:53.980 line:-1 position:50%
+The dog tag ID of each
+rescue dog is used
+
+
+138
+00:06:53.980 --> 00:06:58.852 line:-1 position:50%
+to explicitly identify its
+corresponding view in the list.
+
+
+139
+00:06:58.852 --> 00:07:01.421 line:-1 position:50%
+If the collection
+of rescue dogs changes,
+
+
+140
+00:07:01.421 --> 00:07:05.158 line:-1 position:50%
+SwiftUI can use those IDs to
+understand what exactly changed
+
+
+141
+00:07:05,158 --> 00:07:08,728 line:-1
+and generate the correct
+animations within the list.
+
+
+142
+00:07:08.728 --> 00:07:12.432 line:-1 position:50%
+In this case, SwiftUI was even
+able to correctly animate views
+
+
+143
+00:07:12.432 --> 00:07:15.402 line:-1 position:50%
+moving between
+different sections.
+
+
+144
+00:07:15,402 --> 00:07:18,371 line:-1
+Let's look at a more advanced
+example.
+
+
+145
+00:07:18,371 --> 00:07:20,440 line:-1
+Here, we're using
+a ScrollViewReader
+
+
+146
+00:07:20,440 --> 00:07:25,779 line:-1
+to jump to the top of the view
+using a button at the bottom.
+
+
+147
+00:07:25.779 --> 00:07:29.949 line:-1 position:50%
+The id(_:) modifier provides a way
+to explicitly identify a view
+
+
+148
+00:07:29.949 --> 00:07:32.052 line:-1 position:50%
+using a custom identifier --
+
+
+149
+00:07:32,052 --> 00:07:35,789 line:-1
+in this case, our header view
+at the top of the page.
+
+
+150
+00:07:35,789 --> 00:07:38,258 line:-1
+Then we can pass that identifier
+
+
+151
+00:07:38.258 --> 00:07:41.161 line:-1 position:50%
+to the scroll view proxy's
+scrollTo(_:) method
+
+
+152
+00:07:41.161 --> 00:07:45.498 line:-1 position:50%
+to tell SwiftUI
+to go to that specific view.
+
+
+153
+00:07:45,498 --> 00:07:46,866 line:-1
+What's great about this is that
+
+
+154
+00:07:46.866 --> 00:07:50.437 line:-1 position:50%
+we don't have to explicitly
+identify every view,
+
+
+155
+00:07:50.437 --> 00:07:53.406 line:-1 position:50%
+just the ones we need to refer
+to elsewhere in the code,
+
+
+156
+00:07:53.406 --> 00:07:55.608 line:-1 position:50%
+like our header text.
+
+
+157
+00:07:55,608 --> 00:07:57,777 line:-1
+By comparison,
+the ScrollViewReader,
+
+
+158
+00:07:57,777 --> 00:08:00,380 line:-1
+ScrollView, backstory Text,
+and Bbutton
+
+
+159
+00:08:00,380 --> 00:08:03,350 line:-1
+do not need explicit
+identifiers.
+
+
+160
+00:08:03.350 --> 00:08:05.752 line:-1 position:50%
+But just because their identity
+isn't explicit,
+
+
+161
+00:08:05,752 --> 00:08:09,255 line:-1
+that doesn't mean these views
+have no identity at all
+
+
+162
+00:08:09,255 --> 00:08:12,192 line:-1
+because every view
+has an identity,
+
+
+163
+00:08:12,192 --> 00:08:15,628 line:-1
+even if it's not explicit.
+
+
+164
+00:08:15.628 --> 00:08:18.732 line:-1 position:50%
+This is where
+structural identity comes in.
+
+
+165
+00:08:18.732 --> 00:08:21.901 line:-1 position:50%
+SwiftUI uses the structure
+of your view hierarchy
+
+
+166
+00:08:21.901 --> 00:08:25.171 line:-1 position:50%
+to generate implicit
+identities for your views
+
+
+167
+00:08:25,171 --> 00:08:27,140 line:-1
+so you don't have to.
+
+
+168
+00:08:27.140 --> 00:08:29.442 line:-1 position:50%
+Now, let me bring in
+some more of my friends
+
+
+169
+00:08:29,442 --> 00:08:32,212 line:-1
+to help explain
+what I mean by that.
+
+
+170
+00:08:32,212 --> 00:08:34,447 line:0
+Let's say we have
+two similar dogs
+
+
+171
+00:08:34,447 --> 00:08:35,782 position:50%
+but we don't know their names,
+
+
+172
+00:08:35,782 --> 00:08:38,952 position:50%
+but we still need
+to identify each one.
+
+
+173
+00:08:38.952 --> 00:08:41.755 line:-1 position:50%
+Well, suppose these
+are very good dogs
+
+
+174
+00:08:41.755 --> 00:08:44.958 line:-1 position:50%
+and they're capable
+of sitting very still.
+
+
+175
+00:08:44,958 --> 00:08:46,960 line:-1
+If we can guarantee
+they don't move,
+
+
+176
+00:08:46.960 --> 00:08:50.897 line:-1 position:50%
+we could identify them just
+based on where they're sitting,
+
+
+177
+00:08:50,897 --> 00:08:54,501 line:0
+like "The dog on the left"
+or "The dog on the right".
+
+
+178
+00:08:54,501 --> 00:08:57,203 line:0
+We're using the relative
+arrangement of our subjects
+
+
+179
+00:08:57,203 --> 00:08:59,038 position:50%
+to distinguish them
+from each other --
+
+
+180
+00:08:59,038 --> 00:09:02,475 position:50%
+that's structural identity.
+
+
+181
+00:09:02.475 --> 00:09:05.545 line:-1 position:50%
+SwiftUI leverages structural
+identity throughout its API,
+
+
+182
+00:09:05,545 --> 00:09:09,015 line:-1
+and a classic example
+is when you use if statements
+
+
+183
+00:09:09.015 --> 00:09:11.785 line:-1 position:50%
+and other conditional logic
+within your View code.
+
+
+184
+00:09:11.785 --> 00:09:14.087 line:-1 position:50%
+The structure of
+the conditional statement
+
+
+185
+00:09:14.087 --> 00:09:18.458 line:-1 position:50%
+gives us a clear way
+to identify each view.
+
+
+186
+00:09:18,458 --> 00:09:21,694 line:-1
+The first view only shows
+when the condition is true,
+
+
+187
+00:09:21.694 --> 00:09:25.565 line:-1 position:50%
+while the second view only shows
+when the condition is false.
+
+
+188
+00:09:25.565 --> 00:09:28.535 line:-1 position:50%
+That means we can always
+tell which view is which,
+
+
+189
+00:09:28,535 --> 00:09:31,771 line:-1
+even if they happen
+to look similarly.
+
+
+190
+00:09:31,771 --> 00:09:35,909 line:-1
+However, this only works if
+SwiftUI can statically guarantee
+
+
+191
+00:09:35.909 --> 00:09:39.212 line:-1 position:50%
+that these views stay where
+they are and never swap places.
+
+
+192
+00:09:39.212 --> 00:09:42.348 line:-1 position:50%
+SwiftUI accomplishes this
+by looking at the type structure
+
+
+193
+00:09:42.348 --> 00:09:45.318 line:-1 position:50%
+of your view hierarchy.
+
+
+194
+00:09:45,318 --> 00:09:46,986 line:-1
+When SwiftUI
+looks at your views,
+
+
+195
+00:09:46.986 --> 00:09:50.123 line:-1 position:50%
+it sees their generic types --
+
+
+196
+00:09:50.123 --> 00:09:52.659 line:-1 position:50%
+in this case, our if statement
+translated into
+
+
+197
+00:09:52,659 --> 00:09:54,394 line:-1
+a _ConditionalContent view,
+
+
+198
+00:09:54.394 --> 00:09:58.965 line:-1 position:50%
+which is generic over
+its true and false content.
+
+
+199
+00:09:58.965 --> 00:10:02.035 line:-1 position:50%
+This translation is powered
+by a ViewBuilder,
+
+
+200
+00:10:02,035 --> 00:10:05,038 line:-1
+which is a type
+of result builder in Swift.
+
+
+201
+00:10:05,038 --> 00:10:08,641 line:-1
+The View protocol implicitly
+wraps its body property
+
+
+202
+00:10:08,641 --> 00:10:12,745 line:-1
+in a ViewBuilder, which
+constructs a single generic view
+
+
+203
+00:10:12,745 --> 00:10:15,381 line:-1
+from the logic statements
+in our property.
+
+
+204
+00:10:15.381 --> 00:10:17.684 line:-1 position:50%
+The some View return type
+of our body property
+
+
+205
+00:10:17.684 --> 00:10:21.888 line:-1 position:50%
+is a placeholder that represents
+this static composite type,
+
+
+206
+00:10:21,888 --> 00:10:25,124 line:-1
+hiding it away so it doesn't
+clutter up our code.
+
+
+207
+00:10:25,124 --> 00:10:28,895 line:-1
+Using this generic type,
+SwiftUI can guarantee
+
+
+208
+00:10:28.895 --> 00:10:32.532 line:-1 position:50%
+that the true view will always
+be the AdoptionDirectory,
+
+
+209
+00:10:32,532 --> 00:10:36,302 line:-1
+while the False view
+will always be the DogList,
+
+
+210
+00:10:36.302 --> 00:10:40.640 line:-1 position:50%
+allowing them to be assigned
+an implicit, stable identity
+
+
+211
+00:10:40.640 --> 00:10:42.909 line:-1 position:50%
+behind the scenes.
+
+
+212
+00:10:42.909 --> 00:10:45.144 line:-1 position:50%
+In fact, this is the key
+to understanding
+
+
+213
+00:10:45.144 --> 00:10:48.548 line:-1 position:50%
+the Good Dog, Bad Dog app
+from earlier.
+
+
+214
+00:10:48.548 --> 00:10:50.817 line:-1 position:50%
+With the code on the top,
+we have an if statement
+
+
+215
+00:10:50,817 --> 00:10:55,054 line:-1
+that defines different views
+for each conditional branch.
+
+
+216
+00:10:55,054 --> 00:10:58,324 line:-1
+This will cause the views
+to transition in and out
+
+
+217
+00:10:58.324 --> 00:11:01.861 line:-1 position:50%
+because SwiftUI understands that
+each branch of the if statement
+
+
+218
+00:11:01,861 --> 00:11:06,566 line:-1
+represents a different view
+with a distinct identity.
+
+
+219
+00:11:06,566 --> 00:11:10,436 position:50%
+Alternatively, we could just
+have a single PawView
+
+
+220
+00:11:10,436 --> 00:11:13,439 position:50%
+that changes
+its layout and color.
+
+
+221
+00:11:13,439 --> 00:11:15,508 position:50%
+When it transitions
+to a different state,
+
+
+222
+00:11:15,508 --> 00:11:19,078 line:0
+the view will smoothly slide
+to its next position.
+
+
+223
+00:11:19,078 --> 00:11:21,481 position:50%
+That's because we're
+modifying a single view
+
+
+224
+00:11:21,481 --> 00:11:24,651 position:50%
+with a consistent identity.
+
+
+225
+00:11:24,651 --> 00:11:26,686 line:0
+Both of these strategies
+can work,
+
+
+226
+00:11:26,686 --> 00:11:30,089 position:50%
+but SwiftUI generally recommends
+the second approach.
+
+
+227
+00:11:30,089 --> 00:11:32,125 line:0
+By default,
+try to preserve identity
+
+
+228
+00:11:32,125 --> 00:11:34,961 position:50%
+and provide
+more fluid transitions.
+
+
+229
+00:11:34,961 --> 00:11:38,331 line:0
+This also helps preserve
+your view's lifetime and state,
+
+
+230
+00:11:38,331 --> 00:11:41,668 line:0
+which Luca will talk about
+in more detail later on.
+
+
+231
+00:11:41,668 --> 00:11:44,337 line:-1
+Now that we understand
+structural identity,
+
+
+232
+00:11:44.337 --> 00:11:48.575 line:-1 position:50%
+we need to talk about
+its evil nemesis, AnyView.
+
+
+233
+00:11:48,575 --> 00:11:51,077 line:-1
+To understand the impact
+of using AnyView,
+
+
+234
+00:11:51,077 --> 00:11:52,845 line:-1
+let's look at the effect
+that it has
+
+
+235
+00:11:52.845 --> 00:11:55.248 line:-1 position:50%
+on the structure of your views.
+
+
+236
+00:11:55,248 --> 00:11:57,116 line:-1
+Earlier we wrote
+this if statement
+
+
+237
+00:11:57.116 --> 00:11:59.218 line:-1 position:50%
+to switch between
+the AdoptionDirectory
+
+
+238
+00:11:59.218 --> 00:12:00.620 line:-1 position:50%
+and the DogList.
+
+
+239
+00:12:00,620 --> 00:12:02,322 line:-1
+When SwiftUI looks at this code,
+
+
+240
+00:12:02.322 --> 00:12:06.593 line:-1 position:50%
+it sees the generic
+type structure on the right.
+
+
+241
+00:12:06,593 --> 00:12:08,328 line:-1
+Now let's look
+at a different example,
+
+
+242
+00:12:08.328 --> 00:12:11.864 line:-1 position:50%
+one that uses AnyView
+extensively.
+
+
+243
+00:12:11,864 --> 00:12:13,733 line:-1
+This is a helper function
+I've written
+
+
+244
+00:12:13.733 --> 00:12:17.003 line:-1 position:50%
+to get a view that represents
+a dog's breed.
+
+
+245
+00:12:17,003 --> 00:12:19,539 line:-1
+Each conditional branch
+in the function
+
+
+246
+00:12:19,539 --> 00:12:21,541 line:-1
+returns a different
+kind of view,
+
+
+247
+00:12:21,541 --> 00:12:23,209 line:-1
+so I've wrapped them all
+in AnyViews
+
+
+248
+00:12:23.209 --> 00:12:25.645 line:-1 position:50%
+because Swift requires
+a single return type
+
+
+249
+00:12:25.645 --> 00:12:28.748 line:-1 position:50%
+for the whole function.
+
+
+250
+00:12:28,748 --> 00:12:32,185 line:0
+Unfortunately, this also means
+that SwiftUI can't see
+
+
+251
+00:12:32,185 --> 00:12:34,787 line:0
+the conditional structure
+of my code.
+
+
+252
+00:12:34,787 --> 00:12:37,056 position:50%
+Instead, it just sees an AnyView
+
+
+253
+00:12:37,056 --> 00:12:39,626 position:50%
+as a return type
+of the function.
+
+
+254
+00:12:39,626 --> 00:12:42,295 line:-1
+This is because AnyView
+is what's called
+
+
+255
+00:12:42.295 --> 00:12:45.131 line:-1 position:50%
+a "type-erasing wrapper type" --
+
+
+256
+00:12:45.131 --> 00:12:47.367 line:-1 position:50%
+it hides the type of the view
+it is wrapping
+
+
+257
+00:12:47,367 --> 00:12:49,936 line:-1
+from its generic signature.
+
+
+258
+00:12:49.936 --> 00:12:51.904 line:-1 position:50%
+But perhaps more importantly,
+
+
+259
+00:12:51.904 --> 00:12:54.307 line:-1 position:50%
+this code is also
+just really hard to read
+
+
+260
+00:12:54.307 --> 00:12:56.209 line:-1 position:50%
+for us mere humans.
+
+
+261
+00:12:56,209 --> 00:12:58,511 line:-1
+Let's see if we can
+simplify this code
+
+
+262
+00:12:58.511 --> 00:13:03.249 line:-1 position:50%
+and also make more of its
+structure visible to SwiftUI.
+
+
+263
+00:13:03,249 --> 00:13:07,387 line:-1
+First, it looks like this branch
+is conditionally adding
+
+
+264
+00:13:07.387 --> 00:13:09.989 line:-1 position:50%
+a SheepView alongside
+our BorderCollieView
+
+
+265
+00:13:09,989 --> 00:13:12,792 line:-1
+if there are sheep nearby.
+
+
+266
+00:13:12.792 --> 00:13:15.294 line:-1 position:50%
+We can simplify this by
+conditionally adding the view
+
+
+267
+00:13:15.294 --> 00:13:17.530 line:-1 position:50%
+inside the HStack
+rather than
+
+
+268
+00:13:17.530 --> 00:13:22.301 line:-1 position:50%
+conditionally adding
+the HStack around our views.
+
+
+269
+00:13:22,301 --> 00:13:24,570 position:50%
+With that change,
+it's now easy to see
+
+
+270
+00:13:24,570 --> 00:13:27,407 position:50%
+that we're just returning
+a single view from each branch,
+
+
+271
+00:13:27,407 --> 00:13:31,377 position:50%
+so our local dogView variable
+isn't necessary.
+
+
+272
+00:13:31.377 --> 00:13:34.047 line:-1 position:50%
+Instead, we can replace it
+with return statements
+
+
+273
+00:13:34,047 --> 00:13:36,683 line:-1
+inside of each branch.
+
+
+274
+00:13:36.683 --> 00:13:39.585 line:-1 position:50%
+As we saw earlier,
+normal SwiftUI View code
+
+
+275
+00:13:39,585 --> 00:13:44,257 line:-1
+can use if statements that
+return different types of views.
+
+
+276
+00:13:44,257 --> 00:13:46,659 line:-1
+But if we just try deleting
+the return statements
+
+
+277
+00:13:46,659 --> 00:13:48,661 line:-1
+and AnyViews from our code,
+
+
+278
+00:13:48,661 --> 00:13:52,198 line:-1
+we see some errors
+and warnings appear.
+
+
+279
+00:13:52,198 --> 00:13:55,334 line:-1
+This is because SwiftUI
+requires a single return type
+
+
+280
+00:13:55.334 --> 00:13:57.370 line:-1 position:50%
+from our helper function.
+
+
+281
+00:13:57,370 --> 00:14:00,473 line:-1
+So how can we avoid
+these errors?
+
+
+282
+00:14:00.473 --> 00:14:04.310 line:-1 position:50%
+Recall that the body property
+of a view is special,
+
+
+283
+00:14:04,310 --> 00:14:07,113 line:-1
+because the View protocol
+implicitly wraps it
+
+
+284
+00:14:07,113 --> 00:14:08,681 line:-1
+in a ViewBuilder.
+
+
+285
+00:14:08.681 --> 00:14:10.750 line:-1 position:50%
+This translates
+the logic in the property
+
+
+286
+00:14:10,750 --> 00:14:14,787 line:-1
+into a single, generic
+view structure.
+
+
+287
+00:14:14,787 --> 00:14:17,090 line:-1
+Now, Swift does not infer
+helper functions
+
+
+288
+00:14:17,090 --> 00:14:20,460 line:-1
+to be view builders by default,
+but we can opt into that
+
+
+289
+00:14:20.460 --> 00:14:24.931 line:-1 position:50%
+by manually applying the
+ViewBuilder attribute ourselves.
+
+
+290
+00:14:24.931 --> 00:14:28.067 line:-1 position:50%
+And that allows us to remove
+the return statements
+
+
+291
+00:14:28.067 --> 00:14:32.939 line:-1 position:50%
+and the AnyView wrappers
+without any warnings or errors.
+
+
+292
+00:14:32.939 --> 00:14:35.975 line:-1 position:50%
+OK, our code is looking
+pretty good now!
+
+
+293
+00:14:35.975 --> 00:14:37.510 line:-1 position:50%
+We've gotten rid
+of all of the AnyViews,
+
+
+294
+00:14:37.510 --> 00:14:40.747 line:-1 position:50%
+making it easier to read
+than before.
+
+
+295
+00:14:40.747 --> 00:14:43.549 line:-1 position:50%
+And if we look at the type
+signature of the result,
+
+
+296
+00:14:43,549 --> 00:14:46,052 line:-1
+it now exactly replicates
+the conditional logic
+
+
+297
+00:14:46.052 --> 00:14:49.989 line:-1 position:50%
+of our function with
+a tree of conditional content,
+
+
+298
+00:14:49,989 --> 00:14:53,126 line:-1
+providing SwiftUI
+with a much richer perspective
+
+
+299
+00:14:53,126 --> 00:14:57,597 line:-1
+of the view and the identities
+of its components.
+
+
+300
+00:14:57,597 --> 00:15:00,533 line:-1
+But there's one more small
+improvement we can make.
+
+
+301
+00:15:00,533 --> 00:15:02,602 line:-1
+The top level of our function
+is just matching
+
+
+302
+00:15:02,602 --> 00:15:05,505 line:-1
+against different cases
+of the dog's breed.
+
+
+303
+00:15:05.505 --> 00:15:08.574 line:-1 position:50%
+This seems like an excellent
+use case for a switch statement,
+
+
+304
+00:15:08.574 --> 00:15:12.211 line:-1 position:50%
+which are also supported
+by view builders.
+
+
+305
+00:15:12.211 --> 00:15:14.914 line:-1 position:50%
+Now it's even easier
+to quickly understand
+
+
+306
+00:15:14,914 --> 00:15:17,083 line:-1
+all the different cases
+of our view.
+
+
+307
+00:15:17.083 --> 00:15:20.586 line:-1 position:50%
+And because switch statements
+are really just syntactic sugar
+
+
+308
+00:15:20,586 --> 00:15:22,255 line:-1
+for conditional statements,
+
+
+309
+00:15:22.255 --> 00:15:25.191 line:-1 position:50%
+our resulting view's
+type signature on the right
+
+
+310
+00:15:25.191 --> 00:15:27.894 line:-1 position:50%
+remains exactly the same.
+
+
+311
+00:15:27.894 --> 00:15:30.296 line:-1 position:50%
+Stepping back,
+we just showed you
+
+
+312
+00:15:30.296 --> 00:15:33.800 line:-1 position:50%
+how AnyViews erase type
+information from your code,
+
+
+313
+00:15:33,800 --> 00:15:37,036 line:-1
+and walked through how to
+get rid of unnecessary AnyViews
+
+
+314
+00:15:37.036 --> 00:15:38.805 line:-1 position:50%
+by leveraging view builders.
+
+
+315
+00:15:38.805 --> 00:15:41.941 line:-1 position:50%
+In general, we recommend
+avoiding AnyViews
+
+
+316
+00:15:41.941 --> 00:15:43.910 line:-1 position:50%
+whenever possible.
+
+
+317
+00:15:43.910 --> 00:15:46.546 line:-1 position:50%
+Having too many AnyViews
+will often make code
+
+
+318
+00:15:46.546 --> 00:15:48.848 line:-1 position:50%
+harder to read and understand.
+
+
+319
+00:15:48.848 --> 00:15:50.349 line:-1 position:50%
+Traditional control flow
+statements
+
+
+320
+00:15:50,349 --> 00:15:52,952 line:-1
+like if/else and switch
+make it much easier
+
+
+321
+00:15:52,952 --> 00:15:56,889 line:-1
+to see the different possible
+states of a view.
+
+
+322
+00:15:56,889 --> 00:15:59,125 line:-1
+And because AnyView
+hides static type information
+
+
+323
+00:15:59.125 --> 00:16:00.393 line:-1 position:50%
+from the compiler,
+
+
+324
+00:16:00.393 --> 00:16:03.663 line:-1 position:50%
+it can sometimes prevent helpful
+diagnostic errors and warnings
+
+
+325
+00:16:03,663 --> 00:16:06,532 line:-1
+from being surfaced
+in your code.
+
+
+326
+00:16:06.532 --> 00:16:10.436 line:-1 position:50%
+Finally, keep in mind that using
+AnyView when you don't need to
+
+
+327
+00:16:10,436 --> 00:16:13,306 line:-1
+can result in worse performance.
+
+
+328
+00:16:13,306 --> 00:16:16,943 line:-1
+When possible, use generics to
+preserve static type information
+
+
+329
+00:16:16.943 --> 00:16:20.146 line:-1 position:50%
+rather than passing AnyViews
+around your code.
+
+
+330
+00:16:20,146 --> 00:16:23,249 line:-1
+And with that, we've finished
+introducing the basic types
+
+
+331
+00:16:23,249 --> 00:16:26,586 line:-1
+of view identity in SwiftUI.
+
+
+332
+00:16:26.586 --> 00:16:27.753 line:-1 position:50%
+With explicit identity,
+
+
+333
+00:16:27,753 --> 00:16:30,823 line:-1
+we can tie the identity
+of our views to our data,
+
+
+334
+00:16:30.823 --> 00:16:35.561 line:-1 position:50%
+or provide custom identifiers
+to refer to specific views.
+
+
+335
+00:16:35,561 --> 00:16:37,063 line:-1
+And with structural identity,
+
+
+336
+00:16:37.063 --> 00:16:39.732 line:-1 position:50%
+we've learned how SwiftUI
+can identify our views
+
+
+337
+00:16:39,732 --> 00:16:41,467 line:-1
+just based on their type
+and position
+
+
+338
+00:16:41.467 --> 00:16:44.203 line:-1 position:50%
+within the view hierarchy.
+
+
+339
+00:16:44.203 --> 00:16:46.205 line:-1 position:50%
+And now I'll hand things
+over to Luca
+
+
+340
+00:16:46.205 --> 00:16:48.341 line:-1 position:50%
+to discuss
+how the identity of your views
+
+
+341
+00:16:48.341 --> 00:16:51.611 line:-1 position:50%
+is related to their lifetime
+and state.
+
+
+342
+00:16:51.611 --> 00:16:53.546 line:-1 position:50%
+Luca Bernardi: Thanks, Matt.
+
+
+343
+00:16:53,546 --> 00:16:58,050 line:-1
+Now that we understand how
+SwiftUI identifies your views,
+
+
+344
+00:16:58,050 --> 00:16:59,852 line:-1
+let's explore how identity
+
+
+345
+00:16:59.852 --> 00:17:03.589 line:-1 position:50%
+ties into the lifetime
+of your views and data.
+
+
+346
+00:17:03,589 --> 00:17:07,560 line:-1
+This will help you better
+understand how SwiftUI works.
+
+
+347
+00:17:07.560 --> 00:17:09.061 line:-1 position:50%
+To help illustrate this,
+
+
+348
+00:17:09,061 --> 00:17:12,131 line:-1
+I'm also going
+to bring in a friend.
+
+
+349
+00:17:12.131 --> 00:17:13.532 line:-1 position:50%
+This is Theseus.
+
+
+350
+00:17:13,532 --> 00:17:15,201 line:-1
+Isn't he adorable, too?
+
+
+351
+00:17:15,201 --> 00:17:18,804 line:-1
+Someone will say more adorable,
+but I digress.
+
+
+352
+00:17:18,804 --> 00:17:21,073 line:-1
+It is very intuitive
+for us to think that
+
+
+353
+00:17:21.073 --> 00:17:23.576 line:-1 position:50%
+once we name our favorite pet,
+
+
+354
+00:17:23,576 --> 00:17:26,779 line:-1
+he'll always be
+the same adorable cat,
+
+
+355
+00:17:26.779 --> 00:17:28.648 line:-1 position:50%
+even when he is
+in different states
+
+
+356
+00:17:28.648 --> 00:17:31.317 line:-1 position:50%
+and he moves
+throughout the day.
+
+
+357
+00:17:31,317 --> 00:17:35,321 line:0
+When we look at him one moment,
+he might be sleepy
+
+
+358
+00:17:35,321 --> 00:17:38,190 position:50%
+and a moment later,
+being a proper cat,
+
+
+359
+00:17:38,190 --> 00:17:44,130 position:50%
+he's annoyed by my presence --
+but he'll always be Theseus.
+
+
+360
+00:17:44.130 --> 00:17:48.634 line:-1 position:50%
+This is the essence of
+connecting identity to lifetime.
+
+
+361
+00:17:48.634 --> 00:17:52.171 line:-1 position:50%
+Identity allows us
+to define a stable element
+
+
+362
+00:17:52.171 --> 00:17:55.107 line:-1 position:50%
+for different values over time.
+
+
+363
+00:17:55,107 --> 00:18:00,279 position:50%
+In other words, it allows us to
+introduce continuity over time.
+
+
+364
+00:18:00,279 --> 00:18:04,183 line:-1
+You might be wondering,
+how does this apply to SwiftUI?
+
+
+365
+00:18:04.183 --> 00:18:06.752 line:-1 position:50%
+So let's bring back
+a cat-friendly version
+
+
+366
+00:18:06.752 --> 00:18:10.389 line:-1 position:50%
+of the app
+Matt was working on.
+
+
+367
+00:18:10.389 --> 00:18:12.925 line:-1 position:50%
+Just like Theseus
+can be in different states
+
+
+368
+00:18:12.925 --> 00:18:17.029 line:-1 position:50%
+at different moments in time,
+our views are also
+
+
+369
+00:18:17.029 --> 00:18:21.067 line:-1 position:50%
+in different states
+throughout their lifetime.
+
+
+370
+00:18:21.067 --> 00:18:26.005 line:-1 position:50%
+Every single state is
+a different value for our view.
+
+
+371
+00:18:26,005 --> 00:18:28,908 line:-1
+Identity connects
+these different values
+
+
+372
+00:18:28,908 --> 00:18:33,145 line:-1
+as a single entity --
+a view -- over time.
+
+
+373
+00:18:33.145 --> 00:18:36.949 line:-1 position:50%
+Let's look at some code
+to clarify this.
+
+
+374
+00:18:36.949 --> 00:18:38.317 line:-1 position:50%
+Here we have a simple view
+
+
+375
+00:18:38.317 --> 00:18:41.320 line:-1 position:50%
+that displays
+the intensity of purring.
+
+
+376
+00:18:41.320 --> 00:18:44.323 line:-1 position:50%
+Spoiler: Theseus is pretty loud.
+
+
+377
+00:18:44,323 --> 00:18:46,258 line:-1
+Through the evaluation of body,
+
+
+378
+00:18:46,258 --> 00:18:50,062 line:-1
+SwiftUI will create a new value
+for this view;
+
+
+379
+00:18:50.062 --> 00:18:54.400 line:-1 position:50%
+in this case, with an intensity
+value of 25.
+
+
+380
+00:18:54,400 --> 00:18:58,504 line:0
+Theseus is getting hungry
+and wants more attention.
+
+
+381
+00:18:58,504 --> 00:19:01,374 position:50%
+body is invoked again
+with a higher intensity,
+
+
+382
+00:19:01,374 --> 00:19:05,711 line:0
+and the new value for the view
+is created.
+
+
+383
+00:19:05,711 --> 00:19:08,180 position:50%
+These are two distinct values
+
+
+384
+00:19:08,180 --> 00:19:11,951 position:50%
+created from the same
+view definition.
+
+
+385
+00:19:11,951 --> 00:19:14,887 line:0
+SwiftUI will keep around
+a copy of the value
+
+
+386
+00:19:14,887 --> 00:19:19,091 line:0
+to perform a comparison and
+know if the view has changed.
+
+
+387
+00:19:19,091 --> 00:19:23,362 position:50%
+But after that,
+the value is destroyed.
+
+
+388
+00:19:23,362 --> 00:19:26,098 position:50%
+What it is important
+to understand here is that
+
+
+389
+00:19:26,098 --> 00:19:30,369 line:0
+the view value is different
+from the view identity.
+
+
+390
+00:19:30,369 --> 00:19:32,138 line:-1
+View values are ephemeral
+
+
+391
+00:19:32.138 --> 00:19:34.874 line:-1 position:50%
+and you should not
+rely on their lifetime.
+
+
+392
+00:19:34.874 --> 00:19:39.245 line:-1 position:50%
+But what you can control
+is their identity.
+
+
+393
+00:19:39.245 --> 00:19:42.882 line:-1 position:50%
+When a view is first created
+and it appears,
+
+
+394
+00:19:42.882 --> 00:19:46.952 line:-1 position:50%
+SwiftUI assigns it an identity
+using a combination
+
+
+395
+00:19:46,952 --> 00:19:49,922 line:-1
+of the techniques
+discussed before.
+
+
+396
+00:19:49,922 --> 00:19:52,491 position:50%
+Over time, driven by updates,
+
+
+397
+00:19:52,491 --> 00:19:55,294 position:50%
+new values for the view
+are created.
+
+
+398
+00:19:55,294 --> 00:20:01,233 line:0
+But from SwiftUI's perspective,
+these represent the same view.
+
+
+399
+00:20:01,233 --> 00:20:03,269 line:0
+Once the identity
+of the view changes
+
+
+400
+00:20:03,269 --> 00:20:08,808 line:0
+or the view is removed,
+its lifetime ends.
+
+
+401
+00:20:08,808 --> 00:20:11,477 line:-1
+Whenever we talk about
+the lifetime of a view,
+
+
+402
+00:20:11,477 --> 00:20:14,580 line:-1
+we are referring to
+the duration of the identity
+
+
+403
+00:20:14,580 --> 00:20:17,283 line:-1
+associated with that view.
+
+
+404
+00:20:17,283 --> 00:20:19,285 line:-1
+Being able to connect
+
+
+405
+00:20:19.285 --> 00:20:22.188 line:-1 position:50%
+the identity of a view
+with its lifetime
+
+
+406
+00:20:22.188 --> 00:20:27.293 line:-1 position:50%
+is fundamental to understand
+how SwiftUI persists your state.
+
+
+407
+00:20:27.293 --> 00:20:31.831 line:-1 position:50%
+So let's bring State and
+StateObject into the picture.
+
+
+408
+00:20:31,831 --> 00:20:34,133 line:-1
+When SwiftUI
+is looking at your view
+
+
+409
+00:20:34,133 --> 00:20:37,136 line:-1
+and sees a State
+or a StateObject,
+
+
+410
+00:20:37,136 --> 00:20:40,840 line:-1
+it knows that it needs
+to persist that piece of data
+
+
+411
+00:20:40.840 --> 00:20:43.843 line:-1 position:50%
+throughout the view's lifetime.
+
+
+412
+00:20:43.843 --> 00:20:46.979 line:-1 position:50%
+In other words,
+State and StateObject
+
+
+413
+00:20:46.979 --> 00:20:49.014 line:-1 position:50%
+are the persistent storage
+
+
+414
+00:20:49,014 --> 00:20:52,418 line:-1
+associated with your
+view's identity.
+
+
+415
+00:20:52,418 --> 00:20:54,987 line:-1
+At the beginning
+of a view's identity,
+
+
+416
+00:20:54.987 --> 00:20:57.590 line:-1 position:50%
+when it's created
+for the first time,
+
+
+417
+00:20:57,590 --> 00:21:00,793 line:-1
+SwiftUI is going to allocate
+storage in memory
+
+
+418
+00:21:00,793 --> 00:21:05,831 line:-1
+for State and StateObject
+using their initial values.
+
+
+419
+00:21:05,831 --> 00:21:09,068 position:50%
+Here we are focusing on
+the title state.
+
+
+420
+00:21:09,068 --> 00:21:11,470 position:50%
+Throughout the lifetime
+of the view,
+
+
+421
+00:21:11,470 --> 00:21:15,641 position:50%
+SwiftUI will persist this
+storage as it gets mutated
+
+
+422
+00:21:15,641 --> 00:21:19,011 position:50%
+and the view's body
+is re-evaluated.
+
+
+423
+00:21:19.011 --> 00:21:22.181 line:-1 position:50%
+Let's look at a concrete example
+of how changes in identity
+
+
+424
+00:21:22.181 --> 00:21:25.050 line:-1 position:50%
+affect the persistence of state.
+
+
+425
+00:21:25,050 --> 00:21:29,288 line:-1
+This is an interesting example
+because we have the same view
+
+
+426
+00:21:29.288 --> 00:21:31.957 line:-1 position:50%
+but in two separate branches.
+
+
+427
+00:21:31,957 --> 00:21:33,792 line:-1
+If you remember from before,
+
+
+428
+00:21:33.792 --> 00:21:35.961 line:-1 position:50%
+because of structural identity,
+
+
+429
+00:21:35.961 --> 00:21:40.499 line:-1 position:50%
+the two views are considered
+to have different identities.
+
+
+430
+00:21:40,499 --> 00:21:44,470 line:-1
+Matt has discussed
+how this affects animations,
+
+
+431
+00:21:44,470 --> 00:21:46,705 line:-1
+but this also has
+a profound impact
+
+
+432
+00:21:46.705 --> 00:21:49.508 line:-1 position:50%
+on the persistence
+of your state.
+
+
+433
+00:21:49,508 --> 00:21:51,810 line:-1
+Let's see this in practice.
+
+
+434
+00:21:51.810 --> 00:21:55.848 line:-1 position:50%
+When we first evaluate body
+and we enter the true branch,
+
+
+435
+00:21:55,848 --> 00:22:00,152 line:-1
+SwiftUI will allocate
+persistent storage for the state
+
+
+436
+00:22:00,152 --> 00:22:03,289 line:-1
+with its initial value.
+
+
+437
+00:22:03,289 --> 00:22:05,558 line:-1
+Throughout the lifetime
+of this view,
+
+
+438
+00:22:05.558 --> 00:22:08.127 line:-1 position:50%
+SwiftUI persists the state
+
+
+439
+00:22:08.127 --> 00:22:11.530 line:-1 position:50%
+as it gets mutated
+by various actions.
+
+
+440
+00:22:11.530 --> 00:22:14.967 line:-1 position:50%
+But what happens if
+the value of dayTime changes
+
+
+441
+00:22:14.967 --> 00:22:17.870 line:-1 position:50%
+and we enter the false branch?
+
+
+442
+00:22:17,870 --> 00:22:20,739 line:-1
+SwiftUI knows this is
+a different view
+
+
+443
+00:22:20,739 --> 00:22:23,609 line:-1
+with a distinct identity.
+
+
+444
+00:22:23.609 --> 00:22:26.645 line:-1 position:50%
+It creates new storage
+for the false view,
+
+
+445
+00:22:26.645 --> 00:22:29.815 line:-1 position:50%
+starting with
+the state's initial value,
+
+
+446
+00:22:29.815 --> 00:22:35.287 line:-1 position:50%
+and the storage for the true
+view is deallocated right after.
+
+
+447
+00:22:35,287 --> 00:22:38,824 line:-1
+But what if we go back
+to the true branch?
+
+
+448
+00:22:38,824 --> 00:22:43,796 line:-1
+Well, that's a new view again,
+so SwiftUI creates new storage,
+
+
+449
+00:22:43,796 --> 00:22:47,766 line:-1
+starting again from
+the state's initial value.
+
+
+450
+00:22:47.766 --> 00:22:51.470 line:-1 position:50%
+The takeaway here is that
+whenever the identity changes,
+
+
+451
+00:22:51,470 --> 00:22:54,006 line:-1
+the state is replaced.
+
+
+452
+00:22:54.006 --> 00:22:57.142 line:-1 position:50%
+Let me pause here for a moment
+and make sure
+
+
+453
+00:22:57,142 --> 00:23:00,546 line:-1
+that you understand
+this important point:
+
+
+454
+00:23:00.546 --> 00:23:02.815 line:-1 position:50%
+the persistence of your state
+
+
+455
+00:23:02,815 --> 00:23:07,186 line:-1
+is tied to the lifetime
+of your views.
+
+
+456
+00:23:07,186 --> 00:23:11,657 line:-1
+This is a very powerful concept
+because we can clearly separate
+
+
+457
+00:23:11,657 --> 00:23:14,960 line:-1
+what is the essence of a view --
+its state --
+
+
+458
+00:23:14.960 --> 00:23:17.863 line:-1 position:50%
+and tie that to its identity.
+
+
+459
+00:23:17.863 --> 00:23:21.500 line:-1 position:50%
+Everything else
+can be derived from it.
+
+
+460
+00:23:21.500 --> 00:23:26.171 line:-1 position:50%
+And your data is so important
+that SwiftUI has a set
+
+
+461
+00:23:26.171 --> 00:23:30.643 line:-1 position:50%
+of data-driven constructs that
+use the identity of your data
+
+
+462
+00:23:30.643 --> 00:23:35.014 line:-1 position:50%
+as a form of explicit identity
+for your views.
+
+
+463
+00:23:35.014 --> 00:23:39.318 line:-1 position:50%
+The canonical example
+of this is ForEach.
+
+
+464
+00:23:39,318 --> 00:23:42,154 line:-1
+Let's now take a look
+at all of the different ways
+
+
+465
+00:23:42,154 --> 00:23:44,757 line:-1
+you can initialize a ForEach.
+
+
+466
+00:23:44.757 --> 00:23:49.295 line:-1 position:50%
+This will help us build a better
+intuition around this type.
+
+
+467
+00:23:49.295 --> 00:23:54.099 line:-1 position:50%
+The simplest form of ForEach is
+one that takes a constant range.
+
+
+468
+00:23:54.099 --> 00:23:56.302 line:-1 position:50%
+This is a very convenient
+initializer,
+
+
+469
+00:23:56.302 --> 00:23:58.203 line:-1 position:50%
+especially when
+you are getting started
+
+
+470
+00:23:58.203 --> 00:24:00.939 line:-1 position:50%
+prototyping some new UI.
+
+
+471
+00:24:00.939 --> 00:24:04.209 line:-1 position:50%
+SwiftUI is going to use
+the offset in this range
+
+
+472
+00:24:04.209 --> 00:24:07.813 line:-1 position:50%
+to identify the views produced
+by the view builder.
+
+
+473
+00:24:07.813 --> 00:24:10.582 line:-1 position:50%
+By requiring a constant range,
+
+
+474
+00:24:10.582 --> 00:24:14.086 line:-1 position:50%
+we guarantee that
+the identities are stable
+
+
+475
+00:24:14.086 --> 00:24:16.989 line:-1 position:50%
+for the lifetime of the view.
+
+
+476
+00:24:16.989 --> 00:24:20.726 line:-1 position:50%
+In fact, it is an error
+to use this initializer
+
+
+477
+00:24:20,726 --> 00:24:23,128 line:-1
+with a dynamic range.
+
+
+478
+00:24:23.128 --> 00:24:26.065 line:-1 position:50%
+And new this year,
+you will see a warning
+
+
+479
+00:24:26.065 --> 00:24:29.601 line:-1 position:50%
+when providing
+a non-constant range.
+
+
+480
+00:24:29.601 --> 00:24:31.170 line:-1 position:50%
+Let's make things
+more interesting
+
+
+481
+00:24:31.170 --> 00:24:35.107 line:-1 position:50%
+and bring in a dynamic
+collection of data.
+
+
+482
+00:24:35.107 --> 00:24:37.076 line:-1 position:50%
+This initializer takes
+a collection
+
+
+483
+00:24:37.076 --> 00:24:41.747 line:-1 position:50%
+and a keypath to a property
+serving as an identifier.
+
+
+484
+00:24:41.747 --> 00:24:45.884 line:-1 position:50%
+This property must be hashable
+because SwiftUI
+
+
+485
+00:24:45,884 --> 00:24:49,655 line:-1
+is going to use its value
+to assign an identity
+
+
+486
+00:24:49,655 --> 00:24:55,194 line:-1
+to all the views generated from
+the elements of the collection.
+
+
+487
+00:24:55,194 --> 00:24:58,697 line:-1
+Later, Raj is going
+to show you some examples
+
+
+488
+00:24:58,697 --> 00:25:01,600 line:-1
+of how choosing
+a stable identity affects
+
+
+489
+00:25:01,600 --> 00:25:05,337 line:-1
+the performance and
+correctness of your app.
+
+
+490
+00:25:05.337 --> 00:25:09.575 line:-1 position:50%
+This idea of providing
+a stable identity for your data
+
+
+491
+00:25:09.575 --> 00:25:12.611 line:-1 position:50%
+is so important that
+the standard library
+
+
+492
+00:25:12.611 --> 00:25:15.147 line:-1 position:50%
+defines the Identifiable
+protocol
+
+
+493
+00:25:15,147 --> 00:25:18,317 line:-1
+to describe this capability.
+
+
+494
+00:25:18.317 --> 00:25:21.887 line:-1 position:50%
+And SwiftUI takes full
+advantage of this protocol,
+
+
+495
+00:25:21.887 --> 00:25:24.823 line:-1 position:50%
+allowing you to omit
+the key path
+
+
+496
+00:25:24.823 --> 00:25:28.894 line:-1 position:50%
+and use the identifier provided
+by the protocol requirement
+
+
+497
+00:25:28,894 --> 00:25:32,264 line:-1
+to define the identity
+associated with your data
+
+
+498
+00:25:32.264 --> 00:25:34.666 line:-1 position:50%
+and your views.
+
+
+499
+00:25:34,666 --> 00:25:37,436 line:-1
+Something that I really love
+about Swift is that
+
+
+500
+00:25:37.436 --> 00:25:40.472 line:-1 position:50%
+we can take advantage
+of its type system
+
+
+501
+00:25:40,472 --> 00:25:43,842 line:-1
+to precisely describe
+the constraints of the problem
+
+
+502
+00:25:43.842 --> 00:25:45.577 line:-1 position:50%
+that we are solving.
+
+
+503
+00:25:45.577 --> 00:25:47.780 line:-1 position:50%
+So indulge with me
+in taking a look
+
+
+504
+00:25:47,780 --> 00:25:51,984 line:-1
+at the definition of the
+initializer we are using here.
+
+
+505
+00:25:51,984 --> 00:25:55,587 line:-1
+There are a lot of interesting
+things in this short definition,
+
+
+506
+00:25:55,587 --> 00:25:58,390 line:-1
+so let's try to unpack them.
+
+
+507
+00:25:58,390 --> 00:26:01,894 line:-1
+ForEach needs two main pieces:
+a collection --
+
+
+508
+00:26:01.894 --> 00:26:05.264 line:-1 position:50%
+here indicated by
+the generic argument Data --
+
+
+509
+00:26:05.264 --> 00:26:07.533 line:-1 position:50%
+and a way to generate a view
+
+
+510
+00:26:07.533 --> 00:26:10.702 line:-1 position:50%
+from each element
+of the collection.
+
+
+511
+00:26:10.702 --> 00:26:13.906 line:-1 position:50%
+The shape of this initializer
+should give you the intuition
+
+
+512
+00:26:13,906 --> 00:26:16,508 line:-1
+that ForEach defines
+a relationship
+
+
+513
+00:26:16,508 --> 00:26:21,046 line:-1
+between a collection of data
+and a collection of views.
+
+
+514
+00:26:21,046 --> 00:26:24,450 line:-1
+But actually, the most
+interesting part here
+
+
+515
+00:26:24.450 --> 00:26:27.286 line:-1 position:50%
+is that we constrain
+the elements of the collection
+
+
+516
+00:26:27.286 --> 00:26:29.221 line:-1 position:50%
+to be Identifiable.
+
+
+517
+00:26:29.221 --> 00:26:32.591 line:-1 position:50%
+Again, the purpose
+of the Identifiable protocol
+
+
+518
+00:26:32,591 --> 00:26:34,927 line:-1
+is to allow for your type
+
+
+519
+00:26:34,927 --> 00:26:37,629 line:-1
+to provide
+a stable notion of identity
+
+
+520
+00:26:37,629 --> 00:26:41,166 line:-1
+so that SwiftUI
+can keep track of your data
+
+
+521
+00:26:41,166 --> 00:26:43,602 line:-1
+throughout its lifetime.
+
+
+522
+00:26:43,602 --> 00:26:46,872 line:-1
+In fact, this is very similar
+to the concepts
+
+
+523
+00:26:46.872 --> 00:26:50.576 line:-1 position:50%
+of identity and lifetime
+that we discussed earlier.
+
+
+524
+00:26:50.576 --> 00:26:53.912 line:-1 position:50%
+SwiftUI views that takes
+an Identifiable type
+
+
+525
+00:26:53,912 --> 00:26:57,449 line:-1
+and a view builder
+are data-driven components.
+
+
+526
+00:26:57.449 --> 00:27:00.519 line:-1 position:50%
+These views use
+the identity of the data
+
+
+527
+00:27:00.519 --> 00:27:03.188 line:-1 position:50%
+that you provide
+to scope the lifetime
+
+
+528
+00:27:03.188 --> 00:27:06.124 line:-1 position:50%
+of the views
+associated to it.
+
+
+529
+00:27:06,124 --> 00:27:09,728 line:-1
+Choosing a good identifier
+is your opportunity
+
+
+530
+00:27:09.728 --> 00:27:14.233 line:-1 position:50%
+to control the lifetime
+of your views and data.
+
+
+531
+00:27:14,233 --> 00:27:19,438 line:-1
+So let's recap what we have
+discussed in this section.
+
+
+532
+00:27:19.438 --> 00:27:21.473 line:-1 position:50%
+Views values are ephemeral
+
+
+533
+00:27:21.473 --> 00:27:24.610 line:-1 position:50%
+and you should not
+rely on their lifetime.
+
+
+534
+00:27:24,610 --> 00:27:26,712 line:-1
+But their identity is not,
+
+
+535
+00:27:26.712 --> 00:27:31.016 line:-1 position:50%
+and is what gives them
+continuity over time.
+
+
+536
+00:27:31,016 --> 00:27:34,286 line:-1
+You are in control
+of the identity of your views,
+
+
+537
+00:27:34,286 --> 00:27:35,888 line:-1
+and you can use identity
+
+
+538
+00:27:35,888 --> 00:27:39,791 line:-1
+to clearly scope
+the lifetime of state.
+
+
+539
+00:27:39.791 --> 00:27:43.128 line:-1 position:50%
+And finally, SwiftUI
+takes full advantage
+
+
+540
+00:27:43.128 --> 00:27:46.865 line:-1 position:50%
+of the Identifiable protocol
+for data-driven components,
+
+
+541
+00:27:46.865 --> 00:27:51.703 line:-1 position:50%
+so it's important to choose a
+stable identifier for your data.
+
+
+542
+00:27:51.703 --> 00:27:54.006 line:-1 position:50%
+And now continuing
+the tradition,
+
+
+543
+00:27:54,006 --> 00:27:56,708 line:-1
+I'm going to hand it over
+to Raj. Raj?
+
+
+544
+00:27:56,708 --> 00:27:58,176 line:-1
+Raj Ramamurthy: Thanks, Luca!
+
+
+545
+00:27:58,176 --> 00:28:00,546 line:-1
+So far, we've explained
+what identity is
+
+
+546
+00:28:00.546 --> 00:28:03.415 line:-1 position:50%
+and how it ties into
+a view's lifetime.
+
+
+547
+00:28:03,415 --> 00:28:07,853 line:-1
+Next, I'm going to dive into
+how SwiftUI updates the UI.
+
+
+548
+00:28:07,853 --> 00:28:10,122 line:-1
+The goal is to give you
+a better mental model
+
+
+549
+00:28:10.122 --> 00:28:12.624 line:-1 position:50%
+for how to structure
+SwiftUI code.
+
+
+550
+00:28:12.624 --> 00:28:14.593 line:-1 position:50%
+I'm also going to show
+a few examples
+
+
+551
+00:28:14,593 --> 00:28:17,129 line:-1
+outlining everything at the end.
+
+
+552
+00:28:17,129 --> 00:28:19,565 line:-1
+To kick this discussion
+of dependencies off,
+
+
+553
+00:28:19.565 --> 00:28:21.533 line:-1 position:50%
+let's look at a view.
+
+
+554
+00:28:21,533 --> 00:28:22,968 line:-1
+Here's a simple view.
+
+
+555
+00:28:22.968 --> 00:28:26.672 line:-1 position:50%
+It shows a button that
+rewards a dog with a treat.
+
+
+556
+00:28:26.672 --> 00:28:29.508 line:-1 position:50%
+Sorry, Luca,
+but I'm more of a dog person.
+
+
+557
+00:28:29,508 --> 00:28:32,144 line:-1
+Let's focus on
+the structure of the view.
+
+
+558
+00:28:32,144 --> 00:28:34,379 line:-1
+First, let's look at the top.
+
+
+559
+00:28:34.379 --> 00:28:36.114 line:-1 position:50%
+There are two properties:
+
+
+560
+00:28:36,114 --> 00:28:40,185 line:-1
+one for a dog
+and another for a treat.
+
+
+561
+00:28:40.185 --> 00:28:43.822 line:-1 position:50%
+These properties are
+dependencies of the view.
+
+
+562
+00:28:43,822 --> 00:28:47,859 line:-1
+A dependency is just
+an input to the view.
+
+
+563
+00:28:47.859 --> 00:28:49.528 line:-1 position:50%
+When a dependency changes,
+
+
+564
+00:28:49.528 --> 00:28:53.231 line:-1 position:50%
+the view is required
+to produce a new body.
+
+
+565
+00:28:53,231 --> 00:28:56,835 line:-1
+The body is where you build
+the hierarchy for the view.
+
+
+566
+00:28:56,835 --> 00:28:58,904 line:-1
+Diving into this view's
+hierarchy,
+
+
+567
+00:28:58,904 --> 00:29:03,141 line:-1
+we have a button
+with an action.
+
+
+568
+00:29:03,141 --> 00:29:07,479 line:-1
+Actions are what trigger changes
+to a view's dependencies.
+
+
+569
+00:29:07.479 --> 00:29:11.450 line:-1 position:50%
+Let's swap the code out
+for an equivalent diagram.
+
+
+570
+00:29:11.450 --> 00:29:13.885 line:-1 position:50%
+Here's a diagram of our DogView.
+
+
+571
+00:29:13,885 --> 00:29:15,287 line:-1
+When we tap on the button,
+
+
+572
+00:29:15.287 --> 00:29:18.624 line:-1 position:50%
+it dispatches an action
+to reward the dog.
+
+
+573
+00:29:18.624 --> 00:29:21.360 line:-1 position:50%
+Our dog gulps down the treat
+in a flash.
+
+
+574
+00:29:21.360 --> 00:29:23.595 line:-1 position:50%
+And that results in
+a change to the dog --
+
+
+575
+00:29:23.595 --> 00:29:25.764 line:-1 position:50%
+maybe he wants another.
+
+
+576
+00:29:25,764 --> 00:29:31,303 line:-1
+Because the dependency changed,
+DogView produces a new body.
+
+
+577
+00:29:31,303 --> 00:29:33,005 position:50%
+To learn more about
+the general concepts
+
+
+578
+00:29:33,005 --> 00:29:35,474 position:50%
+of data flow in SwiftUI,
+check out
+
+
+579
+00:29:35,474 --> 00:29:40,145 position:50%
+"Data essentials in SwiftUI"
+from WWDC 2020.
+
+
+580
+00:29:40,145 --> 00:29:43,582 position:50%
+Next, let's simplify
+this diagram a bit.
+
+
+581
+00:29:43,582 --> 00:29:45,684 line:-1
+Focusing in on
+the view hierarchy,
+
+
+582
+00:29:45,684 --> 00:29:48,687 line:-1
+notice how our views
+form a tree-like structure.
+
+
+583
+00:29:48,687 --> 00:29:52,658 line:-1
+And if we add the dog and treat
+dependencies back at the top,
+
+
+584
+00:29:52.658 --> 00:29:55.360 line:-1 position:50%
+it still looks like a tree.
+
+
+585
+00:29:55.360 --> 00:29:59.798 line:-1 position:50%
+However, the DogView is not the
+only view with dependencies.
+
+
+586
+00:29:59.798 --> 00:30:04.002 line:-1 position:50%
+In SwiftUI, each view can have
+its own set of dependencies.
+
+
+587
+00:30:04,002 --> 00:30:06,872 line:-1
+So far, this still
+looks like a tree.
+
+
+588
+00:30:06,872 --> 00:30:09,274 line:-1
+But note, there can be
+multiple views
+
+
+589
+00:30:09.274 --> 00:30:12.277 line:-1 position:50%
+dependent on the same state
+or other data.
+
+
+590
+00:30:12.277 --> 00:30:14.546 line:-1 position:50%
+For example,
+one of the descendants
+
+
+591
+00:30:14.546 --> 00:30:17.082 line:-1 position:50%
+might depend on the dog, too.
+
+
+592
+00:30:17,082 --> 00:30:20,218 line:-1
+And this could happen for
+one of our other dependencies.
+
+
+593
+00:30:20.218 --> 00:30:23.088 line:-1 position:50%
+So we started with a tree,
+but this structure
+
+
+594
+00:30:23.088 --> 00:30:25.657 line:-1 position:50%
+only loosely resembles
+a tree now.
+
+
+595
+00:30:25.657 --> 00:30:29.528 line:-1 position:50%
+In fact, if we rearrange it
+to avoid overlapping lines,
+
+
+596
+00:30:29.528 --> 00:30:31.463 line:-1 position:50%
+we end up with this structure,
+
+
+597
+00:30:31.463 --> 00:30:36.468 line:-1 position:50%
+which reveals that this is
+actually a graph, not a tree.
+
+
+598
+00:30:36.468 --> 00:30:42.007 line:-1 position:50%
+In fact, we call this structure
+the "dependency graph".
+
+
+599
+00:30:42.007 --> 00:30:44.876 line:-1 position:50%
+This structure is important
+because it allows SwiftUI
+
+
+600
+00:30:44.876 --> 00:30:47.312 line:-1 position:50%
+to efficiently update
+only those views
+
+
+601
+00:30:47.312 --> 00:30:49.748 line:-1 position:50%
+that require a new body.
+
+
+602
+00:30:49,748 --> 00:30:53,652 line:0
+Take, for example,
+the dependency at the bottom.
+
+
+603
+00:30:53,652 --> 00:30:57,989 line:0
+If we examine this dependency,
+it has two dependent views.
+
+
+604
+00:30:57,989 --> 00:31:01,226 position:50%
+The secret of the graph is that
+if the dependency changes,
+
+
+605
+00:31:01,226 --> 00:31:04,262 position:50%
+only those views
+will be invalidated.
+
+
+606
+00:31:04,262 --> 00:31:06,431 line:0
+SwiftUI will call
+each view's body,
+
+
+607
+00:31:06,431 --> 00:31:10,068 position:50%
+producing a new body value
+for each view.
+
+
+608
+00:31:10,068 --> 00:31:11,937 line:0
+SwiftUI will instantiate
+the values
+
+
+609
+00:31:11,937 --> 00:31:14,539 position:50%
+of each invalidated view's body.
+
+
+610
+00:31:14,539 --> 00:31:17,275 position:50%
+That may result in more
+dependencies changing,
+
+
+611
+00:31:17,275 --> 00:31:19,711 position:50%
+but not always!
+
+
+612
+00:31:19,711 --> 00:31:21,413 line:-1
+Because views are value types,
+
+
+613
+00:31:21.413 --> 00:31:23.181 line:-1 position:50%
+SwiftUI can efficiently
+compare them
+
+
+614
+00:31:23,181 --> 00:31:26,418 line:-1
+to only update
+the right subset of views.
+
+
+615
+00:31:26,418 --> 00:31:30,322 line:-1
+This is another way to look at
+what Luca discussed earlier.
+
+
+616
+00:31:30.322 --> 00:31:32.624 line:-1 position:50%
+A view's value is short-lived.
+
+
+617
+00:31:32.624 --> 00:31:35.193 line:-1 position:50%
+The struct value is just used
+for comparison,
+
+
+618
+00:31:35.193 --> 00:31:38.363 line:-1 position:50%
+but the view itself
+has a longer lifetime.
+
+
+619
+00:31:38.363 --> 00:31:40.532 line:-1 position:50%
+And that's how we can avoid
+generating a new body
+
+
+620
+00:31:40,532 --> 00:31:43,368 line:-1
+for the view in the center.
+
+
+621
+00:31:43.368 --> 00:31:47.272 line:-1 position:50%
+An identity is the backbone
+of the dependency graph.
+
+
+622
+00:31:47,272 --> 00:31:49,808 line:-1
+As Matt said,
+every view has identity,
+
+
+623
+00:31:49,808 --> 00:31:54,146 line:-1
+whether specified explicitly
+or structurally.
+
+
+624
+00:31:54.146 --> 00:31:56.014 line:-1 position:50%
+That identity is how SwiftUI
+
+
+625
+00:31:56,014 --> 00:31:58,049 line:-1
+routes changes
+to the right views
+
+
+626
+00:31:58,049 --> 00:32:01,353 line:-1
+and efficiently updates the UI.
+
+
+627
+00:32:01.353 --> 00:32:03.555 line:-1 position:50%
+There are many kinds
+of dependencies.
+
+
+628
+00:32:03,555 --> 00:32:06,591 position:50%
+We saw a few examples
+earlier with the treat property
+
+
+629
+00:32:06,591 --> 00:32:08,026 line:0
+and the dog binding,
+
+
+630
+00:32:08,026 --> 00:32:09,961 line:0
+but you can also form
+dependencies by using
+
+
+631
+00:32:09,961 --> 00:32:11,930 position:50%
+the environment, state,
+
+
+632
+00:32:11,930 --> 00:32:15,500 position:50%
+or any of the observable object
+property wrappers.
+
+
+633
+00:32:15,500 --> 00:32:18,170 line:-1
+Next, I'd like to talk about
+how to improve
+
+
+634
+00:32:18,170 --> 00:32:20,672 line:-1
+the use of identity
+in your views.
+
+
+635
+00:32:20,672 --> 00:32:25,143 line:-1
+This will help SwiftUI
+better understand your code.
+
+
+636
+00:32:25,143 --> 00:32:27,345 line:-1
+As Luca said,
+the lifetime of a view
+
+
+637
+00:32:27.345 --> 00:32:29.614 line:-1 position:50%
+is the duration of its identity,
+
+
+638
+00:32:29,614 --> 00:32:33,351 line:-1
+and that means the stability
+of an identifier is crucial.
+
+
+639
+00:32:33,351 --> 00:32:35,020 line:-1
+An identifier that isn't stable
+
+
+640
+00:32:35.020 --> 00:32:37.722 line:-1 position:50%
+can result in
+a shorter view lifetime.
+
+
+641
+00:32:37,722 --> 00:32:41,092 line:-1
+And having a stable identifier
+also helps performance,
+
+
+642
+00:32:41.092 --> 00:32:42.928 line:-1 position:50%
+since SwiftUI doesn't
+need to continually
+
+
+643
+00:32:42,928 --> 00:32:44,629 line:-1
+create storage for the view
+
+
+644
+00:32:44,629 --> 00:32:46,998 line:-1
+and churn through
+updating the graph.
+
+
+645
+00:32:46.998 --> 00:32:49.668 line:-1 position:50%
+As you saw earlier,
+SwiftUI uses lifetime
+
+
+646
+00:32:49,668 --> 00:32:52,737 line:-1
+to manage persisted storage,
+so stable identifiers
+
+
+647
+00:32:52,737 --> 00:32:56,174 line:-1
+are also important
+for avoiding loss of state.
+
+
+648
+00:32:56,174 --> 00:32:58,009 line:-1
+Let's turn to a code example
+
+
+649
+00:32:58,009 --> 00:33:03,181 line:-1
+to explain the importance
+of identifier stability.
+
+
+650
+00:33:03,181 --> 00:33:06,451 line:-1
+In this example, I have a list
+of my favorite pets.
+
+
+651
+00:33:06,451 --> 00:33:09,621 line:-1
+We've got an identifier
+on our pet struct.
+
+
+652
+00:33:09,621 --> 00:33:11,990 line:-1
+But there's actually a bug;
+
+
+653
+00:33:11.990 --> 00:33:18.363 line:-1 position:50%
+every time I get a new pet,
+everything on screen flashes!
+
+
+654
+00:33:18,363 --> 00:33:21,066 line:-1
+Let's stop for a second
+and look at this code.
+
+
+655
+00:33:21,066 --> 00:33:24,669 line:-1
+Can you spot
+where the bug is?
+
+
+656
+00:33:24,669 --> 00:33:27,973 line:-1
+The bug is here, in our
+Identifiable conformance.
+
+
+657
+00:33:27.973 --> 00:33:30.475 line:-1 position:50%
+If you didn't pass the test,
+don't worry;
+
+
+658
+00:33:30,475 --> 00:33:32,611 line:-1
+there are no treats
+in this section.
+
+
+659
+00:33:32.611 --> 00:33:35.547 line:-1 position:50%
+The problem is that
+this identifier isn't stable,
+
+
+660
+00:33:35.547 --> 00:33:40.552 line:-1 position:50%
+so anytime the data changes,
+we get a new identifier.
+
+
+661
+00:33:40.552 --> 00:33:44.689 line:-1 position:50%
+What if instead, we used
+the indices of our pets array?
+
+
+662
+00:33:44,689 --> 00:33:47,826 line:-1
+Unfortunately, this has
+a similar problem.
+
+
+663
+00:33:47.826 --> 00:33:50.962 line:-1 position:50%
+By using the indices,
+views are now identified by
+
+
+664
+00:33:50,962 --> 00:33:54,499 line:-1
+the position of their respective
+pet in the collection.
+
+
+665
+00:33:54,499 --> 00:33:57,502 line:-1
+If I decide I have
+a new first favorite pet,
+
+
+666
+00:33:57,502 --> 00:34:00,005 line:-1
+all the other pets
+will change their identity,
+
+
+667
+00:34:00.005 --> 00:34:02.407 line:-1 position:50%
+which could cause a bad bug.
+
+
+668
+00:34:02.407 --> 00:34:05.410 line:-1 position:50%
+In this example, the button
+inserts a new element
+
+
+669
+00:34:05,410 --> 00:34:09,414 line:-1
+at index zero, but because
+the last index is the new one,
+
+
+670
+00:34:09.414 --> 00:34:16.087 line:-1 position:50%
+we get an insertion at the end
+instead of the start.
+
+
+671
+00:34:16.087 --> 00:34:18.957 line:-1 position:50%
+This is because, like
+computed random identifiers,
+
+
+672
+00:34:18,957 --> 00:34:23,895 line:-1
+indices are not
+a stable form of identity.
+
+
+673
+00:34:23.895 --> 00:34:26.831 line:-1 position:50%
+In this example, we need
+to use a stable identifier,
+
+
+674
+00:34:26.831 --> 00:34:28.233 line:-1 position:50%
+like one from a database
+
+
+675
+00:34:28.233 --> 00:34:31.236 line:-1 position:50%
+or derived from
+stable properties of the pet.
+
+
+676
+00:34:31.236 --> 00:34:34.673 line:-1 position:50%
+Any persistent identifier
+is a great choice.
+
+
+677
+00:34:34,673 --> 00:34:37,008 line:-1
+Now our animation looks great!
+
+
+678
+00:34:39,611 --> 00:34:41,980 line:-1
+But stability isn't
+the only property we need
+
+
+679
+00:34:41.980 --> 00:34:45.817 line:-1 position:50%
+for good identifiers.
+
+
+680
+00:34:45,817 --> 00:34:49,054 line:-1
+Another property of good
+identifiers is uniqueness.
+
+
+681
+00:34:49.054 --> 00:34:52.090 line:-1 position:50%
+Each identifier should map
+to a single view.
+
+
+682
+00:34:52,090 --> 00:34:54,392 line:-1
+This ensures that
+animations look great,
+
+
+683
+00:34:54.392 --> 00:34:55.994 line:-1 position:50%
+performance is smooth,
+
+
+684
+00:34:55.994 --> 00:34:57.796 line:-1 position:50%
+and the dependencies
+of your hierarchy
+
+
+685
+00:34:57,796 --> 00:35:00,966 line:-1
+are reflected in
+the most efficient form.
+
+
+686
+00:35:00.966 --> 00:35:04.736 line:-1 position:50%
+Let's look at another example.
+
+
+687
+00:35:04.736 --> 00:35:06.604 line:-1 position:50%
+In this example,
+I'm working on a view
+
+
+688
+00:35:06.604 --> 00:35:09.374 line:-1 position:50%
+with all of my pet's
+favorite treats.
+
+
+689
+00:35:09,374 --> 00:35:13,611 line:-1
+Each treat has a name, an emoji,
+and an expiration date.
+
+
+690
+00:35:13.611 --> 00:35:18.416 line:-1 position:50%
+I've chosen to identify
+each treat by its name.
+
+
+691
+00:35:18.416 --> 00:35:20.618 line:-1 position:50%
+At this point --
+I'm sure you can guess --
+
+
+692
+00:35:20,618 --> 00:35:22,887 line:-1
+we have a bug here, too.
+
+
+693
+00:35:22.887 --> 00:35:24.022 line:-1 position:50%
+What happens when we have
+
+
+694
+00:35:24.022 --> 00:35:26.691 line:-1 position:50%
+more than one
+of the same kind of treat?
+
+
+695
+00:35:26,691 --> 00:35:27,792 line:-1
+I don't know about you,
+
+
+696
+00:35:27.792 --> 00:35:30.528 line:-1 position:50%
+but I like to buy dog biscuits
+in bulk.
+
+
+697
+00:35:30.528 --> 00:35:33.965 line:-1 position:50%
+When I add them to the jar,
+they might not show up!
+
+
+698
+00:35:33,965 --> 00:35:36,201 line:-1
+The problem is that
+the name of a treat
+
+
+699
+00:35:36.201 --> 00:35:39.137 line:-1 position:50%
+is not a unique identifier
+for it.
+
+
+700
+00:35:39,137 --> 00:35:41,172 line:-1
+Instead, we can use
+a serial number
+
+
+701
+00:35:41,172 --> 00:35:44,209 line:-1
+or other unique ID per treat.
+
+
+702
+00:35:44,209 --> 00:35:48,113 line:-1
+And this ensures all the right
+data is shown in our jar.
+
+
+703
+00:35:48,113 --> 00:35:50,048 line:-1
+It will also ensure
+better animations
+
+
+704
+00:35:50.048 --> 00:35:52.851 line:-1 position:50%
+and better performance.
+
+
+705
+00:35:52.851 --> 00:35:56.521 line:-1 position:50%
+When SwiftUI needs an
+identifier, it needs your help!
+
+
+706
+00:35:56.521 --> 00:35:59.224 line:-1 position:50%
+Please be careful when using
+random identifiers,
+
+
+707
+00:35:59,224 --> 00:36:01,693 line:-1
+especially in computed
+properties.
+
+
+708
+00:36:01.693 --> 00:36:06.031 line:-1 position:50%
+In general, you want all of
+your identifiers to be stable.
+
+
+709
+00:36:06.031 --> 00:36:08.666 line:-1 position:50%
+An identifier shouldn't
+change over time;
+
+
+710
+00:36:08,666 --> 00:36:13,038 line:-1
+a new identifier represents
+a new item with a new lifetime.
+
+
+711
+00:36:13.038 --> 00:36:16.408 line:-1 position:50%
+And lastly, identifiers
+need to be unique.
+
+
+712
+00:36:16.408 --> 00:36:20.245 line:-1 position:50%
+Multiple views
+can't share an identifier.
+
+
+713
+00:36:20.245 --> 00:36:22.213 line:-1 position:50%
+SwiftUI relies on
+these properties
+
+
+714
+00:36:22,213 --> 00:36:25,583 line:-1
+to make your app
+run smoothly and bug-free.
+
+
+715
+00:36:25,583 --> 00:36:28,086 line:-1
+Now that we've talked
+about explicit identity,
+
+
+716
+00:36:28.086 --> 00:36:31.156 line:-1 position:50%
+I'd like to move on
+to structural identity.
+
+
+717
+00:36:31,156 --> 00:36:35,093 line:-1
+In this example, I'm working
+on the treat jar from earlier.
+
+
+718
+00:36:35,093 --> 00:36:36,628 line:-1
+As a responsible pet lover,
+
+
+719
+00:36:36.628 --> 00:36:41.232 line:-1 position:50%
+I only feed my pets
+the finest, unexpired foods.
+
+
+720
+00:36:41.232 --> 00:36:43.334 line:-1 position:50%
+To help me tell when treats
+have gone bad,
+
+
+721
+00:36:43,334 --> 00:36:47,138 line:-1
+I've added a new modifier that
+optionally dims a treat cell
+
+
+722
+00:36:47,138 --> 00:36:49,240 line:-1
+when the treat is expired.
+
+
+723
+00:36:49,240 --> 00:36:52,577 line:-1
+I've highlighted the cell
+that's dimmed.
+
+
+724
+00:36:52,577 --> 00:36:55,814 line:-1
+Let's dive into the modifier.
+
+
+725
+00:36:55.814 --> 00:36:58.249 line:-1 position:50%
+You can see that
+in the modifier, I have a date
+
+
+726
+00:36:58,249 --> 00:37:00,085 line:-1
+and compare it
+to the current date
+
+
+727
+00:37:00,085 --> 00:37:03,321 line:-1
+to know when to dim the view.
+
+
+728
+00:37:03.321 --> 00:37:05.223 line:-1 position:50%
+This seems fine at first blush,
+
+
+729
+00:37:05,223 --> 00:37:07,792 line:-1
+but there's a subtle
+problem here.
+
+
+730
+00:37:07,792 --> 00:37:11,296 line:-1
+If the condition changes
+and our treat becomes expired,
+
+
+731
+00:37:11.296 --> 00:37:15.400 line:-1 position:50%
+we end up with a new identity
+because there is a branch here.
+
+
+732
+00:37:15,400 --> 00:37:20,505 line:-1
+As Matt discussed, branches are
+a form of structural identity.
+
+
+733
+00:37:20,505 --> 00:37:22,807 line:-1
+This means we have
+two copies of the content
+
+
+734
+00:37:22.807 --> 00:37:26.444 line:-1 position:50%
+instead of a single,
+optionally modified copy.
+
+
+735
+00:37:26,444 --> 00:37:29,514 line:-1
+Note that the branch here
+is in a modifier.
+
+
+736
+00:37:29.514 --> 00:37:32.083 line:-1 position:50%
+For clarity, I've put
+the modifier and its use site
+
+
+737
+00:37:32.083 --> 00:37:35.086 line:-1 position:50%
+on the same slide,
+but in your project,
+
+
+738
+00:37:35.086 --> 00:37:37.155 line:-1 position:50%
+you might have branches
+like this across files
+
+
+739
+00:37:37.155 --> 00:37:39.324 line:-1 position:50%
+without even being aware of it!
+
+
+740
+00:37:39.324 --> 00:37:41.826 line:-1 position:50%
+Of course, everything
+we've discussed here
+
+
+741
+00:37:41,826 --> 00:37:46,564 line:-1
+applies to views
+and view modifiers.
+
+
+742
+00:37:46,564 --> 00:37:48,366 line:-1
+So how can we avoid this?
+
+
+743
+00:37:48.366 --> 00:37:50.768 line:-1 position:50%
+Well, one way is to fold
+the branches together
+
+
+744
+00:37:50.768 --> 00:37:56.241 line:-1 position:50%
+and move the condition inside
+the opacity modifier, like so.
+
+
+745
+00:37:56,241 --> 00:37:57,575 line:-1
+By removing this branch,
+
+
+746
+00:37:57,575 --> 00:37:59,244 line:-1
+we've correctly
+described this view
+
+
+747
+00:37:59.244 --> 00:38:01.679 line:-1 position:50%
+as having a single identity.
+
+
+748
+00:38:01.679 --> 00:38:03.414 line:-1 position:50%
+Furthermore,
+moving the condition
+
+
+749
+00:38:03,414 --> 00:38:06,584 line:-1
+inside the opacity modifier
+can help performance,
+
+
+750
+00:38:06.584 --> 00:38:09.921 line:-1 position:50%
+because we've tightly scoped
+the dependent code.
+
+
+751
+00:38:09.921 --> 00:38:12.056 line:-1 position:50%
+Now when the condition changes,
+
+
+752
+00:38:12,056 --> 00:38:16,227 line:-1
+only the opacity
+needs to change.
+
+
+753
+00:38:16.227 --> 00:38:19.063 line:-1 position:50%
+The trick to this is that
+when the condition is true,
+
+
+754
+00:38:19.063 --> 00:38:23.334 line:-1 position:50%
+we have an opacity of 1,
+which looks like this.
+
+
+755
+00:38:23.334 --> 00:38:26.104 line:-1 position:50%
+An opacity of 1 has no effect.
+
+
+756
+00:38:26.104 --> 00:38:28.740 line:-1 position:50%
+We call modifiers like this
+"inert modifiers,"
+
+
+757
+00:38:28,740 --> 00:38:31,543 line:-1
+because they don't
+affect the rendered result.
+
+
+758
+00:38:31.543 --> 00:38:33.411 line:-1 position:50%
+SwiftUI modifiers are cheap,
+
+
+759
+00:38:33.411 --> 00:38:36.481 line:-1 position:50%
+so there is little inherent cost
+with this pattern.
+
+
+760
+00:38:36,481 --> 00:38:38,683 line:-1
+Because there is
+no resulting visual effect,
+
+
+761
+00:38:38.683 --> 00:38:41.486 line:-1 position:50%
+the framework can efficiently
+prune away the modifier,
+
+
+762
+00:38:41,486 --> 00:38:44,422 line:-1
+further reducing its cost.
+
+
+763
+00:38:44,422 --> 00:38:45,890 line:-1
+Branches are great,
+
+
+764
+00:38:45.890 --> 00:38:48.560 line:-1 position:50%
+and they exist in SwiftUI
+for a reason.
+
+
+765
+00:38:48.560 --> 00:38:51.729 line:-1 position:50%
+But when used unnecessarily,
+they can cause poor performance,
+
+
+766
+00:38:51,729 --> 00:38:53,198 line:-1
+surprising animations,
+
+
+767
+00:38:53,198 --> 00:38:56,734 line:-1
+and, as Luca showed,
+even loss of state.
+
+
+768
+00:38:56,734 --> 00:38:59,504 line:-1
+When you introduce a branch,
+pause for a second
+
+
+769
+00:38:59.504 --> 00:39:01.372 line:-1 position:50%
+and consider whether
+you're representing
+
+
+770
+00:39:01.372 --> 00:39:05.443 line:-1 position:50%
+multiple views or two states
+of the same view.
+
+
+771
+00:39:05,443 --> 00:39:09,147 line:-1
+As we saw, it often works better
+to use an inert modifier
+
+
+772
+00:39:09,147 --> 00:39:12,984 line:-1
+instead of a branch
+to identify a single view.
+
+
+773
+00:39:12.984 --> 00:39:16.287 line:-1 position:50%
+Here are just a few examples
+of inert modifiers.
+
+
+774
+00:39:16,287 --> 00:39:18,089 position:50%
+I especially love
+transformEnvironment
+
+
+775
+00:39:18,089 --> 00:39:21,693 position:50%
+for conditionally writing
+to the environment.
+
+
+776
+00:39:21,693 --> 00:39:23,027 line:-1
+Putting everything together,
+
+
+777
+00:39:23.027 --> 00:39:24.696 line:-1 position:50%
+we've shown you today
+that identity
+
+
+778
+00:39:24,696 --> 00:39:27,899 line:-1
+is one of the secrets
+to amazing performance.
+
+
+779
+00:39:27.899 --> 00:39:30.168 line:-1 position:50%
+We've discussed explicit
+and structural identity,
+
+
+780
+00:39:30.168 --> 00:39:32.337 line:-1 position:50%
+and how you can
+take advantage of each
+
+
+781
+00:39:32,337 --> 00:39:34,205 line:-1
+to improve your app.
+
+
+782
+00:39:34.205 --> 00:39:37.709 line:-1 position:50%
+From identity, we can derive
+a view's lifetime,
+
+
+783
+00:39:37,709 --> 00:39:42,814 line:-1
+which controls its associated
+storage, transitions, and more.
+
+
+784
+00:39:42,814 --> 00:39:44,582 line:-1
+And we've also explained
+that SwiftUI
+
+
+785
+00:39:44.582 --> 00:39:48.319 line:-1 position:50%
+uses identity and lifetime
+to form dependencies,
+
+
+786
+00:39:48,319 --> 00:39:49,854 line:-1
+which are represented
+by a graph
+
+
+787
+00:39:49,854 --> 00:39:53,224 line:-1
+that can efficiently
+update the UI.
+
+
+788
+00:39:53,224 --> 00:39:55,426 line:-1
+Along with demystifying SwiftUI,
+
+
+789
+00:39:55,426 --> 00:39:57,195 line:-1
+we've given you
+some tips and tricks
+
+
+790
+00:39:57,195 --> 00:40:01,132 line:-1
+to avoid bugs and improve
+performance in your apps.
+
+
+791
+00:40:01,132 --> 00:40:02,834 line:-1
+And now that you've learned
+these tricks,
+
+
+792
+00:40:02,834 --> 00:40:06,971 line:-1
+take a tour through your code
+to see if they can help you.
+
+
+793
+00:40:06,971 --> 00:40:10,708 line:-1
+Thank you, and keep building
+great apps!
+
+
+794
+00:40:10,708 --> 00:40:14,412 align:right line:0 size:2%
+♪
+

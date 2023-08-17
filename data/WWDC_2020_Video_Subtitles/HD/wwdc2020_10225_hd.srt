@@ -1,0 +1,1017 @@
+1
+00:00:03,871 --> 00:00:06,273 line:-1
+Hello, and welcome to WWDC.
+
+
+2
+00:00:08,074 --> 00:00:12,479 line:0
+Hi. Welcome to WWDC.
+My name is Eryk Vershen.
+
+
+3
+00:00:12,546 --> 00:00:14,848 line:0
+I'm an engineer on the streaming team.
+
+
+4
+00:00:14,915 --> 00:00:18,619 line:0
+This talk is about HLS Tools
+and HLS Authoring.
+
+
+5
+00:00:18,685 --> 00:00:22,890 line:0
+In particular, it's about new stuff
+we have for you this year.
+
+
+6
+00:00:28,962 --> 00:00:30,731 line:-1
+There's three main topics to cover.
+
+
+7
+00:00:30,797 --> 00:00:36,236 line:-2
+First of all, I want to tell you about
+changes that we've made in HLS Tools.
+
+
+8
+00:00:36,303 --> 00:00:38,572 line:-2
+Then I'll tell you about
+how to use some of the tools
+
+
+9
+00:00:38,639 --> 00:00:41,108 line:-1
+to make a Low-Latency HLS stream.
+
+
+10
+00:00:41,909 --> 00:00:46,613 line:-2
+And last, I'll give you some advice
+about creating master playlists.
+
+
+11
+00:00:46,680 --> 00:00:48,715 line:-1
+Let's get started with the first topic.
+
+
+12
+00:00:49,983 --> 00:00:53,754 line:-2
+Last year, the Low-Latency HLS Tools
+were in a separate package.
+
+
+13
+00:00:53,820 --> 00:00:56,523 line:-2
+Since Low-Latency HLS
+is coming out of beta,
+
+
+14
+00:00:56,590 --> 00:00:58,592 line:-2
+we've gone back
+to a single tool distribution
+
+
+15
+00:00:58,659 --> 00:01:00,160 line:-1
+that includes those tools.
+
+
+16
+00:01:00,227 --> 00:01:03,497 line:-2
+When you're validating a stream
+with Media Stream Validator,
+
+
+17
+00:01:03,564 --> 00:01:07,000 line:-2
+the tool waits until it's completely done
+to report most errors.
+
+
+18
+00:01:07,067 --> 00:01:08,602 line:-1
+In the case of a live stream,
+
+
+19
+00:01:08,669 --> 00:01:12,539 line:-2
+where you might run the validator
+for half an hour or even an hour or more,
+
+
+20
+00:01:12,606 --> 00:01:13,640 line:-1
+this can be a problem.
+
+
+21
+00:01:13,707 --> 00:01:15,642 line:-1
+With the new immediate option,
+
+
+22
+00:01:15,709 --> 00:01:18,879 line:-2
+the validator will report errors
+as soon as it detects them.
+
+
+23
+00:01:20,280 --> 00:01:23,150 line:-2
+The other part of validation
+is HLS Report.
+
+
+24
+00:01:23,217 --> 00:01:24,952 line:-1
+That used to be a Python script.
+
+
+25
+00:01:25,018 --> 00:01:27,788 line:-1
+We've changed it into a compiled binary.
+
+
+26
+00:01:28,121 --> 00:01:30,591 line:-1
+We did drop one old deprecated option,
+
+
+27
+00:01:30,657 --> 00:01:33,126 line:-2
+but all the other functionality
+is still there.
+
+
+28
+00:01:34,661 --> 00:01:37,297 line:0
+We've added support
+for some new audio codecs.
+
+
+29
+00:01:37,364 --> 00:01:39,366 line:0
+While I'll mention a few things
+in this talk,
+
+
+30
+00:01:39,433 --> 00:01:44,371 line:-2
+you should watch our other talk,
+<i>Delivering a Better HLS Audio Experience,</i>
+
+
+31
+00:01:44,438 --> 00:01:45,906 line:-1
+for more details.
+
+
+32
+00:01:46,473 --> 00:01:49,142 line:-1
+Let's move on to the Low-Latency Tools.
+
+
+33
+00:01:49,209 --> 00:01:52,112 line:0
+Instead of one very long talk
+about Low-Latency HLS,
+
+
+34
+00:01:52,179 --> 00:01:55,482 line:0
+we've split it into several smaller talks
+this year.
+
+
+35
+00:01:55,549 --> 00:01:57,451 line:0
+You should definitely watch
+the overview talk,
+
+
+36
+00:01:57,518 --> 00:01:59,353 line:0
+<i>Low-Latency HLS Updates.</i>
+
+
+37
+00:01:59,953 --> 00:02:03,624 line:0
+And you may find it helpful to review
+the talk about Low-Latency HLS
+
+
+38
+00:02:03,690 --> 00:02:05,259 line:0
+from last year's conference.
+
+
+39
+00:02:06,994 --> 00:02:10,364 line:-2
+Let's look at the specific tools
+for Low-Latency HLS.
+
+
+40
+00:02:11,498 --> 00:02:13,600 line:-1
+We added TS recompressor.
+
+
+41
+00:02:13,667 --> 00:02:16,403 line:-2
+As the name implies,
+it can modify transport streams,
+
+
+42
+00:02:16,470 --> 00:02:18,672 line:-1
+but it can also generate video and audio.
+
+
+43
+00:02:18,739 --> 00:02:20,207 line:-1
+That's what we're going to use it for.
+
+
+44
+00:02:21,441 --> 00:02:24,678 line:-2
+Media Stream Segmenter was modified
+for Low-Latency HLS
+
+
+45
+00:02:24,745 --> 00:02:28,782 line:-2
+to be able to produce partial segments
+and their associated tags.
+
+
+46
+00:02:29,716 --> 00:02:31,652 line:-1
+And we added two scripts that implement
+
+
+47
+00:02:31,718 --> 00:02:34,655 line:-2
+what we call
+the Delivery Directives Interface,
+
+
+48
+00:02:34,721 --> 00:02:38,592 line:-2
+which is the interpretation and response
+to some query parameters.
+
+
+49
+00:02:38,659 --> 00:02:40,727 line:-1
+I'll talk a little more about those later.
+
+
+50
+00:02:41,995 --> 00:02:43,730 line:-1
+Here's how the flow works.
+
+
+51
+00:02:43,797 --> 00:02:46,767 line:-2
+Any particular variant
+of your Low-Latency HLS stream
+
+
+52
+00:02:46,834 --> 00:02:51,138 line:-2
+is going to use Media Stream Segmenter
+to break up its input.
+
+
+53
+00:02:51,205 --> 00:02:56,810 line:-2
+That's going to be a transport stream
+coming out of TS recompressor via UDP.
+
+
+54
+00:02:57,811 --> 00:03:02,149 line:-2
+The segmenter will produce
+a media playlist and media segments.
+
+
+55
+00:03:02,216 --> 00:03:06,420 line:-2
+And that playlist will point
+at the media segments.
+
+
+56
+00:03:06,486 --> 00:03:08,989 line:-2
+Now, the playlist
+is going to be periodically updated
+
+
+57
+00:03:09,056 --> 00:03:11,725 line:-1
+because it's a live playlist.
+
+
+58
+00:03:11,792 --> 00:03:13,627 line:-1
+And the media segments are dynamic.
+
+
+59
+00:03:13,694 --> 00:03:16,396 line:-1
+That is, we add segments over time
+
+
+60
+00:03:16,463 --> 00:03:19,433 line:-2
+and delete them
+when they're no longer needed.
+
+
+61
+00:03:19,499 --> 00:03:24,271 line:-2
+Low-Latency HLS requires the server
+to interpret some query parameters,
+
+
+62
+00:03:24,338 --> 00:03:27,808 line:-2
+so we have an interface script
+that handles that,
+
+
+63
+00:03:27,875 --> 00:03:32,246 line:-2
+and it returns a modified playlist,
+which points at the same media segments.
+
+
+64
+00:03:33,146 --> 00:03:35,249 line:-1
+Since we have multiple variants,
+
+
+65
+00:03:35,315 --> 00:03:38,285 line:-2
+we need a master playlist
+to reference them,
+
+
+66
+00:03:38,352 --> 00:03:42,789 line:-2
+which is just a static file that uses URLs
+that activate the interface script,
+
+
+67
+00:03:42,856 --> 00:03:45,192 line:-1
+rather than the raw media playlists.
+
+
+68
+00:03:45,526 --> 00:03:48,729 line:-2
+Here's what the TS recompressor
+command line looks like.
+
+
+69
+00:03:48,795 --> 00:03:51,431 line:-2
+We tell it
+we want to generate input for us,
+
+
+70
+00:03:51,498 --> 00:03:54,034 line:-1
+and use the hardware encoder if possible.
+
+
+71
+00:03:54,101 --> 00:03:58,739 line:-2
+Then we tell it to output three versions:
+a preview at 500 Kbps,
+
+
+72
+00:03:58,805 --> 00:04:04,244 line:-2
+a lower-quality video at 2 Mbps,
+and a main output at 4 Mbps.
+
+
+73
+00:04:04,311 --> 00:04:06,680 line:-1
+These are sent to the listed UDP ports.
+
+
+74
+00:04:07,948 --> 00:04:12,319 line:-2
+Each output port needs to have
+its own copy of Media Stream Segmenter.
+
+
+75
+00:04:12,386 --> 00:04:15,622 line:-2
+For example, this one is processing
+the low-quality output
+
+
+76
+00:04:15,689 --> 00:04:17,291 line:-1
+from TS recompressor.
+
+
+77
+00:04:18,091 --> 00:04:21,394 line:-2
+Now the first option,
+part-target-duration-ms,
+
+
+78
+00:04:21,461 --> 00:04:23,897 line:-2
+activates the generation
+of partial segments.
+
+
+79
+00:04:24,865 --> 00:04:26,800 line:-1
+The next three should be familiar:
+
+
+80
+00:04:26,867 --> 00:04:30,137 line:-2
+target duration, how many parent segments
+to have in the playlist,
+
+
+81
+00:04:30,204 --> 00:04:33,540 line:-2
+and delete segments
+after they are no longer needed.
+
+
+82
+00:04:33,607 --> 00:04:36,076 line:-1
+"Date-time" is a new option that adds
+
+
+83
+00:04:36,143 --> 00:04:39,913 line:-2
+an EXT-X-PROGRAM-DATE-TIME tag
+to the playlist.
+
+
+84
+00:04:39,980 --> 00:04:42,850 line:-2
+And then, of course, you have to tell it
+where to put the output files.
+
+
+85
+00:04:43,450 --> 00:04:48,121 line:-2
+As I said earlier, we need to implement
+the Delivery Directives Interface.
+
+
+86
+00:04:48,589 --> 00:04:52,326 line:-2
+The first form is a script
+written in the Go language.
+
+
+87
+00:04:52,392 --> 00:04:54,595 line:-1
+It creates its own HTTP server,
+
+
+88
+00:04:54,661 --> 00:04:58,398 line:-2
+so you pass it a directory
+to tell it where the segmenter output is,
+
+
+89
+00:04:58,465 --> 00:05:02,703 line:-2
+and it serves up synthesized playlist
+when certain URLs are requested.
+
+
+90
+00:05:03,871 --> 00:05:06,373 line:-1
+The other form is a PHP script.
+
+
+91
+00:05:06,440 --> 00:05:09,309 line:-1
+This uses your existing HTTP server.
+
+
+92
+00:05:09,376 --> 00:05:12,913 line:-2
+In this case, you need one copy
+of the script for each variant.
+
+
+93
+00:05:14,648 --> 00:05:20,854 line:-2
+The Delivery Directives Interface requires
+returning the EXT-X-RENDITION-REPORT tag,
+
+
+94
+00:05:20,921 --> 00:05:23,824 line:-2
+which gives information
+about the other variants.
+
+
+95
+00:05:23,891 --> 00:05:26,693 line:-2
+To make that easier
+for both of these scripts,
+
+
+96
+00:05:26,760 --> 00:05:28,962 line:-2
+they expect that
+all the variants are written
+
+
+97
+00:05:29,029 --> 00:05:31,532 line:-2
+to sub-directories
+of a single parent directory.
+
+
+98
+00:05:31,598 --> 00:05:34,735 line:-2
+That way they can simply search
+relative to the parent directory
+
+
+99
+00:05:34,801 --> 00:05:36,370 line:-1
+to find the other variants.
+
+
+100
+00:05:38,238 --> 00:05:41,475 line:-2
+Let's talk about the new audio codecs
+and how you can use them.
+
+
+101
+00:05:42,676 --> 00:05:44,344 line:-1
+Here are the codec tags.
+
+
+102
+00:05:44,411 --> 00:05:50,384 line:-2
+USAC or xHE-AAC
+is an MPEG-4 audio variant.
+
+
+103
+00:05:50,450 --> 00:05:54,054 line:-2
+Apple Lossless has
+a very straightforward CODECS string.
+
+
+104
+00:05:54,121 --> 00:05:58,125 line:-2
+Please note that the CODECS attribute
+for FLAC, that's not a typo.
+
+
+105
+00:05:58,192 --> 00:06:00,694 line:-2
+It really does have
+that odd case structure.
+
+
+106
+00:06:00,994 --> 00:06:04,364 line:-2
+When you're building up a master playlist,
+it can be a bit complicated.
+
+
+107
+00:06:04,631 --> 00:06:07,334 line:-2
+First you need to choose
+your video resolutions and codecs.
+
+
+108
+00:06:07,401 --> 00:06:09,536 line:-1
+These are your basic variants.
+
+
+109
+00:06:09,603 --> 00:06:12,673 line:-2
+Then you have some some set
+of audio languages.
+
+
+110
+00:06:12,739 --> 00:06:14,474 line:-1
+For example, English and Chinese.
+
+
+111
+00:06:15,876 --> 00:06:20,547 line:-2
+You'll have some codecs,
+say, AAC, FLAC, AC-3.
+
+
+112
+00:06:20,614 --> 00:06:24,618 line:-2
+Maybe some of these are in stereo
+and some in 5.1 sound, or both.
+
+
+113
+00:06:26,186 --> 00:06:31,291 line:-2
+You'll want to make one audio group
+for each codec/channel count pair.
+
+
+114
+00:06:31,358 --> 00:06:34,127 line:-1
+Each group must have every language in it.
+
+
+115
+00:06:35,262 --> 00:06:40,200 line:-2
+Then you replicate the variant entries
+for each group, with some exceptions.
+
+
+116
+00:06:41,602 --> 00:06:45,739 line:-2
+When you're making audio groups,
+there are some things to remember.
+
+
+117
+00:06:45,806 --> 00:06:49,109 line:-2
+First, you should always have
+a stereo AAC group.
+
+
+118
+00:06:49,176 --> 00:06:52,379 line:-2
+This is good fallback,
+since it's something all devices can play.
+
+
+119
+00:06:53,981 --> 00:06:57,050 line:-2
+If you have multichannel
+in a lossless audio codec,
+
+
+120
+00:06:57,117 --> 00:07:00,854 line:-2
+then we suggest you have
+a multichannel AAC codec as well.
+
+
+121
+00:07:00,921 --> 00:07:03,223 line:-1
+Lossless requires a high bit rate.
+
+
+122
+00:07:03,290 --> 00:07:06,460 line:-2
+You want something available
+that has a lower bit rate.
+
+
+123
+00:07:07,528 --> 00:07:10,364 line:-2
+Remember, we don't want to switch
+the number of channels.
+
+
+124
+00:07:10,430 --> 00:07:13,433 line:-2
+If you're in multichannel,
+we want to stay in multichannel.
+
+
+125
+00:07:14,468 --> 00:07:17,804 line:-2
+Generally speaking,
+we don't switch between audio codecs,
+
+
+126
+00:07:17,871 --> 00:07:20,274 line:-1
+but there are two notable exceptions.
+
+
+127
+00:07:20,340 --> 00:07:23,243 line:-1
+We will switch among the AAC variants:
+
+
+128
+00:07:23,310 --> 00:07:28,448 line:-1
+AAC-LC, HE-AAC, HE-AACv2,
+
+
+129
+00:07:28,515 --> 00:07:31,985 line:-1
+and USAC or xHE-AAC.
+
+
+130
+00:07:32,052 --> 00:07:36,790 line:-2
+And we will switch between
+lossless codecs and AAC codecs.
+
+
+131
+00:07:37,858 --> 00:07:40,794 line:-2
+As I said earlier,
+once you have your audio groups,
+
+
+132
+00:07:40,861 --> 00:07:44,998 line:-2
+you replicate the variant entries
+for each group, with some exceptions.
+
+
+133
+00:07:45,465 --> 00:07:49,203 line:-2
+If the codecs are switchable between,
+like the AAC codecs,
+
+
+134
+00:07:49,269 --> 00:07:52,539 line:-2
+then you can spread the groups
+across the variants
+
+
+135
+00:07:52,606 --> 00:07:56,610 line:-2
+using the low audio bit rate group
+with the low video bit rates
+
+
+136
+00:07:56,677 --> 00:08:00,514 line:-2
+and the high audio bit rate group
+with the high video.
+
+
+137
+00:08:00,581 --> 00:08:05,152 line:-2
+But, if the codecs are not switchable,
+like AC-3 and lossless,
+
+
+138
+00:08:05,219 --> 00:08:08,021 line:-2
+then you want them to be associated
+with every variant.
+
+
+139
+00:08:08,088 --> 00:08:10,958 line:-2
+Remember, this doesn't create
+new variant playlists,
+
+
+140
+00:08:11,024 --> 00:08:13,694 line:-2
+it just creates new entries
+in the master playlist,
+
+
+141
+00:08:13,760 --> 00:08:16,830 line:-2
+which associate a video playlist
+with an audio group.
+
+
+142
+00:08:18,699 --> 00:08:20,801 line:-1
+Now, some of you may have hit a problem
+
+
+143
+00:08:20,868 --> 00:08:23,670 line:-2
+where the variants you want to favor
+aren't being chosen.
+
+
+144
+00:08:23,737 --> 00:08:26,139 line:-2
+The default behavior
+is to choose the highest bit rate
+
+
+145
+00:08:26,206 --> 00:08:27,808 line:-1
+among what's currently playable.
+
+
+146
+00:08:27,875 --> 00:08:32,145 line:-2
+With USAC and with Dolby Digital Plus,
+this can cause an inversion
+
+
+147
+00:08:32,212 --> 00:08:35,381 line:-2
+where the chosen variant
+is not what you would prefer.
+
+
+148
+00:08:36,250 --> 00:08:39,086 line:-2
+To get around this,
+we've added the SCORE attribute.
+
+
+149
+00:08:39,152 --> 00:08:41,989 line:-1
+This is on variants and I-Frame variants.
+
+
+150
+00:08:42,054 --> 00:08:44,258 line:-1
+The value is a floating-point number.
+
+
+151
+00:08:44,324 --> 00:08:47,261 line:-2
+The feature is already in
+so you can try it without upgrading.
+
+
+152
+00:08:48,061 --> 00:08:51,131 line:-2
+It allows you to set an ordering
+on all the variants.
+
+
+153
+00:08:52,199 --> 00:08:54,468 line:-1
+You have to put it on all the variants.
+
+
+154
+00:08:54,535 --> 00:08:56,937 line:-2
+If you want to set an order,
+it has to be complete,
+
+
+155
+00:08:57,004 --> 00:08:59,907 line:-2
+otherwise we'll have situations
+where we wouldn't be able to choose.
+
+
+156
+00:09:01,108 --> 00:09:03,911 line:-2
+The way it works is
+we'll do all our usual filtering
+
+
+157
+00:09:03,977 --> 00:09:06,747 line:-2
+to get down to a set of variants,
+any of which could be played.
+
+
+158
+00:09:06,813 --> 00:09:10,851 line:-2
+At that point, we use SCORE to decide
+and the highest SCORE wins.
+
+
+159
+00:09:11,718 --> 00:09:15,956 line:-2
+Let's see an example.
+This is a very cut-down master playlist.
+
+
+160
+00:09:16,023 --> 00:09:18,859 line:-2
+I've left out a lot
+so it would fit on one slide,
+
+
+161
+00:09:18,926 --> 00:09:20,827 line:-1
+and I've fiddled with the spacing.
+
+
+162
+00:09:20,894 --> 00:09:22,796 line:-1
+We have two audio groups here.
+
+
+163
+00:09:22,863 --> 00:09:28,335 line:-2
+One is USAC, the other is HE-AAC.
+They have the same set of languages.
+
+
+164
+00:09:29,670 --> 00:09:33,240 line:-2
+We have two video variants,
+a 720p and a 1080p,
+
+
+165
+00:09:34,474 --> 00:09:37,611 line:-2
+which makes for
+four video variant entries.
+
+
+166
+00:09:37,678 --> 00:09:41,782 line:-2
+Even though these are compatible audio,
+I've put all the possible entries in.
+
+
+167
+00:09:43,917 --> 00:09:45,719 line:-1
+These are in order by BANDWIDTH.
+
+
+168
+00:09:45,786 --> 00:09:50,691 line:-2
+So notice, we would end up choosing
+the HE-AAC variants to play.
+
+
+169
+00:09:50,757 --> 00:09:54,795 line:-2
+This is not what we want,
+since the USAC is going to sound better.
+
+
+170
+00:09:54,862 --> 00:09:57,364 line:-1
+We really want to choose the HE-AAC
+
+
+171
+00:09:57,431 --> 00:10:01,134 line:-2
+only if we are on some device
+that can't play the USAC.
+
+
+172
+00:10:02,102 --> 00:10:04,805 line:-1
+We fix this with the SCORE attribute.
+
+
+173
+00:10:04,872 --> 00:10:08,509 line:-2
+We give the USAC variants higher scores,
+so they are preferred.
+
+
+174
+00:10:08,575 --> 00:10:14,248 line:-2
+This allows the USAC to function
+like a mutually exclusive codec.
+
+
+175
+00:10:14,314 --> 00:10:17,751 line:-2
+Let's wrap up.
+Remember, we've made changes to the tools.
+
+
+176
+00:10:17,818 --> 00:10:20,687 line:-2
+And you want to take a look
+at how you're using audio groups.
+
+
+177
+00:10:23,757 --> 00:10:26,026 line:-2
+So download the latest version
+of the tools.
+
+
+178
+00:10:26,093 --> 00:10:29,897 line:-2
+Read the Read Me files and manual pages
+and explore what you can do.
+
+
+179
+00:10:30,697 --> 00:10:32,399 line:-1
+That's all. Thanks for watching.
+

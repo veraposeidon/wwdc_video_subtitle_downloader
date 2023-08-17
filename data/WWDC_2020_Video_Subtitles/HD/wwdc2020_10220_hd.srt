@@ -1,0 +1,1286 @@
+1
+00:00:03,804 --> 00:00:05,939 line:-1
+Hello and welcome to WWDC.
+
+
+2
+00:00:07,774 --> 00:00:08,775 line:0
+Hi, everyone.
+
+
+3
+00:00:08,842 --> 00:00:11,745 line:0
+Welcome to Handle Interruptions
+and Alerts in UI Tests.
+
+
+4
+00:00:11,812 --> 00:00:12,813 line:0
+My name is Dennis,
+
+
+5
+00:00:12,880 --> 00:00:14,882 line:0
+and I'm a software engineer
+on the Xcode team.
+
+
+6
+00:00:14,948 --> 00:00:19,052 line:-2
+In today's session,
+we'll define what a UI interruption is
+
+
+7
+00:00:19,119 --> 00:00:22,489 line:-2
+and how to handle interruptions
+utilizing interruption handlers.
+
+
+8
+00:00:22,823 --> 00:00:26,260 line:-2
+Interruption handlers have been part
+of XCTest for many years,
+
+
+9
+00:00:26,326 --> 00:00:28,862 line:-2
+but it's not always clear
+when they should be used.
+
+
+10
+00:00:30,163 --> 00:00:31,832 line:-1
+In the second half of this session,
+
+
+11
+00:00:31,899 --> 00:00:34,668 line:-2
+I'll demonstrate how to interact
+with expected alerts.
+
+
+12
+00:00:34,735 --> 00:00:37,971 line:-2
+For example, the ones that appear
+when the app wants to get access
+
+
+13
+00:00:38,038 --> 00:00:41,708 line:-2
+to protected resources such as Bluetooth
+or location data for the first time.
+
+
+14
+00:00:42,009 --> 00:00:45,879 line:-2
+And lastly, we'll talk about
+how we can work with protected resources
+
+
+15
+00:00:45,946 --> 00:00:48,248 line:-2
+and how we can reset
+the authorization status
+
+
+16
+00:00:48,315 --> 00:00:51,685 line:-2
+so that you can test these kinds of alerts
+in a deterministic way.
+
+
+17
+00:00:52,119 --> 00:00:54,588 line:-2
+Let's start
+with what is a UI Interruption?
+
+
+18
+00:00:54,988 --> 00:00:58,926 line:-2
+A UI Interruption is any element
+which unexpectedly blocks access
+
+
+19
+00:00:58,992 --> 00:01:02,229 line:-2
+to another element with which
+a UI Test is trying to interact.
+
+
+20
+00:01:03,330 --> 00:01:06,900 line:-2
+In the example on the right,
+you can see a simple recipes app.
+
+
+21
+00:01:06,967 --> 00:01:11,205 line:-2
+Imagine there's a UI Test that wants
+to tab one of the recipes to view it.
+
+
+22
+00:01:12,906 --> 00:01:14,975 line:-1
+Even though there's a banner at the top,
+
+
+23
+00:01:15,042 --> 00:01:17,411 line:-2
+the banner is not considered
+a UI interruption
+
+
+24
+00:01:17,477 --> 00:01:20,347 line:-2
+because the banner's UI
+does not cover the table view row
+
+
+25
+00:01:20,414 --> 00:01:22,249 line:-1
+that the UI Test is going to tab.
+
+
+26
+00:01:23,784 --> 00:01:25,986 line:-2
+Now that we're in the recipe's
+detail view,
+
+
+27
+00:01:26,053 --> 00:01:28,121 line:-2
+we make sure that we actually
+navigated there
+
+
+28
+00:01:28,188 --> 00:01:31,391 line:-2
+by asserting that the UI elements
+appear as expected.
+
+
+29
+00:01:32,326 --> 00:01:35,495 line:-2
+After that, we want to navigate back
+to the list of recipes
+
+
+30
+00:01:35,562 --> 00:01:38,332 line:-2
+to ensure that this part
+of navigation works as well.
+
+
+31
+00:01:39,533 --> 00:01:42,903 line:-2
+But now, the "Back" button is covered
+by the banner notification.
+
+
+32
+00:01:42,970 --> 00:01:44,638 line:-1
+So to be able to tap the button,
+
+
+33
+00:01:44,705 --> 00:01:47,541 line:-2
+the UI Test needs to interact
+with the banner first.
+
+
+34
+00:01:47,608 --> 00:01:50,477 line:-2
+In this case, the banner is considered
+a UI interruption.
+
+
+35
+00:01:52,446 --> 00:01:54,882 line:-2
+Interrupting elements
+are most commonly banners,
+
+
+36
+00:01:54,948 --> 00:01:56,583 line:-1
+like we see in the example,
+
+
+37
+00:01:56,650 --> 00:02:00,954 line:-2
+alerts, dialogs or windows,
+but can be other types as well.
+
+
+38
+00:02:01,021 --> 00:02:04,925 line:-2
+The important thing to remember is
+that interruptions are unexpected
+
+
+39
+00:02:04,992 --> 00:02:07,027 line:-1
+or at least not deterministic.
+
+
+40
+00:02:07,494 --> 00:02:10,731 line:-2
+The appearance of an alert
+in direct response to a test selection,
+
+
+41
+00:02:10,797 --> 00:02:13,967 line:-2
+such as clicking a button,
+is not an interruption.
+
+
+42
+00:02:14,034 --> 00:02:16,937 line:-2
+Now that we understand
+what a UI Interruption is,
+
+
+43
+00:02:17,004 --> 00:02:20,040 line:-2
+let's go ahead and explore how we can use
+UI interruption handlers
+
+
+44
+00:02:20,107 --> 00:02:21,341 line:-1
+to handle these interruptions.
+
+
+45
+00:02:21,408 --> 00:02:23,744 line:-2
+We've learned that interruptions
+are unexpected
+
+
+46
+00:02:23,810 --> 00:02:25,679 line:-1
+and appear nondeterministically.
+
+
+47
+00:02:25,746 --> 00:02:29,283 line:-2
+Per that definition, there is no way
+to handle interruptions efficiently
+
+
+48
+00:02:29,349 --> 00:02:31,318 line:-1
+using the usual automation APIs.
+
+
+49
+00:02:31,385 --> 00:02:34,755 line:-2
+Interruption handlers are closures
+that are invoked by XCTest
+
+
+50
+00:02:34,821 --> 00:02:36,390 line:-1
+when an interruption occurs.
+
+
+51
+00:02:36,456 --> 00:02:39,793 line:-2
+There can be multiple interruption
+handlers registered at anytime,
+
+
+52
+00:02:39,860 --> 00:02:41,528 line:-1
+and the order in which they are added
+
+
+53
+00:02:41,595 --> 00:02:44,164 line:-2
+is decisive of the order
+in which they are invoked.
+
+
+54
+00:02:44,665 --> 00:02:47,067 line:-2
+XCTest keeps a stack
+of interruption handlers
+
+
+55
+00:02:47,134 --> 00:02:50,504 line:-2
+and invokes them in reverse order
+until one of them signals
+
+
+56
+00:02:50,571 --> 00:02:52,072 line:-1
+that it handled the interruption.
+
+
+57
+00:02:52,139 --> 00:02:56,443 line:-2
+You are free to use any of these handlers
+as general or as specific as you wish.
+
+
+58
+00:02:56,510 --> 00:02:59,813 line:-2
+Some handlers may just attempt
+to find a "Cancel" button and press it,
+
+
+59
+00:02:59,880 --> 00:03:01,949 line:-2
+others might make decisions
+based on the UI
+
+
+60
+00:03:02,015 --> 00:03:04,017 line:-1
+and contents of the interrupting element.
+
+
+61
+00:03:04,184 --> 00:03:07,054 line:-2
+If an interruption handler
+successfully handled an interruption,
+
+
+62
+00:03:07,120 --> 00:03:09,723 line:-1
+it returns "True" and the iTest continues.
+
+
+63
+00:03:11,024 --> 00:03:13,293 line:-2
+If it was not able
+to handle the interruption,
+
+
+64
+00:03:13,360 --> 00:03:16,864 line:-2
+it returns "False" and the next handler
+on the stack gets invoked.
+
+
+65
+00:03:17,698 --> 00:03:21,335 line:-2
+UI interruption handlers are automatically
+removed at the end of the test
+
+
+66
+00:03:21,401 --> 00:03:23,604 line:-1
+or can be removed manually at anytime.
+
+
+67
+00:03:24,471 --> 00:03:27,508 line:-2
+At the lowest level in the stack
+of UI interruption handlers,
+
+
+68
+00:03:27,574 --> 00:03:30,277 line:-2
+XCTest provides its own implicit
+interruption handler
+
+
+69
+00:03:30,344 --> 00:03:33,080 line:-2
+that takes care of the most
+common interruptions for you.
+
+
+70
+00:03:33,680 --> 00:03:36,517 line:-2
+On iOS, XCTest handles
+interrupting elements
+
+
+71
+00:03:36,583 --> 00:03:39,152 line:-2
+if they have a "Cancel" button
+or a "Default" button.
+
+
+72
+00:03:39,987 --> 00:03:41,488 line:-1
+And new in Xcode 12,
+
+
+73
+00:03:41,555 --> 00:03:44,491 line:-2
+XCTest also implicitly handles
+banner notifications.
+
+
+74
+00:03:45,726 --> 00:03:49,429 line:-2
+On macOS, XCTest implicitly handles
+user permission dialogs
+
+
+75
+00:03:49,496 --> 00:03:51,198 line:-1
+by clicking the "Don't Allow" button,
+
+
+76
+00:03:51,265 --> 00:03:53,033 line:-1
+and the Bluetooth Setup Assistant,
+
+
+77
+00:03:53,100 --> 00:03:55,669 line:-2
+which is well-known
+for interrupting UI Test flows,
+
+
+78
+00:03:55,736 --> 00:03:58,272 line:-2
+especially in CI
+where no keyboard is attached.
+
+
+79
+00:03:58,338 --> 00:04:00,874 line:-2
+Let's take a look at how all of this works
+in action.
+
+
+80
+00:04:00,941 --> 00:04:03,677 line:-2
+When I lived in Germany
+and studied computer science,
+
+
+81
+00:04:03,744 --> 00:04:06,580 line:-2
+my grandma not only helped me
+with my homework for uni,
+
+
+82
+00:04:06,647 --> 00:04:09,049 line:-2
+she also used to cook for me
+almost every day.
+
+
+83
+00:04:09,683 --> 00:04:11,051 line:-1
+Since I moved to the US,
+
+
+84
+00:04:11,118 --> 00:04:12,819 line:-1
+she's been really worried about my health
+
+
+85
+00:04:12,886 --> 00:04:15,389 line:-2
+and wants to make sure
+that I eat healthy food.
+
+
+86
+00:04:15,889 --> 00:04:18,959 line:-2
+She had this idea of having an app
+that lists all her favorite recipes
+
+
+87
+00:04:19,026 --> 00:04:21,327 line:-2
+she inherited and collected
+over the years,
+
+
+88
+00:04:21,762 --> 00:04:24,498 line:-2
+so that I could easily cook
+the "good food" myself.
+
+
+89
+00:04:24,565 --> 00:04:26,066 line:-1
+She's an exemplary programmer
+
+
+90
+00:04:26,133 --> 00:04:29,570 line:-2
+and knows that she needs to have tests
+that validate her app's behavior.
+
+
+91
+00:04:30,103 --> 00:04:33,106 line:-2
+Here, you can see one
+of the iTests she wrote.
+
+
+92
+00:04:33,173 --> 00:04:35,309 line:-2
+She told me that this test
+would sometimes fail,
+
+
+93
+00:04:35,375 --> 00:04:37,044 line:-1
+but she has no idea why.
+
+
+94
+00:04:37,110 --> 00:04:39,313 line:-1
+I promised her to take a look at this.
+
+
+95
+00:04:39,379 --> 00:04:41,782 line:-2
+And sure enough,
+after several runs of the test,
+
+
+96
+00:04:41,849 --> 00:04:43,784 line:-1
+I was able to reproduce this.
+
+
+97
+00:04:44,618 --> 00:04:46,320 line:-1
+The underlying issue here is
+
+
+98
+00:04:46,386 --> 00:04:48,755 line:-2
+that sometimes the connection
+to the server fails
+
+
+99
+00:04:48,822 --> 00:04:51,325 line:-1
+and the app cannot update the recipes.
+
+
+100
+00:04:51,391 --> 00:04:53,527 line:-1
+In that case, the app displays an alert,
+
+
+101
+00:04:53,594 --> 00:04:55,662 line:-2
+letting the user know
+that there was a problem
+
+
+102
+00:04:55,729 --> 00:04:57,798 line:-1
+and gives them the opportunity to retry.
+
+
+103
+00:04:58,232 --> 00:05:00,167 line:-1
+Now, for the purpose of this demo,
+
+
+104
+00:05:00,234 --> 00:05:01,568 line:-1
+I've shutdown the web server
+
+
+105
+00:05:01,635 --> 00:05:04,104 line:-2
+so that we can easily reproduce
+the issue ourselves.
+
+
+106
+00:05:04,605 --> 00:05:06,039 line:-1
+As you can see at the top,
+
+
+107
+00:05:06,106 --> 00:05:09,076 line:-2
+I've already added
+a UIInterruptionMonitor skeleton
+
+
+108
+00:05:09,142 --> 00:05:12,145 line:-2
+to the test setUpWithError method
+that we'll complete later.
+
+
+109
+00:05:12,713 --> 00:05:14,615 line:-1
+Let's run the test step-by-step.
+
+
+110
+00:05:17,451 --> 00:05:20,554 line:-2
+First, we create
+and launch the application.
+
+
+111
+00:05:24,658 --> 00:05:27,461 line:-2
+Then, we try to tap
+one of the table view cells,
+
+
+112
+00:05:27,528 --> 00:05:29,229 line:-1
+but the alert is in the way.
+
+
+113
+00:05:29,930 --> 00:05:32,165 line:-2
+Since we're actually trying to interact
+with an element,
+
+
+114
+00:05:32,232 --> 00:05:33,867 line:-1
+the alert is considered interruption,
+
+
+115
+00:05:33,934 --> 00:05:36,136 line:-2
+and XCTest invokes
+our interruption handler.
+
+
+116
+00:05:40,507 --> 00:05:43,744 line:-2
+In our skeleton implementation,
+we just return "False"
+
+
+117
+00:05:43,810 --> 00:05:46,280 line:-2
+indicating that we did not handle
+the interruption.
+
+
+118
+00:05:46,747 --> 00:05:50,117 line:-2
+This is where XCTest implicit
+interruption handling kicks in.
+
+
+119
+00:05:50,184 --> 00:05:51,652 line:-1
+Once I step over here,
+
+
+120
+00:05:51,718 --> 00:05:54,288 line:-2
+you can see how XCTest
+presses the "Cancel" button
+
+
+121
+00:05:54,354 --> 00:05:56,390 line:-1
+to dismiss the alert and tap the cell.
+
+
+122
+00:06:01,195 --> 00:06:02,596 line:-1
+Now, the test continues.
+
+
+123
+00:06:04,765 --> 00:06:08,168 line:-2
+Great. You can see that XCTest
+handled this interruption for us
+
+
+124
+00:06:08,235 --> 00:06:09,636 line:-1
+by clicking the "Cancel" button.
+
+
+125
+00:06:09,703 --> 00:06:11,004 line:-1
+But Grandma wants to make sure
+
+
+126
+00:06:11,071 --> 00:06:13,307 line:-2
+that this test used
+the latest relatable data,
+
+
+127
+00:06:13,373 --> 00:06:15,776 line:-2
+so pressing "Retry" here
+would be the better choice.
+
+
+128
+00:06:16,376 --> 00:06:20,314 line:-2
+Let's modify our interruption handler
+to press the "Retry" button instead.
+
+
+129
+00:06:26,119 --> 00:06:27,721 line:-1
+Inside the interruption handler,
+
+
+130
+00:06:27,788 --> 00:06:30,958 line:-2
+we check if the interrupting element
+is an alert
+
+
+131
+00:06:31,024 --> 00:06:33,026 line:-1
+and if it has a "Retry" button.
+
+
+132
+00:06:33,093 --> 00:06:36,263 line:-1
+If it has, we tap it, and return "True"
+
+
+133
+00:06:36,330 --> 00:06:38,232 line:-2
+to indicate that we handled
+the interruption
+
+
+134
+00:06:38,298 --> 00:06:39,666 line:-1
+and the test can continue.
+
+
+135
+00:06:40,367 --> 00:06:41,869 line:-1
+Let's run the test one more time.
+
+
+136
+00:06:53,113 --> 00:06:56,183 line:-2
+Great. Now, our test handles these
+network interruptions by retrying
+
+
+137
+00:06:56,250 --> 00:06:59,253 line:-2
+to fetch the latest set of recipes
+instead of just canceling.
+
+
+138
+00:06:59,887 --> 00:07:02,089 line:-2
+Now that we know how
+to handle interruptions,
+
+
+139
+00:07:02,155 --> 00:07:05,425 line:-2
+let's see how to best handle alerts
+that are expected to show up.
+
+
+140
+00:07:05,826 --> 00:07:09,162 line:0
+Unlike interruptions, expected alerts
+are often deterministic,
+
+
+141
+00:07:09,229 --> 00:07:12,366 line:0
+and the direct result of an action
+performed by the UI Test.
+
+
+142
+00:07:13,000 --> 00:07:15,135 line:0
+The majority of alerts are expected,
+
+
+143
+00:07:15,202 --> 00:07:17,437 line:0
+and should, therefore,
+not be handled as an interruption,
+
+
+144
+00:07:17,504 --> 00:07:18,639 line:0
+but as part of your test,
+
+
+145
+00:07:18,705 --> 00:07:20,941 line:0
+and should participate
+in its validation process
+
+
+146
+00:07:21,008 --> 00:07:23,076 line:0
+using standard queries and events.
+
+
+147
+00:07:23,610 --> 00:07:27,614 line:-2
+In the demo, the test did not explicitly
+trigger the alert's appearance,
+
+
+148
+00:07:27,681 --> 00:07:30,350 line:-2
+and we don't know beforehand
+when it will appear.
+
+
+149
+00:07:30,417 --> 00:07:34,454 line:-2
+The server will probably respond correctly
+most of the time but not always.
+
+
+150
+00:07:34,521 --> 00:07:36,957 line:-2
+That's why they had to use
+a UI interruption handler.
+
+
+151
+00:07:37,024 --> 00:07:41,161 line:-2
+Let's look at a different example to see
+how it can interact with expected alerts.
+
+
+152
+00:07:41,762 --> 00:07:45,165 line:-2
+Here, our test swipes left
+on one of the recipes to remove it.
+
+
+153
+00:07:49,369 --> 00:07:51,638 line:-1
+We know that after deleting a recipe
+
+
+154
+00:07:51,705 --> 00:07:55,075 line:-2
+an alert shows up asking
+if you really want to delete that recipe.
+
+
+155
+00:07:55,709 --> 00:07:57,711 line:-1
+Since the alert is expected to show up,
+
+
+156
+00:07:57,778 --> 00:08:01,481 line:-2
+we use traditional UI element query
+and waitForExistence APIs.
+
+
+157
+00:08:01,982 --> 00:08:03,584 line:-1
+Once it appears onscreen,
+
+
+158
+00:08:03,650 --> 00:08:06,153 line:-2
+we validate that it contains
+the text we expect.
+
+
+159
+00:08:07,354 --> 00:08:10,657 line:0
+Lastly, we dismiss the alert
+by confirming the action
+
+
+160
+00:08:10,724 --> 00:08:12,960 line:0
+and validate that the row
+does not exist anymore.
+
+
+161
+00:08:13,026 --> 00:08:17,231 line:-2
+The expected alerts we've seen so far
+have all been in our control.
+
+
+162
+00:08:17,297 --> 00:08:19,700 line:-2
+This makes it straightforward
+to get the app on our test
+
+
+163
+00:08:19,766 --> 00:08:22,936 line:-2
+in the state we need
+to validate these scenarios.
+
+
+164
+00:08:23,003 --> 00:08:27,274 line:-2
+Protected resources, stuff like location,
+Bluetooth or the microphone,
+
+
+165
+00:08:27,341 --> 00:08:28,809 line:-1
+are very privacy sensitive,
+
+
+166
+00:08:28,876 --> 00:08:30,377 line:-1
+and the system needs to make sure
+
+
+167
+00:08:30,444 --> 00:08:34,313 line:-2
+that the user explicitly allowed each app
+access to these resources
+
+
+168
+00:08:34,381 --> 00:08:36,216 line:-1
+before letting the app access them.
+
+
+169
+00:08:36,884 --> 00:08:40,254 line:-2
+Once the user interacted with the alert
+asking for access,
+
+
+170
+00:08:40,320 --> 00:08:42,389 line:-1
+their decision is stored by the system.
+
+
+171
+00:08:42,456 --> 00:08:46,727 line:-2
+In a test, there are two or more
+distinct branches that should be tested:
+
+
+172
+00:08:46,793 --> 00:08:49,730 line:-2
+How does the app respond
+to the user granting permission,
+
+
+173
+00:08:49,796 --> 00:08:53,000 line:-2
+and how does the app respond
+to the user denying permission?
+
+
+174
+00:08:53,066 --> 00:08:56,570 line:-2
+However, the user response is stored
+as system state,
+
+
+175
+00:08:56,637 --> 00:09:00,541 line:-2
+so after the first such interaction,
+the device is no longer in a clean state,
+
+
+176
+00:09:00,607 --> 00:09:04,244 line:-2
+and it is difficult or impossible
+to explore all the other branches.
+
+
+177
+00:09:04,311 --> 00:09:06,780 line:-2
+For more information about
+protected resources,
+
+
+178
+00:09:06,847 --> 00:09:09,416 line:0
+please watch "Better Apps
+through Better Privacy"
+
+
+179
+00:09:09,483 --> 00:09:12,553 line:0
+and "Your Apps and the Future
+of macOS Security"
+
+
+180
+00:09:12,619 --> 00:09:14,855 line:0
+from WWDC 2018.
+
+
+181
+00:09:15,422 --> 00:09:19,893 line:-1
+In Xcode 11.4, and iOS and tvOS 13.4,
+
+
+182
+00:09:19,960 --> 00:09:22,095 line:0
+and macOS 10.15.4,
+
+
+183
+00:09:22,162 --> 00:09:24,932 line:0
+we introduced API on XCUIApplication
+
+
+184
+00:09:24,998 --> 00:09:28,302 line:0
+to reset the authorization status
+of protected resources.
+
+
+185
+00:09:28,368 --> 00:09:31,438 line:-2
+Resetting the authorization status
+of protected resources
+
+
+186
+00:09:31,505 --> 00:09:35,676 line:-2
+makes the app behave like it never asked
+the user for permission before.
+
+
+187
+00:09:35,742 --> 00:09:38,145 line:-2
+This allows you to retest
+these authorizations
+
+
+188
+00:09:38,212 --> 00:09:41,815 line:-2
+or initial launch experience workflows
+in a deterministic way.
+
+
+189
+00:09:41,882 --> 00:09:45,953 line:-2
+Note that these alerts did not originate
+from your app but from the system.
+
+
+190
+00:09:46,019 --> 00:09:49,056 line:-2
+Therefore, you need to make sure
+to adjust your queries accordingly.
+
+
+191
+00:09:49,122 --> 00:09:51,725 line:-2
+Also note that resetting
+the authorization status
+
+
+192
+00:09:51,792 --> 00:09:55,062 line:-2
+of a protected resource
+may terminate the app process.
+
+
+193
+00:09:55,128 --> 00:09:57,831 line:-2
+This behavior's not exclusive
+to the iTesting, though,
+
+
+194
+00:09:57,898 --> 00:10:01,034 line:-2
+and also happens when the user changes
+the authorization status
+
+
+195
+00:10:01,101 --> 00:10:02,803 line:-1
+in settings while the app is running.
+
+
+196
+00:10:02,870 --> 00:10:07,274 line:-2
+Supported resources for all platforms
+are, for example, context,
+
+
+197
+00:10:07,341 --> 00:10:12,246 line:-2
+calendar, photos, microphone,
+camera and location.
+
+
+198
+00:10:12,312 --> 00:10:16,149 line:-2
+On iOS, we also support
+keyboard network access,
+
+
+199
+00:10:16,216 --> 00:10:20,254 line:-2
+Bluetooth, and new in Xcode 12
+and iOS 14, health.
+
+
+200
+00:10:21,088 --> 00:10:22,322 line:-1
+On macOS,
+
+
+201
+00:10:22,389 --> 00:10:25,792 line:-2
+we additionally support researching
+the access to various directories
+
+
+202
+00:10:25,859 --> 00:10:28,462 line:-2
+like the user's downloads
+or desktop folder.
+
+
+203
+00:10:28,529 --> 00:10:30,631 line:-2
+Here's an example
+of what a test looks like
+
+
+204
+00:10:30,697 --> 00:10:34,768 line:-2
+that validates the flow of accessing
+the user's photos for the first time.
+
+
+205
+00:10:35,536 --> 00:10:39,173 line:-2
+First, we reset the app's
+authorization status for "photos."
+
+
+206
+00:10:39,907 --> 00:10:43,911 line:-2
+Resetting the authorization status
+for photos terminates the app process,
+
+
+207
+00:10:43,977 --> 00:10:46,547 line:-2
+which is why we launch the app
+after the reset.
+
+
+208
+00:10:47,514 --> 00:10:50,350 line:-2
+After that, we continue
+with our usual test code,
+
+
+209
+00:10:50,417 --> 00:10:53,487 line:-2
+where we find that the alert appears
+after requesting access
+
+
+210
+00:10:53,554 --> 00:10:56,390 line:-2
+to the protected resource
+and dismissing the alert.
+
+
+211
+00:10:56,456 --> 00:10:58,058 line:-1
+That's it.
+
+
+212
+00:10:58,125 --> 00:11:00,360 line:-2
+Let's recap what we talked about
+in this session.
+
+
+213
+00:11:00,427 --> 00:11:02,896 line:-2
+We learned that UI interruptions
+are unexpected,
+
+
+214
+00:11:02,963 --> 00:11:07,167 line:-2
+or at least not deterministic UI elements
+that block access to an element
+
+
+215
+00:11:07,234 --> 00:11:09,236 line:-1
+which the UI Test needs to interact with.
+
+
+216
+00:11:09,303 --> 00:11:11,471 line:-1
+We covered UI interruption handlers,
+
+
+217
+00:11:11,538 --> 00:11:12,973 line:-1
+and when and how to use them.
+
+
+218
+00:11:13,040 --> 00:11:15,642 line:-2
+And that XCTest provides
+an implicit interruption handler
+
+
+219
+00:11:15,709 --> 00:11:17,945 line:-2
+that can handle most interruptions
+out of the box.
+
+
+220
+00:11:18,011 --> 00:11:19,746 line:-1
+We talked about expected alerts
+
+
+221
+00:11:19,813 --> 00:11:21,615 line:-2
+and how they're different
+from interruptions.
+
+
+222
+00:11:21,682 --> 00:11:24,718 line:-2
+And lastly, we saw how
+it can work with expected alerts
+
+
+223
+00:11:24,785 --> 00:11:27,487 line:-2
+that result from the use
+of protected resources
+
+
+224
+00:11:27,554 --> 00:11:29,423 line:-1
+by using new API in XCTest
+
+
+225
+00:11:29,489 --> 00:11:32,860 line:-2
+to thoroughly test the initial
+launch experience of your app.
+
+
+226
+00:11:32,926 --> 00:11:34,928 line:-2
+Grandma and I want to thank you
+for watching.
+

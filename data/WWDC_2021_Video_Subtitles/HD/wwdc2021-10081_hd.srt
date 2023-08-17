@@ -1,0 +1,1820 @@
+2
+00:00:01.668 --> 00:00:04.671 line:-1 align:center
+[upbeat music]
+
+
+3
+00:00:04,705 --> 00:00:09,009 line:-1
+♪ ♪
+
+
+4
+00:00:09,042 --> 00:00:10,611 line:-1
+[Nat] Hi, my name is Nat.
+
+
+5
+00:00:10,644 --> 00:00:13,146 line:-1
+And I work on Game Technologies at Apple.
+
+
+6
+00:00:13.180 --> 00:00:16.149 line:-2 position:22% align:start
+Thanks for joining me again this year
+to catch up about game input
+
+
+7
+00:00:16.183 --> 00:00:19.386 line:-1 align:center
+for iOS, tvOS, and macOS.
+
+
+8
+00:00:19,419 --> 00:00:22,756 position:22% line:-2
+Today, I’m going to start with a quick
+recap of both the how and the why
+
+
+9
+00:00:22,789 --> 00:00:26,527 line:-2 position:27%
+for anybody new to game input
+on Apple platforms.
+
+
+10
+00:00:26,560 --> 00:00:29,530 line:-2 position:22%
+Next, I’m going to show you
+a new type of virtual game controller,
+
+
+11
+00:00:29.563 --> 00:00:32.099 line:-1 align:center
+and we’ll write a little code together.
+
+
+12
+00:00:32,132 --> 00:00:35,235 align:start line:-2
+Finally, I want to talk
+about more actual physical controllers
+
+
+13
+00:00:35.269 --> 00:00:37.938 line:-1 align:center
+and work through some of our new features.
+
+
+14
+00:00:37.971 --> 00:00:40.340 line:-1 align:center
+So let’s start out with our review.
+
+
+15
+00:00:40,374 --> 00:00:43,677 position:21% line:-2
+The game controller framework’s goal
+is making it easy to add support
+
+
+16
+00:00:43,710 --> 00:00:46,613 line:-2 align:start
+for all different kinds
+of efficient, low-latency input
+
+
+17
+00:00:46,647 --> 00:00:48,182 line:-1
+across Apple platforms.
+
+
+18
+00:00:48,215 --> 00:00:51,385 align:start line:-2
+By abstracting input hardware
+through the common API,
+
+
+19
+00:00:51,418 --> 00:00:54,555 align:start line:-2
+the game controller framework lets you
+write your input code once
+
+
+20
+00:00:54,588 --> 00:00:57,524 position:18% line:-2
+without having to worry
+about how input may have been remapped
+
+
+21
+00:00:57,558 --> 00:00:59,860 position:30% line:-2
+or the differences
+among specific controllers,
+
+
+22
+00:00:59.893 --> 00:01:01.962 line:-1 align:center
+keyboards, or pointing devices.
+
+
+23
+00:01:01.995 --> 00:01:04.865 line:-1 align:center
+On iOS, iPadOS, and tvOS,
+
+
+24
+00:01:04.898 --> 00:01:06.500 line:-1 align:center
+players can create system-wide
+
+
+25
+00:01:06,533 --> 00:01:09,403 position:23% line:-2
+and per-application game controller
+input remappings,
+
+
+26
+00:01:09,436 --> 00:01:13,040 position:19% line:-2
+which help make your games
+more customizable and more accessible.
+
+
+27
+00:01:13,073 --> 00:01:16,643 position:24% line:-2
+And on all platforms, you can build
+your UI to reflect the symbols
+
+
+28
+00:01:16,677 --> 00:01:19,646 line:-2 align:start
+and capabilities of the specific
+controllers the player is holding.
+
+
+29
+00:01:19,680 --> 00:01:22,816 position:22% line:-2
+So whether your player is
+on team circle-square-triangle-cross
+
+
+30
+00:01:22,850 --> 00:01:24,952 line:-1
+or on team A-B-X-Y,
+
+
+31
+00:01:24.985 --> 00:01:27.888 line:-1 align:center
+your game UI will look right for them.
+
+
+32
+00:01:27.921 --> 00:01:31.592 line:-2 position:22% align:start
+The basics of the game controller
+framework is reacting to notifications
+
+
+33
+00:01:31.625 --> 00:01:34.995 line:-2 align:start position:18%
+about different kinds of GCDevice objects
+connecting and disconnecting
+
+
+34
+00:01:35,028 --> 00:01:38,165 line:0 align:start
+and either polling active devices
+for input state
+
+
+35
+00:01:38,198 --> 00:01:40,234 line:0
+or setting up value-changed handlers
+
+
+36
+00:01:40,267 --> 00:01:43,136 align:center
+to be notified about input state changes.
+
+
+37
+00:01:43,170 --> 00:01:46,173 line:0 align:start
+When controllers connect or disconnect
+from the system,
+
+
+38
+00:01:46,206 --> 00:01:48,942 line:-2 align:start
+GCController objects
+are created and removed,
+
+
+39
+00:01:48.976 --> 00:01:51.678 line:-2 position:31% align:start
+and you are sent
+GCControllerDidConnect
+
+
+40
+00:01:51,712 --> 00:01:54,882 align:start line:-2
+and GCControllerDidDisconnect
+notifications.
+
+
+41
+00:01:54,915 --> 00:01:58,051 position:31% line:-2
+It’s the same pattern
+with GCKeyboard objects
+
+
+42
+00:01:58,085 --> 00:02:01,522 position:20% line:-2
+when keyboards connect or disconnect,
+and with GCMouse objects
+
+
+43
+00:02:01,555 --> 00:02:05,125 line:-2 position:27%
+when pointing devices connect
+or disconnect.
+
+
+44
+00:02:05,158 --> 00:02:08,829 align:start line:-2
+All you need to do is add
+an observer to find out when,
+
+
+45
+00:02:08.862 --> 00:02:12.766 line:-2 align:start position:23%
+for example, a GCController objects
+connects or disconnects.
+
+
+46
+00:02:12,799 --> 00:02:16,069 position:25% line:-2
+Then it’s up to you whether
+to set up those change handlers
+
+
+47
+00:02:16,103 --> 00:02:18,305 line:-1
+to notify you when input state changes,
+
+
+48
+00:02:18,338 --> 00:02:21,308 align:start line:-2
+or to poll the state
+of the controller elsewhere.
+
+
+49
+00:02:21,341 --> 00:02:23,177 position:19% line:-1
+This is the same pattern you should use
+
+
+50
+00:02:23,210 --> 00:02:26,613 align:start line:-2
+whether it’s a controller, a keyboard,
+or a pointing device.
+
+
+51
+00:02:26,647 --> 00:02:29,983 line:-2 position:21%
+We’ve seen so many great new games
+supporting game controllers
+
+
+52
+00:02:30,017 --> 00:02:33,287 line:-2 align:start
+and huge customer interest
+in games that support controllers well.
+
+
+53
+00:02:33,320 --> 00:02:36,089 line:-2 position:30%
+That’s why we really want
+to help people find games
+
+
+54
+00:02:36,123 --> 00:02:37,791 line:-1
+that support game controllers.
+
+
+55
+00:02:37.824 --> 00:02:40.060 line:-2 align:start position:30%
+When we know a game
+supports game controllers,
+
+
+56
+00:02:40,093 --> 00:02:43,297 position:22% line:-2
+we badge it in the App Store
+with the Controller Supported badge.
+
+
+57
+00:02:43,330 --> 00:02:44,865 line:-1
+That looks like a little thing, right?
+
+
+58
+00:02:44.898 --> 00:02:48.001 line:-2 position:19% align:start
+But it’s something players are looking for
+if they love using their controllers,
+
+
+59
+00:02:48.035 --> 00:02:50.771 line:-1 align:center
+and I know it’s a badge I look for.
+
+
+60
+00:02:50,804 --> 00:02:53,507 line:-2 align:start
+And we’re always on the lookout
+to curate and promote apps
+
+
+61
+00:02:53.540 --> 00:02:55.375 line:-1 align:center
+that work great with game controllers.
+
+
+62
+00:02:55,409 --> 00:02:58,178 align:start line:-2
+There are multiple sections for games
+when we discover apps
+
+
+63
+00:02:58,212 --> 00:03:00,047 line:-1
+that make game controllers really shine.
+
+
+64
+00:03:00,080 --> 00:03:02,749 line:-2 position:27%
+I can’t guarantee that your app
+will be chosen for promotion,
+
+
+65
+00:03:02,783 --> 00:03:04,651 line:-2 position:29%
+but when you do a great job
+with controllers,
+
+
+66
+00:03:04.685 --> 00:03:07.120 line:-1 align:center
+players will definitely notice.
+
+
+67
+00:03:07.154 --> 00:03:10.324 line:-2 align:start position:29%
+So here’s all you have to do
+to mark your app’s support.
+
+
+68
+00:03:10,357 --> 00:03:13,927 position:25% line:-2
+In Xcode, just add
+the Game Controllers capability.
+
+
+69
+00:03:13.961 --> 00:03:16.396 line:-1 align:center
+This tags your application’s Info.plist
+
+
+70
+00:03:16,430 --> 00:03:18,232 line:-1
+with the game controller capability,
+
+
+71
+00:03:18,265 --> 00:03:19,733 line:-1
+and that’s all you need to do
+
+
+72
+00:03:19,766 --> 00:03:22,402 line:-1
+before submitting it to the App Store.
+
+
+73
+00:03:22.436 --> 00:03:24.838 line:-1 align:center
+When your game has this capability,
+
+
+74
+00:03:24.872 --> 00:03:28.108 line:-2 position:22% align:start
+we also know to include it
+in the per-app customization section
+
+
+75
+00:03:28,141 --> 00:03:30,110 line:-1
+of the Game Controller preferences panel.
+
+
+76
+00:03:30,143 --> 00:03:33,113 line:-2 align:start
+Players love the ability
+to tweak controls to their liking,
+
+
+77
+00:03:33,146 --> 00:03:36,517 position:27% line:-2
+and it’s a great way to improve
+your game’s accessibility.
+
+
+78
+00:03:36,550 --> 00:03:39,586 position:25% line:-2
+You don’t have to do anything
+to participate in input remapping,
+
+
+79
+00:03:39.620 --> 00:03:41.421 line:-1 align:center
+but when you tag your game,
+
+
+80
+00:03:41,455 --> 00:03:44,258 line:-1
+players can customize it specifically.
+
+
+81
+00:03:44,291 --> 00:03:46,793 line:-1
+Another terrific feature you get for free
+
+
+82
+00:03:46,827 --> 00:03:50,597 position:18% line:-2
+when you adopt the game controller
+framework is screenshots and video clips.
+
+
+83
+00:03:50.631 --> 00:03:54.301 line:-2 align:start position:21%
+Players can capture a screenshot
+or start and stop video clip recordings
+
+
+84
+00:03:54,334 --> 00:03:57,738 position:26% line:-2
+with a quick touch
+of the controller’s share button.
+
+
+85
+00:03:57,771 --> 00:04:00,240 line:-1
+Here I am playing Fox2.
+
+
+86
+00:04:01,842 --> 00:04:05,245 line:-1
+[whooshing, exploding]
+
+
+87
+00:04:05.279 --> 00:04:08.982 line:-2 align:start position:20%
+I can capture a screenshot
+by double-tapping on the Share button.
+
+
+88
+00:04:10.017 --> 00:04:12.219 line:-2 position:30% align:start
+The screenshot lands right
+in my Camera Roll,
+
+
+89
+00:04:12.252 --> 00:04:14.054 line:-1 align:center
+to my Desktop if I’m on macOS,
+
+
+90
+00:04:14,087 --> 00:04:16,823 line:-1
+or it AirDrops to my phone from AppleTV.
+
+
+91
+00:04:16.857 --> 00:04:20.160 line:-2 align:start position:23%
+Now here’s what happens if I want
+to start and stop a screen recording
+
+
+92
+00:04:20.194 --> 00:04:22.563 line:-1 align:center
+using a long press of the Share button.
+
+
+93
+00:04:22.596 --> 00:04:25.165 line:-1 align:center
+[chimes]
+
+
+94
+00:04:26.066 --> 00:04:27.668 line:-1 align:center
+A little bit later, I’ve got some news
+
+
+95
+00:04:27,701 --> 00:04:30,671 align:start line:-2
+about a new type of game clip recording
+we’ve added this year.
+
+
+96
+00:04:32,940 --> 00:04:36,343 position:21% line:-2
+My last bit of advice about what gives
+a game polished controller support
+
+
+97
+00:04:36.376 --> 00:04:38.912 line:-1 align:center
+is the proper use of glyphs in your UI.
+
+
+98
+00:04:38,946 --> 00:04:41,381 line:-1
+Consider this hint to use a button
+
+
+99
+00:04:41,415 --> 00:04:43,016 line:-1
+to display your inventory.
+
+
+100
+00:04:43,050 --> 00:04:45,485 line:-1
+On an MFi or Xbox controller,
+
+
+101
+00:04:45.519 --> 00:04:47.087 line:-1 align:center
+we should show the Y button.
+
+
+102
+00:04:47,120 --> 00:04:48,922 line:-1
+On a PlayStation controller,
+
+
+103
+00:04:48.956 --> 00:04:51.391 line:-1 align:center
+we instead want to show a triangle.
+
+
+104
+00:04:51,425 --> 00:04:54,728 line:-2 position:25%
+It may seem like a small thing,
+but wow, we really hear feedback
+
+
+105
+00:04:54,761 --> 00:04:57,698 line:-2 align:start
+about the wrong button names
+showing in your UI.
+
+
+106
+00:04:57.731 --> 00:04:59.967 line:-2 align:start position:27%
+You might consider
+another approach shown here
+
+
+107
+00:05:00.000 --> 00:05:02.636 line:-2 align:start position:30%
+of optionally representing
+positional button locations
+
+
+108
+00:05:02,669 --> 00:05:04,605 line:-1
+if it’s more appropriate for your game.
+
+
+109
+00:05:04,638 --> 00:05:07,608 position:24% line:-2
+Some players,
+especially new and young players,
+
+
+110
+00:05:07,641 --> 00:05:10,377 line:-2 position:25%
+may more quickly recognize
+the location you’re showing them
+
+
+111
+00:05:10.410 --> 00:05:13.480 line:-2 position:23% align:start
+and they don’t have to glance down
+to try to read the button names.
+
+
+112
+00:05:14,748 --> 00:05:17,918 align:start line:-2
+We made it super easy
+to always show the right glyph,
+
+
+113
+00:05:17,951 --> 00:05:21,288 align:start line:-2
+even if the player has remapped a button
+in the system remapping UI.
+
+
+114
+00:05:21,321 --> 00:05:23,457 line:-1
+So for example, if we have mapped
+
+
+115
+00:05:23,490 --> 00:05:26,059 line:-1
+the press of the X button to the A action,
+
+
+116
+00:05:26.093 --> 00:05:28.061 line:-2 align:start position:27%
+as shown here
+in the remapping preferences,
+
+
+117
+00:05:28,095 --> 00:05:31,632 position:25% line:-2
+and we want to ask the user
+to press the A action to continue,
+
+
+118
+00:05:33,800 --> 00:05:37,337 line:-2 position:22%
+when a developer asks for the glyph
+associated with the A action.
+
+
+119
+00:05:37.371 --> 00:05:39.473 line:-1 align:center
+To do this, we just query
+
+
+120
+00:05:39.506 --> 00:05:41.575 line:-1 align:center
+the sfSymbolsName of the A button,
+
+
+121
+00:05:41,608 --> 00:05:46,046 align:start line:-2
+then use UIImage system image named
+to get an image to display.
+
+
+122
+00:05:46,079 --> 00:05:49,816 line:-2 position:25%
+Now we’ll show the correct glyph
+based on the remapping.
+
+
+123
+00:05:49,850 --> 00:05:51,852 line:-1
+So that was my very quick recap.
+
+
+124
+00:05:51,885 --> 00:05:54,688 line:-2 position:25%
+If you find you need more details,
+check out these other talks
+
+
+125
+00:05:54,721 --> 00:05:58,592 align:start line:-2
+about game controllers
+from past WWDC conferences.
+
+
+126
+00:05:58,625 --> 00:06:01,929 line:-2 position:22%
+So over the past few years,
+we’ve talked with a lot of developers
+
+
+127
+00:06:01,962 --> 00:06:04,498 line:-1
+bringing games to iOS and iPadOS.
+
+
+128
+00:06:04,531 --> 00:06:07,734 line:-2 align:start
+Many are games designed originally
+around game controller input,
+
+
+129
+00:06:07,768 --> 00:06:09,937 line:-1
+so they’re expecting two analog sticks,
+
+
+130
+00:06:09,970 --> 00:06:13,707 align:start line:-2
+maybe a d-pad or touchpads,
+and digital button input.
+
+
+131
+00:06:13,740 --> 00:06:16,476 line:-2 position:22%
+What we heard was that some of you
+had a hard time building
+
+
+132
+00:06:16,510 --> 00:06:18,178 line:-1
+consistent, great-feeling
+
+
+133
+00:06:18,212 --> 00:06:20,914 line:-2 align:start
+and great-looking touch-based input
+for these games.
+
+
+134
+00:06:20,948 --> 00:06:23,851 align:start line:-2
+We heard that your touch input
+handling code was different
+
+
+135
+00:06:23,884 --> 00:06:27,821 line:-2 position:21%
+from your keyboard, mouse,
+and game controller input code paths.
+
+
+136
+00:06:27.855 --> 00:06:29.456 line:-1 align:center
+To address this, I want to tell you
+
+
+137
+00:06:29,489 --> 00:06:32,059 line:-1
+about our new virtual on-screen controller
+
+
+138
+00:06:32,092 --> 00:06:35,829 position:19% line:-2
+which is compatible with all your existing
+game controller input code.
+
+
+139
+00:06:35,863 --> 00:06:39,499 align:start line:-2
+These new on-screen controls
+for iPhone and iPad look amazing,
+
+
+140
+00:06:39,533 --> 00:06:42,836 position:23% line:-2
+and they’re carefully tuned
+for grip locations across hand sizes
+
+
+141
+00:06:42,870 --> 00:06:45,506 line:-1
+and for a great responsiveness and feel.
+
+
+142
+00:06:45.539 --> 00:06:47.808 line:-1 align:center
+They’re easy to add to your application
+
+
+143
+00:06:47,841 --> 00:06:49,877 line:-1
+and act just like a game controller.
+
+
+144
+00:06:49,910 --> 00:06:52,446 align:start line:-2
+Instead of writing
+your own on-screen overlay UI
+
+
+145
+00:06:52.479 --> 00:06:55.282 line:-2 position:28% align:start
+and translating touch inputs
+into your game input system,
+
+
+146
+00:06:55.315 --> 00:06:57.584 line:-2 align:start position:25%
+these on-screen controls appear
+to your code
+
+
+147
+00:06:57.618 --> 00:07:00.721 line:-2 position:23% align:start
+just like game controller framework
+GCController objects,
+
+
+148
+00:07:00.754 --> 00:07:03.724 line:-2 align:start position:27%
+so your input logic can remain
+much more consistent.
+
+
+149
+00:07:03,757 --> 00:07:06,560 line:-2 align:start
+They’re customizable
+with your own symbols,
+
+
+150
+00:07:06.593 --> 00:07:08.629 line:-2 align:start position:31%
+and they integrate
+with your colors and style
+
+
+151
+00:07:08,662 --> 00:07:10,831 line:-2 align:start
+while still sharing elements
+of the design language
+
+
+152
+00:07:10,864 --> 00:07:13,800 line:-1
+of iOS and iPadOS.
+
+
+153
+00:07:13,834 --> 00:07:16,537 line:-2 position:24%
+They adjust to a variety of layouts
+depending on whether you want
+
+
+154
+00:07:16,570 --> 00:07:19,006 line:-1
+just one button, three buttons,
+
+
+155
+00:07:19,039 --> 00:07:22,009 line:-1
+or a d-pad and multiple buttons.
+
+
+156
+00:07:22.042 --> 00:07:24.912 line:-2 align:start position:30%
+The core principle
+of the on-screen controller
+
+
+157
+00:07:24,945 --> 00:07:28,282 position:23% line:-2
+is that the left and the right regions
+are independently configured
+
+
+158
+00:07:28,315 --> 00:07:31,385 position:25% line:-2
+and that the layout is determined
+based on the configuration.
+
+
+159
+00:07:31,418 --> 00:07:34,521 line:-2 align:start
+Manual placement of elements
+is not supported.
+
+
+160
+00:07:34,555 --> 00:07:38,392 line:-2 align:start
+Per side, a configuration can be built
+with zero to four buttons
+
+
+161
+00:07:38,425 --> 00:07:40,160 line:-1
+and one of either a thumbstick,
+
+
+162
+00:07:40.194 --> 00:07:42.496 line:-1 align:center
+a d-pad, or a touchpad.
+
+
+163
+00:07:42,529 --> 00:07:45,065 position:27% line:-2
+There are haptics
+on the buttons and the sticks.
+
+
+164
+00:07:45,098 --> 00:07:48,902 line:-2 align:start
+And finally, configurations are fixed
+at the time of creation.
+
+
+165
+00:07:48.936 --> 00:07:52.172 line:-2 align:start position:24%
+You can show and hide elements,
+but you can’t add or remove them
+
+
+166
+00:07:52,206 --> 00:07:54,308 line:-1
+without creating a new virtual controller.
+
+
+167
+00:07:54,341 --> 00:07:57,444 position:24% line:-2
+So let’s take a look at what you do
+to choose a layout
+
+
+168
+00:07:57,477 --> 00:07:59,847 line:-2 position:31%
+and show your on-screen
+virtual game controller.
+
+
+169
+00:07:59.880 --> 00:08:02.950 line:-2 align:start position:28%
+First, you create
+a GCControllerConfiguration
+
+
+170
+00:08:02,983 --> 00:08:04,852 line:-1
+identifying all the possible buttons
+
+
+171
+00:08:04,885 --> 00:08:07,554 line:-1
+and joysticks you will want to use.
+
+
+172
+00:08:07.588 --> 00:08:10.958 line:-2 align:start position:23%
+Then, you create a virtual controller
+from that configuration.
+
+
+173
+00:08:10,991 --> 00:08:14,194 line:-2 align:start
+Then, you can optionally do
+some configuration on the elements,
+
+
+174
+00:08:14,228 --> 00:08:15,929 line:-1
+such as setting custom shapes
+
+
+175
+00:08:15,963 --> 00:08:18,532 line:-1
+or having some elements hidden.
+
+
+176
+00:08:18,565 --> 00:08:21,134 align:start line:-2
+Next, you tell the system
+to connect the controller,
+
+
+177
+00:08:21,168 --> 00:08:24,505 line:-2 align:start
+and that will trigger the same
+GCGameControllerDidConnect
+
+
+178
+00:08:24,538 --> 00:08:26,607 line:-1
+notification that you’re used to handling,
+
+
+179
+00:08:26,640 --> 00:08:30,244 line:-1
+and that gives you a GCController object.
+
+
+180
+00:08:30.277 --> 00:08:32.513 line:-2 align:start position:30%
+So let’s take a look
+at the code we would write
+
+
+181
+00:08:32,546 --> 00:08:34,214 position:32% line:-2
+to get a layout like
+what I’m showing here:
+
+
+182
+00:08:34,248 --> 00:08:36,884 align:start line:-2
+a thumbstick on the left,
+a thumbstick on the right,
+
+
+183
+00:08:36,917 --> 00:08:39,887 line:-1
+and an A and B button on the right.
+
+
+184
+00:08:39.920 --> 00:08:41.288 line:-1 align:center
+It’s super easy.
+
+
+185
+00:08:41,321 --> 00:08:42,856 line:-1
+We start by creating a new
+
+
+186
+00:08:42,890 --> 00:08:45,392 line:-1
+GCVirtualControllerConfiguration object.
+
+
+187
+00:08:45.425 --> 00:08:47.728 line:-1 align:center
+Then we establish which elements we want.
+
+
+188
+00:08:47.761 --> 00:08:49.963 line:-1 align:center
+We want two thumbsticks and two buttons
+
+
+189
+00:08:49,997 --> 00:08:53,233 line:-2 align:start
+on the right-hand side,
+just like in our previous picture.
+
+
+190
+00:08:53,267 --> 00:08:55,869 line:-2 align:start
+Next we’ll create
+the GCVirtualController object
+
+
+191
+00:08:55,903 --> 00:08:57,738 line:-1
+using that configuration.
+
+
+192
+00:08:57,771 --> 00:09:00,607 align:start line:-2
+And finally we’ll call connect;
+our standard
+
+
+193
+00:09:00,641 --> 00:09:03,644 line:-2 align:start
+GCControllerDidConnectNotification
+is going to arrive.
+
+
+194
+00:09:04.878 --> 00:09:06.113 line:-1 align:center
+So that was easy.
+
+
+195
+00:09:06,146 --> 00:09:08,782 line:-2 align:start
+But how do we establish
+our own visuals for these buttons,
+
+
+196
+00:09:08.815 --> 00:09:11.451 line:-1 align:center
+like what I have in this picture?
+
+
+197
+00:09:11.485 --> 00:09:13.520 line:-1 align:center
+This is readily done by adjusting
+
+
+198
+00:09:13,554 --> 00:09:16,523 line:-2 position:32%
+the GCVirtualController
+element configuration.
+
+
+199
+00:09:16,557 --> 00:09:18,392 line:-1
+To create this layout where I’ve changed
+
+
+200
+00:09:18,425 --> 00:09:20,694 position:32% line:-2
+the A button to indicate
+the spinning attack
+
+
+201
+00:09:20.727 --> 00:09:22.963 line:-2 align:start position:32%
+and to set the B button
+to indicate the jump,
+
+
+202
+00:09:22,996 --> 00:09:26,767 line:-2 align:start
+I just adjust the A button’s configuration
+to add a BezierPath.
+
+
+203
+00:09:26,800 --> 00:09:30,170 line:-2 position:29%
+Then I set the B button
+to establish its BezierPath.
+
+
+204
+00:09:30,204 --> 00:09:33,006 line:-2 position:24%
+It’s just as simple to show
+and hide different button elements
+
+
+205
+00:09:33,040 --> 00:09:35,309 line:-1
+using the config.hidden property.
+
+
+206
+00:09:35.342 --> 00:09:38.178 line:-2 position:25% align:start
+So you see, it doesn’t take much
+to customize these controls
+
+
+207
+00:09:38.212 --> 00:09:39.713 line:-1 align:center
+to just your liking.
+
+
+208
+00:09:39.746 --> 00:09:41.949 line:-1 align:center
+Okay, so let’s get back
+
+
+209
+00:09:41,982 --> 00:09:44,852 position:32% line:-2
+to the non-virtual world
+of physical controllers.
+
+
+210
+00:09:44,885 --> 00:09:48,088 align:start line:-2
+There are so many great controllers
+for players to choose from.
+
+
+211
+00:09:48,121 --> 00:09:50,924 position:29% line:-2
+There are lots of Made
+for iPhone, MFi controllers,
+
+
+212
+00:09:50.958 --> 00:09:53.627 line:-2 position:27% align:start
+and we see new ones
+and improvements all the time.
+
+
+213
+00:09:53,660 --> 00:09:56,263 line:-1
+The standalone SteelSeries Nimbus+,
+
+
+214
+00:09:56,296 --> 00:09:58,599 line:-1
+now with L3/R3 thumbstick triggers
+
+
+215
+00:09:58.632 --> 00:10:00.901 line:-2 align:start position:31%
+and more system buttons
+is really terrific.
+
+
+216
+00:10:00,934 --> 00:10:04,872 position:22% line:-2
+I’m also a huge fan of the form-fitting
+Razer Kishi and the Backbone One.
+
+
+217
+00:10:04,905 --> 00:10:06,640 line:-1
+These types of form-fitting controllers
+
+
+218
+00:10:06,673 --> 00:10:09,076 line:-2 position:31%
+are my new favorites
+to keep in my backpack.
+
+
+219
+00:10:09.109 --> 00:10:11.211 line:-1 align:center
+Of course, besides MFi controllers,
+
+
+220
+00:10:11,245 --> 00:10:14,448 line:-2 align:start
+we support the Sony DualShock 4
+and Xbox One controllers
+
+
+221
+00:10:14,481 --> 00:10:18,318 line:-2 position:24%
+on all Apple platforms,
+and players love the Xbox Elite V2
+
+
+222
+00:10:18,352 --> 00:10:21,855 line:-2 align:start
+and the Xbox Adaptive controller support
+we added last year.
+
+
+223
+00:10:21,889 --> 00:10:24,658 line:-1
+We just added support in iOS 14.5
+
+
+224
+00:10:24,691 --> 00:10:27,494 line:-1
+and macOS 11.3 for the latest generation
+
+
+225
+00:10:27,528 --> 00:10:29,229 line:-1
+of console controllers.
+
+
+226
+00:10:29,263 --> 00:10:32,499 line:-2 position:24%
+The Sony DualSense controller
+and the Xbox Series X controllers
+
+
+227
+00:10:32.533 --> 00:10:35.202 line:-1 align:center
+are such great-feeling controllers,
+
+
+228
+00:10:35.235 --> 00:10:38.205 line:-2 align:start position:22%
+and they just work when you’re
+using the game controller framework.
+
+
+229
+00:10:38,238 --> 00:10:41,808 align:start line:-2
+The Xbox Series X controller
+has a new dedicated Share button,
+
+
+230
+00:10:41,842 --> 00:10:45,078 position:29% line:-2
+and the DualSense has cool
+adaptive trigger technology.
+
+
+231
+00:10:45.112 --> 00:10:47.447 line:-2 align:start position:30%
+Let’s take a moment to dig
+into the adaptive triggers
+
+
+232
+00:10:47.481 --> 00:10:49.750 line:-1 align:center
+and how you can to put them to use.
+
+
+233
+00:10:49,783 --> 00:10:53,053 line:-2 position:17%
+The DualSense adaptive triggers
+really allow you to improve game immersion
+
+
+234
+00:10:53.086 --> 00:10:54.788 line:-1 align:center
+through the use of force feedback.
+
+
+235
+00:10:54,821 --> 00:10:58,392 position:24% line:-2
+By dynamically applying a varying
+resistance to the trigger based
+
+
+236
+00:10:58,425 --> 00:11:00,894 align:start line:-2
+on what the player is doing,
+you can emulate the feeling
+
+
+237
+00:11:00,928 --> 00:11:03,730 align:start line:-2
+of pulling a bow string
+or a slingshot that’s under tension
+
+
+238
+00:11:03,764 --> 00:11:05,332 line:-1
+and many more sensations.
+
+
+239
+00:11:05,365 --> 00:11:08,368 align:start line:-2
+I hope you get a chance to feel
+how great these triggers feel.
+
+
+240
+00:11:08.402 --> 00:11:10.404 line:-1 align:center
+The way to support adaptive triggers
+
+
+241
+00:11:10,437 --> 00:11:12,940 position:25% line:-2
+in the game controller framework
+is really straightforward.
+
+
+242
+00:11:12.973 --> 00:11:16.343 line:-2 align:start position:28%
+First, you need to verify
+that the physical input profile
+
+
+243
+00:11:16,376 --> 00:11:18,879 line:-1
+on the player’s controller is a DualSense.
+
+
+244
+00:11:18.912 --> 00:11:22.382 line:-2 align:start position:21%
+Next, you simply set
+the adaptive trigger effect you’re after
+
+
+245
+00:11:22.416 --> 00:11:24.218 line:-1 align:center
+with a method call.
+
+
+246
+00:11:24.251 --> 00:11:26.553 line:-2 align:start position:32%
+If you want to create
+a really dynamic effect,
+
+
+247
+00:11:26.587 --> 00:11:30.290 line:-2 align:start position:21%
+you can continuously read the state
+of the adaptive triggers and the game
+
+
+248
+00:11:30.324 --> 00:11:32.292 line:-1 align:center
+and adjust your effect accordingly.
+
+
+249
+00:11:32.326 --> 00:11:35.095 line:-1 align:center
+For example, you can apply more resistance
+
+
+250
+00:11:35.128 --> 00:11:36.496 line:-1 align:center
+as the trigger is pulled harder
+
+
+251
+00:11:36.530 --> 00:11:39.399 line:-2 position:29% align:start
+or as the player pulls a rope
+into greater tension.
+
+
+252
+00:11:39.433 --> 00:11:42.069 line:-2 align:start position:28%
+Finally, just like I remind
+my kids to turn out the lights
+
+
+253
+00:11:42.102 --> 00:11:44.738 line:-2 align:start position:23%
+when they leave a room,
+you need to make sure you turn off
+
+
+254
+00:11:44,771 --> 00:11:46,940 line:-2 position:30%
+the adaptive trigger effect
+when you’re done.
+
+
+255
+00:11:46,974 --> 00:11:48,876 line:-1
+Let’s jump in to a quick code example
+
+
+256
+00:11:48,909 --> 00:11:50,944 line:-1
+to see how to achieve this in practice.
+
+
+257
+00:11:50.978 --> 00:11:53.013 line:-1 align:center
+So let’s say we have a game
+
+
+258
+00:11:53,046 --> 00:11:55,249 line:-1
+where a player can fire a slingshot
+
+
+259
+00:11:55.282 --> 00:11:56.950 line:-1 align:center
+to knock out some targets.
+
+
+260
+00:11:56.984 --> 00:11:59.052 line:-2 position:29% align:start
+The player can start aiming
+with the left trigger
+
+
+261
+00:11:59.086 --> 00:12:01.755 line:-2 position:27% align:start
+and pull back on the slingshot
+with the right trigger.
+
+
+262
+00:12:01,788 --> 00:12:03,891 line:-1
+We want to add an adaptive trigger effect
+
+
+263
+00:12:03.924 --> 00:12:05.926 line:-1 align:center
+as the player pulls back on the slingshot.
+
+
+264
+00:12:05,959 --> 00:12:09,830 line:-2 align:start
+First, we’ll want to make sure that
+the player’s controller is a DualSense.
+
+
+265
+00:12:09,863 --> 00:12:11,598 line:-1
+Since our game is a single-player game,
+
+
+266
+00:12:11.632 --> 00:12:13.734 line:-1 align:center
+we can just check GCController.current
+
+
+267
+00:12:13,767 --> 00:12:15,769 line:-1
+to get the active controller.
+
+
+268
+00:12:15.802 --> 00:12:19.606 line:-2 position:21% align:start
+After that, we can grab
+the DualSense’s right adaptive trigger.
+
+
+269
+00:12:19,640 --> 00:12:22,743 line:-2 align:start
+In this example,
+we’ll only want to apply a resistive force
+
+
+270
+00:12:22.776 --> 00:12:25.679 line:-1 align:center
+when the player is aiming their slingshot.
+
+
+271
+00:12:25.712 --> 00:12:28.782 line:-2 position:20% align:start
+We’ll dynamically calculate the strength
+of our applied resistance
+
+
+272
+00:12:28.815 --> 00:12:31.885 line:-2 position:29% align:start
+based on how far
+the trigger has been pulled.
+
+
+273
+00:12:31,919 --> 00:12:34,454 align:start line:-2
+If the trigger has not been
+pulled all the way back,
+
+
+274
+00:12:34,488 --> 00:12:37,991 position:28% line:-2
+we’ll apply a feedback effect
+to the adaptive triggers.
+
+
+275
+00:12:38,025 --> 00:12:41,161 line:-2 position:23%
+The feedback effect provides
+a constant resistance to your finger
+
+
+276
+00:12:41.195 --> 00:12:42.963 line:-1 align:center
+as you pull the trigger.
+
+
+277
+00:12:42.996 --> 00:12:46.099 line:-2 align:start position:25%
+Now, otherwise, if the trigger has
+been pulled all the way back,
+
+
+278
+00:12:46.133 --> 00:12:49.036 line:-2 position:29% align:start
+we’ll apply a vibration effect
+with a low frequency.
+
+
+279
+00:12:49.069 --> 00:12:51.371 line:-2 align:start position:27%
+This effect causes the triggers
+to vibrate,
+
+
+280
+00:12:51,405 --> 00:12:54,007 line:-2 align:start
+emulating the feeling of struggling
+to keep that slingshot
+
+
+281
+00:12:54.041 --> 00:12:56.310 line:-1 align:center
+pulled back and in tension.
+
+
+282
+00:12:56.343 --> 00:12:59.079 line:-2 position:32% align:start
+Finally, once the player
+fires their slingshot,
+
+
+283
+00:12:59.112 --> 00:13:01.582 line:-1 align:center
+we want to turn the adaptive trigger off.
+
+
+284
+00:13:01,615 --> 00:13:03,617 line:-1
+Our final topic of conversation today
+
+
+285
+00:13:03,650 --> 00:13:06,520 align:start line:-2
+is about media capture
+through game controller Share buttons.
+
+
+286
+00:13:06,553 --> 00:13:09,289 position:27% line:-2
+Last year, we introduced
+some media capture gestures
+
+
+287
+00:13:09,323 --> 00:13:11,592 line:-1
+on a controller’s designated Share button.
+
+
+288
+00:13:11.625 --> 00:13:13.260 line:-1 align:center
+The Share button is usually mapped
+
+
+289
+00:13:13,293 --> 00:13:15,829 line:-2 align:start
+to the upper left-most system button
+on a controller,
+
+
+290
+00:13:15.863 --> 00:13:18.532 line:-2 position:33% align:start
+but some controllers
+like the Xbox Series X
+
+
+291
+00:13:18.565 --> 00:13:21.869 line:-1 align:center
+have a button labeled Share elsewhere.
+
+
+292
+00:13:21,902 --> 00:13:25,305 position:21% line:-2
+As I showed you earlier,
+the system gestures for media capture
+
+
+293
+00:13:25,339 --> 00:13:28,141 line:-2 align:start
+are a double press to capture
+a screenshot to your Camera Roll,
+
+
+294
+00:13:28,175 --> 00:13:31,678 position:26% line:-2
+and a long press to start
+and stop a ReplayKit recording.
+
+
+295
+00:13:31,712 --> 00:13:34,848 line:-2 align:start
+This year, we’re adding
+a super cool new type of media capture,
+
+
+296
+00:13:34.882 --> 00:13:36.416 line:-1 align:center
+15-second highlights.
+
+
+297
+00:13:36,450 --> 00:13:40,053 line:-2 align:start
+So now instead of having to remember
+to start and stop your recording,
+
+
+298
+00:13:40.087 --> 00:13:43.090 line:-2 position:25% align:start
+players can just turn on
+automatic background buffering,
+
+
+299
+00:13:43.123 --> 00:13:45.792 line:-2 align:start position:25%
+which will let them save
+the last 15 seconds of gameplay
+
+
+300
+00:13:45,826 --> 00:13:47,861 line:-1
+any time they long press.
+
+
+301
+00:13:47,895 --> 00:13:50,297 line:-1
+ReplayKit clips are an awesome way
+
+
+302
+00:13:50,330 --> 00:13:52,299 line:-1
+to let gamers capture a great boss battle,
+
+
+303
+00:13:52,332 --> 00:13:55,702 position:31% line:-2
+an amazing combo move,
+or an epic fail.
+
+
+304
+00:13:55,736 --> 00:13:58,238 line:-2 align:start
+To choose between our automatic form
+of starting and stopping
+
+
+305
+00:13:58.272 --> 00:14:01.241 line:-2 position:28% align:start
+a longer recording or starting
+the background recording
+
+
+306
+00:14:01.275 --> 00:14:03.644 line:-2 position:30% align:start
+which you can then save
+15-second highlights from,
+
+
+307
+00:14:03,677 --> 00:14:06,547 position:31% line:-2
+just toggle the global
+or per-application setting
+
+
+308
+00:14:06.580 --> 00:14:08.916 line:-1 align:center
+in the Game Controller preferences panel.
+
+
+309
+00:14:08,949 --> 00:14:12,186 position:19% line:-2
+If you want to trigger your own highlights
+for important points in your game,
+
+
+310
+00:14:12.219 --> 00:14:13.887 line:-1 align:center
+there’s an API for that.
+
+
+311
+00:14:13,921 --> 00:14:16,823 align:start line:-2
+That will trigger
+those 15-second snapshots as well.
+
+
+312
+00:14:16.857 --> 00:14:18.458 line:-2 align:start position:45%
+Whew.
+Okay.
+
+
+313
+00:14:18,492 --> 00:14:21,094 align:start line:-2
+So that wraps up
+our game input news for this year.
+
+
+314
+00:14:21,128 --> 00:14:25,132 position:20% line:-2
+Before you go, please remember to tag
+your app with game controller support
+
+
+315
+00:14:25,165 --> 00:14:27,201 line:-1
+to get per-app customization
+
+
+316
+00:14:27,234 --> 00:14:30,103 line:-2 position:24%
+and so the App Store
+can categorize your app properly.
+
+
+317
+00:14:30,137 --> 00:14:33,273 line:-2 align:start
+We really look forward to seeing
+how you make use of game controller,
+
+
+318
+00:14:33,307 --> 00:14:35,742 line:-1
+keyboard, and mouse input in your games.
+
+
+319
+00:14:35,776 --> 00:14:37,644 line:-2 align:start
+If you’re ready to watch
+more presentations
+
+
+320
+00:14:37.678 --> 00:14:40.314 line:-2 align:start position:23%
+about features for game developers
+and for gamers,
+
+
+321
+00:14:40,347 --> 00:14:42,783 line:-2 position:22%
+check out
+“Discover rolling clips with ReplayKit”
+
+
+322
+00:14:42.816 --> 00:14:45.686 line:-1 align:center
+and “What’s new in Game Center” as well.
+
+
+323
+00:14:45,719 --> 00:14:47,020 line:-1
+Thanks so much for watching.
+
+
+324
+00:14:47,054 --> 00:14:48,956 line:-1
+We hope to see you in person again soon.
+
+
+325
+00:14:48,989 --> 00:14:51,558 line:-2 position:26%
+For now, we’re looking forward
+to meeting you online
+
+
+326
+00:14:51.592 --> 00:14:53.460 line:-1 align:center
+and helping answer your questions.
+
+
+327
+00:14:53.493 --> 00:14:56.496 line:-1 align:center
+[upbeat music]
+

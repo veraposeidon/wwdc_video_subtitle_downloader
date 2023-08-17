@@ -1,0 +1,1045 @@
+2
+00:00:02,035 --> 00:00:09,009 line:-1
+[music]
+
+
+3
+00:00:09.042 --> 00:00:13.480 line:-2 align:center
+[Jeremy]
+Hello and welcome to WWDC.
+
+
+4
+00:00:13,514 --> 00:00:17,384 line:-2
+I'm Jeremy Goldman,
+an engineer on the XCTest team.
+
+
+5
+00:00:17.417 --> 00:00:19.319 line:-2 align:center
+In this session,
+we're going to explore
+
+
+6
+00:00:19.353 --> 00:00:22.155 line:-2 align:center
+some exciting new ways
+to interact with devices
+
+
+7
+00:00:22.189 --> 00:00:25.359 line:-1 align:center
+from UI Tests in Xcode 13.
+
+
+8
+00:00:25.392 --> 00:00:26.994 line:-2 align:center
+In particular,
+we're going to focus
+
+
+9
+00:00:27.027 --> 00:00:28.962 line:-1 align:center
+on three new interactions
+
+
+10
+00:00:28.996 --> 00:00:31.365 line:-2 align:center
+across three
+different platforms:
+
+
+11
+00:00:31,398 --> 00:00:33,367 line:-1
+the iPadOS Pointer,
+
+
+12
+00:00:33.400 --> 00:00:35.569 line:-1 align:center
+the watchOS Digital Crown,
+
+
+13
+00:00:35.602 --> 00:00:38.305 line:-1 align:center
+and the macOS trackpad.
+
+
+14
+00:00:39,139 --> 00:00:41,542 line:-2
+Let's start with
+the iPadOS Pointer.
+
+
+15
+00:00:42.876 --> 00:00:45.078 line:-1 align:center
+In iPadOS 13.4,
+
+
+16
+00:00:45.112 --> 00:00:47.981 line:-2 align:center
+Apple introduced mouse and
+trackpad support,
+
+
+17
+00:00:48,015 --> 00:00:49,950 line:-2
+providing users
+with a brand new way
+
+
+18
+00:00:49.983 --> 00:00:51.518 line:-1 align:center
+to interact with iPad,
+
+
+19
+00:00:51,552 --> 00:00:54,254 line:-2
+using accessories like
+the Magic Keyboard.
+
+
+20
+00:00:54.288 --> 00:00:57.157 line:-2 align:center
+Many developers have
+taken full advantage of this
+
+
+21
+00:00:57.191 --> 00:00:59.960 line:-2 align:center
+by adding pointer-specific
+behavior and interactions
+
+
+22
+00:00:59,993 --> 00:01:01,195 line:-1
+to their iPad apps,
+
+
+23
+00:01:01.228 --> 00:01:03.830 line:-1 align:center
+like custom hover animations.
+
+
+24
+00:01:03.864 --> 00:01:05.332 line:-1 align:center
+In Xcode 13,
+
+
+25
+00:01:05.365 --> 00:01:07.868 line:-2 align:center
+we're providing
+a powerful new API
+
+
+26
+00:01:07,901 --> 00:01:11,638 line:-2
+for controlling
+the iPadOS Pointer in UI Tests.
+
+
+27
+00:01:11,672 --> 00:01:15,876 line:-2
+This API will enable you
+to create robust automated tests
+
+
+28
+00:01:15.909 --> 00:01:18.145 line:-2 align:center
+for multiple types of pointer
+interactions
+
+
+29
+00:01:18,178 --> 00:01:19,613 line:-1
+in your iPad apps
+
+
+30
+00:01:19.646 --> 00:01:21.014 line:-1 align:center
+and will be available for use
+
+
+31
+00:01:21,048 --> 00:01:24,751 line:-2
+with devices running
+iPadOS 15 and later.
+
+
+32
+00:01:25.219 --> 00:01:28.422 line:-2 align:center
+Let's examine this
+new API in more detail.
+
+
+33
+00:01:28,455 --> 00:01:32,426 line:-2
+First, we're adding
+a new property on XCUIDevice
+
+
+34
+00:01:32,459 --> 00:01:33,861 line:-1
+to indicate whether or not
+
+
+35
+00:01:33,894 --> 00:01:37,598 line:-2
+a device supports
+pointer interaction.
+
+
+36
+00:01:37.631 --> 00:01:41.268 line:-2 align:center
+Next, we're adding new methods
+on XCUIElement
+
+
+37
+00:01:41,301 --> 00:01:43,704 line:-2
+for performing
+different pointer interactions,
+
+
+38
+00:01:43.737 --> 00:01:46.840 line:-2 align:center
+like hovering,
+multiple types of clicking,
+
+
+39
+00:01:46,874 --> 00:01:49,176 line:-1
+and two-finger scrolling.
+
+
+40
+00:01:49,209 --> 00:01:50,410 line:-1
+We're also adding methods
+
+
+41
+00:01:50.444 --> 00:01:53.347 line:-2 align:center
+for more advanced click-and-drag
+use cases
+
+
+42
+00:01:53.380 --> 00:01:56.617 line:-2 align:center
+as well as a class method
+for executing blocks of code
+
+
+43
+00:01:56,650 --> 00:02:00,187 line:-2
+with one or more
+modifier keys held down.
+
+
+44
+00:02:00,220 --> 00:02:03,757 line:-2
+These methods are also
+available on XCUICoordinate,
+
+
+45
+00:02:03.790 --> 00:02:06.426 line:-2 align:center
+if additional precision
+is required.
+
+
+46
+00:02:06,460 --> 00:02:09,463 line:-2
+Let's explore how these
+new APIs work in practice
+
+
+47
+00:02:09,496 --> 00:02:12,499 line:-2
+by creating a new UI Test
+for a pointer interaction
+
+
+48
+00:02:12.533 --> 00:02:13.734 line:-1 align:center
+in an iOS app.
+
+
+49
+00:02:14.301 --> 00:02:16.904 line:-2 align:center
+In this demo,
+I'll be using the Fruta app,
+
+
+50
+00:02:16.937 --> 00:02:17.938 line:-1 align:center
+which has a sidebar
+
+
+51
+00:02:17.971 --> 00:02:20.340 line:-2 align:center
+that's initially hidden
+on launch.
+
+
+52
+00:02:20.374 --> 00:02:22.776 line:-2 align:center
+I recently added
+pointer-specific functionality
+
+
+53
+00:02:22.809 --> 00:02:26.647 line:-2 align:center
+on iPad, where a horizontal
+two-finger trackpad swipe
+
+
+54
+00:02:26.680 --> 00:02:28.415 line:-1 align:center
+opens the sidebar.
+
+
+55
+00:02:28.448 --> 00:02:31.318 line:-1 align:center
+Let's add a UI Test for that.
+
+
+56
+00:02:31,351 --> 00:02:33,921 line:-2
+Here I have an empty
+UI Test class,
+
+
+57
+00:02:33.954 --> 00:02:37.057 line:-2 align:center
+which is where
+I'll add my new UI Test.
+
+
+58
+00:02:38.959 --> 00:02:42.162 line:-2 align:center
+Let's quickly walk through
+what this test is doing.
+
+
+59
+00:02:42,196 --> 00:02:44,364 line:-1
+It starts by launching the app
+
+
+60
+00:02:44,398 --> 00:02:46,233 line:-2
+and then asserting
+that the sidebar
+
+
+61
+00:02:46,266 --> 00:02:49,036 line:-2
+is not initially present
+on launch.
+
+
+62
+00:02:49,069 --> 00:02:53,240 line:-2
+Then it performs a horizontal
+two-finger trackpad swipe
+
+
+63
+00:02:53.273 --> 00:02:56.476 line:-2 align:center
+and asserts that the sidebar
+is now present.
+
+
+64
+00:02:56,510 --> 00:02:58,312 line:-2
+One other thing
+I'd like to point out
+
+
+65
+00:02:58,345 --> 00:03:00,080 line:-1
+is this availability attribute
+
+
+66
+00:03:00.113 --> 00:03:02.282 line:-1 align:center
+I've added on the test method.
+
+
+67
+00:03:02.316 --> 00:03:04.651 line:-2 align:center
+This is necessary
+whenever you're using methods
+
+
+68
+00:03:04,685 --> 00:03:08,589 line:-2
+that are only available starting
+with a specific iOS version.
+
+
+69
+00:03:08,622 --> 00:03:11,191 line:-2
+In this case,
+the pointer interaction APIs
+
+
+70
+00:03:11.225 --> 00:03:14.161 line:-1 align:center
+were introduced in iOS 15.0.
+
+
+71
+00:03:14,728 --> 00:03:17,698 line:-2
+Let's try running the test
+on the iPad simulator.
+
+
+72
+00:03:17,731 --> 00:03:20,067 line:-2
+You can follow along
+with the cursor indicator,
+
+
+73
+00:03:20,100 --> 00:03:21,034 line:-1
+which is the dark circle
+
+
+74
+00:03:21,068 --> 00:03:24,071 line:-2
+near the bottom left corner
+of the screen.
+
+
+75
+00:03:24.104 --> 00:03:30.110 line:-1 align:center
+[no audio]
+
+
+76
+00:03:44,691 --> 00:03:47,661 line:-2
+Great! It looks like
+our test works on iPad.
+
+
+77
+00:03:47,694 --> 00:03:50,797 line:-2
+However, this app is also
+available on iPhone,
+
+
+78
+00:03:50,831 --> 00:03:53,367 line:-2
+which does not support
+pointer interaction.
+
+
+79
+00:03:53,400 --> 00:03:56,336 line:-2
+Let's try running this test
+on the iPhone simulator.
+
+
+80
+00:03:56.370 --> 00:04:02.376 line:-1 align:center
+[no audio]
+
+
+81
+00:04:10.751 --> 00:04:13.120 line:-1 align:center
+So it appears the test failed
+
+
+82
+00:04:13.153 --> 00:04:14.454 line:-1 align:center
+with an error message that
+
+
+83
+00:04:14,488 --> 00:04:17,991 line:-2
+"Pointer events are
+not supported on this device."
+
+
+84
+00:04:18.025 --> 00:04:20.527 line:-2 align:center
+To resolve this,
+we need to modify our test
+
+
+85
+00:04:20.561 --> 00:04:22.696 line:-2 align:center
+so that it only
+executes on devices
+
+
+86
+00:04:22,729 --> 00:04:25,098 line:-2
+that do support
+pointer interaction.
+
+
+87
+00:04:25,132 --> 00:04:26,567 line:-1
+We can do this by using
+
+
+88
+00:04:26.600 --> 00:04:28.869 line:-1 align:center
+XCTSkipUnless with the new
+
+
+89
+00:04:28.902 --> 00:04:32.539 line:-2 align:center
+supportsPointerInteraction
+property on XCUIDevice
+
+
+90
+00:04:32.573 --> 00:04:36.443 line:-2 align:center
+to skip the test on unsupported
+devices, instead of failing.
+
+
+91
+00:04:36.476 --> 00:04:41.181 line:-1 align:center
+[no audio]
+
+
+92
+00:04:41.215 --> 00:04:44.685 line:-2 align:center
+Now let's try running the test
+on the iPhone simulator again.
+
+
+93
+00:04:44.718 --> 00:04:50.224 line:-1 align:center
+[no audio]
+
+
+94
+00:04:50.257 --> 00:04:52.793 line:-2 align:center
+Perfect.
+So now this test will be skipped
+
+
+95
+00:04:52.826 --> 00:04:56.496 line:-2 align:center
+on devices that don't support
+pointer interaction.
+
+
+96
+00:04:56.530 --> 00:04:58.031 line:-1 align:center
+Let's talk about some new ways
+
+
+97
+00:04:58.065 --> 00:05:01.101 line:-2 align:center
+to interact with devices
+on other platforms,
+
+
+98
+00:05:01,134 --> 00:05:05,506 line:-2
+more specifically,
+watchOS and the Digital Crown.
+
+
+99
+00:05:05,539 --> 00:05:07,074 line:-1
+As you may already know,
+
+
+100
+00:05:07.107 --> 00:05:10.544 line:-2 align:center
+Xcode 12.5 introduced
+UI Testing support
+
+
+101
+00:05:10,577 --> 00:05:12,679 line:-1
+for watchOS apps.
+
+
+102
+00:05:12.713 --> 00:05:16.250 line:-2 align:center
+This support includes methods
+newly available on watchOS
+
+
+103
+00:05:16.283 --> 00:05:18.118 line:-1 align:center
+for synthesizing touch events
+
+
+104
+00:05:18.151 --> 00:05:19.887 line:-2 align:center
+as well as
+hardware button events,
+
+
+105
+00:05:19,920 --> 00:05:21,788 line:-1
+like clicking the crown.
+
+
+106
+00:05:22,556 --> 00:05:25,592 line:-2
+In Xcode 13,
+we're expanding this support
+
+
+107
+00:05:25.626 --> 00:05:26.693 line:-1 align:center
+with a new method
+
+
+108
+00:05:26,727 --> 00:05:29,730 line:-2
+for synthesizing
+Digital Crown rotation.
+
+
+109
+00:05:29.763 --> 00:05:32.366 line:-2 align:center
+This method requires
+just one parameter,
+
+
+110
+00:05:32.399 --> 00:05:34.101 line:-1 align:center
+the number of rotations,
+
+
+111
+00:05:34.134 --> 00:05:36.403 line:-2 align:center
+and has an optional
+velocity parameter
+
+
+112
+00:05:36.436 --> 00:05:40.174 line:-2 align:center
+to specify the speed at which
+the crown should be rotated.
+
+
+113
+00:05:40.207 --> 00:05:44.578 line:-2 align:center
+This velocity parameter
+has type XCUIGestureVelocity,
+
+
+114
+00:05:44,611 --> 00:05:47,481 line:-2
+which means you can either
+use one of the preset values,
+
+
+115
+00:05:47.514 --> 00:05:49.983 line:-1 align:center
+like slow, fast, and default,
+
+
+116
+00:05:50.017 --> 00:05:52.686 line:-2 align:center
+or you can specify
+a custom decimal value
+
+
+117
+00:05:52.719 --> 00:05:54.721 line:-1 align:center
+in rotations per second.
+
+
+118
+00:05:55,455 --> 00:05:58,158 line:-2
+Let's see how this new
+method works in practice.
+
+
+119
+00:05:59.193 --> 00:06:01.628 line:-2 align:center
+Say I have a simple
+weather app for watchOS
+
+
+120
+00:06:01.662 --> 00:06:04.331 line:-2 align:center
+that displays the current
+temperature outside.
+
+
+121
+00:06:04.364 --> 00:06:05.632 line:-1 align:center
+The app has a feature
+
+
+122
+00:06:05,666 --> 00:06:08,202 line:-2
+where users can scroll
+the digital crown forward
+
+
+123
+00:06:08.235 --> 00:06:11.038 line:-2 align:center
+to see forecasted temperatures
+at future times
+
+
+124
+00:06:11.071 --> 00:06:12.406 line:-1 align:center
+or scroll backward
+
+
+125
+00:06:12.439 --> 00:06:14.908 line:-2 align:center
+to see the recorded temperature
+at past times.
+
+
+126
+00:06:16.043 --> 00:06:18.178 line:-2 align:center
+Let's walk through
+a basic UI Test
+
+
+127
+00:06:18,212 --> 00:06:20,647 line:-2
+that makes sure this
+crown rotation functionality
+
+
+128
+00:06:20,681 --> 00:06:22,149 line:-1
+behaves as expected.
+
+
+129
+00:06:22.816 --> 00:06:25.185 line:-2 align:center
+The test starts
+by launching the app
+
+
+130
+00:06:25.219 --> 00:06:27.788 line:-2 align:center
+and then asserting
+that the forecast time label
+
+
+131
+00:06:27.821 --> 00:06:30.724 line:-2 align:center
+initially says
+Current Temperature.
+
+
+132
+00:06:30.757 --> 00:06:34.828 line:-2 align:center
+Then, we rotate the digital crown
+one full rotation forward,
+
+
+133
+00:06:34.862 --> 00:06:38.866 line:-2 align:center
+and assert the label updated
+to say "One hour from now."
+
+
+134
+00:06:38,899 --> 00:06:42,736 line:-2
+After that, we rotate the crown
+two full rotations backward,
+
+
+135
+00:06:42.769 --> 00:06:44.505 line:-2 align:center
+and the test finishes
+by asserting
+
+
+136
+00:06:44.538 --> 00:06:47.374 line:-2 align:center
+that the label updated
+to say "One hour ago."
+
+
+137
+00:06:48.242 --> 00:06:52.613 line:-2 align:center
+Finally, let's talk about
+the macOS trackpad.
+
+
+138
+00:06:52,646 --> 00:06:55,682 line:-2
+More specifically,
+let's focus on scrolling.
+
+
+139
+00:06:55.716 --> 00:06:59.720 line:-2 align:center
+Scrolling can be broken down
+into two different categories:
+
+
+140
+00:06:59,753 --> 00:07:01,822 line:-1
+discrete and continuous.
+
+
+141
+00:07:01,855 --> 00:07:05,526 line:-2
+Discrete scrolling has
+precise incremental movement.
+
+
+142
+00:07:05.559 --> 00:07:07.327 line:-2 align:center
+Think about rotating
+the scroll wheel
+
+
+143
+00:07:07,361 --> 00:07:09,062 line:-1
+on a physical mouse.
+
+
+144
+00:07:09,096 --> 00:07:12,232 line:-2
+The on-screen content
+moves in uniform increments
+
+
+145
+00:07:12,266 --> 00:07:14,401 line:-2
+for each tick
+on the scroll wheel,
+
+
+146
+00:07:14,434 --> 00:07:16,770 line:-2
+and the movement
+is non-inertial,
+
+
+147
+00:07:16.803 --> 00:07:18.772 line:-2 align:center
+meaning it stops moving
+immediately
+
+
+148
+00:07:18.805 --> 00:07:21.608 line:-2 align:center
+when you stop
+rotating the scroll wheel.
+
+
+149
+00:07:21,642 --> 00:07:25,179 line:-2
+On the other hand, continuous,
+or phased scrolling,
+
+
+150
+00:07:25.212 --> 00:07:27.648 line:-1 align:center
+has fluid and dynamic movement.
+
+
+151
+00:07:27,681 --> 00:07:30,784 line:-2
+Picture swiping with
+two fingers on a trackpad.
+
+
+152
+00:07:30.817 --> 00:07:32.019 line:-1 align:center
+The on-screen content
+
+
+153
+00:07:32,052 --> 00:07:33,954 line:-2
+scrolls smoothly
+while you're swiping,
+
+
+154
+00:07:33.987 --> 00:07:35.956 line:-1 align:center
+and the movement is inertial,
+
+
+155
+00:07:35.989 --> 00:07:38.926 line:-2 align:center
+meaning it continues moving
+after you lift your fingers off
+
+
+156
+00:07:38.959 --> 00:07:41.428 line:-2 align:center
+until it gradually
+comes to a stop.
+
+
+157
+00:07:42,863 --> 00:07:46,466 line:-2
+XCTest currently provides
+a scroll method on macOS
+
+
+158
+00:07:46.500 --> 00:07:49.837 line:-2 align:center
+that enables you to perform
+discrete pixel-precise scrolling
+
+
+159
+00:07:49,870 --> 00:07:51,672 line:-1
+in your UI Tests.
+
+
+160
+00:07:51.705 --> 00:07:53.941 line:-2 align:center
+This method
+requires two parameters
+
+
+161
+00:07:53.974 --> 00:07:57.444 line:-2 align:center
+to specify the exact
+horizontal and vertical distance
+
+
+162
+00:07:57.477 --> 00:07:59.146 line:-1 align:center
+in pixels to scroll.
+
+
+163
+00:08:01.148 --> 00:08:04.117 line:-2 align:center
+In Xcode 13,
+we're introducing new methods
+
+
+164
+00:08:04.151 --> 00:08:07.454 line:-2 align:center
+for synthesizing continuous
+or trackpad-like scrolling
+
+
+165
+00:08:07,487 --> 00:08:09,656 line:-1
+on macOS.
+
+
+166
+00:08:09,690 --> 00:08:12,659 line:-2
+These methods accept
+an optional velocity parameter
+
+
+167
+00:08:12.693 --> 00:08:16.063 line:-2 align:center
+to specify the speed
+at which you'd like to scroll.
+
+
+168
+00:08:16.096 --> 00:08:20.100 line:-2 align:center
+This velocity parameter
+has type XCUIGestureVelocity
+
+
+169
+00:08:20,133 --> 00:08:21,635 line:-1
+which means, just like in
+
+
+170
+00:08:21,668 --> 00:08:24,605 line:-2
+the rotateDigitalCrown method
+we explored earlier,
+
+
+171
+00:08:24,638 --> 00:08:26,373 line:-1
+you can either use the presets
+
+
+172
+00:08:26,406 --> 00:08:28,709 line:-2
+or you can specify
+a custom decimal value
+
+
+173
+00:08:28,742 --> 00:08:30,511 line:-1
+in pixels per second.
+
+
+174
+00:08:31,512 --> 00:08:35,983 line:-2
+Xcode 13 introduces APIs
+across multiple platforms
+
+
+175
+00:08:36,016 --> 00:08:38,752 line:-2
+to enable automation
+of new input methods
+
+
+176
+00:08:38,785 --> 00:08:41,889 line:-2
+and provide support
+for more specialized use cases.
+
+
+177
+00:08:43,357 --> 00:08:46,527 line:-2
+Use this new functionality
+to create UI Tests
+
+
+178
+00:08:46,560 --> 00:08:50,063 line:-2
+for pointer-specific
+interactions in your iPad apps,
+
+
+179
+00:08:50,097 --> 00:08:54,001 line:-2
+automate digital crown rotation
+in your watchOS UI Tests,
+
+
+180
+00:08:54,034 --> 00:08:57,905 line:-2
+and perform continuous,
+trackpad-like scrolling on macOS
+
+
+181
+00:08:57,938 --> 00:09:00,007 line:-1
+with the new swipe methods.
+
+
+182
+00:09:00,040 --> 00:09:01,642 line:-2
+If you're interested
+in learning more,
+
+
+183
+00:09:01,675 --> 00:09:04,077 line:-2
+make sure to check out
+these related sessions.
+
+
+184
+00:09:05.779 --> 00:09:09.416 line:-2 align:center
+Thanks for watching
+and enjoy the rest of WWDC.
+
+
+185
+00:09:09,449 --> 00:09:12,386 line:-1
+[music]
+

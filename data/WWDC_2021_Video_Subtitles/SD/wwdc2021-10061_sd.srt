@@ -1,0 +1,5670 @@
+2
+00:00:02,069 --> 00:00:08,075 line:-1
+[upbeat music]
+
+
+3
+00:00:09.543 --> 00:00:10.544 line:-1 align:center
+Donna: Hi.
+
+
+4
+00:00:10,577 --> 00:00:13,914 line:-2
+I'm Donna Tom,
+and I'm a TextKit engineer.
+
+
+5
+00:00:13.947 --> 00:00:17.518 line:-2 align:center
+My colleague Chris Willmore will
+join me later in this video.
+
+
+6
+00:00:17,551 --> 00:00:19,520 line:-1
+We're introducing TextKit 2,
+
+
+7
+00:00:19.553 --> 00:00:21.488 line:-2 align:center
+Apple's next-generation
+text engine.
+
+
+8
+00:00:24.558 --> 00:00:27.194 line:-2 align:center
+To understand
+what TextKit 2 is all about,
+
+
+9
+00:00:27.227 --> 00:00:29.897 line:-2 align:center
+let's briefly review
+the original TextKit,
+
+
+10
+00:00:29.930 --> 00:00:33.000 line:-1 align:center
+which we'll call TextKit 1.
+
+
+11
+00:00:33,033 --> 00:00:34,968 line:-1
+TextKit 1 is a text engine
+
+
+12
+00:00:35,002 --> 00:00:36,803 line:-2
+that drives text layout
+and display
+
+
+13
+00:00:36,837 --> 00:00:39,907 line:-1
+across all of Apple's platforms.
+
+
+14
+00:00:39,940 --> 00:00:43,810 line:-2
+Text controls in UIKit
+and AppKit use TextKit 1
+
+
+15
+00:00:43,844 --> 00:00:46,113 line:-2
+to manage the storage
+and control the layout
+
+
+16
+00:00:46,146 --> 00:00:47,414 line:-1
+of text content.
+
+
+17
+00:00:49,283 --> 00:00:52,786 line:-2
+TextKit 1 first appeared
+on the system in OpenStep
+
+
+18
+00:00:52,819 --> 00:00:55,122 line:-1
+over 20 years ago.
+
+
+19
+00:00:55.155 --> 00:00:57.824 line:-2 align:center
+It's grown and evolved with us
+over the years
+
+
+20
+00:00:57,858 --> 00:00:59,927 line:-1
+from macOS 10.0
+
+
+21
+00:00:59.960 --> 00:01:01.728 line:-1 align:center
+to iOS 7
+
+
+22
+00:01:01.762 --> 00:01:04.464 line:-1 align:center
+to macOS 11 and iOS 14.
+
+
+23
+00:01:05,465 --> 00:01:06,567 line:-1
+It's pretty amazing
+
+
+24
+00:01:06,600 --> 00:01:10,070 line:-2
+that TextKit 1 still powers
+so much essential functionality
+
+
+25
+00:01:10.103 --> 00:01:12.072 line:-1 align:center
+across all Apple devices.
+
+
+26
+00:01:12.840 --> 00:01:15.075 line:-2 align:center
+Technology design and
+engineering principles
+
+
+27
+00:01:15.108 --> 00:01:16.977 line:-2 align:center
+have changed a lot
+over the decades.
+
+
+28
+00:01:17.444 --> 00:01:20.514 line:-2 align:center
+Since TextKit 1 is tied
+to its original principles,
+
+
+29
+00:01:20,547 --> 00:01:22,850 line:-2
+it's become more challenging
+over the years
+
+
+30
+00:01:22.883 --> 00:01:24.918 line:-2 align:center
+to provide APIs
+that integrate well
+
+
+31
+00:01:24,952 --> 00:01:26,653 line:-1
+with our newer technologies
+
+
+32
+00:01:26.687 --> 00:01:29.423 line:-2 align:center
+while still delivering
+a high standard of performance.
+
+
+33
+00:01:31.758 --> 00:01:34.795 line:-2 align:center
+That's why
+we've built TextKit 2.
+
+
+34
+00:01:34,828 --> 00:01:37,998 line:-2
+TextKit 2 is Apple's
+next-generation text engine,
+
+
+35
+00:01:38.031 --> 00:01:38.866 line:-1 align:center
+built on a set
+
+
+36
+00:01:38,899 --> 00:01:40,834 line:-2
+of forward-looking
+design principles.
+
+
+37
+00:01:40.868 --> 00:01:42.603 line:-1 align:center
+And guess what?
+
+
+38
+00:01:42.636 --> 00:01:45.439 line:-2 align:center
+You're already
+using TextKit 2 on your Mac.
+
+
+39
+00:01:45,906 --> 00:01:46,974 line:-1
+In Big Sur,
+
+
+40
+00:01:47.007 --> 00:01:50.110 line:-2 align:center
+we updated many of the text
+components across the OS
+
+
+41
+00:01:50.143 --> 00:01:52.179 line:-2 align:center
+to use TextKit 2
+behind the scenes.
+
+
+42
+00:01:52.880 --> 00:01:54.047 line:-1 align:center
+Big surprise:
+
+
+43
+00:01:54,081 --> 00:01:57,184 line:-2
+you've been using TextKit 2
+since macOS 11.
+
+
+44
+00:01:57.184 --> 00:01:59.353 line:-2 align:center
+Now, let's briefly review
+the architecture
+
+
+45
+00:01:59,386 --> 00:02:00,787 line:-1
+that let us do this.
+
+
+46
+00:02:01,955 --> 00:02:04,791 line:-2
+TextKit 2 coexists
+with TextKit 1.
+
+
+47
+00:02:05.859 --> 00:02:07.561 line:-1 align:center
+Just like its predecessor,
+
+
+48
+00:02:07,594 --> 00:02:10,330 line:-2
+TextKit 2
+is built on top of Foundation,
+
+
+49
+00:02:10.364 --> 00:02:13.534 line:-1 align:center
+Quartz, and Core Text.
+
+
+50
+00:02:13.567 --> 00:02:15.602 line:-2 align:center
+Text controls in UIKit
+and AppKit
+
+
+51
+00:02:15.636 --> 00:02:18.105 line:-1 align:center
+are built on top of TextKit 2.
+
+
+52
+00:02:18,138 --> 00:02:21,441 line:-2
+TextKit 2 also loosely
+retains the MVC design
+
+
+53
+00:02:21,475 --> 00:02:23,477 line:-1
+of its predecessor.
+
+
+54
+00:02:23.510 --> 00:02:26.346 line:-2 align:center
+The view portion remains
+in the view objects
+
+
+55
+00:02:26,380 --> 00:02:28,882 line:-2
+of the UIKit
+and AppKit frameworks,
+
+
+56
+00:02:28.916 --> 00:02:31.351 line:-2 align:center
+while there are new versions
+of our old friends,
+
+
+57
+00:02:31,385 --> 00:02:33,987 line:-2
+NSTextStorage
+and NSLayoutManager.
+
+
+58
+00:02:35.122 --> 00:02:36.890 line:-2 align:center
+In addition
+to these new versions,
+
+
+59
+00:02:36.924 --> 00:02:39.059 line:-2 align:center
+there are many more
+new classes and protocols
+
+
+60
+00:02:39.092 --> 00:02:42.162 line:-2 align:center
+joining the model
+and controller layers.
+
+
+61
+00:02:42.196 --> 00:02:45.265 line:-2 align:center
+There are a quite a few of them,
+but don't be alarmed.
+
+
+62
+00:02:45.299 --> 00:02:47.868 line:-1 align:center
+These new components are simple,
+
+
+63
+00:02:47.901 --> 00:02:50.637 line:-2 align:center
+focused,
+and powerful in combination.
+
+
+64
+00:02:52,639 --> 00:02:54,374 line:-2
+They make it easier
+for you to express
+
+
+65
+00:02:54,408 --> 00:02:56,410 line:-2
+what you want
+to do with your text
+
+
+66
+00:02:56.443 --> 00:02:59.379 line:-2 align:center
+and worry less about
+how the system accomplishes
+
+
+67
+00:02:59.413 --> 00:03:00.547 line:-1 align:center
+what you want.
+
+
+68
+00:03:02,482 --> 00:03:04,017 line:-2
+Now that we've gotten
+an architectural view
+
+
+69
+00:03:04.051 --> 00:03:05.152 line:-1 align:center
+of the system,
+
+
+70
+00:03:05.185 --> 00:03:06.787 line:-1 align:center
+let's dive into the details.
+
+
+71
+00:03:07.821 --> 00:03:10.490 line:-2 align:center
+First, we're going to discuss
+the core design principles
+
+
+72
+00:03:10.524 --> 00:03:12.125 line:-1 align:center
+of TextKit 2
+
+
+73
+00:03:12.159 --> 00:03:14.862 line:-2 align:center
+and how these principles
+will change the way you think
+
+
+74
+00:03:14,895 --> 00:03:17,097 line:-1
+about customizing the storage,
+
+
+75
+00:03:17,130 --> 00:03:19,967 line:-2
+layout, and display
+of text in your apps.
+
+
+76
+00:03:21,068 --> 00:03:22,102 line:-1
+After that,
+
+
+77
+00:03:22.135 --> 00:03:23.237 line:-1 align:center
+Chris will walk you through
+
+
+78
+00:03:23.270 --> 00:03:25.072 line:-2 align:center
+a TextKit 2 sample app
+we've created
+
+
+79
+00:03:25.105 --> 00:03:26.974 line:-2 align:center
+to collaborate
+on a book of recipes.
+
+
+80
+00:03:28.141 --> 00:03:30.611 line:-2 align:center
+This app uses
+the new TextKit 2 classes
+
+
+81
+00:03:30,644 --> 00:03:33,981 line:-2
+to lay out and display text
+in CALayers.
+
+
+82
+00:03:34,014 --> 00:03:35,516 line:-1
+Here, you'll get to learn
+
+
+83
+00:03:35,549 --> 00:03:38,018 line:-2
+how the design principles work
+in practice.
+
+
+84
+00:03:39,219 --> 00:03:40,153 line:-1
+Finally,
+
+
+85
+00:03:40,187 --> 00:03:42,422 line:-2
+we'll cover some
+important technical details
+
+
+86
+00:03:42.456 --> 00:03:44.825 line:-2 align:center
+for modernizing your apps
+for TextKit 2.
+
+
+87
+00:03:45,826 --> 00:03:48,495 line:-2
+So let's get started
+with the design principles.
+
+
+88
+00:03:49.596 --> 00:03:53.000 line:-2 align:center
+The core high-level
+design principles of TextKit 2
+
+
+89
+00:03:53,033 --> 00:03:57,905 line:-2
+are correctness,
+safety, and performance.
+
+
+90
+00:03:57.938 --> 00:03:59.973 line:-1 align:center
+We've taken a balanced approach.
+
+
+91
+00:04:00.007 --> 00:04:01.775 line:-2 align:center
+All three principles
+are important,
+
+
+92
+00:04:01,808 --> 00:04:03,810 line:-2
+so there is no priority
+to the order
+
+
+93
+00:04:03.844 --> 00:04:05.379 line:-1 align:center
+in which we discuss them.
+
+
+94
+00:04:07.114 --> 00:04:09.316 line:-2 align:center
+Each of these
+high-level design principles
+
+
+95
+00:04:09,349 --> 00:04:12,953 line:-2
+informs a specific design change
+in the system.
+
+
+96
+00:04:14.321 --> 00:04:18.125 line:-2 align:center
+For correctness, TextKit 2
+abstracts away glyph handling.
+
+
+97
+00:04:19.593 --> 00:04:20.761 line:-1 align:center
+For safety,
+
+
+98
+00:04:20,794 --> 00:04:25,232 line:-2
+TextKit 2 places a heavier focus
+on value semantics.
+
+
+99
+00:04:26,667 --> 00:04:28,235 line:-1
+And for performance,
+
+
+100
+00:04:28,268 --> 00:04:30,504 line:-2
+TextKit 2 uses
+viewport-based layout
+
+
+101
+00:04:30,537 --> 00:04:31,772 line:-1
+and rendering.
+
+
+102
+00:04:33,073 --> 00:04:35,342 line:-1
+We'll begin with correctness.
+
+
+103
+00:04:35,375 --> 00:04:38,212 line:-2
+In this area, we've abstracted
+away glyph handling
+
+
+104
+00:04:38.245 --> 00:04:40.347 line:-2 align:center
+to provide
+a consistent experience
+
+
+105
+00:04:40.380 --> 00:04:42.516 line:-1 align:center
+for international text.
+
+
+106
+00:04:43,283 --> 00:04:46,887 line:-2
+Apple devices are used
+everywhere around the world,
+
+
+107
+00:04:46,920 --> 00:04:50,891 line:-2
+so it's really important
+to provide correct layout,
+
+
+108
+00:04:50,924 --> 00:04:53,927 line:-2
+rendering,
+and interaction for text
+
+
+109
+00:04:53,961 --> 00:04:56,029 line:-1
+in all languages and scripts.
+
+
+110
+00:04:57,064 --> 00:04:59,366 line:-2
+We want everyone to be able
+to read and interact
+
+
+111
+00:04:59,399 --> 00:05:01,401 line:-1
+with text on their devices.
+
+
+112
+00:05:01,401 --> 00:05:04,338 line:-2
+And the design
+of some of the TextKit 1 APIs
+
+
+113
+00:05:04.371 --> 00:05:06.740 line:-2 align:center
+makes it difficult
+to work with international text
+
+
+114
+00:05:06,773 --> 00:05:09,243 line:-2
+in a way
+that's universally correct.
+
+
+115
+00:05:10.577 --> 00:05:12.179 line:-1 align:center
+To understand why,
+
+
+116
+00:05:12.212 --> 00:05:13.413 line:-1 align:center
+we first need to understand
+
+
+117
+00:05:13,447 --> 00:05:15,315 line:-1
+what a glyph is.
+
+
+118
+00:05:15,349 --> 00:05:17,951 line:-2
+A glyph
+is a visual representation
+
+
+119
+00:05:17,985 --> 00:05:19,152 line:-1
+of a variable number
+
+
+120
+00:05:19.186 --> 00:05:20.320 line:-1 align:center
+of characters.
+
+
+121
+00:05:21.722 --> 00:05:23.457 line:-1 align:center
+In many Western languages,
+
+
+122
+00:05:23.490 --> 00:05:25.492 line:-1 align:center
+one glyph usually represents
+
+
+123
+00:05:25,526 --> 00:05:26,860 line:-1
+one character,
+
+
+124
+00:05:26.894 --> 00:05:28.428 line:-1 align:center
+but this is not always true.
+
+
+125
+00:05:30,097 --> 00:05:33,734 line:-2
+You can have multiple glyphs
+representing a single character,
+
+
+126
+00:05:33,767 --> 00:05:35,502 line:-2
+or it could be
+the other way around.
+
+
+127
+00:05:35.536 --> 00:05:37.437 line:-1 align:center
+A single glyph could represent
+
+
+128
+00:05:37,471 --> 00:05:38,839 line:-1
+multiple characters.
+
+
+129
+00:05:40,374 --> 00:05:41,341 line:-1
+This single glyph
+
+
+130
+00:05:41.375 --> 00:05:42.209 line:-1 align:center
+used to represent
+
+
+131
+00:05:42.242 --> 00:05:43.277 line:-1 align:center
+multiple characters
+
+
+132
+00:05:43,310 --> 00:05:44,912 line:-1
+is called a ligature.
+
+
+133
+00:05:46.246 --> 00:05:47.681 line:-1 align:center
+There aren't too many ligatures
+
+
+134
+00:05:47,714 --> 00:05:49,082 line:-1
+in Western languages,
+
+
+135
+00:05:49,116 --> 00:05:50,417 line:-1
+and they don't usually affect
+
+
+136
+00:05:50.450 --> 00:05:52.653 line:-1 align:center
+the legibility of the text.
+
+
+137
+00:05:52.686 --> 00:05:53.587 line:-1 align:center
+You can still read it
+
+
+138
+00:05:53,620 --> 00:05:55,289 line:-1
+just fine without ligatures.
+
+
+139
+00:05:56.890 --> 00:05:57.791 line:-1 align:center
+But that's not true
+
+
+140
+00:05:57.824 --> 00:05:59.393 line:-1 align:center
+for all languages.
+
+
+141
+00:05:59,426 --> 00:06:00,694 line:-1
+Scripts like Arabic
+
+
+142
+00:06:00,727 --> 00:06:01,995 line:-1
+and Devanagari
+
+
+143
+00:06:02.029 --> 00:06:03.730 line:-1 align:center
+use lots of ligatures,
+
+
+144
+00:06:03.764 --> 00:06:06.033 line:-2 align:center
+and they do affect
+the legibility.
+
+
+145
+00:06:06.066 --> 00:06:07.801 line:-2 align:center
+Check out this word
+in Arabic script.
+
+
+146
+00:06:09.336 --> 00:06:12.072 line:-2 align:center
+It's an Urdu word
+that means "moment."
+
+
+147
+00:06:12.105 --> 00:06:14.041 line:-1 align:center
+Now take a moment
+
+
+148
+00:06:14,074 --> 00:06:15,876 line:-1
+to compare these two renderings.
+
+
+149
+00:06:17,177 --> 00:06:18,011 line:-1
+The full word,
+
+
+150
+00:06:18,045 --> 00:06:19,580 line:-2
+drawn with ligatures
+on the right,
+
+
+151
+00:06:19,613 --> 00:06:20,747 line:-1
+appears very different
+
+
+152
+00:06:20.781 --> 00:06:21.915 line:-1 align:center
+from the individual characters
+
+
+153
+00:06:21,949 --> 00:06:22,950 line:-1
+on the left.
+
+
+154
+00:06:23.951 --> 00:06:25.319 line:-1 align:center
+Native readers of the language
+
+
+155
+00:06:25.352 --> 00:06:28.755 line:-2 align:center
+would consider the version
+on the left to be illegible.
+
+
+156
+00:06:32.392 --> 00:06:34.361 line:-1 align:center
+Many of the APIs in TextKit 1
+
+
+157
+00:06:34.394 --> 00:06:38.098 line:-2 align:center
+require working with
+a glyph index or range.
+
+
+158
+00:06:38.131 --> 00:06:39.366 line:-1 align:center
+For example,
+
+
+159
+00:06:39,399 --> 00:06:41,802 line:-2
+to get the bounding rectangle
+of some text,
+
+
+160
+00:06:41.835 --> 00:06:44.838 line:-2 align:center
+you need to know the glyph range
+of the text you want.
+
+
+161
+00:06:47,074 --> 00:06:49,209 align:center
+If the text is
+in a Western language,
+
+
+162
+00:06:49,243 --> 00:06:51,979 line:0
+figuring out the right
+glyph range isn't too bad.
+
+
+163
+00:06:53,180 --> 00:06:54,581 line:0
+In this English example,
+
+
+164
+00:06:54,615 --> 00:06:56,550 align:center
+it's pretty easy to find
+the glyph range
+
+
+165
+00:06:56,583 --> 00:06:59,286 line:0
+for the first four characters
+of the text.
+
+
+166
+00:07:01,622 --> 00:07:03,390 line:-1
+Now consider Kannada,
+
+
+167
+00:07:03,423 --> 00:07:04,324 line:-1
+a script and language
+
+
+168
+00:07:04,358 --> 00:07:06,560 line:-2
+spoken by millions
+of people in India.
+
+
+169
+00:07:07,628 --> 00:07:10,063 line:-2
+Not only does it use
+lots of ligatures,
+
+
+170
+00:07:10,097 --> 00:07:11,999 line:-2
+the glyphs can be reordered
+and combined
+
+
+171
+00:07:12.032 --> 00:07:14.468 line:-2 align:center
+in all sorts
+of interesting ways.
+
+
+172
+00:07:15.469 --> 00:07:18.405 line:-2 align:center
+This Kannada word
+meaning "October"
+
+
+173
+00:07:18,438 --> 00:07:21,341 line:-2
+features a split vowel
+at character index four,
+
+
+174
+00:07:21,375 --> 00:07:23,610 line:-2
+so that gets split up
+into two glyphs.
+
+
+175
+00:07:25,078 --> 00:07:27,347 line:-2
+Then the one on the left
+gets reordered
+
+
+176
+00:07:27,381 --> 00:07:30,517 line:-2
+between the glyphs representing
+characters one and two
+
+
+177
+00:07:30,551 --> 00:07:33,120 line:-2
+before the ligature
+for two is applied.
+
+
+178
+00:07:34,855 --> 00:07:37,958 line:-2
+The glyph representing
+the character at index three
+
+
+179
+00:07:37,991 --> 00:07:40,894 line:-2
+also gets substituted
+to a conjoining form.
+
+
+180
+00:07:42,062 --> 00:07:43,297 line:-1
+In the final word,
+
+
+181
+00:07:43,330 --> 00:07:44,865 line:-2
+it's drawn below
+one of the glyphs
+
+
+182
+00:07:44,898 --> 00:07:46,166 line:-1
+in the split vowel.
+
+
+183
+00:07:46.967 --> 00:07:47.801 line:-1 align:center
+Now,
+
+
+184
+00:07:47,835 --> 00:07:49,970 line:-2
+if you didn't understand
+any of what I just said,
+
+
+185
+00:07:50,003 --> 00:07:51,738 line:-1
+that is totally OK.
+
+
+186
+00:07:52,973 --> 00:07:54,007 line:-1
+These are details
+
+
+187
+00:07:54.041 --> 00:07:56.143 line:-2 align:center
+that the framework
+should be handling for you
+
+
+188
+00:07:56,176 --> 00:07:58,512 line:-2
+so that you can focus
+on building your app.
+
+
+189
+00:07:59,613 --> 00:08:00,714 line:-1
+The point is,
+
+
+190
+00:08:00,747 --> 00:08:01,615 line:-1
+it's not possible
+
+
+191
+00:08:01,648 --> 00:08:02,883 line:-1
+to find the glyph range
+
+
+192
+00:08:02,916 --> 00:08:04,117 line:-1
+for the first four characters
+
+
+193
+00:08:04.151 --> 00:08:05.652 line:-1 align:center
+of text like this.
+
+
+194
+00:08:06.687 --> 00:08:08.689 line:-1 align:center
+There is no single glyph range
+
+
+195
+00:08:08,722 --> 00:08:09,823 line:-1
+that will represent
+
+
+196
+00:08:09,857 --> 00:08:11,124 line:-1
+those four characters.
+
+
+197
+00:08:12,726 --> 00:08:14,761 line:-1
+And since many TextKit 1 APIs
+
+
+198
+00:08:14,795 --> 00:08:16,997 line:-1
+require a glyph range,
+
+
+199
+00:08:17.030 --> 00:08:18.365 line:-1 align:center
+using those APIs
+
+
+200
+00:08:18.398 --> 00:08:19.466 line:-1 align:center
+can potentially break
+
+
+201
+00:08:19.499 --> 00:08:20.501 line:-1 align:center
+layout and rendering
+
+
+202
+00:08:20,534 --> 00:08:22,603 line:-1
+for complex scripts like this.
+
+
+203
+00:08:23.504 --> 00:08:27.074 line:-2 align:center
+And that's why TextKit 2
+abstracts away glyph handling.
+
+
+204
+00:08:27,808 --> 00:08:30,911 line:-2
+TextKit 2 renders
+all text with Core Text--
+
+
+205
+00:08:30,944 --> 00:08:33,013 line:-2
+so you'll automatically
+get correct rendering
+
+
+206
+00:08:33,046 --> 00:08:34,348 line:-1
+for complex scripts.
+
+
+207
+00:08:35,749 --> 00:08:39,019 line:-2
+You won't have to manage glyphs
+at all with TextKit 2.
+
+
+208
+00:08:39.052 --> 00:08:39.953 line:-1 align:center
+Instead,
+
+
+209
+00:08:39.987 --> 00:08:41.488 line:-1 align:center
+you use higher-level objects
+
+
+210
+00:08:41.522 --> 00:08:44.358 line:-2 align:center
+to control text layout
+and interactions.
+
+
+211
+00:08:45,592 --> 00:08:47,461 line:-1
+Meet NSTextSelection,
+
+
+212
+00:08:47,494 --> 00:08:49,296 line:-2
+one of these
+higher-level objects.
+
+
+213
+00:08:50,297 --> 00:08:52,533 line:-2
+It contains
+all the necessary context
+
+
+214
+00:08:52.566 --> 00:08:54.501 line:-1 align:center
+to represent a text selection,
+
+
+215
+00:08:54.535 --> 00:08:56.637 line:-1 align:center
+such as its granularity,
+
+
+216
+00:08:56.670 --> 00:08:58.205 line:-1 align:center
+its affinity,
+
+
+217
+00:08:58.238 --> 00:09:00.574 line:-2 align:center
+and the possibly disjoint
+ranges of text
+
+
+218
+00:09:00,607 --> 00:09:02,242 line:-1
+that make up the selection.
+
+
+219
+00:09:03,310 --> 00:09:05,279 line:-2
+These properties
+on NSTextSelection
+
+
+220
+00:09:05.312 --> 00:09:06.413 line:-1 align:center
+are read only,
+
+
+221
+00:09:06,446 --> 00:09:09,016 line:-2
+so you won't modify instances
+of the selection object
+
+
+222
+00:09:09,049 --> 00:09:11,318 line:-1
+to change them.
+
+
+223
+00:09:11.351 --> 00:09:12.452 line:-1 align:center
+Instead,
+
+
+224
+00:09:12,486 --> 00:09:15,789 line:-2
+you use an instance
+of NSTextSelectionNavigation
+
+
+225
+00:09:15,822 --> 00:09:17,925 line:-2
+to perform actions
+on text selections,
+
+
+226
+00:09:17,958 --> 00:09:20,594 line:-2
+receiving new instances
+of NSTextSelection
+
+
+227
+00:09:20,627 --> 00:09:23,063 line:-2
+that represent
+the resulting selection.
+
+
+228
+00:09:27,034 --> 00:09:28,802 line:-2
+You can ask
+the navigation object
+
+
+229
+00:09:28,836 --> 00:09:29,937 line:-1
+to give you selections
+
+
+230
+00:09:29,970 --> 00:09:31,004 line:-1
+resulting from tap
+
+
+231
+00:09:31.038 --> 00:09:32.172 line:-1 align:center
+or mouse-down events
+
+
+232
+00:09:32,206 --> 00:09:33,974 line:-1
+at a point on the screen
+
+
+233
+00:09:34,007 --> 00:09:35,509 line:-1
+or get a new selection resulting
+
+
+234
+00:09:35,542 --> 00:09:36,777 line:-1
+from navigating forward
+
+
+235
+00:09:36,810 --> 00:09:39,012 line:-1
+or backward.
+
+
+236
+00:09:39,046 --> 00:09:39,980 line:-1
+This makes it easier
+
+
+237
+00:09:40,013 --> 00:09:40,848 line:-1
+to do things,
+
+
+238
+00:09:40,881 --> 00:09:42,182 line:-2
+like extend
+the selection forward
+
+
+239
+00:09:42.216 --> 00:09:43.050 line:-1 align:center
+by one word
+
+
+240
+00:09:43,083 --> 00:09:44,551 line:-1
+and get the correct result,
+
+
+241
+00:09:44,585 --> 00:09:46,119 line:-2
+accounting
+for bidirectional text
+
+
+242
+00:09:46,153 --> 00:09:47,721 line:-1
+in right-to-left languages.
+
+
+243
+00:09:49.323 --> 00:09:50.591 line:-1 align:center
+Now I wanna call your attention
+
+
+244
+00:09:50,624 --> 00:09:51,792 line:-1
+to something interesting
+
+
+245
+00:09:51,825 --> 00:09:53,827 line:-1
+about these new selection APIs.
+
+
+246
+00:09:54,728 --> 00:09:55,762 line:-1
+This method takes
+
+
+247
+00:09:55.796 --> 00:09:57.965 line:-1 align:center
+a NSTextLocation.
+
+
+248
+00:09:57,998 --> 00:09:59,299 line:-1
+This is another new object
+
+
+249
+00:09:59.333 --> 00:10:00.601 line:-1 align:center
+in TextKit 2.
+
+
+250
+00:10:02,369 --> 00:10:05,439 line:-2
+Meet NSTextLocation
+and NSTextRange.
+
+
+251
+00:10:06.440 --> 00:10:09.309 line:-2 align:center
+These are very similar
+to the UITextPosition
+
+
+252
+00:10:09.343 --> 00:10:11.678 line:-2 align:center
+and UITextRange classes
+from UIKit,
+
+
+253
+00:10:11,712 --> 00:10:14,281 line:-2
+except you're not required
+to subclass them.
+
+
+254
+00:10:15.215 --> 00:10:16.450 line:-1 align:center
+Most of the time,
+
+
+255
+00:10:16,483 --> 00:10:18,619 line:-2
+you'll use the default location
+and range objects
+
+
+256
+00:10:18,652 --> 00:10:20,320 line:-1
+with TextKit 2.
+
+
+257
+00:10:22,122 --> 00:10:24,224 line:-2
+Using objects
+instead of integers
+
+
+258
+00:10:24,258 --> 00:10:26,527 line:-2
+allows for more
+expressive document models
+
+
+259
+00:10:26,560 --> 00:10:29,363 line:-2
+because the ranges are defined
+in terms of locations
+
+
+260
+00:10:29,396 --> 00:10:31,732 line:-1
+relative to each other.
+
+
+261
+00:10:31.765 --> 00:10:33.834 line:-1 align:center
+The HTML document object model
+
+
+262
+00:10:33,867 --> 00:10:36,336 line:-1
+is a good example of this.
+
+
+263
+00:10:36,370 --> 00:10:38,105 line:-1
+Since it has nested elements,
+
+
+264
+00:10:38.138 --> 00:10:39.840 line:-1 align:center
+a location needs to represent
+
+
+265
+00:10:39.873 --> 00:10:41.308 line:-1 align:center
+both the absolute position
+
+
+266
+00:10:41,341 --> 00:10:42,509 line:-1
+in the document
+
+
+267
+00:10:42.543 --> 00:10:43.744 line:-1 align:center
+and also the position
+
+
+268
+00:10:43.777 --> 00:10:45.746 line:-1 align:center
+in the visible text.
+
+
+269
+00:10:45.779 --> 00:10:46.747 line:-1 align:center
+This can't be expressed
+
+
+270
+00:10:46,780 --> 00:10:48,649 line:-1
+with a single numerical index.
+
+
+271
+00:10:49,650 --> 00:10:52,186 line:-1
+And that's it for correctness.
+
+
+272
+00:10:52,219 --> 00:10:53,520 line:-1
+Next up is safety.
+
+
+273
+00:10:54.688 --> 00:10:57.291 line:-2 align:center
+In this area,
+we've designed TextKit 2
+
+
+274
+00:10:57.324 --> 00:11:00.360 line:-2 align:center
+with a greater emphasis
+on value semantics
+
+
+275
+00:11:00,394 --> 00:11:02,596 line:-2
+to better align
+with the goals of technologies
+
+
+276
+00:11:02,629 --> 00:11:04,631 line:-1
+like Swift and SwiftUI.
+
+
+277
+00:11:07,467 --> 00:11:09,503 line:-2
+And when I say
+"value semantics,"
+
+
+278
+00:11:09,536 --> 00:11:12,406 line:-2
+I'm not talking
+about value types.
+
+
+279
+00:11:12.439 --> 00:11:15.309 line:-2 align:center
+We did not make
+NSLayoutManager into a struct.
+
+
+280
+00:11:18.011 --> 00:11:20.747 line:-2 align:center
+Value types keep
+a unique copy of their data,
+
+
+281
+00:11:20,781 --> 00:11:23,116 line:-2
+which prevents
+mutation of that data.
+
+
+282
+00:11:23,584 --> 00:11:25,986 line:-2
+This makes your code safer
+and more stable
+
+
+283
+00:11:26,019 --> 00:11:27,888 line:-1
+by removing unintended sharing
+
+
+284
+00:11:27,921 --> 00:11:30,290 line:-1
+and associated side effects.
+
+
+285
+00:11:30,324 --> 00:11:31,291 line:-1
+But value types
+
+
+286
+00:11:31.325 --> 00:11:33.560 line:-2 align:center
+are not the only way
+to get this benefit.
+
+
+287
+00:11:35.295 --> 00:11:37.231 line:-2 align:center
+Immutable classes
+have properties
+
+
+288
+00:11:37.264 --> 00:11:39.900 line:-2 align:center
+that cannot be changed
+after initialization,
+
+
+289
+00:11:39.933 --> 00:11:42.603 line:-2 align:center
+which also prevents
+mutation of their data.
+
+
+290
+00:11:43.937 --> 00:11:46.406 line:-2 align:center
+These classes
+behave like value types,
+
+
+291
+00:11:46,440 --> 00:11:50,511 line:-2
+so we refer to them
+as having value semantics.
+
+
+292
+00:11:50.544 --> 00:11:51.845 line:-1 align:center
+If you want to change the data
+
+
+293
+00:11:51,879 --> 00:11:53,113 line:-1
+in one of these objects,
+
+
+294
+00:11:53.146 --> 00:11:55.616 line:-2 align:center
+you have to make
+a brand-new instance
+
+
+295
+00:11:55,649 --> 00:11:57,951 line:-1
+to replace the original one.
+
+
+296
+00:11:57,985 --> 00:11:59,319 line:-1
+And many of the classes
+
+
+297
+00:11:59.353 --> 00:12:00.354 line:-1 align:center
+in TextKit 2
+
+
+298
+00:12:00,387 --> 00:12:02,022 line:-1
+are designed in this way.
+
+
+299
+00:12:03.423 --> 00:12:05.859 line:-2 align:center
+To illustrate the benefits
+of this design change,
+
+
+300
+00:12:05,893 --> 00:12:09,696 line:-2
+let's refresh our memory
+on the design of TextKit 1.
+
+
+301
+00:12:09,730 --> 00:12:10,898 line:-1
+The flow of text
+
+
+302
+00:12:10.931 --> 00:12:12.533 line:-1 align:center
+from the storage to the screen
+
+
+303
+00:12:12,566 --> 00:12:14,101 line:-1
+used to work like this.
+
+
+304
+00:12:15.936 --> 00:12:19.873 line:-2 align:center
+Updates to the text storage
+notified the layout manager,
+
+
+305
+00:12:19.907 --> 00:12:22.242 line:-2 align:center
+which would then
+generate glyphs,
+
+
+306
+00:12:22,276 --> 00:12:25,412 line:-2
+position them, and draw them
+directly into the view.
+
+
+307
+00:12:27,147 --> 00:12:30,584 line:-2
+With this approach of drawing
+glyphs directly into the view,
+
+
+308
+00:12:30.617 --> 00:12:32.052 line:-1 align:center
+it's difficult to figure out
+
+
+309
+00:12:32.085 --> 00:12:33.520 line:-1 align:center
+where to separate the text
+
+
+310
+00:12:33,554 --> 00:12:35,656 line:-2
+to create spaces
+for custom drawing.
+
+
+311
+00:12:37,391 --> 00:12:38,759 line:-2
+To understand
+what I mean by that,
+
+
+312
+00:12:38.792 --> 00:12:40.594 line:-2 align:center
+check out
+this sneak-peek screenshot
+
+
+313
+00:12:40,627 --> 00:12:41,762 line:-1
+from the sample app,
+
+
+314
+00:12:41,795 --> 00:12:43,830 line:-2
+where I've left
+some comments on a recipe.
+
+
+315
+00:12:45.732 --> 00:12:47.334 line:-1 align:center
+Notice how the comment appears
+
+
+316
+00:12:47.367 --> 00:12:49.736 line:-2 align:center
+right underneath
+the recipe it's referring to
+
+
+317
+00:12:49,770 --> 00:12:52,472 line:-2
+and it's drawn with
+this distinct, bubble-shaped,
+
+
+318
+00:12:52.506 --> 00:12:54.842 line:-2 align:center
+indigo background
+and white text.
+
+
+319
+00:12:56.243 --> 00:12:57.544 line:-1 align:center
+What approach should we take
+
+
+320
+00:12:57,578 --> 00:12:59,446 line:-2
+to insert comments
+in the correct place
+
+
+321
+00:12:59.479 --> 00:13:02.449 line:-2 align:center
+and make them look different
+from the rest of the text?
+
+
+322
+00:13:04,885 --> 00:13:06,620 line:-1
+You might expect to do this
+
+
+323
+00:13:06.653 --> 00:13:09.423 line:-2 align:center
+by dividing the recipe text
+into meaningful units,
+
+
+324
+00:13:09.456 --> 00:13:11.225 line:-1 align:center
+or elements,
+
+
+325
+00:13:11.258 --> 00:13:14.061 line:-2 align:center
+putting each comment
+in its own element,
+
+
+326
+00:13:14,094 --> 00:13:15,562 line:-1
+and positioning each comment
+
+
+327
+00:13:15,596 --> 00:13:17,698 line:-2
+after the recipe
+it's related to,
+
+
+328
+00:13:17,731 --> 00:13:20,767 line:-2
+while providing instructions
+for how to draw the comments.
+
+
+329
+00:13:21,635 --> 00:13:24,571 line:-2
+With TextKit 1,
+the reality is quite different.
+
+
+330
+00:13:25.439 --> 00:13:27.875 line:-2 align:center
+You have to worry about
+a lot of details,
+
+
+331
+00:13:27.908 --> 00:13:28.976 line:-1 align:center
+like finding the glyph index,
+
+
+332
+00:13:29,009 --> 00:13:29,877 line:-1
+making sure that the glyph
+
+
+333
+00:13:29.910 --> 00:13:31.011 line:-2 align:center
+is not in the middle
+of a grapheme cluster,
+
+
+334
+00:13:31.044 --> 00:13:32.246 line:-2 align:center
+adjusting that glyph index
+if it is,
+
+
+335
+00:13:32,279 --> 00:13:33,280 line:-1
+changing the line spacing,
+
+
+336
+00:13:33.313 --> 00:13:35.849 line:-2 align:center
+and possibly customizing
+the line-fragment geometry.
+
+
+337
+00:13:37.084 --> 00:13:38.652 line:-2 align:center
+And these details are not
+relevant
+
+
+338
+00:13:38.685 --> 00:13:40.554 line:-1 align:center
+to what you're trying to do.
+
+
+339
+00:13:40,587 --> 00:13:41,989 line:-1
+So with TextKit 2,
+
+
+340
+00:13:42.022 --> 00:13:46.426 line:-2 align:center
+we're aiming to make
+the expectation into reality.
+
+
+341
+00:13:46.460 --> 00:13:48.562 line:-2 align:center
+We've changed the flow
+of text through the system
+
+
+342
+00:13:48.595 --> 00:13:50.330 line:-2 align:center
+to make approaches
+like this possible.
+
+
+343
+00:13:52.566 --> 00:13:54.968 line:-2 align:center
+Here's how that flow works
+in TextKit 2.
+
+
+344
+00:13:56,970 --> 00:13:59,406 line:-2
+Updates to the text storage
+go through a new object
+
+
+345
+00:13:59.439 --> 00:14:01.208 line:-1 align:center
+called the content manager.
+
+
+346
+00:14:03,143 --> 00:14:06,380 line:-2
+The content manager divides
+the text up into elements
+
+
+347
+00:14:06.413 --> 00:14:09.049 line:-1 align:center
+and keeps track of them.
+
+
+348
+00:14:09,082 --> 00:14:10,651 line:-1
+When it's time for layout,
+
+
+349
+00:14:10,684 --> 00:14:13,687 line:-2
+the text layout manager
+asks the content manager
+
+
+350
+00:14:13,720 --> 00:14:14,988 line:-1
+for the elements.
+
+
+351
+00:14:16,890 --> 00:14:19,293 line:-2
+Then the text layout manager
+lays out the elements
+
+
+352
+00:14:19,326 --> 00:14:20,661 line:-1
+into the text container
+
+
+353
+00:14:20.694 --> 00:14:22.196 line:-1 align:center
+and generates layout fragments
+
+
+354
+00:14:22.229 --> 00:14:25.098 line:-2 align:center
+that contain the layout
+and positioning information.
+
+
+355
+00:14:27,334 --> 00:14:29,002 line:-1
+When it's time for display,
+
+
+356
+00:14:29,036 --> 00:14:30,470 line:-2
+the layout fragments
+are handed off
+
+
+357
+00:14:30.504 --> 00:14:32.172 line:-1 align:center
+to the ViewportLayoutController,
+
+
+358
+00:14:32.206 --> 00:14:33.841 line:-2 align:center
+which coordinates
+the positioning
+
+
+359
+00:14:33,874 --> 00:14:35,108 line:-1
+and layout of those fragments
+
+
+360
+00:14:35,142 --> 00:14:36,977 line:-2
+in your rendering surface
+of choice,
+
+
+361
+00:14:37.010 --> 00:14:38.979 line:-1 align:center
+whether it's a view or a layer.
+
+
+362
+00:14:40.380 --> 00:14:41.448 line:-1 align:center
+As you can tell,
+
+
+363
+00:14:41,481 --> 00:14:44,518 line:-2
+there are a lot of new objects
+involved in this process.
+
+
+364
+00:14:44,551 --> 00:14:47,855 line:-2
+And this is where the emphasis
+on value semantics comes in.
+
+
+365
+00:14:50,123 --> 00:14:52,826 line:0
+You control the layout
+and display of your text
+
+
+366
+00:14:52,860 --> 00:14:55,395 align:center
+by hooking into the system
+at the right point
+
+
+367
+00:14:55,429 --> 00:14:57,598 align:center
+and obtaining the information
+you need
+
+
+368
+00:14:57,631 --> 00:15:00,367 align:center
+from objects
+that use value semantics.
+
+
+369
+00:15:02.936 --> 00:15:04.004 line:-1 align:center
+To make changes,
+
+
+370
+00:15:04,037 --> 00:15:05,372 line:-1
+you create new instances
+
+
+371
+00:15:05,405 --> 00:15:06,240 line:-1
+of the value objects
+
+
+372
+00:15:06,273 --> 00:15:07,441 line:-1
+with the changes you want
+
+
+373
+00:15:07,474 --> 00:15:08,342 line:-1
+and give them back
+
+
+374
+00:15:08,375 --> 00:15:10,177 line:-1
+to the system.
+
+
+375
+00:15:10,210 --> 00:15:11,712 line:-1
+The system uses the values
+
+
+376
+00:15:11,745 --> 00:15:12,746 line:-1
+from your replacement objects
+
+
+377
+00:15:12,779 --> 00:15:14,248 line:-1
+for layout and display.
+
+
+378
+00:15:15,816 --> 00:15:17,718 line:-2
+So now,
+let's meet these new objects
+
+
+379
+00:15:17.751 --> 00:15:18.585 line:-1 align:center
+and identify
+
+
+380
+00:15:18,619 --> 00:15:19,953 line:-2
+the different points
+of the system
+
+
+381
+00:15:19.987 --> 00:15:21.955 line:-2 align:center
+where you can receive
+or replace them.
+
+
+382
+00:15:21,989 --> 00:15:23,590 line:-2
+We'll start
+with the storage objects.
+
+
+383
+00:15:25.792 --> 00:15:28.061 line:-1 align:center
+Meet NSTextElement.
+
+
+384
+00:15:28,095 --> 00:15:31,098 line:-2
+Elements are the building blocks
+of your document.
+
+
+385
+00:15:31,131 --> 00:15:33,834 line:-2
+Each element represents
+a portion of the content
+
+
+386
+00:15:33,867 --> 00:15:35,102 line:-1
+and contains a range
+
+
+387
+00:15:35,135 --> 00:15:37,971 line:-2
+that describes
+where it is in the document.
+
+
+388
+00:15:38,005 --> 00:15:40,974 line:-2
+And elements
+have value semantics.
+
+
+389
+00:15:41,008 --> 00:15:42,943 line:-2
+Their properties,
+including the range,
+
+
+390
+00:15:42,976 --> 00:15:44,778 line:-2
+are immutable
+and cannot be changed
+
+
+391
+00:15:44,811 --> 00:15:46,280 line:-1
+after creating the element.
+
+
+392
+00:15:48.148 --> 00:15:50.951 line:-2 align:center
+Modeling the document
+as a series of elements
+
+
+393
+00:15:50.984 --> 00:15:52.853 line:-2 align:center
+rather than
+a series of characters
+
+
+394
+00:15:52.886 --> 00:15:55.589 line:-1 align:center
+gives us a lot more power.
+
+
+395
+00:15:55.622 --> 00:15:58.025 line:-2 align:center
+We gain the ability
+to easily distinguish
+
+
+396
+00:15:58.058 --> 00:16:01.195 line:-2 align:center
+what kind of content
+a given element represents,
+
+
+397
+00:16:01,228 --> 00:16:03,130 line:-2
+whether
+it's a paragraph of text,
+
+
+398
+00:16:03.163 --> 00:16:04.598 line:-1 align:center
+an attachment,
+
+
+399
+00:16:04.631 --> 00:16:07.100 line:-1 align:center
+or some other custom type.
+
+
+400
+00:16:07.134 --> 00:16:09.870 line:-2 align:center
+And we can make decisions
+on how to lay out elements
+
+
+401
+00:16:09.903 --> 00:16:11.271 line:-1 align:center
+based on their type.
+
+
+402
+00:16:13,040 --> 00:16:15,609 line:-2
+Now let's meet
+NSTextContentManager.
+
+
+403
+00:16:16,844 --> 00:16:19,112 line:-2
+The content manager knows
+how to generate elements
+
+
+404
+00:16:19,146 --> 00:16:20,447 line:-1
+from the text content
+
+
+405
+00:16:20,480 --> 00:16:22,249 line:-2
+and keeps track of the ranges
+of those elements
+
+
+406
+00:16:22,282 --> 00:16:25,085 line:-1
+within the overall document.
+
+
+407
+00:16:25.118 --> 00:16:27.588 line:-2 align:center
+It also knows how to work
+with the backing store
+
+
+408
+00:16:27.621 --> 00:16:29.223 line:-1 align:center
+and how to generate new elements
+
+
+409
+00:16:29,256 --> 00:16:30,557 line:-1
+with updated ranges
+
+
+410
+00:16:30.591 --> 00:16:32.960 line:-2 align:center
+when the content
+in the backing store changes.
+
+
+411
+00:16:34.094 --> 00:16:35.929 line:-2 align:center
+Think of the content manager
+as a wrapper
+
+
+412
+00:16:35.963 --> 00:16:37.264 line:-1 align:center
+for the backing store.
+
+
+413
+00:16:38.365 --> 00:16:40.434 line:-2 align:center
+The content manager provides
+an interface
+
+
+414
+00:16:40,467 --> 00:16:43,504 line:-2
+for translating
+the raw data into elements.
+
+
+415
+00:16:46,073 --> 00:16:48,609 line:-2
+NSTextContentManager
+and NSTextElement
+
+
+416
+00:16:48.642 --> 00:16:50.611 line:-1 align:center
+are both abstract types,
+
+
+417
+00:16:50,644 --> 00:16:51,645 line:-1
+so you could subclass them
+
+
+418
+00:16:51.678 --> 00:16:53.747 line:-2 align:center
+if you need to use
+a custom document model
+
+
+419
+00:16:53,780 --> 00:16:56,183 line:-1
+or a custom backing store.
+
+
+420
+00:16:56,216 --> 00:16:58,118 line:-2
+The headers and documentation
+provide guidance
+
+
+421
+00:16:58.151 --> 00:16:59.987 line:-1 align:center
+on how to do this.
+
+
+422
+00:17:00.020 --> 00:17:01.088 line:-1 align:center
+But most of the time,
+
+
+423
+00:17:01,121 --> 00:17:04,024 line:-2
+you can use the default ones
+that TextKit 2 provides.
+
+
+424
+00:17:05,893 --> 00:17:09,963 line:-2
+Meet NSTextContentStorage
+and NSTextParagraph.
+
+
+425
+00:17:09.997 --> 00:17:14.368 line:-2 align:center
+These are the default content
+manager and element types.
+
+
+426
+00:17:14,401 --> 00:17:17,137 line:-2
+NSTextContentStorage
+is a content manager
+
+
+427
+00:17:17.171 --> 00:17:20.507 line:-2 align:center
+that uses an NSTextStorage
+as the backing store.
+
+
+428
+00:17:21.675 --> 00:17:24.378 line:-2 align:center
+It knows how to divide
+the contents of the text storage
+
+
+429
+00:17:24.411 --> 00:17:25.913 line:-1 align:center
+into paragraph elements,
+
+
+430
+00:17:25,946 --> 00:17:29,650 line:-2
+which are instances
+of NSTextParagraph.
+
+
+431
+00:17:29.683 --> 00:17:31.585 line:-1 align:center
+NSTextContentStorage also knows
+
+
+432
+00:17:31,618 --> 00:17:34,087 line:-2
+how to generate updated
+paragraph elements
+
+
+433
+00:17:34,121 --> 00:17:37,124 line:-2
+when the text
+in the text storage changes.
+
+
+434
+00:17:37,157 --> 00:17:39,259 line:-2
+This brings me
+to an important point.
+
+
+435
+00:17:40.794 --> 00:17:43.430 line:-2 align:center
+When making changes
+to the underlying text storage,
+
+
+436
+00:17:43.463 --> 00:17:45.399 line:-2 align:center
+you should wrap your updates
+in this
+
+
+437
+00:17:45,432 --> 00:17:48,836 line:-2
+performEditingTransaction
+method.
+
+
+438
+00:17:48,869 --> 00:17:49,770 line:-1
+This ensures
+
+
+439
+00:17:49.803 --> 00:17:51.605 line:-2 align:center
+that the other parts
+of the TextKit 2 system
+
+
+440
+00:17:51.638 --> 00:17:53.574 line:-1 align:center
+are notified of your changes.
+
+
+441
+00:17:55.042 --> 00:17:56.176 line:-1 align:center
+You can do some cool stuff
+
+
+442
+00:17:56,210 --> 00:17:57,644 line:-2
+with
+the content storage delegates
+
+
+443
+00:17:57.678 --> 00:17:58.946 line:-1 align:center
+without having to implement
+
+
+444
+00:17:58,979 --> 00:18:01,582 line:-2
+a full NSTextContentManager
+subclass.
+
+
+445
+00:18:02,950 --> 00:18:04,318 line:-1
+Later in this video,
+
+
+446
+00:18:04,351 --> 00:18:06,553 line:-2
+Chris will cover how
+to use content delegates
+
+
+447
+00:18:06.587 --> 00:18:08.322 line:-2 align:center
+to change
+the comment font and color
+
+
+448
+00:18:08.355 --> 00:18:10.724 line:-2 align:center
+without modifying
+the text storage
+
+
+449
+00:18:10.757 --> 00:18:12.793 line:-2 align:center
+and how to hide comments
+altogether.
+
+
+450
+00:18:12.826 --> 00:18:14.561 line:-1 align:center
+So stay tuned for more details.
+
+
+451
+00:18:16,597 --> 00:18:17,431 line:-1
+OK.
+
+
+452
+00:18:17.464 --> 00:18:20.000 line:-2 align:center
+Now we understand how
+TextKit 2 creates elements
+
+
+453
+00:18:20.033 --> 00:18:22.102 line:-1 align:center
+from your text content.
+
+
+454
+00:18:22,135 --> 00:18:23,904 line:-2
+That takes care
+of the first two steps
+
+
+455
+00:18:23.937 --> 00:18:25.205 line:-1 align:center
+from our new approach.
+
+
+456
+00:18:26.340 --> 00:18:27.941 line:-2 align:center
+The content storage
+automatically
+
+
+457
+00:18:27,975 --> 00:18:30,244 line:-2
+divides the text
+into paragraph elements,
+
+
+458
+00:18:30,277 --> 00:18:31,111 line:-1
+and it knows
+
+
+459
+00:18:31.144 --> 00:18:33.947 line:-2 align:center
+how to create new paragraphs
+for the new comments.
+
+
+460
+00:18:35,182 --> 00:18:36,049 line:-1
+Next,
+
+
+461
+00:18:36.083 --> 00:18:37.751 line:-2 align:center
+let's figure out
+how we can accomplish
+
+
+462
+00:18:37,784 --> 00:18:38,852 line:-1
+the last two steps:
+
+
+463
+00:18:38,886 --> 00:18:41,021 line:-2
+the positioning
+and display of comments.
+
+
+464
+00:18:41.989 --> 00:18:43.790 line:-1 align:center
+Returning to our flow diagram,
+
+
+465
+00:18:43,824 --> 00:18:45,259 line:-2
+we need
+to get layout information
+
+
+466
+00:18:45.292 --> 00:18:47.661 line:-1 align:center
+for our comment elements.
+
+
+467
+00:18:47.694 --> 00:18:50.364 line:-2 align:center
+There are new layout objects
+to help us with these tasks.
+
+
+468
+00:18:50,397 --> 00:18:51,598 line:-1
+Let's meet them now.
+
+
+469
+00:18:53,267 --> 00:18:56,103 line:-1
+Meet NSTextLayoutManager.
+
+
+470
+00:18:56.136 --> 00:18:59.540 line:-2 align:center
+The text layout manager controls
+the text layout process.
+
+
+471
+00:19:00.507 --> 00:19:02.576 line:-1 align:center
+NSTextLayoutManager is similar
+
+
+472
+00:19:02.609 --> 00:19:05.312 line:-2 align:center
+to the old NSLayoutManager
+from TextKit 1
+
+
+473
+00:19:05.345 --> 00:19:07.814 line:-1 align:center
+with one major difference:
+
+
+474
+00:19:07,848 --> 00:19:11,084 line:-2
+NSTextLayoutManager
+does not deal with glyphs.
+
+
+475
+00:19:12.786 --> 00:19:13.787 line:-1 align:center
+Instead,
+
+
+476
+00:19:13,820 --> 00:19:16,890 line:-2
+NSTextLayoutManager
+takes text elements,
+
+
+477
+00:19:16.924 --> 00:19:19.293 line:-2 align:center
+lays them out
+into the text container,
+
+
+478
+00:19:19,326 --> 00:19:21,995 line:-2
+and generates layout fragments
+for those elements.
+
+
+479
+00:19:23.197 --> 00:19:24.731 line:-1 align:center
+You work with layout fragments
+
+
+480
+00:19:24.765 --> 00:19:27.167 line:-2 align:center
+to get layout information
+for text elements.
+
+
+481
+00:19:27.201 --> 00:19:29.903 line:-2 align:center
+So now let's learn
+about layout fragments.
+
+
+482
+00:19:31.638 --> 00:19:34.441 line:-1 align:center
+Meet NSTextLayoutFragment.
+
+
+483
+00:19:34.474 --> 00:19:37.110 line:-2 align:center
+A layout fragment
+contains layout information
+
+
+484
+00:19:37,144 --> 00:19:39,680 line:-1
+for one or more text elements.
+
+
+485
+00:19:39.713 --> 00:19:41.014 line:-1 align:center
+Just like elements,
+
+
+486
+00:19:41.048 --> 00:19:42.616 line:-1 align:center
+they use value semantics
+
+
+487
+00:19:42.649 --> 00:19:44.551 line:-2 align:center
+and their properties
+are immutable.
+
+
+488
+00:19:45,853 --> 00:19:47,454 line:-1
+So the text layout manager
+
+
+489
+00:19:47.487 --> 00:19:50.824 line:-2 align:center
+will create layout fragments for
+each of our comment elements,
+
+
+490
+00:19:50.858 --> 00:19:52.526 line:-2 align:center
+and then we can
+use the information
+
+
+491
+00:19:52,559 --> 00:19:53,660 line:-1
+from the layout fragments
+
+
+492
+00:19:53.694 --> 00:19:55.329 line:-1 align:center
+to position and display them.
+
+
+493
+00:19:56,930 --> 00:19:59,433 line:-2
+Layout fragments
+communicate layout information
+
+
+494
+00:19:59,466 --> 00:20:01,502 line:-1
+through three properties:
+
+
+495
+00:20:01,535 --> 00:20:04,605 line:-1
+an array of textLineFragments,
+
+
+496
+00:20:04,638 --> 00:20:07,107 line:-1
+the layoutFragmentFrame,
+
+
+497
+00:20:07,140 --> 00:20:09,276 line:-1
+and the renderingSurfaceBounds.
+
+
+498
+00:20:10.444 --> 00:20:13.280 line:-2 align:center
+If you want to customize
+or change the layout,
+
+
+499
+00:20:13,313 --> 00:20:15,716 line:-2
+it's essential to understand
+the information you get
+
+
+500
+00:20:15.749 --> 00:20:17.317 line:-1 align:center
+with each of these properties.
+
+
+501
+00:20:17,351 --> 00:20:18,819 line:-1
+So we'll go over that next.
+
+
+502
+00:20:20.587 --> 00:20:21.755 line:-1 align:center
+For the first property,
+
+
+503
+00:20:21.788 --> 00:20:24.758 line:-1 align:center
+we'll meet NSTextLineFragment.
+
+
+504
+00:20:24.791 --> 00:20:26.994 line:-2 align:center
+Line fragments contain
+measurement information
+
+
+505
+00:20:27,027 --> 00:20:29,496 line:-2
+for each line of text
+in the layout fragment.
+
+
+506
+00:20:30,697 --> 00:20:31,598 line:-1
+These are useful
+
+
+507
+00:20:31,632 --> 00:20:33,200 line:-2
+for obtaining
+geometric information
+
+
+508
+00:20:33,233 --> 00:20:34,968 line:-1
+for specific lines
+
+
+509
+00:20:35,002 --> 00:20:37,671 line:-2
+or for counting the number
+of lines in a layout fragment.
+
+
+510
+00:20:39,606 --> 00:20:42,709 line:0
+The second property,
+the layout fragment frame,
+
+
+511
+00:20:42,743 --> 00:20:44,778 line:0
+describes how the text
+in the layout fragment
+
+
+512
+00:20:44,811 --> 00:20:48,382 align:center
+is laid out
+inside the text container area.
+
+
+513
+00:20:48,415 --> 00:20:49,650 line:0
+In TextKit 2,
+
+
+514
+00:20:49,683 --> 00:20:52,186 line:0
+text layout is basically
+stacking up
+
+
+515
+00:20:52,219 --> 00:20:55,589 align:center
+the layout fragment frames
+within the container.
+
+
+516
+00:20:55,622 --> 00:20:57,624 line:0
+Think of these frames
+like tiles.
+
+
+517
+00:20:57,658 --> 00:20:59,793 line:0
+The system is dividing up
+the text container area
+
+
+518
+00:20:59,826 --> 00:21:02,062 line:0
+into tiles,
+where each layout fragment
+
+
+519
+00:21:02,095 --> 00:21:03,630 align:center
+is a single tile.
+
+
+520
+00:21:05,332 --> 00:21:07,734 align:center
+Empty lines have
+their own layout fragment frame,
+
+
+521
+00:21:07,768 --> 00:21:10,637 align:center
+as shown in the diagram.
+
+
+522
+00:21:10,671 --> 00:21:12,906 line:0
+In general,
+layout fragment frames
+
+
+523
+00:21:12,940 --> 00:21:15,776 align:center
+are useful for positioning
+other views in your UI
+
+
+524
+00:21:15,809 --> 00:21:17,544 align:center
+near the fragment contents
+
+
+525
+00:21:17,578 --> 00:21:20,480 align:center
+or for calculating the total
+height of the text content.
+
+
+526
+00:21:22,115 --> 00:21:22,950 line:-1
+Now, this frame
+
+
+527
+00:21:22,983 --> 00:21:24,551 line:-1
+does not accurately represent
+
+
+528
+00:21:24,585 --> 00:21:25,419 line:-1
+the space needed
+
+
+529
+00:21:25.452 --> 00:21:27.955 line:-1 align:center
+to draw the text itself.
+
+
+530
+00:21:27.988 --> 00:21:28.922 line:-1 align:center
+That information comes
+
+
+531
+00:21:28.956 --> 00:21:31.925 line:-1 align:center
+from the third property.
+
+
+532
+00:21:31.959 --> 00:21:33.393 line:-1 align:center
+The rendering surface bounds
+
+
+533
+00:21:33.427 --> 00:21:35.028 line:-1 align:center
+describes the area required
+
+
+534
+00:21:35,062 --> 00:21:37,364 line:-1
+to draw the text.
+
+
+535
+00:21:37,397 --> 00:21:38,465 line:-1
+This is the rectangle
+
+
+536
+00:21:38.498 --> 00:21:39.466 line:-1 align:center
+you want to use
+
+
+537
+00:21:39,499 --> 00:21:40,667 line:-1
+to get the size of the text
+
+
+538
+00:21:40,701 --> 00:21:43,303 line:-1
+in the view's coordinate space.
+
+
+539
+00:21:43.337 --> 00:21:44.171 line:-1 align:center
+And this is different
+
+
+540
+00:21:44,204 --> 00:21:45,772 line:-1
+from the layout fragment frame
+
+
+541
+00:21:45.806 --> 00:21:47.241 line:-1 align:center
+because the text can overshoot
+
+
+542
+00:21:47.274 --> 00:21:49.877 line:-1 align:center
+the edges of the fragment frame.
+
+
+543
+00:21:49,910 --> 00:21:51,778 line:-1
+This happens with diacritics
+
+
+544
+00:21:51.812 --> 00:21:53.413 line:-1 align:center
+or, as shown here,
+
+
+545
+00:21:53.447 --> 00:21:54.548 line:-1 align:center
+with long descenders
+
+
+546
+00:21:54,581 --> 00:21:56,817 line:-1
+in italic fonts.
+
+
+547
+00:21:56,850 --> 00:21:59,586 line:-2
+Notice how the bottom-left
+edge of the J
+
+
+548
+00:21:59.620 --> 00:22:01.688 line:-1 align:center
+sticks out just a little bit
+
+
+549
+00:22:01,722 --> 00:22:04,658 line:-1
+from the layout fragment frame.
+
+
+550
+00:22:04.691 --> 00:22:06.159 line:-1 align:center
+It doesn't stick out that much,
+
+
+551
+00:22:06.193 --> 00:22:07.928 line:-2 align:center
+so here's
+a more extreme example.
+
+
+552
+00:22:09.229 --> 00:22:10.597 line:-1 align:center
+Some fonts, like Zapfino,
+
+
+553
+00:22:10.631 --> 00:22:12.266 line:-1 align:center
+have glyphs that extend very far
+
+
+554
+00:22:12.299 --> 00:22:14.201 line:-1 align:center
+outside the typographic bounds.
+
+
+555
+00:22:15,135 --> 00:22:16,336 line:-1
+The rendering surface bounds
+
+
+556
+00:22:16,370 --> 00:22:17,471 line:-1
+will be much larger
+
+
+557
+00:22:17,504 --> 00:22:18,639 line:-1
+than the layout fragment frame
+
+
+558
+00:22:18,672 --> 00:22:20,574 line:-1
+in this case.
+
+
+559
+00:22:21.608 --> 00:22:24.044 line:-2 align:center
+Now that we understand
+the layout information
+
+
+560
+00:22:24,077 --> 00:22:25,746 line:-1
+that layout fragments provide,
+
+
+561
+00:22:25.779 --> 00:22:26.880 line:-1 align:center
+let's back up a bit
+
+
+562
+00:22:26.914 --> 00:22:29.583 line:-2 align:center
+and talk about how to use
+this information
+
+
+563
+00:22:29,616 --> 00:22:31,785 line:-2
+to customize
+the layout of text elements.
+
+
+564
+00:22:32.953 --> 00:22:34.855 line:-2 align:center
+Since layout fragments
+are immutable,
+
+
+565
+00:22:34.888 --> 00:22:37.157 line:-2 align:center
+you can't directly change
+the layout information
+
+
+566
+00:22:37.191 --> 00:22:38.458 line:-1 align:center
+on a fragment.
+
+
+567
+00:22:40.661 --> 00:22:42.829 line:-1 align:center
+Going back to our flow diagram,
+
+
+568
+00:22:42.863 --> 00:22:44.731 line:-2 align:center
+we need to hook into
+the layout process
+
+
+569
+00:22:44.765 --> 00:22:46.200 line:-1 align:center
+and create new instances
+
+
+570
+00:22:46,233 --> 00:22:47,901 line:-1
+of NSTextLayoutFragment
+
+
+571
+00:22:47.935 --> 00:22:49.937 line:-2 align:center
+with the information
+we want to change.
+
+
+572
+00:22:53.907 --> 00:22:55.776 line:-2 align:center
+And you hook into
+the layout process
+
+
+573
+00:22:55,809 --> 00:22:57,211 line:-1
+using this delegate method
+
+
+574
+00:22:57,244 --> 00:23:00,180 line:-1
+on NSTextLayoutManager.
+
+
+575
+00:23:00.214 --> 00:23:02.549 line:-2 align:center
+This method gets called
+during the layout process
+
+
+576
+00:23:02,583 --> 00:23:04,017 line:-1
+when the text layout manager
+
+
+577
+00:23:04,051 --> 00:23:05,886 line:-2
+is generating
+the layout fragments
+
+
+578
+00:23:05,919 --> 00:23:07,821 line:-1
+from the elements.
+
+
+579
+00:23:07,855 --> 00:23:09,957 line:-1
+Here you have an opportunity
+
+
+580
+00:23:09.990 --> 00:23:11.725 line:-2 align:center
+to create
+your own layout fragment
+
+
+581
+00:23:11.758 --> 00:23:13.060 line:-1 align:center
+for an element.
+
+
+582
+00:23:15,295 --> 00:23:16,663 align:center
+That takes care
+of the last two steps
+
+
+583
+00:23:16,663 --> 00:23:19,466 line:0
+in our approach
+to the comment problem.
+
+
+584
+00:23:19,466 --> 00:23:21,535 align:center
+We'll handle the positioning
+and custom drawing
+
+
+585
+00:23:21,535 --> 00:23:23,036 line:0
+of our comment layout fragment
+
+
+586
+00:23:23,036 --> 00:23:26,139 align:center
+by using a subclass
+of NSTextLayoutFragment
+
+
+587
+00:23:26,139 --> 00:23:28,509 line:0
+and providing instances
+of our custom fragment
+
+
+588
+00:23:28,509 --> 00:23:30,143 line:0
+in the text layout
+manager delegate.
+
+
+589
+00:23:31.578 --> 00:23:32.946 line:-1 align:center
+Later in this video,
+
+
+590
+00:23:32,946 --> 00:23:35,816 line:-2
+Chris will demonstrate how
+this is done in our sample app.
+
+
+591
+00:23:37,184 --> 00:23:38,685 line:-1
+And that's safety.
+
+
+592
+00:23:38.719 --> 00:23:41.421 line:-2 align:center
+Now let's move on
+to performance.
+
+
+593
+00:23:42,422 --> 00:23:44,525 line:-2
+Performance is one
+of the greatest challenges
+
+
+594
+00:23:44,558 --> 00:23:46,627 line:-1
+for any text engine.
+
+
+595
+00:23:46.660 --> 00:23:48.795 line:-1 align:center
+TextKit 2 is extremely fast
+
+
+596
+00:23:48.829 --> 00:23:51.131 line:-2 align:center
+for an incredibly
+wide range of scenarios,
+
+
+597
+00:23:51.164 --> 00:23:54.434 line:-2 align:center
+from quickly rendering labels
+that are only a few lines each
+
+
+598
+00:23:54.468 --> 00:23:56.970 line:-2 align:center
+to laying out documents
+that are hundreds of megabytes
+
+
+599
+00:23:57,004 --> 00:23:59,773 line:-2
+being scrolled through
+at interactive rates.
+
+
+600
+00:23:59,806 --> 00:24:01,308 line:-1
+And for these scenarios,
+
+
+601
+00:24:01.341 --> 00:24:03.644 line:-2 align:center
+when you're scrolling through
+these really large documents
+
+
+602
+00:24:04.044 --> 00:24:05.812 line:-1 align:center
+at variable rates,
+
+
+603
+00:24:05,812 --> 00:24:08,182 line:-1
+noncontiguous text layout
+
+
+604
+00:24:08,182 --> 00:24:11,418 line:-2
+is absolutely essential
+for great performance.
+
+
+605
+00:24:14.354 --> 00:24:15.622 line:-1 align:center
+Let's review the difference
+
+
+606
+00:24:15.622 --> 00:24:17.991 line:-2 align:center
+between contiguous
+and noncontiguous layout.
+
+
+607
+00:24:19,660 --> 00:24:21,528 line:-1
+This diagram shows a document
+
+
+608
+00:24:21.562 --> 00:24:22.896 line:-1 align:center
+where the yellow rectangle
+
+
+609
+00:24:22,930 --> 00:24:24,865 line:-2
+represents
+the visible content area
+
+
+610
+00:24:24.898 --> 00:24:25.966 line:-1 align:center
+on the screen.
+
+
+611
+00:24:27,334 --> 00:24:28,769 line:-1
+Contiguous layout starts
+
+
+612
+00:24:28,802 --> 00:24:30,537 line:-2
+at the very beginning
+of the document
+
+
+613
+00:24:30.571 --> 00:24:31.772 line:-1 align:center
+and goes in order
+
+
+614
+00:24:31.805 --> 00:24:34.241 line:-2 align:center
+from the beginning
+to the end of the text.
+
+
+615
+00:24:35.976 --> 00:24:39.046 line:-2 align:center
+So if you scroll to some point
+in the middle of the document,
+
+
+616
+00:24:39.079 --> 00:24:41.114 line:-2 align:center
+contiguous layout
+performs layout
+
+
+617
+00:24:41,148 --> 00:24:43,584 line:-2
+for all of the text
+that came before that point.
+
+
+618
+00:24:44,685 --> 00:24:46,119 line:-1
+This includes all the text
+
+
+619
+00:24:46.153 --> 00:24:47.754 line:-2 align:center
+that's been scrolled
+off the screen,
+
+
+620
+00:24:47,788 --> 00:24:50,624 line:-2
+all the way back
+to the beginning.
+
+
+621
+00:24:50,657 --> 00:24:52,459 line:-1
+And if there's a lot of text,
+
+
+622
+00:24:52,492 --> 00:24:54,428 line:-1
+the performance can be slow
+
+
+623
+00:24:54.461 --> 00:24:57.531 line:-2 align:center
+and you can get animation
+hiccups when scrolling.
+
+
+624
+00:24:57.564 --> 00:24:59.499 line:-1 align:center
+In the worst case, it can hang.
+
+
+625
+00:25:01,668 --> 00:25:02,736 line:-1
+In contrast,
+
+
+626
+00:25:02,769 --> 00:25:04,338 line:-1
+noncontiguous layout means
+
+
+627
+00:25:04.371 --> 00:25:05.973 line:-2 align:center
+we can lay out
+a piece of the text
+
+
+628
+00:25:06,006 --> 00:25:07,841 line:-1
+anywhere within the document
+
+
+629
+00:25:07.875 --> 00:25:10.210 line:-2 align:center
+without laying out the pieces
+that come before it.
+
+
+630
+00:25:11.678 --> 00:25:14.047 line:-2 align:center
+Now when you scroll
+to the middle of the document,
+
+
+631
+00:25:14.081 --> 00:25:17.117 line:-2 align:center
+layout happens for that visible
+area right away.
+
+
+632
+00:25:18.752 --> 00:25:20.087 line:-1 align:center
+This improves performance
+
+
+633
+00:25:20,120 --> 00:25:22,623 line:-2
+by performing layout
+only for the portions of text
+
+
+634
+00:25:22.656 --> 00:25:24.424 line:-1 align:center
+that are visible on the screen,
+
+
+635
+00:25:24,458 --> 00:25:26,727 line:-2
+plus an additional
+over-scroll region,
+
+
+636
+00:25:26,760 --> 00:25:29,296 line:-2
+resulting in a smoother
+scrolling experience.
+
+
+637
+00:25:30.264 --> 00:25:34.301 line:-2 align:center
+And layout in TextKit 2
+is always noncontiguous.
+
+
+638
+00:25:35,869 --> 00:25:37,137 line:-1
+In contrast,
+
+
+639
+00:25:37.171 --> 00:25:40.440 line:-2 align:center
+noncontiguous layout
+is optional in TextKit 1.
+
+
+640
+00:25:41.441 --> 00:25:43.343 line:-2 align:center
+It's enabled
+using a boolean property
+
+
+641
+00:25:43,377 --> 00:25:46,079 line:-1
+on NSLayoutManager.
+
+
+642
+00:25:46,113 --> 00:25:49,516 line:-2
+This API is simple,
+but because it is simple,
+
+
+643
+00:25:49,550 --> 00:25:52,586 line:-2
+it can't express information
+about the state of the layout
+
+
+644
+00:25:52,619 --> 00:25:55,222 line:-2
+at the time
+you request layout information.
+
+
+645
+00:25:57,391 --> 00:25:59,793 line:-2
+Noncontiguous layout
+relies on estimates
+
+
+646
+00:25:59.826 --> 00:26:01.128 line:-1 align:center
+that may change later
+
+
+647
+00:26:01,161 --> 00:26:02,396 line:-2
+once other portions
+of the document
+
+
+648
+00:26:02,429 --> 00:26:04,665 line:-1
+have been laid out.
+
+
+649
+00:26:04,698 --> 00:26:05,866 line:-1
+With TextKit 1,
+
+
+650
+00:26:05.899 --> 00:26:09.369 line:-2 align:center
+you can only turn
+noncontiguous layout on or off.
+
+
+651
+00:26:10,237 --> 00:26:11,705 line:-1
+There is no ability to control
+
+
+652
+00:26:11.738 --> 00:26:14.174 line:-2 align:center
+which parts of the document
+get laid out
+
+
+653
+00:26:14.208 --> 00:26:16.543 line:-2 align:center
+and no way to know
+when layout finishes
+
+
+654
+00:26:16,577 --> 00:26:19,479 line:-2
+and the layout estimates
+are updated to the real values.
+
+
+655
+00:26:20,581 --> 00:26:23,884 line:-2
+The TextKit 2 API is richer
+and more expressive.
+
+
+656
+00:26:26,086 --> 00:26:28,856 line:-2
+TextKit 2 gives you
+consistent layout information
+
+
+657
+00:26:28,889 --> 00:26:31,558 line:-2
+for elements
+in the visible content area
+
+
+658
+00:26:31,592 --> 00:26:32,693 line:-1
+and notifies you
+
+
+659
+00:26:32,726 --> 00:26:35,195 line:-2
+when the layout updates
+for that visible area.
+
+
+660
+00:26:36,530 --> 00:26:39,266 line:-2
+This area is called
+the viewport.
+
+
+661
+00:26:39,299 --> 00:26:42,569 line:-2
+You manage the viewport
+by adjusting or relocating it,
+
+
+662
+00:26:42.603 --> 00:26:45.572 line:-2 align:center
+and you receive callbacks
+before, during,
+
+
+663
+00:26:45,606 --> 00:26:47,140 line:-1
+and after viewport layout.
+
+
+664
+00:26:48.942 --> 00:26:50.477 line:-1 align:center
+For optimum performance,
+
+
+665
+00:26:50.511 --> 00:26:51.512 line:-1 align:center
+your code should focus
+
+
+666
+00:26:51,545 --> 00:26:53,247 line:-2
+on working
+with layout information
+
+
+667
+00:26:53,280 --> 00:26:55,849 line:-1
+inside the viewport area.
+
+
+668
+00:26:55.883 --> 00:26:57.818 line:-2 align:center
+Avoid requesting
+layout information
+
+
+669
+00:26:57,851 --> 00:27:00,521 line:-2
+for elements outside
+the viewport when possible.
+
+
+670
+00:27:02.489 --> 00:27:03.590 line:-1 align:center
+The layout information
+
+
+671
+00:27:03.624 --> 00:27:05.325 line:-2 align:center
+for elements outside
+the viewport
+
+
+672
+00:27:05,359 --> 00:27:06,560 line:-1
+might not be accurate
+
+
+673
+00:27:06,593 --> 00:27:08,395 line:-1
+unless you explicitly ask
+
+
+674
+00:27:08,428 --> 00:27:10,397 line:-2
+to ensure layout
+for the text ranges
+
+
+675
+00:27:10.430 --> 00:27:13.267 line:-1 align:center
+corresponding to those elements.
+
+
+676
+00:27:13,300 --> 00:27:16,737 line:-2
+This call can be expensive,
+especially for large documents.
+
+
+677
+00:27:19.106 --> 00:27:22.376 line:-2 align:center
+Revisiting
+our flow diagram from earlier,
+
+
+678
+00:27:22,409 --> 00:27:24,011 line:-2
+there's another
+new controller class
+
+
+679
+00:27:24.044 --> 00:27:25.846 line:-1 align:center
+to help us manage the viewport.
+
+
+680
+00:27:28.048 --> 00:27:31.852 line:-2 align:center
+Meet
+NSTextViewportLayoutController.
+
+
+681
+00:27:31,885 --> 00:27:35,689 line:-2
+This is the source of truth
+for viewport layout information.
+
+
+682
+00:27:35.722 --> 00:27:37.391 line:-2 align:center
+It talks
+to the text layout manager
+
+
+683
+00:27:37.424 --> 00:27:38.692 line:-1 align:center
+to get layout fragments
+
+
+684
+00:27:38,725 --> 00:27:42,529 line:-2
+for elements
+within the viewport area.
+
+
+685
+00:27:42.563 --> 00:27:44.631 line:-2 align:center
+You can access
+the viewport layout controller
+
+
+686
+00:27:44,665 --> 00:27:47,601 line:-2
+through the property
+on the text layout manager.
+
+
+687
+00:27:48.635 --> 00:27:50.971 line:-2 align:center
+Now that we've met
+the viewport layout controller,
+
+
+688
+00:27:51.004 --> 00:27:52.639 line:-2 align:center
+let's talk about how
+to participate
+
+
+689
+00:27:52.673 --> 00:27:54.741 line:-1 align:center
+in the viewport layout process.
+
+
+690
+00:27:56.677 --> 00:27:58.011 line:-1 align:center
+The viewport layout controller
+
+
+691
+00:27:58.045 --> 00:28:00.280 line:-2 align:center
+calls three important methods
+on its delegate
+
+
+692
+00:28:00,314 --> 00:28:02,783 line:-2
+during the viewport layout
+process:
+
+
+693
+00:28:02.816 --> 00:28:06.420 line:-2 align:center
+TextViewportLayoutController
+WillLayout,
+
+
+694
+00:28:06,453 --> 00:28:08,055 line:-1
+textViewportController
+
+
+695
+00:28:08.088 --> 00:28:12.125 line:-2 align:center
+configureRenderingSurface
+FortextLayoutFragment,
+
+
+696
+00:28:12,159 --> 00:28:14,962 line:-2
+and textViewportLayoutController
+DidLayout.
+
+
+697
+00:28:16,997 --> 00:28:17,831 line:-1
+First,
+
+
+698
+00:28:17.865 --> 00:28:20.634 line:-2 align:center
+the viewport layout controller
+calls the willLayout method
+
+
+699
+00:28:20,667 --> 00:28:23,871 line:-2
+before laying out elements
+in the viewport.
+
+
+700
+00:28:23,904 --> 00:28:25,639 line:-2
+Here is where you do
+any setup work
+
+
+701
+00:28:25,672 --> 00:28:26,807 line:-1
+to prepare for layout,
+
+
+702
+00:28:26,840 --> 00:28:28,308 line:-2
+such as clearing out
+the contents
+
+
+703
+00:28:28,342 --> 00:28:29,776 line:-1
+of the view or layer.
+
+
+704
+00:28:31,545 --> 00:28:32,379 line:-1
+Next,
+
+
+705
+00:28:32,412 --> 00:28:35,682 line:-2
+the viewport layout controller
+calls configureRenderingSurface
+
+
+706
+00:28:35.716 --> 00:28:39.319 line:-2 align:center
+for every layout fragment
+that's visible in the viewport.
+
+
+707
+00:28:39.353 --> 00:28:41.288 line:-2 align:center
+Here is where you update
+the geometry
+
+
+708
+00:28:41.321 --> 00:28:43.490 line:-1 align:center
+of each fragment view or layer.
+
+
+709
+00:28:44.858 --> 00:28:45.959 line:-1 align:center
+Finally,
+
+
+710
+00:28:45.993 --> 00:28:47.094 line:-1 align:center
+the viewport layout controller
+
+
+711
+00:28:47,127 --> 00:28:49,062 line:-1
+calls the didLayout method
+
+
+712
+00:28:49,096 --> 00:28:50,330 line:-1
+after it's finished laying out
+
+
+713
+00:28:50,364 --> 00:28:51,765 line:-1
+all of the layout fragments
+
+
+714
+00:28:51.798 --> 00:28:53.100 line:-1 align:center
+visible in the viewport.
+
+
+715
+00:28:54.134 --> 00:28:55.169 line:-1 align:center
+And here's where you perform
+
+
+716
+00:28:55,202 --> 00:28:56,203 line:-1
+any needed updates
+
+
+717
+00:28:56,236 --> 00:28:57,104 line:-1
+after viewport layout
+
+
+718
+00:28:57,137 --> 00:28:58,138 line:-1
+is finished,
+
+
+719
+00:28:58.172 --> 00:28:59.006 line:-1 align:center
+like if you wanted
+
+
+720
+00:28:59.039 --> 00:28:59.873 line:-1 align:center
+to adjust the viewport
+
+
+721
+00:28:59,907 --> 00:29:01,074 line:-1
+to make the last element
+
+
+722
+00:29:01.108 --> 00:29:02.709 line:-1 align:center
+fully visible on the screen.
+
+
+723
+00:29:03,443 --> 00:29:05,779 line:-2
+And that sums it up
+for performance.
+
+
+724
+00:29:05.812 --> 00:29:07.080 line:-1 align:center
+Now I'll hand it off to Chris
+
+
+725
+00:29:07.114 --> 00:29:10.083 line:-2 align:center
+to show you how to use
+TextKit 2 in practice.
+
+
+726
+00:29:10.083 --> 00:29:11.952 line:-1 align:center
+[Chris] Thank you, Donna.
+
+
+727
+00:29:11,985 --> 00:29:13,020 line:-1
+We wrote a sample app
+
+
+728
+00:29:13.053 --> 00:29:15.055 line:-2 align:center
+that demonstrates
+some of the different ways
+
+
+729
+00:29:15.088 --> 00:29:16.356 line:-1 align:center
+you can use TextKit 2
+
+
+730
+00:29:16.390 --> 00:29:18.792 line:-2 align:center
+to lay out and interact
+with text in your app.
+
+
+731
+00:29:18.792 --> 00:29:21.828 line:-2 align:center
+You can download the sample code
+used in this video.
+
+
+732
+00:29:21,862 --> 00:29:24,031 line:-1
+Let's open it up and try it out.
+
+
+733
+00:29:24.031 --> 00:29:25.999 line:-2 align:center
+We're using
+this collaboration app
+
+
+734
+00:29:26,033 --> 00:29:27,901 line:-1
+to review a book of recipes
+
+
+735
+00:29:27.935 --> 00:29:28.769 line:-1 align:center
+so we can figure out
+
+
+736
+00:29:28,802 --> 00:29:30,470 line:-1
+what we want to make for lunch.
+
+
+737
+00:29:31,238 --> 00:29:33,874 line:-2
+Scrolling through the recipes
+works as expected,
+
+
+738
+00:29:33.874 --> 00:29:37.344 line:-2 align:center
+but something special
+is happening behind the scenes:
+
+
+739
+00:29:37,377 --> 00:29:39,980 line:-2
+Only the paragraphs
+that are visible in the viewport
+
+
+740
+00:29:40,013 --> 00:29:41,114 line:-1
+are being drawn.
+
+
+741
+00:29:42,015 --> 00:29:43,350 line:-1
+And instead of every paragraph
+
+
+742
+00:29:43,383 --> 00:29:44,218 line:-1
+being rendered
+
+
+743
+00:29:44,251 --> 00:29:45,752 line:-1
+on the same big surface,
+
+
+744
+00:29:45,752 --> 00:29:48,622 line:-2
+each paragraph is being
+rendered into its own layer.
+
+
+745
+00:29:49,623 --> 00:29:51,592 line:-2
+If I click
+the Show Bounds button
+
+
+746
+00:29:51.625 --> 00:29:53.427 line:-1 align:center
+in the toolbar here,
+
+
+747
+00:29:53.460 --> 00:29:55.963 line:-1 align:center
+these colored rectangles appear.
+
+
+748
+00:29:55.996 --> 00:30:00.033 line:-2 align:center
+The orange rectangle
+shows the bounds of each layer.
+
+
+749
+00:30:00.067 --> 00:30:01.101 line:-1 align:center
+Drawing text
+
+
+750
+00:30:01,134 --> 00:30:02,135 line:-1
+into separate layers
+
+
+751
+00:30:02.169 --> 00:30:04.204 line:-1 align:center
+lets us implement a fun feature:
+
+
+752
+00:30:04.238 --> 00:30:06.473 line:-2 align:center
+I can leave comments
+on the recipes.
+
+
+753
+00:30:06.507 --> 00:30:09.610 line:-2 align:center
+Now, I think an egg sandwich
+sounds pretty good,
+
+
+754
+00:30:09,643 --> 00:30:12,145 line:-2
+so I'm going to double-click
+on this paragraph
+
+
+755
+00:30:12,179 --> 00:30:16,316 line:-2
+and type,
+"hey this sounds pretty good,"
+
+
+756
+00:30:16.350 --> 00:30:17.351 line:-1 align:center
+and hit Enter
+
+
+757
+00:30:17.384 --> 00:30:18.585 line:-1 align:center
+to insert the comment.
+
+
+758
+00:30:19,586 --> 00:30:20,454 line:-1
+I've just inserted
+
+
+759
+00:30:20.487 --> 00:30:21.355 line:-1 align:center
+a new paragraph
+
+
+760
+00:30:21.388 --> 00:30:23.023 line:-1 align:center
+into the document.
+
+
+761
+00:30:23,056 --> 00:30:23,891 line:-1
+The bubble background
+
+
+762
+00:30:23.924 --> 00:30:24.758 line:-1 align:center
+is being drawn
+
+
+763
+00:30:24.791 --> 00:30:25.759 line:-1 align:center
+by a custom subclass
+
+
+764
+00:30:25.792 --> 00:30:27.461 line:-1 align:center
+of NSTextLayoutFragment
+
+
+765
+00:30:27.494 --> 00:30:29.630 line:-1 align:center
+called BubbleLayoutFragment.
+
+
+766
+00:30:29.663 --> 00:30:30.697 line:-1 align:center
+More on that later.
+
+
+767
+00:30:31.698 --> 00:30:33.000 line:-1 align:center
+What's special is,
+
+
+768
+00:30:33,033 --> 00:30:33,967 line:-1
+as I insert comments
+
+
+769
+00:30:34.001 --> 00:30:35.369 line:-1 align:center
+into the document,
+
+
+770
+00:30:35,402 --> 00:30:36,270 line:-1
+all of the paragraphs
+
+
+771
+00:30:36.303 --> 00:30:37.371 line:-1 align:center
+below the comment
+
+
+772
+00:30:37.404 --> 00:30:39.006 line:-1 align:center
+move to make room for it.
+
+
+773
+00:30:39,606 --> 00:30:40,440 line:-1
+If you didn't catch it
+
+
+774
+00:30:40.474 --> 00:30:41.108 line:-1 align:center
+the first time,
+
+
+775
+00:30:41.108 --> 00:30:42.843 line:-2 align:center
+I'm going to click
+this turtle button
+
+
+776
+00:30:42.876 --> 00:30:44.945 line:-2 align:center
+in the toolbar
+to enable Slow Mode.
+
+
+777
+00:30:46,146 --> 00:30:47,581 line:-1
+Let's add another comment.
+
+
+778
+00:30:48,482 --> 00:30:51,518 line:-2
+"Yeah let's make it
+for lunch today."
+
+
+779
+00:30:52.486 --> 00:30:54.254 line:-1 align:center
+After I hit Enter,
+
+
+780
+00:30:54.288 --> 00:30:55.322 line:-1 align:center
+the comment is added
+
+
+781
+00:30:55.355 --> 00:30:56.423 line:-1 align:center
+to the document below it,
+
+
+782
+00:30:56.456 --> 00:30:57.658 line:-1 align:center
+and all paragraphs below it
+
+
+783
+00:30:57,691 --> 00:30:59,560 line:-1
+animate slowly.
+
+
+784
+00:30:59,593 --> 00:31:00,427 line:-1
+If you want
+
+
+785
+00:31:00.460 --> 00:31:01.295 line:-1 align:center
+to hide all the comments,
+
+
+786
+00:31:01,328 --> 00:31:02,162 line:-1
+you can click
+
+
+787
+00:31:02.196 --> 00:31:03.030 line:-1 align:center
+the Toggle Comments button
+
+
+788
+00:31:03,063 --> 00:31:04,831 line:-1
+in the toolbar.
+
+
+789
+00:31:04,865 --> 00:31:06,133 line:-1
+This is not actually editing
+
+
+790
+00:31:06,166 --> 00:31:08,235 line:-1
+the underlying document.
+
+
+791
+00:31:08.268 --> 00:31:09.269 line:-1 align:center
+It's instead asking
+
+
+792
+00:31:09.303 --> 00:31:10.470 line:-1 align:center
+the text content manager
+
+
+793
+00:31:10,504 --> 00:31:12,039 line:-1
+to skip comments
+
+
+794
+00:31:12.072 --> 00:31:13.373 line:-1 align:center
+when enumerating text elements
+
+
+795
+00:31:13,407 --> 00:31:14,474 line:-1
+for layout.
+
+
+796
+00:31:15,475 --> 00:31:20,113 line:-2
+TextKit 2 works just as well
+on iOS as it does on macOS.
+
+
+797
+00:31:20,147 --> 00:31:22,683 line:-2
+This means the TextKit 2 parts
+of the macOS app
+
+
+798
+00:31:22.716 --> 00:31:24.918 line:-1 align:center
+can be reused on iOS.
+
+
+799
+00:31:24.952 --> 00:31:26.620 line:-1 align:center
+Let's run it on iPad.
+
+
+800
+00:31:28.455 --> 00:31:31.124 line:-2 align:center
+We've used those parts
+to write an iOS version
+
+
+801
+00:31:31.158 --> 00:31:32.693 line:-1 align:center
+of our collaboration app
+
+
+802
+00:31:32.726 --> 00:31:35.262 line:-1 align:center
+with all the same functionality.
+
+
+803
+00:31:35.295 --> 00:31:38.265 line:-2 align:center
+I'm long-pressing on a paragraph
+to leave a comment,
+
+
+804
+00:31:38.298 --> 00:31:43.737 line:-2 align:center
+then typing,
+"hey that sounds good"...
+
+
+805
+00:31:43,770 --> 00:31:45,038 line:-1
+and hitting Enter.
+
+
+806
+00:31:46,273 --> 00:31:48,141 line:-1
+Just like the app on macOS,
+
+
+807
+00:31:48,175 --> 00:31:49,009 line:-1
+I can tap
+
+
+808
+00:31:49,042 --> 00:31:50,644 line:-1
+the comment Show/Hide button
+
+
+809
+00:31:50.677 --> 00:31:52.179 line:-1 align:center
+to hide all comments.
+
+
+810
+00:31:53,480 --> 00:31:54,481 line:-1
+I've just gone through an app
+
+
+811
+00:31:54,515 --> 00:31:55,749 line:-1
+that uses TextKit 2
+
+
+812
+00:31:55,782 --> 00:31:59,086 line:-2
+to lay out, draw,
+and interact with text.
+
+
+813
+00:31:59.086 --> 00:32:01.555 line:-2 align:center
+Now let's go over some
+of the code in the sample app
+
+
+814
+00:32:01.588 --> 00:32:04.124 line:-2 align:center
+and how TextKit 2
+makes it possible.
+
+
+815
+00:32:05.859 --> 00:32:08.095 line:-2 align:center
+The app demonstrates
+a lot of the functionality
+
+
+816
+00:32:08.128 --> 00:32:10.230 line:-1 align:center
+that TextKit 2 provides,
+
+
+817
+00:32:10.264 --> 00:32:13.233 line:-2 align:center
+but I want to focus on
+two areas for now:
+
+
+818
+00:32:13.267 --> 00:32:15.068 line:-2 align:center
+how it lays out the text
+in the viewport
+
+
+819
+00:32:15,102 --> 00:32:17,571 line:-1
+using NSViewportLayoutController
+
+
+820
+00:32:17.604 --> 00:32:19.806 line:-2 align:center
+and how it implements
+the custom hiding behavior
+
+
+821
+00:32:19.840 --> 00:32:21.575 line:-1 align:center
+and rendering of the comments.
+
+
+822
+00:32:23.610 --> 00:32:26.880 line:-2 align:center
+When the text layout manager is
+about to lay out the document
+
+
+823
+00:32:26.914 --> 00:32:28.448 line:-1 align:center
+either because it changed,
+
+
+824
+00:32:28.482 --> 00:32:30.517 line:-1 align:center
+the container size was changed,
+
+
+825
+00:32:30.551 --> 00:32:32.886 line:-2 align:center
+or a previously unseen
+portion of the document
+
+
+826
+00:32:32.920 --> 00:32:34.788 line:-1 align:center
+has moved into the viewport,
+
+
+827
+00:32:34.821 --> 00:32:38.358 line:-2 align:center
+it calls textViewportLayout
+ControllerWillLayout
+
+
+828
+00:32:38,392 --> 00:32:41,028 line:-1
+on its viewport layout delegate.
+
+
+829
+00:32:41.061 --> 00:32:42.029 line:-1 align:center
+We're using it here
+
+
+830
+00:32:42.062 --> 00:32:44.398 line:-2 align:center
+to clear out
+all the text sublayers
+
+
+831
+00:32:44,431 --> 00:32:46,266 line:-2
+and open
+an animation transaction.
+
+
+832
+00:32:48.635 --> 00:32:49.837 line:-1 align:center
+For each text element
+
+
+833
+00:32:49,870 --> 00:32:51,038 line:-1
+that the text layout manager
+
+
+834
+00:32:51,071 --> 00:32:52,306 line:-1
+lays out,
+
+
+835
+00:32:52,339 --> 00:32:54,675 line:-2
+it calls
+textViewportLayoutController,
+
+
+836
+00:32:54,708 --> 00:32:57,945 line:-2
+configureRenderingSurfaceFor
+textLayoutFragment.
+
+
+837
+00:32:57.978 --> 00:32:59.479 line:-1 align:center
+Here we're getting a layer
+
+
+838
+00:32:59.513 --> 00:33:00.347 line:-1 align:center
+to display
+
+
+839
+00:33:00,380 --> 00:33:01,949 line:-1
+the text layout fragment in,
+
+
+840
+00:33:01.982 --> 00:33:03.917 line:-1 align:center
+updating its geometry,
+
+
+841
+00:33:03,951 --> 00:33:04,785 line:-1
+animating it
+
+
+842
+00:33:04.818 --> 00:33:05.819 line:-1 align:center
+to its new position,
+
+
+843
+00:33:05,853 --> 00:33:07,120 line:-1
+if possible,
+
+
+844
+00:33:07.154 --> 00:33:07.988 line:-1 align:center
+and adding it
+
+
+845
+00:33:08,021 --> 00:33:09,356 line:-1
+as sublayer of the view.
+
+
+846
+00:33:11,425 --> 00:33:13,861 line:-2
+When the layout manager
+is done laying out,
+
+
+847
+00:33:13,894 --> 00:33:17,598 line:-2
+it will call textViewportLayout
+ControllerDidLayout.
+
+
+848
+00:33:17,631 --> 00:33:19,900 line:-2
+We commit
+the animation transaction,
+
+
+849
+00:33:19.933 --> 00:33:22.002 line:-1 align:center
+update the selection highlights,
+
+
+850
+00:33:22,035 --> 00:33:23,504 line:-1
+and update the content size
+
+
+851
+00:33:23,537 --> 00:33:25,939 line:-2
+so the scroll thumb
+is placed correctly.
+
+
+852
+00:33:28.008 --> 00:33:30.577 line:-2 align:center
+Now let's talk about
+the comments.
+
+
+853
+00:33:30.611 --> 00:33:32.446 line:-1 align:center
+TextKit 2 provides several hooks
+
+
+854
+00:33:32,479 --> 00:33:34,882 line:-2
+that you can use
+to customize layout element
+
+
+855
+00:33:34,915 --> 00:33:37,351 line:-1
+and layout fragment generation.
+
+
+856
+00:33:37,384 --> 00:33:38,452 line:-1
+I'm gonna show you
+
+
+857
+00:33:38,485 --> 00:33:41,255 line:-2
+how we take comments
+in the document,
+
+
+858
+00:33:41.288 --> 00:33:45.125 line:-2 align:center
+set custom attributes
+like font and color for display,
+
+
+859
+00:33:45.158 --> 00:33:47.261 line:-1 align:center
+and draw the bubble behind them.
+
+
+860
+00:33:48,962 --> 00:33:50,931 line:-2
+For each paragraph
+in the document,
+
+
+861
+00:33:50,964 --> 00:33:53,534 line:-2
+the text content storage gives
+its delegate a chance
+
+
+862
+00:33:53,567 --> 00:33:57,371 line:-2
+to customize the attributes
+on that paragraph.
+
+
+863
+00:33:57.404 --> 00:33:58.906 line:-1 align:center
+In our implementation,
+
+
+864
+00:33:58,939 --> 00:34:01,775 line:-2
+we're setting a custom font
+and color on comments
+
+
+865
+00:34:01,808 --> 00:34:03,810 line:-2
+without having to alter
+the font or color
+
+
+866
+00:34:03,844 --> 00:34:05,746 line:-1
+of the underlying text storage.
+
+
+867
+00:34:07.581 --> 00:34:10.317 line:-2 align:center
+The text content manager
+also gives its delegate
+
+
+868
+00:34:10,350 --> 00:34:12,920 line:-2
+the chance to decide which text
+elements will be shown
+
+
+869
+00:34:12,953 --> 00:34:15,355 line:-2
+to the text layout manager
+during layout.
+
+
+870
+00:34:16,390 --> 00:34:18,125 line:-2
+Returning false
+for a text element
+
+
+871
+00:34:18,158 --> 00:34:20,394 line:-2
+prevents it
+from being displayed.
+
+
+872
+00:34:20,427 --> 00:34:21,962 line:-1
+Here we're hiding comments
+
+
+873
+00:34:21.995 --> 00:34:23.997 line:-2 align:center
+by choosing
+not to enumerate them
+
+
+874
+00:34:24,031 --> 00:34:25,866 line:-2
+without having
+to actually delete them
+
+
+875
+00:34:25.899 --> 00:34:28.435 line:-2 align:center
+from the underlying
+text storage.
+
+
+876
+00:34:29,703 --> 00:34:32,739 line:-2
+The text layout manager
+has a delegate too.
+
+
+877
+00:34:32,773 --> 00:34:34,942 line:-2
+By implementing
+textLayoutManager,
+
+
+878
+00:34:34.975 --> 00:34:38.445 line:-2 align:center
+textLayoutFragmentFor location
+in textElement,
+
+
+879
+00:34:38.478 --> 00:34:41.415 line:-2 align:center
+the delegate can generate
+a custom text layout fragment
+
+
+880
+00:34:41.448 --> 00:34:42.816 line:-1 align:center
+instead of the default
+
+
+881
+00:34:42.850 --> 00:34:44.785 line:-1 align:center
+NSTextLayoutFragment instance
+
+
+882
+00:34:44,818 --> 00:34:47,487 line:-1
+for a given NSTextElement.
+
+
+883
+00:34:47,521 --> 00:34:48,555 line:-1
+In this case,
+
+
+884
+00:34:48,589 --> 00:34:50,490 line:-2
+when it encounters
+an NSTextElement
+
+
+885
+00:34:50.524 --> 00:34:52.359 line:-1 align:center
+that represents a comment,
+
+
+886
+00:34:52.392 --> 00:34:54.528 line:-2 align:center
+it creates
+a BubbleLayoutFragment,
+
+
+887
+00:34:54.561 --> 00:34:57.598 line:-2 align:center
+which is a custom subclass
+of NSTextLayoutFragment.
+
+
+888
+00:34:59,366 --> 00:35:02,002 line:-2
+BubbleLayoutFragment
+overrides the draw method
+
+
+889
+00:35:02.035 --> 00:35:03.937 line:-1 align:center
+of NSTextLayoutFragment
+
+
+890
+00:35:03.971 --> 00:35:05.906 line:-1 align:center
+to draw the background bubble
+
+
+891
+00:35:05.939 --> 00:35:06.807 line:-1 align:center
+before calling
+
+
+892
+00:35:06.840 --> 00:35:08.075 line:-1 align:center
+the base class implementation
+
+
+893
+00:35:08.108 --> 00:35:10.377 line:-1 align:center
+to draw the text on top.
+
+
+894
+00:35:10,410 --> 00:35:11,345 line:-1
+Note that the text
+
+
+895
+00:35:11,378 --> 00:35:12,212 line:-1
+is being rendered
+
+
+896
+00:35:12.246 --> 00:35:13.146 line:-1 align:center
+with the custom font
+
+
+897
+00:35:13,180 --> 00:35:14,014 line:-1
+and text color
+
+
+898
+00:35:14.047 --> 00:35:15.015 line:-1 align:center
+that we set earlier.
+
+
+899
+00:35:17,651 --> 00:35:20,420 line:-2
+I've gone over how
+the sample app uses TextKit 2
+
+
+900
+00:35:20.454 --> 00:35:23.824 line:-2 align:center
+to perform viewport-based
+animated layout of text
+
+
+901
+00:35:23.857 --> 00:35:26.560 line:-2 align:center
+and how it renders comments
+in those colorful bubbles,
+
+
+902
+00:35:26,593 --> 00:35:28,662 line:-2
+going all the way
+from custom attributes
+
+
+903
+00:35:28.695 --> 00:35:29.997 line:-1 align:center
+in the text storage
+
+
+904
+00:35:30,030 --> 00:35:31,598 line:-1
+to custom drawing.
+
+
+905
+00:35:31.632 --> 00:35:33.600 line:-2 align:center
+But there's a lot more
+in the sample code
+
+
+906
+00:35:33,634 --> 00:35:37,437 line:-2
+that takes advantage of new API
+provided by TextKit 2,
+
+
+907
+00:35:37,471 --> 00:35:39,039 line:-2
+including interpreting
+mouse events
+
+
+908
+00:35:39.072 --> 00:35:40.974 line:-1 align:center
+to determine the text selection,
+
+
+909
+00:35:41.008 --> 00:35:43.477 line:-2 align:center
+rendering
+the text selection highlight,
+
+
+910
+00:35:43.510 --> 00:35:44.778 line:-1 align:center
+placing the comment popover
+
+
+911
+00:35:44,811 --> 00:35:47,247 line:-2
+at a particular paragraph
+in the document,
+
+
+912
+00:35:47.281 --> 00:35:49.983 line:-2 align:center
+and estimating
+the document height.
+
+
+913
+00:35:50.017 --> 00:35:51.485 line:-1 align:center
+You can find further discussion
+
+
+914
+00:35:51,518 --> 00:35:54,188 line:-2
+of all of these topics
+in the sample code.
+
+
+915
+00:35:54.621 --> 00:35:55.923 line:-1 align:center
+Let's go back to Donna
+
+
+916
+00:35:55.956 --> 00:35:58.959 line:-2 align:center
+to talk about preparing
+your apps for TextKit 2.
+
+
+917
+00:35:58,959 --> 00:36:00,827 line:-1
+[Donna] Thanks, Chris.
+
+
+918
+00:36:00,861 --> 00:36:04,598 line:-2
+That's a fantastic example of
+how TextKit 2 works in practice.
+
+
+919
+00:36:05,132 --> 00:36:07,868 line:-2
+Now that we've gone over
+what TextKit 2 can do,
+
+
+920
+00:36:07,901 --> 00:36:10,671 line:-2
+let's discuss some approaches
+for app modernization.
+
+
+921
+00:36:13.674 --> 00:36:15.709 line:-2 align:center
+Everything
+we've talked about so far
+
+
+922
+00:36:15.742 --> 00:36:18.111 line:-2 align:center
+applies to creating
+your own TextKit 2 stack
+
+
+923
+00:36:18,145 --> 00:36:20,447 line:-2
+to use
+with a generic view or layer.
+
+
+924
+00:36:21,381 --> 00:36:23,283 line:-2
+All of the new classes
+are available
+
+
+925
+00:36:23,317 --> 00:36:27,821 line:-2
+in UIKit with iOS 15
+and in AppKit with macOS 12.
+
+
+926
+00:36:27,855 --> 00:36:29,389 line:-1
+So if you wanna go this route,
+
+
+927
+00:36:29,423 --> 00:36:32,526 line:-2
+you can start writing
+new code with TextKit 2 today.
+
+
+928
+00:36:34,094 --> 00:36:35,395 line:-1
+On the other hand,
+
+
+929
+00:36:35,429 --> 00:36:38,665 line:-2
+many apps use the built-in
+text controls, like text view,
+
+
+930
+00:36:38,665 --> 00:36:41,435 line:-2
+to take advantage of all the
+great, free functionality,
+
+
+931
+00:36:41.468 --> 00:36:42.970 line:-1 align:center
+like accessibility support
+
+
+932
+00:36:43,003 --> 00:36:46,273 line:-2
+and selection
+and editing services.
+
+
+933
+00:36:46,306 --> 00:36:48,809 line:-2
+Some of these controls
+have already been updated
+
+
+934
+00:36:48.842 --> 00:36:51.278 line:-1 align:center
+to use TextKit 2.
+
+
+935
+00:36:51.311 --> 00:36:53.180 line:-2 align:center
+If your app uses
+the built-in controls,
+
+
+936
+00:36:53,213 --> 00:36:55,082 line:-2
+there are
+a few additional details
+
+
+937
+00:36:55,115 --> 00:36:56,750 line:-1
+to be aware of.
+
+
+938
+00:36:57,384 --> 00:37:00,387 line:-2
+Maintaining compatibility
+is as important to us
+
+
+939
+00:37:00,420 --> 00:37:02,623 line:-1
+as it is to you.
+
+
+940
+00:37:02.656 --> 00:37:05.125 line:-2 align:center
+Since TextKit 1
+is such an integral part
+
+
+941
+00:37:05.158 --> 00:37:07.127 line:-1 align:center
+of the built-in text controls,
+
+
+942
+00:37:07.160 --> 00:37:09.429 line:-2 align:center
+we're going to great lengths
+to maintain compatibility
+
+
+943
+00:37:09,463 --> 00:37:11,031 line:-1
+for apps that are using them.
+
+
+944
+00:37:11.732 --> 00:37:15.769 line:-2 align:center
+This is why only some controls
+use TextKit 2 automatically
+
+
+945
+00:37:15,802 --> 00:37:18,572 line:-1
+in iOS 15 and macOS 12.
+
+
+946
+00:37:19.740 --> 00:37:20.641 line:-1 align:center
+Additionally,
+
+
+947
+00:37:20.674 --> 00:37:24.278 line:-2 align:center
+some controls require taking
+extra steps to use TextKit 2
+
+
+948
+00:37:24.311 --> 00:37:25.879 line:-1 align:center
+in these OS versions.
+
+
+949
+00:37:26.680 --> 00:37:28.215 line:-1 align:center
+For AppKit developers,
+
+
+950
+00:37:28.248 --> 00:37:31.718 line:-2 align:center
+NSTextView does not
+use TextKit 2 automatically.
+
+
+951
+00:37:32,753 --> 00:37:35,722 line:-2
+If you want to use TextKit 2
+with a NSTextView,
+
+
+952
+00:37:35,756 --> 00:37:37,624 line:-2
+you need to opt in
+programmatically
+
+
+953
+00:37:37,658 --> 00:37:39,026 line:-1
+at creation time.
+
+
+954
+00:37:40.761 --> 00:37:42.729 line:-1 align:center
+This is how to do it.
+
+
+955
+00:37:42.763 --> 00:37:46.300 line:-2 align:center
+First,
+create a text layout manager.
+
+
+956
+00:37:46,333 --> 00:37:49,937 line:-1
+Next, create a text container.
+
+
+957
+00:37:49.970 --> 00:37:51.872 line:-2 align:center
+Then associate
+the text container
+
+
+958
+00:37:51.905 --> 00:37:53.373 line:-1 align:center
+with the text layout manager
+
+
+959
+00:37:53.407 --> 00:37:57.845 line:-2 align:center
+using the textContainer property
+on NSTextLayoutManager.
+
+
+960
+00:37:57,878 --> 00:37:58,745 line:-1
+Finally,
+
+
+961
+00:37:58,779 --> 00:38:02,583 line:-2
+create your NSTextView
+using the designated initializer
+
+
+962
+00:38:02.616 --> 00:38:05.219 line:-1 align:center
+with the text container.
+
+
+963
+00:38:05,252 --> 00:38:07,654 line:-2
+Now you'll have a text view
+that uses TextKit 2.
+
+
+964
+00:38:08,722 --> 00:38:10,591 line:-2
+You can access
+the text layout manager
+
+
+965
+00:38:10,624 --> 00:38:11,792 line:-1
+and text content storage
+
+
+966
+00:38:11,825 --> 00:38:15,128 line:-2
+with new properties
+on NSTextView.
+
+
+967
+00:38:15,162 --> 00:38:17,130 line:-2
+There's just one thing
+to be careful of.
+
+
+968
+00:38:18.665 --> 00:38:21.335 line:-2 align:center
+Recall that NSTextView
+has a layoutManager property
+
+
+969
+00:38:21.368 --> 00:38:24.571 line:-2 align:center
+that allows getting
+and setting its NSLayoutManager.
+
+
+970
+00:38:25.839 --> 00:38:28.709 line:-2 align:center
+NSLayoutManager
+is a TextKit 1 object
+
+
+971
+00:38:28.742 --> 00:38:31.245 line:-2 align:center
+and it's not compatible
+with the TextKit 2 stack.
+
+
+972
+00:38:32,713 --> 00:38:35,349 line:-2
+A text view can't have
+both a layout manager
+
+
+973
+00:38:35,382 --> 00:38:37,684 line:-2
+and a text layout manager
+at the same time.
+
+
+974
+00:38:39.119 --> 00:38:41.021 line:-1 align:center
+So here's the deal.
+
+
+975
+00:38:41,054 --> 00:38:41,889 line:-1
+We added
+
+
+976
+00:38:41.922 --> 00:38:43.156 line:-1 align:center
+a special compatibility mode
+
+
+977
+00:38:43,190 --> 00:38:44,491 line:-1
+for NSTextView
+
+
+978
+00:38:44,525 --> 00:38:45,893 line:-1
+that switches it to TextKit 1
+
+
+979
+00:38:45.926 --> 00:38:47.828 line:-1 align:center
+when needed.
+
+
+980
+00:38:47,861 --> 00:38:48,695 line:-1
+The text view
+
+
+981
+00:38:48.729 --> 00:38:49.563 line:-1 align:center
+can automatically detect
+
+
+982
+00:38:49.596 --> 00:38:50.430 line:-1 align:center
+whether it needs
+
+
+983
+00:38:50,464 --> 00:38:51,365 line:-1
+to use this mode
+
+
+984
+00:38:51.398 --> 00:38:52.232 line:-1 align:center
+and replace
+
+
+985
+00:38:52,266 --> 00:38:53,800 line:-1
+its NSTextLayoutManager
+
+
+986
+00:38:53,834 --> 00:38:56,403 line:-1
+with NSLayoutManager.
+
+
+987
+00:38:56.436 --> 00:38:57.971 line:-1 align:center
+For optimum performance,
+
+
+988
+00:38:58,005 --> 00:38:59,173 line:-1
+the text view will remain
+
+
+989
+00:38:59.206 --> 00:39:00.340 line:-1 align:center
+in compatibility mode
+
+
+990
+00:39:00,374 --> 00:39:01,708 line:-1
+from that point forward.
+
+
+991
+00:39:03.310 --> 00:39:05.746 line:-2 align:center
+Even if you opted in
+to TextKit 2,
+
+
+992
+00:39:05,779 --> 00:39:07,548 line:-2
+your text view will
+automatically switch
+
+
+993
+00:39:07.581 --> 00:39:08.782 line:-1 align:center
+to TextKit 1
+
+
+994
+00:39:08,815 --> 00:39:11,919 line:-2
+if you explicitly call
+the layoutManager property
+
+
+995
+00:39:11,952 --> 00:39:14,054 line:-2
+on your text view
+or text container.
+
+
+996
+00:39:15,155 --> 00:39:16,590 line:-1
+The text view will also switch
+
+
+997
+00:39:16,623 --> 00:39:19,626 line:-2
+if it encounters text content
+that is not yet supported
+
+
+998
+00:39:19.660 --> 00:39:22.529 line:-2 align:center
+or detects other conditions
+that require TextKit 1.
+
+
+999
+00:39:24.531 --> 00:39:27.968 line:-2 align:center
+And this can happen
+for field editors as well.
+
+
+1000
+00:39:28.001 --> 00:39:32.339 line:-2 align:center
+Field editors for NSTextField
+use TextKit 2 by default.
+
+
+1001
+00:39:32,372 --> 00:39:35,709 line:-2
+But if your text field subclass
+is requesting layout information
+
+
+1002
+00:39:35,742 --> 00:39:38,178 line:-2
+from the field editor's
+layout manager,
+
+
+1003
+00:39:38.212 --> 00:39:40.848 line:-2 align:center
+the field editor will switch
+to TextKit 1
+
+
+1004
+00:39:40.881 --> 00:39:43.016 line:-2 align:center
+for all text fields
+in that window.
+
+
+1005
+00:39:45.152 --> 00:39:46.987 line:-2 align:center
+The system will
+issue notifications
+
+
+1006
+00:39:47.020 --> 00:39:50.257 line:-2 align:center
+before and after a text view
+switches to TextKit 1.
+
+
+1007
+00:39:50.290 --> 00:39:51.792 line:-2 align:center
+You can observe
+these notifications
+
+
+1008
+00:39:51,825 --> 00:39:53,460 line:-1
+to receive this information.
+
+
+1009
+00:39:54.695 --> 00:39:56.897 line:-2 align:center
+The notification objects
+contain a reference
+
+
+1010
+00:39:56,930 --> 00:39:59,533 line:-2
+to the exact text view
+that changed modes.
+
+
+1011
+00:40:00,601 --> 00:40:01,668 line:0
+For complete details
+
+
+1012
+00:40:01,702 --> 00:40:04,438 line:0
+on the TextKit 1 compatibility
+mode for AppKit,
+
+
+1013
+00:40:04,471 --> 00:40:06,006 line:0
+please refer
+to the documentation
+
+
+1014
+00:40:06,039 --> 00:40:07,708 align:center
+on the Apple Developer portal.
+
+
+1015
+00:40:09.576 --> 00:40:11.211 line:-1 align:center
+For UIKit developers,
+
+
+1016
+00:40:11,245 --> 00:40:15,315 line:-2
+UITextField uses TextKit 2
+automatically in iOS 15.
+
+
+1017
+00:40:16,850 --> 00:40:21,688 line:-2
+UITextView with TextKit 2
+is not available in iOS 15.
+
+
+1018
+00:40:23.023 --> 00:40:25.692 line:-2 align:center
+We're working to ensure
+maximum compatibility
+
+
+1019
+00:40:25,726 --> 00:40:28,095 line:-2
+for all applications
+that use UITextView,
+
+
+1020
+00:40:28.128 --> 00:40:30.564 line:-2 align:center
+and there are
+quite a lot of them.
+
+
+1021
+00:40:30,597 --> 00:40:31,732 line:-1
+In the meantime,
+
+
+1022
+00:40:31.765 --> 00:40:33.534 line:-2 align:center
+you can review
+your existing code
+
+
+1023
+00:40:33,567 --> 00:40:37,271 line:-2
+for uses of UITextView's
+layoutManager property
+
+
+1024
+00:40:37,304 --> 00:40:40,741 line:-2
+and think about how to express
+your intent with TextKit 2.
+
+
+1025
+00:40:41,441 --> 00:40:42,276 line:-1
+That way,
+
+
+1026
+00:40:42,309 --> 00:40:44,545 line:-2
+you'll be ready to transition
+once it's available.
+
+
+1027
+00:40:45,879 --> 00:40:47,347 line:-1
+And that's a wrap.
+
+
+1028
+00:40:47,381 --> 00:40:49,183 line:-1
+Now you've met TextKit 2,
+
+
+1029
+00:40:49,216 --> 00:40:52,553 line:-2
+Apple's new text engine
+to take us into the future.
+
+
+1030
+00:40:52,586 --> 00:40:54,154 line:-2
+We look forward to seeing
+what you'll build
+
+
+1031
+00:40:54.188 --> 00:40:55.489 line:-1 align:center
+with TextKit 2.
+
+
+1032
+00:40:55,522 --> 00:40:56,490 line:-1
+Thanks for watching.
+
+
+1033
+00:40:56.523 --> 00:41:00.861 line:-1 align:center
+[upbeat music]
+

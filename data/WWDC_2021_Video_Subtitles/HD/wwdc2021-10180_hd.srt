@@ -1,0 +1,3583 @@
+2
+00:00:00.601 --> 00:00:07.608 line:-1 align:center
+[percussive music]
+
+
+3
+00:00:10.277 --> 00:00:12.713 line:-2 align:center
+[Tanuja] Hi, my name is Tanuja,
+and I'm an engineer
+
+
+4
+00:00:12,779 --> 00:00:14,481 line:-1
+on the OS Performance team.
+
+
+5
+00:00:14.548 --> 00:00:17.217 line:-2 align:center
+Today Stefan and I are going
+to talk about how to detect
+
+
+6
+00:00:17.284 --> 00:00:21.054 line:-2 align:center
+and diagnose memory issues
+in your applications.
+
+
+7
+00:00:21,121 --> 00:00:24,057 line:-2
+We will start with looking
+into the impact
+
+
+8
+00:00:24,124 --> 00:00:26,059 line:-2
+of an application's
+memory footprint.
+
+
+9
+00:00:27,494 --> 00:00:28,996 line:-2
+We will then talk about
+the tools
+
+
+10
+00:00:29.062 --> 00:00:30.764 line:-2 align:center
+to profile your
+memory usage
+
+
+11
+00:00:30,831 --> 00:00:33,500 line:-2
+and the types of memory
+issues you may encounter.
+
+
+12
+00:00:34.801 --> 00:00:36.103 line:-1 align:center
+Let's jump right in.
+
+
+13
+00:00:38,105 --> 00:00:40,274 line:-2
+One question you might
+immediately ask is,
+
+
+14
+00:00:40,340 --> 00:00:43,911 line:-2
+why should I care about my
+application's memory footprint?
+
+
+15
+00:00:44.711 --> 00:00:45.946 line:-1 align:center
+The key reason is that
+
+
+16
+00:00:46.013 --> 00:00:49.583 line:-2 align:center
+it improves your app's
+user experience tremendously.
+
+
+17
+00:00:49,650 --> 00:00:53,053 align:center
+There is a finite amount
+of memory on the system
+
+
+18
+00:00:53,120 --> 00:00:56,256 line:0
+and monitoring your app's memory
+use can prevent the system
+
+
+19
+00:00:56,323 --> 00:00:58,825 line:0
+from terminating your app
+to reclaim that memory.
+
+
+20
+00:01:00,127 --> 00:01:02,429 align:center
+This means your app
+can preserve its state
+
+
+21
+00:01:02,496 --> 00:01:04,431 align:center
+when in the background,
+which is great,
+
+
+22
+00:01:04,498 --> 00:01:06,834 line:0
+because loading
+into memory takes time,
+
+
+23
+00:01:06,900 --> 00:01:08,836 align:center
+and keeping your memory
+footprint compact
+
+
+24
+00:01:08,902 --> 00:01:11,104 line:0
+increases the chance
+of your application
+
+
+25
+00:01:11,171 --> 00:01:14,942 align:center
+remaining in memory, leading
+to faster app activations.
+
+
+26
+00:01:16,510 --> 00:01:19,413 align:center
+Reducing your memory use
+also results in a dynamic,
+
+
+27
+00:01:19,479 --> 00:01:21,248 align:center
+responsive experience
+
+
+28
+00:01:21,315 --> 00:01:22,983 line:0
+which is exactly
+what your users want
+
+
+29
+00:01:23,050 --> 00:01:24,852 align:center
+as they explore
+your new features.
+
+
+30
+00:01:26,353 --> 00:01:28,655 align:center
+By being strategic about
+with what your app
+
+
+31
+00:01:28,722 --> 00:01:32,226 align:center
+has loaded into memory, your app
+can avoid the cost of waiting
+
+
+32
+00:01:32,292 --> 00:01:35,462 line:0
+to reclaim memory as your user
+interacts with your app.
+
+
+33
+00:01:36,997 --> 00:01:39,299 align:center
+Being strategic about
+your memory usage
+
+
+34
+00:01:39,366 --> 00:01:41,668 line:0
+also opens the door to a wider
+range of features
+
+
+35
+00:01:41,735 --> 00:01:44,338 line:0
+you could add to your app,
+such as loading videos,
+
+
+36
+00:01:44,404 --> 00:01:47,007 line:0
+including animations,
+and a whole lot more.
+
+
+37
+00:01:48,208 --> 00:01:52,379 line:0
+Finally, our devices are
+constantly evolving over time,
+
+
+38
+00:01:52,446 --> 00:01:56,016 line:0
+and our newer devices have more
+physical memory than before.
+
+
+39
+00:01:56,083 --> 00:01:57,918 align:center
+By reducing your memory
+footprint,
+
+
+40
+00:01:57,985 --> 00:02:00,621 align:center
+your app will be just as
+performant on older devices,
+
+
+41
+00:02:00,687 --> 00:02:03,524 line:0
+increasing the audience
+that can enjoy your app.
+
+
+42
+00:02:05,459 --> 00:02:07,394 align:center
+By monitoring your app's memory
+footprint,
+
+
+43
+00:02:07,461 --> 00:02:10,230 line:0
+your app will activate faster,
+be more responsive,
+
+
+44
+00:02:10,297 --> 00:02:11,899 align:center
+handle complex features,
+
+
+45
+00:02:11,965 --> 00:02:14,968 align:center
+and be performant
+on a wider range of devices.
+
+
+46
+00:02:15,035 --> 00:02:18,172 line:0
+Let's now take a look at what
+makes up your memory footprint.
+
+
+47
+00:02:20.007 --> 00:02:21.875 line:-2 align:center
+There are three categories
+we use to break down
+
+
+48
+00:02:21.942 --> 00:02:24.278 line:-2 align:center
+your application's
+memory profile:
+
+
+49
+00:02:24.344 --> 00:02:27.347 line:-2 align:center
+dirty, compressed,
+and clean memory.
+
+
+50
+00:02:27.414 --> 00:02:30.150 line:-2 align:center
+Let's take a quick look at
+what each of these includes.
+
+
+51
+00:02:31,952 --> 00:02:35,923 line:-2
+Dirty memory consists of memory
+written by your application.
+
+
+52
+00:02:35,989 --> 00:02:38,325 line:-2
+It also includes
+all heap allocations
+
+
+53
+00:02:38,392 --> 00:02:41,128 line:-2
+such as when you use malloc,
+decoded image buffers,
+
+
+54
+00:02:41.195 --> 00:02:43.030 line:-1 align:center
+and frameworks.
+
+
+55
+00:02:44,831 --> 00:02:47,334 line:-2
+Compressed memory
+refers to any dirty pages
+
+
+56
+00:02:47,401 --> 00:02:49,570 line:-2
+that haven't recently
+been accessed
+
+
+57
+00:02:49.636 --> 00:02:52.172 line:-2 align:center
+that the memory
+compressor has compressed.
+
+
+58
+00:02:52.239 --> 00:02:54.775 line:-2 align:center
+These pages will be
+decompressed on access.
+
+
+59
+00:02:56,476 --> 00:02:59,346 line:-2
+Note that we do not have
+the concept of swap on iOS,
+
+
+60
+00:02:59.413 --> 00:03:01.648 line:-1 align:center
+which is specific to macOS.
+
+
+61
+00:03:03,150 --> 00:03:05,319 line:-2
+And finally,
+we have clean memory.
+
+
+62
+00:03:05,385 --> 00:03:08,255 line:-2
+Clean memory is memory
+that has not been written to
+
+
+63
+00:03:08,322 --> 00:03:10,090 line:-1
+or data that can be paged out.
+
+
+64
+00:03:10,157 --> 00:03:12,793 line:-2
+For example,
+these can be memory mapped files
+
+
+65
+00:03:12.860 --> 00:03:16.763 line:-2 align:center
+such as images that are on disk
+but loaded into memory.
+
+
+66
+00:03:16,830 --> 00:03:18,732 line:-1
+Or they can be frameworks.
+
+
+67
+00:03:20,133 --> 00:03:22,536 align:center
+When we refer your
+application's memory footprint,
+
+
+68
+00:03:22,603 --> 00:03:25,272 align:center
+we're really talking
+the your app's dirty memory
+
+
+69
+00:03:25,339 --> 00:03:27,574 align:center
+and compressed memory together.
+
+
+70
+00:03:27,641 --> 00:03:29,543 align:center
+Clean memory
+does not count here.
+
+
+71
+00:03:31,411 --> 00:03:32,913 align:center
+This is
+a high-level understanding
+
+
+72
+00:03:32,980 --> 00:03:34,548 align:center
+of your memory footprint.
+
+
+73
+00:03:34,615 --> 00:03:37,050 line:0
+For a more in-depth,
+detailed explanation,
+
+
+74
+00:03:37,117 --> 00:03:40,120 align:center
+we recommend you check out
+the iOS memory deep dive talk
+
+
+75
+00:03:40,187 --> 00:03:42,589 line:0
+from WWDC 2018.
+
+
+76
+00:03:43,357 --> 00:03:46,159 align:center
+Let's now take a look at
+the tools you can use
+
+
+77
+00:03:46,226 --> 00:03:48,262 line:0
+to profile your memory
+footprint.
+
+
+78
+00:03:49,863 --> 00:03:52,065 align:center
+Xcode offers a suite
+of tools to help monitor
+
+
+79
+00:03:52,132 --> 00:03:53,901 line:0
+your app's memory
+performance throughout
+
+
+80
+00:03:53,967 --> 00:03:56,770 line:0
+both the development
+and production workflows.
+
+
+81
+00:03:58,238 --> 00:04:01,341 line:0
+The XCTest framework helps you
+monitor your memory footprint
+
+
+82
+00:04:01,408 --> 00:04:03,944 align:center
+directly in your project's unit
+and UI tests,
+
+
+83
+00:04:04,011 --> 00:04:06,079 line:0
+while MetricKit
+and the Xcode Organizer
+
+
+84
+00:04:06,146 --> 00:04:08,882 line:0
+allow you to monitor memory
+metrics in production
+
+
+85
+00:04:08,949 --> 00:04:10,617 align:center
+from your customers.
+
+
+86
+00:04:12,119 --> 00:04:13,520 line:0
+The continuation of this talk
+
+
+87
+00:04:13,587 --> 00:04:16,757 line:0
+will be in the context of using
+performance XCTests.
+
+
+88
+00:04:16,823 --> 00:04:19,159 line:0
+But note that these
+techniques still apply
+
+
+89
+00:04:19,226 --> 00:04:21,695 align:center
+to general memory triage
+and investigations.
+
+
+90
+00:04:23,297 --> 00:04:27,334 line:-2
+Using performance XCTests,
+you can measure system resources
+
+
+91
+00:04:27,401 --> 00:04:30,771 line:-2
+such as memory utilization,
+CPU usage, disk writes,
+
+
+92
+00:04:30,838 --> 00:04:32,472 line:-1
+and a whole lot more.
+
+
+93
+00:04:32,539 --> 00:04:34,208 line:-1
+Let's take a look at
+
+
+94
+00:04:34.274 --> 00:04:35.843 line:-1 align:center
+an example test together.
+
+
+95
+00:04:37.611 --> 00:04:40.113 line:-2 align:center
+Let's say I'm an app
+developer at Meal Planner,
+
+
+96
+00:04:40,180 --> 00:04:42,983 line:-2
+an app that helps you organize
+what you will eat in a week,
+
+
+97
+00:04:43,050 --> 00:04:45,285 line:-2
+and I want to measure
+the memory usage
+
+
+98
+00:04:45,352 --> 00:04:47,588 line:-2
+of this new save meal feature
+I've added
+
+
+99
+00:04:47,654 --> 00:04:50,524 line:-2
+that lets user download
+the recipe to their device.
+
+
+100
+00:04:52,326 --> 00:04:53,794 line:-1
+In my performance test,
+
+
+101
+00:04:53,861 --> 00:04:56,396 line:-2
+I'm using the
+measure(metrics:options:block:) API
+
+
+102
+00:04:56,463 --> 00:04:59,099 line:-2
+and I'm specifying
+that I want to measure
+
+
+103
+00:04:59.166 --> 00:05:03.070 line:-2 align:center
+the memory use
+of my targeted application.
+
+
+104
+00:05:03.136 --> 00:05:04.538 line:-2 align:center
+In the body
+of the measure block,
+
+
+105
+00:05:04,605 --> 00:05:06,473 line:-1
+I'm launching the application,
+
+
+106
+00:05:06.540 --> 00:05:08.842 line:-2 align:center
+manually telling
+the measure API
+
+
+107
+00:05:08,909 --> 00:05:10,544 line:-1
+to start measuring,
+
+
+108
+00:05:10,611 --> 00:05:13,247 line:-2
+and then tapping on
+the save meal button.
+
+
+109
+00:05:14,515 --> 00:05:17,117 line:0
+I wait up to 30 seconds
+for the recipe download
+
+
+110
+00:05:17,184 --> 00:05:20,287 align:center
+to complete by checking
+for an update in the UI.
+
+
+111
+00:05:22,256 --> 00:05:24,725 line:-2
+Now I can run this test
+directly in Xcode's UI
+
+
+112
+00:05:24,791 --> 00:05:26,560 line:-1
+to view my measurements.
+
+
+113
+00:05:28.462 --> 00:05:30.497 line:-2 align:center
+I can access my measurements
+by clicking on
+
+
+114
+00:05:30.564 --> 00:05:32.766 line:-2 align:center
+the gray diamond
+next to my test.
+
+
+115
+00:05:32,833 --> 00:05:35,035 line:-2
+The results popover UI
+has a drop down
+
+
+116
+00:05:35,102 --> 00:05:37,237 line:-2
+that shows me
+which metrics were measured.
+
+
+117
+00:05:39,072 --> 00:05:40,807 line:-2
+The bar graph
+on the bottom shows me
+
+
+118
+00:05:40.874 --> 00:05:43.610 line:-2 align:center
+the measurements for each
+individual iteration.
+
+
+119
+00:05:45,245 --> 00:05:46,980 line:-2
+The average of
+all five iterations
+
+
+120
+00:05:47,047 --> 00:05:49,049 line:-1
+is computed and displayed.
+
+
+121
+00:05:50.384 --> 00:05:53.420 line:-2 align:center
+I can now decide if I want
+to set this run's average
+
+
+122
+00:05:53,487 --> 00:05:57,524 line:-2
+as my baseline for future
+tests to be compared against.
+
+
+123
+00:05:59,359 --> 00:06:01,195 line:-2
+A future run of the test
+would now fail
+
+
+124
+00:06:01,261 --> 00:06:04,298 line:-2
+if its average is greater
+than the set baseline.
+
+
+125
+00:06:04.364 --> 00:06:07.901 line:-2 align:center
+We call this deviation from
+the set baseline a regression.
+
+
+126
+00:06:09.770 --> 00:06:12.739 line:-2 align:center
+A regression indicates that
+we should stop, investigate,
+
+
+127
+00:06:12,806 --> 00:06:16,043 line:-2
+and fix our code to make sure
+that the test passes.
+
+
+128
+00:06:18,445 --> 00:06:20,981 line:0
+We are excited to share
+that in Xcode 13,
+
+
+129
+00:06:21,048 --> 00:06:23,817 line:0
+we've added in a new feature
+to collect diagnostics
+
+
+130
+00:06:23,884 --> 00:06:26,620 align:center
+to help triage
+these test regressions.
+
+
+131
+00:06:26,687 --> 00:06:29,723 line:0
+There are two diagnostics
+that we find valuable:
+
+
+132
+00:06:29,790 --> 00:06:32,025 line:0
+ktrace files and memory graphs.
+
+
+133
+00:06:34,394 --> 00:06:36,997 align:center
+Ktrace files
+are powerful and versatile.
+
+
+134
+00:06:37,064 --> 00:06:39,333 line:0
+They can be used for general
+system investigations,
+
+
+135
+00:06:39,399 --> 00:06:42,102 line:0
+or they can be focused
+on specific issues,
+
+
+136
+00:06:42,169 --> 00:06:44,471 line:0
+such as diving into
+the rendering pipeline
+
+
+137
+00:06:44,538 --> 00:06:46,173 line:0
+when investigating hitches
+
+
+138
+00:06:46,240 --> 00:06:48,308 line:0
+or looking into reasons
+for why your main thread
+
+
+139
+00:06:48,375 --> 00:06:50,410 line:0
+might be blocked,
+resulting in a hang.
+
+
+140
+00:06:52,646 --> 00:06:55,082 align:center
+These ktrace files can
+be opened and analyzed
+
+
+141
+00:06:55,148 --> 00:06:57,284 align:center
+in Instruments
+using your normal workflow.
+
+
+142
+00:06:59,052 --> 00:07:01,488 align:center
+The second diagnostic
+is a memory graph
+
+
+143
+00:07:01,555 --> 00:07:04,791 align:center
+which are great for
+memory-specific investigations.
+
+
+144
+00:07:04,858 --> 00:07:07,961 line:0
+Memory graphs can be used
+with Xcode's visual debugger
+
+
+145
+00:07:08,028 --> 00:07:10,564 align:center
+as well as a variety
+of command line tools,
+
+
+146
+00:07:10,631 --> 00:07:12,966 line:0
+some of which we'll cover
+later in this talk.
+
+
+147
+00:07:15.068 --> 00:07:17.571 line:-2 align:center
+A memory graph is essentially
+a snapshot
+
+
+148
+00:07:17.638 --> 00:07:21.742 line:-2 align:center
+of your process's address space
+at an instance in time.
+
+
+149
+00:07:21.808 --> 00:07:24.311 line:-2 align:center
+Memgraphs record
+the address and size
+
+
+150
+00:07:24,378 --> 00:07:26,246 line:-2
+of each virtual
+memory region
+
+
+151
+00:07:26,313 --> 00:07:28,615 line:-2
+and each
+allocated malloc block,
+
+
+152
+00:07:28.682 --> 00:07:32.186 line:-2 align:center
+as well as pointers between
+those regions and blocks.
+
+
+153
+00:07:32.252 --> 00:07:33.287 line:-1 align:center
+This allows you to inspect
+
+
+154
+00:07:33.353 --> 00:07:35.055 line:-2 align:center
+individual objects
+on the heap,
+
+
+155
+00:07:35.122 --> 00:07:37.624 line:-2 align:center
+view data regions associated
+with linked frameworks,
+
+
+156
+00:07:37,691 --> 00:07:39,059 line:-1
+and more.
+
+
+157
+00:07:40,394 --> 00:07:43,263 line:-2
+XCTest automatically enables
+malloc stack logging,
+
+
+158
+00:07:43.330 --> 00:07:47.868 line:-2 align:center
+which captures backtraces
+for newly allocated objects.
+
+
+159
+00:07:49.970 --> 00:07:51.638 line:-2 align:center
+To enable
+diagnostic collection,
+
+
+160
+00:07:51,705 --> 00:07:54,374 line:-2
+use the xcodebuild
+command line tool
+
+
+161
+00:07:54,441 --> 00:07:55,676 line:-1
+in conjunction with the
+
+
+162
+00:07:55,742 --> 00:07:58,579 line:-2
+enablePerformanceTestsDiagnostics flag.
+
+
+163
+00:07:58,645 --> 00:08:00,981 line:-2
+This flag will enable
+ktrace collection
+
+
+164
+00:08:01.048 --> 00:08:02.850 line:-1 align:center
+for nonmemory metrics
+
+
+165
+00:08:02,916 --> 00:08:05,152 line:-2
+and memgraphs
+for memory metrics.
+
+
+166
+00:08:06,887 --> 00:08:08,622 line:-2
+Once our previously written
+performance test
+
+
+167
+00:08:08,689 --> 00:08:10,257 line:-1
+is done running,
+
+
+168
+00:08:10.324 --> 00:08:12.860 line:-2 align:center
+we see the following
+printed to our console.
+
+
+169
+00:08:12.926 --> 00:08:14.561 line:-2 align:center
+This is quite a lot,
+but there are a few
+
+
+170
+00:08:14.628 --> 00:08:16.263 line:-1 align:center
+key things to look for.
+
+
+171
+00:08:17,564 --> 00:08:21,301 align:center
+The first thing to look for is
+if the test failed or passed.
+
+
+172
+00:08:21,368 --> 00:08:23,337 line:0
+In this case, the test failed.
+
+
+173
+00:08:25,105 --> 00:08:27,307 align:center
+The output also calls out
+that the test failed
+
+
+174
+00:08:27,374 --> 00:08:30,010 align:center
+specifically
+due to a regression.
+
+
+175
+00:08:30,077 --> 00:08:33,380 line:0
+Our new average is 12%
+worse than our baseline.
+
+
+176
+00:08:35,115 --> 00:08:38,619 line:0
+Finally, we can find
+the path to our xcresult bundle.
+
+
+177
+00:08:40,921 --> 00:08:43,156 line:-2
+When we open the xcresult bundle
+in Xcode,
+
+
+178
+00:08:43.223 --> 00:08:45.592 line:-2 align:center
+we see the memory
+measurements at the top
+
+
+179
+00:08:45.659 --> 00:08:47.194 line:-1 align:center
+next to the test name.
+
+
+180
+00:08:49.129 --> 00:08:52.199 line:-2 align:center
+We can then expand the test logs
+and towards the bottom,
+
+
+181
+00:08:52.266 --> 00:08:55.169 line:-2 align:center
+we can find our
+attached memgraphs.
+
+
+182
+00:08:57,137 --> 00:09:00,774 line:-2
+Once downloaded and unzipped,
+we find 2 memgraphs.
+
+
+183
+00:09:00.841 --> 00:09:03.343 line:-2 align:center
+This is because we append
+an additional iteration
+
+
+184
+00:09:03,410 --> 00:09:07,114 line:-2
+to your test to enable
+malloc stack logging.
+
+
+185
+00:09:07,181 --> 00:09:09,950 line:-2
+We collect an initial memgraph,
+prefixed with pre,
+
+
+186
+00:09:10,017 --> 00:09:12,452 line:-2
+at the beginning of
+the measured iteration,
+
+
+187
+00:09:12,519 --> 00:09:14,488 line:-2
+and we collect
+a second memgraph,
+
+
+188
+00:09:14,555 --> 00:09:17,791 line:-2
+prefixed with post,
+at the end of the iteration.
+
+
+189
+00:09:17.858 --> 00:09:20.127 line:-2 align:center
+This allows you to analyze
+the memory growth
+
+
+190
+00:09:20,194 --> 00:09:23,430 line:-2
+over the period of one single
+iteration if needed.
+
+
+191
+00:09:25,465 --> 00:09:27,734 line:0
+Now with ktrace files
+and memory graphs
+
+
+192
+00:09:27,801 --> 00:09:29,736 align:center
+with malloc stack logging
+enabled,
+
+
+193
+00:09:29,803 --> 00:09:33,073 line:0
+you are ready to not just answer
+if a regression occurred
+
+
+194
+00:09:33,140 --> 00:09:35,876 line:0
+but also why did
+the regression occur?
+
+
+195
+00:09:35,943 --> 00:09:38,812 line:-2
+I'll now hand it off
+to my colleague, Stefan,
+
+
+196
+00:09:38.879 --> 00:09:40.614 line:-2 align:center
+to talk about the types
+of memory issues
+
+
+197
+00:09:40,681 --> 00:09:41,815 line:-1
+you may encounter
+
+
+198
+00:09:41.882 --> 00:09:45.252 line:-2 align:center
+when looking into your collected
+memgraph diagnostics.
+
+
+199
+00:09:45.319 --> 00:09:48.021 line:-2 align:center
+[Stefan] Thanks, Tanuja.
+Hi, everyone.
+
+
+200
+00:09:48.088 --> 00:09:50.791 line:-2 align:center
+I'm Stefan, an engineer
+on the OS Performance Team.
+
+
+201
+00:09:50,858 --> 00:09:53,227 line:-2
+I'll be going over some
+common memory issues
+
+
+202
+00:09:53,293 --> 00:09:56,129 line:-2
+you might find in your app
+as well as how you can diagnose,
+
+
+203
+00:09:56,196 --> 00:09:57,564 line:-1
+fix, and prevent them.
+
+
+204
+00:10:00,601 --> 00:10:04,271 line:-2
+I'll go over two types of memory
+issues: leaks and heap issues,
+
+
+205
+00:10:04,338 --> 00:10:07,174 line:0
+which can be broken down into
+heap allocation regressions
+
+
+206
+00:10:07,241 --> 00:10:09,243 line:0
+and fragmentation issues.
+
+
+207
+00:10:09,309 --> 00:10:11,144 align:center
+This is not an exhaustive list,
+
+
+208
+00:10:11,211 --> 00:10:14,448 line:0
+but it does cover some
+of the most common issues.
+
+
+209
+00:10:14,515 --> 00:10:16,783 align:center
+I'll also cover some
+command line workflows
+
+
+210
+00:10:16,850 --> 00:10:19,052 line:0
+that can be used
+to diagnose these issues.
+
+
+211
+00:10:19,119 --> 00:10:21,755 align:center
+For a more in-depth summary
+of the command line tools,
+
+
+212
+00:10:21,822 --> 00:10:26,026 line:0
+check out the iOS memory deep
+dive talk from WWDC 2018.
+
+
+213
+00:10:27,628 --> 00:10:29,496 line:0
+Let's start
+by discussing memory leaks.
+
+
+214
+00:10:31,398 --> 00:10:34,034 align:center
+A leak occurs when the process
+allocates an object
+
+
+215
+00:10:34,101 --> 00:10:38,438 line:0
+and loses all references to it
+without ever deallocating it.
+
+
+216
+00:10:38,505 --> 00:10:40,407 line:0
+Here I have
+an example object graph,
+
+
+217
+00:10:40,474 --> 00:10:43,477 line:0
+where the gray arrows denote
+references between objects.
+
+
+218
+00:10:43,544 --> 00:10:46,446 line:0
+Notice that every object has
+at least one reference to it.
+
+
+219
+00:10:47,981 --> 00:10:51,618 align:center
+Notice the dotted line reference
+from object A to object B.
+
+
+220
+00:10:51,685 --> 00:10:54,388 align:center
+Let's say I set this reference
+to nil, removing it.
+
+
+221
+00:10:55,622 --> 00:10:58,692 line:0
+With that reference gone,
+object B has been leaked.
+
+
+222
+00:10:58,759 --> 00:11:00,827 align:center
+There are
+no references to it at all.
+
+
+223
+00:11:00,894 --> 00:11:02,229 line:0
+It's still dirty,
+
+
+224
+00:11:02,296 --> 00:11:04,164 line:0
+but the process has no way
+to reference it
+
+
+225
+00:11:04,231 --> 00:11:06,834 line:0
+and no way to free it
+until it exits.
+
+
+226
+00:11:06,900 --> 00:11:09,436 align:center
+For this reason,
+you should always fix leaks.
+
+
+227
+00:11:11,104 --> 00:11:14,575 line:0
+A common way objects leak
+in Swift is via retain cycles.
+
+
+228
+00:11:14,641 --> 00:11:18,679 line:0
+In this diagram, objects A and B
+are in a retain cycle.
+
+
+229
+00:11:18,745 --> 00:11:20,113 line:0
+They reference one another,
+
+
+230
+00:11:20,180 --> 00:11:23,183 align:center
+but there are no external
+references to either of them.
+
+
+231
+00:11:23,250 --> 00:11:26,119 align:center
+This means the process can't
+access or free either of them,
+
+
+232
+00:11:26,186 --> 00:11:27,821 line:0
+so they're considered leaked.
+
+
+233
+00:11:29,456 --> 00:11:32,426 line:-2
+Fortunately, most objects
+in Swift are managed by
+
+
+234
+00:11:32,492 --> 00:11:35,462 line:-2
+Swift's automatic reference
+counting system, or ARC,
+
+
+235
+00:11:35.529 --> 00:11:37.831 line:-1 align:center
+which prevents a lot of leaks.
+
+
+236
+00:11:37,898 --> 00:11:40,033 line:-2
+If you're working with objects
+not managed by ARC,
+
+
+237
+00:11:40.100 --> 00:11:43.203 line:-2 align:center
+such as unsafe pointers,
+make sure you deallocate them
+
+
+238
+00:11:43.270 --> 00:11:45.205 line:-2 align:center
+before you lose
+your references to them.
+
+
+239
+00:11:46.940 --> 00:11:49.543 line:-2 align:center
+Even ARC managed objects
+are susceptible to being
+
+
+240
+00:11:49,610 --> 00:11:51,311 line:-1
+part of a retain cycle.
+
+
+241
+00:11:51,378 --> 00:11:53,380 line:-2
+So avoid creating strong
+circular references
+
+
+242
+00:11:53,447 --> 00:11:54,781 line:-1
+in your code.
+
+
+243
+00:11:54.848 --> 00:11:57.184 line:-2 align:center
+If a circular reference
+is absolutely necessary,
+
+
+244
+00:11:57,251 --> 00:12:00,287 line:-2
+consider a weak reference
+instead, because weak references
+
+
+245
+00:12:00.354 --> 00:12:02.656 line:-2 align:center
+won't prevent objects
+from being deallocated.
+
+
+246
+00:12:04,791 --> 00:12:07,494 align:center
+Let's look at an example
+from the Meal Planner app.
+
+
+247
+00:12:07,561 --> 00:12:10,230 line:0
+Tanuja has sent me some
+pre and post memgraphs
+
+
+248
+00:12:10,297 --> 00:12:12,232 align:center
+from the failing XCTest.
+
+
+249
+00:12:12,299 --> 00:12:15,302 line:0
+Right away, I want to check
+for leaks in the post memgraph.
+
+
+250
+00:12:17,304 --> 00:12:19,940 line:0
+To do this,
+I run leaks on the memgraph.
+
+
+251
+00:12:20,007 --> 00:12:21,942 line:0
+This shows me some
+helpful information
+
+
+252
+00:12:22,009 --> 00:12:23,510 line:0
+about any leaks I have.
+
+
+253
+00:12:26,747 --> 00:12:30,751 line:0
+The output shows I have 4 leaks
+for a total of 240 leaked bytes.
+
+
+254
+00:12:32,252 --> 00:12:34,821 align:center
+Further down, the output
+includes a detailed view
+
+
+255
+00:12:34,888 --> 00:12:36,924 align:center
+of the object graph
+for each of the leaks,
+
+
+256
+00:12:36,990 --> 00:12:39,493 align:center
+which gives me some clues
+as to what might be leaking.
+
+
+257
+00:12:41,161 --> 00:12:43,497 line:0
+The top of the object
+graph says ROOT CYCLE,
+
+
+258
+00:12:43,564 --> 00:12:46,133 align:center
+which means I'm dealing
+with a retain cycle.
+
+
+259
+00:12:47,801 --> 00:12:49,703 line:0
+There are
+some useful symbols here.
+
+
+260
+00:12:49,770 --> 00:12:51,772 line:0
+Looks like this retain cycle
+probably includes
+
+
+261
+00:12:51,839 --> 00:12:54,474 line:0
+meal plan and menu item objects.
+
+
+262
+00:12:56,176 --> 00:12:59,046 line:0
+Because malloc stack logging
+is enabled for XCTests,
+
+
+263
+00:12:59,112 --> 00:13:01,215 align:center
+the output also includes
+an allocation call stack
+
+
+264
+00:13:01,281 --> 00:13:02,783 line:0
+for each leak.
+
+
+265
+00:13:02,850 --> 00:13:04,418 line:0
+This is extremely useful
+
+
+266
+00:13:04,484 --> 00:13:06,153 line:0
+for finding
+which objects leaked.
+
+
+267
+00:13:07,988 --> 00:13:10,757 line:0
+Often, you'll want to find
+the section of the call stack
+
+
+268
+00:13:10,824 --> 00:13:12,626 line:0
+with symbols from your code.
+
+
+269
+00:13:12,693 --> 00:13:15,162 line:0
+Here's the portion of
+the call stack from my code.
+
+
+270
+00:13:16,630 --> 00:13:18,599 line:0
+The leaking meal plan
+object is allocated
+
+
+271
+00:13:18,665 --> 00:13:21,068 align:center
+in the populateMealData
+function.
+
+
+272
+00:13:21,134 --> 00:13:23,470 align:center
+I'll open up Xcode and see
+if I can fix the issue.
+
+
+273
+00:13:25,138 --> 00:13:28,542 line:-2
+Here's the populateMealData
+function I saw in leaks.
+
+
+274
+00:13:28.609 --> 00:13:31.812 line:-2 align:center
+Here I'm allocating a meal plan
+object and a menu item object,
+
+
+275
+00:13:31,879 --> 00:13:35,082 line:-2
+which are the two objects
+I saw in my retain cycle.
+
+
+276
+00:13:35.148 --> 00:13:39.319 line:-2 align:center
+Hmm, this addMealToMealPlan
+function looks a bit suspicious.
+
+
+277
+00:13:39,386 --> 00:13:40,420 line:-1
+I'll take a look.
+
+
+278
+00:13:41,822 --> 00:13:44,992 line:-2
+Hmm, so it looks like I'm
+calling addItem on the meal plan,
+
+
+279
+00:13:45,058 --> 00:13:48,328 line:-2
+but I'm also calling
+addPlan on the menu item.
+
+
+280
+00:13:48,395 --> 00:13:50,464 line:-2
+This is for a feature
+allowing us to see all the items
+
+
+281
+00:13:50,531 --> 00:13:54,535 line:-2
+for a plan but also which
+plan an item is associated with.
+
+
+282
+00:13:56.069 --> 00:13:58.906 line:-2 align:center
+Here in meal plan,
+addItem adds the menu item
+
+
+283
+00:13:58,972 --> 00:14:01,542 line:-2
+to an array,
+saving a reference to it.
+
+
+284
+00:14:01,608 --> 00:14:03,177 align:center
+And here in menu item,
+
+
+285
+00:14:03,243 --> 00:14:06,113 align:center
+addPlan saves a reference
+to the meal plan.
+
+
+286
+00:14:06,180 --> 00:14:08,215 line:0
+So this is definitely
+a retain cycle because
+
+
+287
+00:14:08,282 --> 00:14:10,517 align:center
+they both hold a strong
+reference to each other.
+
+
+288
+00:14:11,952 --> 00:14:15,055 line:-2
+Once populateMealData exits,
+both the meal plan
+
+
+289
+00:14:15,122 --> 00:14:17,691 line:-2
+and menu item objects
+will be out of scope,
+
+
+290
+00:14:17,758 --> 00:14:20,594 line:-2
+so there will be no external
+references to them.
+
+
+291
+00:14:20.661 --> 00:14:22.896 line:-2 align:center
+But they still reference
+each other, causing a leak.
+
+
+292
+00:14:24.631 --> 00:14:26.433 line:-2 align:center
+I should probably try
+to find a solution
+
+
+293
+00:14:26,500 --> 00:14:28,569 line:-1
+without a cyclical reference.
+
+
+294
+00:14:28.635 --> 00:14:31.305 line:-2 align:center
+But as a quick fix for now,
+I'll change menu item
+
+
+295
+00:14:31.371 --> 00:14:34.274 line:-2 align:center
+to use a weak reference
+for its meal plan object.
+
+
+296
+00:14:34,341 --> 00:14:35,943 line:-1
+This breaks the retain cycle
+
+
+297
+00:14:36.009 --> 00:14:39.213 line:-2 align:center
+because we no longer have two
+cyclical strong references.
+
+
+298
+00:14:43,150 --> 00:14:45,519 line:-2
+Let's shift gears now to heap
+allocation regressions.
+
+
+299
+00:14:47.120 --> 00:14:50.090 line:-2 align:center
+The heap is simply a section
+of your process's address space
+
+
+300
+00:14:50,157 --> 00:14:53,060 line:-2
+where dynamically allocated
+objects are stored.
+
+
+301
+00:14:53,126 --> 00:14:54,494 line:-1
+Heap allocation regressions
+
+
+302
+00:14:54,561 --> 00:14:57,164 line:-2
+are an increase in memory
+footprint due to the process
+
+
+303
+00:14:57.231 --> 00:15:00.167 line:-2 align:center
+allocating more objects
+on the heap than before.
+
+
+304
+00:15:00,234 --> 00:15:02,135 line:-1
+To reduce heap regressions,
+
+
+305
+00:15:02,202 --> 00:15:04,404 line:-2
+look to remove
+unused allocations
+
+
+306
+00:15:04.471 --> 00:15:07.274 line:-2 align:center
+and shrink unnecessarily
+large allocations.
+
+
+307
+00:15:07,341 --> 00:15:08,709 line:-1
+You should also pay attention
+
+
+308
+00:15:08.775 --> 00:15:10.978 line:-2 align:center
+to how much memory
+you hold at once.
+
+
+309
+00:15:11,044 --> 00:15:12,980 line:-2
+Deallocate memory
+you're no longer using
+
+
+310
+00:15:13.046 --> 00:15:15.716 line:-2 align:center
+and wait to allocate memory
+until you need it.
+
+
+311
+00:15:15.782 --> 00:15:17.885 line:-2 align:center
+This will reduce your
+app's peak footprint,
+
+
+312
+00:15:17,951 --> 00:15:20,354 line:-2
+making it less likely
+to be terminated.
+
+
+313
+00:15:21.588 --> 00:15:23.857 line:-2 align:center
+So let's return now
+to the failing XCTest
+
+
+314
+00:15:23.924 --> 00:15:27.094 line:-2 align:center
+from the MealPlanner app
+and check for a heap regression.
+
+
+315
+00:15:27,160 --> 00:15:28,962 line:-2
+To understand
+where I should look,
+
+
+316
+00:15:29,029 --> 00:15:30,998 line:-1
+I'll run vmmap -summary
+
+
+317
+00:15:31,064 --> 00:15:33,100 line:-2
+on both the pre
+and post memgraphs
+
+
+318
+00:15:33.166 --> 00:15:35.903 line:-2 align:center
+to get a nice overview
+of where memory is being used.
+
+
+319
+00:15:37,905 --> 00:15:39,506 line:-2
+My footprint
+in the pre memgraph
+
+
+320
+00:15:39.573 --> 00:15:42.009 line:-1 align:center
+is around 112 megabytes.
+
+
+321
+00:15:42.075 --> 00:15:46.180 line:-2 align:center
+And in the post memgraph,
+my footprint is 125 megabytes,
+
+
+322
+00:15:46.246 --> 00:15:48.582 line:-2 align:center
+so that's about
+a 13 megabyte difference.
+
+
+323
+00:15:50.150 --> 00:15:51.685 line:-2 align:center
+Further down,
+the output shows
+
+
+324
+00:15:51,752 --> 00:15:54,454 line:-2
+my process's memory usage
+broken down by region.
+
+
+325
+00:15:56,023 --> 00:15:58,559 line:-2
+Because I suspect this is
+a heap allocation issue,
+
+
+326
+00:15:58,625 --> 00:16:01,562 line:-2
+I want to look at the regions
+starting with MALLOC_
+
+
+327
+00:16:01,628 --> 00:16:04,331 line:-2
+because those regions contain
+all of my heap objects.
+
+
+328
+00:16:05,866 --> 00:16:07,668 line:0
+Remember Tanuja's equation:
+
+
+329
+00:16:07,734 --> 00:16:11,104 line:0
+Memory footprint = Dirty memory
++ Compressed Memory.
+
+
+330
+00:16:11,171 --> 00:16:14,308 line:0
+In this tool, the term
+"swapped" means "compressed."
+
+
+331
+00:16:14,374 --> 00:16:16,343 line:0
+So of these columns,
+I only care about
+
+
+332
+00:16:16,410 --> 00:16:18,278 line:0
+"dirty size" and "swapped size."
+
+
+333
+00:16:19,413 --> 00:16:20,981 line:0
+And sure enough,
+the output shows
+
+
+334
+00:16:21,048 --> 00:16:22,549 align:center
+that the MALLOC_LARGE region
+
+
+335
+00:16:22,616 --> 00:16:25,519 align:center
+is holding about
+13 megabytes of dirty memory.
+
+
+336
+00:16:25,586 --> 00:16:27,888 align:center
+That's roughly equivalent
+to my regression size,
+
+
+337
+00:16:27,955 --> 00:16:29,723 line:0
+so I definitely want
+to look into that.
+
+
+338
+00:16:29,790 --> 00:16:32,426 line:-2
+The next step is to figure
+out what kinds of objects
+
+
+339
+00:16:32.492 --> 00:16:35.195 line:-2 align:center
+are contributing to this
+13 megabyte regression.
+
+
+340
+00:16:35.262 --> 00:16:38.265 line:-2 align:center
+To get that information,
+I'll run heap -diffFrom
+
+
+341
+00:16:38.332 --> 00:16:39.766 line:-1 align:center
+on my post memgraph.
+
+
+342
+00:16:41.168 --> 00:16:44.404 line:-2 align:center
+I pass in my pre and post
+memgraphs as arguments.
+
+
+343
+00:16:44.471 --> 00:16:46.006 line:-2 align:center
+This shows me
+the objects that exist
+
+
+344
+00:16:46,073 --> 00:16:47,508 line:-1
+in the post memgraph heap
+
+
+345
+00:16:47,574 --> 00:16:49,409 line:-2
+but not
+in the pre memgraph heap.
+
+
+346
+00:16:50.811 --> 00:16:53.146 line:-2 align:center
+Near the top,
+the output shows I have around
+
+
+347
+00:16:53.213 --> 00:16:56.049 line:-2 align:center
+13 megabytes of new objects
+in the post memgraph.
+
+
+348
+00:16:57.584 --> 00:17:01.588 line:-2 align:center
+Below, the heap memory is broken
+down by object class.
+
+
+349
+00:17:01,655 --> 00:17:02,923 line:-1
+For each object class,
+
+
+350
+00:17:02.990 --> 00:17:04.858 line:-2 align:center
+the output shows
+the number of objects
+
+
+351
+00:17:04,925 --> 00:17:07,294 line:-2
+and the sum in bytes
+of those objects.
+
+
+352
+00:17:08.228 --> 00:17:09.796 line:-2 align:center
+Right away,
+I notice that I have
+
+
+353
+00:17:09,863 --> 00:17:13,033 line:-2
+about 13 megabytes worth of
+this "non-object" type.
+
+
+354
+00:17:13,100 --> 00:17:16,537 line:-2
+In Swift, this usually
+indicates raw malloced bytes.
+
+
+355
+00:17:16.603 --> 00:17:20.174 line:-2 align:center
+This type of object can be
+a bit tricky to track down,
+
+
+356
+00:17:20.240 --> 00:17:23.443 line:-2 align:center
+but there are some tools I
+can use to get some information.
+
+
+357
+00:17:23,510 --> 00:17:26,713 line:-2
+To start, I want the addresses
+of these non-objects.
+
+
+358
+00:17:27.848 --> 00:17:30.450 line:-2 align:center
+I'll run heap -addresses
+to grab them.
+
+
+359
+00:17:32,252 --> 00:17:34,121 line:-2
+I'll specify that I only
+want non-objects
+
+
+360
+00:17:34,188 --> 00:17:36,256 line:-2
+whose size
+is at least 500 kilobytes.
+
+
+361
+00:17:37,991 --> 00:17:39,193 align:center
+Aha.
+
+
+362
+00:17:39,259 --> 00:17:41,495 align:center
+This non-object
+is about 13 megabytes,
+
+
+363
+00:17:41,562 --> 00:17:44,031 line:0
+so it's a prime suspect
+in this investigation.
+
+
+364
+00:17:44,097 --> 00:17:45,999 align:center
+I'll grab its address
+and see if I can
+
+
+365
+00:17:46,066 --> 00:17:47,968 align:center
+find some clues
+about what it is.
+
+
+366
+00:17:48,035 --> 00:17:50,604 line:-2
+I have several options
+at this point.
+
+
+367
+00:17:50,671 --> 00:17:53,140 line:-2
+Each has its benefits
+depending on the situation,
+
+
+368
+00:17:53,207 --> 00:17:55,209 line:-2
+so I'll walk through
+each one briefly.
+
+
+369
+00:17:56,410 --> 00:17:59,012 line:-2
+One option I have is to run
+leaks --traceTree
+
+
+370
+00:17:59.079 --> 00:18:00.514 line:-1 align:center
+on this address.
+
+
+371
+00:18:01,849 --> 00:18:04,718 line:-2
+This gives me a tree of objects
+that reference this address.
+
+
+372
+00:18:04,785 --> 00:18:06,820 line:-2
+This is useful if I have
+a specific object
+
+
+373
+00:18:06,887 --> 00:18:08,789 line:-2
+I want to get more information
+about
+
+
+374
+00:18:08,856 --> 00:18:11,792 line:-2
+and my memgraph doesn't
+have malloc stack logging
+
+
+375
+00:18:11,859 --> 00:18:14,094 line:-1
+or MSL enabled.
+
+
+376
+00:18:14.161 --> 00:18:15.963 line:-2 align:center
+Remember
+that our XCTest memgraphs
+
+
+377
+00:18:16.029 --> 00:18:18.232 line:-2 align:center
+automatically
+have MSL enabled,
+
+
+378
+00:18:18,298 --> 00:18:20,567 line:-2
+but if you're ever working
+with a memgraph that doesn't,
+
+
+379
+00:18:20.634 --> 00:18:22.069 line:-1 align:center
+keep this tool in mind.
+
+
+380
+00:18:23,504 --> 00:18:26,273 line:-2
+I've highlighted the object
+in the tree that seems relevant.
+
+
+381
+00:18:26,340 --> 00:18:27,574 line:-1
+My large non-object
+
+
+382
+00:18:27,641 --> 00:18:30,010 line:-2
+probably has something to do
+with this meal data object
+
+
+383
+00:18:30,077 --> 00:18:33,714 line:-2
+in MKTCustomMeal
+PlannerCollectionViewCell.
+
+
+384
+00:18:33.780 --> 00:18:37.618 line:-2 align:center
+I can also run
+leaks --referenceTree.
+
+
+385
+00:18:42,990 --> 00:18:44,758 line:-2
+This gives me a top-down
+reference tree
+
+
+386
+00:18:44.825 --> 00:18:46.627 line:-2 align:center
+of all the memory
+in my process
+
+
+387
+00:18:46,693 --> 00:18:49,630 line:-2
+with a best guess
+of which objects are the roots.
+
+
+388
+00:18:49.696 --> 00:18:51.398 line:-2 align:center
+With this output,
+I can get a sense
+
+
+389
+00:18:51.465 --> 00:18:53.600 line:-2 align:center
+of where memory is
+aggregated in my app.
+
+
+390
+00:18:53,667 --> 00:18:55,669 line:-1
+This tool is extremely helpful
+
+
+391
+00:18:55,736 --> 00:18:57,771 line:-2
+if I know
+I have a large regression
+
+
+392
+00:18:57.838 --> 00:19:01.542 line:-2 align:center
+but I don't know which specific
+objects are responsible.
+
+
+393
+00:19:01,608 --> 00:19:04,678 line:-2
+I can pass the --groupByType
+argument
+
+
+394
+00:19:04.745 --> 00:19:06.480 line:-1 align:center
+to group like types together,
+
+
+395
+00:19:06,547 --> 00:19:07,714 line:-1
+shrinking the output
+
+
+396
+00:19:07.781 --> 00:19:09.082 line:-2 align:center
+and making it a bit easier
+to parse.
+
+
+397
+00:19:10.651 --> 00:19:12.586 line:-2 align:center
+Oftentimes,
+a large chunk of the regression
+
+
+398
+00:19:12.653 --> 00:19:15.122 line:-2 align:center
+will be grouped under
+a single node in this tree,
+
+
+399
+00:19:15,189 --> 00:19:18,091 line:-2
+making it easier to find
+clues about what that memory is.
+
+
+400
+00:19:19,927 --> 00:19:21,628 line:-2
+Again, I've highlighted
+the section
+
+
+401
+00:19:21,695 --> 00:19:23,397 line:-1
+showing the relevant objects.
+
+
+402
+00:19:23,463 --> 00:19:25,132 line:-2
+Here's that same
+meal data object
+
+
+403
+00:19:25.199 --> 00:19:28.168 line:-2 align:center
+I saw in the leaks
+-traceTree output.
+
+
+404
+00:19:28.235 --> 00:19:30.337 line:-2 align:center
+The output shows that
+there's about 13 megabytes
+
+
+405
+00:19:30,404 --> 00:19:33,440 line:-2
+worth of memory allocated
+to this meal data object.
+
+
+406
+00:19:33,507 --> 00:19:36,610 line:-2
+I'd love to know how this
+object is being allocated.
+
+
+407
+00:19:36,677 --> 00:19:39,112 line:-2
+Because my memgraph
+has MSL enabled,
+
+
+408
+00:19:39,179 --> 00:19:42,816 line:-2
+I can use malloc_history
+-fullStacks to figure that out.
+
+
+409
+00:19:44,585 --> 00:19:46,420 line:-2
+I pass in the address
+of the large non-object
+
+
+410
+00:19:46.486 --> 00:19:48.789 line:-2 align:center
+I grabbed from heap
+-addresses earlier.
+
+
+411
+00:19:50.490 --> 00:19:51.725 line:-2 align:center
+And I get
+an allocation call stack
+
+
+412
+00:19:51,792 --> 00:19:53,760 line:-1
+for the object at that address.
+
+
+413
+00:19:53.827 --> 00:19:56.930 line:-2 align:center
+This is extremely useful
+when I have MSL enabled
+
+
+414
+00:19:56.997 --> 00:19:59.733 line:-2 align:center
+and I have the address
+of the object I care about.
+
+
+415
+00:20:01.702 --> 00:20:03.971 line:-2 align:center
+So looks like my meal data
+object was allocated
+
+
+416
+00:20:04,037 --> 00:20:07,508 line:-2
+in the saveMeal function,
+shown here on line 3.
+
+
+417
+00:20:07.574 --> 00:20:09.943 line:-2 align:center
+I'll head over to Xcode
+to see what's going on.
+
+
+418
+00:20:10,711 --> 00:20:12,012 line:-1
+Here's the saveMeal function
+
+
+419
+00:20:12,079 --> 00:20:14,781 line:-2
+inside my custom
+cell view controller.
+
+
+420
+00:20:14.848 --> 00:20:16.250 line:-1 align:center
+And here's the culprit.
+
+
+421
+00:20:16,316 --> 00:20:18,051 line:-2
+I'm allocating
+this raw buffer here
+
+
+422
+00:20:18.118 --> 00:20:20.921 line:-2 align:center
+and then wrapping it
+with the meal data object.
+
+
+423
+00:20:20.988 --> 00:20:23.857 line:-2 align:center
+I'm only allocating this buffer
+so that I can populate it
+
+
+424
+00:20:23,924 --> 00:20:25,792 line:-1
+and save the result to disk.
+
+
+425
+00:20:25,859 --> 00:20:27,461 line:-1
+Once I'm done saving to disk,
+
+
+426
+00:20:27,528 --> 00:20:29,463 line:-2
+I don't really need
+this buffer anymore.
+
+
+427
+00:20:29.530 --> 00:20:31.164 line:-1 align:center
+So why is it sticking around?
+
+
+428
+00:20:32.666 --> 00:20:34.635 line:-2 align:center
+Well, meal data
+is a class member,
+
+
+429
+00:20:34,701 --> 00:20:37,171 line:-2
+so as long as this
+class instance exists,
+
+
+430
+00:20:37,237 --> 00:20:39,072 line:-1
+the reference will stick around.
+
+
+431
+00:20:39.139 --> 00:20:41.508 line:-2 align:center
+This means that when I hit
+saveMeal on any cell,
+
+
+432
+00:20:41,575 --> 00:20:44,077 line:-2
+that cell allocates
+and holds a large buffer
+
+
+433
+00:20:44.144 --> 00:20:46.780 line:-2 align:center
+that will stick around until
+that cell is destroyed.
+
+
+434
+00:20:46.847 --> 00:20:50.184 line:-2 align:center
+That memory could really add
+up if I'm saving multiple meals.
+
+
+435
+00:20:51,552 --> 00:20:52,986 line:-1
+So how can I fix this?
+
+
+436
+00:20:53,053 --> 00:20:54,121 line:-1
+One option would be
+
+
+437
+00:20:54,188 --> 00:20:56,657 line:-2
+to just define mealData
+in the saveMeal function,
+
+
+438
+00:20:56,723 --> 00:20:58,892 line:-2
+but I know it's used
+elsewhere in the class,
+
+
+439
+00:20:58,959 --> 00:21:01,395 line:-1
+so I don't want to do that.
+
+
+440
+00:21:01,461 --> 00:21:03,931 line:-2
+Another way would be
+to set mealData to nil
+
+
+441
+00:21:03,997 --> 00:21:06,333 line:-2
+once I'm done writing it
+to disk.
+
+
+442
+00:21:06,400 --> 00:21:09,169 line:-2
+The data object in Swift
+is smart enough to automatically
+
+
+443
+00:21:09,236 --> 00:21:12,239 line:-2
+deallocate the buffer once I've
+lost my final reference to it,
+
+
+444
+00:21:12.306 --> 00:21:15.042 line:-2 align:center
+so the buffer won't stick around
+past the end of this function.
+
+
+445
+00:21:18.745 --> 00:21:20.981 line:-2 align:center
+Lastly, let's talk about
+fragmentation.
+
+
+446
+00:21:24,051 --> 00:21:27,754 line:-2
+Let's quickly go over
+how pages work in iOS.
+
+
+447
+00:21:27,821 --> 00:21:30,357 line:-2
+A page is a fixed size,
+indivisible chunk of memory
+
+
+448
+00:21:30,424 --> 00:21:32,292 line:-2
+that the system
+grants to your process.
+
+
+449
+00:21:33,794 --> 00:21:35,229 line:-1
+Because pages are indivisible,
+
+
+450
+00:21:35,295 --> 00:21:37,798 line:-2
+when your process writes
+to any part of a page,
+
+
+451
+00:21:37,865 --> 00:21:40,000 line:-2
+the entire page
+is considered dirty,
+
+
+452
+00:21:40,067 --> 00:21:41,835 line:-2
+and your process
+will be charged for it,
+
+
+453
+00:21:41,902 --> 00:21:43,871 line:-1
+even if most of it is unused.
+
+
+454
+00:21:44.905 --> 00:21:47.908 line:-2 align:center
+Fragmentation occurs when
+a process has dirty pages
+
+
+455
+00:21:47,975 --> 00:21:50,410 line:-1
+that are not 100% utilized.
+
+
+456
+00:21:50.477 --> 00:21:53.480 line:-2 align:center
+To understand how this happens,
+let's look at an example.
+
+
+457
+00:21:53,547 --> 00:21:56,450 line:-2
+To start,
+I have 3 contiguous clean pages.
+
+
+458
+00:21:58.118 --> 00:21:59.419 line:-1 align:center
+As the process runs,
+
+
+459
+00:21:59,486 --> 00:22:01,522 line:-2
+allocations begin
+filling up these pages,
+
+
+460
+00:22:01,588 --> 00:22:02,789 line:-1
+dirtying them.
+
+
+461
+00:22:05.592 --> 00:22:07.094 line:-1 align:center
+When objects are deallocated,
+
+
+462
+00:22:07,160 --> 00:22:09,429 line:-2
+they create empty slots
+where they used to be
+
+
+463
+00:22:09,496 --> 00:22:11,965 line:-2
+marked "free memory"
+in the diagram.
+
+
+464
+00:22:12,032 --> 00:22:14,134 line:-2
+However,
+these pages are still dirty
+
+
+465
+00:22:14,201 --> 00:22:17,070 line:-2
+because there are still some
+allocated objects on them.
+
+
+466
+00:22:18,906 --> 00:22:20,874 line:-2
+The system will attempt
+to fill these empty slots
+
+
+467
+00:22:20,941 --> 00:22:22,709 line:-1
+with future allocations.
+
+
+468
+00:22:22,776 --> 00:22:24,978 line:-2
+Here I have a large
+incoming allocation
+
+
+469
+00:22:25,045 --> 00:22:27,714 line:-1
+notated by the box on the right.
+
+
+470
+00:22:27.781 --> 00:22:30.017 line:-2 align:center
+Unfortunately,
+this incoming allocation
+
+
+471
+00:22:30,083 --> 00:22:33,086 line:-2
+is too large to fit
+in my free memory slots.
+
+
+472
+00:22:33,153 --> 00:22:35,455 line:-2
+Even though the combined
+size of the empty slots
+
+
+473
+00:22:35.522 --> 00:22:37.691 line:-2 align:center
+is large enough,
+they aren't contiguous
+
+
+474
+00:22:37,758 --> 00:22:40,194 line:-2
+and they can't be used
+for a single allocation.
+
+
+475
+00:22:41,929 --> 00:22:44,498 line:0
+So because it couldn't fit
+in any existing free slots,
+
+
+476
+00:22:44,565 --> 00:22:47,434 line:0
+the system placed my allocation
+on a new dirty page
+
+
+477
+00:22:47,501 --> 00:22:49,336 line:0
+on the right side
+of the diagram.
+
+
+478
+00:22:49,403 --> 00:22:51,538 line:0
+The free memory slots
+remain unfilled
+
+
+479
+00:22:51,605 --> 00:22:53,607 align:center
+and are considered
+fragmented memory.
+
+
+480
+00:22:55,542 --> 00:22:57,411 line:-2
+The best way to reduce
+fragmentation
+
+
+481
+00:22:57.477 --> 00:22:59.746 line:-2 align:center
+is to allocate objects
+with similar lifetimes
+
+
+482
+00:22:59,813 --> 00:23:01,949 line:-1
+close to each other in memory.
+
+
+483
+00:23:02.015 --> 00:23:03.750 line:-2 align:center
+This helps ensure
+that all of those objects
+
+
+484
+00:23:03,817 --> 00:23:06,720 line:-2
+are freed together,
+giving the process large chunks
+
+
+485
+00:23:06.787 --> 00:23:09.556 line:-2 align:center
+of contiguous memory to work
+with for future allocations.
+
+
+486
+00:23:11,158 --> 00:23:13,193 align:center
+In this example,
+I manually allocated
+
+
+487
+00:23:13,260 --> 00:23:15,295 align:center
+all the objects marked
+"my object,"
+
+
+488
+00:23:15,362 --> 00:23:18,065 line:0
+and I plan to free them
+at the same time.
+
+
+489
+00:23:18,131 --> 00:23:19,800 line:0
+But I wasn't careful in my code,
+
+
+490
+00:23:19,867 --> 00:23:22,002 align:center
+and the system ended up
+interleaving my objects
+
+
+491
+00:23:22,069 --> 00:23:23,370 align:center
+with other objects.
+
+
+492
+00:23:24,805 --> 00:23:26,573 line:0
+Now, when I free all my objects,
+
+
+493
+00:23:26,640 --> 00:23:28,709 align:center
+I have four slots
+of free memory,
+
+
+494
+00:23:28,775 --> 00:23:30,377 align:center
+none of which are contiguous
+
+
+495
+00:23:30,444 --> 00:23:32,946 align:center
+because they're broken up
+by these allocated objects.
+
+
+496
+00:23:33,013 --> 00:23:35,082 line:0
+This results
+in 50% fragmentation
+
+
+497
+00:23:35,148 --> 00:23:36,917 line:0
+and four dirty pages.
+
+
+498
+00:23:36,984 --> 00:23:38,352 line:0
+Not great.
+
+
+499
+00:23:39,453 --> 00:23:40,888 line:0
+What if I instead wrote code
+
+
+500
+00:23:40,954 --> 00:23:43,457 line:0
+to allocate all
+of my objects together?
+
+
+501
+00:23:43,524 --> 00:23:46,727 line:0
+Now they all end up
+together on two pages.
+
+
+502
+00:23:46,793 --> 00:23:48,829 line:0
+And when I free my objects,
+
+
+503
+00:23:48,896 --> 00:23:51,798 align:center
+the process frees up two
+clean pages for the system,
+
+
+504
+00:23:51,865 --> 00:23:55,936 line:0
+resulting in only 2 dirty pages
+and 0% fragmentation.
+
+
+505
+00:23:56,003 --> 00:23:59,873 align:center
+Notice how fragmentation
+is a footprint multiplier.
+
+
+506
+00:23:59,940 --> 00:24:02,509 line:0
+50% fragmentation
+doubled my footprint
+
+
+507
+00:24:02,576 --> 00:24:05,712 line:0
+from 2 to 4 dirty pages.
+
+
+508
+00:24:05.779 --> 00:24:07.814 line:-1 align:center
+In most real scenarios,
+
+
+509
+00:24:07,881 --> 00:24:10,217 line:-2
+some fragmentation
+is inevitable.
+
+
+510
+00:24:10,284 --> 00:24:11,618 line:-1
+So as a rule of thumb,
+
+
+511
+00:24:11.685 --> 00:24:14.188 line:-2 align:center
+aim for about
+25% fragmentation or less.
+
+
+512
+00:24:15,622 --> 00:24:19,326 line:-2
+One way to reduce fragmentation
+is to use autorelease pools.
+
+
+513
+00:24:19,393 --> 00:24:21,228 line:-2
+An autorelease pool
+tells the system
+
+
+514
+00:24:21,295 --> 00:24:23,564 line:-2
+to release all objects
+allocated inside of it
+
+
+515
+00:24:23.630 --> 00:24:25.799 line:-1 align:center
+as soon as it goes out of scope.
+
+
+516
+00:24:25.866 --> 00:24:27.734 line:-2 align:center
+This helps ensure
+that all objects created
+
+
+517
+00:24:27,801 --> 00:24:30,070 line:-2
+in the autorelease pool
+have similar lifetimes.
+
+
+518
+00:24:31.705 --> 00:24:34.274 line:-2 align:center
+Although fragmentation can be
+an issue for all processes,
+
+
+519
+00:24:34.341 --> 00:24:37.110 line:-2 align:center
+long running processes
+can be especially prone,
+
+
+520
+00:24:37.177 --> 00:24:39.913 line:-2 align:center
+because there are lots
+of allocations and deallocations
+
+
+521
+00:24:39.980 --> 00:24:42.749 line:-2 align:center
+to potentially fragment
+the address space.
+
+
+522
+00:24:42,816 --> 00:24:45,452 line:-2
+If your app uses long running
+extensions, for example,
+
+
+523
+00:24:45.519 --> 00:24:47.187 line:-2 align:center
+be sure to take a look
+at fragmentation
+
+
+524
+00:24:47,254 --> 00:24:48,922 line:-1
+in those processes.
+
+
+525
+00:24:51.191 --> 00:24:53.660 line:-2 align:center
+To take a quick look at
+my process's fragmentation,
+
+
+526
+00:24:53,727 --> 00:24:56,096 line:-1
+I can run vmmap -summary
+
+
+527
+00:24:56,163 --> 00:24:58,665 line:-2
+and scroll down
+to the bottom of the output.
+
+
+528
+00:25:00,000 --> 00:25:02,202 line:0
+This section is divided
+into malloc zones.
+
+
+529
+00:25:02,269 --> 00:25:05,506 align:center
+Each zone contains different
+types of allocations.
+
+
+530
+00:25:05,572 --> 00:25:09,309 line:0
+Usually I would only care
+about the DefaultMallocZone,
+
+
+531
+00:25:09,376 --> 00:25:12,279 align:center
+because that's where my heap
+allocations end up by default.
+
+
+532
+00:25:13,914 --> 00:25:16,817 line:0
+However, because this
+memgraph has MSL enabled,
+
+
+533
+00:25:16,884 --> 00:25:20,521 line:0
+I actually care about
+the MallocStackLoggingLiteZone.
+
+
+534
+00:25:20,587 --> 00:25:22,222 line:0
+As long as MSL is enabled,
+
+
+535
+00:25:22,289 --> 00:25:24,758 align:center
+this zone is where all the heap
+allocations end up.
+
+
+536
+00:25:26,527 --> 00:25:29,396 align:center
+The % FRAG column shows me
+what percentage of my memory
+
+
+537
+00:25:29,463 --> 00:25:32,900 line:0
+is wasted due to fragmentation
+in each malloc zone.
+
+
+538
+00:25:32,966 --> 00:25:34,701 align:center
+Some of these numbers
+are pretty large,
+
+
+539
+00:25:34,768 --> 00:25:38,205 line:0
+but I only need to focus on
+the MallocStackLoggingLiteZone.
+
+
+540
+00:25:39,740 --> 00:25:41,842 align:center
+That's because
+the MallocStackLoggingLiteZone
+
+
+541
+00:25:41,909 --> 00:25:44,711 line:0
+has by far the largest
+share of dirty memory,
+
+
+542
+00:25:44,778 --> 00:25:48,048 line:0
+with 4.3 megabytes
+out of 5 megabytes total.
+
+
+543
+00:25:48,115 --> 00:25:50,651 align:center
+So I can ignore the other zones
+this time.
+
+
+544
+00:25:52,352 --> 00:25:54,221 align:center
+The "dirty+swap frag size"
+column
+
+
+545
+00:25:54,288 --> 00:25:56,456 line:0
+shows me exactly how much
+memory is wasted
+
+
+546
+00:25:56,523 --> 00:25:58,725 line:0
+due to fragmentation
+in each malloc zone.
+
+
+547
+00:26:00,494 --> 00:26:04,498 line:0
+In my case, I'm wasting
+about 800K due to fragmentation.
+
+
+548
+00:26:04,565 --> 00:26:06,967 align:center
+This seems like a lot,
+but as I mentioned before,
+
+
+549
+00:26:07,034 --> 00:26:09,436 line:0
+some fragmentation
+is inevitable.
+
+
+550
+00:26:09,503 --> 00:26:12,239 align:center
+So as long as I'm sitting
+under 25% fragmentation,
+
+
+551
+00:26:12,306 --> 00:26:14,641 line:0
+I'll consider
+this much waste acceptable.
+
+
+552
+00:26:16,243 --> 00:26:18,445 line:0
+Looks like I'm sitting
+at about 19% fragmentation
+
+
+553
+00:26:18,512 --> 00:26:21,081 line:0
+in the
+MallocStackLoggingLiteZone.
+
+
+554
+00:26:21,148 --> 00:26:23,917 align:center
+This is comfortably below
+the 25% rule of thumb,
+
+
+555
+00:26:23,984 --> 00:26:25,385 align:center
+so I'm not concerned.
+
+
+556
+00:26:26,753 --> 00:26:28,488 line:0
+If I did have
+fragmentation issues,
+
+
+557
+00:26:28,555 --> 00:26:31,625 line:0
+I could use the Allocations
+track in the Instruments tool.
+
+
+558
+00:26:33,260 --> 00:26:35,162 line:0
+Specifically,
+I'd want to look at
+
+
+559
+00:26:35,229 --> 00:26:37,831 line:0
+the allocations list view
+and see which objects
+
+
+560
+00:26:37,898 --> 00:26:40,667 align:center
+were persisted and destroyed
+in my area of interest.
+
+
+561
+00:26:42.436 --> 00:26:44.171 line:-1 align:center
+In the context of fragmentation,
+
+
+562
+00:26:44,238 --> 00:26:46,840 line:-2
+the destroyed objects
+create free memory slots,
+
+
+563
+00:26:46,907 --> 00:26:49,643 line:-2
+while the persisted objects
+are the remaining objects,
+
+
+564
+00:26:49,710 --> 00:26:52,212 line:-2
+responsible
+for keeping the pages dirty.
+
+
+565
+00:26:52.279 --> 00:26:53.814 line:-2 align:center
+Both of them
+are worth investigating
+
+
+566
+00:26:53,881 --> 00:26:55,649 line:-2
+when you're looking
+into fragmentation.
+
+
+567
+00:26:57,551 --> 00:27:00,487 align:center
+For more information about how
+to use the Instruments tool,
+
+
+568
+00:27:00,554 --> 00:27:02,990 line:0
+check out the Getting started
+with Instruments talk
+
+
+569
+00:27:03,056 --> 00:27:05,025 align:center
+from WWDC 2019.
+
+
+570
+00:27:06,760 --> 00:27:08,862 align:center
+Now that I've addressed
+the leaks and heap regressions
+
+
+571
+00:27:08,929 --> 00:27:11,598 align:center
+and verified that fragmentation
+isn't an issue,
+
+
+572
+00:27:11,665 --> 00:27:13,767 align:center
+I'll run that XCTest again.
+
+
+573
+00:27:18,138 --> 00:27:19,273 line:0
+Excellent.
+
+
+574
+00:27:19,339 --> 00:27:22,643 line:0
+The XCTest now passes
+and the regression is resolved.
+
+
+575
+00:27:22.709 --> 00:27:24.545 line:-2 align:center
+Now that
+you've learned about detecting
+
+
+576
+00:27:24.611 --> 00:27:26.113 line:-1 align:center
+and diagnosing memory issues,
+
+
+577
+00:27:26.180 --> 00:27:29.383 line:-2 align:center
+let's review the workflow
+you can use for your own app.
+
+
+578
+00:27:29.449 --> 00:27:31.818 line:-1 align:center
+Anytime you add a new feature,
+
+
+579
+00:27:31,885 --> 00:27:34,855 line:-2
+write a performance
+XCTest to monitor memory,
+
+
+580
+00:27:34,922 --> 00:27:38,192 line:-2
+and/or any of the other
+provided system metrics.
+
+
+581
+00:27:38,258 --> 00:27:40,527 line:-1
+For each test, set a baseline.
+
+
+582
+00:27:40.594 --> 00:27:42.863 line:-2 align:center
+Then use the test
+to catch regressions
+
+
+583
+00:27:42,930 --> 00:27:44,932 line:-2
+and investigate
+using the collected ktrace
+
+
+584
+00:27:44,998 --> 00:27:46,466 line:-1
+and memgraph files.
+
+
+585
+00:27:48,068 --> 00:27:50,037 line:-2
+Use the memgraphs
+from any failing XCTests
+
+
+586
+00:27:50.103 --> 00:27:52.973 line:-2 align:center
+to help diagnose
+your memory issue.
+
+
+587
+00:27:53.040 --> 00:27:55.342 line:-2 align:center
+The first thing you should
+do is check for leaks.
+
+
+588
+00:27:55,409 --> 00:27:58,278 line:-2
+Run the leaks tool and use
+the MSL backtraces
+
+
+589
+00:27:58,345 --> 00:28:01,181 line:-2
+to help find
+and fix any leaks.
+
+
+590
+00:28:01.248 --> 00:28:02.883 line:-2 align:center
+If the regression
+doesn't include leaks,
+
+
+591
+00:28:02,950 --> 00:28:04,985 line:-1
+then check out the heap.
+
+
+592
+00:28:05,052 --> 00:28:06,687 line:-1
+Start with vmmap -summary
+
+
+593
+00:28:06,753 --> 00:28:08,722 line:-2
+to confirm that the memory
+is in the heap.
+
+
+594
+00:28:10,557 --> 00:28:14,027 line:-2
+If so, run heap -diffFrom
+to see which object types
+
+
+595
+00:28:14.094 --> 00:28:15.929 line:-2 align:center
+are responsible
+for the growth.
+
+
+596
+00:28:15.996 --> 00:28:17.664 line:-1 align:center
+If the culprits seem obvious,
+
+
+597
+00:28:17,731 --> 00:28:20,667 line:-2
+use heap -addresses
+to get their addresses.
+
+
+598
+00:28:20.734 --> 00:28:24.171 line:-2 align:center
+If not, look at leaks
+-referenceTree for some clues.
+
+
+599
+00:28:24,238 --> 00:28:27,074 line:-2
+Finally, investigate culprit
+object addresses
+
+
+600
+00:28:27.140 --> 00:28:30.143 line:-2 align:center
+with leaks -traceTree
+and/or malloc_history.
+
+
+601
+00:28:31,712 --> 00:28:34,081 line:-2
+Lastly, make sure
+you're developing with these
+
+
+602
+00:28:34,147 --> 00:28:36,383 line:-1
+memory best practices in mind.
+
+
+603
+00:28:36.450 --> 00:28:38.685 line:-2 align:center
+Strive to have
+zero leaks in your app.
+
+
+604
+00:28:38,752 --> 00:28:40,454 line:-2
+If you're working with
+unsafe types,
+
+
+605
+00:28:40.521 --> 00:28:43.624 line:-2 align:center
+make sure you remember
+to free everything you allocate.
+
+
+606
+00:28:43.690 --> 00:28:46.426 line:-2 align:center
+And be on the lookout for retain
+cycles in your code as well.
+
+
+607
+00:28:47,794 --> 00:28:50,364 line:-2
+Find ways to reduce
+your heap allocations,
+
+
+608
+00:28:50,430 --> 00:28:51,865 line:-1
+whether that's shrinking them,
+
+
+609
+00:28:51.932 --> 00:28:53.934 line:-2 align:center
+holding them
+for a shorter period of time,
+
+
+610
+00:28:54.001 --> 00:28:55.969 line:-2 align:center
+or just getting rid of
+unnecessary allocations
+
+
+611
+00:28:56.036 --> 00:28:57.938 line:-1 align:center
+altogether.
+
+
+612
+00:28:58,005 --> 00:29:00,574 line:-2
+Make sure to keep
+fragmentation in mind.
+
+
+613
+00:29:00,641 --> 00:29:03,644 line:-2
+Allocate objects with similar
+lifetimes next to each other
+
+
+614
+00:29:03,710 --> 00:29:07,247 line:-2
+to create nice, large chunks
+of free memory later on.
+
+
+615
+00:29:07.314 --> 00:29:10.684 line:-2 align:center
+With these best practices
+and the XCTest workflow,
+
+
+616
+00:29:10,751 --> 00:29:12,920 line:-2
+you'll be equipped to detect,
+diagnose,
+
+
+617
+00:29:12,986 --> 00:29:15,255 line:-2
+and fix memory issues
+in your app.
+
+
+618
+00:29:15,322 --> 00:29:19,660 line:-2
+On behalf of Tanuja and myself,
+thanks so much for tuning in.
+
+
+619
+00:29:19,726 --> 00:29:22,396 align:center
+[percussive music]
+

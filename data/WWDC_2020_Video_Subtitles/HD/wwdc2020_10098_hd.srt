@@ -1,0 +1,2411 @@
+1
+00:00:00,133 --> 00:00:01,768 line:-1
+[chimes]
+
+
+2
+00:00:03,836 --> 00:00:07,040 line:-1
+Hello and welcome to WWDC.
+
+
+3
+00:00:08,876 --> 00:00:11,812 line:0
+Hello. Welcome to
+"What's New in Universal Links."
+
+
+4
+00:00:11,879 --> 00:00:13,380 line:0
+My name is Christopher Linn.
+
+
+5
+00:00:14,014 --> 00:00:17,751 line:-2
+We've talked about universal links
+at WWDC before,
+
+
+6
+00:00:17,818 --> 00:00:19,820 line:-2
+but we'd like to give you
+a brief refresher.
+
+
+7
+00:00:21,889 --> 00:00:26,393 line:-1
+Universal links are HTTPS or HTTP URLs
+
+
+8
+00:00:26,460 --> 00:00:30,497 line:-2
+that represent your content
+both on the Web and in your app.
+
+
+9
+00:00:31,365 --> 00:00:36,203 line:-2
+They allow users to open your content
+in your app instead of in a Web browser,
+
+
+10
+00:00:36,270 --> 00:00:38,672 line:-2
+allowing you to provide
+a richer experience.
+
+
+11
+00:00:39,139 --> 00:00:41,942 line:-2
+You create them by adding
+a special entitlement,
+
+
+12
+00:00:42,009 --> 00:00:45,045 line:-2
+the Associated Domains entitlement,
+to your app
+
+
+13
+00:00:45,112 --> 00:00:48,048 line:-2
+and by adding a JSON file
+to your Web server.
+
+
+14
+00:00:48,115 --> 00:00:50,884 line:-2
+The entitlement mentions
+your Web server's domain name,
+
+
+15
+00:00:50,951 --> 00:00:54,221 line:-2
+and the Web server mentions
+your app's application identifier.
+
+
+16
+00:00:54,288 --> 00:00:59,660 line:-2
+This creates a secure two-way association
+between your app and your website,
+
+
+17
+00:00:59,726 --> 00:01:03,497 line:-2
+allowing your app to perform special tasks
+on behalf of your website.
+
+
+18
+00:01:04,031 --> 00:01:06,633 line:-2
+Where you are currently using
+custom URL schemes,
+
+
+19
+00:01:06,700 --> 00:01:09,303 line:-2
+you should migrate to universal links
+as soon as possible.
+
+
+20
+00:01:10,370 --> 00:01:12,739 line:-1
+Custom URL schemes are not recommended.
+
+
+21
+00:01:12,806 --> 00:01:16,510 line:-2
+For more detail about what
+universal links are and how to adopt them,
+
+
+22
+00:01:16,577 --> 00:01:19,680 line:0
+check out our session from WWDC19.
+
+
+23
+00:01:20,514 --> 00:01:23,183 line:-2
+After that high-level review
+of universal links,
+
+
+24
+00:01:23,250 --> 00:01:24,518 line:-1
+let's get to the fun stuff:
+
+
+25
+00:01:24,585 --> 00:01:26,353 line:-1
+support for new platforms.
+
+
+26
+00:01:27,054 --> 00:01:28,989 line:-1
+The first and smallest platform
+
+
+27
+00:01:29,056 --> 00:01:31,592 line:-2
+we're adding support for this year
+is watchOS.
+
+
+28
+00:01:32,125 --> 00:01:34,962 line:-2
+Universal links work the same way
+on watchOS
+
+
+29
+00:01:35,028 --> 00:01:36,930 line:-1
+as they do on our other platforms,
+
+
+30
+00:01:36,997 --> 00:01:40,601 line:-2
+but there are some platform-specific
+differences we want to share with you.
+
+
+31
+00:01:40,667 --> 00:01:43,070 line:-1
+The first is that, when using WatchKit,
+
+
+32
+00:01:43,136 --> 00:01:47,107 line:-2
+the API is different
+than when using UIKit or AppKit.
+
+
+33
+00:01:47,174 --> 00:01:50,010 line:-2
+And it's important to remember
+that your entitlements,
+
+
+34
+00:01:50,077 --> 00:01:52,579 line:-2
+including the Associated Domains
+entitlement,
+
+
+35
+00:01:52,646 --> 00:01:57,017 line:-2
+are applied to your WatchKit extension,
+not the containing WatchKit app.
+
+
+36
+00:01:57,518 --> 00:02:00,587 line:-1
+On iOS, or when using Mac Catalyst,
+
+
+37
+00:02:00,654 --> 00:02:03,624 line:-2
+you implement
+the UIApplicationDelegate method
+
+
+38
+00:02:03,690 --> 00:02:07,528 line:-2
+"application: continue userActivity:
+restorationHandler"
+
+
+39
+00:02:07,594 --> 00:02:09,795 line:-1
+to handle incoming universal links.
+
+
+40
+00:02:10,264 --> 00:02:14,001 line:-2
+We've shown how to use this
+delegate method in previous sessions.
+
+
+41
+00:02:14,067 --> 00:02:17,738 line:-2
+When you want to open a universal link
+in another application,
+
+
+42
+00:02:17,804 --> 00:02:20,374 line:-1
+you use UIApplication, openURL.
+
+
+43
+00:02:21,341 --> 00:02:25,379 line:-2
+However, on watchOS,
+you use WatchKit instead of UIKit,
+
+
+44
+00:02:25,445 --> 00:02:28,582 line:-2
+so to adopt on watchOS,
+we'll need to make some changes here.
+
+
+45
+00:02:29,183 --> 00:02:32,786 line:-2
+WKExtensionDelegate's
+handle(_ userActivity method
+
+
+46
+00:02:32,853 --> 00:02:36,356 line:-2
+is responsible for handling
+incoming universal links.
+
+
+47
+00:02:36,423 --> 00:02:38,992 line:-2
+The body of this method
+will be fundamentally the same
+
+
+48
+00:02:39,059 --> 00:02:40,961 line:-1
+as on iOS and macOS.
+
+
+49
+00:02:41,795 --> 00:02:44,298 line:-1
+To open a URL in another application,
+
+
+50
+00:02:44,364 --> 00:02:48,468 line:-2
+you use WKExtension's
+openSystemURL method.
+
+
+51
+00:02:48,535 --> 00:02:50,270 line:-1
+Just like on our other platforms,
+
+
+52
+00:02:50,337 --> 00:02:54,708 line:-2
+if you attempt to open a universal link
+in an application that's not installed,
+
+
+53
+00:02:54,775 --> 00:02:56,210 line:-1
+that link will fail to open.
+
+
+54
+00:02:56,777 --> 00:02:59,413 line:-1
+Now, Safari is not available on watchOS
+
+
+55
+00:02:59,479 --> 00:03:02,816 line:-2
+except in limited contexts
+like Mail and Messages.
+
+
+56
+00:03:02,883 --> 00:03:06,720 line:-2
+And this method does not return a value
+or take a completion handler.
+
+
+57
+00:03:06,787 --> 00:03:09,890 line:-2
+So, rather than leave the user
+with no feedback,
+
+
+58
+00:03:09,957 --> 00:03:13,861 line:-2
+we present UI to the user on watchOS,
+and that looks like this.
+
+
+59
+00:03:14,561 --> 00:03:17,064 line:-2
+Here you can see
+an app we've been working on
+
+
+60
+00:03:17,130 --> 00:03:20,000 line:-2
+that shows us the menus
+for all our favorite restaurants.
+
+
+61
+00:03:20,767 --> 00:03:22,870 line:-1
+It lets us select our favorite foods,
+
+
+62
+00:03:22,936 --> 00:03:27,474 line:-2
+then order them in each restaurant's app
+by invoking a universal link.
+
+
+63
+00:03:27,541 --> 00:03:31,945 line:-2
+However, this Apple Watch doesn't have
+this restaurant's app installed.
+
+
+64
+00:03:32,012 --> 00:03:35,649 line:-2
+So when we tap the button to order,
+we'll see this alert,
+
+
+65
+00:03:35,716 --> 00:03:38,051 line:-2
+telling us to continue
+on the paired iPhone.
+
+
+66
+00:03:38,118 --> 00:03:40,020 line:-1
+So, to quickly summarize,
+
+
+67
+00:03:40,554 --> 00:03:44,391 line:-2
+these are the methods you use
+to handle and open universal links
+
+
+68
+00:03:44,458 --> 00:03:45,926 line:-1
+when using WatchKit.
+
+
+69
+00:03:46,793 --> 00:03:49,763 line:0
+These are the equivalent methods
+when using UIKit.
+
+
+70
+00:03:49,830 --> 00:03:53,433 line:0
+Note that when your app is configured
+to use UIScene,
+
+
+71
+00:03:53,500 --> 00:03:55,602 line:0
+you need to implement
+a different delegate method
+
+
+72
+00:03:55,669 --> 00:03:57,804 line:0
+than when using only UIApplication.
+
+
+73
+00:03:58,405 --> 00:04:01,842 line:0
+And AppKit is similar to,
+but distinct from, UIKit.
+
+
+74
+00:04:02,276 --> 00:04:04,745 line:0
+In the end, the exact API you use
+
+
+75
+00:04:04,811 --> 00:04:07,347 line:0
+will depend on the platform
+and SDK you're using.
+
+
+76
+00:04:08,048 --> 00:04:10,817 line:-2
+But-- and we're very pleased
+to tell you about this--
+
+
+77
+00:04:10,884 --> 00:04:14,621 line:-2
+SwiftUI is adding support
+for universal links this year too.
+
+
+78
+00:04:14,688 --> 00:04:16,456 line:-1
+And that looks a little like this,
+
+
+79
+00:04:17,089 --> 00:04:19,892 line:-1
+no matter which platform or SDK you use.
+
+
+80
+00:04:19,959 --> 00:04:23,463 line:-2
+For more information about
+the enhancements to SwiftUI this year,
+
+
+81
+00:04:23,530 --> 00:04:26,300 line:0
+please check out "What's New in SwiftUI."
+
+
+82
+00:04:26,800 --> 00:04:30,337 line:-2
+It's really exciting that we now have
+universal links on watchOS
+
+
+83
+00:04:30,404 --> 00:04:32,406 line:-1
+and when using SwiftUI.
+
+
+84
+00:04:32,472 --> 00:04:35,309 line:-2
+We also have new features available
+across all our platforms.
+
+
+85
+00:04:35,375 --> 00:04:36,944 line:-1
+We'd like to tell you about them now.
+
+
+86
+00:04:38,478 --> 00:04:39,646 line:-1
+First, a quick refresher
+
+
+87
+00:04:39,713 --> 00:04:42,616 line:-2
+about how pattern matching works
+with universal links.
+
+
+88
+00:04:43,550 --> 00:04:46,587 line:-2
+You can use the asterisk
+and question mark characters
+
+
+89
+00:04:46,653 --> 00:04:49,423 line:-2
+in your pattern strings
+to specify wildcards.
+
+
+90
+00:04:50,324 --> 00:04:54,027 line:-2
+Asterisk matches zero
+or more characters and does so greedily.
+
+
+91
+00:04:54,094 --> 00:04:56,496 line:-2
+It will match as many characters
+as possible.
+
+
+92
+00:04:57,731 --> 00:05:00,601 line:-2
+Question mark matches
+exactly one character.
+
+
+93
+00:05:00,667 --> 00:05:04,938 line:-2
+To match at least one character,
+use question mark followed by asterisk.
+
+
+94
+00:05:05,506 --> 00:05:07,574 line:-2
+For more information
+about pattern matching
+
+
+95
+00:05:07,641 --> 00:05:11,512 line:0
+using wildcard characters,
+please take a look at last year's video.
+
+
+96
+00:05:12,012 --> 00:05:13,947 line:-1
+And now, on to the cool new stuff.
+
+
+97
+00:05:14,715 --> 00:05:16,917 line:-2
+The first new feature
+we'd like to announce today
+
+
+98
+00:05:16,984 --> 00:05:19,853 line:-2
+is support for case-insensitive
+pattern matching.
+
+
+99
+00:05:19,920 --> 00:05:22,256 line:-2
+We've had a lot of requests
+for this feature.
+
+
+100
+00:05:22,322 --> 00:05:24,558 line:-2
+Let's say you have a pattern
+like this one.
+
+
+101
+00:05:24,625 --> 00:05:28,428 line:-2
+It will match any path that starts
+with the path component "sourdough"
+
+
+102
+00:05:28,495 --> 00:05:30,797 line:-1
+and at least one character afterward.
+
+
+103
+00:05:31,765 --> 00:05:35,602 line:-2
+However, it can only match
+the lowercase word "sourdough."
+
+
+104
+00:05:35,669 --> 00:05:39,840 line:-2
+So, to support all possible mixes
+of uppercase and lowercase letters,
+
+
+105
+00:05:39,907 --> 00:05:43,644 line:-2
+you might want to add patterns
+for each combination of characters.
+
+
+106
+00:05:44,178 --> 00:05:45,512 line:-1
+But actually, you might not.
+
+
+107
+00:05:45,579 --> 00:05:47,681 line:-2
+There's such a thing
+as too much sourdough.
+
+
+108
+00:05:48,081 --> 00:05:50,450 line:-2
+But you don't have to worry about
+carb comas anymore,
+
+
+109
+00:05:50,517 --> 00:05:54,021 line:-2
+because we are introducing a new key
+in the components dictionary:
+
+
+110
+00:05:54,087 --> 00:05:55,455 line:-1
+caseSensitive.
+
+
+111
+00:05:55,522 --> 00:05:59,193 line:-2
+Set its value to "false" to disable
+case-sensitive pattern matching
+
+
+112
+00:05:59,259 --> 00:06:02,062 line:-2
+and to enable case-insensitive
+pattern matching.
+
+
+113
+00:06:02,729 --> 00:06:05,966 line:-2
+Case-insensitive pattern matching
+is available today
+
+
+114
+00:06:06,033 --> 00:06:11,238 line:-1
+with macOS Catalina 10.15.5 and iOS 13.5.
+
+
+115
+00:06:11,772 --> 00:06:13,907 line:-1
+Next up, let's talk Unicode.
+
+
+116
+00:06:14,341 --> 00:06:16,376 line:-1
+URLs are always ASCII.
+
+
+117
+00:06:16,443 --> 00:06:20,247 line:-2
+When you encounter a URL
+with non-ASCII Unicode characters,
+
+
+118
+00:06:20,314 --> 00:06:23,250 line:-2
+what's happening behind the scenes
+is that you're actually encountering
+
+
+119
+00:06:23,317 --> 00:06:25,252 line:-2
+percent-encoded characters
+like you see here.
+
+
+120
+00:06:26,119 --> 00:06:28,422 line:-1
+The string is converted to UTF-8,
+
+
+121
+00:06:28,488 --> 00:06:32,926 line:-2
+and then the hexadecimal representation
+of each byte in the UTF-8 sequence
+
+
+122
+00:06:32,993 --> 00:06:35,028 line:-1
+is emplaced in the URL.
+
+
+123
+00:06:35,629 --> 00:06:39,800 line:-2
+This is the name of a tasty Szechuan dish
+called "ants crawling on logs,"
+
+
+124
+00:06:39,867 --> 00:06:43,871 line:-2
+but even a fluent Chinese reader would
+have trouble telling that from this URL.
+
+
+125
+00:06:44,371 --> 00:06:48,108 line:-2
+Wouldn't it be nice if this pattern could
+contain actual Chinese characters?
+
+
+126
+00:06:48,575 --> 00:06:50,511 line:-1
+Good news: Now it can.
+
+
+127
+00:06:50,577 --> 00:06:53,814 line:-2
+Add the key percentEncoded
+to your components dictionary
+
+
+128
+00:06:53,881 --> 00:06:55,716 line:-1
+and set its value to "false."
+
+
+129
+00:06:55,782 --> 00:06:59,486 line:-2
+This disables percent-encoding,
+meaning that your pattern is matched
+
+
+130
+00:06:59,553 --> 00:07:02,556 line:-2
+as a sequence
+of 32-bit Unicode code points
+
+
+131
+00:07:02,623 --> 00:07:04,725 line:-1
+instead of 7-bit ASCII characters.
+
+
+132
+00:07:05,092 --> 00:07:09,897 line:-2
+Support for Unicode is available
+in macOS Big Sur and iOS 14.
+
+
+133
+00:07:10,297 --> 00:07:14,001 line:-2
+And, of course, you can use
+both percentEncoded and caseInsensitive
+
+
+134
+00:07:14,067 --> 00:07:15,402 line:-1
+in the same pattern.
+
+
+135
+00:07:15,469 --> 00:07:18,038 line:-2
+We support case-insensitive
+Unicode pattern matching.
+
+
+136
+00:07:19,640 --> 00:07:21,375 line:-1
+But this can get a little repetitive,
+
+
+137
+00:07:21,441 --> 00:07:24,178 line:-2
+as we have percentEncoded
+specified twice here
+
+
+138
+00:07:24,244 --> 00:07:26,513 line:-1
+and caseSensitive specified twice too.
+
+
+139
+00:07:27,181 --> 00:07:28,982 line:-1
+You can now add "defaults,"
+
+
+140
+00:07:29,049 --> 00:07:33,287 line:-2
+a dictionary containing values
+to apply by default to all patterns
+
+
+141
+00:07:33,353 --> 00:07:36,056 line:-1
+unless a pattern explicitly overrides it.
+
+
+142
+00:07:36,523 --> 00:07:37,958 line:-1
+Once we add this key,
+
+
+143
+00:07:38,025 --> 00:07:41,662 line:-2
+we can remove the percentEncoded
+and caseSensitive keys
+
+
+144
+00:07:41,728 --> 00:07:43,664 line:-1
+from each individual component.
+
+
+145
+00:07:43,730 --> 00:07:45,132 line:-1
+That's a lot cleaner.
+
+
+146
+00:07:45,199 --> 00:07:47,134 line:-1
+If it's a sibling of components,
+
+
+147
+00:07:47,201 --> 00:07:50,270 line:-2
+it will apply to all patterns
+in that components array.
+
+
+148
+00:07:50,337 --> 00:07:52,072 line:-1
+If it's a sibling of "details,"
+
+
+149
+00:07:52,139 --> 00:07:54,908 line:-2
+it will apply to all universal links
+for this domain.
+
+
+150
+00:07:55,309 --> 00:08:00,214 line:0
+And the defaults key is available
+for macOS Big Sur and iOS 14,
+
+
+151
+00:08:00,280 --> 00:08:02,182 line:0
+along with Unicode support.
+
+
+152
+00:08:02,249 --> 00:08:05,252 line:-2
+Now let's look at a pattern-matching story
+from the real world.
+
+
+153
+00:08:05,953 --> 00:08:08,055 line:-1
+This is based on a true story.
+
+
+154
+00:08:08,121 --> 00:08:11,558 line:-2
+My colleague Jonathan and I
+are building a food-ordering app
+
+
+155
+00:08:11,625 --> 00:08:14,828 line:-2
+that you briefly saw back when we were
+talking about watchOS support.
+
+
+156
+00:08:15,562 --> 00:08:18,465 line:-2
+Here's a URL that we would like to
+pattern-match against.
+
+
+157
+00:08:18,532 --> 00:08:22,736 line:-2
+It contains a locale code,
+consisting of a two-letter language code,
+
+
+158
+00:08:22,803 --> 00:08:25,439 line:-2
+an underscore
+and a two-letter country code.
+
+
+159
+00:08:25,906 --> 00:08:28,475 line:-1
+This is followed by a product name,
+
+
+160
+00:08:28,542 --> 00:08:30,944 line:-2
+one of several food items
+sold on our website
+
+
+161
+00:08:31,011 --> 00:08:32,779 line:-1
+and in our corresponding app.
+
+
+162
+00:08:33,447 --> 00:08:37,049 line:-2
+A simple pattern that would
+reasonably match a URL like this one
+
+
+163
+00:08:37,116 --> 00:08:38,885 line:-1
+looks like what you see here.
+
+
+164
+00:08:38,952 --> 00:08:41,989 line:-2
+Remember, the question marks
+match single characters,
+
+
+165
+00:08:42,054 --> 00:08:44,124 line:-2
+and a question mark
+followed by an asterisk
+
+
+166
+00:08:44,191 --> 00:08:45,993 line:-1
+matches one or more characters.
+
+
+167
+00:08:46,393 --> 00:08:49,229 line:-2
+But this pattern will match more URLs
+than we want.
+
+
+168
+00:08:49,663 --> 00:08:51,832 line:0
+What about countries
+where we don't operate,
+
+
+169
+00:08:51,899 --> 00:08:54,701 line:0
+languages we don't support,
+and products we don't sell?
+
+
+170
+00:08:55,202 --> 00:08:57,070 line:-1
+This pattern would match all of them.
+
+
+171
+00:08:58,071 --> 00:09:01,175 line:-2
+Our first attempt at pattern matching
+involved hard coding
+
+
+172
+00:09:01,241 --> 00:09:04,144 line:-2
+the list of possible values
+we wanted to match against,
+
+
+173
+00:09:04,545 --> 00:09:05,846 line:-1
+and that might have worked
+
+
+174
+00:09:05,913 --> 00:09:09,183 line:-2
+if we had a small number of regions
+and languages that we supported
+
+
+175
+00:09:09,249 --> 00:09:11,218 line:-1
+and just a handful of products.
+
+
+176
+00:09:11,285 --> 00:09:13,320 line:-1
+But thanks to Jonathan's hard work,
+
+
+177
+00:09:13,387 --> 00:09:15,756 line:-2
+we operate in over 100 countries
+around the world.
+
+
+178
+00:09:16,256 --> 00:09:19,726 line:-2
+Once we added the products we sell,
+all heck broke loose.
+
+
+179
+00:09:20,194 --> 00:09:23,363 line:-2
+If we just consider
+every two-letter language code,
+
+
+180
+00:09:23,430 --> 00:09:26,567 line:-2
+every two-letter region code
+and four products,
+
+
+181
+00:09:27,267 --> 00:09:31,738 line:-2
+we're already looking at 1.8 million
+possible patterns to match against,
+
+
+182
+00:09:31,805 --> 00:09:34,241 line:-1
+and they take up over 27 megabytes.
+
+
+183
+00:09:34,308 --> 00:09:38,045 line:-2
+That's because pattern matching
+has exponential complexity.
+
+
+184
+00:09:38,679 --> 00:09:41,548 line:-2
+We took a look
+at this apple-app-site-association file
+
+
+185
+00:09:41,615 --> 00:09:43,383 line:-1
+and said, "Let's do better."
+
+
+186
+00:09:43,750 --> 00:09:46,286 line:-2
+We're happy to introduce
+a new feature of universal links
+
+
+187
+00:09:46,353 --> 00:09:48,522 line:-1
+that we call "substitution variables."
+
+
+188
+00:09:48,589 --> 00:09:50,524 line:-1
+What are they? In a nutshell,
+
+
+189
+00:09:50,591 --> 00:09:54,595 line:-2
+they are named lists of strings
+that can be matched against.
+
+
+190
+00:09:54,661 --> 00:09:57,164 line:-2
+These variables appear
+in your pattern-matching strings
+
+
+191
+00:09:57,231 --> 00:10:00,734 line:-2
+and represent any and all of the values
+you specify.
+
+
+192
+00:10:00,801 --> 00:10:03,804 line:-2
+Their names can contain
+almost any character.
+
+
+193
+00:10:03,871 --> 00:10:07,875 line:-2
+In a moment, you'll see why dollar signs
+and parentheses are restricted.
+
+
+194
+00:10:07,941 --> 00:10:11,879 line:-2
+Variable names are always case-sensitive
+when encountered in a pattern.
+
+
+195
+00:10:11,945 --> 00:10:14,281 line:-1
+The values you specify, on the other hand,
+
+
+196
+00:10:14,348 --> 00:10:18,118 line:-2
+can contain question mark and asterisk
+for wildcard matching
+
+
+197
+00:10:18,185 --> 00:10:20,287 line:-2
+but can't reference
+substitution variables.
+
+
+198
+00:10:20,354 --> 00:10:21,822 line:-1
+They don't recurse.
+
+
+199
+00:10:22,322 --> 00:10:26,360 line:-2
+The values are case-sensitive
+if pattern matching is case-sensitive,
+
+
+200
+00:10:26,426 --> 00:10:28,529 line:-1
+which is the default behavior.
+
+
+201
+00:10:28,595 --> 00:10:31,231 line:-2
+If you have enabled
+case-insensitive pattern matching,
+
+
+202
+00:10:31,298 --> 00:10:33,834 line:-1
+then values will be matched accordingly.
+
+
+203
+00:10:34,401 --> 00:10:38,272 line:-2
+To get you started, we've built in
+some common substitution variables.
+
+
+204
+00:10:38,338 --> 00:10:39,673 line:-1
+The first is alpha,
+
+
+205
+00:10:39,740 --> 00:10:42,609 line:-2
+which is all upper and lowercase
+ASCII letters.
+
+
+206
+00:10:43,310 --> 00:10:47,481 line:-2
+You can see here why the dollar sign
+and parentheses characters are restricted.
+
+
+207
+00:10:47,548 --> 00:10:50,551 line:-2
+They're part of a variable's name
+when referenced in a pattern.
+
+
+208
+00:10:52,286 --> 00:10:56,089 line:-2
+"Upper" and "lower" are the uppercase
+and lowercase ASCII alphabets.
+
+
+209
+00:10:56,790 --> 00:10:59,426 line:-1
+"Alnum" is short for "alphanumeric"
+
+
+210
+00:10:59,493 --> 00:11:03,363 line:-2
+and matches all ASCII letters
+and the digits zero through nine.
+
+
+211
+00:11:04,164 --> 00:11:08,101 line:-2
+"Digit" is decimal digits,
+and "xdigit" is hexadecimal digits.
+
+
+212
+00:11:09,303 --> 00:11:13,807 line:-2
+These variables are equivalent
+to the similarly-named character classes
+
+
+213
+00:11:13,874 --> 00:11:15,609 line:-1
+in the standard C library.
+
+
+214
+00:11:15,976 --> 00:11:17,477 line:-1
+Next we have "region,"
+
+
+215
+00:11:17,544 --> 00:11:22,115 line:-2
+which is every ISO region code
+recognized by Foundation's Locale type.
+
+
+216
+00:11:22,182 --> 00:11:25,986 line:0
+And finally, we have "lang,"
+which is every ISO language code.
+
+
+217
+00:11:26,854 --> 00:11:30,023 line:-2
+Let's take a look at
+the apple-app-site-association file
+
+
+218
+00:11:30,090 --> 00:11:32,359 line:-2
+that we were worried about
+a few slides back.
+
+
+219
+00:11:33,160 --> 00:11:36,997 line:-2
+Here are all those patterns
+as they appear within the full file.
+
+
+220
+00:11:37,064 --> 00:11:39,466 line:-1
+Equipped with substitution variables,
+
+
+221
+00:11:39,533 --> 00:11:42,503 line:-2
+we're now ready to wake up
+from this combinatoric nightmare.
+
+
+222
+00:11:44,037 --> 00:11:47,941 line:-2
+The first thing we'll do is to add
+a new key-value pair under "applinks"
+
+
+223
+00:11:48,008 --> 00:11:50,010 line:-1
+named substitutionVariables.
+
+
+224
+00:11:50,511 --> 00:11:52,779 line:-1
+The value for that key is a dictionary.
+
+
+225
+00:11:52,846 --> 00:11:55,415 line:-2
+The keys in that dictionary
+are variable names,
+
+
+226
+00:11:55,482 --> 00:11:59,353 line:-2
+and the values are arrays
+containing sets of substrings to match.
+
+
+227
+00:11:59,987 --> 00:12:02,956 line:-2
+The variable we've added here
+is named "food"
+
+
+228
+00:12:03,023 --> 00:12:05,259 line:-1
+and has four possible values.
+
+
+229
+00:12:06,493 --> 00:12:09,429 line:-2
+And now we're going to use this variable
+in these patterns.
+
+
+230
+00:12:09,496 --> 00:12:11,765 line:-1
+Watch me make 27 megabytes disappear.
+
+
+231
+00:12:13,100 --> 00:12:15,269 line:-1
+Wow. That's an obvious improvement.
+
+
+232
+00:12:15,335 --> 00:12:19,006 line:-2
+We accomplished this feat by using
+three substitution variables.
+
+
+233
+00:12:19,072 --> 00:12:21,842 line:-2
+"Lang" and "region"
+are predefined variables,
+
+
+234
+00:12:21,909 --> 00:12:24,645 line:-2
+so we didn't need to define them
+ourselves,
+
+
+235
+00:12:24,711 --> 00:12:27,114 line:-2
+and "food" is the variable
+we defined above.
+
+
+236
+00:12:27,648 --> 00:12:29,816 line:-2
+You'll note that when defining
+the variable,
+
+
+237
+00:12:29,883 --> 00:12:31,752 line:-1
+its name is in quotation marks.
+
+
+238
+00:12:31,818 --> 00:12:34,521 line:-2
+That's because that's the syntax
+for JSON keys.
+
+
+239
+00:12:34,988 --> 00:12:38,192 line:-2
+In a pattern, it's wrapped
+with a dollar sign and parentheses.
+
+
+240
+00:12:39,026 --> 00:12:42,296 line:-2
+So, we could ship this,
+but we do have one problem:
+
+
+241
+00:12:42,362 --> 00:12:44,965 line:-2
+We can't sell our app or our products
+in Canada
+
+
+242
+00:12:45,032 --> 00:12:48,602 line:-2
+because we've been having a lot of trouble
+securing a supply of maple syrup.
+
+
+243
+00:12:49,336 --> 00:12:52,272 line:-2
+So we'll add another pattern
+before the one we have
+
+
+244
+00:12:52,339 --> 00:12:56,643 line:-2
+to match the ISO region code CA,
+which corresponds to Canada,
+
+
+245
+00:12:56,710 --> 00:12:58,946 line:-1
+and we'll mark this pattern as "excluded,"
+
+
+246
+00:12:59,012 --> 00:13:02,683 line:-2
+which tells the operating system
+that if a URL matches this pattern,
+
+
+247
+00:13:02,749 --> 00:13:05,819 line:-2
+it should not be opened by this app
+as a universal link.
+
+
+248
+00:13:06,286 --> 00:13:10,357 line:-2
+This way, we can still exclude individual
+combinations of variable values.
+
+
+249
+00:13:11,191 --> 00:13:13,393 line:-1
+However, Jonathan was born in Canada,
+
+
+250
+00:13:13,460 --> 00:13:15,762 line:-2
+and he really wants to do business
+back home,
+
+
+251
+00:13:15,829 --> 00:13:18,565 line:-2
+so let's say we secure
+that maple syrup supply.
+
+
+252
+00:13:18,632 --> 00:13:22,035 line:-2
+Of course, all that syrupy goodness means
+that Canada needs a different menu
+
+
+253
+00:13:22,102 --> 00:13:24,071 line:-1
+than the other countries where we operate.
+
+
+254
+00:13:24,638 --> 00:13:28,242 line:-2
+How can we handle special cases
+in his substitution variables?
+
+
+255
+00:13:28,775 --> 00:13:32,079 line:-2
+It's not hard. We just add
+another variable, "Canadian food,"
+
+
+256
+00:13:32,145 --> 00:13:34,248 line:-1
+specifically for Canada.
+
+
+257
+00:13:34,314 --> 00:13:37,818 line:-2
+You'll notice right away that there's
+some overlap between the menus,
+
+
+258
+00:13:37,885 --> 00:13:39,219 line:-1
+and that's okay.
+
+
+259
+00:13:39,286 --> 00:13:43,757 line:-2
+You'll also notice
+we kept the exclusionary pattern we had.
+
+
+260
+00:13:43,824 --> 00:13:47,761 line:-2
+If we were to remove it, then the last
+pattern would match all values
+
+
+261
+00:13:47,828 --> 00:13:50,764 line:-2
+from the "food" variable in Canada,
+which we don't want to do.
+
+
+262
+00:13:51,365 --> 00:13:54,134 line:-2
+So, we're almost ready
+to deploy this file.
+
+
+263
+00:13:54,201 --> 00:13:58,472 line:-2
+But Canada is a multilingual country.
+Not everyone there speaks English.
+
+
+264
+00:13:58,539 --> 00:14:01,608 line:-2
+At a minimum,
+we should support English and French,
+
+
+265
+00:14:01,675 --> 00:14:05,212 line:-2
+so we'll add the French translations
+of those Canadian food names.
+
+
+266
+00:14:06,480 --> 00:14:07,881 line:-1
+Oh, that looks weird.
+
+
+267
+00:14:07,948 --> 00:14:10,484 line:-2
+One of the French food names
+has an accented letter,
+
+
+268
+00:14:10,551 --> 00:14:13,120 line:-2
+which means we need to deal with
+percent encoding.
+
+
+269
+00:14:13,187 --> 00:14:14,454 line:-1
+Let's clean that up.
+
+
+270
+00:14:14,988 --> 00:14:16,356 line:-1
+Ah, much better.
+
+
+271
+00:14:16,423 --> 00:14:20,027 line:-2
+We can use the percentEncoded key
+we are introducing this year.
+
+
+272
+00:14:20,093 --> 00:14:23,997 line:-2
+It allows us to use accented letters
+directly in our patterns and variables.
+
+
+273
+00:14:24,731 --> 00:14:26,767 line:-1
+We're done. And now I'm hungry.
+
+
+274
+00:14:26,834 --> 00:14:29,469 line:-2
+But I won't have to wait long
+to order lunch with this app,
+
+
+275
+00:14:29,536 --> 00:14:32,105 line:-2
+because substitution variables
+are available today
+
+
+276
+00:14:32,506 --> 00:14:38,779 line:-2
+with the macOS Catalina 10.15.6
+and iOS 13.5 updates.
+
+
+277
+00:14:39,746 --> 00:14:42,716 line:-2
+Now that we've spent some time
+talking about the contents
+
+
+278
+00:14:42,783 --> 00:14:44,918 line:-1
+of the apple-app-site-association file,
+
+
+279
+00:14:44,985 --> 00:14:47,855 line:-2
+let's talk about how it gets on
+to your users' devices
+
+
+280
+00:14:47,921 --> 00:14:49,723 line:-1
+and how we can improve that flow.
+
+
+281
+00:14:50,858 --> 00:14:54,595 line:-2
+Let's say we have an iPad,
+and we want to download an app.
+
+
+282
+00:14:55,195 --> 00:14:58,432 line:-2
+We open the App Store
+and select the app we want to download.
+
+
+283
+00:14:58,498 --> 00:14:59,733 line:-1
+There it goes.
+
+
+284
+00:15:01,001 --> 00:15:03,504 line:-1
+After the app is downloaded and installed,
+
+
+285
+00:15:03,570 --> 00:15:06,607 line:-2
+the system checks its entitlements
+and sees that it needs data
+
+
+286
+00:15:06,673 --> 00:15:09,576 line:-2
+from one or more
+apple-app-site-association files.
+
+
+287
+00:15:10,310 --> 00:15:12,779 line:0
+The device opens a connection
+to the Web server
+
+
+288
+00:15:12,846 --> 00:15:15,816 line:0
+where that file is hosted
+in order to download it.
+
+
+289
+00:15:15,883 --> 00:15:18,252 line:0
+Now, devices have limited bandwidth,
+
+
+290
+00:15:18,318 --> 00:15:21,955 line:0
+so if multiple files need to be downloaded
+from multiple Web servers,
+
+
+291
+00:15:22,022 --> 00:15:24,892 line:0
+the device needs to download them
+a few at a time.
+
+
+292
+00:15:25,492 --> 00:15:28,629 line:0
+The apple-app-site-association file
+makes its way
+
+
+293
+00:15:28,695 --> 00:15:30,797 line:0
+from the Web server to the device,
+
+
+294
+00:15:30,864 --> 00:15:33,901 line:0
+is parsed by the Associated Domains
+daemon,
+
+
+295
+00:15:33,967 --> 00:15:37,204 line:0
+and the app's universal links
+become active.
+
+
+296
+00:15:37,271 --> 00:15:40,974 line:0
+Then the device moves on
+to the next queued server and so forth.
+
+
+297
+00:15:41,341 --> 00:15:43,477 line:-2
+But what if there's a problem
+with the download?
+
+
+298
+00:15:43,544 --> 00:15:47,247 line:-2
+Let's go back a few slides here
+and try downloading that file again.
+
+
+299
+00:15:48,248 --> 00:15:51,518 line:-2
+The device attempts to establish
+a connection to the server.
+
+
+300
+00:15:51,585 --> 00:15:54,922 line:-2
+But let's say the Wi-Fi goes down
+or the server crashes
+
+
+301
+00:15:54,988 --> 00:15:57,858 line:-2
+or the server is simply unreachable
+from the device.
+
+
+302
+00:15:58,358 --> 00:16:02,262 line:-2
+How far the download can proceed depends
+on the exact nature of the failure,
+
+
+303
+00:16:02,329 --> 00:16:04,398 line:-1
+but the data won't make it to the device.
+
+
+304
+00:16:04,464 --> 00:16:07,067 line:-2
+Eventually,
+the device has to give up on the download
+
+
+305
+00:16:07,134 --> 00:16:08,969 line:-1
+and move on to the next server.
+
+
+306
+00:16:09,036 --> 00:16:11,939 line:-2
+This leaves the device
+in an inconsistent state,
+
+
+307
+00:16:12,005 --> 00:16:14,675 line:-2
+where the app is installed
+but its universal links
+
+
+308
+00:16:14,741 --> 00:16:17,945 line:-2
+and other Associated Domains data
+are not available.
+
+
+309
+00:16:18,445 --> 00:16:20,781 line:-1
+This state can persist for hours or days,
+
+
+310
+00:16:20,848 --> 00:16:24,618 line:-2
+until the system next attempts
+to update the data for that app.
+
+
+311
+00:16:25,152 --> 00:16:26,753 line:-1
+But I think we can do better here.
+
+
+312
+00:16:26,820 --> 00:16:31,058 line:-2
+Let's go back a few slides again,
+but this time with an ace up our sleeve.
+
+
+313
+00:16:31,758 --> 00:16:34,661 line:-2
+Once again,
+we pick an app on the App Store,
+
+
+314
+00:16:34,728 --> 00:16:37,097 line:-1
+and it's downloaded onto this device.
+
+
+315
+00:16:37,164 --> 00:16:40,834 line:-2
+This device sees that the app has
+the Associated Domains entitlement,
+
+
+316
+00:16:40,901 --> 00:16:43,904 line:-2
+but instead of connecting
+to the associated Web server,
+
+
+317
+00:16:43,971 --> 00:16:47,508 line:-2
+it connects to a content delivery network,
+or CDN,
+
+
+318
+00:16:47,574 --> 00:16:49,910 line:-1
+that manages Associated Domains data.
+
+
+319
+00:16:51,645 --> 00:16:55,582 line:-2
+A CDN is a powerful tool
+and can cache large amounts of data,
+
+
+320
+00:16:55,649 --> 00:16:58,719 line:-2
+so it might already have the data
+from this Web server stored.
+
+
+321
+00:16:58,785 --> 00:17:00,487 line:0
+But let's say it doesn't.
+
+
+322
+00:17:00,554 --> 00:17:03,557 line:0
+It can connect to the server
+on behalf of this device.
+
+
+323
+00:17:03,624 --> 00:17:05,992 line:0
+But again, CDNs are powerful,
+
+
+324
+00:17:06,059 --> 00:17:10,464 line:0
+so it can connect to all the servers for
+all apps on this device simultaneously.
+
+
+325
+00:17:11,231 --> 00:17:14,201 line:0
+It can download
+the apple-app-site-association files
+
+
+326
+00:17:14,268 --> 00:17:17,436 line:0
+for all of these domains concurrently,
+cache them,
+
+
+327
+00:17:17,503 --> 00:17:21,241 line:-2
+and send the data to the device
+with a single network connection.
+
+
+328
+00:17:21,308 --> 00:17:24,877 line:-2
+This device is looking much happier
+than it was the last time we tried this.
+
+
+329
+00:17:25,746 --> 00:17:29,483 line:-2
+There are a number of reasons
+we want to use a CDN here.
+
+
+330
+00:17:29,550 --> 00:17:33,187 line:-2
+We've built a CDN dedicated
+to just Associated Domains
+
+
+331
+00:17:33,253 --> 00:17:35,656 line:-1
+and apple-app-site-association files,
+
+
+332
+00:17:35,722 --> 00:17:39,159 line:-2
+so we can fine-tune it to deliver
+the best experience to users.
+
+
+333
+00:17:40,227 --> 00:17:43,430 line:-2
+Because a CDN caches data
+from multiple Web servers,
+
+
+334
+00:17:43,497 --> 00:17:48,001 line:-2
+we can use a single HTTP/2 connection
+to request all the data we need
+
+
+335
+00:17:48,068 --> 00:17:50,804 line:-2
+instead of a separate connection
+for every Web server.
+
+
+336
+00:17:51,438 --> 00:17:54,074 line:-2
+Caching reduces the total load
+on your server
+
+
+337
+00:17:54,141 --> 00:17:57,544 line:-2
+from potentially millions of requests
+per day to just a handful.
+
+
+338
+00:17:58,312 --> 00:18:02,583 line:-2
+And, because the CDN has a known-good,
+known-fast connection,
+
+
+339
+00:18:02,649 --> 00:18:06,286 line:-2
+users' experiences with your apps
+are overall more reliable.
+
+
+340
+00:18:06,820 --> 00:18:09,790 line:0
+Beginning with macOS Big Sur and iOS 14,
+
+
+341
+00:18:09,857 --> 00:18:14,928 line:0
+your Web server will only receive requests
+for your apple-app-site-association files
+
+
+342
+00:18:14,995 --> 00:18:18,065 line:0
+from Apple's CDN,
+which lives on the public Internet.
+
+
+343
+00:18:18,432 --> 00:18:21,201 line:0
+However,
+not all servers are created equal.
+
+
+344
+00:18:21,268 --> 00:18:24,972 line:0
+What if your Web server cannot be reached
+from the public Internet?
+
+
+345
+00:18:25,038 --> 00:18:28,842 line:0
+Perhaps it's a Web server you use
+for pre-deployment testing
+
+
+346
+00:18:28,909 --> 00:18:33,347 line:0
+or one intended only for use by employees
+connected to your internal network.
+
+
+347
+00:18:34,281 --> 00:18:36,884 line:0
+How can you continue to support
+these scenarios?
+
+
+348
+00:18:37,985 --> 00:18:40,954 line:-2
+We've designed a few features
+into our CDN support
+
+
+349
+00:18:41,021 --> 00:18:44,358 line:-2
+that are here to help you,
+and we call them "alternate modes."
+
+
+350
+00:18:45,158 --> 00:18:47,995 line:-2
+Alternate modes allow you to bypass
+the CDN
+
+
+351
+00:18:48,061 --> 00:18:50,864 line:-2
+and directly connect to a domain
+you control.
+
+
+352
+00:18:51,532 --> 00:18:55,802 line:-2
+There are two alternate modes
+in macOS Big Sur and iOS 14,
+
+
+353
+00:18:55,869 --> 00:18:58,338 line:-2
+and they're distinguished
+by when you would use them.
+
+
+354
+00:18:58,939 --> 00:19:01,508 line:-2
+The first alternate mode
+is called "developer mode,"
+
+
+355
+00:19:01,575 --> 00:19:04,845 line:-2
+and it's designed for use
+when you're building and testing your app
+
+
+356
+00:19:04,912 --> 00:19:07,814 line:-2
+before you deploy it to TestFlight
+or end users.
+
+
+357
+00:19:09,049 --> 00:19:11,518 line:-2
+The second alternate mode
+is called "managed mode"
+
+
+358
+00:19:11,585 --> 00:19:15,489 line:-2
+and is for use when your app is installed
+using an MDM profile.
+
+
+359
+00:19:15,556 --> 00:19:17,891 line:-1
+We'll be focusing today on developer mode.
+
+
+360
+00:19:18,392 --> 00:19:20,727 line:0
+For more information
+about managing your devices
+
+
+361
+00:19:20,794 --> 00:19:23,030 line:0
+and configuring your MDM profile,
+
+
+362
+00:19:23,096 --> 00:19:25,566 line:0
+watch "Managing Apple Devices."
+
+
+363
+00:19:26,400 --> 00:19:30,270 line:-2
+The first big difference with
+developer mode is that, when enabled,
+
+
+364
+00:19:30,337 --> 00:19:33,941 line:-2
+you can use any valid SSL certificate
+on your Web server,
+
+
+365
+00:19:34,007 --> 00:19:38,011 line:-2
+even if it is not trusted by the operating
+system's built-in certificate store.
+
+
+366
+00:19:39,213 --> 00:19:42,616 line:-2
+This is more powerful than it sounds,
+because without precautions,
+
+
+367
+00:19:42,683 --> 00:19:45,018 line:-2
+it could allow
+for a man-in-the-middle attack
+
+
+368
+00:19:45,085 --> 00:19:48,422 line:-2
+that could leave your users vulnerable
+to a number of security issues.
+
+
+369
+00:19:49,089 --> 00:19:52,192 line:-2
+We require that a user opt in
+to developer mode
+
+
+370
+00:19:52,259 --> 00:19:53,994 line:-1
+on any device that uses it.
+
+
+371
+00:19:54,328 --> 00:19:57,397 line:-1
+On iOS, watchOS and tvOS,
+
+
+372
+00:19:57,464 --> 00:19:59,466 line:-1
+opting in looks similar to this.
+
+
+373
+00:20:00,934 --> 00:20:04,037 line:-2
+Open the Settings app
+and select Developer Settings.
+
+
+374
+00:20:04,404 --> 00:20:07,808 line:-2
+They'll appear after your device
+is connected for the first time
+
+
+375
+00:20:07,875 --> 00:20:09,409 line:-1
+to a Mac running Xcode.
+
+
+376
+00:20:10,277 --> 00:20:14,147 line:-2
+Under Developer Settings,
+enable "Associated Domains Development."
+
+
+377
+00:20:14,214 --> 00:20:17,217 line:-2
+This device is now configured
+for developer mode.
+
+
+378
+00:20:18,519 --> 00:20:21,088 line:-2
+On macOS,
+the process is a little different.
+
+
+379
+00:20:21,154 --> 00:20:24,258 line:-2
+Open Terminal
+and enter the command you see here:
+
+
+380
+00:20:24,324 --> 00:20:29,229 line:-1
+swcutil developer-mode -e true.
+
+
+381
+00:20:29,897 --> 00:20:33,534 line:-2
+You'll be prompted for
+an administrator password or Touch ID.
+
+
+382
+00:20:33,600 --> 00:20:36,837 line:-2
+After granting permission,
+developer mode is enabled.
+
+
+383
+00:20:36,904 --> 00:20:38,572 line:-1
+This is a per-user operation.
+
+
+384
+00:20:40,207 --> 00:20:44,545 line:-2
+Because developer mode is a global switch,
+we don't want to enable it for all apps.
+
+
+385
+00:20:44,611 --> 00:20:46,446 line:-1
+Only the app you're developing.
+
+
+386
+00:20:47,314 --> 00:20:51,451 line:-2
+So it only takes effect for apps that
+are signed with a development profile.
+
+
+387
+00:20:52,152 --> 00:20:55,556 line:-2
+Apps signed for distribution
+on the App Store or TestFlight
+
+
+388
+00:20:55,622 --> 00:20:58,592 line:-2
+or Mac apps that have been signed
+and notarized
+
+
+389
+00:20:58,659 --> 00:21:00,794 line:-1
+cannot be used with this alternate mode.
+
+
+390
+00:21:02,329 --> 00:21:04,798 line:0
+Finally, developer mode and managed mode
+
+
+391
+00:21:04,865 --> 00:21:08,268 line:0
+require that you host
+your apple-app-site-association file
+
+
+392
+00:21:08,335 --> 00:21:11,738 line:0
+in the .well-known directory,
+not at the root of your domain.
+
+
+393
+00:21:13,273 --> 00:21:17,444 line:-2
+That's a great summary of alternate modes
+and how you enable one on a device.
+
+
+394
+00:21:17,811 --> 00:21:21,582 line:-2
+But how do you tell the system that
+your app should use that alternate mode
+
+
+395
+00:21:21,648 --> 00:21:22,950 line:-1
+for a given domain?
+
+
+396
+00:21:23,283 --> 00:21:26,687 line:-2
+Let's take a look at our
+Associated Domains entitlement.
+
+
+397
+00:21:26,753 --> 00:21:31,558 line:-2
+This entitlement currently has support
+for www.example.com.
+
+
+398
+00:21:32,693 --> 00:21:33,760 line:-1
+Pretty typical.
+
+
+399
+00:21:33,827 --> 00:21:36,830 line:-2
+Now let's enable developer mode
+and managed mode for this app.
+
+
+400
+00:21:38,298 --> 00:21:42,002 line:-2
+We've added separate entitlement entries
+for these alternate modes.
+
+
+401
+00:21:42,069 --> 00:21:44,905 line:-2
+The domain names we've selected
+are examples only.
+
+
+402
+00:21:44,972 --> 00:21:48,842 line:-2
+They don't need to be distinct from your
+public-facing domain or from each other.
+
+
+403
+00:21:49,276 --> 00:21:53,113 line:-2
+The domain names you use
+will be specific to your organization.
+
+
+404
+00:21:54,681 --> 00:21:59,019 line:-2
+These new entitlement entries include
+a query item with the name "mode"
+
+
+405
+00:21:59,086 --> 00:22:02,155 line:-2
+and a value specifying
+the alternate mode to use.
+
+
+406
+00:22:02,222 --> 00:22:05,125 line:-2
+The first entitlement value
+we added specifies
+
+
+407
+00:22:05,192 --> 00:22:08,495 line:-2
+that this domain can be accessed
+when in developer mode.
+
+
+408
+00:22:08,562 --> 00:22:11,899 line:-2
+The second says that it can be accessed
+in managed mode.
+
+
+409
+00:22:12,533 --> 00:22:13,700 line:-1
+And the third?
+
+
+410
+00:22:13,767 --> 00:22:17,171 line:-2
+This domain can be accessed
+when this device is in both
+
+
+411
+00:22:17,237 --> 00:22:20,140 line:-2
+developer and managed mode
+at the same time.
+
+
+412
+00:22:20,574 --> 00:22:24,912 line:-2
+You might want to use this configuration
+when building your internal applications.
+
+
+413
+00:22:25,746 --> 00:22:28,615 line:-2
+We've gone through
+a lot of new stuff today.
+
+
+414
+00:22:28,682 --> 00:22:31,385 line:-1
+We have support for watchOS with WatchKit
+
+
+415
+00:22:31,451 --> 00:22:33,554 line:-1
+and all platforms with SwiftUI.
+
+
+416
+00:22:34,321 --> 00:22:36,557 line:-2
+We've added several new
+pattern-matching features,
+
+
+417
+00:22:36,623 --> 00:22:38,525 line:-1
+including substitution variables,
+
+
+418
+00:22:38,592 --> 00:22:41,595 line:-2
+to help you build efficient,
+effective universal links.
+
+
+419
+00:22:42,563 --> 00:22:47,534 line:-2
+And we've introduced a new CDN
+that speeds up and streamlines the process
+
+
+420
+00:22:47,601 --> 00:22:50,571 line:-2
+for downloading
+your apple-app-site-association files.
+
+
+421
+00:22:51,171 --> 00:22:54,741 line:-2
+We're looking forward to seeing what
+you're able to build with these new tools.
+
+
+422
+00:22:54,808 --> 00:22:55,809 line:-1
+Thank you.
+
+
+423
+00:22:55,876 --> 00:22:57,578 line:-1
+[chimes]
+

@@ -1,0 +1,707 @@
+1
+00:00:03,770 --> 00:00:06,507 line:-1
+Hello and welcome to WWDC.
+
+
+2
+00:00:08,074 --> 00:00:09,543 line:0
+My name is Roger Pantos,
+
+
+3
+00:00:09,610 --> 00:00:13,580 line:0
+and today we will be looking
+at Playlist Delta Updates.
+
+
+4
+00:00:14,114 --> 00:00:19,586 line:-2
+We introduced Playlist Delta Updates to
+optimize one particular use case of HLS.
+
+
+5
+00:00:20,387 --> 00:00:24,091 line:-2
+As you probably know,
+when a client is playing a livestream,
+
+
+6
+00:00:24,157 --> 00:00:28,228 line:-2
+it is constantly reloading the media
+playlist to discover new segments.
+
+
+7
+00:00:28,529 --> 00:00:31,031 line:-2
+Now,
+that's fine when the playlist is small,
+
+
+8
+00:00:31,098 --> 00:00:35,135 line:-2
+but if you want to present
+a large DVR window or a long event,
+
+
+9
+00:00:35,569 --> 00:00:39,206 line:-2
+the playlist can actually become
+pretty large, even using gzip.
+
+
+10
+00:00:39,907 --> 00:00:42,876 line:-2
+Reloading a big playlist over and over
+takes time,
+
+
+11
+00:00:43,243 --> 00:00:47,114 line:-2
+and the bandwidth it requires can even
+make the player switch down
+
+
+12
+00:00:47,181 --> 00:00:50,250 line:-2
+to a lower quality tier
+if it's on a bad network.
+
+
+13
+00:00:51,718 --> 00:00:56,290 line:-2
+So Playlist Delta Updates are a new way
+to reload an HLS playlist,
+
+
+14
+00:00:56,356 --> 00:00:59,660 line:-2
+where the server sends only
+the most recent changes to the client.
+
+
+15
+00:01:00,794 --> 00:01:05,364 line:-2
+The client then combines that update,
+with the version it already has,
+
+
+16
+00:01:05,432 --> 00:01:08,669 line:-2
+to reconstruct the current version
+that's on the server.
+
+
+17
+00:01:09,203 --> 00:01:11,004 line:-1
+Let's walk through the entire process.
+
+
+18
+00:01:11,405 --> 00:01:14,341 line:-2
+First,
+Playlist Delta Updates are optional.
+
+
+19
+00:01:14,808 --> 00:01:17,411 line:-2
+The server advertises
+that it supports them
+
+
+20
+00:01:17,477 --> 00:01:21,048 line:-2
+using the Can-Skip-Until attribute
+of the server control tag.
+
+
+21
+00:01:21,915 --> 00:01:25,319 line:-2
+The value of Can-Skip-Until
+is the skip limit,
+
+
+22
+00:01:25,652 --> 00:01:29,356 line:-2
+which is how old something
+in the playlist has to be in seconds
+
+
+23
+00:01:29,423 --> 00:01:31,191 line:-1
+to be skipped by a delta update.
+
+
+24
+00:01:31,825 --> 00:01:34,795 line:-2
+It is always
+at least six target durations.
+
+
+25
+00:01:35,963 --> 00:01:40,067 line:-2
+The client downloads
+the first full playlist at least once.
+
+
+26
+00:01:40,767 --> 00:01:44,071 line:-2
+If the server has advertised
+Playlist Delta Updates,
+
+
+27
+00:01:44,137 --> 00:01:46,240 line:-1
+then the next time it asks for one,
+
+
+28
+00:01:46,306 --> 00:01:49,409 line:-2
+it can use
+the HLS skip Delivery Directive.
+
+
+29
+00:01:49,943 --> 00:01:52,913 line:-2
+It will then use the delta
+that is produced
+
+
+30
+00:01:52,980 --> 00:01:56,216 line:-2
+to update the previous version
+of the playlist to what's current.
+
+
+31
+00:01:57,117 --> 00:02:00,587 line:-2
+Let's take a closer look
+to see how a delta update is structured.
+
+
+32
+00:02:01,088 --> 00:02:04,091 line:-2
+First,
+the playlist version is nine or higher,
+
+
+33
+00:02:04,925 --> 00:02:06,460 line:-1
+and that indicates to clients
+
+
+34
+00:02:06,527 --> 00:02:09,229 line:-2
+that they have to understand
+Playlist Delta Updates to parse it.
+
+
+35
+00:02:09,596 --> 00:02:12,199 line:-2
+A delta update
+is not a stand-alone playlist,
+
+
+36
+00:02:12,266 --> 00:02:13,834 line:-1
+so it's not backward-compatible.
+
+
+37
+00:02:15,035 --> 00:02:17,304 line:-2
+Clients will look
+at the media sequence tag
+
+
+38
+00:02:17,371 --> 00:02:21,375 line:-2
+to find out which segments
+have been removed since the last update.
+
+
+39
+00:02:22,442 --> 00:02:27,514 line:-2
+And then, the most important part of
+a Playlist Delta Update, is the skip tag.
+
+
+40
+00:02:28,115 --> 00:02:31,718 line:-2
+The skip tag replaces
+all the segment URL lines
+
+
+41
+00:02:31,785 --> 00:02:34,555 line:-2
+which were added to the playlist
+before the skip limit,
+
+
+42
+00:02:34,621 --> 00:02:38,959 line:-2
+as well as any media segment tags
+applied to one of those lines,
+
+
+43
+00:02:39,459 --> 00:02:42,663 line:-2
+such as discontinuity tags
+or Program-Date-Time tags.
+
+
+44
+00:02:43,597 --> 00:02:44,998 line:-1
+For a long playlist,
+
+
+45
+00:02:45,065 --> 00:02:48,836 line:-2
+this one skip tag could replace
+thousands of lines of playlists
+
+
+46
+00:02:48,902 --> 00:02:50,704 line:-1
+that the client already has.
+
+
+47
+00:02:52,239 --> 00:02:56,543 line:-2
+It has a skipped segments attribute that
+says how many segments were skipped.
+
+
+48
+00:02:57,811 --> 00:03:00,314 line:0
+After the skip tag
+is the rest of the playlist.
+
+
+49
+00:03:00,881 --> 00:03:02,950 line:-2
+And that will include
+any segments and tags
+
+
+50
+00:03:03,016 --> 00:03:05,185 line:-1
+that were added since the last skip limit.
+
+
+51
+00:03:05,686 --> 00:03:07,454 line:-1
+Let's take a look at an example.
+
+
+52
+00:03:07,521 --> 00:03:10,958 line:-2
+On the left here,
+we have a regular live HLS playlist.
+
+
+53
+00:03:11,491 --> 00:03:13,927 line:-2
+I've omitted some stuff in the middle
+to save space,
+
+
+54
+00:03:14,328 --> 00:03:17,464 line:-2
+but you can see that
+it starts with segment 0,
+
+
+55
+00:03:17,931 --> 00:03:19,800 line:-1
+and the last segment is segment 20.
+
+
+56
+00:03:20,534 --> 00:03:22,769 line:-1
+It has that Can-Skip-Until attribute,
+
+
+57
+00:03:22,836 --> 00:03:26,340 line:-2
+so the client knows
+that as long as it got this playlist
+
+
+58
+00:03:26,406 --> 00:03:31,178 line:-2
+comfortably within the last 36 seconds,
+it can ask for a delta update.
+
+
+59
+00:03:31,845 --> 00:03:36,116 line:-2
+And so it does that
+by adding an HLS skip Delivery Directive
+
+
+60
+00:03:36,183 --> 00:03:37,618 line:-1
+to its playlist request.
+
+
+61
+00:03:38,752 --> 00:03:41,355 line:-2
+That will produce
+the delta update on the right.
+
+
+62
+00:03:42,389 --> 00:03:44,324 line:-1
+It has a version number of nine,
+
+
+63
+00:03:44,391 --> 00:03:46,026 line:-1
+and the media sequence is one,
+
+
+64
+00:03:46,093 --> 00:03:49,463 line:-2
+which tells us that that first segment
+has been rolled out of the playlist.
+
+
+65
+00:03:50,364 --> 00:03:51,999 line:-1
+Then we have the skip tag,
+
+
+66
+00:03:52,065 --> 00:03:55,068 line:-2
+and that acts as a stand-in
+for all the segments in the middle.
+
+
+67
+00:03:55,736 --> 00:03:58,372 line:-2
+It's followed by
+all the recently added segments,
+
+
+68
+00:03:58,438 --> 00:04:00,240 line:-1
+including a new one, segment 21.
+
+
+69
+00:04:01,408 --> 00:04:03,810 line:0
+And so the client will take
+what's new on the right
+
+
+70
+00:04:03,877 --> 00:04:06,480 line:0
+and combine it
+with the previous version on the left
+
+
+71
+00:04:07,381 --> 00:04:11,752 line:-2
+to produce a complete playlist that is
+up to date with what is now on the server.
+
+
+72
+00:04:12,953 --> 00:04:16,990 line:-2
+Now, Playlist Delta Updates were
+actually a feature of last year's OS,
+
+
+73
+00:04:17,057 --> 00:04:21,495 line:-2
+and one of the bits of feedback we got
+was that, while they were great,
+
+
+74
+00:04:21,562 --> 00:04:25,232 line:-2
+they didn't go quite far enough
+for providers who had large playlists
+
+
+75
+00:04:25,299 --> 00:04:29,536 line:-2
+that also included lots
+of playlist metadata in DATERANGE tags.
+
+
+76
+00:04:30,237 --> 00:04:34,675 line:-2
+And so this year, we are adding
+an extension to Playlist Delta Updates
+
+
+77
+00:04:35,075 --> 00:04:37,511 line:-2
+that supports skipping DATERANGE tags
+as well.
+
+
+78
+00:04:38,879 --> 00:04:43,584 line:-2
+Servers say they support it by advertising
+a Can-Skip-Dateranges attribute
+
+
+79
+00:04:43,650 --> 00:04:45,085 line:-1
+in their server control tag.
+
+
+80
+00:04:45,886 --> 00:04:49,323 line:-2
+Clients, in turn,
+will ask for a date range-skipping update
+
+
+81
+00:04:49,389 --> 00:04:53,093 line:-2
+with a new form
+of skip delivery directive, skip=v2.
+
+
+82
+00:04:54,328 --> 00:04:56,196 line:-1
+The way v2 updates work
+
+
+83
+00:04:56,263 --> 00:05:01,201 line:-2
+is they skip any date range that was added
+to the playlist before the skip limit.
+
+
+84
+00:05:02,035 --> 00:05:06,106 line:-2
+Also, they indicate which, if any,
+DATERANGE tags
+
+
+85
+00:05:06,173 --> 00:05:08,542 line:-1
+have been removed since the skip limit,
+
+
+86
+00:05:08,609 --> 00:05:11,144 line:-2
+using the Recently-Removed-Dateranges
+attribute.
+
+
+87
+00:05:11,578 --> 00:05:15,415 line:-2
+Now again,
+this is an incompatible version,
+
+
+88
+00:05:15,849 --> 00:05:18,652 line:-2
+so that is signaled
+with a playlist version of 10.
+
+
+89
+00:05:19,887 --> 00:05:23,624 line:-2
+Next, let's take a look at an example
+of date range skipping.
+
+
+90
+00:05:25,526 --> 00:05:28,629 line:-2
+So on the left,
+we have a live HLS playlist,
+
+
+91
+00:05:29,029 --> 00:05:33,767 line:-2
+this time with DATERANGE tags
+and a Can-Skip-Dateranges attribute,
+
+
+92
+00:05:33,834 --> 00:05:36,170 line:-2
+saying that the server supports
+skipping date ranges.
+
+
+93
+00:05:36,870 --> 00:05:39,806 line:0
+Now, DATERANGE tags
+can go anywhere in a playlist.
+
+
+94
+00:05:39,873 --> 00:05:43,143 line:0
+In this case, the author decided
+to put them all at the bottom.
+
+
+95
+00:05:43,877 --> 00:05:49,683 line:-2
+The client asks for a delta update
+using the HLS skip=v2 delivery directive.
+
+
+96
+00:05:50,717 --> 00:05:53,287 line:-2
+And that will produce this delta
+on the right.
+
+
+97
+00:05:53,954 --> 00:05:56,290 line:-2
+It's version 10,
+because it skips date ranges.
+
+
+98
+00:05:56,990 --> 00:05:58,125 line:-1
+As before,
+
+
+99
+00:05:58,192 --> 00:06:01,762 line:-2
+the media sequence tag indicates
+that segment 0 has rolled off.
+
+
+100
+00:06:02,596 --> 00:06:06,466 line:-2
+The skip tag also contains
+a Recently-Removed-Dateranges attribute
+
+
+101
+00:06:06,533 --> 00:06:10,470 line:-2
+that says that DATERANGE ID 1
+was recently removed from the playlist.
+
+
+102
+00:06:10,904 --> 00:06:14,741 line:-2
+At then at the end of the update,
+we see our new segment 21 as before.
+
+
+103
+00:06:16,043 --> 00:06:20,180 line:-2
+DATERANGE ID 1 is missing
+because it was removed by the author.
+
+
+104
+00:06:20,714 --> 00:06:23,217 line:-1
+DATERANGE 2 is not in the update
+
+
+105
+00:06:23,283 --> 00:06:28,255 line:-2
+because it was in the playlist previously,
+early enough ago that it was skipped.
+
+
+106
+00:06:28,922 --> 00:06:31,058 line:-1
+DATERANGE P, on the other hand, is there
+
+
+107
+00:06:31,124 --> 00:06:33,393 line:-2
+because it was added to the playlist
+more recently.
+
+
+108
+00:06:33,827 --> 00:06:38,365 line:-2
+And finally, at the end,
+there's a new DATERANGE, DATERANGE Q.
+
+
+109
+00:06:38,432 --> 00:06:41,502 line:-1
+And so, when the client combines the delta
+
+
+110
+00:06:41,568 --> 00:06:44,171 line:-2
+with the previous playlist,
+it will get this:
+
+
+111
+00:06:44,638 --> 00:06:46,173 line:-1
+an updated playlist
+
+
+112
+00:06:46,240 --> 00:06:49,843 line:-2
+with all the DATERANGE tags
+still in the playlist present.
+
+
+113
+00:06:49,910 --> 00:06:52,312 line:-1
+We've got 2, we've got P, we've got Q.
+
+
+114
+00:06:52,846 --> 00:06:56,817 line:-2
+And without the DATERANGE ID 1
+that was previously removed.
+
+
+115
+00:06:58,185 --> 00:07:01,221 line:-2
+So Playlist Delta Updates
+are a powerful tool
+
+
+116
+00:07:01,288 --> 00:07:04,691 line:-2
+for optimizing livestreams
+with large playlists.
+
+
+117
+00:07:05,158 --> 00:07:09,062 line:-2
+In this year's OS,
+they can also do a great job on playlists
+
+
+118
+00:07:09,129 --> 00:07:10,998 line:-1
+with lots of DATERANGE tags.
+
+
+119
+00:07:11,732 --> 00:07:14,701 line:-2
+They can dramatically improve
+playlist reload performance,
+
+
+120
+00:07:15,269 --> 00:07:18,372 line:-2
+which at the end of the day
+will improve playback reliability,
+
+
+121
+00:07:18,438 --> 00:07:20,607 line:-1
+and ultimately, your users' experience.
+
+
+122
+00:07:21,008 --> 00:07:23,777 line:-2
+And so we hope
+that you can take advantage of them.
+
+
+123
+00:07:24,211 --> 00:07:25,379 line:-1
+Thank you very much.
+

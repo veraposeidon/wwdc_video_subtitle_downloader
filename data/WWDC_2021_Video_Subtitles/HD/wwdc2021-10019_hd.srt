@@ -1,0 +1,2432 @@
+2
+00:00:02.035 --> 00:00:09.009 line:-1 align:center
+[music]
+
+
+3
+00:00:09,042 --> 00:00:12,813 line:-2
+[Curt] Hi, welcome to "Discover
+concurrency in SwiftUI."
+
+
+4
+00:00:12,846 --> 00:00:15,749 line:-2
+I'm Curt Clifton,
+an engineer on the SwiftUI team.
+
+
+5
+00:00:15.782 --> 00:00:18.819 line:-2 align:center
+Later, I'll be joined
+by my colleague Jessica.
+
+
+6
+00:00:18.852 --> 00:00:21.989 line:-2 align:center
+Swift 5.5 introduces
+a variety of new tools
+
+
+7
+00:00:22,022 --> 00:00:24,925 line:-2
+for managing concurrency
+in your Swift code.
+
+
+8
+00:00:24,958 --> 00:00:27,628 line:-2
+In this talk, Jessica and I
+will help you understand
+
+
+9
+00:00:27,661 --> 00:00:32,032 line:-2
+how these improvements
+interact with your SwiftUI apps.
+
+
+10
+00:00:32,065 --> 00:00:33,667 line:-2
+I’ll walk through
+how the new tools
+
+
+11
+00:00:33.700 --> 00:00:36.737 line:-2 align:center
+can help you make
+your data models even better
+
+
+12
+00:00:36,770 --> 00:00:40,874 line:-2
+and show you how SwiftUI works
+with the new main actor.
+
+
+13
+00:00:40.908 --> 00:00:42.609 line:-2 align:center
+Then Jessica will show you
+how to connect
+
+
+14
+00:00:42,643 --> 00:00:44,144 line:-1
+your concurrent data model
+
+
+15
+00:00:44.178 --> 00:00:45.779 line:-1 align:center
+to your SwiftUI views
+
+
+16
+00:00:45,812 --> 00:00:48,148 line:-2
+and introduce some
+great new APIs
+
+
+17
+00:00:48.182 --> 00:00:51.885 line:-2 align:center
+that take advantage of Swift’s
+new concurrency tools.
+
+
+18
+00:00:52.619 --> 00:00:54.121 line:-2 align:center
+To make the most
+of the information
+
+
+19
+00:00:54.154 --> 00:00:55.722 line:-1 align:center
+Jessica and I will be sharing,
+
+
+20
+00:00:55,756 --> 00:00:57,224 line:-2
+it’s important to have
+some background
+
+
+21
+00:00:57,257 --> 00:00:59,626 line:-2
+on Swift’s new
+concurrency support.
+
+
+22
+00:00:59.660 --> 00:01:02.996 line:-2 align:center
+We recommend you watch
+“Meet async/await in Swift”
+
+
+23
+00:01:03,030 --> 00:01:05,966 line:-2
+and “Explore structured
+concurrency in Swift”
+
+
+24
+00:01:05,999 --> 00:01:08,836 line:-2
+before diving into
+the rest of this video.
+
+
+25
+00:01:09,236 --> 00:01:10,204 line:-1
+When I was a child,
+
+
+26
+00:01:10.237 --> 00:01:12.706 line:-2 align:center
+I always dreamed
+of being an astronaut.
+
+
+27
+00:01:12,739 --> 00:01:14,374 line:-1
+I sometimes work in a spaceship,
+
+
+28
+00:01:14.408 --> 00:01:16.443 line:-2 align:center
+but otherwise
+that particular childhood dream
+
+
+29
+00:01:16,476 --> 00:01:17,945 line:-1
+didn't come true.
+
+
+30
+00:01:17,978 --> 00:01:21,215 line:-2
+Still, I haven't lost
+my enthusiasm for space.
+
+
+31
+00:01:21.248 --> 00:01:23.483 line:-2 align:center
+So I decided to apply
+my actual skills
+
+
+32
+00:01:23,517 --> 00:01:25,719 line:-2
+as a SwiftUI engineer
+to build an app
+
+
+33
+00:01:25,752 --> 00:01:27,855 line:-2
+to download
+space-related photos.
+
+
+34
+00:01:27.888 --> 00:01:30.190 line:-2 align:center
+Let's take a look at
+the app I have planned.
+
+
+35
+00:01:31.058 --> 00:01:33.660 line:-2 align:center
+The app shows a list
+of random space photos.
+
+
+36
+00:01:33.694 --> 00:01:35.963 line:-1 align:center
+These colors are just beautiful.
+
+
+37
+00:01:35,996 --> 00:01:37,731 line:-2
+When I see
+a photo I really love,
+
+
+38
+00:01:37.764 --> 00:01:40.434 line:-1 align:center
+I can save it to view later.
+
+
+39
+00:01:40,467 --> 00:01:42,936 line:-2
+In order to fetch
+these beautiful images,
+
+
+40
+00:01:42.970 --> 00:01:45.606 line:-2 align:center
+my app is going to interact with
+a web service
+
+
+41
+00:01:45.639 --> 00:01:47.774 line:-1 align:center
+using a REST API.
+
+
+42
+00:01:47.808 --> 00:01:49.610 line:-1 align:center
+This sounds like a perfect use
+
+
+43
+00:01:49,643 --> 00:01:52,613 line:-2
+of the new concurrency features
+introduced in Swift.
+
+
+44
+00:01:52,646 --> 00:01:54,448 line:-1
+Let's start with our data model.
+
+
+45
+00:01:55,115 --> 00:01:57,584 line:-1
+I’m using a SpacePhoto struct
+
+
+46
+00:01:57,618 --> 00:02:00,587 line:-2
+to hold the information
+for a single image.
+
+
+47
+00:02:00,621 --> 00:02:03,690 line:-2
+The struct has fields
+like the title,
+
+
+48
+00:02:03.724 --> 00:02:06.093 line:-1 align:center
+a description of the photo,
+
+
+49
+00:02:06,126 --> 00:02:08,495 line:-1
+the date the image was posted,
+
+
+50
+00:02:08.529 --> 00:02:12.032 line:-2 align:center
+and a URL pointing
+to the actual image.
+
+
+51
+00:02:12,065 --> 00:02:13,567 line:-1
+I made my type Codable
+
+
+52
+00:02:13.600 --> 00:02:15.903 line:-2 align:center
+so that I can easily
+instantiate instances
+
+
+53
+00:02:15,936 --> 00:02:19,106 line:-2
+from a server response
+or save them to disk,
+
+
+54
+00:02:19,139 --> 00:02:22,109 line:-2
+and Identifiable
+so I can use them in ForEach
+
+
+55
+00:02:22.142 --> 00:02:24.778 line:-1 align:center
+and other data driven views.
+
+
+56
+00:02:24,811 --> 00:02:27,915 line:-2
+Next, I want to display
+a list of these entries.
+
+
+57
+00:02:27,948 --> 00:02:29,716 line:-1
+For that, I need a model
+
+
+58
+00:02:29,750 --> 00:02:32,619 line:-2
+that will fetch and hold
+a collection of them.
+
+
+59
+00:02:32.653 --> 00:02:36.156 line:-2 align:center
+I'm using a Photos class
+for this.
+
+
+60
+00:02:36,190 --> 00:02:39,960 line:-2
+By making my Photos class
+conform to ObservableObject,
+
+
+61
+00:02:39,993 --> 00:02:42,462 line:-2
+my SwiftUI views
+will automatically update
+
+
+62
+00:02:42.496 --> 00:02:45.933 line:-1 align:center
+whenever my data updates.
+
+
+63
+00:02:45.966 --> 00:02:47.734 line:-1 align:center
+I'm using a published property
+
+
+64
+00:02:47,768 --> 00:02:50,671 line:-2
+to store an array
+of SpacePhotos.
+
+
+65
+00:02:51,672 --> 00:02:54,608 line:-2
+To fetch updated items
+from the REST endpoint,
+
+
+66
+00:02:54,641 --> 00:02:56,910 line:-2
+I’m using
+an Update Items method.
+
+
+67
+00:02:56,944 --> 00:02:59,213 line:-2
+I’ll talk about that
+in more detail shortly.
+
+
+68
+00:02:59,246 --> 00:03:02,382 line:-2
+But first I’d like to rough in
+a basic user interface.
+
+
+69
+00:03:03,383 --> 00:03:06,019 line:-2
+This is the user interface
+I want to build.
+
+
+70
+00:03:06.053 --> 00:03:08.889 line:-2 align:center
+So far, I just have
+my tab view in place
+
+
+71
+00:03:08,922 --> 00:03:10,757 line:-1
+and a basic PhotoView.
+
+
+72
+00:03:13,193 --> 00:03:17,631 line:-2
+My PhotoView takes a space photo
+and displays its title.
+
+
+73
+00:03:17,664 --> 00:03:19,633 line:-2
+That’s enough plumbing
+that I’ll be able to see
+
+
+74
+00:03:19,666 --> 00:03:21,335 line:-1
+my data model in action.
+
+
+75
+00:03:21,368 --> 00:03:24,238 line:-2
+Let’s look
+at the Catalog view next.
+
+
+76
+00:03:24.271 --> 00:03:27.508 line:-2 align:center
+My Catalog view
+will show the list of photos.
+
+
+77
+00:03:27,541 --> 00:03:30,677 line:-2
+To do that,
+I'll add a State Object
+
+
+78
+00:03:30,711 --> 00:03:34,147 line:-2
+and instantiate it with
+my Photos observable object.
+
+
+79
+00:03:34.181 --> 00:03:38.318 line:-2 align:center
+In the body of my view,
+I'll add a NavigationView.
+
+
+80
+00:03:38,352 --> 00:03:40,187 line:-2
+Using a navigation view here
+will let me add
+
+
+81
+00:03:40.220 --> 00:03:43.223 line:-2 align:center
+a large
+navigation title shortly.
+
+
+82
+00:03:43,257 --> 00:03:47,160 line:-2
+Next, inside my NavigationView,
+I’ll add a List.
+
+
+83
+00:03:47,194 --> 00:03:48,362 line:-1
+And inside my List,
+
+
+84
+00:03:48.395 --> 00:03:52.032 line:-2 align:center
+I’ll use a ForEach
+to map over my photos,
+
+
+85
+00:03:52,065 --> 00:03:54,334 line:-2
+showing a PhotoView
+for each of them.
+
+
+86
+00:03:56.336 --> 00:03:58.572 line:-2 align:center
+With that,
+I can see my sample data.
+
+
+87
+00:04:00.007 --> 00:04:01.909 line:-2 align:center
+That’s as far as I need to go
+for now,
+
+
+88
+00:04:01,942 --> 00:04:04,311 line:-2
+but let’s add just
+a bit more polish here.
+
+
+89
+00:04:05,312 --> 00:04:08,348 line:-2
+First, here’s the promised
+navigation title.
+
+
+90
+00:04:08.382 --> 00:04:12.119 line:-2 align:center
+Now, the default inset list
+style here looks great,
+
+
+91
+00:04:12.152 --> 00:04:14.555 line:-2 align:center
+but to really show off
+my space photos,
+
+
+92
+00:04:14,588 --> 00:04:16,823 line:-2
+I want to switch
+to a plain style
+
+
+93
+00:04:16,857 --> 00:04:18,492 line:-1
+so the photos will really pop
+
+
+94
+00:04:18.525 --> 00:04:20.561 line:-1 align:center
+against the black background.
+
+
+95
+00:04:21,562 --> 00:04:23,697 line:-1
+I can make the list style plain
+
+
+96
+00:04:23.730 --> 00:04:27.534 line:-2 align:center
+using the new enum-like
+static member syntax here.
+
+
+97
+00:04:27.568 --> 00:04:30.771 line:-2 align:center
+With this syntax,
+SwiftUI’s style modifiers
+
+
+98
+00:04:30.804 --> 00:04:32.506 line:-1 align:center
+get a more concise spelling
+
+
+99
+00:04:32.539 --> 00:04:36.043 line:-2 align:center
+with better support
+for autocompletion in Xcode 13.
+
+
+100
+00:04:36,410 --> 00:04:38,745 line:-2
+Finally,
+let me use another feature
+
+
+101
+00:04:38,779 --> 00:04:40,814 line:-1
+new in SwiftUI this year:
+
+
+102
+00:04:40.848 --> 00:04:42.816 line:-1 align:center
+control of list separators.
+
+
+103
+00:04:43.851 --> 00:04:45.452 line:-1 align:center
+Inside my ForEach,
+
+
+104
+00:04:45.485 --> 00:04:48.288 line:-2 align:center
+I can use
+the listRowSeparator modifier
+
+
+105
+00:04:48,322 --> 00:04:49,523 line:-1
+to hide the separators.
+
+
+106
+00:04:50.524 --> 00:04:53.560 line:-2 align:center
+Sometimes when I’m polishing
+a user interface with SwiftUI,
+
+
+107
+00:04:53,594 --> 00:04:55,395 line:-1
+I find it hard to stop.
+
+
+108
+00:04:55,429 --> 00:04:57,264 line:-1
+But I’ll leave the UI for now.
+
+
+109
+00:04:57,297 --> 00:04:58,632 line:-1
+Jessica is planning to finish it
+
+
+110
+00:04:58.665 --> 00:05:01.168 line:-2 align:center
+after I’m done
+with the data model.
+
+
+111
+00:05:01.902 --> 00:05:04.171 line:-2 align:center
+Before I dig into
+the data model though,
+
+
+112
+00:05:04,204 --> 00:05:05,506 line:-1
+I’d like to talk just a bit
+
+
+113
+00:05:05.539 --> 00:05:09.376 line:-2 align:center
+about how SwiftUI interacts
+with your observable objects.
+
+
+114
+00:05:09,409 --> 00:05:11,378 line:-2
+And how
+the new concurrency features
+
+
+115
+00:05:11,411 --> 00:05:13,113 line:-1
+in Swift 5.5
+
+
+116
+00:05:13.146 --> 00:05:16.450 line:-2 align:center
+make this interaction
+easier than ever to get right.
+
+
+117
+00:05:16,783 --> 00:05:20,787 line:-2
+At Dub Dub 2020,
+in “Data Essentials in SwiftUI,”
+
+
+118
+00:05:20.821 --> 00:05:25.192 line:-2 align:center
+my colleague Raj talked about
+the SwiftUI update life cycle.
+
+
+119
+00:05:25.225 --> 00:05:28.128 line:-2 align:center
+I’ll refer to the code
+that drives this life cycle
+
+
+120
+00:05:28,161 --> 00:05:29,663 line:-1
+as the “run loop.”
+
+
+121
+00:05:29.696 --> 00:05:33.834 line:-2 align:center
+With Swift 5.5, the run loop
+runs on the main actor.
+
+
+122
+00:05:33.867 --> 00:05:36.036 line:-2 align:center
+For more details on actors
+in general,
+
+
+123
+00:05:36,069 --> 00:05:37,104 line:-1
+check out the talk,
+
+
+124
+00:05:37,137 --> 00:05:40,140 line:-2
+“Protect mutable state
+with Swift actors.”
+
+
+125
+00:05:40.174 --> 00:05:43.644 line:-2 align:center
+Jessica and I will focus
+on the main actor in this talk.
+
+
+126
+00:05:44.011 --> 00:05:47.381 line:-2 align:center
+The SwiftUI run loop
+receives events from your user,
+
+
+127
+00:05:47,414 --> 00:05:49,082 line:-1
+lets you update your model,
+
+
+128
+00:05:49,116 --> 00:05:51,852 line:-2
+and then renders your SwiftUI
+views to the screen.
+
+
+129
+00:05:51.885 --> 00:05:53.420 line:-1 align:center
+I like to call these updates
+
+
+130
+00:05:53.453 --> 00:05:55.822 line:-1 align:center
+the “ticks of the run loop.”
+
+
+131
+00:05:55,856 --> 00:05:59,393 line:-2
+Let’s unroll this loop so we can
+look at multiple ticks in a row.
+
+
+132
+00:06:01,395 --> 00:06:04,231 line:-2
+In SwiftUI,
+ObservableObjects can interact
+
+
+133
+00:06:04,264 --> 00:06:07,901 line:-2
+with the SwiftUI run loop
+in some interesting ways.
+
+
+134
+00:06:07,935 --> 00:06:10,504 line:-2
+Let’s go back
+to the Photos ObservableObject
+
+
+135
+00:06:10,537 --> 00:06:12,739 line:-2
+and look
+at the updateItems method.
+
+
+136
+00:06:12.773 --> 00:06:15.976 line:-2 align:center
+I’m going to call updateItems
+from my SwiftUI views
+
+
+137
+00:06:16,009 --> 00:06:17,945 line:-2
+and it will run
+on the main actor.
+
+
+138
+00:06:17,978 --> 00:06:20,681 line:-2
+Let’s use this blue rectangle
+to show the time
+
+
+139
+00:06:20,714 --> 00:06:23,517 line:-1
+when updateItems is running.
+
+
+140
+00:06:23,550 --> 00:06:25,986 line:-2
+I want to focus
+on this line of code
+
+
+141
+00:06:26.019 --> 00:06:29.523 line:-2 align:center
+where I assign the fetched
+photos to my “items” property.
+
+
+142
+00:06:29.556 --> 00:06:32.092 line:-2 align:center
+Because “items”
+is a Published property,
+
+
+143
+00:06:32,125 --> 00:06:35,495 line:-2
+this assignment triggers
+an objectWillChange event,
+
+
+144
+00:06:35.529 --> 00:06:38.432 line:-2 align:center
+immediately followed
+by writing the fetched photos
+
+
+145
+00:06:38.465 --> 00:06:40.801 line:-1 align:center
+to the storage for “items.”
+
+
+146
+00:06:40.834 --> 00:06:44.071 line:-2 align:center
+When SwiftUI sees
+this objectWillChange,
+
+
+147
+00:06:44,104 --> 00:06:46,607 line:-1
+it takes a snapshot of my items.
+
+
+148
+00:06:46.640 --> 00:06:49.843 line:-2 align:center
+On the next tick of the run loop
+after the snapshot,
+
+
+149
+00:06:49,877 --> 00:06:53,847 line:-2
+SwiftUI compares the snapshot
+to the current value.
+
+
+150
+00:06:53.881 --> 00:06:55.482 line:-2 align:center
+Because these
+values are different,
+
+
+151
+00:06:55,516 --> 00:06:59,653 line:-2
+SwiftUI knows to update my views
+that depend on Photos.
+
+
+152
+00:06:59,686 --> 00:07:02,222 line:-2
+Note that because
+objectWillChange,
+
+
+153
+00:07:02,256 --> 00:07:05,125 line:-2
+updating the storage,
+and the run loop tick
+
+
+154
+00:07:05.158 --> 00:07:06.827 line:-1 align:center
+all happen on the main actor,
+
+
+155
+00:07:06.860 --> 00:07:09.897 line:-2 align:center
+they’re guaranteed
+to happen in order.
+
+
+156
+00:07:09.930 --> 00:07:12.366 line:-2 align:center
+In the 2020
+“Data Essentials” talk,
+
+
+157
+00:07:12.399 --> 00:07:14.268 line:-1 align:center
+Raj describes slow updates
+
+
+158
+00:07:14.301 --> 00:07:16.370 line:-2 align:center
+when your view does
+too much work in body.
+
+
+159
+00:07:17,538 --> 00:07:20,807 line:-2
+Slow updates can also happen
+if your model code
+
+
+160
+00:07:20,841 --> 00:07:23,076 line:-2
+does too much work
+on the main actor.
+
+
+161
+00:07:24.578 --> 00:07:25.712 line:-1 align:center
+For example,
+
+
+162
+00:07:25,746 --> 00:07:28,048 line:-2
+suppose my fetchPhotos
+function blocks
+
+
+163
+00:07:28.081 --> 00:07:30.250 line:-2 align:center
+while waiting
+for the download to complete,
+
+
+164
+00:07:30,284 --> 00:07:33,620 line:-2
+and suppose
+I’m on a slow connection.
+
+
+165
+00:07:33,654 --> 00:07:35,756 line:-2
+Because I’m blocking
+the main actor,
+
+
+166
+00:07:35.789 --> 00:07:38.892 line:-2 align:center
+I miss this tick
+of the run loop.
+
+
+167
+00:07:38,926 --> 00:07:42,896 line:-2
+This is visible
+to my users as a hitch.
+
+
+168
+00:07:42,930 --> 00:07:44,598 line:-2
+In the past,
+you might have dispatched
+
+
+169
+00:07:44,631 --> 00:07:46,667 line:-2
+to another queue
+to perform the work,
+
+
+170
+00:07:46,700 --> 00:07:49,303 line:-2
+so that
+the expensive fetchPhotos
+
+
+171
+00:07:49.336 --> 00:07:51.905 line:-1 align:center
+occurs off of the main thread.
+
+
+172
+00:07:51,939 --> 00:07:56,176 line:-2
+This might seem to work fine,
+but I have a tricky issue here.
+
+
+173
+00:07:56,210 --> 00:08:00,514 line:-2
+I’m changing my ObservableObject
+from off the main actor.
+
+
+174
+00:08:00,547 --> 00:08:03,183 line:-2
+It’s possible for my changes
+and the run loop tick
+
+
+175
+00:08:03.217 --> 00:08:04.451 line:-1 align:center
+to interleave.
+
+
+176
+00:08:04.484 --> 00:08:07.154 line:-2 align:center
+For example,
+when I assign to “items,”
+
+
+177
+00:08:07,187 --> 00:08:10,757 line:-2
+and SwiftUI takes
+its objectWillChange snapshot,
+
+
+178
+00:08:10.791 --> 00:08:13.794 line:-2 align:center
+it’s possible that this happens
+immediately before
+
+
+179
+00:08:13,827 --> 00:08:15,896 line:-1
+a tick of the run loop.
+
+
+180
+00:08:15.929 --> 00:08:18.599 line:-2 align:center
+The state change
+hasn’t happened yet,
+
+
+181
+00:08:18.632 --> 00:08:21.101 line:-1 align:center
+so SwiftUI compares the snapshot
+
+
+182
+00:08:21,134 --> 00:08:23,670 line:-1
+to the unchanged value.
+
+
+183
+00:08:23.704 --> 00:08:27.140 line:-2 align:center
+The actual state change happens
+after the run loop tick,
+
+
+184
+00:08:27,174 --> 00:08:29,176 line:-2
+but SwiftUI
+doesn’t see that change,
+
+
+185
+00:08:29.209 --> 00:08:31.411 line:-1 align:center
+and so my views aren’t updated.
+
+
+186
+00:08:31,445 --> 00:08:32,813 line:-1
+To update correctly,
+
+
+187
+00:08:32,846 --> 00:08:36,450 line:-2
+SwiftUI needs these events
+to happen in order:
+
+
+188
+00:08:36,483 --> 00:08:38,252 line:-1
+objectWillChange,
+
+
+189
+00:08:38.285 --> 00:08:40.854 line:-2 align:center
+the ObservableObject’s state
+is updated,
+
+
+190
+00:08:40.888 --> 00:08:44.324 line:-2 align:center
+and then the run loop
+reaches its next tick.
+
+
+191
+00:08:44,358 --> 00:08:45,826 line:-2
+If I can ensure
+that these all happen
+
+
+192
+00:08:45.859 --> 00:08:47.094 line:-1 align:center
+on the main actor,
+
+
+193
+00:08:47,127 --> 00:08:49,596 line:-1
+I can guarantee this ordering.
+
+
+194
+00:08:49,630 --> 00:08:51,398 line:-1
+Prior to Swift 5.5,
+
+
+195
+00:08:51.431 --> 00:08:53.433 line:-2 align:center
+I might have dispatched
+back to the main queue
+
+
+196
+00:08:53,467 --> 00:08:54,868 line:-1
+to update my state,
+
+
+197
+00:08:54.902 --> 00:08:57.004 line:-1 align:center
+but now it’s much easier.
+
+
+198
+00:08:57,037 --> 00:08:59,006 line:-1
+Just use await!
+
+
+199
+00:08:59,039 --> 00:09:03,010 line:-2
+By using await to make an
+async call from the main actor,
+
+
+200
+00:09:03.043 --> 00:09:05.779 line:-2 align:center
+I let other work continue
+on the main actor
+
+
+201
+00:09:05,812 --> 00:09:08,282 line:-1
+while the async work happens.
+
+
+202
+00:09:08,315 --> 00:09:11,618 line:-2
+This is called “yielding”
+the main actor.
+
+
+203
+00:09:13.620 --> 00:09:16.990 line:-2 align:center
+In updateItems, I can use await
+to yield the main actor
+
+
+204
+00:09:17,024 --> 00:09:18,492 line:-1
+back to SwiftUI
+
+
+205
+00:09:18.525 --> 00:09:20.394 line:-1 align:center
+during my long running I/O,
+
+
+206
+00:09:20,427 --> 00:09:21,962 line:-2
+so it can keep
+the run loop ticking
+
+
+207
+00:09:21.995 --> 00:09:24.164 line:-1 align:center
+and avoid any UI hitches.
+
+
+208
+00:09:24,198 --> 00:09:25,866 line:-1
+When the async work completes,
+
+
+209
+00:09:25,899 --> 00:09:29,002 line:-2
+Swift re-enters my updateItems
+method
+
+
+210
+00:09:29.036 --> 00:09:31.071 line:-1 align:center
+back on the main actor,
+
+
+211
+00:09:31,104 --> 00:09:32,973 line:-1
+so I can update my state.
+
+
+212
+00:09:33.006 --> 00:09:34.274 line:-1 align:center
+Let’s see how this works.
+
+
+213
+00:09:35,209 --> 00:09:37,878 line:-2
+Instead of dispatching
+to another queue,
+
+
+214
+00:09:37.911 --> 00:09:41.615 line:-2 align:center
+I simply await the result
+of the long running operation.
+
+
+215
+00:09:41.648 --> 00:09:43.350 line:-1 align:center
+When I write await,
+
+
+216
+00:09:43,383 --> 00:09:46,854 line:-2
+the updateItems function
+yields control of the main actor
+
+
+217
+00:09:46,887 --> 00:09:49,756 line:-2
+so that the run loop
+can continue.
+
+
+218
+00:09:49,790 --> 00:09:51,859 line:-2
+When the awaited fetch
+is complete,
+
+
+219
+00:09:51.892 --> 00:09:55.362 line:-2 align:center
+the main actor
+re-enters my function,
+
+
+220
+00:09:55.395 --> 00:09:58.165 line:-2 align:center
+so that I can safely update
+my published property,
+
+
+221
+00:09:58,198 --> 00:10:00,334 line:-1
+triggering objectWillChange,
+
+
+222
+00:10:00,367 --> 00:10:03,804 line:-2
+and making the new value
+available to SwiftUI.
+
+
+223
+00:10:04,505 --> 00:10:08,275 line:-2
+Let’s jump into Xcode and see
+if I can make fetch happen.
+
+
+224
+00:10:09.209 --> 00:10:12.212 line:-2 align:center
+Here’s the updateItems method
+that I showed on the slides.
+
+
+225
+00:10:12.246 --> 00:10:13.947 line:-1 align:center
+To implement fetchPhotos,
+
+
+226
+00:10:13,981 --> 00:10:17,518 line:-2
+let’s start by adding the code
+to fetch a single photo.
+
+
+227
+00:10:17,551 --> 00:10:20,120 line:-2
+I’ll make my fetchPhoto method
+take the URL
+
+
+228
+00:10:20.153 --> 00:10:22.890 line:-2 align:center
+of a photo
+from the rest endpoint,
+
+
+229
+00:10:22,923 --> 00:10:24,658 line:-1
+and return a SpacePhoto.
+
+
+230
+00:10:27,628 --> 00:10:29,963 line:-2
+Next,
+I’ll use the new async version
+
+
+231
+00:10:29.997 --> 00:10:32.466 line:-2 align:center
+of the data convenience
+on URLSession
+
+
+232
+00:10:32.499 --> 00:10:35.102 line:-1 align:center
+to fetch the data from the URL.
+
+
+233
+00:10:35,135 --> 00:10:41,141 line:-1
+[no audio]
+
+
+234
+00:10:52.119 --> 00:10:54.821 line:-2 align:center
+To stub this in,
+I’m using a forced try.
+
+
+235
+00:10:54,855 --> 00:10:57,324 line:-1
+I’ll clean that up shortly.
+
+
+236
+00:11:01.361 --> 00:11:04.765 line:-2 align:center
+Ah, the data method is async,
+so I need to use await.
+
+
+237
+00:11:07.968 --> 00:11:10.904 line:-2 align:center
+And that means I need to make
+my fetchPhoto method async.
+
+
+238
+00:11:13.207 --> 00:11:14.341 line:-1 align:center
+OK, great.
+
+
+239
+00:11:14,374 --> 00:11:15,809 line:-1
+Now that I have my data,
+
+
+240
+00:11:15.843 --> 00:11:17.711 line:-2 align:center
+I’ll use
+the Decodable initializer
+
+
+241
+00:11:17.744 --> 00:11:19.379 line:-2 align:center
+to instantiate a photo
+and return it.
+
+
+242
+00:11:19,413 --> 00:11:25,419 line:-1
+[no audio]
+
+
+243
+00:11:28,288 --> 00:11:30,591 line:-1
+Let’s look at fetchPhotos next.
+
+
+244
+00:11:30,624 --> 00:11:31,758 line:-1
+I’ve stubbed in some code
+
+
+245
+00:11:31,792 --> 00:11:33,360 line:-2
+to get a random selection
+of dates
+
+
+246
+00:11:33,393 --> 00:11:34,761 line:-1
+and loop over them.
+
+
+247
+00:11:34,795 --> 00:11:36,430 line:-1
+I want to build up an array,
+
+
+248
+00:11:36.463 --> 00:11:38.966 line:-1 align:center
+so I’ll make “downloaded” a var,
+
+
+249
+00:11:38,999 --> 00:11:41,869 line:-2
+and add a date variable
+to my loop.
+
+
+250
+00:11:43.871 --> 00:11:47.241 line:-2 align:center
+Inside the loop, I’ll call
+a helper method I already have
+
+
+251
+00:11:47,274 --> 00:11:49,309 line:-2
+to construct
+the rest endpoint URL
+
+
+252
+00:11:49.343 --> 00:11:50.911 line:-1 align:center
+for fetching a particular date.
+
+
+253
+00:11:59.152 --> 00:12:01.455 line:-2 align:center
+Then, I’ll call
+my fetchPhoto method
+
+
+254
+00:12:01.488 --> 00:12:03.490 line:-2 align:center
+and append
+the results to my array.
+
+
+255
+00:12:03.524 --> 00:12:09.530 line:-1 align:center
+[no audio]
+
+
+256
+00:12:15,002 --> 00:12:16,637 line:-1
+And let’s build.
+
+
+257
+00:12:16.670 --> 00:12:19.306 line:-1 align:center
+Ah, because fetchPhoto is async,
+
+
+258
+00:12:19.339 --> 00:12:21.441 line:-1 align:center
+I need to await the result.
+
+
+259
+00:12:23.076 --> 00:12:26.046 line:-2 align:center
+And that means fetchPhotos
+needs to be async, too.
+
+
+260
+00:12:27,414 --> 00:12:29,516 line:-2
+I’m making these calls
+to fetchPhoto
+
+
+261
+00:12:29.550 --> 00:12:31.518 line:-1 align:center
+sequentially for simplicity.
+
+
+262
+00:12:31,552 --> 00:12:34,454 line:-2
+Check out Swift 5.5’s
+task groups
+
+
+263
+00:12:34.488 --> 00:12:36.456 line:-1 align:center
+for even more powerful options.
+
+
+264
+00:12:37,357 --> 00:12:40,227 line:-2
+Now, I just need
+to await fetchPhotos
+
+
+265
+00:12:40,260 --> 00:12:41,695 line:-1
+like I showed in the slides.
+
+
+266
+00:12:43,697 --> 00:12:47,301 line:-2
+And with that,
+my update logic is in place.
+
+
+267
+00:12:47,334 --> 00:12:49,703 line:-2
+Now,
+maybe you’re as nervous as I am
+
+
+268
+00:12:49.736 --> 00:12:52.539 line:-2 align:center
+by these forced tries
+to make fetch happen.
+
+
+269
+00:12:52,573 --> 00:12:53,907 line:-1
+Let’s clean that up.
+
+
+270
+00:12:53,941 --> 00:12:56,777 line:-2
+For now, I’ll return nil
+when the download fails.
+
+
+271
+00:12:56.810 --> 00:13:02.816 line:-1 align:center
+[no audio]
+
+
+272
+00:13:11,291 --> 00:13:12,659 line:-1
+Then in fetchPhotos,
+
+
+273
+00:13:12,693 --> 00:13:15,028 line:-2
+I’ll only add
+the non-nil values to my array.
+
+
+274
+00:13:20,067 --> 00:13:22,436 line:-2
+Now that Photos
+uses async-await,
+
+
+275
+00:13:22.469 --> 00:13:24.037 line:-2 align:center
+I can be sure it won’t run into
+any of the tricky
+
+
+276
+00:13:25,138 --> 00:13:27,841 line:-2
+objectWillChange bugs
+I discussed,
+
+
+277
+00:13:27,875 --> 00:13:30,544 line:-2
+as long as it runs
+on the main actor.
+
+
+278
+00:13:30.577 --> 00:13:32.346 line:-1 align:center
+But how can I ensure that?
+
+
+279
+00:13:32.379 --> 00:13:34.982 line:-2 align:center
+Luckily, the Swift compiler
+can help me here.
+
+
+280
+00:13:35,015 --> 00:13:38,919 line:-2
+By adding the new @MainActor
+annotation to Photos,
+
+
+281
+00:13:38.952 --> 00:13:40.521 line:-1 align:center
+the compiler will guarantee
+
+
+282
+00:13:40.554 --> 00:13:42.956 line:-2 align:center
+that the properties and methods
+on Photos
+
+
+283
+00:13:42,990 --> 00:13:46,527 line:-2
+are only ever accessed
+from the main actor.
+
+
+284
+00:13:46.560 --> 00:13:49.463 line:-2 align:center
+With that done,
+the model is in place.
+
+
+285
+00:13:49,496 --> 00:13:52,599 line:-2
+Next, Jessica will connect
+our views to the model
+
+
+286
+00:13:52,633 --> 00:13:55,736 line:-2
+and show you
+some great new SwiftUI APIs
+
+
+287
+00:13:55,769 --> 00:13:58,172 line:-2
+for leveraging concurrency
+in your apps.
+
+
+288
+00:13:58,205 --> 00:13:59,339 line:-1
+Jessica?
+
+
+289
+00:14:00,440 --> 00:14:01,475 line:-1
+[Jessica] Thank you, Curt.
+
+
+290
+00:14:01,508 --> 00:14:03,310 line:-2
+Let’s switch over
+to the CatalogView
+
+
+291
+00:14:03.343 --> 00:14:04.912 line:-1 align:center
+and use the updateItems method
+
+
+292
+00:14:04,945 --> 00:14:06,013 line:-1
+that Curt just showed us.
+
+
+293
+00:14:09.550 --> 00:14:13.020 line:-2 align:center
+I want to call updateItems
+whenever my Catalog shows.
+
+
+294
+00:14:13.053 --> 00:14:16.256 line:-2 align:center
+In the past, you might have used
+onAppear for this,
+
+
+295
+00:14:16.290 --> 00:14:18.192 line:-2 align:center
+but starting this year
+in SwiftUI,
+
+
+296
+00:14:18,225 --> 00:14:20,527 line:-1
+use the task modifier.
+
+
+297
+00:14:20.561 --> 00:14:22.996 line:-2 align:center
+Task lets you associate
+an asynchronous task
+
+
+298
+00:14:23,030 --> 00:14:24,431 line:-1
+with your view.
+
+
+299
+00:14:24,464 --> 00:14:27,935 line:-2
+The task starts at the beginning
+of the view’s lifetime.
+
+
+300
+00:14:27,968 --> 00:14:29,636 line:-1
+Task is async by default,
+
+
+301
+00:14:29.670 --> 00:14:31.071 line:-1 align:center
+so inside its closure,
+
+
+302
+00:14:31,104 --> 00:14:33,974 line:-2
+I can call updateItems
+on myPhotos object
+
+
+303
+00:14:34,007 --> 00:14:35,542 line:-1
+and await the results.
+
+
+304
+00:14:42,649 --> 00:14:44,218 line:-1
+This is a great use of task,
+
+
+305
+00:14:44,251 --> 00:14:46,553 line:-2
+but there’s even more
+to this new modifier.
+
+
+306
+00:14:46,587 --> 00:14:49,256 line:-2
+A task’s lifetime
+is tied to the view’s lifetime,
+
+
+307
+00:14:49.289 --> 00:14:50.324 line:-1 align:center
+so you can do things
+
+
+308
+00:14:50.357 --> 00:14:52.292 line:-2 align:center
+like waiting on
+an async sequence
+
+
+309
+00:14:52.326 --> 00:14:54.228 line:-1 align:center
+and responding to its values.
+
+
+310
+00:14:54,261 --> 00:14:56,263 line:-2
+And the task will be
+automatically canceled
+
+
+311
+00:14:56,296 --> 00:14:58,699 line:-1
+when the view’s lifetime ends.
+
+
+312
+00:14:58,732 --> 00:15:00,100 line:-1
+For more on view lifetime,
+
+
+313
+00:15:00,133 --> 00:15:03,804 line:-2
+be sure to check out the talk
+“Demystify SwiftUI.”
+
+
+314
+00:15:04,738 --> 00:15:08,041 line:-2
+Using live preview, I can see
+that the entries are updated.
+
+
+315
+00:15:08.075 --> 00:15:10.911 line:-2 align:center
+But we’re still missing
+the beautiful images.
+
+
+316
+00:15:10.944 --> 00:15:13.146 line:-2 align:center
+I’ve already been
+updating the PhotoView
+
+
+317
+00:15:13,180 --> 00:15:15,015 line:-1
+that Curt showed earlier.
+
+
+318
+00:15:15.048 --> 00:15:18.218 line:-2 align:center
+I’ll add some background
+materials behind the title.
+
+
+319
+00:15:18,252 --> 00:15:20,787 line:-1
+Now, let’s add the images.
+
+
+320
+00:15:20,821 --> 00:15:23,924 line:-2
+Happily,
+using the new AsyncImage API,
+
+
+321
+00:15:23.957 --> 00:15:25.859 line:-2 align:center
+loading images
+from a remote server
+
+
+322
+00:15:25.893 --> 00:15:27.794 line:-1 align:center
+is easier than ever.
+
+
+323
+00:15:27,828 --> 00:15:30,130 line:-2
+All I have to do
+is get the image URL
+
+
+324
+00:15:30.163 --> 00:15:32.199 line:-2 align:center
+I want to fetch
+out of our entry,
+
+
+325
+00:15:32.232 --> 00:15:34.868 line:-1 align:center
+and pass it to AsyncImage.
+
+
+326
+00:15:34,902 --> 00:15:40,908 line:-1
+[no audio]
+
+
+327
+00:15:49,483 --> 00:15:52,286 line:-2
+Well, this is a little
+too big at its full size,
+
+
+328
+00:15:52.319 --> 00:15:54.555 line:-2 align:center
+so let’s use the overload
+of AsyncImage
+
+
+329
+00:15:54,588 --> 00:15:57,357 line:-2
+that lets me adjust the image
+and show a placeholder
+
+
+330
+00:15:57.391 --> 00:16:00.027 line:-2 align:center
+so that users know
+their image is loading.
+
+
+331
+00:16:00.060 --> 00:16:07.067 line:-1 align:center
+[no audio]
+
+
+332
+00:16:18,912 --> 00:16:23,784 line:-1
+[no audio]
+
+
+333
+00:16:23,817 --> 00:16:26,353 line:-2
+Next,
+I’ll make the image resizable
+
+
+334
+00:16:26.386 --> 00:16:29.356 line:-2 align:center
+and set its aspect ratio
+to fill the space.
+
+
+335
+00:16:29,389 --> 00:16:36,396 line:-1
+[no audio]
+
+
+336
+00:16:49,209 --> 00:16:51,411 line:-2
+Finally, I’ll add
+a minimum width and height
+
+
+337
+00:16:51.445 --> 00:16:53.547 line:-1 align:center
+to make my image flexible.
+
+
+338
+00:16:53,580 --> 00:16:55,415 line:-2
+Using a non-zero minimum
+height
+
+
+339
+00:16:55.449 --> 00:16:57.317 line:-2 align:center
+will also make sure that the
+progress view
+
+
+340
+00:16:57,351 --> 00:16:59,119 line:-1
+peeks out over my title area.
+
+
+341
+00:16:59,152 --> 00:17:05,158 line:-1
+[no audio]
+
+
+342
+00:17:09.863 --> 00:17:11.765 line:-1 align:center
+Like the rest of SwiftUI,
+
+
+343
+00:17:11,798 --> 00:17:14,701 line:-2
+AsyncImage comes built with
+intelligent defaults,
+
+
+344
+00:17:14.735 --> 00:17:17.304 line:-2 align:center
+so even if there are errors
+loading your image,
+
+
+345
+00:17:17,337 --> 00:17:20,374 line:-2
+the result will be to continue
+showing the placeholder.
+
+
+346
+00:17:20,407 --> 00:17:24,111 line:-2
+You can also choose to customize
+the error handling behavior.
+
+
+347
+00:17:24.144 --> 00:17:25.412 line:-1 align:center
+To do that, check out
+
+
+348
+00:17:25,445 --> 00:17:29,183 line:-2
+“AsyncImage’s overload
+that uses a phase.”
+
+
+349
+00:17:29,216 --> 00:17:30,184 line:-1
+It would also be great
+
+
+350
+00:17:30,217 --> 00:17:31,985 line:-2
+if users could save
+their favorite images
+
+
+351
+00:17:32,019 --> 00:17:33,787 line:-1
+to view later.
+
+
+352
+00:17:33,820 --> 00:17:36,823 line:-2
+Let’s add a button
+to this title area to do that.
+
+
+353
+00:17:36,857 --> 00:17:38,992 line:-2
+The button will trigger
+an async action
+
+
+354
+00:17:39.026 --> 00:17:41.595 line:-1 align:center
+to save the image entry to disk.
+
+
+355
+00:17:41.628 --> 00:17:45.265 line:-2 align:center
+Saved entries will appear
+in the Saved tab in our app.
+
+
+356
+00:17:45,299 --> 00:17:47,935 line:-2
+I’ve already stubbed in
+a view to do this.
+
+
+357
+00:17:47,968 --> 00:17:51,505 line:-2
+Let me add it here, then we can
+take a look at its code.
+
+
+358
+00:17:51,538 --> 00:17:57,544 line:-1
+[no audio]
+
+
+359
+00:18:03,250 --> 00:18:05,886 line:-2
+Here’s the stubbed-in
+version of my Save button.
+
+
+360
+00:18:05,919 --> 00:18:08,989 line:-2
+Let’s add an action
+to save the photo.
+
+
+361
+00:18:09.022 --> 00:18:11.825 line:-2 align:center
+Button actions in SwiftUI
+are synchronous,
+
+
+362
+00:18:11,859 --> 00:18:14,394 line:-2
+but my “save” method
+is asynchronous.
+
+
+363
+00:18:14.428 --> 00:18:17.364 line:-2 align:center
+To call the method,
+I’ll start an async task.
+
+
+364
+00:18:21,902 --> 00:18:23,670 line:-1
+Then, inside the closure,
+
+
+365
+00:18:23.704 --> 00:18:26.440 line:-2 align:center
+I’ll call the “save” method on
+“photo.”
+
+
+366
+00:18:26,473 --> 00:18:29,276 line:-2
+It’s asynchronous,
+so I’ll just use await.
+
+
+367
+00:18:37.317 --> 00:18:39.786 line:-2 align:center
+I think it would be nice
+to show a progress view
+
+
+368
+00:18:39.820 --> 00:18:41.688 line:-1 align:center
+while the save is taking place.
+
+
+369
+00:18:41,722 --> 00:18:44,291 line:-2
+To do that,
+I’ll add a State property.
+
+
+370
+00:18:44.324 --> 00:18:51.331 line:-1 align:center
+[no audio]
+
+
+371
+00:18:59,273 --> 00:19:02,843 line:-2
+Then, I’ll update the State
+around my call to save.
+
+
+372
+00:19:02,876 --> 00:19:08,882 line:-1
+[no audio]
+
+
+373
+00:19:20.761 --> 00:19:22.729 line:-2 align:center
+Then, I’ll update the label
+on my button
+
+
+374
+00:19:22,763 --> 00:19:25,766 line:-2
+to show a progress view
+when the save is happening.
+
+
+375
+00:19:25.799 --> 00:19:28.569 line:-2 align:center
+I’m using “opacity”
+to hide the Save label
+
+
+376
+00:19:28,602 --> 00:19:31,405 line:-2
+and an overlay
+to show the progress view.
+
+
+377
+00:19:31.438 --> 00:19:34.908 line:-2 align:center
+This combination ensures that
+the button stays the same size,
+
+
+378
+00:19:34.942 --> 00:19:38.212 line:-2 align:center
+based on the localization
+of the word “save.”
+
+
+379
+00:19:38.245 --> 00:19:45.252 line:-1 align:center
+[no audio]
+
+
+380
+00:19:56,263 --> 00:19:59,266 line:-1
+[no audio]
+
+
+381
+00:20:01,268 --> 00:20:07,574 line:-1
+[no audio]
+
+
+382
+00:20:07,608 --> 00:20:11,144 line:-2
+Finally, I’ll disable the button
+while the save is happening.
+
+
+383
+00:20:18,719 --> 00:20:21,388 line:-2
+Let’s see how this works
+with live preview.
+
+
+384
+00:20:24.558 --> 00:20:26.126 line:-1 align:center
+That’s pretty great!
+
+
+385
+00:20:26.159 --> 00:20:29.096 line:-2 align:center
+Let’s go back to the Catalog
+view to put it all together.
+
+
+386
+00:20:36,303 --> 00:20:38,805 line:-2
+SwiftUI has a great new modifier
+this year
+
+
+387
+00:20:38,839 --> 00:20:40,607 line:-2
+that you can use
+to give people the ability
+
+
+388
+00:20:40,641 --> 00:20:42,776 line:-1
+to manually refresh their data.
+
+
+389
+00:20:42.809 --> 00:20:46.213 line:-2 align:center
+By adding the refreshable
+modifier to my List,
+
+
+390
+00:20:46,246 --> 00:20:49,950 line:-2
+I tell SwiftUI that
+this content is refreshable.
+
+
+391
+00:20:49.983 --> 00:20:53.120 line:-2 align:center
+I can provide an async closure
+to refreshable
+
+
+392
+00:20:53,153 --> 00:20:56,623 line:-2
+and call our updateItems method
+to update the List.
+
+
+393
+00:20:56,657 --> 00:20:58,592 line:-1
+As I showed earlier with “task,”
+
+
+394
+00:20:58,625 --> 00:21:02,029 line:-2
+I’ll use await
+on this async method.
+
+
+395
+00:21:10,170 --> 00:21:12,706 line:-2
+The refreshing indicator
+dismisses automatically
+
+
+396
+00:21:12,739 --> 00:21:16,009 line:-2
+when my
+asynchronous work is done.
+
+
+397
+00:21:16,043 --> 00:21:20,347 line:-2
+Now, I can pull down
+to refresh my images,
+
+
+398
+00:21:20.380 --> 00:21:24.084 line:-2 align:center
+tap Save
+to save an image I like,
+
+
+399
+00:21:24,117 --> 00:21:27,688 line:-2
+and switch to my Saved tab
+to see my saved images.
+
+
+400
+00:21:29.923 --> 00:21:31.191 line:-1 align:center
+Swift’s new features
+
+
+401
+00:21:31,225 --> 00:21:34,561 line:-2
+make it easy to work
+with concurrent data.
+
+
+402
+00:21:34.595 --> 00:21:36.096 line:-1 align:center
+SwiftUI integrates nicely
+
+
+403
+00:21:36,129 --> 00:21:37,731 line:-2
+with Swift’s concurrency
+features
+
+
+404
+00:21:37,764 --> 00:21:40,367 line:-2
+to provide you
+the best behavior by default.
+
+
+405
+00:21:40,400 --> 00:21:41,702 line:-1
+In many cases,
+
+
+406
+00:21:41.735 --> 00:21:43.437 line:-1 align:center
+you just need to use await
+
+
+407
+00:21:43,470 --> 00:21:45,973 line:-2
+to leverage the power
+of concurrency.
+
+
+408
+00:21:46,006 --> 00:21:48,909 line:-2
+Mark your ObservableObject
+as “@MainActor”
+
+
+409
+00:21:48.942 --> 00:21:50.344 line:-1 align:center
+for more robust checking
+
+
+410
+00:21:50.377 --> 00:21:51.578 line:-1 align:center
+that your object updates
+
+
+411
+00:21:51.612 --> 00:21:53.780 line:-2 align:center
+in ways that work well
+with your views.
+
+
+412
+00:21:55.282 --> 00:21:58.151 line:-2 align:center
+Take advantage of SwiftUI’s
+API additions
+
+
+413
+00:21:58,185 --> 00:22:00,521 line:-2
+to write safe and performant
+concurrent apps
+
+
+414
+00:22:00,554 --> 00:22:03,156 line:-1
+with minimal effort.
+
+
+415
+00:22:03,190 --> 00:22:07,561 line:-2
+Use AsyncImage
+to concurrently load images.
+
+
+416
+00:22:07,594 --> 00:22:10,163 line:-2
+Add the “refreshable”
+modifier to your view hierarchy
+
+
+417
+00:22:10.197 --> 00:22:15.068 line:-2 align:center
+to allow users
+to manually refresh their data.
+
+
+418
+00:22:15,102 --> 00:22:16,904 line:-2
+Like we saw
+with the Save button,
+
+
+419
+00:22:16,937 --> 00:22:18,672 line:-2
+you can use Swift’s
+new concurrency features
+
+
+420
+00:22:18,705 --> 00:22:20,474 line:-1
+in your own custom views.
+
+
+421
+00:22:22,476 --> 00:22:25,679 line:-2
+As we all know,
+concurrency is tricky.
+
+
+422
+00:22:25,712 --> 00:22:27,514 line:-1
+It’s a hard problem,
+
+
+423
+00:22:27,548 --> 00:22:29,349 line:-2
+but with these
+new language features
+
+
+424
+00:22:29.383 --> 00:22:31.051 line:-1 align:center
+and SwiftUI APIs,
+
+
+425
+00:22:31.084 --> 00:22:35.289 line:-2 align:center
+you now have the tools to manage
+that complexity in your apps.
+
+
+426
+00:22:35.322 --> 00:22:36.857 line:-1 align:center
+We hope you enjoyed learning
+
+
+427
+00:22:36,890 --> 00:22:39,126 line:-2
+about the great new concurrency
+tools
+
+
+428
+00:22:39.159 --> 00:22:42.362 line:-1 align:center
+in Swift 5.5 and SwiftUI,
+
+
+429
+00:22:42,396 --> 00:22:43,397 line:-1
+and we look forward to seeing
+
+
+430
+00:22:43.430 --> 00:22:44.698 line:-1 align:center
+all the ways you use them
+
+
+431
+00:22:44.731 --> 00:22:46.967 line:-2 align:center
+to tackle tricky problems
+in your apps.
+
+
+432
+00:22:47,000 --> 00:22:50,037 line:-1
+[music]
+
